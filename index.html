@@ -10,9 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&family=Nunito:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Manrope:wght@400;600;700&family=Comfortaa:wght@400;600;700&family=Rubik:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   /* ===================== THEME VARIABLES (بعد میں Theme Selector یہاں تبدیل کرے گا) ===================== */
-  /* ===================== EMBEDDED FONT: Jameel Noori Nastaleeq (base64، پوری ایپ میں دستیاب) ===================== */
-  
-
   :root{
     --primary:#0f766e;
     --primary-dark:#0b4a45;
@@ -628,6 +625,22 @@
   .billActions button{padding:7px 12px; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;}
   .btnPrint{background:#eef2ff; color:var(--primary-dark);}
   .billActions .btnReceiveShipment{background:var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer;}
+  /* --- Bill History: status tabs + bulk delete bar --- */
+  .billStatusTabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .billTabBtn{flex:1 1 auto; padding:9px 10px; border:1px solid #dbe1ea; background:var(--card); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--muted); cursor:pointer;}
+  .billTabBtn.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+  .billTabBtn.bulkToggleBtn{background:#fef2f2; color:var(--danger); border-color:#fecaca;}
+  .billTabBtn.bulkToggleBtn.active{background:var(--danger); color:#fff;}
+  .bulkDeleteBar{background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; margin-bottom:12px;}
+  .bulkDeleteRow{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:12.5px; font-weight:600; margin-bottom:6px;}
+  .bulkDeleteRow:last-child{margin-bottom:0;}
+  .bulkSelectAllLabel{display:flex; align-items:center; gap:6px;}
+  .bulkDeleteDateRange input[type=date]{padding:5px 6px; border-radius:6px; border:1px solid #dbe1ea; font-size:12px;}
+  .bulkRangeBtn{padding:5px 10px; border:none; border-radius:6px; background:var(--primary); color:#fff; font-size:11px; font-weight:700; cursor:pointer; margin-left:4px;}
+  .bulkCancelBtn{padding:7px 12px; border:none; border-radius:8px; background:#e2e8f0; color:#334155; font-size:12px; font-weight:700; cursor:pointer; margin-right:6px;}
+  .bulkConfirmBtn{padding:7px 12px; border:none; border-radius:8px; background:var(--danger); color:#fff; font-size:12px; font-weight:700; cursor:pointer;}
+  .billCheckbox{margin-right:10px; width:18px; height:18px;}
+  .billCardRow{display:flex; align-items:center;}
   .btnWhatsapp{background:#dcfce7; color:#166534;}
   .btnRequestEdit{background:#fefce8; color:#a16207;}
   .btnRequestDelete{background:#fef2f2; color:var(--danger);}
@@ -1747,8 +1760,44 @@
           <option value="az">🔤 Customer A-Z</option>
         </select>
       </div>
+      <div class="billStatusTabs">
+        <button class="billTabBtn active" id="billTab-all" onclick="setBillStatusFilter('all')">📋 All Bills</button>
+        <button class="billTabBtn" id="billTab-pending" onclick="setBillStatusFilter('pending')">⏳ Pending Bills</button>
+        <button class="billTabBtn" id="billTab-clear" onclick="setBillStatusFilter('clear')">✅ Clear Bills</button>
+        <button class="billTabBtn bulkToggleBtn admin-only" id="bulkDeleteToggleBtn" onclick="toggleBulkDeleteMode()">🗑️ Bulk Delete</button>
+      </div>
+      <div class="bulkDeleteBar admin-only" id="bulkDeleteBar" style="display:none;">
+        <div class="bulkDeleteRow">
+          <label class="bulkSelectAllLabel"><input type="checkbox" id="bulkSelectAllChk" onchange="toggleSelectAllBills(this.checked)"> Select All Visible</label>
+          <span class="bulkDeleteDateRange">
+            <input type="date" id="bulkFromDate"> to <input type="date" id="bulkToDate">
+            <button class="bulkRangeBtn" onclick="selectBillsInDateRange()">Select Range</button>
+          </span>
+        </div>
+        <div class="bulkDeleteRow">
+          <span id="bulkSelectedCount">0 bill(s) selected</span>
+          <div>
+            <button class="bulkCancelBtn" onclick="toggleBulkDeleteMode()">Cancel</button>
+            <button class="bulkConfirmBtn" onclick="requestBulkDeleteAuth()">🗑️ Delete Selected</button>
+          </div>
+        </div>
+      </div>
       <div class="billSummaryBar" id="billSummaryBar"></div>
       <div id="billHistoryWrap"></div>
+    </div>
+
+    <!-- BULK DELETE PIN AUTHORIZATION MODAL -->
+    <div class="modalOverlay" id="bulkDeletePinModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox" style="max-width:340px;">
+        <h3>🔒 Confirm Bulk Delete</h3>
+        <div class="settingsHint">Enter your admin PIN to permanently delete the selected bill(s). This cannot be undone.</div>
+        <input type="password" id="bulkDeletePinInput" placeholder="Enter PIN" inputmode="numeric" style="width:100%; padding:10px; border-radius:8px; border:1px solid #dbe1ea; margin:10px 0; font-size:16px; text-align:center; letter-spacing:4px;">
+        <div id="bulkDeletePinError" style="color:var(--danger); font-size:12px; display:none; margin-bottom:8px;">❌ Incorrect PIN. Try again.</div>
+        <div class="modalActions">
+          <button class="cancelBtn" onclick="document.getElementById('bulkDeletePinModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" style="background:var(--danger);" onclick="confirmBulkDeleteWithPin()">Confirm Delete</button>
+        </div>
+      </div>
     </div>
 
     <!-- INVOICE PREVIEW MODAL (Canvas سے پریمیم انوائس رینڈر) -->
@@ -3106,7 +3155,7 @@ function renderAutoPaymentNote(){
 
 // ---------- تاریخ کے ساتھ دن کا 3-حرفی نام (MON/TUE/WED/THU/FRI/SAT/SUN) — پرنٹ پر دکھانے کے لیے ----------
 function getDayAbbrev(dateStr){
-  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   return days[new Date(dateStr).getDay()];
 }
 
@@ -6283,6 +6332,82 @@ const INVOICES_SEED_DATA = [
 ];
 let invoicesData = loadFromStorage('invoices', INVOICES_SEED_DATA);
 
+// ---------- Bill History: Status Tabs (All / Pending / Clear) ----------
+// نوٹ: "Pending" کا مطلب وہ بل ہیں جن کی رقم ابھی وصول نہیں ہوئی (credit پر بکے)
+// "Clear" کا مطلب وہ بل ہیں جن کی مکمل رقم مل چکی ہے (cash/wallet سے ادا شدہ)
+let billStatusFilter = 'all'; // 'all' | 'pending' | 'clear'
+function setBillStatusFilter(status){
+  billStatusFilter = status;
+  document.querySelectorAll('.billTabBtn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`billTab-${status}`)?.classList.add('active');
+  if(bulkDeleteMode) toggleBulkDeleteMode(); // فلٹر بدلنے پر بلک موڈ بند کر دیں تاکہ سلیکشن الجھے نہیں
+  renderBillHistory(document.getElementById('billSearchInput').value);
+}
+
+// ---------- Bulk Delete: موڈ ٹوگل + سلیکشن اسٹیٹ ----------
+let bulkDeleteMode = false;
+let selectedBillIds = new Set();
+function toggleBulkDeleteMode(){
+  bulkDeleteMode = !bulkDeleteMode;
+  selectedBillIds.clear();
+  document.getElementById('bulkDeleteToggleBtn').classList.toggle('active', bulkDeleteMode);
+  document.getElementById('bulkDeleteBar').style.display = bulkDeleteMode ? 'block' : 'none';
+  document.getElementById('bulkSelectAllChk').checked = false;
+  renderBillHistory(document.getElementById('billSearchInput').value);
+}
+function toggleBillSelection(invoiceId, checked){
+  if(checked) selectedBillIds.add(invoiceId); else selectedBillIds.delete(invoiceId);
+  updateBulkSelectionCount();
+}
+function toggleSelectAllBills(checked){
+  document.querySelectorAll('.billCheckbox').forEach(chk => {
+    chk.checked = checked;
+    const id = Number(chk.dataset.invoiceId);
+    if(checked) selectedBillIds.add(id); else selectedBillIds.delete(id);
+  });
+  updateBulkSelectionCount();
+}
+function updateBulkSelectionCount(){
+  document.getElementById('bulkSelectedCount').textContent = `${selectedBillIds.size} bill(s) selected`;
+}
+// ---------- From/To تاریخ کے درمیان جتنے بل نظر آ رہے ہیں، انہیں خودکار سلیکٹ کر دیں ----------
+function selectBillsInDateRange(){
+  const fromVal = document.getElementById('bulkFromDate').value;
+  const toVal = document.getElementById('bulkToDate').value;
+  if(!fromVal || !toVal){ alert('Please choose both From and To dates.'); return; }
+  const from = new Date(fromVal); const to = new Date(toVal); to.setHours(23,59,59,999);
+  document.querySelectorAll('.billCheckbox').forEach(chk => {
+    const id = Number(chk.dataset.invoiceId);
+    const inv = invoicesData.find(i => i.invoice_id === id);
+    if(!inv) return;
+    const d = new Date(inv.created_at);
+    if(d >= from && d <= to){ chk.checked = true; selectedBillIds.add(id); }
+  });
+  updateBulkSelectionCount();
+}
+// ---------- Bulk Delete سے پہلے PIN لازمی — تاکہ غلطی سے/بلا اجازت ڈیلیٹ نہ ہو ----------
+function requestBulkDeleteAuth(){
+  if(selectedBillIds.size === 0){ alert('Please select at least one bill to delete.'); return; }
+  document.getElementById('bulkDeletePinInput').value = '';
+  document.getElementById('bulkDeletePinError').style.display = 'none';
+  document.getElementById('bulkDeletePinModal').classList.add('show');
+}
+function confirmBulkDeleteWithPin(){
+  const enteredPin = document.getElementById('bulkDeletePinInput').value.trim();
+  // کوئی بھی ایکٹو ایڈمن یوزر کا PIN درست تصدیق کے لیے قابلِ قبول ہے
+  const validAdmin = usersData.some(u => u.role === 'admin' && u.is_active && u.pin === enteredPin);
+  if(!validAdmin){
+    document.getElementById('bulkDeletePinError').style.display = 'block';
+    return;
+  }
+  const countDeleted = selectedBillIds.size;
+  invoicesData = invoicesData.filter(inv => !selectedBillIds.has(inv.invoice_id));
+  saveToStorage('invoices', invoicesData);
+  document.getElementById('bulkDeletePinModal').classList.remove('show');
+  alert(`✅ ${countDeleted} bill(s) permanently deleted.`);
+  toggleBulkDeleteMode();
+}
+
 // ---------- Render Bill History List ----------
 function renderBillHistory(query=''){
   const wrap = document.getElementById('billHistoryWrap');
@@ -6308,6 +6433,12 @@ function renderBillHistory(query=''){
     filtered = filtered.filter(inv => inv.sold_by === AppState.currentUser?.name);
   } else if(salesmanFilterVal && salesmanFilterVal !== 'all'){
     filtered = filtered.filter(inv => inv.sold_by === salesmanFilterVal);
+  }
+  // ---------- Status Tab فلٹر: Pending (credit پر بکے، رقم باقی) بمقابلہ Clear (مکمل وصول شدہ) ----------
+  if(billStatusFilter === 'pending'){
+    filtered = filtered.filter(inv => inv.payment_method === 'credit' && inv.status !== 'voided');
+  } else if(billStatusFilter === 'clear'){
+    filtered = filtered.filter(inv => inv.payment_method !== 'credit' && inv.status !== 'voided');
   }
 
   // ---------- ترتیب (Sort): تاریخ، رقم، یا نام کے مطابق ----------
@@ -6340,13 +6471,19 @@ function renderBillHistory(query=''){
     const creatorBadge = isAdminGenerated
       ? `<span class="creatorBadge admin">🛡️ Admin Generated</span>`
       : `<span class="creatorBadge salesman">👤 ${inv.sold_by}</span>`;
+    const payTag = inv.payment_method === 'credit'
+      ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending</span>`
+      : `<span class="billStatusTag completed">✅ Clear</span>`;
     return `
     <div class="billCard">
-      <div>
-        <div class="bNo">${inv.invoice_no} <span class="billStatusTag ${inv.status}">${
-          inv.status==='completed' ? 'Completed' : inv.status==='edited' ? 'Edited' : 'Voided'
-        }</span>${inv.reviewed_by_admin ? ' <span class="pendingStatusTag approved">✔ ADMIN REVIEWED</span>' : ''}</div>
-        <div class="bMeta">${creatorBadge} ${inv.customer_name} | Rs. ${inv.grand_total.toLocaleString()}</div>
+      <div class="billCardRow">
+        ${isAdmin && bulkDeleteMode ? `<input type="checkbox" class="billCheckbox" data-invoice-id="${inv.invoice_id}" ${selectedBillIds.has(inv.invoice_id) ? 'checked' : ''} onchange="toggleBillSelection(${inv.invoice_id}, this.checked)">` : ''}
+        <div>
+          <div class="bNo">${inv.invoice_no} <span class="billStatusTag ${inv.status}">${
+            inv.status==='completed' ? 'Completed' : inv.status==='edited' ? 'Edited' : 'Voided'
+          }</span> ${payTag}${inv.reviewed_by_admin ? ' <span class="pendingStatusTag approved">✔ ADMIN REVIEWED</span>' : ''}</div>
+          <div class="bMeta">${creatorBadge} ${inv.customer_name} | Rs. ${inv.grand_total.toLocaleString()}</div>
+        </div>
       </div>
       <div class="billActions">
         <button class="btnPrint" onclick="openInvoicePreview(${inv.invoice_id})">🖨️ Print</button>
