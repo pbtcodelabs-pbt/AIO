@@ -1591,6 +1591,18 @@
       </div>
     </div>
 
+    <!-- CATEGORIES (Admin only) — پراڈکٹس کا الگ صفحہ نہیں، صرف کیٹگریز کی فہرست/انتظام -->
+    <div class="screen admin-only" id="screen-categories">
+      <div class="pageTitle">🏷️ Categories</div>
+      <div class="productToolbar">
+        <input type="text" id="newCategoryNameInput" placeholder="New category name...">
+        <button onclick="addCategoryFromScreen()">+ Add Category</button>
+      </div>
+      <div id="categoriesListWrap" style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+        <!-- JS سے کیٹگری کارڈز یہاں بنیں گی -->
+      </div>
+    </div>
+
     <!-- PARTIES (Admin only) -->
     <div class="screen admin-only" id="screen-parties">
       <div class="pageTitle" id="partyPageTitle">🧑‍🤝‍🧑 Customers</div>
@@ -3014,7 +3026,7 @@ const HOME_TILES_ADMIN = [
   {icon:'👥', label:'Customers', screen:'customers'},
   {icon:'🚚', label:'Suppliers', screen:'suppliers'},
   {icon:'📦', label:'Products', screen:'products'},
-  {icon:'🏷️', label:'Categories', screen:'products'},
+  {icon:'🏷️', label:'Categories', screen:'categories'},
   {icon:'📊', label:'Dashboard', screen:'dashboard'},
   {icon:'🧾', label:'Bill History', screen:'billhistory'},
   {icon:'🔑', label:'Users', screen:'users'},
@@ -3303,6 +3315,7 @@ function goTo(screenName){
       '🧑‍💼 Salesman: ' + AppState.currentUser.name + renderTodaysBillBadge();
   }
   if(screenName === 'products') renderProductList(document.getElementById('productSearchInput').value);
+  if(screenName === 'categories') renderCategoriesScreen();
   if(screenName === 'customers') enterPartyPage('customers');
   if(screenName === 'suppliers') enterPartyPage('suppliers');
   if(screenName === 'users') { renderUserList(); renderApprovalList(); }
@@ -5122,6 +5135,90 @@ function renderCategoryRail(){
 function filterByCategory(cat){
   activeProductCategory = cat;
   renderProductList(document.getElementById('productSearchInput').value);
+}
+
+/* =====================================================================
+   🏷️ Categories اسکرین — الگ صفحہ، صرف کیٹگریز کی فہرست اور انتظام
+   (پہلے یہ غلطی سے Products والا ہی صفحہ دوبارہ کھول دیتا تھا)
+   ===================================================================== */
+function renderCategoriesScreen(){
+  const wrap = document.getElementById('categoriesListWrap');
+  if(!wrap) return;
+
+  const counts = {};
+  productsData.forEach(p => {
+    const cat = p.category && p.category.trim() ? p.category.trim() : 'Uncategorized';
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  // ---------- خالی/نئی بنائی گئی کیٹیگریز بھی دکھائیں جن میں ابھی کوئی پراڈکٹ نہیں ----------
+  (customCategories || []).forEach(cat => { if(!(cat in counts)) counts[cat] = 0; });
+
+  const names = Object.keys(counts).sort();
+  if(names.length === 0){
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px; padding:8px 2px;">No categories yet — add one above, or it'll appear automatically once you assign it to a product.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = names.map(cat => `
+    <div class="productCard" style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px;">
+      <div>
+        <div style="font-weight:700;">${cat}</div>
+        <div style="font-size:12px; color:var(--muted);">${counts[cat]} product${counts[cat] === 1 ? '' : 's'}</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        ${cat !== 'Uncategorized' ? `<button class="btnResetPin" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
+        ${counts[cat] > 0 && cat !== 'Uncategorized'
+          ? `<button class="btnResetPin" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
+          : counts[cat] === 0 ? `<button class="btnResetPin" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ---------- نیا (ابھی خالی) کیٹگری بنائیں — Billing کے کیٹگری ڈراپ ڈاؤن میں پہلے سے استعمال ہونے والی customCategories فہرست میں ہی شامل ہوگی ----------
+function addCategoryFromScreen(){
+  const input = document.getElementById('newCategoryNameInput');
+  const name = input.value.trim();
+  if(!name){ alert('Please enter a category name.'); return; }
+  const exists = productsData.some(p => (p.category || '').trim().toLowerCase() === name.toLowerCase())
+    || (customCategories || []).some(c => c.toLowerCase() === name.toLowerCase());
+  if(exists){ alert('This category already exists.'); return; }
+  customCategories.push(name);
+  input.value = '';
+  persistAllData();
+  renderCategoriesScreen();
+}
+
+// ---------- کیٹگری کا نام بدلیں — اس کیٹگری کے تمام پراڈکٹس خودکار نئے نام پر منتقل ہو جاتے ہیں ----------
+function renameCategoryPrompt(oldName){
+  const newName = prompt(`Rename "${oldName}" to:`, oldName);
+  if(!newName || !newName.trim() || newName.trim() === oldName) return;
+  const trimmed = newName.trim();
+  productsData.forEach(p => { if((p.category || '').trim() === oldName) p.category = trimmed; });
+  const idx = (customCategories || []).indexOf(oldName);
+  if(idx !== -1) customCategories[idx] = trimmed;
+  persistAllData();
+  renderCategoriesScreen();
+}
+
+// ---------- کیٹگری کو "Uncategorize" کریں — پراڈکٹس ڈیلیٹ نہیں ہوں گے، صرف ان کی کیٹگری خالی کر کے "Uncategorized" میں چلے جائیں گے ----------
+function clearCategoryProducts(name){
+  const count = productsData.filter(p => (p.category || '').trim() === name).length;
+  if(!confirm(`This will move ${count} product(s) out of "${name}" into "Uncategorized". Products themselves will NOT be deleted. Continue?`)) return;
+  productsData.forEach(p => { if((p.category || '').trim() === name) p.category = ''; });
+  const idx = (customCategories || []).indexOf(name);
+  if(idx !== -1) customCategories.splice(idx, 1);
+  persistAllData();
+  renderCategoriesScreen();
+}
+
+// ---------- ایک بالکل خالی (کوئی پراڈکٹ نہ رکھنے والی) کیٹگری حذف کریں ----------
+function deleteEmptyCategory(name){
+  if(!confirm(`Delete the empty category "${name}"?`)) return;
+  const idx = (customCategories || []).indexOf(name);
+  if(idx !== -1) customCategories.splice(idx, 1);
+  persistAllData();
+  renderCategoriesScreen();
 }
 
 // ---------- کون سے Product Card کھلے ہوئے ہیں اس کی یاد رکھی جاتی ہے ----------
