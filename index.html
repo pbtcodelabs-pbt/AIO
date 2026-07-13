@@ -2417,22 +2417,22 @@
           </div>
           <div id="adminControlUnlocked" style="display:none;">
             <div class="settingsSubLabel">Developer WhatsApp Number</div>
-            <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <input type="text" id="devWhatsappInput" placeholder="e.g. 923206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Developer SMS Number</div>
-            <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Developer Gmail</div>
-            <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Account to Send Your Payments</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This shows up right where the customer sees their calculated price in Package Plans — so they know exactly where to send payment without asking.</div>
-            <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
               <option value="">— Select Bank/Wallet —</option>
             </select>
-            <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-            <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
+            <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Rate Per Day (Rs.)</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this once — every customer's calculated price updates automatically. Change it anytime and everything recalculates immediately.</div>
-            <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
 
             <div class="settingsSubLabel">Quick-Select Day Presets (optional)</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">These appear as tappable shortcuts for customers (e.g. 15, 30, 90 days) — not required, the customer can always type any number of days.</div>
@@ -2440,12 +2440,12 @@
             <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Preset</button>
 
             <div class="settingsSubLabel">One Admin PIN for Everything</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b> and reset the Admin's PIN there.</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering both of these correctly. No need to contact anyone.</div>
-            <input type="text" id="securityCnicInput" placeholder="CNIC Number (e.g. 3520112345671)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-            <input type="date" id="securityDobInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering both of these correctly. No need to contact anyone. (For security, these two boxes always show blank when you reopen this screen — that does NOT mean they weren't saved.)</div>
+            <input type="text" id="securityCnicInput" placeholder="CNIC Number (e.g. 3520112345671)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <input type="date" id="securityDobInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
 
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
@@ -9774,81 +9774,116 @@ async function renderAccountCardToCanvas(acc){
     const c = document.createElement('canvas'); c.id = 'accountCardCanvas'; c.style.display = 'none';
     document.body.appendChild(c); return c;
   })();
-  const W = 800, H = 460;
+  const W = 800, H = 500;
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const theme = getAccountCardTheme(acc.type);
+  const cx = W / 2; // ---------- ہر چیز اسی مرکزی لکیر پر centered رہے گی ----------
 
-  // ---------- خوبصورت ترچھا رنگین پس منظر (بینک کے اپنے رنگوں کے مطابق) ----------
+  // ---------- خوبصورت گہرا/دھیمہ پس منظر — چمکیلا رنگ صرف کونوں میں ہلکی سی جھلک کے طور پر،
+  // تاکہ اوپر کی سفید لکھائی ہمیشہ صاف اور واضح نظر آئے ----------
   const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, theme.bg1);
+  grad.addColorStop(0, theme.bg2);
+  grad.addColorStop(0.55, theme.bgDeep || '#12181c');
   grad.addColorStop(1, theme.bg2);
   ctx.fillStyle = grad;
-  roundRectPath(ctx, 0, 0, W, H, 28);
+  roundRectPath(ctx, 0, 0, W, H, 30);
   ctx.fill();
 
-  // ---------- ہلکا سا سجاوٹی دائرہ — ویزیٹنگ کارڈ جیسا خوبصورت ٹچ ----------
+  // ---------- کونوں میں برانڈ رنگ کی ہلکی سی چمک — سجاوٹ کے لیے، متن پر اثر نہ ڈالے ----------
   ctx.save();
-  ctx.globalAlpha = 0.10;
-  ctx.beginPath(); ctx.arc(W - 60, 60, 160, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
-  ctx.beginPath(); ctx.arc(50, H - 40, 120, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.35;
+  const glow1 = ctx.createRadialGradient(W-40, -20, 10, W-40, -20, 260);
+  glow1.addColorStop(0, theme.bg1); glow1.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow1;
+  ctx.fillRect(0, 0, W, H);
+  const glow2 = ctx.createRadialGradient(20, H+20, 10, 20, H+20, 220);
+  glow2.addColorStop(0, theme.bg1); glow2.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, W, H);
   ctx.restore();
 
-  // ---------- سفید بارڈر فریم — خوبصورت "کارڈ" احساس ----------
-  ctx.strokeStyle = 'rgba(255,255,255,.55)';
+  // ---------- گولڈن بارڈر فریم — خوبصورت، پریمیم "وزٹنگ کارڈ" احساس ----------
+  ctx.strokeStyle = '#d4af37';
   ctx.lineWidth = 3;
-  roundRectPath(ctx, 10, 10, W-20, H-20, 22);
+  roundRectPath(ctx, 10, 10, W-20, H-20, 24);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(212,175,55,.35)';
+  ctx.lineWidth = 1;
+  roundRectPath(ctx, 16, 16, W-32, H-32, 20);
   ctx.stroke();
 
-  ctx.fillStyle = theme.text;
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
+  let y = 92;
 
-  // ---------- مالک کی تصویر (اگر موجود ہو) — گول، سفید بارڈر کے ساتھ ----------
-  let textLeftX = 50;
+  // ---------- اوپر مرکز میں: مالک کی تصویر (اگر ہو) ورنہ برانڈ کا مونوگرام دائرہ ----------
   if(acc.photo){
     await new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
         ctx.save();
-        ctx.beginPath();
-        ctx.arc(110, 100, 55, 0, Math.PI*2);
-        ctx.closePath();
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 4;
-        ctx.clip();
-        ctx.drawImage(img, 55, 45, 110, 110);
+        ctx.beginPath(); ctx.arc(cx, 78, 56, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+        ctx.drawImage(img, cx-56, 22, 112, 112);
         ctx.restore();
-        ctx.beginPath(); ctx.arc(110, 100, 55, 0, Math.PI*2); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, 78, 56, 0, Math.PI*2); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 4; ctx.stroke();
         resolve();
       };
       img.onerror = resolve;
       img.src = acc.photo;
     });
-    textLeftX = 190;
+  } else {
+    // ---------- مونوگرام — برانڈ کے ابتدائی حروف، گول رنگین بیج میں (کسی اصل لوگو کی نقل نہیں، اپنا سادہ ڈیزائن) ----------
+    const initials = (acc.type || '?').replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase() || '$';
+    ctx.beginPath(); ctx.arc(cx, 78, 56, 0, Math.PI*2);
+    ctx.fillStyle = theme.bg1; ctx.fill();
+    ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 4; ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 44px Poppins, sans-serif`;
+    ctx.fillText(initials, cx, 92);
+  }
+  y = 168;
+
+  // ---------- نام — مرکز میں، نمایاں و موٹا ----------
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 32px Poppins, sans-serif`;
+  ctx.fillText(acc.name || 'Account Holder', cx, y);
+  y += 30;
+
+  if(AppState.settings.businessName){
+    ctx.font = `600 17px Poppins, sans-serif`;
+    ctx.globalAlpha = 0.75;
+    ctx.fillText(AppState.settings.businessName, cx, y);
+    ctx.globalAlpha = 1;
+    y += 34;
+  } else {
+    y += 10;
   }
 
-  ctx.font = `bold 26px ${document.documentElement.style.getPropertyValue('--font') || 'Poppins, sans-serif'}`;
-  ctx.fillText(acc.name || 'Account Holder', textLeftX, 90);
-  ctx.font = `18px Poppins, sans-serif`;
-  ctx.globalAlpha = 0.9;
-  ctx.fillText(AppState.settings.businessName || '', textLeftX, 120);
-  ctx.globalAlpha = 1;
+  // ---------- ایک باریک گولڈن لکیر — نام اور اکاؤنٹ کے درمیان خوبصورت جدائی ----------
+  ctx.strokeStyle = 'rgba(212,175,55,.5)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx-70, y); ctx.lineTo(cx+70, y); ctx.stroke();
+  y += 40;
 
-  // ---------- بینک/والیٹ کا نام — بڑا، نمایاں ----------
-  ctx.font = `bold 34px Poppins, sans-serif`;
-  ctx.fillText(acc.type || '', 50, 210);
+  // ---------- بینک/والیٹ کا نام — مرکز میں، سنہری رنگ میں نمایاں ----------
+  ctx.fillStyle = '#f2d675';
+  ctx.font = `800 36px Poppins, sans-serif`;
+  ctx.fillText(acc.type || '', cx, y);
+  y += 58;
 
-  // ---------- اکاؤنٹ نمبر — سب سے نمایاں، فاصلے والے ہندسوں کے ساتھ صاف پڑھا جائے ----------
-  ctx.font = `bold 44px 'Courier New', monospace`;
-  ctx.fillText(acc.number || '', 50, 275);
+  // ---------- اکاؤنٹ نمبر — سب سے نمایاں، سفید، فاصلے والے ہندسوں کے ساتھ صاف پڑھا جائے ----------
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 46px 'Courier New', monospace`;
+  ctx.fillText(acc.number || '', cx, y);
+  y += 56;
 
-  // ---------- نیچے پیغام والا باکس ----------
-  ctx.fillStyle = 'rgba(0,0,0,.22)';
-  roundRectPath(ctx, 30, H - 110, W - 60, 70, 14);
+  // ---------- نیچے پیغام والا باکس — پہلے یہ لکھائی بہت باریک تھی، اب موٹی اور بڑی کر دی تاکہ صاف پڑھی جا سکے ----------
+  ctx.fillStyle = 'rgba(0,0,0,.28)';
+  roundRectPath(ctx, 40, H - 96, W - 80, 62, 14);
   ctx.fill();
-  ctx.fillStyle = theme.text;
-  ctx.font = `15px Poppins, sans-serif`;
-  ctx.textAlign = 'center';
-  wrapCenteredText(ctx, '📸 Please send a screenshot after sending the payment', W/2, H - 78, W - 100, 20);
+  ctx.fillStyle = '#f2d675';
+  ctx.font = `800 19px Poppins, sans-serif`;
+  wrapCenteredText(ctx, '📸 Please send a screenshot after sending the payment', cx, H - 65, W - 100, 24);
 
   return canvas;
 }
