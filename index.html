@@ -1400,6 +1400,15 @@
           <div class="walletBalanceHint" id="walletBalanceHint"></div>
           <div class="autoPaymentNote" id="autoPaymentNote">💵 Cash (Walk-in)</div>
 
+          <!-- ---------- جزوی ادائیگی — کریڈٹ موڈ میں کسٹمر ابھی کچھ نقد دے رہا ہو تو یہاں درج کریں،
+               باقی خودکار اس کے کھاتے میں بقایہ (Pending) چلا جائے گا ---------- -->
+          <div id="amountReceivedRow" style="display:none; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
+            <label style="font-size:12px; color:var(--muted); font-weight:600;">💵 Amount Received Now (Rs.)</label>
+            <input type="number" id="amountReceivedInput" min="0" value="" placeholder="0" onfocus="this.select()" oninput="renderCart()"
+                   style="width:110px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
+          </div>
+          <div id="amountReceivedHint" style="display:none; font-size:11.5px; color:var(--muted); margin:-6px 0 10px;"></div>
+
           <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
             <label style="font-size:12px; color:var(--muted); font-weight:600;">🏷️ Discount (Rs.)</label>
             <input type="number" id="discountInput" min="0" value="0" onfocus="this.select()" oninput="renderCart()"
@@ -4339,6 +4348,16 @@ function renderCart(){
   document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(0)}`;
   document.getElementById('sumGrand').textContent = `Rs. ${grandTotal.toFixed(0)}`;
 
+  // ---------- جزوی ادائیگی کا فوری اشارہ — کتنا بقایہ رہ جائے گا، ابھی ٹائپ کرتے ہی نظر آئے ----------
+  const receivedHint = document.getElementById('amountReceivedHint');
+  if(receivedHint && !Billing.counterSale){
+    const receivedVal = Math.max(0, Math.min(grandTotal, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0));
+    const remaining = grandTotal - receivedVal;
+    receivedHint.textContent = receivedVal > 0
+      ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
+      : `Leave blank/0 if nothing is being paid right now (full amount goes to Pending).`;
+  }
+
   // ---------- منافع کا خفیہ اشارہ — صرف بل بنانے والے کو نظر آئے، کسٹمر یا پرنٹ میں کبھی نہیں ----------
   const profitEl = document.getElementById('profitWatermark');
   if(profitEl){
@@ -4428,23 +4447,30 @@ function toggleCounterSale(){
   renderAutoPaymentNote();
 }
 
-// ---------- بلنگ کے دوران پیمنٹ کا فیصلہ خودکار ہے — یہاں صرف بتایا جاتا ہے کہ بل کس طرح ریکارڈ ہوگا ----------
-// (اصل ادائیگی کا طریقہ — نقد/والٹ — بعد میں کسٹمر کی پروفائل سے "📥 Collect" کے ذریعے طے ہوتا ہے)
+// ---------- بلنگ کے دوران پیمنٹ کا فیصلہ — Counter Sale میں فوری مکمل نقد؛ ورنہ صارف چاہے تو یہیں جزوی رقم درج کر سکتا ہے،
+// باقی خودکار کسٹمر کے کھاتے میں Pending چلا جاتا ہے (یا بعد میں کسٹمر پروفائل سے "📥 Collect" کر کے بھی طے کیا جا سکتا ہے) ----------
 function renderAutoPaymentNote(){
   const note = document.getElementById('autoPaymentNote');
+  const receivedRow = document.getElementById('amountReceivedRow');
+  const receivedHint = document.getElementById('amountReceivedHint');
   if(!note) return;
 
   if(Billing.counterSale){
     note.textContent = '💵 Cash (Walk-in)';
+    receivedRow.style.display = 'none';
+    receivedHint.style.display = 'none';
     return;
   }
+
+  receivedRow.style.display = 'flex';
+  receivedHint.style.display = 'block';
 
   const custId = document.getElementById('customerSelect').value;
   if(custId){
     const customer = customersData.find(c => c.customer_id == custId);
-    note.innerHTML = `📒 Will be added as <b>Pending</b> for ${customer ? customer.name : 'this customer'} — settle later from their profile`;
+    note.innerHTML = `📒 Enter any cash received now — the rest goes as <b>Pending</b> for ${customer ? customer.name : 'this customer'}`;
   } else {
-    note.innerHTML = `📒 Pending — name & mobile number will be asked when you complete the bill`;
+    note.innerHTML = `📒 Enter any cash received now — the rest goes as <b>Pending</b> (name & mobile number will be asked when you complete the bill)`;
   }
 }
 
@@ -4550,7 +4576,8 @@ function finalizeInvoice(){
     });
   });
 
-  // ---------- پیمنٹ خودکار "Credit" ہے تو پہلے کسٹمر کے والٹ سے خودکار رقم کاٹیں، باقی بچی رقم ہی بقایہ (credit) میں جائے ----------
+  // ---------- پیمنٹ خودکار "Credit" ہے تو پہلے کسٹمر کے والٹ سے خودکار رقم کاٹیں، پھر صارف کا درج کردہ نقد بھی کاٹیں،
+  // باقی بچی رقم ہی اصل بقایہ (Pending) میں جائے ----------
   let walletApplied = 0;
   if(customer && method === 'credit' && customer.wallet_balance > 0){
     walletApplied = Math.min(customer.wallet_balance, grandTotal);
@@ -4558,24 +4585,33 @@ function finalizeInvoice(){
     customer.walletHistory = customer.walletHistory || [];
     customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
   }
-  const remainingDue = (method === 'credit') ? Math.max(0, grandTotal - walletApplied) : 0;
+  // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو (جزوی ادائیگی) ----------
+  const cashReceivedNow = (method === 'credit')
+    ? Math.max(0, Math.min(grandTotal - walletApplied, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0))
+    : 0;
+  const remainingDue = (method === 'credit') ? Math.max(0, grandTotal - walletApplied - cashReceivedNow) : 0;
   if(customer && method === 'credit' && remainingDue > 0){
     customer.total_receivable += remainingDue;
     // TODO: customers.total_receivable UPDATE
   }
   invoice.wallet_applied = walletApplied;
+  invoice.cash_received_now = cashReceivedNow;
   invoice.amount_due = remainingDue;
   invoice.paid_now = grandTotal - remainingDue; // ---------- اس بل میں سے ابھی کتنا ادا ہوا (نقد یا والٹ سے)، بل پر دکھانے کے لیے ----------
   invoice.new_balance = customer ? customer.total_receivable : 0; // ---------- اس بل کے بعد کسٹمر کا کل بقایہ — ہمیشہ کے لیے بل پر محفوظ ----------
-  if(walletApplied > 0) invoice.payment_method = remainingDue > 0 ? 'wallet+credit' : 'wallet';
+  if(walletApplied > 0 || cashReceivedNow > 0) invoice.payment_method = remainingDue > 0 ? 'partial+credit' : (walletApplied > 0 ? 'wallet' : 'cash');
 
   // ---------- نقد (Counter Sale) بل — یہ رقم فوری کیش میں آئی، Cash in Hand میں شامل کریں ----------
   if(method === 'cash'){
     financeDummy.cashInHand += grandTotal; // TODO: نقدی لیجر (cash ledger) میں INSERT
+  } else if(cashReceivedNow > 0){
+    // ---------- Credit بل میں بھی اگر کچھ نقد ابھی وصول ہوا تو وہ فوری Cash in Hand میں شامل ہوگا ----------
+    financeDummy.cashInHand += cashReceivedNow;
   }
 
   Billing.cart = [];
   document.getElementById('discountInput').value = 0;
+  document.getElementById('amountReceivedInput').value = '';
   renderCart();
   renderBillingProductGrid(); // اسٹاک کم ہوا، گرڈ میں بھی فوراً نظر آئے
   populateCustomerDropdown();
