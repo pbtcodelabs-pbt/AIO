@@ -1665,10 +1665,10 @@
         <div id="photoVideoWrap" style="position:relative; overflow:hidden; background:#000;">
           <video id="itemPhotoVideo" autoplay playsinline muted></video>
           <img id="itemPhotoStaticImg" style="width:auto; height:auto; max-width:100%; max-height:70vh; display:none; margin:0 auto; background:#fff; transform-origin:center center;">
+          <div class="photoCropFrame" id="photoCropFrame"></div>
+          <div class="pinchHint" id="pinchHint">👆 Pinch to zoom • Drag to move</div>
         </div>
         <canvas id="itemPhotoCanvas" style="display:none;"></canvas>
-        <div class="photoCropFrame" id="photoCropFrame"></div>
-        <div class="pinchHint" id="pinchHint">👆 Pinch to zoom • Drag to move</div>
 
         <!-- محفوظ کرنے سے پہلے کا نظارہ (Retake / Use Photo) -->
         <div id="photoPreviewStep" style="display:none; flex-direction:column; align-items:center; background:#fff; padding:10px;">
@@ -1678,9 +1678,11 @@
         <div class="scannerFooter">
           <div id="photoCaptureControls" style="display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px;">
-              <button id="shapeRect" class="shapeToggleBtn active" onclick="setPhotoShape('rect')">⬜ Rectangle</button>
-              <button id="shapeCircle" class="shapeToggleBtn" onclick="setPhotoShape('circle')">⚪ Circle</button>
-              <button id="enhanceToggle" class="shapeToggleBtn" onclick="togglePhotoEnhance()">✨ Enhance</button>
+              <div id="shapeToggleRow" style="display:flex; gap:8px; flex:2;">
+                <button id="shapeRect" class="shapeToggleBtn active" onclick="setPhotoShape('rect')">⬜ Rectangle</button>
+                <button id="shapeCircle" class="shapeToggleBtn" onclick="setPhotoShape('circle')">⚪ Circle</button>
+              </div>
+              <button id="enhanceToggle" class="shapeToggleBtn" onclick="togglePhotoEnhance()" style="flex:1;">✨ Enhance</button>
             </div>
             <div id="photoLivePreviewWrap" style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.06); border-radius:8px; padding:6px 8px;">
               <div id="photoLivePreviewCard" class="photoLivePreviewCard">
@@ -5275,6 +5277,7 @@ async function startPhotoCapture(mode, defaultShape, title){
 
   document.getElementById('photoModalTitle').textContent = title;
   document.getElementById('itemPhotoModal').classList.add('show');
+  document.getElementById('photoVideoWrap').style.display = '';
   document.getElementById('itemPhotoVideo').style.display = 'block';
   document.getElementById('itemPhotoStaticImg').style.display = 'none';
   document.getElementById('itemPhotoStaticImg').src = '';
@@ -5283,6 +5286,7 @@ async function startPhotoCapture(mode, defaultShape, title){
   document.getElementById('removeBgRow').style.display = 'none';
   document.getElementById('photoCaptureControls').style.display = 'flex';
   document.getElementById('brightnessSlider').value = 125;
+  document.getElementById('shapeToggleRow').style.display = (mode === 'item' || mode === 'quickadd') ? 'none' : 'flex';
   setPhotoShape(defaultShape);
   photoEnhance = true;
   document.getElementById('enhanceToggle').classList.add('active');
@@ -5452,6 +5456,7 @@ function renderCroppedPhoto(source, sx, sy, sw, sh, brightness){
 
 function showPhotoPreview(){
   stopLivePreviewLoop();
+  document.getElementById('photoVideoWrap').style.display = 'none';
   document.getElementById('itemPhotoVideo').style.display = 'none';
   document.getElementById('itemPhotoStaticImg').style.display = 'none';
   document.getElementById('photoCropFrame').style.display = 'none';
