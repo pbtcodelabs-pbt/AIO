@@ -630,7 +630,6 @@
     body.printing-invoice > *:not(#printReceiptArea){display:none !important;}
     #printReceiptArea{display:block !important; width:100%;}
     #printReceiptArea img{width:100%; display:block;}
-    @page{margin:0;}
   }
 
   /* --- ZONE 3: Alerts side-by-side (کم اسٹاک اور ایکسپائری ایک ساتھ، الگ الگ پینل میں) --- */
@@ -1124,6 +1123,10 @@
   body.nastaleeq-active .statLabel,
   body.nastaleeq-active .hLabel{ font-size:12.5px; line-height:1.9; }
 </style>
+  <!-- ---------- یہ الگ style ٹیگ خاص طور پر پرنٹ کے وقت اصل کاغذ کی چوڑائی (58mm/80mm) بتانے کے لیے ہے —
+       بغیر اس کے، پرنٹ سسٹم صفحے کا سائز A4/Letter سمجھ کر رسید کو چھوٹا کر کے سکیڑ دیتا تھا،
+       اسی وجہ سے پرنٹ آؤٹ پٹ بہت چھوٹا آ رہا تھا۔ JS سے ہر پرنٹ سے پہلے اپڈیٹ ہوتا ہے (applyPrintPageSize) ---------- -->
+  <style id="dynamicPrintPageStyle">@page{ size: 80mm auto; margin: 0; }</style>
 </head>
 <body>
 
@@ -5081,15 +5084,15 @@ function renderVariantRow(productId, v){
       <td><input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)"></td>
       <td><input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)"></td>
       <td><input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></td>
-      <td>
+      <td id="stockCell-${v.variant_id}">
         <input type="number" value="${v.stock}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
-        ${isLow ? '<div class="lowStockTag">⚠️ Low Stock</div>' : ''}
+        <div class="lowStockTag" id="lowStockTag-${v.variant_id}" style="display:${isLow ? 'block' : 'none'};">⚠️ Low Stock</div>
       </td>
       <td>
         <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value)">
       </td>
       <td>
-        <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value)">
+        <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
       </td>
       <td><input value="${v.location}" placeholder="Aisle/Shelf/Warehouse" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)"></td>
       <td class="variantRowActions">
@@ -5708,7 +5711,12 @@ function toggleProductCard(productId){
 }
 
 // ---------- Inline Variant Field Update (خرید Price صرف Admin دیکھتا ہے — role check یہاں بھی لگے گا) ----------
-function updateVariantField(productId, variantId, field, value){
+// نوٹ: پہلے یہاں ہر فیلڈ ایڈٹ (onchange/blur) پر پوری renderProductList() چلتی تھی — چونکہ یہ پوری
+// لسٹ کا DOM دوبارہ بناتی ہے، اس لیے صارف کے اگلے فیلڈ کی طرف ٹیپ کرتے وقت وہ فیلڈ "بھاگ" جاتی/غائب ہو
+// جاتی تھی (نیا DOM node بن جاتا، پرانا focus/tap ضائع ہو جاتا)۔ اب صرف ڈیٹا خاموشی سے اپڈیٹ ہوتا ہے،
+// اور صرف Stock/Low-Stock-Limit یا Expiry Date بدلنے پر متعلقہ چھوٹا سا بیج/رنگ خود بخود (بغیر پوری لسٹ
+// دوبارہ بنائے) اپڈیٹ ہو جاتا ہے — باقی پوری اسکرین ساکن رہتی ہے، صارف بلا رکاوٹ اگلی فیلڈ میں جا سکتا ہے۔
+function updateVariantField(productId, variantId, field, value, inputEl){
   const product = productsData.find(p => p.product_id === productId);
   const variant = product?.variants.find(v => v.variant_id === variantId);
   if(!variant) return;
@@ -5717,9 +5725,31 @@ function updateVariantField(productId, variantId, field, value){
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
-  // ---------- کارڈ کھلا رہے گا — جب تک صارف خود اسے بند نہ کرے، فیلڈ ایڈٹ کرنے پر مین لسٹ پر واپس نہیں پھینکا جائے گا ----------
-  openProductCards.add(productId);
+  openProductCards.add(productId); // کارڈ کھلا رہے گا، محض حفاظتی ریکارڈ کے لیے (اب اصل رینڈر پر انحصار نہیں)
+
+  if(field === 'stock' || field === 'lowStockAt'){
+    const tag = document.getElementById(`lowStockTag-${variantId}`);
+    if(tag){
+      const isLow = variant.stock <= variant.lowStockAt;
+      tag.style.display = isLow ? 'block' : 'none';
+    }
+    return;
+  }
+  if(field === 'expiryDate' && inputEl){
+    const tier = getExpiryTier(variant.expiryDate);
+    inputEl.className = 'expiryInput ' + (tier || '');
+    return;
+  }
+  // ---------- باقی فیلڈز (label, barcode, purchase, retail, wholesale, location) کا اسی کارڈ میں کوئی اور بصری اثر نہیں —
+  // اس لیے کوئی re-render درکار نہیں؛ ڈیٹا خاموشی سے محفوظ ہو چکا (persistAllData ہر 1.5 سیکنڈ بعد خودکار) ----------
+}
+
+// ---------- جب واقعی پوری Product لسٹ دوبارہ بنانا ضروری ہو (نیا/حذف شدہ variant, نیا Product) —
+// اسکرول پوزیشن محفوظ رکھ کر واپس اسی جگہ لوٹا دیں، تاکہ صارف اوپر نہ پھینکا جائے ----------
+function rerenderProductListPreserveScroll(){
+  const scrollY = window.scrollY;
   renderProductList(document.getElementById('productSearchInput').value);
+  window.scrollTo(0, scrollY);
 }
 
 // ---------- Add New Variant Row (خالی row، فوری edit کے لیے) ----------
@@ -5733,7 +5763,7 @@ function addVariantRow(productId){
   });
 
   openProductCards.add(productId);
-  renderProductList(document.getElementById('productSearchInput').value);
+  rerenderProductListPreserveScroll();
 }
 
 function deleteVariant(productId, variantId){
@@ -5741,7 +5771,7 @@ function deleteVariant(productId, variantId){
   const product = productsData.find(p => p.product_id === productId);
   product.variants = product.variants.filter(v => v.variant_id !== variantId);
   openProductCards.add(productId);
-  renderProductList(document.getElementById('productSearchInput').value);
+  rerenderProductListPreserveScroll();
 }
 
 // ---------- New Product (Parent) Modal ----------
@@ -8682,6 +8712,7 @@ function closeInvoicePreview(){
 function printCurrentInvoice(){
   const canvas = document.getElementById('invoiceCanvas');
   if(!canvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   document.body.classList.add('printing-invoice');
@@ -9324,8 +9355,16 @@ function updateOpeningCashBalance(value){
   renderKpiCards(); // Dashboard کھلا ہو تو فوری اپڈیٹ ہو جائے
 }
 
+// ---------- پرنٹ کے وقت اصل کاغذ کی چوڑائی (58mm/80mm) صفحے کے سائز کے طور پر لاگو کریں —
+// یہی وہ فکس ہے جو رسید کو A4 میں سکڑنے سے روک کر اصل سائز میں پرنٹ ہونے دیتا ہے ----------
+function applyPrintPageSize(mm){
+  const tag = document.getElementById('dynamicPrintPageStyle');
+  if(tag) tag.textContent = `@page{ size: ${mm}mm auto; margin: 0; }`;
+}
+
 function setPaperWidth(mm){
   AppState.settings.paperWidth = mm;
+  applyPrintPageSize(mm);
   document.querySelectorAll('#paperWidthGrid button').forEach(b => {
     b.classList.toggle('active', Number(b.dataset.width) === mm);
   });
@@ -9351,6 +9390,7 @@ function setTaxPercent(val){
 // ---------- ٹیسٹ پرنٹ بھیجیں — اصل پرنٹ ڈائیلاگ کھلے گا (کسی بھی منسلک/جوڑے گئے پرنٹر پر ٹیسٹ صفحہ جائے گا) ----------
 function testPrint(){
   const mm = AppState.settings.paperWidth;
+  applyPrintPageSize(mm);
   const now = new Date();
   const area = document.getElementById('printReceiptArea');
   area.innerHTML = `
@@ -9373,6 +9413,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyTheme(AppState.settings.themeId);
   applyFont('segoe');
   renderFontsFabPanel();
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
   tryAutoLogin();
