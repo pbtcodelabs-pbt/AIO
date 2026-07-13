@@ -570,7 +570,7 @@
   table.variantTable input:focus{border-color:var(--primary); outline:none; box-shadow:0 0 0 3px rgba(124,58,237,.12);}
   .lowStockTag{background:#fef2f2; color:var(--danger); font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600;}
   .variantImgCell{width:52px;}
-  .variantThumb{width:44px; height:44px; border-radius:8px; object-fit:cover; cursor:pointer; border:1.5px solid #e2e8f0;}
+  .variantThumb{width:46px; height:46px; border-radius:50%; object-fit:cover; cursor:pointer; border:3px solid var(--primary); box-shadow:0 1px 4px rgba(0,0,0,.15);}
   .variantImgBtn{width:44px; height:44px; border-radius:8px; border:1.5px dashed #cbd5e1; background:#f8fafc; cursor:pointer; font-size:16px; color:var(--muted);}
   .addVariantBtn{margin-top:10px; padding:8px 16px; background:#eef2ff; color:var(--primary-dark); border:1px dashed var(--primary); border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;}
   .variantRowActions{display:flex; gap:6px;}
@@ -913,7 +913,7 @@
   .shapeToggleBtn{flex:1; padding:8px 4px; border:1.5px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:#fff; border-radius:8px; font-size:11.5px; cursor:pointer;}
   .shapeToggleBtn.active{background:var(--primary); border-color:var(--primary);}
   .photoLivePreviewCard{width:64px; height:48px; border-radius:8px; overflow:hidden; background:#1f2937; border:1.5px solid rgba(255,255,255,.3); flex:0 0 auto;}
-  .photoLivePreviewCard.circleShape{width:56px; height:56px; border-radius:50%;}
+  .photoLivePreviewCard.circleShape{width:56px; height:56px; border-radius:50%; border:3px solid #22c55e;}
   #photoLivePreviewCanvas{width:100%; height:100%; object-fit:cover; display:block;}
   #captureBtnMain:disabled{opacity:.5; cursor:not-allowed;}
   .scanLine{position:absolute; left:6%; right:6%; top:0; height:2px; background:#22c55e; box-shadow:0 0 8px #22c55e; animation:scanMove 1.8s linear infinite;}
@@ -2229,6 +2229,15 @@
 
       <div class="settingsWrap">
 
+        <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
+        <div class="settingsCard" id="storageUsageCard">
+          <h3>💾 Storage Used</h3>
+          <div class="settingsHint" id="storageUsageText">Calculating…</div>
+          <div style="width:100%; height:10px; background:#e2e8f0; border-radius:6px; overflow:hidden; margin-top:8px;">
+            <div id="storageUsageBar" style="height:100%; width:0%; background:var(--primary); transition:width .3s;"></div>
+          </div>
+        </div>
+
         <!-- --- تھیم اور ظاہری شکل --- -->
         <div class="settingsCard">
           <h3>🎨 Theme & Appearance</h3>
@@ -2485,11 +2494,26 @@ function loadFromStorage(key, fallback){
     return fallback;
   }
 }
+let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
 function saveToStorage(key, value){
   try{
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+    return true;
   }catch(e){
     console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
+    if(!storageQuotaWarned){
+      storageQuotaWarned = true;
+      alert(
+        '⚠️ Storage Full — Recent changes may NOT be saved!\n\n' +
+        'Your device\'s storage for this app is full (this usually happens after adding many product photos). ' +
+        'Anything you change from now on — including product photos — may be lost when you close the app.\n\n' +
+        'Please do this now:\n' +
+        '1) Go to Dashboard → Export Backup (save it somewhere safe)\n' +
+        '2) Delete a few old/unused product photos to free up space\n' +
+        '3) Re-check that your latest changes were saved'
+      );
+    }
+    return false;
   }
 }
 
@@ -2510,6 +2534,7 @@ function persistAllData(){
   if(typeof nextUserId !== 'undefined') saveToStorage('nextUserId', nextUserId);
   if(typeof nextRequestId !== 'undefined') saveToStorage('nextRequestId', nextRequestId);
   if(typeof AppState !== 'undefined') saveToStorage('settings', AppState.settings);
+  if(typeof quickDockItems !== 'undefined') saveToStorage('quickDockItems', quickDockItems);
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
 
@@ -3258,7 +3283,7 @@ function quickNewSupplier(){
 
 let quickDockOpen = false;
 let quickDockEditMode = false;
-let quickDockItems = ['billing', 'dashboard', 'settings', 'customers', 'suppliers']; // ڈیفالٹ شارٹ کٹس (Settings شامل — Export/Import آسانی سے ملے؛ Customers/Suppliers اب الگ الگ اندراج، اوپر نیچے دکھائی دیں گے)
+let quickDockItems = loadFromStorage('quickDockItems', ['billing', 'dashboard', 'settings', 'customers', 'suppliers']); // ڈیفالٹ شارٹ کٹس — اگر پہلے سے محفوظ ترتیب موجود ہو تو وہی لوڈ ہوگی
 
 function toggleQuickDock(){
   quickDockOpen = !quickDockOpen;
@@ -3314,14 +3339,17 @@ function toggleQuickDockEdit(){
 function addQuickDockItem(key){
   if(!quickDockItems.includes(key)) quickDockItems.push(key);
   renderQuickDock();
+  persistAllData();
 }
 function removeQuickDockItem(key){
   quickDockItems = quickDockItems.filter(k => k !== key);
   renderQuickDock();
+  persistAllData();
 }
 function saveQuickDockOrderFromDOM(){
   const rows = document.querySelectorAll('#quickDockItems .quickDockEditRow[data-key]');
   quickDockItems = Array.from(rows).map(r => r.dataset.key);
+  persistAllData();
 }
 
 // ---------- ایڈٹ موڈ میں شارٹ کٹس کو دبا کر ڈریگ کر کے ترتیب دینا (Long Press) ----------
@@ -5286,7 +5314,7 @@ async function startPhotoCapture(mode, defaultShape, title){
   document.getElementById('removeBgRow').style.display = 'none';
   document.getElementById('photoCaptureControls').style.display = 'flex';
   document.getElementById('brightnessSlider').value = 125;
-  document.getElementById('shapeToggleRow').style.display = (mode === 'item' || mode === 'quickadd') ? 'none' : 'flex';
+  document.getElementById('shapeToggleRow').style.display = 'flex';
   setPhotoShape(defaultShape);
   photoEnhance = true;
   document.getElementById('enhanceToggle').classList.add('active');
@@ -5427,7 +5455,9 @@ function captureItemPhoto(){ performCropCapture(); }
 // ---------- مشترکہ کراپ فنکشن: ویڈیو یا گیلری تصویر — دونوں کے لیے، شکل (گول/مستطیل) اور Enhance کے مطابق ----------
 function renderCroppedPhoto(source, sx, sy, sw, sh, brightness){
   const canvas = document.getElementById('itemPhotoCanvas');
-  const outW = 400, outH = photoShape === 'circle' ? 400 : 300;
+  // ---------- کارڈز پر یہ تصویر ہمیشہ بہت چھوٹی (44-84px) دکھتی ہے، اس لیے 240px کافی ہے —
+  // چھوٹا سائز = کم اسٹوریج = زیادہ تصاویر localStorage میں سما سکیں (پہلے 400px بلاوجہ زیادہ جگہ لیتا تھا) ----------
+  const outW = 240, outH = photoShape === 'circle' ? 240 : 180;
   canvas.width = outW; canvas.height = outH;
   const ctx = canvas.getContext('2d');
 
@@ -5451,7 +5481,7 @@ function renderCroppedPhoto(source, sx, sy, sw, sh, brightness){
   if(photoShape === 'circle') ctx.restore();
 
   // ---------- اب دونوں شکلوں کا پس منظر ہمیشہ سفید (opaque) ہے، اس لیے ہمیشہ JPEG — سائز بھی چھوٹا رہتا ہے ----------
-  return canvas.toDataURL('image/jpeg', 0.85);
+  return canvas.toDataURL('image/jpeg', 0.75);
 }
 
 function showPhotoPreview(){
@@ -8944,7 +8974,31 @@ function applyFont(fontId){
 }
 
 // ---------- Settings اسکرین کھلتے وقت سب کچھ رینڈر + پرنٹر خودکار تلاش ----------
+// ---------- Settings میں 💾 Storage Used کارڈ اپڈیٹ کریں — تاکہ صارف کو ہمیشہ حقیقی اندازہ رہے کتنی جگہ استعمال ہو چکی ----------
+// نوٹ: 5MB ایک عام/محفوظ اندازہ ہے (زیادہ تر Android Chrome پر localStorage کی حد اس کے آس پاس ہوتی ہے)،
+// اصل حد ڈیوائس کے مطابق تھوڑی مختلف ہو سکتی ہے — اس لیے یہ ایک رہنما اندازہ ہے، حتمی نمبر نہیں۔
+function renderStorageUsage(){
+  const textEl = document.getElementById('storageUsageText');
+  const barEl = document.getElementById('storageUsageBar');
+  if(!textEl || !barEl) return;
+  let totalBytes = 0;
+  for(let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith(STORAGE_PREFIX)){
+      totalBytes += (k.length + (localStorage.getItem(k) || '').length) * 2; // UTF-16 → ہر حرف ~2 بائٹ
+    }
+  }
+  const budgetBytes = 5 * 1024 * 1024; // ~5MB اندازہ
+  const usedMB = (totalBytes / (1024*1024)).toFixed(2);
+  const pct = Math.min(100, Math.round((totalBytes / budgetBytes) * 100));
+  textEl.textContent = `${usedMB} MB used (approx. ${pct}% of a typical ${(budgetBytes/(1024*1024)).toFixed(0)}MB device limit). Mostly product photos — delete unused ones or export/clear old Bill History if this gets close to full.`;
+  barEl.style.width = pct + '%';
+  barEl.style.background = pct >= 90 ? 'var(--danger)' : pct >= 70 ? '#f59e0b' : 'var(--primary)';
+}
+
 function renderSettingsScreen(){
+  renderStorageUsage();
+
   // تھیم سواچز بنائیں
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
     <div class="themeSwatch ${t.id === AppState.settings.themeId ? 'active' : ''}"
