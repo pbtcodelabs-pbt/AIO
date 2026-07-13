@@ -2452,11 +2452,63 @@
           </div>
         </div>
 
+        <!-- --- ⚠️ Danger Zone — صرف Admin، PIN درکار، دونوں عمل ناقابلِ واپسی --- -->
+        <div class="settingsCard" style="border:2px solid #fecaca; background:#fff7f7;">
+          <h3 style="color:#b91c1c;">⚠️ Danger Zone</h3>
+          <div class="settingsHint">These actions cannot be undone. Export a backup first if you're unsure.</div>
+
+          <div style="margin-top:14px; padding-top:14px; border-top:1px solid #fecaca;">
+            <div class="settingsSubLabel">🧾 Reset Bills &amp; Transactions</div>
+            <div class="settingsHint" style="margin-top:0;">Clears all bills, purchase orders, customer/supplier balances, and Dashboard totals. Your Products, Categories, and current Stock quantities stay exactly as they are — so you can start fresh billing without re-entering your inventory.</div>
+            <button class="testPrintBtn" style="margin-top:8px; background:#fff7ed; color:#c2410c; border:1px solid #fdba74;" onclick="requestSoftResetAuth()">🧾 Reset Bills &amp; Transactions…</button>
+          </div>
+
+          <div style="margin-top:16px; padding-top:14px; border-top:1px solid #fecaca;">
+            <div class="settingsSubLabel" style="color:#b91c1c;">🔥 Master Reset — Erase Everything</div>
+            <div class="settingsHint" style="margin-top:0;">Wipes Products, Categories, Customers, Suppliers, Bills, everything — the app goes back to a completely blank, zero state, as if freshly installed. Your login PIN, subscription/activation, and app settings (theme, printer, business info) are NOT affected.</div>
+            <button class="testPrintBtn" style="margin-top:8px; background:#b91c1c; color:#fff;" onclick="requestMasterResetAuth()">🔥 Master Reset — Erase Everything…</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
   </div>
 </div>
+
+    <!-- SOFT RESET (Bills & Transactions) CONFIRMATION MODAL -->
+    <div class="modalOverlay" id="softResetModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox" style="max-width:360px;">
+        <h3 style="color:#c2410c;">🧾 Reset Bills &amp; Transactions</h3>
+        <div class="settingsHint" style="margin-top:0;">This will permanently erase: all Bills, Purchase Orders, customer/supplier balances, and Dashboard totals. <b>Products, Categories, and Stock will NOT be touched.</b> This cannot be undone.</div>
+        <label style="display:flex; align-items:flex-start; gap:8px; margin:14px 0; font-size:12.5px;">
+          <input type="checkbox" id="softResetAckChk" style="width:18px; height:18px; margin:2px 0 0 0; flex:0 0 auto;">
+          I understand this cannot be undone and I have a backup if needed.
+        </label>
+        <input type="password" id="softResetPinInput" placeholder="Your Admin login PIN" inputmode="numeric" style="width:100%; padding:10px; border-radius:8px; border:1px solid #dbe1ea; margin:6px 0; font-size:16px; text-align:center; letter-spacing:4px;">
+        <div id="softResetError" style="color:var(--danger); font-size:12px; display:none; margin-bottom:8px;">❌ Incorrect PIN, or please tick the checkbox above.</div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="document.getElementById('softResetModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" style="background:#c2410c;" onclick="confirmSoftReset()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MASTER RESET CONFIRMATION MODAL — extra friction: must type DELETE, plus PIN -->
+    <div class="modalOverlay" id="masterResetModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox" style="max-width:360px;">
+        <h3 style="color:#b91c1c;">🔥 Master Reset — Erase Everything</h3>
+        <div class="settingsHint" style="margin-top:0; color:#b91c1c; font-weight:700;">This erases ALL Products, Categories, Customers, Suppliers, and Bills — the app goes back to completely blank/zero. This CANNOT be undone.</div>
+        <div class="settingsHint" style="margin-top:6px;">Type <b>DELETE</b> below to confirm.</div>
+        <input type="text" id="masterResetTypeInput" placeholder="Type DELETE" style="width:100%; padding:10px; border-radius:8px; border:1.5px solid #fca5a5; margin:8px 0; font-size:15px; text-align:center; text-transform:uppercase;">
+        <input type="password" id="masterResetPinInput" placeholder="Your Admin login PIN" inputmode="numeric" style="width:100%; padding:10px; border-radius:8px; border:1px solid #dbe1ea; margin:6px 0; font-size:16px; text-align:center; letter-spacing:4px;">
+        <div id="masterResetError" style="color:var(--danger); font-size:12px; display:none; margin-bottom:8px;">❌ Please type DELETE exactly, and enter your correct PIN.</div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="document.getElementById('masterResetModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" style="background:#b91c1c;" onclick="confirmMasterReset()">Erase Everything</button>
+        </div>
+      </div>
+    </div>
 
     <!-- ADD PAYMENT ACCOUNT MODAL -->
     <div class="modalOverlay" id="addPaymentAccountModal" onclick="if(event.target===this) this.classList.remove('show')">
@@ -9609,6 +9661,82 @@ function saveNewPaymentAccount(){
   });
   document.getElementById('addPaymentAccountModal').classList.remove('show');
   renderMyPaymentAccounts();
+}
+
+/* =====================================================================
+   ⚠️ Danger Zone — Reset Bills/Transactions اور Master Reset
+   دونوں کے لیے موجودہ لاگ ان Admin کا اپنا PIN دوبارہ درکار ہے (کسی اور یوزر کا نہیں چلے گا)۔
+   Master Reset پر اضافی رکاوٹ کے طور پر "DELETE" ٹائپ کرنا بھی ضروری ہے۔
+   ===================================================================== */
+function requestSoftResetAuth(){
+  document.getElementById('softResetAckChk').checked = false;
+  document.getElementById('softResetPinInput').value = '';
+  document.getElementById('softResetError').style.display = 'none';
+  document.getElementById('softResetModal').classList.add('show');
+}
+
+async function confirmSoftReset(){
+  const ack = document.getElementById('softResetAckChk').checked;
+  const enteredPin = document.getElementById('softResetPinInput').value.trim();
+  const enteredHash = await hashPin(enteredPin);
+  const validAdmin = usersData.some(u => u.role === 'admin' && u.is_active && u.pin === enteredHash);
+  if(!ack || !validAdmin){
+    document.getElementById('softResetError').style.display = 'block';
+    return;
+  }
+  performSoftReset();
+  document.getElementById('softResetModal').classList.remove('show');
+  alert('✅ Bills & Transactions have been reset. Products and Stock were not touched.');
+  goTo('home');
+}
+
+// ---------- صرف Bills/Transactions/Balances صاف کریں — Products/Categories/Stock/Users بالکل چھوئے بغیر ----------
+function performSoftReset(){
+  invoicesData.length = 0;
+  pendingBillsData.length = 0;
+  customersData.forEach(c => { c.wallet_balance = 0; c.total_receivable = 0; c.walletHistory = []; });
+  suppliersData.forEach(s => { s.total_payable = 0; s.purchaseHistory = []; });
+  financeDummy.cashInHand = 0;
+  AppState.settings.openingCashBalance = 0;
+  persistAllData();
+}
+
+function requestMasterResetAuth(){
+  document.getElementById('masterResetTypeInput').value = '';
+  document.getElementById('masterResetPinInput').value = '';
+  document.getElementById('masterResetError').style.display = 'none';
+  document.getElementById('masterResetModal').classList.add('show');
+}
+
+async function confirmMasterReset(){
+  const typed = document.getElementById('masterResetTypeInput').value.trim().toUpperCase();
+  const enteredPin = document.getElementById('masterResetPinInput').value.trim();
+  const enteredHash = await hashPin(enteredPin);
+  const validAdmin = usersData.some(u => u.role === 'admin' && u.is_active && u.pin === enteredHash);
+  if(typed !== 'DELETE' || !validAdmin){
+    document.getElementById('masterResetError').style.display = 'block';
+    return;
+  }
+  performMasterReset();
+  document.getElementById('masterResetModal').classList.remove('show');
+  alert('✅ Everything has been erased. The app is now back to a blank, zero state.');
+  goTo('home');
+}
+
+// ---------- بالکل زیرو — Products، Categories، Customers، Suppliers، Bills سب کچھ صاف —
+// لیکن Login PIN/Users، Subscription/Activation، اور App Settings (تھیم، پرنٹر، بزنس انفو) کو ہاتھ نہیں لگایا جاتا،
+// ورنہ ری سیٹ کے بعد صارف اپنی ہی ایپ میں لاگ ان نہ ہو سکے یا سبسکرپشن ضائع ہو جائے ----------
+function performMasterReset(){
+  productsData.length = 0;
+  customersData.length = 0;
+  suppliersData.length = 0;
+  invoicesData.length = 0;
+  pendingBillsData.length = 0;
+  nextCustomerId = 1;
+  nextSupplierId = 1;
+  financeDummy.cashInHand = 0;
+  AppState.settings.openingCashBalance = 0;
+  persistAllData();
 }
 
 // ---------- اکاؤنٹ ڈیلیٹ کریں ----------
