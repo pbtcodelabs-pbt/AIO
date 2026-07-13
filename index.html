@@ -195,9 +195,9 @@
   .resultItem .rMeta{font-size:12px; color:var(--muted);}
 
   .cartWrap{background:var(--card); border-radius:var(--radius); max-height:160px; overflow-y:auto; box-shadow:0 2px 10px rgba(41,29,10,.07);}
-  table.cartTable{width:100%; border-collapse:collapse; font-size:14px;}
+  table.cartTable{width:100%; border-collapse:collapse; font-size:var(--cart-font-size, 14px); font-weight:var(--cart-font-weight, 400);}
   table.cartTable th{text-align:left; padding:12px; background:#f1f5fb; color:var(--muted); font-size:12px; text-transform:uppercase; position:sticky; top:0;}
-  table.cartTable td{padding:10px 12px; border-bottom:1px solid #eef1f6;}
+  table.cartTable td{padding:var(--cart-row-pad, 10px) 12px; border-bottom:1px solid #eef1f6;}
   .qtyBtns{display:flex; align-items:center; gap:6px;}
   .rateEditInput{width:64px; padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:13px; text-align:center; background:#fffbea;}
 
@@ -1354,6 +1354,17 @@
           <span class="closeBtn" onclick="closeCartSheet()">✖</span>
         </div>
 
+        <!-- ---------- بل بناتے وقت لکھائی کا سائز/موٹاپن اور دو لائنوں کے درمیان فاصلہ — صرف اسی کارٹ کے لیے ---------- -->
+        <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
+          <span style="font-size:11px; color:var(--muted); margin-left:2px;">Text:</span>
+          <button type="button" onclick="adjustCartTextSetting('fontSize',-1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:11px;">A−</button>
+          <button type="button" onclick="adjustCartTextSetting('fontSize',1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:15px;">A+</button>
+          <button type="button" id="cartBoldToggleBtn" onclick="toggleCartTextBold()" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-weight:800;">B</button>
+          <span style="font-size:11px; color:var(--muted); margin-left:8px;">Spacing:</span>
+          <button type="button" onclick="adjustCartTextSetting('rowPad',-1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:13px;">↕−</button>
+          <button type="button" onclick="adjustCartTextSetting('rowPad',1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:13px;">↕+</button>
+        </div>
+
         <div class="cartSheetBody">
           <div class="cartWrap">
             <table class="cartTable">
@@ -2310,6 +2321,41 @@
           <button class="testPrintBtn" onclick="testPrint()">🧾 Send Test Print</button>
         </div>
 
+        <!-- --- 🧾 پرنٹ شدہ بل پر کیا کیا معلومات شامل ہوں --- -->
+        <div class="settingsCard">
+          <h3>🧾 Receipt Content</h3>
+          <div class="settingsHint">Turn on whichever details you want to appear on every printed bill.</div>
+
+          <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+            <input type="checkbox" id="printSortAlphaChk" onchange="updatePrintToggle('printSortAlpha', this.checked)" style="width:18px; height:18px; margin:0;">
+            <span style="font-size:13px;">Sort items alphabetically on receipt</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+            <input type="checkbox" id="printShowSalesmanChk" onchange="updatePrintToggle('printShowSalesman', this.checked)" style="width:18px; height:18px; margin:0;">
+            <span style="font-size:13px;">Print salesman name ("Sold by") on bill</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+            <input type="checkbox" id="printShowPaymentAccountChk" onchange="updatePrintToggle('printShowPaymentAccount', this.checked)" style="width:18px; height:18px; margin:0;">
+            <span style="font-size:13px;">Show Payment Account(s) marked "🧾" in footer, so customers can pay you — tick which accounts in My Payment Accounts (Settings)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:8px 0;">
+            <input type="checkbox" id="printShowBrandingChk" onchange="updatePrintToggle('printShowBranding', this.checked)" style="width:18px; height:18px; margin:0;">
+            <span style="font-size:13px;">Show small "Powered by AIO POS" line in footer</span>
+          </label>
+        </div>
+
+        <!-- --- 🔠 پرنٹ کی لکھائی کا سائز --- -->
+        <div class="settingsCard">
+          <h3>🔠 Print Text Size</h3>
+          <div class="settingsHint">Make the printed receipt's writing bigger or smaller across the board.</div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+            <span style="font-size:12px; color:var(--muted);">A</span>
+            <input type="range" id="printFontScaleSlider" min="85" max="130" step="5" value="100" oninput="updatePrintFontScale(this.value)" style="flex:1;">
+            <span style="font-size:18px; color:var(--muted);">A</span>
+          </div>
+          <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span id="printFontScaleLabel">100%</span></div>
+        </div>
+
         <!-- --- ٹیکس Settings — پاکستان کے عام کاؤنٹر بلوں پر لازمی نہیں، اس لیے مکمل اختیاری اور ڈیفالٹ بند --- -->
         <div class="settingsCard">
           <h3>🧾 Tax Settings</h3>
@@ -2408,11 +2454,19 @@
     <div class="modalOverlay" id="addPaymentAccountModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
         <h3>➕ Add Payment Account</h3>
+        <div style="display:flex; justify-content:center; margin-bottom:10px;">
+          <div id="papPhotoPreview" onclick="triggerPapPhotoUpload()" style="width:64px; height:64px; border-radius:50%; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:26px; overflow:hidden; border:2px dashed #dbe1ea; cursor:pointer;">👤</div>
+        </div>
+        <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:10px;">Tap the circle to add your photo (optional — shown on the shareable account card)</div>
         <input type="text" id="papTitle" placeholder="Account Title (e.g. Abdul Hafeez / Shop Account)">
         <select id="papBankName" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
           <option value="">— Select Bank/Wallet —</option>
         </select>
         <input type="text" id="papNumber" placeholder="Account Number">
+        <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px;">
+          <input type="checkbox" id="papShowOnReceipt" style="width:18px; height:18px; margin:0;">
+          Show this account on printed bill footer
+        </label>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="document.getElementById('addPaymentAccountModal').classList.remove('show')">Cancel</button>
           <button class="saveBtn" onclick="saveNewPaymentAccount()">Add Account</button>
@@ -2748,6 +2802,16 @@ const DEFAULT_SETTINGS = {
   // ---------- 🔍 پوری ایپ کا سائز (Zoom) — آئیکن، فونٹ، ہر چیز بیک وقت بڑی/چھوٹی ہو جاتی ہے —
   // ان لوگوں کے لیے مفید جو بڑی اسکرین یا بڑا فونٹ دیکھنا چاہیں ----------
   uiZoom: 100, // 80–150 (%)
+  // ---------- 🛒 بل بناتے وقت (Cart) کی لکھائی کا سائز/موٹاپن/لائن اسپیسنگ — App Zoom سے الگ، صرف بلنگ کارٹ کے لیے ----------
+  cartFontSize: 14,   // 11–20 px
+  cartRowPad: 10,     // 6–20 px (دو لائنوں کے درمیان فاصلہ)
+  cartBold: false,
+  // ---------- 🧾 پرنٹ شدہ رسید پر اضافی معلومات — Settings کے نئے Receipt Content کارڈ سے کنٹرول ----------
+  printSortAlpha: false,        // آئٹمز حروفِ تہجی کی ترتیب میں پرنٹ ہوں (بصورتِ دیگر جس ترتیب میں شامل کیے، اسی میں)
+  printShowSalesman: false,     // بل کس سیلز مین نے بنایا، اس کا نام پرنٹ ہو
+  printShowPaymentAccount: false, // فوٹر میں وہ Payment Accounts دکھائیں جن پر "Show on Receipt" ✅ ٹِک ہو
+  printShowBranding: false,     // فوٹر میں چھوٹی سی "Powered by AIO POS" لائن
+  printFontScale: 100,          // 85–130 (%) — پورے پرنٹ شدہ بل کی لکھائی کا سائز
 };
 const AppState = {
   currentUser: null,
@@ -4225,6 +4289,7 @@ function renderFloatingCartBar(){
 
 function openCartSheet(){
   document.getElementById('cartSheetModal').classList.add('show');
+  applyCartTextSettings();
 }
 function closeCartSheet(){
   document.getElementById('cartSheetModal').classList.remove('show');
@@ -5321,6 +5386,12 @@ async function triggerPartyPhotoUpload(){
   await startPhotoCapture('party', 'circle', '📷 Profile Photo');
 }
 
+// ---------- Payment Account کے مالک کی تصویر — Share Card پر دکھانے کے لیے (اختیاری) ----------
+let papPhotoDataUrl = null;
+async function triggerPapPhotoUpload(){
+  await startPhotoCapture('paymentaccount', 'circle', '📷 Account Photo');
+}
+
 // ---------- مشترکہ کیمرہ اسٹارٹ اپ لاجک — Item اور Party دونوں فوٹو کیپچر کے لیے ایک ہی جگہ سے ----------
 async function startPhotoCapture(mode, defaultShape, title){
   photoCaptureMode = mode;
@@ -5535,6 +5606,14 @@ function confirmPhoto(){
     if(capturedPhotoDataUrl){
       npPhotoDataUrl = capturedPhotoDataUrl; // TODO: DB میں یہ ایک فائل path/URL کے طور پر محفوظ ہوگی
       renderAvatarInto('npPhotoPreview', npPhotoDataUrl, currentPartyTab === 'customers' ? '👤' : '🏭');
+    }
+    closeItemPhotoCapture();
+    return;
+  }
+  if(photoCaptureMode === 'paymentaccount'){
+    if(capturedPhotoDataUrl){
+      papPhotoDataUrl = capturedPhotoDataUrl;
+      renderAvatarInto('papPhotoPreview', papPhotoDataUrl, '👤');
     }
     closeItemPhotoCapture();
     return;
@@ -8364,6 +8443,10 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
   estimatedHeight += 34; // Grand Total لائن
   if(invoice.customer_id) estimatedHeight += 120; // کسٹمر بیلنس سمری باکس
+  if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
+  const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
+  if(AppState.settings.printShowPaymentAccount && receiptAccounts.length) estimatedHeight += 20 + (receiptAccounts.length * 16);
+  if(AppState.settings.printShowBranding) estimatedHeight += 20;
   estimatedHeight += 40; // فوٹر + مارجن
 
   canvas.width = pxWidth;
@@ -8384,6 +8467,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   // نستعلیق منتخب ہونے پر پرنٹ خودکار طور پر صاف Arial پر چلا جاتا ہے (باقی سب فونٹ جوں کے توں پرنٹ ہوں گے)۔
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.fontId) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  // ---------- Settings کے "🔠 Print Text Size" سلائیڈر کے مطابق — پورے بل کی لکھائی کا سائز اسی تناسب سے بڑا/چھوٹا ہوتا ہے ----------
+  const fscale = (AppState.settings.printFontScale || 100) / 100;
+  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
 
   // ---------- ڈرائنگ سے پہلے یقینی بنائیں کہ منتخب فونٹ مکمل لوڈ ہو چکا ہے (خصوصاً پہلی بار Google Font کے لیے) ----------
   try{
@@ -8394,20 +8480,20 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
 
   let y = 30;
   ctx.textAlign = 'center';
-  ctx.font = `bold 26px ${canvasFontFamily}`;
+  ctx.font = F('bold 26px');
   ctx.fillStyle = '#000';
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 26;
 
   // ---------- دکان کا پتہ/فون ہو تو دکھائیں ----------
   if(AppState.settings.businessAddress || AppState.settings.businessPhone){
-    ctx.font = `12px ${canvasFontFamily}`;
+    ctx.font = F('12px');
     if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16; }
     if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16; }
   }
 
   // ---------- بل نمبر + تاریخ + دن — ایک ہی لائن میں: Bill#1/532 09/07/26 Thu ----------
   // (نمبروں کے آگے زیرو نہیں — یہ Infinite Sequence ہیں؛ تاریخ DD/MM/YY فارمیٹ میں زیرو کے ساتھ رہے گی)
-  ctx.font = `bold 15px ${canvasFontFamily}`;
+  ctx.font = F('bold 15px');
   const billDateObj = new Date(invoice.created_at);
   const dd = String(billDateObj.getDate()).padStart(2, '0');
   const mm = String(billDateObj.getMonth() + 1).padStart(2, '0');
@@ -8415,10 +8501,21 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   const billLine = `Bill#${invoice.daily_bill_no || '—'}/${invoice.monthly_bill_no || '—'} ${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`;
   ctx.fillText(billLine, pxWidth/2, y); y += 22;
 
-  ctx.font = `16px ${canvasFontFamily}`;
+  ctx.font = F('16px');
   ctx.fillText('Customer: ' + invoice.customer_name, pxWidth/2, y); y += 28;
 
+  if(AppState.settings.printShowSalesman && invoice.sold_by){
+    ctx.font = F('13px');
+    ctx.fillText('Sold by: ' + invoice.sold_by, pxWidth/2, y); y += 16;
+  }
+
   drawSolidLine(ctx, y, pxWidth); y += 16;
+
+  // ---------- اگر "حروفِ تہجی ترتیب" آن ہو تو صرف پرنٹ کے لیے ایک عارضی sorted کاپی بنائیں —
+  // اصل invoice.items (اور اسٹاک/سیلز کا حساب) اسی ترتیب میں رہے گا جس میں اصل میں شامل ہوئے تھے ----------
+  const printItems = AppState.settings.printSortAlpha
+    ? [...invoice.items].sort((a, b) => a.name.localeCompare(b.name))
+    : invoice.items;
 
   // ---------- آئٹمز ٹیبل — مکمل باریک ٹھوس گرڈ (باکس والا)، ہر کالم پر عمودی لائن، ہر آئٹم پر افقی لائن ----------
   // کالمز کی ترتیب: #  |  Item  |  Qty  |  Price  |  Total
@@ -8432,7 +8529,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   drawTableHLine(hLineY); // اوپر کی باؤنڈری
 
   // ---------- ہیڈر لائن ----------
-  ctx.font = `bold 13px ${canvasFontFamily}`;
+  ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - 7;
   ctx.textAlign = 'center';
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
@@ -8446,9 +8543,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   drawTableHLine(hLineY);
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
-  ctx.font = `bold 14px ${canvasFontFamily}`;
+  ctx.font = F('bold 14px');
   const maxItemWidth = itemW - 8;
-  invoice.items.forEach((item, idx) => {
+  printItems.forEach((item, idx) => {
     const rowBaseline = hLineY + rowH - 7;
 
     let displayName = item.name;
@@ -8477,18 +8574,18 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   ctx.textAlign = 'right';
   if(invoice.discount && invoice.discount > 0){
     const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-    ctx.font = `14px ${canvasFontFamily}`;
+    ctx.font = F('14px');
     ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), pxWidth-10, y); y += 20;
     ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), pxWidth-10, y); y += 24;
   }
 
   // ---------- ٹیکس ہو تو الگ لائن میں دکھائیں (فیصد کے ساتھ) ----------
   if(invoice.tax_amount && invoice.tax_amount > 0){
-    ctx.font = `14px ${canvasFontFamily}`;
+    ctx.font = F('14px');
     ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), pxWidth-10, y); y += 20;
   }
 
-  ctx.font = `bold 20px ${canvasFontFamily}`;
+  ctx.font = F('bold 20px');
   ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(0), pxWidth-10, y);
   y += 34;
 
@@ -8500,11 +8597,11 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
     ctx.strokeStyle = '#000';
     ctx.strokeRect(tableLeft + 0.5, boxTop + 0.5, tableRight - tableLeft, boxH);
     y += 18;
-    ctx.font = `bold 13px ${canvasFontFamily}`;
+    ctx.font = F('bold 13px');
     ctx.textAlign = 'center';
     ctx.fillText('Account Summary', pxWidth/2, y); y += 20;
 
-    ctx.font = `13px ${canvasFontFamily}`;
+    ctx.font = F('13px');
     ctx.textAlign = 'left';
     const paidNow = invoice.paid_now || 0;
     const rows = [
@@ -8519,7 +8616,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
       ctx.fillText(val, tableRight - 10, y);
       y += 18;
     });
-    ctx.font = `bold 14px ${canvasFontFamily}`;
+    ctx.font = F('bold 14px');
     ctx.textAlign = 'left';
     ctx.fillText('New Balance Due', tableLeft + 10, y);
     ctx.textAlign = 'right';
@@ -8528,8 +8625,22 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   }
 
   ctx.textAlign = 'center';
-  ctx.font = `13px ${canvasFontFamily}`;
+  ctx.font = F('13px');
   ctx.fillText('Thank you for your purchase!', pxWidth/2, y);
+
+  if(AppState.settings.printShowPaymentAccount && receiptAccounts.length){
+    ctx.font = F('bold 12px');
+    receiptAccounts.forEach(acc => {
+      y += 16;
+      ctx.fillText(`💳 ${acc.type || ''}: ${acc.number || ''}`, pxWidth/2, y);
+    });
+  }
+  if(AppState.settings.printShowBranding){
+    y += 18;
+    ctx.font = F('10px');
+    ctx.fillStyle = '#888';
+    ctx.fillText('Powered by AIO POS — Best Billing App', pxWidth/2, y);
+  }
 }
 
 function drawSolidLine(ctx, y, width){
@@ -8972,6 +9083,30 @@ function applyUiZoom(pct){
   document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
 }
 
+// ---------- بل بناتے وقت (Cart) کی لکھائی کا سائز/موٹاپن/لائن اسپیسنگ — یہ صرف بلنگ کی ٹیبل پر لاگو ہوتا ہے،
+// پوری ایپ کے Zoom سے الگ، تاکہ صرف بل بناتے وقت بڑی/موٹی/کھلی لکھائی چاہیے تو باقی ایپ چھوٹی ہی رہے ----------
+function applyCartTextSettings(){
+  const fs = Math.max(11, Math.min(20, AppState.settings.cartFontSize || 14));
+  const rp = Math.max(6, Math.min(20, AppState.settings.cartRowPad || 10));
+  document.documentElement.style.setProperty('--cart-font-size', fs + 'px');
+  document.documentElement.style.setProperty('--cart-row-pad', rp + 'px');
+  document.documentElement.style.setProperty('--cart-font-weight', AppState.settings.cartBold ? '700' : '400');
+  const boldBtn = document.getElementById('cartBoldToggleBtn');
+  if(boldBtn) boldBtn.style.background = AppState.settings.cartBold ? 'var(--primary)' : '#fff';
+  if(boldBtn) boldBtn.style.color = AppState.settings.cartBold ? '#fff' : '#000';
+}
+function adjustCartTextSetting(key, dir){
+  if(key === 'fontSize') AppState.settings.cartFontSize = Math.max(11, Math.min(20, (AppState.settings.cartFontSize || 14) + dir));
+  if(key === 'rowPad') AppState.settings.cartRowPad = Math.max(6, Math.min(20, (AppState.settings.cartRowPad || 10) + dir));
+  applyCartTextSettings();
+  persistAllData();
+}
+function toggleCartTextBold(){
+  AppState.settings.cartBold = !AppState.settings.cartBold;
+  applyCartTextSettings();
+  persistAllData();
+}
+
 // ---------- تھیم پوری ایپ پر لاگو کریں (:root پر CSS variables تبدیل ہوتے ہی ہر جگہ خودکار اپڈیٹ) ----------
 function applyTheme(themeId){
   const t = THEME_PRESETS.find(x => x.id === themeId) || THEME_PRESETS[0];
@@ -9034,6 +9169,12 @@ function renderSettingsScreen(){
   renderStorageUsage();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
+  document.getElementById('printSortAlphaChk').checked = !!AppState.settings.printSortAlpha;
+  document.getElementById('printShowSalesmanChk').checked = !!AppState.settings.printShowSalesman;
+  document.getElementById('printShowPaymentAccountChk').checked = !!AppState.settings.printShowPaymentAccount;
+  document.getElementById('printShowBrandingChk').checked = !!AppState.settings.printShowBranding;
+  document.getElementById('printFontScaleSlider').value = AppState.settings.printFontScale || 100;
+  document.getElementById('printFontScaleLabel').textContent = (AppState.settings.printFontScale || 100) + '%';
 
   // تھیم سواچز بنائیں
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
@@ -9377,13 +9518,27 @@ function renderMyPaymentAccounts(){
   }
   wrap.innerHTML = accounts.map((acc, idx) => `
     <div class="paymentAccCard">
+      <div style="width:36px; height:36px; border-radius:50%; overflow:hidden; flex:0 0 36px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:16px;">
+        ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
+      </div>
       <div class="paymentAccInfo">
         <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank">${acc.type || '—'}</span></div>
         <div class="paymentAccNumber">${acc.number || '—'}</div>
       </div>
+      <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer" style="border:none; background:none; font-size:18px; padding:4px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
+      <button onclick="shareAccountCard(${idx})" title="Share as a card" style="border:none; background:none; font-size:18px; padding:4px;">🎴</button>
       <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
     </div>
   `).join('');
+}
+
+// ---------- کسی اکاؤنٹ کو بل کے فٹر پر دکھانا/چھپانا ٹوگل کریں ----------
+function toggleAccountShowOnReceipt(idx){
+  const acc = AppState.settings.paymentAccounts[idx];
+  if(!acc) return;
+  acc.showOnReceipt = !acc.showOnReceipt;
+  renderMyPaymentAccounts();
+  persistAllData();
 }
 
 // ---------- نیا اکاؤنٹ شامل کرنے کا موڈل کھولیں (بینک لسٹ تازہ بھریں) ----------
@@ -9394,6 +9549,9 @@ function openAddPaymentAccountModal(){
   document.getElementById('papTitle').value = '';
   document.getElementById('papBankName').value = '';
   document.getElementById('papNumber').value = '';
+  document.getElementById('papShowOnReceipt').checked = false;
+  papPhotoDataUrl = null;
+  document.getElementById('papPhotoPreview').innerHTML = '👤';
   document.getElementById('addPaymentAccountModal').classList.add('show');
 }
 
@@ -9409,7 +9567,9 @@ function saveNewPaymentAccount(){
   AppState.settings.paymentAccounts.push({
     type: bank,
     number: number,
-    name: title || ''
+    name: title || '',
+    photo: papPhotoDataUrl || null,
+    showOnReceipt: document.getElementById('papShowOnReceipt').checked
   });
   document.getElementById('addPaymentAccountModal').classList.remove('show');
   renderMyPaymentAccounts();
@@ -9420,6 +9580,158 @@ function deletePaymentAccount(idx){
   if(!confirm('Delete this account?')) return;
   AppState.settings.paymentAccounts.splice(idx, 1);
   renderMyPaymentAccounts();
+}
+
+/* =====================================================================
+   💳 Payment Account Share Card — ہر محفوظ شدہ اکاؤنٹ کو ایک خوبصورت،
+   رنگین، بینک/والیٹ کے اپنے انداز والے کارڈ کی صورت میں شیئر کریں —
+   تاکہ جب کوئی اکاؤنٹ نمبر مانگے تو ایک ٹیپ میں مکمل، خوبصورت کارڈ بھیجا جا سکے۔
+   ===================================================================== */
+const ACCOUNT_CARD_THEMES = {
+  'EasyPaisa': {bg1:'#00A651', bg2:'#007A3D', text:'#ffffff'},
+  'JazzCash':  {bg1:'#F04E23', bg2:'#B7250A', text:'#ffffff'},
+  'HBL':       {bg1:'#0C6A35', bg2:'#083F20', text:'#ffffff'},
+  'UBL':       {bg1:'#004990', bg2:'#00234A', text:'#ffffff'},
+  'MCB':       {bg1:'#B7202E', bg2:'#6E0F18', text:'#ffffff'},
+  'Meezan Bank':{bg1:'#005B31', bg2:'#00341C', text:'#ffd23f'},
+  'Allied Bank':{bg1:'#0A4F9C', bg2:'#052A54', text:'#ffffff'},
+  'Bank Alfalah':{bg1:'#B0272B', bg2:'#6B1416', text:'#ffffff'},
+  'Askari Bank':{bg1:'#00512D', bg2:'#00301A', text:'#ffffff'},
+  'Faysal Bank':{bg1:'#7A1F2B', bg2:'#4A1119', text:'#ffffff'},
+  'Standard Chartered':{bg1:'#0473EA', bg2:'#02397A', text:'#ffffff'},
+};
+function getAccountCardTheme(bankName){
+  return ACCOUNT_CARD_THEMES[bankName] || {bg1:'#0f766e', bg2:'#0b4a45', text:'#ffffff'};
+}
+
+// ---------- کارڈ کینوس پر بنائیں (Async — مالک کی تصویر لوڈ ہونے کا انتظار کرتا ہے) ----------
+async function renderAccountCardToCanvas(acc){
+  const canvas = document.getElementById('accountCardCanvas') || (() => {
+    const c = document.createElement('canvas'); c.id = 'accountCardCanvas'; c.style.display = 'none';
+    document.body.appendChild(c); return c;
+  })();
+  const W = 800, H = 460;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const theme = getAccountCardTheme(acc.type);
+
+  // ---------- خوبصورت ترچھا رنگین پس منظر (بینک کے اپنے رنگوں کے مطابق) ----------
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, theme.bg1);
+  grad.addColorStop(1, theme.bg2);
+  ctx.fillStyle = grad;
+  roundRectPath(ctx, 0, 0, W, H, 28);
+  ctx.fill();
+
+  // ---------- ہلکا سا سجاوٹی دائرہ — ویزیٹنگ کارڈ جیسا خوبصورت ٹچ ----------
+  ctx.save();
+  ctx.globalAlpha = 0.10;
+  ctx.beginPath(); ctx.arc(W - 60, 60, 160, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(50, H - 40, 120, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // ---------- سفید بارڈر فریم — خوبصورت "کارڈ" احساس ----------
+  ctx.strokeStyle = 'rgba(255,255,255,.55)';
+  ctx.lineWidth = 3;
+  roundRectPath(ctx, 10, 10, W-20, H-20, 22);
+  ctx.stroke();
+
+  ctx.fillStyle = theme.text;
+  ctx.textAlign = 'left';
+
+  // ---------- مالک کی تصویر (اگر موجود ہو) — گول، سفید بارڈر کے ساتھ ----------
+  let textLeftX = 50;
+  if(acc.photo){
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(110, 100, 55, 0, Math.PI*2);
+        ctx.closePath();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 4;
+        ctx.clip();
+        ctx.drawImage(img, 55, 45, 110, 110);
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(110, 100, 55, 0, Math.PI*2); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.stroke();
+        resolve();
+      };
+      img.onerror = resolve;
+      img.src = acc.photo;
+    });
+    textLeftX = 190;
+  }
+
+  ctx.font = `bold 26px ${document.documentElement.style.getPropertyValue('--font') || 'Poppins, sans-serif'}`;
+  ctx.fillText(acc.name || 'Account Holder', textLeftX, 90);
+  ctx.font = `18px Poppins, sans-serif`;
+  ctx.globalAlpha = 0.9;
+  ctx.fillText(AppState.settings.businessName || '', textLeftX, 120);
+  ctx.globalAlpha = 1;
+
+  // ---------- بینک/والیٹ کا نام — بڑا، نمایاں ----------
+  ctx.font = `bold 34px Poppins, sans-serif`;
+  ctx.fillText(acc.type || '', 50, 210);
+
+  // ---------- اکاؤنٹ نمبر — سب سے نمایاں، فاصلے والے ہندسوں کے ساتھ صاف پڑھا جائے ----------
+  ctx.font = `bold 44px 'Courier New', monospace`;
+  ctx.fillText(acc.number || '', 50, 275);
+
+  // ---------- نیچے پیغام والا باکس ----------
+  ctx.fillStyle = 'rgba(0,0,0,.22)';
+  roundRectPath(ctx, 30, H - 110, W - 60, 70, 14);
+  ctx.fill();
+  ctx.fillStyle = theme.text;
+  ctx.font = `15px Poppins, sans-serif`;
+  ctx.textAlign = 'center';
+  wrapCenteredText(ctx, '📸 Please send a screenshot after sending the payment', W/2, H - 78, W - 100, 20);
+
+  return canvas;
+}
+
+// ---------- گول کونوں والا مستطیل راستہ (fill/stroke دونوں کے لیے دوبارہ قابلِ استعمال) ----------
+function roundRectPath(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+// ---------- درمیان میں سیدھا متن، ضرورت پڑے تو ایک اضافی لائن میں لپیٹ دے ----------
+function wrapCenteredText(ctx, text, cx, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '', lines = [];
+  words.forEach(w => {
+    const test = line ? line + ' ' + w : w;
+    if(ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = w; }
+    else line = test;
+  });
+  lines.push(line);
+  const startY = y - ((lines.length - 1) * lineHeight) / 2;
+  lines.forEach((l, i) => ctx.fillText(l, cx, startY + i * lineHeight));
+}
+
+// ---------- کارڈ بنائیں اور Web Share API (یا فال بیک) سے شیئر کر دیں ----------
+async function shareAccountCard(idx){
+  const acc = AppState.settings.paymentAccounts[idx];
+  if(!acc) return;
+  const canvas = await renderAccountCardToCanvas(acc);
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the account card.'); return; }
+    const file = new File([blob], `${(acc.type||'account').replace(/\s+/g,'_')}.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({ files:[file], title: acc.type, text: `${acc.name || ''} — ${acc.type} Account` });
+      } catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
 }
 
 // ---------- پیمنٹ اکاؤنٹس کو reminder پیغام میں شامل کرنے کے لیے متن بنائیں ----------
@@ -9463,6 +9775,20 @@ function setPaperWidth(mm){
   document.querySelectorAll('#paperWidthGrid button').forEach(b => {
     b.classList.toggle('active', Number(b.dataset.width) === mm);
   });
+}
+
+// ---------- Receipt Content ٹوگلز — سادہ آن/آف، فوری محفوظ ----------
+function updatePrintToggle(key, checked){
+  AppState.settings[key] = checked;
+  persistAllData();
+}
+// ---------- پرنٹ کی لکھائی کا مجموعی سائز (٪) — thermal canvas میں فونٹ سائز پر ضرب کے طور پر لاگو ہوتا ہے ----------
+function updatePrintFontScale(pct){
+  const clamped = Math.max(85, Math.min(130, Number(pct) || 100));
+  AppState.settings.printFontScale = clamped;
+  const label = document.getElementById('printFontScaleLabel');
+  if(label) label.textContent = clamped + '%';
+  persistAllData();
 }
 
 // ---------- انوائس اسٹائل — تھرمل رسید یا رنگین A4 بزنس انوائس ----------
@@ -9510,6 +9836,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderFontsFabPanel();
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   applyUiZoom(AppState.settings.uiZoom || 100);
+  applyCartTextSettings();
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
   tryAutoLogin();
