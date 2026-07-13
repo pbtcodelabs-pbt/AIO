@@ -1272,6 +1272,15 @@
       </div>
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
 
+      <!-- ---------- 🔍 فوری App Size کنٹرول — پورا Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
+      <div style="display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px; margin:8px 0;">
+        <span style="font-size:13px;">🔍</span>
+        <span style="font-size:11px; color:var(--muted);">A</span>
+        <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
+        <span style="font-size:16px; color:var(--muted);">A</span>
+        <span class="uiZoomValueLabel" style="font-size:11px; font-weight:700; color:var(--primary); min-width:34px; text-align:right;">100%</span>
+      </div>
+
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
       <div class="subBoxRow" id="subBoxRow" style="display:none;">
         <div class="subBox" id="subBoxStart"><div class="subBoxLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
@@ -2238,6 +2247,18 @@
           </div>
         </div>
 
+        <!-- --- 🔍 پوری ایپ کا سائز — آئیکن، فونٹ، بٹن سب ایک ساتھ بڑے/چھوٹے --- -->
+        <div class="settingsCard">
+          <h3>🔍 App Display Size</h3>
+          <div class="settingsHint">Make the whole app — icons, text, buttons — bigger or smaller. Useful for bigger screens or if you want larger text.</div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+            <span style="font-size:12px; color:var(--muted);">A</span>
+            <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
+            <span style="font-size:18px; color:var(--muted);">A</span>
+          </div>
+          <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span class="uiZoomValueLabel">100%</span></div>
+        </div>
+
         <!-- --- تھیم اور ظاہری شکل --- -->
         <div class="settingsCard">
           <h3>🎨 Theme & Appearance</h3>
@@ -2274,8 +2295,8 @@
 
           <div class="settingsSubLabel">Paper Width (for receipt layout)</div>
           <div class="settingsBtnGrid two" id="paperWidthGrid">
-            <button data-width="58" onclick="setPaperWidth(58)">58mm</button>
-            <button data-width="80" onclick="setPaperWidth(80)">80mm</button>
+            <button data-width="58" onclick="setPaperWidth(58)">58mm (2")</button>
+            <button data-width="80" onclick="setPaperWidth(80)">80mm (3")</button>
           </div>
           <div class="settingsHint">Printing a full page instead? Just choose "A4" / "Fit to page" in the print dialog itself — the same bill works for both.</div>
 
@@ -2724,6 +2745,9 @@ const DEFAULT_SETTINGS = {
   // Dashboard کا "Cash in Hand" اسی رقم سے شروع ہو کر، اس کے بعد کی ہر نقد فروخت/وصولی/ادائیگی سے خودکار اپڈیٹ ہوتا ہے —
   // یعنی مکمل طور پر آپ کے اصل ریکارڈ پر مبنی، کوئی خفیہ فرضی نمبر نہیں ----------
   openingCashBalance: 0,
+  // ---------- 🔍 پوری ایپ کا سائز (Zoom) — آئیکن، فونٹ، ہر چیز بیک وقت بڑی/چھوٹی ہو جاتی ہے —
+  // ان لوگوں کے لیے مفید جو بڑی اسکرین یا بڑا فونٹ دیکھنا چاہیں ----------
+  uiZoom: 100, // 80–150 (%)
 };
 const AppState = {
   currentUser: null,
@@ -8422,7 +8446,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   drawTableHLine(hLineY);
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
-  ctx.font = `13px ${canvasFontFamily}`;
+  ctx.font = `bold 14px ${canvasFontFamily}`;
   const maxItemWidth = itemW - 8;
   invoice.items.forEach((item, idx) => {
     const rowBaseline = hLineY + rowH - 7;
@@ -8938,6 +8962,16 @@ const FONT_PRESETS = [
   {id:'nastaleeq',  label:'✒️ نوری نستعلیق', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
 ];
 
+// ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
+// آئیکن، بٹن، فونٹ — سب کچھ ایک ساتھ متناسب طور پر بڑا/چھوٹا ہو جاتا ہے، الگ الگ ایڈجسٹ کرنے کی ضرورت نہیں ----------
+function applyUiZoom(pct){
+  const clamped = Math.max(80, Math.min(150, Number(pct) || 100));
+  document.documentElement.style.zoom = (clamped / 100);
+  AppState.settings.uiZoom = clamped;
+  document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = clamped + '%');
+  document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
+}
+
 // ---------- تھیم پوری ایپ پر لاگو کریں (:root پر CSS variables تبدیل ہوتے ہی ہر جگہ خودکار اپڈیٹ) ----------
 function applyTheme(themeId){
   const t = THEME_PRESETS.find(x => x.id === themeId) || THEME_PRESETS[0];
@@ -8998,6 +9032,8 @@ function renderStorageUsage(){
 
 function renderSettingsScreen(){
   renderStorageUsage();
+  document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
+  document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
 
   // تھیم سواچز بنائیں
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
@@ -9473,6 +9509,7 @@ document.addEventListener('DOMContentLoaded', () => {
   applyFont('segoe');
   renderFontsFabPanel();
   applyPrintPageSize(AppState.settings.paperWidth || 80);
+  applyUiZoom(AppState.settings.uiZoom || 100);
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
   tryAutoLogin();
