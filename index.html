@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>AIO POS — Skeleton</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkFJTyBQT1MiLCAic2hvcnRfbmFtZSI6ICJBSU8gUE9TIiwgInN0YXJ0X3VybCI6ICIuIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmYWY3ZjIiLCAidGhlbWVfY29sb3IiOiAiIzBmNzY2ZSIsICJpY29ucyI6IFt7InNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBMU1USWdOVEV5SWo0S0lDQThaR1ZtY3o0S0lDQWdJRHhzYVc1bFlYSkhjbUZrYVdWdWRDQnBaRDBpWnlJZ2VERTlJakFpSUhreFBTSXdJaUI0TWowaU1TSWdlVEk5SWpFaVBnb2dJQ0FnSUNBOGMzUnZjQ0J2Wm1aelpYUTlJakFpSUhOMGIzQXRZMjlzYjNJOUlpTXdaamMyTm1VaUx6NEtJQ0FnSUNBZ1BITjBiM0FnYjJabWMyVjBQU0l4SWlCemRHOXdMV052Ykc5eVBTSWpNR0kwWVRRMUlpOCtDaUFnSUNBOEwyeHBibVZoY2tkeVlXUnBaVzUwUGdvZ0lEd3ZaR1ZtY3o0S0lDQThjbVZqZENCM2FXUjBhRDBpTlRFeUlpQm9aV2xuYUhROUlqVXhNaUlnY25nOUlqRXhNaUlnWm1sc2JEMGlkWEpzS0NObktTSXZQZ29nSUR4MFpYaDBJSGc5SWpJMU5pSWdlVDBpTWpRNElpQm1iMjUwTFdaaGJXbHNlVDBpUVhKcFlXd3NJRWhsYkhabGRHbGpZU3dnYzJGdWN5MXpaWEpwWmlJZ1ptOXVkQzF6YVhwbFBTSXhOalFpSUdadmJuUXRkMlZwWjJoMFBTSTRNREFpSUdacGJHdzlJaU5tWm1abVptWWlJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdSdmJXbHVZVzUwTFdKaGMyVnNhVzVsUFNKdGFXUmtiR1VpUGtGSlR6d3ZkR1Y0ZEQ0S0lDQThkR1Y0ZENCNFBTSXlOVFlpSUhrOUlqTTJNQ0lnWm05dWRDMW1ZVzFwYkhrOUlrRnlhV0ZzTENCSVpXeDJaWFJwWTJFc0lITmhibk10YzJWeWFXWWlJR1p2Ym5RdGMybDZaVDBpTnpJaUlHWnZiblF0ZDJWcFoyaDBQU0kzTURBaUlHWnBiR3c5SWlNMVpXVmhaRFFpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaUlHUnZiV2x1WVc1MExXSmhjMlZzYVc1bFBTSnRhV1JrYkdVaUlHeGxkSFJsY2kxemNHRmphVzVuUFNJeE5DSStVRTlUUEM5MFpYaDBQZ284TDNOMlp6NEsiLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLCAicHVycG9zZSI6ICJhbnkifSwgeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTFNVElnTlRFeUlqNEtJQ0E4WkdWbWN6NEtJQ0FnSUR4c2FXNWxZWEpIY21Ga2FXVnVkQ0JwWkQwaVp5SWdlREU5SWpBaUlIa3hQU0l3SWlCNE1qMGlNU0lnZVRJOUlqRWlQZ29nSUNBZ0lDQThjM1J2Y0NCdlptWnpaWFE5SWpBaUlITjBiM0F0WTI5c2IzSTlJaU13WmpjMk5tVWlMejRLSUNBZ0lDQWdQSE4wYjNBZ2IyWm1jMlYwUFNJeElpQnpkRzl3TFdOdmJHOXlQU0lqTUdJMFlUUTFJaTgrQ2lBZ0lDQThMMnhwYm1WaGNrZHlZV1JwWlc1MFBnb2dJRHd2WkdWbWN6NEtJQ0E4Y21WamRDQjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2NuZzlJakV4TWlJZ1ptbHNiRDBpZFhKc0tDTm5LU0l2UGdvZ0lEeDBaWGgwSUhnOUlqSTFOaUlnZVQwaU1qUTRJaUJtYjI1MExXWmhiV2xzZVQwaVFYSnBZV3dzSUVobGJIWmxkR2xqWVN3Z2MyRnVjeTF6WlhKcFppSWdabTl1ZEMxemFYcGxQU0l4TmpRaUlHWnZiblF0ZDJWcFoyaDBQU0k0TURBaUlHWnBiR3c5SWlObVptWm1abVlpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaUlHUnZiV2x1WVc1MExXSmhjMlZzYVc1bFBTSnRhV1JrYkdVaVBrRkpUend2ZEdWNGRENEtJQ0E4ZEdWNGRDQjRQU0l5TlRZaUlIazlJak0yTUNJZ1ptOXVkQzFtWVcxcGJIazlJa0Z5YVdGc0xDQklaV3gyWlhScFkyRXNJSE5oYm5NdGMyVnlhV1lpSUdadmJuUXRjMmw2WlQwaU56SWlJR1p2Ym5RdGQyVnBaMmgwUFNJM01EQWlJR1pwYkd3OUlpTTFaV1ZoWkRRaUlIUmxlSFF0WVc1amFHOXlQU0p0YVdSa2JHVWlJR1J2YldsdVlXNTBMV0poYzJWc2FXNWxQU0p0YVdSa2JHVWlJR3hsZEhSbGNpMXpjR0ZqYVc1blBTSXhOQ0krVUU5VFBDOTBaWGgwUGdvOEwzTjJaejRLIiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55In0sIHsic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTVRJZ05URXlJajRLSUNBOFpHVm1jejRLSUNBZ0lEeHNhVzVsWVhKSGNtRmthV1Z1ZENCcFpEMGlaeUlnZURFOUlqQWlJSGt4UFNJd0lpQjRNajBpTVNJZ2VUSTlJakVpUGdvZ0lDQWdJQ0E4YzNSdmNDQnZabVp6WlhROUlqQWlJSE4wYjNBdFkyOXNiM0k5SWlNd1pqYzJObVVpTHo0S0lDQWdJQ0FnUEhOMGIzQWdiMlptYzJWMFBTSXhJaUJ6ZEc5d0xXTnZiRzl5UFNJak1HSTBZVFExSWk4K0NpQWdJQ0E4TDJ4cGJtVmhja2R5WVdScFpXNTBQZ29nSUR3dlpHVm1jejRLSUNBOGNtVmpkQ0IzYVdSMGFEMGlOVEV5SWlCb1pXbG5hSFE5SWpVeE1pSWdjbmc5SWpFeE1pSWdabWxzYkQwaWRYSnNLQ05uS1NJdlBnb2dJRHgwWlhoMElIZzlJakkxTmlJZ2VUMGlNalE0SWlCbWIyNTBMV1poYldsc2VUMGlRWEpwWVd3c0lFaGxiSFpsZEdsallTd2djMkZ1Y3kxelpYSnBaaUlnWm05dWRDMXphWHBsUFNJeE5qUWlJR1p2Ym5RdGQyVnBaMmgwUFNJNE1EQWlJR1pwYkd3OUlpTm1abVptWm1ZaUlIUmxlSFF0WVc1amFHOXlQU0p0YVdSa2JHVWlJR1J2YldsdVlXNTBMV0poYzJWc2FXNWxQU0p0YVdSa2JHVWlQa0ZKVHp3dmRHVjRkRDRLSUNBOGRHVjRkQ0I0UFNJeU5UWWlJSGs5SWpNMk1DSWdabTl1ZEMxbVlXMXBiSGs5SWtGeWFXRnNMQ0JJWld4MlpYUnBZMkVzSUhOaGJuTXRjMlZ5YVdZaUlHWnZiblF0YzJsNlpUMGlOeklpSUdadmJuUXRkMlZwWjJoMFBTSTNNREFpSUdacGJHdzlJaU0xWldWaFpEUWlJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdSdmJXbHVZVzUwTFdKaGMyVnNhVzVsUFNKdGFXUmtiR1VpSUd4bGRIUmxjaTF6Y0dGamFXNW5QU0l4TkNJK1VFOVRQQzkwWlhoMFBnbzhMM04yWno0SyIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogIm1hc2thYmxlIn1dfQ==">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AIO POS">
 <!-- ---------- Google Fonts (7 پیارے انگلش فونٹس — صرف ہلکے وزن، ایپ کو بھاری نہیں کرتے) ---------- -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -573,6 +581,8 @@
   .variantThumb{width:46px; height:46px; border-radius:50%; object-fit:cover; cursor:pointer; border:3px solid var(--primary); box-shadow:0 1px 4px rgba(0,0,0,.15);}
   .variantImgBtn{width:44px; height:44px; border-radius:8px; border:1.5px dashed #cbd5e1; background:#f8fafc; cursor:pointer; font-size:16px; color:var(--muted);}
   .addVariantBtn{margin-top:10px; padding:8px 16px; background:#eef2ff; color:var(--primary-dark); border:1px dashed var(--primary); border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;}
+  .collapseCardBtn{margin-top:8px; width:100%; padding:11px 16px; background:var(--primary); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:13.5px; font-weight:700; box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  .collapseCardBtn:active{opacity:.85;}
   .variantRowActions{display:flex; gap:6px;}
   .variantRowActions button{border:none; background:none; cursor:pointer; font-size:14px;}
 
@@ -1187,9 +1197,7 @@
       <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Your Device ID (share this with your developer)</div>
       <div id="subGateUid" style="font-weight:800; font-size:14px; color:var(--primary-dark); word-break:break-all;"></div>
     </div>
-    <label style="display:block; font-size:12px; color:var(--muted); text-align:left; margin-bottom:4px;">Number of days given by developer</label>
-    <input type="number" id="subGateDaysInput" placeholder="e.g. 30" style="margin-bottom:10px;">
-    <label style="display:block; font-size:12px; color:var(--muted); text-align:left; margin-bottom:4px;">Activation code</label>
+    <label style="display:block; font-size:12px; color:var(--muted); text-align:left; margin-bottom:4px;">Activation code (from your developer)</label>
     <input type="text" id="subGateCodeInput" placeholder="6-digit code">
     <button onclick="submitActivationCode()" style="margin-top:14px;">✅ Activate</button>
     <div id="subGateMsg" style="margin-top:10px; font-size:13px; font-weight:700;"></div>
@@ -1283,7 +1291,7 @@
 
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
       <div class="subBoxRow" id="subBoxRow" style="display:none;">
-        <div class="subBox" id="subBoxStart"><div class="subBoxLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
+        <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
         <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
       </div>
@@ -1869,7 +1877,7 @@
     <!-- VARIANT CHOOSER MODAL (کئی ویریئنٹس والا پراڈکٹ دبانے پر — کون سا سائز بل میں شامل کرنا ہے) -->
     <div class="modalOverlay" id="chooseVariantModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="profileBox" style="width:380px;">
-        <div class="profileHead">
+        <div class="profileHead" style="position:sticky; top:0; background:#fff; z-index:2; padding-top:4px;">
           <div class="pAvatarLg" id="chooseVariantAvatar">📦</div>
           <div class="pInfo">
             <div class="pName" id="chooseVariantProductName">—</div>
@@ -2852,17 +2860,41 @@ function simpleHash(str){
 }
 
 // ---------- UID + دنوں کی تعداد سے 6 ہندسوں کا فعال سازی کوڈ بنائیں ----------
+// نیا کوڈ فارمیٹ: پہلے 3 ہندسے = دنوں کی تعداد (000-999)، آخری 3 ہندسے = چیک سم —
+// اسی لیے کسٹمر کو صرف ایک ہی کوڈ درج کرنا ہوتا ہے، دنوں کی تعداد الگ سے پوچھنے کی ضرورت نہیں —
+// کوڈ خود بتا دیتا ہے کتنے دن دیے گئے، اور چیک سم تصدیق کرتا ہے کہ کوڈ اسی ڈیوائس کے لیے صحیح ہے ----------
 function generateLicenseCode(uid, days){
-  const raw = `${uid}-${days}-${LICENSE_SECRET}`;
-  const hash = simpleHash(raw);
-  return String(100000 + (hash % 900000));
+  const daysNum = Math.max(1, Math.min(999, parseInt(days) || 0));
+  const daysPart = String(daysNum).padStart(3, '0');
+  const raw = `${uid}-${daysPart}-${LICENSE_SECRET}`;
+  const checksum = String(simpleHash(raw) % 1000).padStart(3, '0');
+  return daysPart + checksum;
+}
+// ---------- کوڈ سے دنوں کی تعداد نکالیں اور تصدیق کریں کہ یہ اسی ڈیوائس کے لیے صحیح بنایا گیا تھا ----------
+function verifyAndExtractDays(uid, code){
+  const trimmed = (code || '').trim();
+  if(!/^\d{6}$/.test(trimmed)) return null;
+  const daysPart = trimmed.slice(0, 3);
+  const daysNum = parseInt(daysPart);
+  const expected = generateLicenseCode(uid, daysNum);
+  return (expected === trimmed) ? daysNum : null;
 }
 
 // ---------- ہر انسٹالیشن کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
+// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 7 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے — تاکہ
+// کسی نئے صارف کو فائل کھولتے ہی PIN/Activation کے چکر میں نہ الجھنا پڑے، وہ فوراً ایپ آزما سکے۔
 function getOrCreateDeviceUID(){
   if(AppState.settings.deviceUID) return AppState.settings.deviceUID;
   const uid = 'AIO-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
   AppState.settings.deviceUID = uid;
+  if(!AppState.settings.subscriptionExpiry && !AppState.settings.freeTrialGranted){
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 7);
+    AppState.settings.subscriptionExpiry = trialEnd.toISOString().slice(0,10);
+    AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+    AppState.settings.freeTrialGranted = true;
+    AppState.settings.isOnFreeTrial = true;
+  }
   persistAllData();
   return uid;
 }
@@ -2882,21 +2914,20 @@ function daysLeftInSubscription(){
   return Math.round((expDate - today) / (1000*60*60*24));
 }
 
-// ---------- کسٹمر کا درج کردہ کوڈ + دن، اسی فارمولے سے خود تصدیق کریں ----------
-function activateSubscription(days, code){
+// ---------- کسٹمر کا درج کردہ کوڈ خود تصدیق کریں — دنوں کی تعداد کوڈ کے اندر سے نکل آتی ہے ----------
+function activateSubscription(code){
   const uid = getOrCreateDeviceUID();
-  const daysNum = parseInt(days);
-  if(!daysNum || daysNum <= 0) return {success:false, message:'Please enter a valid number of days.'};
-  const expectedCode = generateLicenseCode(uid, daysNum);
-  if(code.trim() !== expectedCode) return {success:false, message:'Invalid activation code. Please double-check with your developer.'};
+  const daysNum = verifyAndExtractDays(uid, code);
+  if(!daysNum) return {success:false, message:'Invalid activation code. Please double-check with your developer.'};
 
   // ---------- اگر پہلے سے فعال سبسکرپشن ہو تو نئے دن اس میں جوڑ دیں (توسیع)، ورنہ آج سے شروع کریں ----------
   const base = isSubscriptionActive() ? new Date(AppState.settings.subscriptionExpiry) : new Date();
   base.setDate(base.getDate() + daysNum);
   AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
   AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10); // ---------- آج کی تاریخ — بینر میں "Subscribed on" کے لیے ----------
+  AppState.settings.isOnFreeTrial = false; // ---------- اصل ادائیگی شدہ کوڈ لگ گیا — اب یہ مفت ٹرائل نہیں رہا ----------
   persistAllData();
-  return {success:true, expiry: AppState.settings.subscriptionExpiry};
+  return {success:true, expiry: AppState.settings.subscriptionExpiry, daysGranted: daysNum};
 }
 
 // ---------- ہوم پیج (اور ہر صفحے) کے اوپر باریک پٹی — کب سبسکرائب کیا، کب ختم ہوگی، کتنے دن باقی — روزانہ خودکار تازہ ----------
@@ -2910,6 +2941,7 @@ function renderSubscriptionBanner(){
   if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; return; }
 
   const daysLeft = daysLeftInSubscription();
+  document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
   document.getElementById('subBoxStartVal').textContent = formatDateDMY(AppState.settings.subscriptionActivatedOn);
   document.getElementById('subBoxEndVal').textContent = formatDateDMY(AppState.settings.subscriptionExpiry);
   document.getElementById('subBoxDaysVal').textContent = `${daysLeft} day${daysLeft === 1 ? '' : 's'}`;
@@ -3084,6 +3116,8 @@ function finishLogin(user){
   document.getElementById('pinInput').value = '';
 
   // ---------- سبسکرپشن فعال نہ ہو تو ایپ نہیں کھلے گی، فعال سازی صفحہ دکھایا جائے گا ----------
+  // (getOrCreateDeviceUID یہاں پہلے چلانا ضروری ہے — بالکل نئے ڈیوائس پر یہی 7 دن کا مفت ٹرائل شروع کرتا ہے)
+  getOrCreateDeviceUID();
   if(!isSubscriptionActive()){
     showSubscriptionGate();
     return;
@@ -3110,19 +3144,20 @@ function showSubscriptionGate(){
   document.getElementById('subGateUid').textContent = uid;
   const exp = AppState.settings.subscriptionExpiry;
   document.getElementById('subGateStatus').textContent = exp
-    ? `Your subscription expired on ${formatDateDMY(exp)}.`
+    ? (AppState.settings.isOnFreeTrial
+        ? `Your 7-day free trial ended on ${formatDateDMY(exp)}. Enter an activation code to continue.`
+        : `Your subscription expired on ${formatDateDMY(exp)}.`)
     : `This app is not yet activated.`;
   document.getElementById('subscriptionGateScreen').style.display = 'flex';
 }
 
 function submitActivationCode(){
-  const days = document.getElementById('subGateDaysInput').value;
   const code = document.getElementById('subGateCodeInput').value;
-  const result = activateSubscription(days, code);
+  const result = activateSubscription(code);
   const msgEl = document.getElementById('subGateMsg');
   if(result.success){
     msgEl.style.color = 'var(--success)';
-    msgEl.textContent = `✅ Activated! Valid until ${result.expiry}. Opening app...`;
+    msgEl.textContent = `✅ Activated! ${result.daysGranted} day(s) added — valid until ${result.expiry}. Opening app...`;
     setTimeout(() => {
       document.getElementById('subscriptionGateScreen').style.display = 'none';
       document.getElementById('app').style.display = 'grid';
@@ -3884,7 +3919,7 @@ function renderVariantChooserList(productId){
           <button class="vPlus" ${outOfStock ? 'disabled style="opacity:.4;"' : ''} onclick="addToCart(${v.variant_id}); renderVariantChooserList(${productId});">+</button>
         </div>
       </div>`;
-  }).join('');
+  }).join('') + `<button class="collapseCardBtn" style="margin-top:14px;" onclick="document.getElementById('chooseVariantModal').classList.remove('show')">◀ Done — Back to Bill</button>`;
 }
 
 function filterBillingCategory(cat){
@@ -5183,6 +5218,7 @@ function renderProductList(query = ''){
           </tbody>
         </table>
         <button class="addVariantBtn" onclick="addVariantRow(${p.product_id})">+ Add new variant (e.g. 100g)</button>
+        <button class="collapseCardBtn" onclick="toggleProductCard(${p.product_id})">▲ Done — Collapse this product</button>
       </div>
     </div>
   `).join('');
@@ -9830,7 +9866,37 @@ function testPrint(){
 
 // ---------- ابتدائی لوڈ: جب صفحہ کھلے تو ایک بار product list render ہو ----------
 document.addEventListener('DOMContentLoaded', () => {
-  // تھیم اور فونٹ سب سے پہلے لاگو کریں — Login اسکرین سمیت پوری ایپ پر (universal application)
+  // ---------- 🔙 Android کا Back بٹن/اشارہ — پہلے یہ کھلے ہوئے modal کو نظرانداز کر کے سیدھا پوری PWA بند کر دیتا تھا
+  // (خاص طور پر جب Variant Chooser جیسا لمبا modal کھلا ہو اور اوپر کا ✖ نظر نہ آئے) —
+  // اب یہ ہر modal کے کھلنے پر ایک history entry ڈالتا ہے، تاکہ Back پہلے modal بند کرے، ایپ سے باہر نہ لے جائے ----------
+  let modalHistoryDepth = 0;
+  const modalObserver = new MutationObserver((mutations) => {
+    mutations.forEach(m => {
+      if(m.attributeName !== 'class') return;
+      const el = m.target;
+      if(!el.classList || !el.classList.contains('modalOverlay')) return;
+      const isShowingNow = el.classList.contains('show');
+      const wasShowingBefore = m.oldValue ? m.oldValue.split(' ').includes('show') : false;
+      if(isShowingNow && !wasShowingBefore){
+        modalHistoryDepth++;
+        history.pushState({ aioModal: true, depth: modalHistoryDepth }, '');
+      }
+    });
+  });
+  document.querySelectorAll('.modalOverlay').forEach(el => {
+    modalObserver.observe(el, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+
+  window.addEventListener('popstate', (e) => {
+    const anyOpen = document.querySelector('.modalOverlay.show');
+    if(anyOpen){
+      // ---------- Back دبانے پر کھلا ہوا سب سے اوپر والا modal بند کر دیں، ایپ سے باہر مت جائیں ----------
+      anyOpen.classList.remove('show');
+      if(modalHistoryDepth > 0) modalHistoryDepth--;
+    }
+    // ---------- کوئی modal کھلا نہ ہو تو عام رویہ — یعنی اگر یہ ہماری خود ڈالی ہوئی state تھی، کچھ نہ کریں (پہلے ہی صارف کو ایپ میں رکھے گا) ----------
+  });
+
   applyTheme(AppState.settings.themeId);
   applyFont('segoe');
   renderFontsFabPanel();
