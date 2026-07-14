@@ -2403,16 +2403,6 @@
           <div class="fontOptionGrid" id="fontOptionGrid"></div>
         </div>
 
-        <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
-        <div class="settingsCard">
-          <h3>🏪 Business Info</h3>
-          <div class="settingsHint">This appears on printed bills. Leave blank to just show "AIO POS".</div>
-          <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-          <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-          <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-          <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        </div>
-
         <!-- --- 💵 ابتدائی نقد رقم — Dashboard کا Cash in Hand اسی سے شروع ہو کر حقیقی بلوں سے اپڈیٹ ہوتا ہے --- -->
         <div class="settingsCard">
           <h3>💵 Opening Cash Balance</h3>
@@ -2420,61 +2410,11 @@
           <input type="number" id="openingCashInput" placeholder="e.g. 10000" onchange="updateOpeningCashBalance(this.value)" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         </div>
 
-        <!-- --- پرنٹر Settings --- -->
-        <div class="settingsCard">
-          <h3>🖨️ Printer Settings</h3>
-          <div class="settingsHint">Printing works through your phone's own Print system. When you tap Print, Android shows every printer it knows about — Bluetooth thermal printers (via an app like RawBT), Sunmi's built-in printer, WiFi/USB printers, or "Save as PDF". If your printer doesn't appear, install its print-service app from Play Store once — after that it'll show up automatically here and in every other app.</div>
-
-          <div class="settingsSubLabel">Paper Width (for receipt layout)</div>
-          <div class="settingsBtnGrid two" id="paperWidthGrid">
-            <button data-width="58" onclick="setPaperWidth(58)">58mm (2")</button>
-            <button data-width="80" onclick="setPaperWidth(80)">80mm (3")</button>
-          </div>
-          <div class="settingsHint">Printing a full page instead? Just choose "A4" / "Fit to page" in the print dialog itself — the same bill works for both.</div>
-
-          <div class="settingsSubLabel">Invoice Style</div>
-          <div class="settingsBtnGrid two" id="invoiceStyleGrid">
-            <button data-style="thermal" onclick="setInvoiceStyle('thermal')">🧾 Thermal Receipt</button>
-            <button data-style="a4" onclick="setInvoiceStyle('a4')">📄 A4 Business Invoice</button>
-          </div>
-          <div class="settingsHint">A4 style uses your current theme color and font, with a signature line — best for formal invoices or sharing a polished bill on WhatsApp.</div>
-
-          <button class="testPrintBtn" onclick="testPrint()">🧾 Send Test Print</button>
-        </div>
-
-        <!-- --- 🧾 پرنٹ شدہ بل پر کیا کیا معلومات شامل ہوں --- -->
-        <div class="settingsCard">
-          <h3>🧾 Receipt Content</h3>
-          <div class="settingsHint">Turn on whichever details you want to appear on every printed bill.</div>
-
-          <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
-            <input type="checkbox" id="printSortAlphaChk" onchange="updatePrintToggle('printSortAlpha', this.checked)" style="width:18px; height:18px; margin:0;">
-            <span style="font-size:13px;">Sort items alphabetically on receipt</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
-            <input type="checkbox" id="printShowSalesmanChk" onchange="updatePrintToggle('printShowSalesman', this.checked)" style="width:18px; height:18px; margin:0;">
-            <span style="font-size:13px;">Print salesman name ("Sold by") on bill</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
-            <input type="checkbox" id="printShowPaymentAccountChk" onchange="updatePrintToggle('printShowPaymentAccount', this.checked)" style="width:18px; height:18px; margin:0;">
-            <span style="font-size:13px;">Show Payment Account(s) marked "🧾" in footer, so customers can pay you — tick which accounts in My Payment Accounts (Settings)</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:10px; padding:8px 0;">
-            <input type="checkbox" id="printShowBrandingChk" onchange="updatePrintToggle('printShowBranding', this.checked)" style="width:18px; height:18px; margin:0;">
-            <span style="font-size:13px;">Show small "Powered by AIO POS" line in footer</span>
-          </label>
-        </div>
-
-        <!-- --- 🔠 پرنٹ کی لکھائی کا سائز --- -->
-        <div class="settingsCard">
-          <h3>🔠 Print Text Size</h3>
-          <div class="settingsHint">Make the printed receipt's writing bigger or smaller across the board.</div>
-          <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
-            <span style="font-size:12px; color:var(--muted);">A</span>
-            <input type="range" id="printFontScaleSlider" min="85" max="130" step="5" value="100" oninput="updatePrintFontScale(this.value)" style="flex:1;">
-            <span style="font-size:18px; color:var(--muted);">A</span>
-          </div>
-          <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span id="printFontScaleLabel">100%</span></div>
+        <!-- --- 🧾 Bill/Print کی تمام سیٹنگز اب اپنے الگ صفحے "🧾 Bill & Print Settings" پر منتقل کر دی گئی ہیں --- -->
+        <div class="settingsCard" style="background:#eef2ff; text-align:center;">
+          <h3 style="margin-bottom:8px;">🧾 Bill & Print Settings moved!</h3>
+          <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Business Info, Printer, Receipt Content, and Print Text Size are now all together in one place — under 🛠️ Tools on the Home screen.</div>
+          <button class="testPrintBtn" onclick="goTo('billsettings')">Go to Bill & Print Settings →</button>
         </div>
 
         <!-- --- ٹیکس Settings — پاکستان کے عام کاؤنٹر بلوں پر لازمی نہیں، اس لیے مکمل اختیاری اور ڈیفالٹ بند --- -->
@@ -2549,10 +2489,10 @@
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this once — every customer's calculated price updates automatically. Change it anytime and everything recalculates immediately.</div>
             <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
 
-            <div class="settingsSubLabel">Quick-Select Day Presets (optional)</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">These appear as tappable shortcuts for customers (e.g. 15, 30, 90 days) — not required, the customer can always type any number of days.</div>
+            <div class="settingsSubLabel">Package Plans (with fixed price per plan)</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">These appear as tappable plans for customers (e.g. 1 day, 1 month, 1 year). Set an exact price for each — useful when longer plans are discounted and don't follow the plain per-day rate. Leave price empty to auto-calculate from the per-day rate above.</div>
             <div id="dayPresetsWrap"></div>
-            <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Preset</button>
+            <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Plan</button>
 
             <div class="settingsSubLabel">One Admin PIN for Everything</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
@@ -2585,6 +2525,93 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- 🧾 BILL & PRINT SETTINGS (Admin only) — سب کچھ ایک جگہ: دکان کی معلومات، پرنٹر، رسید کا مواد، لکھائی کا سائز، بارکوڈ لیبل -->
+    <div class="screen admin-only" id="screen-billsettings">
+      <div class="pageTitle">🧾 Bill & Print Settings</div>
+
+      <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
+      <div class="settingsCard">
+        <h3>🏪 Business Info</h3>
+        <div class="settingsHint">This appears on printed bills. Leave blank to just show "AIO POS".</div>
+        <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      </div>
+
+      <!-- --- پرنٹر Settings --- -->
+      <div class="settingsCard">
+        <h3>🖨️ Printer Settings</h3>
+        <div class="settingsHint">Printing works through your phone's own Print system. When you tap Print, Android shows every printer it knows about — Bluetooth thermal printers (via an app like RawBT), Sunmi's built-in printer, WiFi/USB printers, or "Save as PDF". If your printer doesn't appear, install its print-service app from Play Store once — after that it'll show up automatically here and in every other app.</div>
+
+        <div class="settingsSubLabel">Paper Width (for receipt layout)</div>
+        <div class="settingsBtnGrid two" id="paperWidthGrid">
+          <button data-width="58" onclick="setPaperWidth(58)">58mm (2")</button>
+          <button data-width="80" onclick="setPaperWidth(80)">80mm (3")</button>
+        </div>
+        <div class="settingsHint">Printing a full page instead? Just choose "A4" / "Fit to page" in the print dialog itself — the same bill works for both.</div>
+
+        <div class="settingsSubLabel">Invoice Style</div>
+        <div class="settingsBtnGrid two" id="invoiceStyleGrid">
+          <button data-style="thermal" onclick="setInvoiceStyle('thermal')">🧾 Thermal Receipt</button>
+          <button data-style="a4" onclick="setInvoiceStyle('a4')">📄 A4 Business Invoice</button>
+        </div>
+        <div class="settingsHint">A4 style uses your current theme color and font, with a signature line — best for formal invoices or sharing a polished bill on WhatsApp.</div>
+
+        <button class="testPrintBtn" onclick="testPrint()">🧾 Send Test Print</button>
+      </div>
+
+      <!-- --- 🧾 پرنٹ شدہ بل پر کیا کیا معلومات شامل ہوں --- -->
+      <div class="settingsCard">
+        <h3>🧾 Receipt Content</h3>
+        <div class="settingsHint">Turn on whichever details you want to appear on every printed bill.</div>
+
+        <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+          <input type="checkbox" id="printSortAlphaChk" onchange="updatePrintToggle('printSortAlpha', this.checked)" style="width:18px; height:18px; margin:0;">
+          <span style="font-size:13px;">Sort items alphabetically on receipt</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+          <input type="checkbox" id="printShowSalesmanChk" onchange="updatePrintToggle('printShowSalesman', this.checked)" style="width:18px; height:18px; margin:0;">
+          <span style="font-size:13px;">Print salesman name ("Sold by") on bill</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
+          <input type="checkbox" id="printShowPaymentAccountChk" onchange="updatePrintToggle('printShowPaymentAccount', this.checked)" style="width:18px; height:18px; margin:0;">
+          <span style="font-size:13px;">Show Payment Account(s) marked "🧾" in footer, so customers can pay you — tick which accounts in My Payment Accounts</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; padding:8px 0;">
+          <input type="checkbox" id="printShowBrandingChk" onchange="updatePrintToggle('printShowBranding', this.checked)" style="width:18px; height:18px; margin:0;">
+          <span style="font-size:13px;">Show small "Powered by AIO POS" line in footer</span>
+        </label>
+      </div>
+
+      <!-- --- 🔠 پرنٹ کی لکھائی کا سائز --- -->
+      <div class="settingsCard">
+        <h3>🔠 Print Text Size</h3>
+        <div class="settingsHint">Make the printed receipt's writing bigger or smaller across the board.</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+          <span style="font-size:12px; color:var(--muted);">A</span>
+          <input type="range" id="printFontScaleSlider" min="85" max="130" step="5" value="100" oninput="updatePrintFontScale(this.value)" style="flex:1;">
+          <span style="font-size:18px; color:var(--muted);">A</span>
+        </div>
+        <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span id="printFontScaleLabel">100%</span></div>
+      </div>
+
+      <!-- --- 🏷️ بارکوڈ لیبل پرنٹنگ — کسی بھی پراڈکٹ ویریئنٹ کے موجودہ بارکوڈ نمبر سے پرنٹ کے قابل لیبل بنائیں --- -->
+      <div class="settingsCard">
+        <h3>🏷️ Barcode Labels</h3>
+        <div class="settingsHint">Print a barcode sticker for any product — using the barcode number already saved on that product's variant. Useful for labeling shelves or items so a barcode scanner (or phone camera scanner app) can look them up quickly at checkout.</div>
+        <select id="barcodeLabelProductSelect" style="width:100%; padding:9px; margin-top:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateBarcodeLabelPreview()">
+          <option value="">— Select a product variant —</option>
+        </select>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <label style="font-size:12px; color:var(--muted); flex:0 0 auto;">Copies:</label>
+          <input type="number" id="barcodeLabelCopies" value="1" min="1" max="50" style="width:70px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
+        </div>
+        <canvas id="barcodeLabelPreviewCanvas" style="display:none; width:100%; max-width:320px; margin:0 auto 10px; border:1px solid #eef1f6; border-radius:8px;"></canvas>
+        <button class="testPrintBtn" onclick="printBarcodeLabels()">🖨️ Print Barcode Label(s)</button>
       </div>
     </div>
 
@@ -2985,10 +3012,20 @@ const DEFAULT_SETTINGS = {
     {title:'Out of Stock', text:'Sorry, this item is currently out of stock. We will notify you as soon as it is available again.'},
   ],
   // ---------- 🗂️ سبسکرپشن پیکج پلانز — ہر کوئی (کسٹمر سمیت) بغیر PIN کے دیکھ سکتا ہے، Login صفحے اور Home دونوں جگہ ----------
-  subscriptionPlans: [],
-  // ---------- 💰 روزانہ کی شرح — ایک بار سیٹ کریں، تمام پلانز کی قیمت خودکار اسی سے حساب ہو گی۔
-  // بعد میں یہ ریٹ بدلیں تو ہر جگہ (پلانز کی فہرست، کیلکولیٹر، کسٹمر کا پیغام) خودکار نئی قیمت دکھائے گی ----------
-  perDayRate: 0,
+  // نوٹ: ہر پلان کی اپنی مقررہ (fixed) قیمت ہے — کیونکہ 6 ماہ اور 1 سال والے پلانز پر ڈسکاؤنٹ ہے
+  // (خالص روزانہ ریٹ سے حساب نہیں ہوتا)، اس لیے price یہاں خود لکھی ہوئی ہے، rate سے خودکار نہیں بنتی۔
+  // 1-دن کا پلان جان بوجھ کر یہاں شامل نہیں کیا — 7 دن فری ٹرائل پہلے سے موجود ہے، اس لیے صرف
+  // 1 ماہ سے اوپر کے پلانز دکھانا زیادہ مناسب ہے۔ (per-day rate نیچے پھر بھی موجود ہے تاکہ کسٹمر
+  // کیلکولیٹر میں کوئی بھی کسٹم دن لکھے تو قیمت خودکار نکل آئے۔)
+  subscriptionPlans: [
+    {days: 30,  price: 900},
+    {days: 90,  price: 2700},
+    {days: 180, price: 5200},
+    {days: 365, price: 9000},
+  ],
+  // ---------- 💰 روزانہ کی شرح — صرف اس وقت استعمال ہوتی ہے جب کسی پلان کی اپنی fixed price نہ ہو
+  // (کیلکولیٹر میں کوئی بھی کسٹم دن لکھے جائیں تو اسی ریٹ سے قیمت نکلے گی) ----------
+  perDayRate: 30,
   // ---------- 💵 ابتدائی نقد رقم — وہ کیش جو آپ کے پاس ایپ استعمال شروع کرنے سے پہلے موجود تھا۔
   // Dashboard کا "Cash in Hand" اسی رقم سے شروع ہو کر، اس کے بعد کی ہر نقد فروخت/وصولی/ادائیگی سے خودکار اپڈیٹ ہوتا ہے —
   // یعنی مکمل طور پر آپ کے اصل ریکارڈ پر مبنی، کوئی خفیہ فرضی نمبر نہیں ----------
@@ -3164,6 +3201,7 @@ const HOME_TILE_GROUPS_ADMIN = [
     {icon:'⚙️', label:'Settings', screen:'settings'},
   ]},
   { section: '🛠️ Tools', tiles: [
+    {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
     {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
     {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
   ]},
@@ -3496,6 +3534,7 @@ function goTo(screenName){
   if(screenName === 'billhistory') renderBillHistory();
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
   if(screenName === 'settings') renderSettingsScreen();
+  if(screenName === 'billsettings') renderBillSettingsScreen();
 
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
   closeSidebar();
@@ -9884,12 +9923,6 @@ function renderSettingsScreen(){
   renderStorageUsage();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
-  document.getElementById('printSortAlphaChk').checked = !!AppState.settings.printSortAlpha;
-  document.getElementById('printShowSalesmanChk').checked = !!AppState.settings.printShowSalesman;
-  document.getElementById('printShowPaymentAccountChk').checked = !!AppState.settings.printShowPaymentAccount;
-  document.getElementById('printShowBrandingChk').checked = !!AppState.settings.printShowBranding;
-  document.getElementById('printFontScaleSlider').value = AppState.settings.printFontScale || 100;
-  document.getElementById('printFontScaleLabel').textContent = (AppState.settings.printFontScale || 100) + '%';
 
   // تھیم سواچز بنائیں
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
@@ -9906,6 +9939,146 @@ function renderSettingsScreen(){
          onclick="applyFont('${f.id}')">${f.label}</div>
   `).join('');
 
+  document.getElementById('openingCashInput').value = AppState.settings.openingCashBalance || '';
+
+  // ٹیکس فیلڈز کو موجودہ سیٹنگ کے مطابق دکھائیں
+  document.getElementById('taxEnabledChk').checked = AppState.settings.taxEnabled;
+  document.getElementById('taxPercentRow').style.display = AppState.settings.taxEnabled ? 'block' : 'none';
+  document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
+
+  renderMyPaymentAccounts();
+}
+
+/* =====================================================================
+   🏷️ Barcode Labels — Code 39 (سب سے سادہ اور تقریباً ہر بارکوڈ اسکینر پڑھ سکتا ہے)
+   ہر پراڈکٹ ویریئنٹ کے پہلے سے موجود barcode نمبر سے ایک پرنٹ کے قابل لیبل بناتا ہے۔
+   ===================================================================== */
+// ---------- ہر حرف کا 9 عنصری پیٹرن (bar-space-bar-space-bar-space-bar-space-bar)، 1=چوڑا 0=باریک ----------
+const CODE39_PATTERNS = {
+  '0':'000110100', '1':'100100001', '2':'001100001', '3':'101100000', '4':'000110001',
+  '5':'100110000', '6':'001110000', '7':'000100101', '8':'100100100', '9':'001100100',
+  'A':'100001001', 'B':'001001001', 'C':'101001000', 'D':'000011001', 'E':'100011000',
+  'F':'001011000', 'G':'000001101', 'H':'100001100', 'I':'001001100', 'J':'000011100',
+  'K':'100000011', 'L':'001000011', 'M':'101000010', 'N':'000010011', 'O':'100010010',
+  'P':'001010010', 'Q':'000000111', 'R':'100000110', 'S':'001000110', 'T':'000010110',
+  'U':'110000001', 'V':'011000001', 'W':'111000000', 'X':'010010001', 'Y':'110010000',
+  'Z':'011010000', '-':'010000101', '.':'110000100', ' ':'011000100', '$':'010101000',
+  '/':'010100010', '+':'010001010', '%':'000101010', '*':'010010100'
+};
+// ---------- کوئی بھی متن Code 39 کینوس پر بنائیں — سپورٹ نہ ہونے والے حروف خودکار ہٹا دیے جائیں گے ----------
+function renderCode39ToCanvas(text, canvas, opts){
+  opts = opts || {};
+  const narrowPx = opts.narrow || 2;
+  const wideRatio = opts.wideRatio || 2.5;
+  const barHeight = opts.height || 70;
+  const widePx = Math.round(narrowPx * wideRatio);
+
+  const clean = ('*' + text.toUpperCase().replace(/[^0-9A-Z\-\.\ \$\/\+\%]/g, '') + '*');
+  const chars = clean.split('');
+
+  // ---------- کل چوڑائی حساب کریں (ہر حرف کے 9 عناصر + ہر دو حروف کے درمیان ایک باریک خالی جگہ) ----------
+  let totalWidth = 0;
+  chars.forEach(ch => {
+    const pattern = CODE39_PATTERNS[ch] || CODE39_PATTERNS['-'];
+    for(const bit of pattern) totalWidth += (bit === '1') ? widePx : narrowPx;
+  });
+  totalWidth += (chars.length - 1) * narrowPx; // انٹر کریکٹر گیپ
+  const quietZone = narrowPx * 10; // دونوں طرف خاموش جگہ (اسکینر کے لیے ضروری)
+  canvas.width = totalWidth + quietZone * 2;
+  canvas.height = barHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#000';
+
+  let x = quietZone;
+  chars.forEach((ch, idx) => {
+    const pattern = CODE39_PATTERNS[ch] || CODE39_PATTERNS['-'];
+    let isBar = true; // ہر حرف کا پہلا عنصر ہمیشہ Bar (سیاہ) سے شروع ہوتا ہے
+    for(const bit of pattern){
+      const w = (bit === '1') ? widePx : narrowPx;
+      if(isBar) ctx.fillRect(x, 0, w, barHeight);
+      x += w;
+      isBar = !isBar;
+    }
+    if(idx < chars.length - 1) x += narrowPx; // انٹر کریکٹر گیپ (خالی)
+  });
+  return canvas;
+}
+
+// ---------- Bill & Print Settings کے "Barcode Labels" کارڈ میں ڈراپ ڈاؤن بھریں — ہر وہ ویریئنٹ جس کا بارکوڈ محفوظ ہو ----------
+function renderBarcodeLabelProductOptions(){
+  const sel = document.getElementById('barcodeLabelProductSelect');
+  if(!sel) return;
+  const flat = getFlatVariants().filter(v => v.barcode && v.barcode.trim());
+  sel.innerHTML = `<option value="">— Select a product variant —</option>` +
+    flat.map(v => `<option value="${v.variant_id}">${v.name} — Rs.${v.retail} (${v.barcode})</option>`).join('');
+  document.getElementById('barcodeLabelPreviewCanvas').style.display = 'none';
+}
+function updateBarcodeLabelPreview(){
+  const variantId = document.getElementById('barcodeLabelProductSelect').value;
+  const canvas = document.getElementById('barcodeLabelPreviewCanvas');
+  if(!variantId){ canvas.style.display = 'none'; return; }
+  const v = getFlatVariants().find(f => f.variant_id == variantId);
+  if(!v) return;
+  renderCode39ToCanvas(v.barcode, canvas, {narrow:2, height:60});
+  canvas.style.display = 'block';
+}
+// ---------- منتخب ویریئنٹ کے اتنے لیبل بنائیں جتنی Copies درج ہوں، پھر پرنٹ ڈائیلاگ کھولیں ----------
+function printBarcodeLabels(){
+  const variantId = document.getElementById('barcodeLabelProductSelect').value;
+  if(!variantId){ alert('Please select a product variant first.'); return; }
+  const copies = Math.max(1, Math.min(50, parseInt(document.getElementById('barcodeLabelCopies').value) || 1));
+  const v = getFlatVariants().find(f => f.variant_id == variantId);
+  if(!v) return;
+
+  const labelCanvas = document.createElement('canvas');
+  renderCode39ToCanvas(v.barcode, labelCanvas, {narrow:2, height:70});
+
+  // ---------- ایک بڑا کینوس بنائیں جس میں لیبل کی مطلوبہ تعداد ایک کے نیچے ایک آ جائیں — تاکہ ایک ہی پرنٹ میں سب نکل جائیں ----------
+  const labelH = 130, labelW = Math.max(260, labelCanvas.width + 20);
+  const sheet = document.createElement('canvas');
+  sheet.width = labelW;
+  sheet.height = labelH * copies;
+  const ctx = sheet.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, sheet.width, sheet.height);
+
+  for(let i = 0; i < copies; i++){
+    const yOff = i * labelH;
+    ctx.strokeStyle = '#ccc';
+    ctx.setLineDash([4,3]);
+    ctx.strokeRect(4, yOff+4, labelW-8, labelH-8);
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.font = `bold 14px Arial`;
+    let name = v.name;
+    if(name.length > 30) name = name.slice(0,29) + '…';
+    ctx.fillText(name, labelW/2, yOff + 22);
+    ctx.drawImage(labelCanvas, (labelW - labelCanvas.width)/2, yOff + 30, labelCanvas.width, 60);
+    ctx.font = `12px monospace`;
+    ctx.fillText(v.barcode, labelW/2, yOff + 100);
+    ctx.font = `bold 13px Arial`;
+    ctx.fillText(`Rs. ${v.retail}`, labelW/2, yOff + 118);
+  }
+
+  const area = document.getElementById('printReceiptArea');
+  area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  document.body.classList.add('printing-invoice');
+  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+}
+
+// ---------- 🧾 Bill & Print Settings کا اپنا الگ صفحہ — دکان کی معلومات، پرنٹر، رسید کا مواد، لکھائی کا سائز، بارکوڈ ----------
+function renderBillSettingsScreen(){
+  document.getElementById('printSortAlphaChk').checked = !!AppState.settings.printSortAlpha;
+  document.getElementById('printShowSalesmanChk').checked = !!AppState.settings.printShowSalesman;
+  document.getElementById('printShowPaymentAccountChk').checked = !!AppState.settings.printShowPaymentAccount;
+  document.getElementById('printShowBrandingChk').checked = !!AppState.settings.printShowBranding;
+  document.getElementById('printFontScaleSlider').value = AppState.settings.printFontScale || 100;
+  document.getElementById('printFontScaleLabel').textContent = (AppState.settings.printFontScale || 100) + '%';
+
   // Paper Width بٹن اپڈیٹ کریں
   document.querySelectorAll('#paperWidthGrid button').forEach(b => {
     b.classList.toggle('active', Number(b.dataset.width) === AppState.settings.paperWidth);
@@ -9921,14 +10094,8 @@ function renderSettingsScreen(){
   document.getElementById('bizOwnerInput').value = AppState.settings.ownerName || '';
   document.getElementById('bizAddressInput').value = AppState.settings.businessAddress || '';
   document.getElementById('bizPhoneInput').value = AppState.settings.businessPhone || '';
-  document.getElementById('openingCashInput').value = AppState.settings.openingCashBalance || '';
 
-  // ٹیکس فیلڈز کو موجودہ سیٹنگ کے مطابق دکھائیں
-  document.getElementById('taxEnabledChk').checked = AppState.settings.taxEnabled;
-  document.getElementById('taxPercentRow').style.display = AppState.settings.taxEnabled ? 'block' : 'none';
-  document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
-
-  renderMyPaymentAccounts();
+  renderBarcodeLabelProductOptions();
 }
 
 // ---------- میرے پیمنٹ اکاؤنٹس (لامحدود اکاؤنٹس) — Reminders میں خودکار شامل ہوں گے ----------
@@ -10156,10 +10323,35 @@ function updatePlanCalculator(){
   selectedPlanPrice = price;
 }
 
-// ---------- کسی محفوظ شدہ preset پر ٹیپ کریں تو کیلکولیٹر خودکار اسی دن سے بھر جائے ----------
-function selectPresetPlan(days){
+// ---------- دنوں کو خوش کن لیبل میں بدلیں — "30 days" کی بجائے "1 Month" وغیرہ ----------
+function formatPlanDaysLabel(days){
+  if(days === 30) return '1 Month';
+  if(days === 90) return '3 Months';
+  if(days === 180) return '6 Months';
+  if(days === 365) return '1 Year';
+  if(days % 30 === 0 && days > 0) return `${days / 30} Months`;
+  return `${days} day${days === 1 ? '' : 's'}`;
+}
+
+// ---------- کسی محفوظ شدہ پلان پر ٹیپ کریں تو کیلکولیٹر فوراً اسی دن/قیمت سے بھر جائے
+// (fixedPrice ہو تو وہی استعمال ہوگی، ورنہ per-day rate سے حساب ہوگی) ----------
+function selectPresetPlan(days, fixedPrice){
   document.getElementById('planCalcDaysInput').value = days;
-  updatePlanCalculator();
+  if(fixedPrice != null){
+    selectedPlanDays = days;
+    selectedPlanPrice = fixedPrice;
+    document.getElementById('planCalcPriceOutput').textContent = `Rs. ${fixedPrice.toLocaleString()}`;
+  } else {
+    updatePlanCalculator();
+  }
+}
+
+// ---------- پلان پر ٹیپ کرتے ہی سیدھا Chat with Developer کھل جائے (WhatsApp/SMS/Email چننے کے لیے) —
+// کسٹمر کو الگ سے نیچے کا بٹن دبانے کی ضرورت نہیں رہتی، ایک ٹیپ میں پیغام تیار ----------
+function selectPresetPlanAndChat(days, fixedPrice){
+  selectPresetPlan(days, fixedPrice);
+  document.getElementById('packagePlansModal').classList.remove('show');
+  openDevChat('subscription');
 }
 
 function renderPackagePlansView(){
@@ -10191,12 +10383,15 @@ function renderPackagePlansView(){
     wrap.innerHTML = rate > 0 ? '' : `<div style="color:var(--muted); font-size:12px; padding:10px 2px;">No plans published yet. Please chat with the developer directly.</div>`;
     return;
   }
-  wrap.innerHTML = plans.map(p => `
-    <div onclick="selectPresetPlan(${p.days})" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:11px 14px; margin-bottom:8px; cursor:pointer;">
-      <div style="font-weight:800; font-size:14px;">${p.days} days</div>
-      <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${rate > 0 ? 'Rs. ' + (p.days * rate).toLocaleString() : '—'}</div>
-    </div>
-  `).join('');
+  wrap.innerHTML = plans.map(p => {
+    const price = p.price != null ? p.price : (rate > 0 ? p.days * rate : null);
+    const priceLabel = price != null ? 'Rs. ' + price.toLocaleString() : '—';
+    return `
+    <div onclick="selectPresetPlanAndChat(${p.days}, ${p.price != null ? p.price : 'null'})" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:11px 14px; margin-bottom:8px; cursor:pointer;">
+      <div style="font-weight:800; font-size:14px;">${formatPlanDaysLabel(p.days)}</div>
+      <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${priceLabel}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderDayPresetsInAdmin(){
@@ -10205,6 +10400,7 @@ function renderDayPresetsInAdmin(){
   wrap.innerHTML = plans.map((p, idx) => `
     <div style="display:flex; gap:6px; margin-bottom:6px;">
       <input type="number" value="${p.days}" placeholder="Days" onchange="updateSubscriptionPlan(${idx}, 'days', this.value)" style="flex:1; padding:7px; border:1px solid #dbe1ea; border-radius:6px; font-size:12.5px;">
+      <input type="number" value="${p.price != null ? p.price : ''}" placeholder="Price (Rs.)" onchange="updateSubscriptionPlan(${idx}, 'price', this.value)" style="flex:1; padding:7px; border:1px solid #dbe1ea; border-radius:6px; font-size:12.5px;">
       <button onclick="deleteSubscriptionPlan(${idx})" style="padding:7px 10px; background:#fef2f2; color:var(--danger); border:none; border-radius:6px; font-size:12px; cursor:pointer;">🗑️</button>
     </div>
   `).join('');
@@ -10217,12 +10413,16 @@ function updatePerDayRate(value){
 
 function addSubscriptionPlan(){
   if(!AppState.settings.subscriptionPlans) AppState.settings.subscriptionPlans = [];
-  AppState.settings.subscriptionPlans.push({days: 30});
+  AppState.settings.subscriptionPlans.push({days: 30, price: null});
   persistAllData();
   renderDayPresetsInAdmin();
 }
 function updateSubscriptionPlan(idx, field, value){
-  AppState.settings.subscriptionPlans[idx][field] = parseInt(value) || 0;
+  if(field === 'price'){
+    AppState.settings.subscriptionPlans[idx].price = value === '' ? null : (parseFloat(value) || 0);
+  } else {
+    AppState.settings.subscriptionPlans[idx][field] = parseInt(value) || 0;
+  }
   persistAllData();
 }
 function deleteSubscriptionPlan(idx){
