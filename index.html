@@ -3001,6 +3001,10 @@ const DEFAULT_SETTINGS = {
   devPaymentNumber: '',
   devPaymentName: '',
   devPaymentAccounts: [], // {type, number, name} — اگر خالی ہو تو اوپر والے پرانے تین فیلڈز سے خودکار مائیگریٹ ہو جاتے ہیں
+  // ---------- 🩹 مائیگریشن ورژن — جب بھی ہم پرانے فون/براؤزر پر خودکار کوئی نیا ڈیفالٹ ڈیٹا (جیسے Package Plans)
+  // زبردستی لانا چاہیں، اس نمبر کو بڑھا دیتے ہیں۔ ہر پرانا محفوظ شدہ settings اس نئے نمبر سے پیچھے ہوگا،
+  // چاہے rate/plans میں پہلے سے کچھ بھی موجود ہو — اس لیے migration ہمیشہ صحیح چلتی ہے ----------
+  settingsVersion: 2,
   // ---------- 🆘 PIN Recovery — اگر Admin PIN بالکل بھول جائیں تو یہ دونوں چیزیں درست بتانے پر نیا PIN خود بنا سکیں گے ----------
   securityCnicHash: '',
   securityDobHash: '',
@@ -3052,13 +3056,14 @@ const AppState = {
   settings: {...DEFAULT_SETTINGS, ...loadFromStorage('settings', DEFAULT_SETTINGS)},
 };
 
-// ---------- 🩹 ون-ٹائم مائیگریشن: اگر یہ ڈیوائس پہلے (پرانے ورژن میں) ٹیسٹ ہو چکی ہے جہاں
-// Package Plans خالی اور perDayRate=0 محفوظ ہو چکے تھے، تو پرانا خالی ڈیٹا نئے ڈیفالٹ پلانز کو
-// چھپا دیتا ہے (localStorage نئے DEFAULT_SETTINGS پر حاوی ہو جاتا ہے)۔ یہاں خودکار ٹھیک کر دیتے ہیں —
-// صرف اس صورت میں جب صاف پتا چلے کہ کبھی جان بوجھ کر کوئی پلان/ریٹ سیٹ نہیں کیا گیا۔ ----------
-if((AppState.settings.subscriptionPlans || []).length === 0 && !AppState.settings.perDayRate){
+// ---------- 🩹 ون-ٹائم مائیگریشن (ورژن کی بنیاد پر) — پرانی ٹیسٹنگ کے دوران کوئی بھی rate/plans
+// پہلے سے محفوظ ہو چکے ہوں (چاہے 0 نہ ہوں)، پھر بھی یہ نئی 4 پلانز (1mo/3mo/6mo/1yr) ایک بار
+// ضرور بھر دے گی — flag لگ جانے کے بعد دوبارہ نہیں چلے گی، تاکہ بعد میں Admin خود پلانز
+// ڈیلیٹ/تبدیل کرے تو وہ برقرار رہے ----------
+if(AppState.settings.packagePlansMigratedV2 !== true){
   AppState.settings.subscriptionPlans = DEFAULT_SETTINGS.subscriptionPlans.map(p => ({...p}));
   AppState.settings.perDayRate = DEFAULT_SETTINGS.perDayRate;
+  AppState.settings.packagePlansMigratedV2 = true;
   saveToStorage('settings', AppState.settings);
 }
 
