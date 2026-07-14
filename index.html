@@ -4429,7 +4429,7 @@ function renderCart(){
   const changeDueBox = document.getElementById('changeDueBox');
   const changeToWalletRow = document.getElementById('changeToWalletRow');
 
-  if(receivedHint && !Billing.counterSale){
+  if(receivedHint){
     // ---------- یہاں اوپری حد نہیں لگاتے — کسٹمر بل سے زیادہ رقم بھی دے سکتا ہے (مثلاً 5000 کا نوٹ)، تبھی Change پکڑا جا سکے ----------
     const receivedRaw = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
     const remaining = grandTotal - receivedRaw; // منفی ہو تو مطلب زائد رقم (Change) بنتی ہے
@@ -4447,9 +4447,15 @@ function renderCart(){
       document.getElementById('sumBalance').textContent = `Rs. ${remaining.toFixed(0)}`;
       document.getElementById('sumBalance').style.color = remaining > 0 ? 'var(--danger)' : 'var(--success)';
       changeDueBox.style.display = 'none';
-      receivedHint.textContent = receivedRaw > 0
-        ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
-        : `Leave blank/0 if nothing is being paid right now (full amount goes to Pending).`;
+      if(Billing.counterSale){
+        receivedHint.textContent = (receivedRaw > 0 && remaining > 0)
+          ? `Rs. ${remaining.toFixed(0)} short — their Name & Mobile will be asked to save this as a Pending balance.`
+          : `Leave blank for a normal full-cash Walk-in sale.`;
+      } else {
+        receivedHint.textContent = receivedRaw > 0
+          ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
+          : `Leave blank/0 if nothing is being paid right now (full amount goes to Pending).`;
+      }
     } else {
       // ---------- زائد رقم موصول ہوئی — Change Due دکھائیں، فیصلہ لینے دیں (نقد واپس یا Wallet میں) ----------
       const changeAmt = -remaining;
@@ -4569,15 +4575,13 @@ function renderAutoPaymentNote(){
   const receivedHint = document.getElementById('amountReceivedHint');
   if(!note) return;
 
-  if(Billing.counterSale){
-    note.textContent = '💵 Cash (Walk-in)';
-    receivedRow.style.display = 'none';
-    receivedHint.style.display = 'none';
-    return;
-  }
-
   receivedRow.style.display = 'flex';
   receivedHint.style.display = 'block';
+
+  if(Billing.counterSale){
+    note.textContent = '💵 Cash (Walk-in) — leave Amount below blank for full cash payment';
+    return;
+  }
 
   const custId = document.getElementById('customerSelect').value;
   if(custId){
@@ -4622,24 +4626,28 @@ function finalizeInvoice(){
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
-  // ---------- Counter Sale آف ہے اور ابھی تک کوئی کسٹمر منتخب نہیں — ادھار ٹریک کرنے کے لیے نام/نمبر مانگیں ----------
-  if(!Billing.counterSale && !customer){
-    document.getElementById('qccName').value = '';
-    document.getElementById('qccPhone').value = '';
-    document.getElementById('quickCreditCustomerModal').classList.add('show');
-    return;
-  }
-
   const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
   const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
   const grandTotal = subtotal - discount + taxAmount;
 
+  // ---------- کسٹمر منتخب نہیں، اور کسی نہ کسی صورت بقایہ رہ جائے گا — ادھار ٹریک کرنے کے لیے نام/نمبر مانگیں:
+  // (a) عام Retail/Wholesale موڈ میں ہمیشہ (پرانا رویہ) — یا
+  // (b) Walk-in موڈ میں بھی، اگر صارف نے جزوی رقم درج کی ہو جو بل سے کم ہے (نیا رویہ — ورنہ Walk-in خاموشی سے مکمل نقد ہی رہے) ----------
+  const rawReceivedForCheck = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
+  const isWalkInPartial = Billing.counterSale && rawReceivedForCheck > 0 && rawReceivedForCheck < grandTotal;
+  if(!customer && (!Billing.counterSale || isWalkInPartial)){
+    document.getElementById('qccName').value = '';
+    document.getElementById('qccPhone').value = '';
+    document.getElementById('quickCreditCustomerModal').classList.add('show');
+    return;
+  }
+
   // ---------- پیمنٹ خودکار طے ہوتی ہے — بلنگ کے دوران کوئی انتخاب نہیں کرنا پڑتا ----------
-  // Counter Sale: فوری نقد، کوئی کسٹمر اکاؤنٹ متاثر نہیں ہوتا۔
-  // Counter Sale آف: ہمیشہ Pending (Credit) — بعد میں کسٹمر پروفائل سے "📥 Collect" کر کے نقد/والٹ سے طے کریں۔
-  const method = Billing.counterSale ? 'cash' : 'credit';
+  // Counter Sale: فوری نقد، کوئی کسٹمر اکاؤنٹ متاثر نہیں ہوتا (جب تک پوری رقم ادا ہو)۔
+  // Counter Sale آف، یا Walk-in میں جزوی ادائیگی: Pending (Credit) — بعد میں کسٹمر پروفائل سے "📥 Collect" کر کے نقد/والٹ سے طے کریں۔
+  const method = (Billing.counterSale && !isWalkInPartial) ? 'cash' : 'credit';
 
   // ---------- اسٹاک کی جانچ: کہیں کوئی Item موجودہ اسٹاک سے زیادہ نہ بک رہا ہو ----------
   const flatVariants = getFlatVariants();
