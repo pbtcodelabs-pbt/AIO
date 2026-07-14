@@ -67,8 +67,11 @@
   }
 
   /* --- 📅 Subscription Boxes — تین الگ خوبصورت ڈبے، ایک ہی لائن میں، صرف Billing پیج پر --- */
-  .subBoxRow{display:flex; gap:6px; margin-bottom:8px;}
+  .subBoxRow{display:flex; gap:6px; margin-bottom:8px; background:#f4f1ea; padding:8px; border-radius:14px;}
   .subBox{flex:1; padding:5px 4px; border-radius:10px; text-align:center; background:#eef2ff;}
+  .subBox#subBoxStart{background:#e0f2fe;}
+  .subBox#subBoxEnd{background:#fef3c7;}
+  .subBox#subBoxDays{background:#dcfce7;}
   .subBoxLabel{font-size:8.5px; font-weight:700; text-transform:uppercase; opacity:.75; margin-bottom:1px;}
   .subBoxVal{font-size:11px; font-weight:800;}
 
@@ -2162,6 +2165,16 @@
       </div>
       <!-- ---------- کمپیکٹ سرچ لائن: سب باکس ایک ساتھ، کم سے کم جگہ — تاکہ نیچے زیادہ سے زیادہ بل نظر آئیں ---------- -->
       <div class="billCompactBar" id="billAdvFilters">
+        <select id="billRangePreset" class="bcbItem bcbDate" onchange="onBillRangePresetChange()">
+          <option value="all">📅 All Time</option>
+          <option value="today">Today</option>
+          <option value="thisweek">This Week</option>
+          <option value="lastweek">Last Week</option>
+          <option value="thismonth">This Month</option>
+          <option value="lastmonth">Last Month</option>
+          <option value="thisyear">This Year</option>
+          <option value="custom">Custom Range…</option>
+        </select>
         <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 Party name" oninput="renderBillHistory()">
         <input type="date" id="billDateFilter" class="bcbItem bcbDate" onchange="onBillDateFilterChange()">
         <select id="billDayFilter" class="bcbItem bcbDay" onchange="onBillDayFilterChange()">
@@ -2188,6 +2201,12 @@
         </select>
         <button class="billAdvClearBtn bcbItem" onclick="clearBillAdvFilters()">✖</button>
       </div>
+      <div id="billCustomRangeRow" style="display:none; gap:8px; align-items:center; padding:8px 4px; font-size:12px;">
+        <span>From</span>
+        <input type="date" id="billCustomFrom" onchange="renderBillHistory()" style="padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:12px;">
+        <span>To</span>
+        <input type="date" id="billCustomTo" onchange="renderBillHistory()" style="padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:12px;">
+      </div>
       <div class="bulkDeleteBar admin-only" id="bulkDeleteBar" style="display:none;">
         <div class="bulkDeleteRow">
           <label class="bulkSelectAllLabel"><input type="checkbox" id="bulkSelectAllChk" onchange="toggleSelectAllBills(this.checked)"> Select All Visible</label>
@@ -2205,6 +2224,7 @@
         </div>
       </div>
       <div class="billSummaryBar" id="billSummaryBar"></div>
+      <button class="testPrintBtn" style="margin-bottom:12px; background:#eef2ff; color:var(--primary-dark);" onclick="generateBillHistoryReport()">📄 Generate Printable Report (for filtered bills above)</button>
       <div id="billHistoryWrap"></div>
     </div>
 
@@ -6927,9 +6947,9 @@ function openCustomerReminderModal(customerId){
   document.getElementById('customerReminderMeta').textContent = `${c.name} — Rs. ${c.total_receivable.toLocaleString()} outstanding`;
 
   // ---------- اس کسٹمر کے تمام Credit بل الگ الگ فہرست کریں (پورا خلاصہ پڑھنے میں آسان ہو) ----------
-  const creditBills = invoicesData.filter(inv => inv.customer_id === customerId && inv.payment_method === 'credit');
+  const creditBills = invoicesData.filter(inv => inv.customer_id === customerId && (inv.amount_due || 0) > 0);
   const billsListText = creditBills.length > 0
-    ? '\n\nOutstanding Invoices:\n' + creditBills.map(inv => `- ${inv.invoice_no}: Rs. ${inv.grand_total.toLocaleString()} (${new Date(inv.created_at).toLocaleDateString('en-GB')})`).join('\n')
+    ? '\n\nOutstanding Invoices:\n' + creditBills.map(inv => `- ${inv.invoice_no}: Rs. ${inv.amount_due.toLocaleString()} due (${new Date(inv.created_at).toLocaleDateString('en-GB')})`).join('\n')
     : '';
 
   document.getElementById('customerReminderText').value =
@@ -8389,6 +8409,32 @@ async function confirmBulkDeleteWithPin(){
 }
 
 // ---------- Advanced Search: تاریخ منتخب ہوتے ہی متعلقہ دن خودبخود Day باکس میں آ جائے ----------
+// ---------- Date Range Preset — "Custom Range" منتخب ہونے پر From/To خانے دکھائیں، ورنہ چھپا دیں ----------
+function onBillRangePresetChange(){
+  const preset = document.getElementById('billRangePreset').value;
+  document.getElementById('billCustomRangeRow').style.display = (preset === 'custom') ? 'flex' : 'none';
+  renderBillHistory();
+}
+// ---------- منتخب preset کے مطابق From/To تاریخیں نکالیں (دونوں شامل — inclusive) ----------
+function getBillRangeDates(preset){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const startOfWeek = (d) => { const x = new Date(d); const day = x.getDay(); x.setDate(x.getDate() - day); return x; }; // اتوار = ہفتے کا پہلا دن
+  let from = null, to = null;
+  if(preset === 'today'){ from = new Date(today); to = new Date(today); }
+  else if(preset === 'thisweek'){ from = startOfWeek(today); to = new Date(today); }
+  else if(preset === 'lastweek'){ const thisWeekStart = startOfWeek(today); to = new Date(thisWeekStart); to.setDate(to.getDate()-1); from = new Date(thisWeekStart); from.setDate(from.getDate()-7); }
+  else if(preset === 'thismonth'){ from = new Date(today.getFullYear(), today.getMonth(), 1); to = new Date(today); }
+  else if(preset === 'lastmonth'){ from = new Date(today.getFullYear(), today.getMonth()-1, 1); to = new Date(today.getFullYear(), today.getMonth(), 0); }
+  else if(preset === 'thisyear'){ from = new Date(today.getFullYear(), 0, 1); to = new Date(today); }
+  else if(preset === 'custom'){
+    const f = document.getElementById('billCustomFrom')?.value;
+    const t = document.getElementById('billCustomTo')?.value;
+    from = f ? new Date(f) : null;
+    to = t ? new Date(t) : null;
+  }
+  return {from, to};
+}
+
 function onBillDateFilterChange(){
   const dateVal = document.getElementById('billDateFilter').value;
   const dayEl = document.getElementById('billDayFilter');
@@ -8413,9 +8459,94 @@ function clearBillAdvFilters(){
   document.getElementById('billDayFilter').value = '';
   document.getElementById('billNumberFilter').value = '';
   document.getElementById('billAmountFilter').value = '';
+  document.getElementById('billRangePreset').value = 'all';
+  document.getElementById('billCustomRangeRow').style.display = 'none';
+  document.getElementById('billCustomFrom').value = '';
+  document.getElementById('billCustomTo').value = '';
   renderBillHistory();
 }
 
+// ---------- 📄 فلٹر شدہ بلوں کی فہرست کی پرنٹ/شیئر کے قابل رپورٹ — Bill History کے اوپر موجود کسی بھی فلٹر پر مبنی ----------
+async function generateBillHistoryReport(){
+  if(!lastFilteredBills || lastFilteredBills.length === 0){
+    alert('No bills match the current filters — nothing to generate a report for.');
+    return;
+  }
+  const bills = lastFilteredBills;
+  const totalAmount = bills.reduce((s, inv) => s + inv.grand_total, 0);
+  const totalSettled = bills.reduce((s, inv) => s + (inv.grand_total - (inv.amount_due || 0)), 0);
+  const totalPending = bills.reduce((s, inv) => s + (inv.amount_due || 0), 0);
+
+  const rowH = 26;
+  const W = 800, headerH = 150, footerH = 110;
+  const H = headerH + (bills.length * rowH) + footerH;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#0b4a45';
+  ctx.font = `800 26px Poppins, sans-serif`;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', W/2, 40);
+  ctx.font = `600 14px Poppins, sans-serif`;
+  ctx.fillStyle = '#475569';
+  ctx.fillText('Bill History Report', W/2, 64);
+  ctx.font = `12px Poppins, sans-serif`;
+  ctx.fillText(`Generated: ${new Date().toLocaleString('en-GB')}  •  ${bills.length} bill(s)`, W/2, 84);
+
+  // ---------- کالم ہیڈر ----------
+  let y = headerH;
+  ctx.textAlign = 'left';
+  ctx.font = `700 12px Poppins, sans-serif`;
+  ctx.fillStyle = '#1e293b';
+  const cols = [ {x:16, w:110, label:'Bill#'}, {x:126, w:90, label:'Date'}, {x:216, w:250, label:'Customer'}, {x:466, w:120, label:'Status'}, {x:586, w:198, label:'Amount'} ];
+  ctx.fillStyle = '#f1f5fb'; ctx.fillRect(10, y-18, W-20, 24);
+  ctx.fillStyle = '#1e293b';
+  cols.forEach(c => ctx.fillText(c.label, c.x, y-1));
+  y += 12;
+  ctx.font = `12px Poppins, sans-serif`;
+
+  bills.forEach((inv, idx) => {
+    if(idx % 2 === 1){ ctx.fillStyle = '#f8fafc'; ctx.fillRect(10, y-4, W-20, rowH); }
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(inv.invoice_no || '—', cols[0].x, y+13);
+    ctx.fillText(new Date(inv.created_at).toLocaleDateString('en-GB'), cols[1].x, y+13);
+    let name = inv.customer_name || 'Walk-in';
+    if(name.length > 28) name = name.slice(0,27) + '…';
+    ctx.fillText(name, cols[2].x, y+13);
+    ctx.fillStyle = (inv.amount_due || 0) > 0 ? '#c2410c' : '#15803d';
+    ctx.fillText((inv.amount_due || 0) > 0 ? `Pending Rs.${inv.amount_due}` : 'Clear', cols[3].x, y+13);
+    ctx.fillStyle = '#1e293b';
+    ctx.textAlign = 'right';
+    ctx.fillText('Rs. ' + inv.grand_total.toLocaleString(), cols[4].x + cols[4].w, y+13);
+    ctx.textAlign = 'left';
+    y += rowH;
+  });
+
+  // ---------- فوٹر: کل رقم، وصول شدہ، بقایہ ----------
+  y += 14;
+  ctx.strokeStyle = '#dbe1ea'; ctx.beginPath(); ctx.moveTo(16, y-10); ctx.lineTo(W-16, y-10); ctx.stroke();
+  ctx.font = `700 14px Poppins, sans-serif`;
+  ctx.fillStyle = '#1e293b'; ctx.fillText(`Total Billed: Rs. ${totalAmount.toLocaleString()}`, 16, y+10);
+  ctx.fillStyle = '#15803d'; ctx.fillText(`Total Settled: Rs. ${totalSettled.toLocaleString()}`, 16, y+34);
+  ctx.fillStyle = '#c2410c'; ctx.fillText(`Total Pending: Rs. ${totalPending.toLocaleString()}`, 16, y+58);
+
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the report.'); return; }
+    const file = new File([blob], `Bill_History_Report.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'Bill History Report'}); } catch(err){ /* منسوخ */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot.");
+    }
+  }, 'image/png');
+}
+
+let lastFilteredBills = []; // ---------- Bill History کی سب سے تازہ فلٹر شدہ فہرست — Report Generator اسی کو استعمال کرتا ہے ----------
 // ---------- Render Bill History List ----------
 function renderBillHistory(){
   const wrap = document.getElementById('billHistoryWrap');
@@ -8463,9 +8594,9 @@ function renderBillHistory(){
     // ---------- عام حالت: Status Tab + Date + Day + Party Name سب آپس میں مل کر (AND) کام کریں ----------
     filtered = base;
     if(billStatusFilter === 'pending'){
-      filtered = filtered.filter(inv => inv.payment_method === 'credit' && inv.status !== 'voided');
+      filtered = filtered.filter(inv => (inv.amount_due || 0) > 0 && inv.status !== 'voided');
     } else if(billStatusFilter === 'clear'){
-      filtered = filtered.filter(inv => inv.payment_method !== 'credit' && inv.status !== 'voided');
+      filtered = filtered.filter(inv => (inv.amount_due || 0) <= 0 && inv.status !== 'voided');
     } else if(billStatusFilter === 'voided'){
       // ---------- صرف Voided بل — عام فہرست سے چھپے رہتے ہیں، یہاں چاہیں تو دیکھ لیں ----------
       filtered = filtered.filter(inv => inv.status === 'voided');
@@ -8483,6 +8614,13 @@ function renderBillHistory(){
     if(partyQuery){
       filtered = filtered.filter(inv => (inv.customer_name || '').toLowerCase().includes(partyQuery));
     }
+    // ---------- Date Range Preset (Today/This Week/.../Custom) — موجودہ Date/Day فلٹرز کے ساتھ مل کر کام کرتا ہے ----------
+    const rangePreset = document.getElementById('billRangePreset')?.value || 'all';
+    if(rangePreset !== 'all'){
+      const {from, to} = getBillRangeDates(rangePreset);
+      if(from) filtered = filtered.filter(inv => new Date((inv.created_at||'').split('T')[0]) >= from);
+      if(to) filtered = filtered.filter(inv => new Date((inv.created_at||'').split('T')[0]) <= to);
+    }
   }
 
   // ---------- ترتیب (Sort): تاریخ، رقم، یا نام کے مطابق ----------
@@ -8497,6 +8635,7 @@ function renderBillHistory(){
   });
 
   // ---------- خلاصہ پٹی: کتنے بل، کل رقم کتنی — سیلزمین کے لیے "میرے آج کے بل" کا واضح جواب ----------
+  lastFilteredBills = filtered; // ---------- 📄 Report بٹن اسی فہرست کو دوبارہ استعمال کرتا ہے ----------
   const totalAmount = filtered.reduce((s, inv) => s + inv.grand_total, 0);
   const summaryLabel = isAdmin
     ? (salesmanFilterVal !== 'all' ? `${salesmanFilterVal}'s Bills` : 'All Bills')
@@ -8515,8 +8654,8 @@ function renderBillHistory(){
     const creatorBadge = isAdminGenerated
       ? `<span class="creatorBadge admin">🛡️ Admin Generated</span>`
       : `<span class="creatorBadge salesman">👤 ${inv.sold_by}</span>`;
-    const payTag = inv.payment_method === 'credit'
-      ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending</span>`
+    const payTag = (inv.amount_due || 0) > 0
+      ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending (Rs. ${inv.amount_due.toLocaleString()})</span>`
       : `<span class="billStatusTag completed">✅ Clear</span>`;
     return `
     <div class="billCard">
