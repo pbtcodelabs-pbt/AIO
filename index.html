@@ -177,7 +177,7 @@
   /* --- کارٹ/چیک آؤٹ Bottom Sheet --- */
   .cartSheetBox{background:#fff; border-radius:18px 18px 0 0; width:100%; max-width:480px; max-height:88vh; margin-top:auto; overflow-y:auto; align-self:flex-end;}
   #cartSheetModal{align-items:flex-end;}
-  .cartSheetHead{display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid #eef1f6; position:sticky; top:0; background:#fff; z-index:2;}
+  .cartSheetHead{display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid #eef1f6; position:sticky; top:0; background:#fff; z-index:2;}
   .cartSheetBody{padding:16px 18px;}
   .addMoreItemsBtn{
     width:100%; margin-top:10px; padding:11px; border:1.5px dashed var(--primary); border-radius:10px;
@@ -207,7 +207,7 @@
 
   .cartWrap{background:var(--card); border-radius:var(--radius); max-height:160px; overflow-y:auto; box-shadow:0 2px 10px rgba(41,29,10,.07);}
   table.cartTable{width:100%; border-collapse:collapse; font-size:var(--cart-font-size, 14px); font-weight:var(--cart-font-weight, 400);}
-  table.cartTable th{text-align:left; padding:12px; background:#f1f5fb; color:var(--muted); font-size:12px; text-transform:uppercase; position:sticky; top:0;}
+  table.cartTable th{text-align:left; padding:7px 12px; background:#f1f5fb; color:var(--muted); font-size:11px; text-transform:uppercase; position:sticky; top:0;}
   table.cartTable td{padding:var(--cart-row-pad, 10px) 12px; border-bottom:1px solid #eef1f6;}
   .qtyBtns{display:flex; align-items:center; gap:6px;}
   .rateEditInput{width:64px; padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:13px; text-align:center; background:#fffbea;}
@@ -1373,15 +1373,15 @@
           <span class="closeBtn" onclick="closeCartSheet()">✖</span>
         </div>
 
-        <!-- ---------- بل بناتے وقت لکھائی کا سائز/موٹاپن اور دو لائنوں کے درمیان فاصلہ — صرف اسی کارٹ کے لیے ---------- -->
-        <div style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
-          <span style="font-size:11px; color:var(--muted); margin-left:2px;">Text:</span>
-          <button type="button" onclick="adjustCartTextSetting('fontSize',-1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:11px;">A−</button>
-          <button type="button" onclick="adjustCartTextSetting('fontSize',1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:15px;">A+</button>
-          <button type="button" id="cartBoldToggleBtn" onclick="toggleCartTextBold()" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-weight:800;">B</button>
-          <span style="font-size:11px; color:var(--muted); margin-left:8px;">Spacing:</span>
-          <button type="button" onclick="adjustCartTextSetting('rowPad',-1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:13px;">↕−</button>
-          <button type="button" onclick="adjustCartTextSetting('rowPad',1)" style="width:26px; height:26px; border-radius:6px; border:1px solid #dbe1ea; background:#fff; font-size:13px;">↕+</button>
+        <!-- ---------- بل بناتے وقت لکھائی کا سائز/موٹاپن اور دو لائنوں کے درمیان فاصلہ — صرف اسی کارٹ کے لیے (چھوٹا سا بار، جگہ بچانے کے لیے) ---------- -->
+        <div style="display:flex; align-items:center; gap:4px; padding:3px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
+          <span style="font-size:9.5px; color:var(--muted);">Text:</span>
+          <button type="button" onclick="adjustCartTextSetting('fontSize',-1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:9px; padding:0;">A−</button>
+          <button type="button" onclick="adjustCartTextSetting('fontSize',1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:12px; padding:0;">A+</button>
+          <button type="button" id="cartBoldToggleBtn" onclick="toggleCartTextBold()" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-weight:800; font-size:10px; padding:0;">B</button>
+          <span style="font-size:9.5px; color:var(--muted); margin-left:6px;">Spacing:</span>
+          <button type="button" onclick="adjustCartTextSetting('rowPad',-1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:10px; padding:0;">↕−</button>
+          <button type="button" onclick="adjustCartTextSetting('rowPad',1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:10px; padding:0;">↕+</button>
         </div>
 
         <div class="cartSheetBody">
@@ -1432,6 +1432,17 @@
             <div class="row"><span>Discount</span><span id="sumDiscount">Rs. 0</span></div>
             <div class="row" id="sumTaxRow" style="display:none;"><span id="sumTaxLabel">Tax</span><span id="sumTax">Rs. 0</span></div>
             <div class="grand"><span>Grand Total</span><span id="sumGrand">Rs. 0</span></div>
+            <div class="row" id="sumReceivedRow" style="display:none; color:var(--success);"><span>💵 Received Now</span><span id="sumReceived">Rs. 0</span></div>
+            <div class="row" id="sumBalanceRow" style="display:none; font-weight:800;"><span>📒 Balance Due</span><span id="sumBalance">Rs. 0</span></div>
+          </div>
+
+          <!-- ---------- بل سے زیادہ رقم موصول ہو تو (مثلاً 5000 کا نوٹ دیا، بل 3000 کا تھا) — واپسی رقم دکھائیں اور فیصلہ لینے دیں ---------- -->
+          <div id="changeDueBox" style="display:none; background:#fff7ed; border:1px solid #fdba74; border-radius:10px; padding:10px 12px; margin-top:8px;">
+            <div style="font-size:13px; font-weight:800; color:#9a3412;">💰 Change Due: <span id="changeDueAmount">Rs. 0</span></div>
+            <label id="changeToWalletRow" style="display:none; align-items:center; gap:8px; margin-top:8px; font-size:12px; color:#7c2d12;">
+              <input type="checkbox" id="changeToWalletChk" onchange="renderCart()">
+              Add this extra amount to customer's Wallet instead of giving cash change
+            </label>
           </div>
 
           <button class="checkoutBtn" id="checkoutBtn" disabled onclick="finalizeInvoice()">✅ Complete Bill</button>
@@ -2048,6 +2059,24 @@
       </div>
     </div>
 
+    <!-- ⚖️ OPENING / ADJUST BALANCE MODAL — بغیر کسی جعلی بل کے، کسی بھی وقت کسٹمر کا بقایہ سیدھا سیٹ/ایڈجسٹ کریں -->
+    <div class="modalOverlay" id="openingBalanceModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox">
+        <h3>⚖️ Set/Adjust Opening Balance</h3>
+        <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Already owed money before you started using this app? Add it here directly — no need to create a fake bill. This only changes their Receivable total; it does NOT touch stock or create any invoice.</div>
+        <div class="txnTypeToggle">
+          <button id="obAdd" class="active" onclick="setOpeningBalanceType('add')">➕ Customer Owes This</button>
+          <button id="obReduce" onclick="setOpeningBalanceType('reduce')">➖ Reduce/Correct Balance</button>
+        </div>
+        <input type="number" id="obAmount" placeholder="Enter amount" onfocus="this.select()">
+        <input type="text" id="obNote" placeholder="Note (optional, e.g. 'Old balance before app')" style="margin-top:8px;">
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="document.getElementById('openingBalanceModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" onclick="saveOpeningBalanceAdjustment()">Save</button>
+        </div>
+      </div>
+    </div>
+
     <!-- WALLET HISTORY MODAL -->
     <div class="modalOverlay" id="historyModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
@@ -2562,6 +2591,18 @@
     </div>
 
     <!-- ADD PAYMENT ACCOUNT MODAL -->
+    <!-- IMAGE SHARE PREVIEW MODAL — کارڈ/پوسٹر بنانے کے فوراً بعد یہاں دکھایا جائے، سیدھا شیئر شیٹ پر نہیں کودنا ---------- -->
+    <div class="modalOverlay" id="imageSharePreviewModal" onclick="if(event.target===this) closeImageSharePreview()">
+      <div class="modalBox" style="max-width:360px; text-align:center;">
+        <h3 id="imageSharePreviewTitle">پیش نظارہ</h3>
+        <img id="imageSharePreviewImg" style="width:100%; border-radius:12px; margin:8px 0; box-shadow:0 4px 14px rgba(0,0,0,.18);">
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeImageSharePreview()">Cancel</button>
+          <button class="saveBtn" style="background:#25D366;" onclick="confirmImageShare()">💬 Share</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modalOverlay" id="addPaymentAccountModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
         <h3>➕ Add Payment Account</h3>
@@ -2917,7 +2958,7 @@ const DEFAULT_SETTINGS = {
   uiZoom: 100, // 80–150 (%)
   // ---------- 🛒 بل بناتے وقت (Cart) کی لکھائی کا سائز/موٹاپن/لائن اسپیسنگ — App Zoom سے الگ، صرف بلنگ کارٹ کے لیے ----------
   cartFontSize: 14,   // 11–20 px
-  cartRowPad: 10,     // 6–20 px (دو لائنوں کے درمیان فاصلہ)
+  cartRowPad: 7,      // 6–20 px (دو لائنوں کے درمیان فاصلہ) — زیادہ سے زیادہ آئٹمز ایک ساتھ نظر آئیں، اسی لیے ڈیفالٹ تنگ رکھا
   cartBold: false,
   // ---------- 🧾 پرنٹ شدہ رسید پر اضافی معلومات — Settings کے نئے Receipt Content کارڈ سے کنٹرول ----------
   printSortAlpha: false,        // آئٹمز حروفِ تہجی کی ترتیب میں پرنٹ ہوں (بصورتِ دیگر جس ترتیب میں شامل کیے، اسی میں)
@@ -4381,14 +4422,54 @@ function renderCart(){
   document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(0)}`;
   document.getElementById('sumGrand').textContent = `Rs. ${grandTotal.toFixed(0)}`;
 
-  // ---------- جزوی ادائیگی کا فوری اشارہ — کتنا بقایہ رہ جائے گا، ابھی ٹائپ کرتے ہی نظر آئے ----------
+  // ---------- جزوی ادائیگی + زائد رقم (Change) کا مکمل حساب — سب کچھ یہیں، پرنٹ پریویو پر جانے سے پہلے صاف نظر آئے ----------
   const receivedHint = document.getElementById('amountReceivedHint');
+  const sumReceivedRow = document.getElementById('sumReceivedRow');
+  const sumBalanceRow = document.getElementById('sumBalanceRow');
+  const changeDueBox = document.getElementById('changeDueBox');
+  const changeToWalletRow = document.getElementById('changeToWalletRow');
+
   if(receivedHint && !Billing.counterSale){
-    const receivedVal = Math.max(0, Math.min(grandTotal, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0));
-    const remaining = grandTotal - receivedVal;
-    receivedHint.textContent = receivedVal > 0
-      ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
-      : `Leave blank/0 if nothing is being paid right now (full amount goes to Pending).`;
+    // ---------- یہاں اوپری حد نہیں لگاتے — کسٹمر بل سے زیادہ رقم بھی دے سکتا ہے (مثلاً 5000 کا نوٹ)، تبھی Change پکڑا جا سکے ----------
+    const receivedRaw = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
+    const remaining = grandTotal - receivedRaw; // منفی ہو تو مطلب زائد رقم (Change) بنتی ہے
+
+    if(receivedRaw > 0){
+      sumReceivedRow.style.display = 'flex';
+      document.getElementById('sumReceived').textContent = `− Rs. ${receivedRaw.toFixed(0)}`;
+    } else {
+      sumReceivedRow.style.display = 'none';
+    }
+
+    if(remaining >= 0){
+      // ---------- عام صورت: کچھ یا سارا بقایہ ہے، کوئی Change نہیں ----------
+      sumBalanceRow.style.display = receivedRaw > 0 ? 'flex' : 'none';
+      document.getElementById('sumBalance').textContent = `Rs. ${remaining.toFixed(0)}`;
+      document.getElementById('sumBalance').style.color = remaining > 0 ? 'var(--danger)' : 'var(--success)';
+      changeDueBox.style.display = 'none';
+      receivedHint.textContent = receivedRaw > 0
+        ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
+        : `Leave blank/0 if nothing is being paid right now (full amount goes to Pending).`;
+    } else {
+      // ---------- زائد رقم موصول ہوئی — Change Due دکھائیں، فیصلہ لینے دیں (نقد واپس یا Wallet میں) ----------
+      const changeAmt = -remaining;
+      sumBalanceRow.style.display = 'none';
+      changeDueBox.style.display = 'block';
+      document.getElementById('changeDueAmount').textContent = `Rs. ${changeAmt.toFixed(0)}`;
+      receivedHint.textContent = `✅ Fully paid — Rs. ${changeAmt.toFixed(0)} extra received.`;
+
+      const custId = document.getElementById('customerSelect')?.value;
+      if(custId){
+        changeToWalletRow.style.display = 'flex';
+      } else {
+        changeToWalletRow.style.display = 'none';
+        document.getElementById('changeToWalletChk').checked = false;
+      }
+    }
+  } else {
+    sumReceivedRow.style.display = 'none';
+    sumBalanceRow.style.display = 'none';
+    changeDueBox.style.display = 'none';
   }
 
   // ---------- منافع کا خفیہ اشارہ — صرف بل بنانے والے کو نظر آئے، کسٹمر یا پرنٹ میں کبھی نہیں ----------
@@ -4618,17 +4699,39 @@ function finalizeInvoice(){
     customer.walletHistory = customer.walletHistory || [];
     customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
   }
-  // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو (جزوی ادائیگی) ----------
-  const cashReceivedNow = (method === 'credit')
-    ? Math.max(0, Math.min(grandTotal - walletApplied, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0))
-    : 0;
-  const remainingDue = (method === 'credit') ? Math.max(0, grandTotal - walletApplied - cashReceivedNow) : 0;
+  // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو — اب یہ بل سے زیادہ بھی ہو سکتی ہے (مثلاً 5000 کا نوٹ) ----------
+  const dueAfterWallet = Math.max(0, grandTotal - walletApplied);
+  const rawReceivedInput = (method === 'credit') ? Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0) : 0;
+  const changeToWallet = document.getElementById('changeToWalletChk')?.checked || false;
+
+  let cashReceivedNow, remainingDue, changeGiven = 0, changeCreditedToWallet = 0;
+  if(method === 'credit' && rawReceivedInput > dueAfterWallet){
+    // ---------- زائد رقم موصول ہوئی — بل مکمل ادا ہے، فرق یا تو نقد واپس، یا کسٹمر کے Wallet میں ----------
+    const excess = rawReceivedInput - dueAfterWallet;
+    remainingDue = 0;
+    if(changeToWallet && customer){
+      cashReceivedNow = rawReceivedInput; // ---------- پوری رقم رجسٹر میں رہی، کچھ واپس نہیں دیا ----------
+      customer.wallet_balance = (customer.wallet_balance || 0) + excess;
+      customer.walletHistory = customer.walletHistory || [];
+      customer.walletHistory.unshift({type:'deposit', amount:excess, via:'change', date:new Date().toISOString().split('T')[0], note:`Change credited from ${invoice.invoice_no}`});
+      changeCreditedToWallet = excess;
+    } else {
+      cashReceivedNow = dueAfterWallet; // ---------- صرف بل جتنی رقم رجسٹر میں رہی، باقی نقد واپس دے دی ----------
+      changeGiven = excess;
+    }
+  } else {
+    cashReceivedNow = (method === 'credit') ? Math.min(dueAfterWallet, rawReceivedInput) : 0;
+    remainingDue = (method === 'credit') ? Math.max(0, dueAfterWallet - cashReceivedNow) : 0;
+  }
+
   if(customer && method === 'credit' && remainingDue > 0){
     customer.total_receivable += remainingDue;
     // TODO: customers.total_receivable UPDATE
   }
   invoice.wallet_applied = walletApplied;
   invoice.cash_received_now = cashReceivedNow;
+  invoice.change_given = changeGiven;
+  invoice.change_credited_to_wallet = changeCreditedToWallet;
   invoice.amount_due = remainingDue;
   invoice.paid_now = grandTotal - remainingDue; // ---------- اس بل میں سے ابھی کتنا ادا ہوا (نقد یا والٹ سے)، بل پر دکھانے کے لیے ----------
   invoice.new_balance = customer ? customer.total_receivable : 0; // ---------- اس بل کے بعد کسٹمر کا کل بقایہ — ہمیشہ کے لیے بل پر محفوظ ----------
@@ -4641,10 +4744,14 @@ function finalizeInvoice(){
     // ---------- Credit بل میں بھی اگر کچھ نقد ابھی وصول ہوا تو وہ فوری Cash in Hand میں شامل ہوگا ----------
     financeDummy.cashInHand += cashReceivedNow;
   }
+  if(changeGiven > 0){
+    alert(`💰 Change to give back: Rs. ${changeGiven.toLocaleString()}`);
+  }
 
   Billing.cart = [];
   document.getElementById('discountInput').value = 0;
   document.getElementById('amountReceivedInput').value = '';
+  document.getElementById('changeToWalletChk').checked = false;
   renderCart();
   renderBillingProductGrid(); // اسٹاک کم ہوا، گرڈ میں بھی فوراً نظر آئے
   populateCustomerDropdown();
@@ -6797,6 +6904,7 @@ function openCustomerProfile(customerId){
     <button style="background:var(--primary); color:#fff;" onclick="startNewBillForCustomer(${c.customer_id})">🧾 New Bill</button>
     <button style="background:#fef2f2; color:var(--danger);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});">📥 Collect</button>
     <button style="background:#dcfce7; color:var(--success);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});">➕ Wallet</button>
+    <button style="background:#fff7ed; color:#c2410c; flex-basis:100%;" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});">⚖️ Set/Adjust Opening Balance (no bill needed)</button>
   `;
   if(c.total_receivable > 0){
     document.getElementById('profileQuickActions').innerHTML += `
@@ -8042,6 +8150,50 @@ function saveWalletTxn(){
   renderPartyList(document.getElementById('partySearchInput').value);
 }
 
+// ---------- ⚖️ Opening/Adjust Balance — بغیر جعلی بل بنائے، کسی بھی وقت کسٹمر کا بقایہ سیدھا سیٹ کریں ----------
+let activeOpeningBalanceCustomerId = null;
+let activeOpeningBalanceType = 'add';
+function openOpeningBalanceModal(customerId){
+  activeOpeningBalanceCustomerId = customerId;
+  activeOpeningBalanceType = 'add';
+  setOpeningBalanceType('add');
+  document.getElementById('obAmount').value = '';
+  document.getElementById('obNote').value = '';
+  document.getElementById('openingBalanceModal').classList.add('show');
+}
+function setOpeningBalanceType(type){
+  activeOpeningBalanceType = type;
+  document.getElementById('obAdd').classList.toggle('active', type==='add');
+  document.getElementById('obReduce').classList.toggle('active', type==='reduce');
+}
+function saveOpeningBalanceAdjustment(){
+  const amount = parseFloat(document.getElementById('obAmount').value) || 0;
+  if(amount <= 0){ alert('Please enter a valid amount.'); return; }
+  const note = document.getElementById('obNote').value.trim();
+  const c = customersData.find(x => x.customer_id === activeOpeningBalanceCustomerId);
+  if(!c) return;
+
+  if(activeOpeningBalanceType === 'reduce' && amount > c.total_receivable){
+    if(!confirm(`This would take the balance below zero (currently Rs. ${c.total_receivable.toLocaleString()}). Continue anyway?`)) return;
+  }
+
+  // TODO: یہ receivable_adjustments table میں INSERT ہوگا اور customers.total_receivable UPDATE ہوگا
+  c.total_receivable += (activeOpeningBalanceType === 'add' ? amount : -amount);
+  c.walletHistory = c.walletHistory || [];
+  c.walletHistory.unshift({
+    type: 'opening_balance',
+    amount,
+    direction: activeOpeningBalanceType,
+    note: note || (activeOpeningBalanceType === 'add' ? 'Opening balance set' : 'Balance corrected'),
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  document.getElementById('openingBalanceModal').classList.remove('show');
+  persistAllData();
+  renderPartyList(document.getElementById('partySearchInput')?.value);
+  alert(`✅ ${c.name}'s balance updated. New Receivable: Rs. ${c.total_receivable.toLocaleString()}`);
+}
+
 // ---------- Wallet History Modal ----------
 function openHistoryModal(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
@@ -8055,6 +8207,7 @@ function openHistoryModal(customerId){
       let label;
       if(h.type === 'deposit') label = '➕ Add to Wallet';
       else if(h.type === 'redeem') label = '➖ Withdrawn from Wallet';
+      else if(h.type === 'opening_balance') label = h.direction === 'add' ? `⚖️ Opening Balance Added${h.note ? ' — ' + h.note : ''}` : `⚖️ Balance Reduced${h.note ? ' — ' + h.note : ''}`;
       else label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`;
       return `
         <div class="walletHistoryRow">
@@ -8563,18 +8716,7 @@ async function generateBillHistoryReport(){
   ctx.fillStyle = '#15803d'; ctx.fillText(`Total Settled: Rs. ${totalSettled.toLocaleString()}`, 16, y+34);
   ctx.fillStyle = '#c2410c'; ctx.fillText(`Total Pending: Rs. ${totalPending.toLocaleString()}`, 16, y+58);
 
-  canvas.toBlob(async (blob) => {
-    if(!blob){ alert('There was a problem creating the report.'); return; }
-    const file = new File([blob], `Bill_History_Report.png`, {type:'image/png'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file], title:'Bill History Report'}); } catch(err){ /* منسوخ */ }
-    } else {
-      const dataUrl = canvas.toDataURL('image/png');
-      const win = window.open();
-      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
-      else alert("Sharing isn't supported. Please take a screenshot.");
-    }
-  }, 'image/png');
+  showImageSharePreview(canvas, 'Bill_History_Report.png', 'Bill History Report', `${bills.length} bill(s) — Rs. ${totalAmount.toLocaleString()}`);
 }
 
 let lastFilteredBills = []; // ---------- Bill History کی سب سے تازہ فلٹر شدہ فہرست — Report Generator اسی کو استعمال کرتا ہے ----------
@@ -10409,43 +10551,51 @@ async function renderAccountPosterToCanvas(acc){
 
   return canvas;
 }
-async function shareAccountPoster(idx){
-  const acc = AppState.settings.paymentAccounts[idx];
-  if(!acc) return;
-  const canvas = await renderAccountPosterToCanvas(acc);
-  canvas.toBlob(async (blob) => {
-    if(!blob){ alert('There was a problem creating the poster.'); return; }
-    const file = new File([blob], `${(acc.type||'account').replace(/\s+/g,'_')}_poster.png`, {type:'image/png'});
+// ---------- کارڈ/پوسٹر بننے کے بعد سیدھا شیئر شیٹ پر نہیں جاتے — پہلے تصویر دکھاتے ہیں تاکہ صارف دیکھ لے یہ کیسی بنی ہے، پھر خود فیصلہ کرے شیئر کرنی ہے یا نہیں ----------
+let pendingShareCanvas = null, pendingShareFilename = '', pendingShareTitle = '', pendingShareText = '';
+function showImageSharePreview(canvas, filename, title, text){
+  pendingShareCanvas = canvas;
+  pendingShareFilename = filename;
+  pendingShareTitle = title;
+  pendingShareText = text;
+  document.getElementById('imageSharePreviewTitle').textContent = title || 'Preview';
+  document.getElementById('imageSharePreviewImg').src = canvas.toDataURL('image/png');
+  document.getElementById('imageSharePreviewModal').classList.add('show');
+}
+function closeImageSharePreview(){
+  document.getElementById('imageSharePreviewModal').classList.remove('show');
+  pendingShareCanvas = null;
+}
+async function confirmImageShare(){
+  if(!pendingShareCanvas) return;
+  pendingShareCanvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem preparing the image.'); return; }
+    const file = new File([blob], pendingShareFilename, {type:'image/png'});
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({ files:[file], title: acc.type, text: `${acc.name || ''} — ${acc.type} Account` }); }
-      catch(err){ /* منسوخ */ }
+      try{ await navigator.share({ files:[file], title: pendingShareTitle, text: pendingShareText }); }
+      catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
     } else {
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = pendingShareCanvas.toDataURL('image/png');
       const win = window.open();
       if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
       else alert("Sharing isn't supported. Please take a screenshot and send it.");
     }
+    closeImageSharePreview();
   }, 'image/png');
+}
+
+async function shareAccountPoster(idx){
+  const acc = AppState.settings.paymentAccounts[idx];
+  if(!acc) return;
+  const canvas = await renderAccountPosterToCanvas(acc);
+  showImageSharePreview(canvas, `${(acc.type||'account').replace(/\s+/g,'_')}_poster.png`, acc.type, `${acc.name || ''} — ${acc.type} Account`);
 }
 
 async function shareAccountCard(idx){
   const acc = AppState.settings.paymentAccounts[idx];
   if(!acc) return;
   const canvas = await renderAccountCardToCanvas(acc);
-  canvas.toBlob(async (blob) => {
-    if(!blob){ alert('There was a problem creating the account card.'); return; }
-    const file = new File([blob], `${(acc.type||'account').replace(/\s+/g,'_')}.png`, {type:'image/png'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      try{
-        await navigator.share({ files:[file], title: acc.type, text: `${acc.name || ''} — ${acc.type} Account` });
-      } catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
-    } else {
-      const dataUrl = canvas.toDataURL('image/png');
-      const win = window.open();
-      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
-      else alert("Sharing isn't supported. Please take a screenshot and send it.");
-    }
-  }, 'image/png');
+  showImageSharePreview(canvas, `${(acc.type||'account').replace(/\s+/g,'_')}.png`, acc.type, `${acc.name || ''} — ${acc.type} Account`);
 }
 
 // ---------- پیمنٹ اکاؤنٹس کو reminder پیغام میں شامل کرنے کے لیے متن بنائیں ----------
