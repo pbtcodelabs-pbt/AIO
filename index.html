@@ -531,15 +531,24 @@
   }
   .newActionFab.open .newActionFabMain{ transform:rotate(45deg); background:var(--primary-dark); }
 
-  /* ---------- 🏠 فلوٹنگ Home بٹن — نیچے دائیں کونے میں (+ کے بالکل مخالف)، انگوٹھے کی پہنچ میں،
+  /* ---------- ◀ Back / 🏠 Home / ▶ Forward — نیچے وسط میں ایک کمپیکٹ، چھوٹا، 3D بار،
        Home اسکرین پر خود بخود چھپ جاتا ہے (وہاں ضرورت نہیں) ---------- */
-  .floatingHomeBtn{
-    position:fixed; right:16px; bottom:16px; z-index:260; display:none;
-    width:44px; height:44px; border-radius:50%; background:var(--primary); color:#fff; border:none;
-    font-size:20px; box-shadow:0 6px 16px rgba(15,118,110,.4); cursor:pointer;
-    align-items:center; justify-content:center;
+  .navArrowBar{
+    position:fixed; left:50%; bottom:10px; transform:translateX(-50%); z-index:260; display:none;
+    gap:8px; background:rgba(255,255,255,.7); backdrop-filter:blur(6px); padding:5px; border-radius:20px;
+    box-shadow:0 4px 14px rgba(15,23,42,.18);
   }
-  body.billing-active .floatingHomeBtn{ bottom:90px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
+  body.billing-active .navArrowBar{ bottom:84px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
+  .navArrowBar button{
+    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff;
+    background:linear-gradient(155deg, var(--primary), var(--primary-dark));
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 3px 7px -2px rgba(0,0,0,.35);
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .navArrowBar button:active{ transform:scale(.9); }
+  .navArrowBar button#navHomeBtn{ width:38px; height:38px; font-size:17px; background:linear-gradient(155deg,#c2790f,#8a560a); }
+  .navArrowBar button:disabled{ opacity:.35; pointer-events:none; background:linear-gradient(155deg,#94a3b8,#64748b); }
   .newActionFabItems{
     display:flex; flex-direction:column-reverse; align-items:flex-start; gap:14px; margin-bottom:4px;
     max-height:0; overflow:hidden; opacity:0; pointer-events:none; transition:max-height .25s ease, opacity .2s ease;
@@ -997,17 +1006,20 @@
   .pNicknameTag{display:inline-flex; align-items:center; gap:3px; font-size:10.5px; font-weight:700; color:#fff; opacity:.9;
     background:rgba(255,255,255,.16); padding:2px 8px; border-radius:8px; margin-top:4px; cursor:pointer; width:fit-content;}
 
-  /* --- فوری رابطہ آئیکن — اب نام کے بالکل نیچے، چھوٹے گول بٹن (قمیض کے بٹنوں کی طرح)، پوری پٹی کی جگہ نہیں گھیرتے --- */
-  .profileHeadContacts{display:flex; gap:7px; margin-top:8px;}
+  /* --- فوری رابطہ آئیکن — اب نام کے بالکل نیچے، چھوٹے گول 3D بٹن (قمیض کے بٹنوں کی طرح)، پوری پٹی کی جگہ نہیں گھیرتے --- */
+  .profileHeadContacts{display:flex; gap:8px; margin-top:8px;}
   .profileHeadContacts a, .profileHeadContacts span{
     width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-size:14px; text-decoration:none; box-shadow:0 2px 5px rgba(0,0,0,.25); flex:0 0 auto;
+    font-size:14px; text-decoration:none; flex:0 0 auto; color:#fff;
+    box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 -2px 4px rgba(0,0,0,.15) inset, 0 3px 7px -1px rgba(0,0,0,.4);
+    transition:transform .12s ease, box-shadow .12s ease;
   }
-  .profileHeadContacts .cCall{background:#eef2ff;}
-  .profileHeadContacts .cWhatsapp{background:#dcfce7;}
-  .profileHeadContacts .cSms{background:#fff7ed;}
-  .profileHeadContacts .cGmail{background:#fee2e2;}
-  .profileHeadContacts .cDisabled{background:rgba(255,255,255,.15); opacity:.5; pointer-events:none;}
+  .profileHeadContacts a:active{transform:scale(.88); box-shadow:0 1px 3px -1px rgba(0,0,0,.4);}
+  .profileHeadContacts .cCall{background:linear-gradient(155deg,#60a5fa,#1d4ed8);}
+  .profileHeadContacts .cWhatsapp{background:linear-gradient(155deg,#4ade80,#15803d);}
+  .profileHeadContacts .cSms{background:linear-gradient(155deg,#fb923c,#c2410c);}
+  .profileHeadContacts .cGmail{background:linear-gradient(155deg,#f87171,#b91c1c);}
+  .profileHeadContacts .cDisabled{background:rgba(255,255,255,.15); opacity:.45; pointer-events:none; box-shadow:none;}
 
   /* --- تھیم: کسٹمر = ہلکا سبز، سپلائر = ہلکا نیلا --- */
   .profileBox.themeCustomer{background:linear-gradient(180deg, #ecfdf5 0%, #f6fefb 220px, #ffffff 420px);}
@@ -1098,12 +1110,18 @@
   .partyRow .prBalance.receivable{color:var(--danger);}
   .partyRow .prBalance.payable{color:var(--warning);}
   .partyRow .prBalance.zero{color:var(--muted); font-weight:600; font-size:11px;}
-  .partyRow .prContacts{display:flex; gap:4px; flex:0 0 auto;}
-  .partyRow .prIconBtn{width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; text-decoration:none; flex:0 0 28px;}
-  .partyRow .cCall{background:#eef2ff;}
-  .partyRow .cWhatsapp{background:#dcfce7;}
-  .partyRow .cSms{background:#fff7ed;}
-  .partyRow .cDisabled{background:#f1f5f9; opacity:.5; pointer-events:none;}
+  .partyRow .prContacts{display:flex; gap:5px; flex:0 0 auto;}
+  .partyRow .prIconBtn{
+    width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    font-size:14px; text-decoration:none; flex:0 0 30px; color:#fff;
+    box-shadow:0 1px 0 rgba(255,255,255,.4) inset, 0 2px 5px -1px rgba(0,0,0,.35);
+    transition:transform .12s ease;
+  }
+  .partyRow .prIconBtn:active{transform:scale(.88);}
+  .partyRow .cCall{background:linear-gradient(155deg,#60a5fa,#1d4ed8);}
+  .partyRow .cWhatsapp{background:linear-gradient(155deg,#4ade80,#15803d);}
+  .partyRow .cSms{background:linear-gradient(155deg,#fb923c,#c2410c);}
+  .partyRow .cDisabled{background:#e2e8f0; color:#94a3b8; opacity:.7; pointer-events:none; box-shadow:none;}
 
   .pendingStatusTag.small{font-size:9px; padding:1px 7px;}
 
@@ -1345,8 +1363,12 @@
     <button class="newActionFabMain" id="newActionFabMain" onclick="toggleNewActionFab()">+</button>
   </div>
 
-  <!-- ---------- 🏠 فلوٹنگ Home بٹن — ہر صفحے پر (Home کے علاوہ)، نیچے دائیں کونے میں ---------- -->
-  <button class="floatingHomeBtn" id="floatingHomeBtn" onclick="goTo('home')" title="Go to Home">🏠</button>
+  <!-- ---------- ◀ Back / 🏠 Home / ▶ Forward — ہر صفحے پر (Home کے علاوہ)، نیچے وسط میں کمپیکٹ بار ---------- -->
+  <div class="navArrowBar" id="navArrowBar">
+    <button id="navBackBtn" onclick="goBack()" title="Back">◀</button>
+    <button id="navHomeBtn" onclick="goTo('home')" title="Go to Home">🏠</button>
+    <button id="navForwardBtn" onclick="goForward()" title="Forward">▶</button>
+  </div>
 
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
@@ -3723,7 +3745,12 @@ window.resetMainAreaScroll = function(){
   window.scrollTo(0, 0);
 };
 
-function goTo(screenName){
+// ---------- Back/Forward نیویگیشن کے لیے اسکرین ہسٹری — goTo() ہر حقیقی نیویگیشن پر خودکار ریکارڈ کرتا ہے ----------
+let currentScreenName = 'home';
+let navBackStack = [];
+let navForwardStack = [];
+
+function goTo(screenName, _isHistoryNav){
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
 
@@ -3733,6 +3760,15 @@ function goTo(screenName){
     alert('Access to this section is admin-only.');
     return;
   }
+
+  // ---------- ہسٹری صرف اُس وقت اپڈیٹ کریں جب یہ ایک عام (نئی) نیویگیشن ہو، Back/Forward بٹن سے نہ ہو،
+  // اور نئی اسکرین پچھلی سے مختلف ہو (بار بار ایک ہی جگہ نہ گھسے) ----------
+  if(!_isHistoryNav && screenName !== currentScreenName){
+    navBackStack.push(currentScreenName);
+    navForwardStack = []; // نئی نیویگیشن پر آگے کا راستہ صاف — بالکل براؤزر کی طرح
+  }
+  currentScreenName = screenName;
+  updateNavArrowsState();
 
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.navItem').forEach(n => n.classList.remove('active'));
@@ -3771,8 +3807,28 @@ function goTo(screenName){
   closeNewActionFab();
   requestAnimationFrame(resetScrollNow); // ---------- مواد اور drawer بند ہونے کے بعد آخری بار یقینی بنائیں ----------
   document.body.classList.toggle('billing-active', screenName === 'billing');
-  document.getElementById('floatingHomeBtn').style.display = (screenName === 'home') ? 'none' : 'flex';
+  document.getElementById('navArrowBar').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
+}
+
+// ---------- Back/Forward بٹن — بالکل براؤزر کی طرح، ایک وقت میں ایک قدم ----------
+function goBack(){
+  if(navBackStack.length === 0) return;
+  const prev = navBackStack.pop();
+  navForwardStack.push(currentScreenName);
+  goTo(prev, true);
+}
+function goForward(){
+  if(navForwardStack.length === 0) return;
+  const next = navForwardStack.pop();
+  navBackStack.push(currentScreenName);
+  goTo(next, true);
+}
+function updateNavArrowsState(){
+  const backBtn = document.getElementById('navBackBtn');
+  const fwdBtn = document.getElementById('navForwardBtn');
+  if(backBtn) backBtn.disabled = navBackStack.length === 0;
+  if(fwdBtn) fwdBtn.disabled = navForwardStack.length === 0;
 }
 
 // ---------- سیلزمین کو ان کے مسترد شدہ بلز کی وجہ دکھائیں (جب تک وہ خود بند نہ کریں) ----------
@@ -7435,6 +7491,7 @@ function openCustomerProfile(customerId){
     <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
+    <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
   `;
 
@@ -7743,6 +7800,7 @@ function openSupplierProfile(supplierId){
   document.getElementById('profileQuickActions').innerHTML = `
     <button style="background:linear-gradient(155deg,#3b82f6,#1e3a8a);" onclick="closeProfileModal(); openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">New PO</span></button>
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">Pay Supplier</span></button>
+    <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
   `;
 
@@ -11515,6 +11573,140 @@ async function confirmImageShare(){
     closeImageSharePreview();
   }, 'image/png');
 }
+
+// ---------- کسٹمر/سپلائر کی رنگین، شیئر ایبل "پروفائل پوسٹر" — تصویر، نام، موبائل نمبر (سپلائر کے لیے بینک اکاؤنٹ کی تفصیل بھی) ----------
+async function renderPartyProfilePosterToCanvas(party, kind){
+  const canvas = document.createElement('canvas');
+  const isSupplier = kind === 'suppliers';
+  const hasBank = isSupplier && (party.bankAccountNumber || party.bankAccountTitle);
+  const W = 640, H = hasBank ? 1000 : 800;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const cx = W / 2;
+
+  // ---------- تھیم: کسٹمر = سبز، سپلائر = نیلا (پروفائل پیج جیسا ہی) ----------
+  const bg1 = isSupplier ? '#1d4ed8' : '#0f766e';
+  const bg2 = isSupplier ? '#1e3a8a' : '#065f52';
+  const accent = isSupplier ? '#93c5fd' : '#6ee7b7';
+
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, bg1);
+  grad.addColorStop(1, bg2);
+  ctx.fillStyle = grad;
+  roundRectPath(ctx, 0, 0, W, H, 26);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 3;
+  roundRectPath(ctx, 10, 10, W-20, H-20, 20);
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+
+  // ---------- اوپر بڑی گول تصویر — نہ ہو تو مونوگرام ----------
+  if(party.photo){
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cx, 220, 140, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+        ctx.drawImage(img, cx-140, 80, 280, 280);
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(cx, 220, 140, 0, Math.PI*2); ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.stroke();
+        resolve();
+      };
+      img.onerror = resolve;
+      img.src = party.photo;
+    });
+  } else {
+    const initials = (party.name || '?').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+    ctx.beginPath(); ctx.arc(cx, 220, 140, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,.15)'; ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = `800 84px Poppins, sans-serif`;
+    ctx.fillText(initials, cx, 248);
+  }
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 38px Poppins, sans-serif`;
+  ctx.fillText(party.name || (isSupplier ? 'Supplier' : 'Customer'), cx, 410);
+
+  if(AppState.settings.businessName){
+    ctx.font = `600 18px Poppins, sans-serif`;
+    ctx.globalAlpha = 0.85;
+    ctx.fillText(AppState.settings.businessName, cx, 440);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx-90, 470); ctx.lineTo(cx+90, 470); ctx.stroke();
+
+  // ---------- موبائل نمبر ----------
+  ctx.fillStyle = accent;
+  ctx.font = `700 18px Poppins, sans-serif`;
+  ctx.fillText('📱 MOBILE NUMBER', cx, 515);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 34px 'Courier New', monospace`;
+  ctx.fillText(party.phone || '—', cx, 555);
+
+  let y = 620;
+  if(hasBank){
+    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    roundRectPath(ctx, 50, y, W-100, isSupplier ? 340 : 0, 16);
+    ctx.fill();
+    y += 40;
+    ctx.fillStyle = accent;
+    ctx.font = `700 18px Poppins, sans-serif`;
+    ctx.fillText('🏦 BANK / WALLET ACCOUNT', cx, y);
+    y += 44;
+    if(party.bankAccountType){
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 26px Poppins, sans-serif`;
+      ctx.fillText(party.bankAccountType, cx, y);
+      y += 40;
+    }
+    if(party.bankAccountTitle){
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.font = `600 18px Poppins, sans-serif`;
+      ctx.fillText(party.bankAccountTitle, cx, y);
+      y += 34;
+    }
+    if(party.bankAccountNumber){
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 30px 'Courier New', monospace`;
+      ctx.fillText(party.bankAccountNumber, cx, y);
+      y += 40;
+    }
+    if(party.bankAccountUan){
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.font = `600 16px Poppins, sans-serif`;
+      ctx.fillText(`UAN: ${party.bankAccountUan}`, cx, y);
+      y += 30;
+    }
+  }
+
+  ctx.fillStyle = 'rgba(0,0,0,.22)';
+  roundRectPath(ctx, 50, H - 90, W - 100, 60, 14);
+  ctx.fill();
+  ctx.fillStyle = accent;
+  ctx.font = `700 17px Poppins, sans-serif`;
+  wrapCenteredText(ctx, isSupplier ? '📸 Please confirm before sending any payment' : '📇 Contact card', cx, H - 55, W - 130, 24);
+
+  return canvas;
+}
+
+async function shareCustomerProfile(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  const canvas = await renderPartyProfilePosterToCanvas(c, 'customers');
+  showImageSharePreview(canvas, `${(c.name||'customer').replace(/\s+/g,'_')}_profile.png`, c.name, `${c.name} — Contact Card`);
+}
+async function shareSupplierProfile(supplierId){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  if(!s) return;
+  const canvas = await renderPartyProfilePosterToCanvas(s, 'suppliers');
+  showImageSharePreview(canvas, `${(s.name||'supplier').replace(/\s+/g,'_')}_profile.png`, s.name, `${s.name} — Supplier Profile`);
+}
+
 
 async function shareAccountPoster(idx){
   const acc = AppState.settings.paymentAccounts[idx];
