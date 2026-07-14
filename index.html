@@ -2664,8 +2664,8 @@
       <div style="width:54px; height:54px; flex:0 0 auto; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px;
         background:linear-gradient(155deg, var(--primary), var(--primary-dark)); box-shadow:0 5px 12px -3px rgba(15,118,110,.5);">🧾</div>
       <div>
-        <h3 style="margin-bottom:2px;">Products Stock &amp; Price Report</h3>
-        <div class="settingsHint" style="margin:0;">Every product, grouped by category — quantity, price &amp; stock value. Pick one category, several, or the whole stock. Print or Save as PDF to share.</div>
+        <h3 style="margin-bottom:2px;">Products Price List</h3>
+        <div class="settingsHint" style="margin:0;">Every product, grouped by category, with its price — ready to send to customers. Pick one category, several, or all of them. Print or Save as PDF to share.</div>
       </div>
     </div>
   </div>
@@ -2674,7 +2674,7 @@
 <!-- 🧾 Products Detail Report Modal -->
 <div class="modalOverlay" id="productsReportModal" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:560px;">
-    <h3>🧾 Products Stock &amp; Price Report</h3>
+    <h3>🧾 Products Price List</h3>
     <div class="settingsHint" style="margin-top:0;">Select categories to include, then print — or choose "Save as PDF" in the print dialog to share it.</div>
 
     <div style="display:flex; align-items:center; gap:8px; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eef2f7;">
@@ -10264,6 +10264,7 @@ function toggleAllReportCategories(checked){
 }
 
 // ---------- منتخب کیٹگریز کے حساب سے خوبصورت باکس والا HTML بنائیں — یہی preview اور پرنٹ دونوں میں استعمال ہوگا ----------
+// ---------- سادہ رکھا گیا: صرف کیٹگری کے اندر آئٹمز اور ان کی قیمت — کوئی Stock/Value/Total نہیں (کسٹمر کو بھیجنے کے لیے) ----------
 function buildProductsReportHTML(selectedCats){
   const flat = getFlatVariants();
   const grouped = {};
@@ -10279,63 +10280,33 @@ function buildProductsReportHTML(selectedCats){
   const businessName = AppState.settings.businessName || 'AIO POS';
   const businessAddr = AppState.settings.businessAddress || '';
   const businessPhone = AppState.settings.businessPhone || '';
-  const now = new Date();
-  const dateStr = now.toLocaleDateString();
-  const timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-  let grandQty = 0, grandValue = 0, grandItems = 0;
+  const dateStr = new Date().toLocaleDateString();
 
   let html = `<div style="font-family:Arial, sans-serif; color:#1e293b;">
     <div style="text-align:center; margin-bottom:6px; padding-bottom:12px; border-bottom:2.5px solid #0f766e;">
       <div style="font-size:19px; font-weight:800; color:#0b4a45;">${businessName}</div>
       ${businessAddr ? `<div style="font-size:11.5px; color:#666; margin-top:2px;">${businessAddr}</div>` : ''}
       ${businessPhone ? `<div style="font-size:11.5px; color:#666;">📞 ${businessPhone}</div>` : ''}
-      <div style="font-size:13.5px; font-weight:700; color:#0f766e; margin-top:8px;">🧾 Products Stock &amp; Price Report</div>
-      <div style="font-size:11px; color:#888;">${dateStr} — ${timeStr}</div>
+      <div style="font-size:13.5px; font-weight:700; color:#0f766e; margin-top:8px;">🧾 Products Price List</div>
+      <div style="font-size:11px; color:#888;">${dateStr}</div>
     </div>`;
 
   catNames.forEach(cat => {
-    let catQty = 0, catValue = 0;
     html += `<div style="border:1.5px solid #cbd5e1; border-radius:10px; margin-bottom:12px; overflow:hidden; page-break-inside:avoid;">
       <div style="background:linear-gradient(135deg,#0f766e,#0b4a45); color:#fff; font-weight:800; font-size:13.5px; padding:8px 12px; display:flex; justify-content:space-between;">
         <span>🏷️ ${cat}</span><span style="opacity:.85; font-weight:700; font-size:11.5px;">${grouped[cat].length} items</span>
       </div>
-      <div>
-      <div style="display:flex; gap:8px; padding:5px 12px; font-size:10.5px; font-weight:800; color:#64748b; background:#f8fafc; text-transform:uppercase;">
-        <span style="flex:1;">Item</span><span style="width:44px; text-align:center;">Qty</span><span style="width:70px; text-align:right;">Price</span><span style="width:78px; text-align:right;">Value</span>
-      </div>`;
+      <div>`;
     grouped[cat].forEach((v, idx) => {
-      const qty = Number(v.stock || 0);
       const price = Number(v.retail || 0);
-      const value = qty * price;
-      catQty += qty; catValue += value;
-      const lowStock = qty <= (v.lowStockThreshold || 5);
-      html += `<div style="display:flex; gap:8px; align-items:center; padding:7px 12px; font-size:12px; ${idx % 2 === 1 ? 'background:#f1f5f9;' : ''}">
-        <span style="flex:1;">${v.name}</span>
-        <span style="width:44px; text-align:center; font-weight:700; ${lowStock ? 'color:#b91c1c;' : ''}">${qty}</span>
-        <span style="width:70px; text-align:right; color:#555;">Rs.${price.toLocaleString()}</span>
-        <span style="width:78px; text-align:right; font-weight:800;">Rs.${value.toLocaleString()}</span>
+      html += `<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 12px; font-size:13px; ${idx % 2 === 1 ? 'background:#f1f5f9;' : ''}">
+        <span>${v.name}</span>
+        <span style="font-weight:800; white-space:nowrap; background:#e7f4f2; color:#0b4a45; padding:3px 10px; border-radius:8px;">Rs. ${price.toLocaleString()}</span>
       </div>`;
     });
-    html += `<div style="display:flex; gap:8px; padding:7px 12px; font-size:12px; font-weight:800; background:#e7f4f2; border-top:1.5px solid #cbd5e1;">
-        <span style="flex:1;">Subtotal — ${cat}</span>
-        <span style="width:44px; text-align:center;">${catQty}</span>
-        <span style="width:70px;"></span>
-        <span style="width:78px; text-align:right; color:#0b4a45;">Rs.${catValue.toLocaleString()}</span>
-      </div>`;
     html += `</div></div>`;
-    grandQty += catQty; grandValue += catValue; grandItems += grouped[cat].length;
   });
 
-  html += `<div style="margin-top:6px; border-radius:12px; overflow:hidden; box-shadow:0 3px 10px rgba(15,118,110,.18);">
-    <div style="background:linear-gradient(135deg,#c2790f,#8a560a); color:#fff; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
-      <div>
-        <div style="font-size:11.5px; opacity:.9; font-weight:700; text-transform:uppercase;">Grand Total</div>
-        <div style="font-size:11px; opacity:.85;">${grandItems} items · ${grandQty} units in stock</div>
-      </div>
-      <div style="font-size:20px; font-weight:800;">Rs. ${grandValue.toLocaleString()}</div>
-    </div>
-  </div>`;
   html += `</div>`;
   return html;
 }
