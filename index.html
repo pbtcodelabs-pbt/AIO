@@ -993,6 +993,10 @@
   .profileHead .pInfo .pMeta a{color:#fff; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4);}
   .profileHead .closeBtn{cursor:pointer; font-size:18px; opacity:.85; margin-top:2px;}
 
+  /* --- نک نیم — نام کے نیچے ایک چھوٹا سا ٹیگ، دبانے پر تبدیل کیا جا سکے؛ عام سرچ بار میں یہی نک نیم مل جاتا ہے --- */
+  .pNicknameTag{display:inline-flex; align-items:center; gap:3px; font-size:10.5px; font-weight:700; color:#fff; opacity:.9;
+    background:rgba(255,255,255,.16); padding:2px 8px; border-radius:8px; margin-top:4px; cursor:pointer; width:fit-content;}
+
   /* --- فوری رابطہ آئیکن — اب نام کے بالکل نیچے، چھوٹے گول بٹن (قمیض کے بٹنوں کی طرح)، پوری پٹی کی جگہ نہیں گھیرتے --- */
   .profileHeadContacts{display:flex; gap:7px; margin-top:8px;}
   .profileHeadContacts a, .profileHeadContacts span{
@@ -1985,6 +1989,7 @@
           <div class="pInfo">
             <div class="pName" id="profileName">—</div>
             <div class="pMeta" id="profileMeta">—</div>
+            <div class="pNicknameTag" id="profileNicknameTag" onclick="editProfileNickname()"></div>
             <div class="profileHeadContacts" id="profileHeadContacts"></div>
           </div>
           <span class="closeBtn" onclick="openEditPartyModal()" title="Edit" style="margin-inline-end:6px;">✏️</span>
@@ -1994,7 +1999,6 @@
           <div class="profileSidebar" id="profileQuickActions"></div>
           <div class="profileMain">
             <div id="profileEmailRow" style="display:none; align-items:center; gap:6px; margin-bottom:10px;"></div>
-            <div id="profileKeywordRow" style="display:flex; align-items:center; gap:6px; margin-bottom:10px;"></div>
             <div class="profileFigures" id="profileFigures"></div>
             <div id="profileSections"></div>
           </div>
@@ -3710,6 +3714,15 @@ function logout(){
 }
 
 // ---------- NAVIGATION LOGIC ----------
+// ---------- مین اسکرولنگ ایریا کو ہمیشہ اوپر پر لے آئیں — کئی جگہ سے استعمال ہوتا ہے (goTo, dock بند ہونے پر وغیرہ) ----------
+window.resetMainAreaScroll = function(){
+  const mainAreaEl = document.getElementById('mainArea');
+  if(mainAreaEl) mainAreaEl.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  window.scrollTo(0, 0);
+};
+
 function goTo(screenName){
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
@@ -3728,10 +3741,12 @@ function goTo(screenName){
   document.querySelector(`.navItem[data-screen="${screenName}"]`)?.classList.add('active');
 
   // ---------- ہر نئی اسکرین ہمیشہ اوپر سے شروع ہو — پچھلی اسکرین کا سکرول پوزیشن نئی (چھوٹی) اسکرین پر منتقل نہ ہو
-  // (یہی وجہ تھی کہ مثلاً Reports جیسی چھوٹی اسکرین کھلتے ہی نیچے سے/خالی جگہ کے ساتھ نظر آتی تھی) ----------
-  const mainAreaEl = document.getElementById('mainArea');
-  if(mainAreaEl) mainAreaEl.scrollTop = 0;
-  window.scrollTo(0, 0);
+  // (یہی وجہ تھی کہ مثلاً Reports جیسی چھوٹی اسکرین کھلتے ہی نیچے سے/خالی جگہ کے ساتھ نظر آتی تھی)
+  // نوٹ: کچھ موبائل براؤزرز میں مواد render ہونے کے بعد بھی پرانی scroll پوزیشن واپس آ جاتی ہے (scroll anchoring) —
+  // اسی لیے فوری طور پر بھی صاف کریں اور اگلے frame پر (مواد بننے کے بعد) دوبارہ بھی صاف کریں ----------
+  const resetScrollNow = window.resetMainAreaScroll;
+  resetScrollNow();
+  requestAnimationFrame(resetScrollNow);
 
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); }
@@ -3754,6 +3769,7 @@ function goTo(screenName){
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
   closeSidebar();
   closeNewActionFab();
+  requestAnimationFrame(resetScrollNow); // ---------- مواد اور drawer بند ہونے کے بعد آخری بار یقینی بنائیں ----------
   document.body.classList.toggle('billing-active', screenName === 'billing');
   document.getElementById('floatingHomeBtn').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
@@ -3946,6 +3962,7 @@ function renderQuickDock(){
 function goToFromDock(screenName){
   goTo(screenName);
   toggleQuickDock(); // نیویگیٹ ہونے کے بعد dock خودکار بند ہو جائے
+  requestAnimationFrame(window.resetMainAreaScroll);
 }
 
 function toggleQuickDockEdit(){
@@ -7400,12 +7417,7 @@ function openCustomerProfile(customerId){
     ? `<a href="tel:+${c.phone.replace(/[^0-9]/g,'')}">📱 ${c.phone}</a>` : 'No phone number saved';
   document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(c.phone);
   document.getElementById('profileEmailRow').style.display = 'none'; // یہ خانہ فی الحال صرف سپلائر پروفائل کے لیے ہے
-  document.getElementById('profileKeywordRow').innerHTML = `
-    <span style="font-size:12px; color:var(--muted);">🔑</span>
-    <input type="text" placeholder="Nickname / Keyword for search (e.g. Jago, Peshawar)" value="${c.keywords || ''}"
-           onchange="updateCustomerKeywords(${c.customer_id}, this.value)"
-           style="flex:1; padding:7px 10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;">
-  `;
+  renderProfileNicknameTag(c.keywords);
 
   // --- مالی خلاصہ: والٹ + واجب الوصول ایک نظر میں (کمپیکٹ — پرانی رابطہ پٹی کی جگہ یہیں آ گئی) ---
   const figuresEl = document.getElementById('profileFigures');
@@ -7488,7 +7500,7 @@ function renderCustomerBillsSection(customerId){
           const itemsDesc = p.items.slice(0,2).map(i => i.name).join(', ') + (p.items.length > 2 ? ` +${p.items.length-2} more` : '');
           const tag = p.status === 'pending' ? 'Awaiting approval' : 'Rejected';
           return `
-            <div class="billRow pending" style="cursor:default;">
+            <div class="billRow pending" onclick="closeProfileModal(); openPendingReview(${p.pending_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(p.submitted_at).toLocaleDateString('en-GB')} · ${tag} · via ${p.salesman_name}</div>
                 <div class="brDesc">${itemsDesc}</div>
@@ -7710,12 +7722,7 @@ function openSupplierProfile(supplierId){
   document.getElementById('profileMeta').innerHTML = s.phone
     ? `<a href="tel:+${s.phone.replace(/[^0-9]/g,'')}">📱 ${s.phone}</a>` : 'No phone number saved';
   document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(s.phone, s.email);
-  document.getElementById('profileKeywordRow').innerHTML = `
-    <span style="font-size:12px; color:var(--muted);">🔑</span>
-    <input type="text" placeholder="Nickname / Keyword for search (e.g. Peshawar wala)" value="${s.keywords || ''}"
-           onchange="updateSupplierKeywords(${s.supplier_id}, this.value)"
-           style="flex:1; padding:7px 10px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;">
-  `;
+  renderProfileNicknameTag(s.keywords);
 
   const emailRow = document.getElementById('profileEmailRow');
   emailRow.style.display = 'flex';
@@ -7890,6 +7897,7 @@ function updateCustomerKeywords(customerId, keywords){
   if(c){
     c.keywords = keywords.trim(); // TODO: DB میں customers.keywords UPDATE
     renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
+    renderProfileNicknameTag(c.keywords);
   }
 }
 function updateSupplierKeywords(supplierId, keywords){
@@ -7897,7 +7905,26 @@ function updateSupplierKeywords(supplierId, keywords){
   if(s){
     s.keywords = keywords.trim(); // TODO: DB میں suppliers.keywords UPDATE
     renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
+    renderProfileNicknameTag(s.keywords);
   }
+}
+
+// ---------- نام کے نیچے چھوٹا سا نک نیم ٹیگ دکھائیں — دبانے پر تبدیل کیا جا سکے ----------
+function renderProfileNicknameTag(keywords){
+  const el = document.getElementById('profileNicknameTag');
+  if(!el) return;
+  el.innerHTML = keywords ? `🔑 ${keywords}` : `🔑 Add nickname`;
+}
+function editProfileNickname(){
+  const isCustomer = currentProfileType === 'customers';
+  const rec = isCustomer
+    ? customersData.find(x => x.customer_id === currentProfileId)
+    : suppliersData.find(x => x.supplier_id === currentProfileId);
+  if(!rec) return;
+  const val = prompt('Nickname / Keyword for search (e.g. Jago, Peshawar wala):', rec.keywords || '');
+  if(val === null) return; // کینسل
+  if(isCustomer) updateCustomerKeywords(rec.customer_id, val);
+  else updateSupplierKeywords(rec.supplier_id, val);
 }
 
 // ---------- بینک اکاؤنٹ کی تفصیل محفوظ کریں (Type/Number/Notes) ----------
