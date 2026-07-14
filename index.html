@@ -493,6 +493,16 @@
     display:flex; align-items:center; justify-content:center; transition:transform .2s ease, background .2s ease; flex:0 0 auto;
   }
   .newActionFab.open .newActionFabMain{ transform:rotate(45deg); background:var(--primary-dark); }
+
+  /* ---------- 🏠 فلوٹنگ Home بٹن — نیچے دائیں کونے میں (+ کے بالکل مخالف)، انگوٹھے کی پہنچ میں،
+       Home اسکرین پر خود بخود چھپ جاتا ہے (وہاں ضرورت نہیں) ---------- */
+  .floatingHomeBtn{
+    position:fixed; right:16px; bottom:16px; z-index:260; display:none;
+    width:44px; height:44px; border-radius:50%; background:var(--primary); color:#fff; border:none;
+    font-size:20px; box-shadow:0 6px 16px rgba(15,118,110,.4); cursor:pointer;
+    align-items:center; justify-content:center;
+  }
+  body.billing-active .floatingHomeBtn{ bottom:90px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
   .newActionFabItems{
     display:flex; flex-direction:column-reverse; align-items:flex-start; gap:14px; margin-bottom:4px;
     max-height:0; overflow:hidden; opacity:0; pointer-events:none; transition:max-height .25s ease, opacity .2s ease;
@@ -1041,10 +1051,6 @@
       background:rgba(255,255,255,.15); border:none; color:#fff; font-size:20px;
       width:36px; height:36px; border-radius:8px; cursor:pointer;
     }
-    #homeBtn{
-      background:rgba(255,255,255,.15); border:none; color:#fff; font-size:19px;
-      width:36px; height:36px; border-radius:8px; cursor:pointer; flex:0 0 auto;
-    }
 
     #sidebar{
       position:fixed; top:0; right:-260px; bottom:0; width:240px; z-index:800;
@@ -1231,11 +1237,13 @@
     <button class="newActionFabMain" id="newActionFabMain" onclick="toggleNewActionFab()">+</button>
   </div>
 
+  <!-- ---------- 🏠 فلوٹنگ Home بٹن — ہر صفحے پر (Home کے علاوہ)، نیچے دائیں کونے میں ---------- -->
+  <button class="floatingHomeBtn" id="floatingHomeBtn" onclick="goTo('home')" title="Go to Home">🏠</button>
+
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
-    <button id="homeBtn" onclick="goTo('home')" title="Go to Home">🏠</button>
   </div>
 
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
@@ -2463,13 +2471,15 @@
             <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Developer Gmail</div>
             <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsSubLabel">Account to Send Your Payments</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This shows up right where the customer sees their calculated price in Package Plans — so they know exactly where to send payment without asking.</div>
-            <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Add as many as you like (EasyPaisa, JazzCash, Bank, etc). Customers will see these in Package Plans and can switch between them — useful if they don't have your default wallet.</div>
+            <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
+            <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
               <option value="">— Select Bank/Wallet —</option>
             </select>
-            <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
+            <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+            <button class="testPrintBtn" style="margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addDevPaymentAccount()">➕ Add This Account</button>
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Rate Per Day (Rs.)</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this once — every customer's calculated price updates automatically. Change it anytime and everything recalculates immediately.</div>
@@ -2591,8 +2601,9 @@
     </div>
 
     <div id="devPaymentAccountWrap" style="display:none; background:#fff7ed; border-radius:10px; padding:11px 14px; margin-top:10px; font-size:12.5px;">
-      <div style="font-weight:700; color:#9a3412; margin-bottom:2px;">💳 Send Payment To</div>
-      <div id="devPaymentAccountText" style="color:#7c2d12; font-weight:600;"></div>
+      <div style="font-weight:700; color:#9a3412; margin-bottom:2px;">💳 Send Payment To <span style="font-weight:400; font-size:11px;">(tap number to copy)</span></div>
+      <div id="devPaymentAccountText" onclick="copyDevPaymentNumber()" style="color:#7c2d12; font-weight:600; cursor:pointer; text-decoration:underline dotted;"></div>
+      <button id="devPaymentSwitchBtn" onclick="switchDevPaymentAccount()" style="display:none; margin-top:8px; border:1px solid #fdba74; background:#fff; color:#9a3412; border-radius:8px; padding:6px 10px; font-size:11.5px; font-weight:700;">🔄 Try a Different Wallet/Bank</button>
     </div>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
@@ -2882,10 +2893,11 @@ const DEFAULT_SETTINGS = {
   devWhatsapp: '923206793793',
   devSms: '03206793793',
   devEmail: 'pbtcodelabs@gmail.com',
-  // ---------- 🏦 آپ کا اکاؤنٹ — سبسکرپشن کی رقم وصول کرنے کے لیے، کسٹمر کو Package Plans کے اندر ہی نظر آئے گا ----------
+  // ---------- 🏦 آپ کے اکاؤنٹس — سبسکرپشن کی رقم وصول کرنے کے لیے، کسٹمر Package Plans میں اپنی مرضی کا بینک/والیٹ چن سکے ----------
   devPaymentType: '',
   devPaymentNumber: '',
   devPaymentName: '',
+  devPaymentAccounts: [], // {type, number, name} — اگر خالی ہو تو اوپر والے پرانے تین فیلڈز سے خودکار مائیگریٹ ہو جاتے ہیں
   // ---------- 🆘 PIN Recovery — اگر Admin PIN بالکل بھول جائیں تو یہ دونوں چیزیں درست بتانے پر نیا PIN خود بنا سکیں گے ----------
   securityCnicHash: '',
   securityDobHash: '',
@@ -3356,6 +3368,7 @@ function goTo(screenName){
   closeSidebar();
   closeNewActionFab();
   document.body.classList.toggle('billing-active', screenName === 'billing');
+  document.getElementById('floatingHomeBtn').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
 }
 
@@ -9603,20 +9616,64 @@ async function unlockAdminControl(){
       payTypeSel.appendChild(opt);
     });
   }
-  payTypeSel.value = AppState.settings.devPaymentType || '';
-  document.getElementById('devPaymentNumberInput').value = AppState.settings.devPaymentNumber || '';
-  document.getElementById('devPaymentNameInput').value = AppState.settings.devPaymentName || '';
+  // ---------- پرانا واحد اکاؤنٹ ہو اور نئی فہرست ابھی خالی ہو تو خودکار فہرست میں منتقل کر دیں (ایک بار) ----------
+  AppState.settings.devPaymentAccounts = AppState.settings.devPaymentAccounts || [];
+  if(AppState.settings.devPaymentAccounts.length === 0 && AppState.settings.devPaymentType && AppState.settings.devPaymentNumber){
+    AppState.settings.devPaymentAccounts.push({
+      type: AppState.settings.devPaymentType,
+      number: AppState.settings.devPaymentNumber,
+      name: AppState.settings.devPaymentName || ''
+    });
+    persistAllData();
+  }
+  payTypeSel.value = '';
+  document.getElementById('devPaymentNumberInput').value = '';
+  document.getElementById('devPaymentNameInput').value = '';
+  renderDevPaymentAccountsList();
   document.getElementById('perDayRateInput').value = AppState.settings.perDayRate || '';
   renderDayPresetsInAdmin();
+}
+
+// ---------- Admin Control میں موجودہ Payment Accounts کی فہرست دکھائیں (ہر ایک کے ساتھ حذف کا بٹن) ----------
+function renderDevPaymentAccountsList(){
+  const wrap = document.getElementById('devPaymentAccountsListWrap');
+  if(!wrap) return;
+  const accounts = AppState.settings.devPaymentAccounts || [];
+  if(accounts.length === 0){
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:4px 2px;">No accounts added yet.</div>`;
+    return;
+  }
+  wrap.innerHTML = accounts.map((acc, idx) => `
+    <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border:1px solid #eef2f7; border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12.5px;">
+      <div><b>${acc.type}</b>: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}</div>
+      <button onclick="deleteDevPaymentAccount(${idx})" style="border:none; background:none; font-size:16px; padding:2px 6px;">🗑️</button>
+    </div>
+  `).join('');
+}
+function addDevPaymentAccount(){
+  const type = document.getElementById('devPaymentTypeInput').value;
+  const number = document.getElementById('devPaymentNumberInput').value.trim();
+  const name = document.getElementById('devPaymentNameInput').value.trim();
+  if(!type || !number){ alert('Please select a bank/wallet and enter the account number.'); return; }
+  AppState.settings.devPaymentAccounts = AppState.settings.devPaymentAccounts || [];
+  AppState.settings.devPaymentAccounts.push({type, number, name});
+  document.getElementById('devPaymentTypeInput').value = '';
+  document.getElementById('devPaymentNumberInput').value = '';
+  document.getElementById('devPaymentNameInput').value = '';
+  persistAllData();
+  renderDevPaymentAccountsList();
+}
+function deleteDevPaymentAccount(idx){
+  if(!confirm('Delete this account?')) return;
+  AppState.settings.devPaymentAccounts.splice(idx, 1);
+  persistAllData();
+  renderDevPaymentAccountsList();
 }
 
 async function saveAdminControl(){
   AppState.settings.devWhatsapp = document.getElementById('devWhatsappInput').value.trim();
   AppState.settings.devSms = document.getElementById('devSmsInput').value.trim();
   AppState.settings.devEmail = document.getElementById('devEmailInput').value.trim();
-  AppState.settings.devPaymentType = document.getElementById('devPaymentTypeInput').value;
-  AppState.settings.devPaymentNumber = document.getElementById('devPaymentNumberInput').value.trim();
-  AppState.settings.devPaymentName = document.getElementById('devPaymentNameInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
   persistAllData();
@@ -9705,11 +9762,42 @@ function openPackagePlansModal(){
   document.getElementById('planCalcPriceOutput').textContent = '—';
   selectedPlanDays = null;
   selectedPlanPrice = null;
+  devPaymentSelectedIdx = 0;
   renderPackagePlansView();
   document.getElementById('packagePlansModal').classList.add('show');
 }
 
 // ---------- کوئی بھی دن لکھیں — قیمت خودکار بنے (دن × روزانہ کی شرح)، Chat پیغام کے لیے بھی محفوظ ہو جائے ----------
+let devPaymentSelectedIdx = 0; // ---------- Package Plans میں فی الحال کون سا Dev Payment Account دکھایا جا رہا ہے ----------
+// ---------- کسٹمر "🔄 Try a Different Wallet/Bank" دبائے تو اگلے محفوظ شدہ اکاؤنٹ پر منتقل ہو جائیں (آخری کے بعد پہلے پر واپس) ----------
+function switchDevPaymentAccount(){
+  const accounts = AppState.settings.devPaymentAccounts || [];
+  if(accounts.length <= 1) return;
+  devPaymentSelectedIdx = (devPaymentSelectedIdx + 1) % accounts.length;
+  renderPackagePlansView();
+}
+// ---------- اکاؤنٹ نمبر پر ٹیپ کرتے ہی کلپ بورڈ میں کاپی ہو جائے — تاکہ کسٹمر کو ٹائپ نہ کرنا پڑے ----------
+function copyDevPaymentNumber(){
+  const accounts = AppState.settings.devPaymentAccounts || [];
+  const acc = accounts[devPaymentSelectedIdx];
+  if(!acc) return;
+  const el = document.getElementById('devPaymentAccountText');
+  const originalText = el.textContent;
+  const showCopied = () => { el.textContent = '✅ Copied: ' + acc.number; setTimeout(() => { el.textContent = originalText; }, 1800); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(acc.number).then(showCopied).catch(() => {});
+  } else {
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = acc.number; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopied();
+    }catch(e){ /* کاپی ناکام — خاموشی سے نظرانداز */ }
+  }
+}
+
 function updatePlanCalculator(){
   const days = parseInt(document.getElementById('planCalcDaysInput').value) || 0;
   const rate = AppState.settings.perDayRate || 0;
@@ -9743,11 +9831,16 @@ function renderPackagePlansView(){
     document.getElementById('planCalcWrap').style.display = 'none';
   }
 
-  // ---------- ڈویلپر کا پیمنٹ اکاؤنٹ — قیمت کے فوراً نیچے، تاکہ کسٹمر کو الگ سے پوچھنا نہ پڑے ----------
+  // ---------- ڈویلپر کے پیمنٹ اکاؤنٹس — قیمت کے فوراً نیچے، تاکہ کسٹمر کو الگ سے پوچھنا نہ پڑے؛
+  // ایک سے زیادہ ہوں تو "🔄 Try a Different Wallet/Bank" سے دوسرے اکاؤنٹ پر منتقل ہو سکتے ہیں ----------
   const s = AppState.settings;
-  if(s.devPaymentType && s.devPaymentNumber){
-    document.getElementById('devPaymentAccountText').textContent = `${s.devPaymentType}: ${s.devPaymentNumber}${s.devPaymentName ? ' (' + s.devPaymentName + ')' : ''}`;
+  const devAccounts = s.devPaymentAccounts || [];
+  if(devAccounts.length > 0){
+    if(devPaymentSelectedIdx >= devAccounts.length) devPaymentSelectedIdx = 0;
+    const acc = devAccounts[devPaymentSelectedIdx];
+    document.getElementById('devPaymentAccountText').textContent = `${acc.type}: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}`;
     document.getElementById('devPaymentAccountWrap').style.display = 'block';
+    document.getElementById('devPaymentSwitchBtn').style.display = devAccounts.length > 1 ? 'inline-block' : 'none';
   } else {
     document.getElementById('devPaymentAccountWrap').style.display = 'none';
   }
