@@ -3672,6 +3672,12 @@ function goTo(screenName){
   targetEl.classList.add('active');
   document.querySelector(`.navItem[data-screen="${screenName}"]`)?.classList.add('active');
 
+  // ---------- ہر نئی اسکرین ہمیشہ اوپر سے شروع ہو — پچھلی اسکرین کا سکرول پوزیشن نئی (چھوٹی) اسکرین پر منتقل نہ ہو
+  // (یہی وجہ تھی کہ مثلاً Reports جیسی چھوٹی اسکرین کھلتے ہی نیچے سے/خالی جگہ کے ساتھ نظر آتی تھی) ----------
+  const mainAreaEl = document.getElementById('mainArea');
+  if(mainAreaEl) mainAreaEl.scrollTop = 0;
+  window.scrollTo(0, 0);
+
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); }
   if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); }
