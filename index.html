@@ -2623,7 +2623,35 @@
   </div>
 </div>
 
-    <!-- SOFT RESET (Bills & Transactions) CONFIRMATION MODAL -->
+<!-- ===================== 📑 REPORTS — نیا سیکشن، مستقبل میں مزید رپورٹس یہاں شامل ہوں گی ===================== -->
+<div class="screen admin-only" id="screen-reports">
+  <div class="pageTitle">📑 Reports</div>
+  <div class="settingsCard" style="cursor:pointer;" onclick="openProductsReportModal()">
+    <h3>🧾 Products Detail Report</h3>
+    <div class="settingsHint">Every product, grouped by category, with its price — ready to print or save as PDF and send. Choose which categories to include.</div>
+  </div>
+</div>
+
+<!-- 🧾 Products Detail Report Modal -->
+<div class="modalOverlay" id="productsReportModal" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:520px;">
+    <h3>🧾 Products Detail Report</h3>
+    <div class="settingsHint" style="margin-top:0;">Select categories to include, then print — or choose "Save as PDF" in the print dialog to share it.</div>
+
+    <div style="display:flex; align-items:center; gap:8px; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eef2f7;">
+      <input type="checkbox" id="reportCatAllChk" style="width:18px; height:18px;" onchange="toggleAllReportCategories(this.checked)">
+      <label for="reportCatAllChk" style="font-weight:800; font-size:13.5px; cursor:pointer;">Select All Categories</label>
+    </div>
+    <div id="reportCategoryChecklist" style="display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; margin-bottom:10px;"></div>
+
+    <div id="reportPreviewWrap" style="max-height:340px; overflow-y:auto; border:1px solid #eef2f7; border-radius:10px; padding:8px; background:#f8fafc;"></div>
+
+    <div class="modalBtns" style="margin-top:14px;">
+      <button class="cancelBtn" onclick="document.getElementById('productsReportModal').classList.remove('show')">Close</button>
+      <button class="checkoutBtn" onclick="printProductsReport()">🖨️ Print / Save as PDF</button>
+    </div>
+  </div>
+</div>
     <div class="modalOverlay" id="softResetModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox" style="max-width:360px;">
         <h3 style="color:#c2410c;">🧾 Reset Bills &amp; Transactions</h3>
@@ -3219,6 +3247,9 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '📊 Insights', tiles: [
     {icon:'📊', label:'Dashboard', screen:'dashboard'},
   ]},
+  { section: '📑 Reports', tiles: [
+    {icon:'📑', label:'Reports', screen:'reports'},
+  ]},
   { section: '⚙️ Management', tiles: [
     {icon:'🔑', label:'Users', screen:'users'},
     {icon:'⚙️', label:'Settings', screen:'settings'},
@@ -3577,6 +3608,7 @@ function goTo(screenName){
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
+  if(screenName === 'reports') renderReportsScreen();
 
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
   closeSidebar();
@@ -10110,6 +10142,103 @@ function printBarcodeLabels(){
   area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   document.body.classList.add('printing-invoice');
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+}
+
+/* =====================================================================
+   📑 Reports — 🧾 Products Detail Report (پہلی رپورٹ)
+   ہر پراڈکٹ، کیٹگری کے حساب سے گروپ ہو کر، ساتھ قیمت — پرنٹ/PDF کے قابل۔
+   کیٹگری کا انتخاب (ایک، کئی، یا سب) پرنٹ سے پہلے preview میں فوری اثر دکھاتا ہے۔
+   ===================================================================== */
+function renderReportsScreen(){
+  // ---------- فی الحال کوئی متحرک ڈیٹا درکار نہیں — مستقبل میں مزید رپورٹس کے کارڈز یہیں شامل ہوں گے ----------
+}
+
+// ---------- صرف وہ کیٹگریز جن میں کم از کم ایک پراڈکٹ موجود ہو ----------
+function getAllUsedReportCategories(){
+  const set = new Set();
+  getFlatVariants().forEach(v => set.add(v.category || 'Uncategorized'));
+  return Array.from(set).sort((a,b) => a.localeCompare(b));
+}
+
+function openProductsReportModal(){
+  const cats = getAllUsedReportCategories();
+  const wrap = document.getElementById('reportCategoryChecklist');
+  if(cats.length === 0){
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:12.5px;">No products added yet.</div>`;
+  } else {
+    wrap.innerHTML = cats.map(c => `
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+        <input type="checkbox" class="reportCatChk" value="${c.replace(/"/g,'&quot;')}" checked onchange="updateProductsReportPreview()">
+        ${c}
+      </label>`).join('');
+  }
+  document.getElementById('reportCatAllChk').checked = true;
+  updateProductsReportPreview();
+  document.getElementById('productsReportModal').classList.add('show');
+}
+
+// ---------- "Select All" ٹِک/اَن ٹِک ہونے پر تمام کیٹگری چیک باکسز خودکار اسی حالت میں بدلیں ----------
+function toggleAllReportCategories(checked){
+  document.querySelectorAll('.reportCatChk').forEach(cb => cb.checked = checked);
+  updateProductsReportPreview();
+}
+
+// ---------- منتخب کیٹگریز کے حساب سے خوبصورت باکس والا HTML بنائیں — یہی preview اور پرنٹ دونوں میں استعمال ہوگا ----------
+function buildProductsReportHTML(selectedCats){
+  const flat = getFlatVariants();
+  const grouped = {};
+  flat.forEach(v => {
+    if(!selectedCats.includes(v.category)) return;
+    if(!grouped[v.category]) grouped[v.category] = [];
+    grouped[v.category].push(v);
+  });
+  const catNames = Object.keys(grouped).sort((a,b) => a.localeCompare(b));
+  if(catNames.length === 0){
+    return `<div style="text-align:center; color:#94a3b8; padding:24px 10px; font-size:13px;">No products found for the selected categories.</div>`;
+  }
+  const businessName = AppState.settings.businessName || 'AIO POS';
+  const dateStr = new Date().toLocaleDateString();
+  let html = `<div style="font-family:Arial, sans-serif;">
+    <div style="text-align:center; margin-bottom:14px;">
+      <div style="font-size:18px; font-weight:800;">${businessName}</div>
+      <div style="font-size:13px; color:#555;">🧾 Products Detail Report — ${dateStr}</div>
+    </div>`;
+  catNames.forEach(cat => {
+    html += `<div style="border:1.5px solid #cbd5e1; border-radius:10px; margin-bottom:12px; overflow:hidden; page-break-inside:avoid;">
+      <div style="background:#0f766e; color:#fff; font-weight:800; font-size:13.5px; padding:7px 12px;">${cat}</div>
+      <div>`;
+    grouped[cat].forEach((v, idx) => {
+      html += `<div style="display:flex; justify-content:space-between; gap:10px; padding:7px 12px; font-size:12.5px; ${idx % 2 === 1 ? 'background:#f1f5f9;' : ''}">
+        <span>${v.name}</span>
+        <span style="font-weight:700; white-space:nowrap;">Rs. ${Number(v.retail || 0).toLocaleString()}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+// ---------- checkboxes بدلتے ہی preview فوری اپڈیٹ، اور "Select All" کی حالت خودکار sync ----------
+function updateProductsReportPreview(){
+  const selected = Array.from(document.querySelectorAll('.reportCatChk:checked')).map(cb => cb.value);
+  document.getElementById('reportPreviewWrap').innerHTML = buildProductsReportHTML(selected);
+  const allBoxes = document.querySelectorAll('.reportCatChk');
+  document.getElementById('reportCatAllChk').checked = allBoxes.length > 0 && Array.from(allBoxes).every(cb => cb.checked);
+}
+
+// ---------- پرنٹ/PDF: منتخب کیٹگریز کی رپورٹ A4 سائز پیج پر بھیجیں — Print دباؤ میں سے "Save as PDF" چن کر شیئر بھی کیا جا سکتا ہے ----------
+function printProductsReport(){
+  const selected = Array.from(document.querySelectorAll('.reportCatChk:checked')).map(cb => cb.value);
+  if(selected.length === 0){ alert('Please select at least one category.'); return; }
+  const html = buildProductsReportHTML(selected);
+  const area = document.getElementById('printReceiptArea');
+  area.innerHTML = `<div style="width:190mm; padding:8mm; box-sizing:border-box;">${html}</div>`;
+  const tag = document.getElementById('dynamicPrintPageStyle');
+  if(tag) tag.textContent = `@page{ size: A4; margin: 10mm; }`;
+  document.body.classList.add('printing-invoice');
+  document.getElementById('productsReportModal').classList.remove('show');
+  setTimeout(() => window.print(), 80);
 }
 
 // ---------- 🧾 Bill & Print Settings کا اپنا الگ صفحہ — دکان کی معلومات، پرنٹر، رسید کا مواد، لکھائی کا سائز، بارکوڈ ----------
