@@ -1153,12 +1153,25 @@
 <div id="loginScreen">
   <div class="loginBox">
     <h2>🔐 Login</h2>
-    <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
-    <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
-      <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
-      🔒 Remember me on this device
-    </label>
-    <button onclick="login()">Enter</button>
+
+    <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
+    <div id="loginSubStatus" style="background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark);"></div>
+
+    <!-- ---------- ڈیفالٹ PIN (1234) پر موجود نئے/ٹرائل صارف کے لیے — کوئی PIN ٹائپ نہیں کرنی، سیدھا اندر ---------- -->
+    <div id="loginQuickEnterWrap" style="display:none;">
+      <button onclick="quickEnterApp()" style="background:var(--primary); font-size:16px; padding:14px;">🎁 Enter App — Free Trial</button>
+    </div>
+
+    <!-- ---------- عام PIN entry — صرف اسی وقت نظر آئے گی جب Admin نے اپنا PIN بدل لیا ہو (یعنی حقیقی/سنجیدہ استعمال شروع ہو چکا) ---------- -->
+    <div id="loginPinWrap" style="display:none;">
+      <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+      <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
+        <input type="checkbox" id="rememberPinChk" style="width:16px; height:16px; margin:0; cursor:pointer;">
+        🔒 Remember me on this device
+      </label>
+      <button onclick="login()">Enter</button>
+    </div>
+
     <button onclick="openPackagePlansModal()" style="background:#eef2ff; color:var(--primary-dark); margin-top:10px;">🗂️ View Package Plans</button>
     <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
   </div>
@@ -3222,6 +3235,37 @@ function sendDevChat(channel){
   document.getElementById('devChatPanel').classList.remove('show');
 }
 
+// ---------- Login اسکرین ہمیشہ سب سے پہلے سبسکرپشن/ٹرائل کی صحیح حیثیت دکھائے —
+// اور اگر Admin کا PIN ابھی تک ڈیفالٹ (1234) ہی ہے (یعنی نیا/ٹرائل صارف جس نے ابھی سنجیدگی سے سیٹ اپ نہیں کیا)
+// تو PIN ٹائپ کروانے کی بجائے سیدھا "Enter App" بٹن دکھائیں — تاکہ نیا صارف پاسورڈ کی ٹینشن میں نہ الجھے ----------
+async function setupLoginScreen(){
+  getOrCreateDeviceUID(); // ---------- پہلی بار کھلنے پر یہیں سے 7 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے ----------
+
+  const statusEl = document.getElementById('loginSubStatus');
+  if(isSubscriptionActive()){
+    const days = daysLeftInSubscription();
+    statusEl.textContent = AppState.settings.isOnFreeTrial
+      ? `🎁 Free Trial Active — ${days} day${days===1?'':'s'} remaining`
+      : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
+  } else {
+    statusEl.textContent = `⚠️ Not activated — tap "View Package Plans" below`;
+  }
+
+  const defaultHash = await hashPin('1234');
+  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
+  const stillDefaultPin = admin && admin.pin === defaultHash;
+
+  document.getElementById('loginQuickEnterWrap').style.display = stillDefaultPin ? 'block' : 'none';
+  document.getElementById('loginPinWrap').style.display = stillDefaultPin ? 'none' : 'block';
+}
+
+// ---------- ڈیفالٹ PIN پر — بغیر ٹائپ کیے سیدھا اندر داخل ہوں ----------
+function quickEnterApp(){
+  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
+  if(!admin){ alert('No active Admin account found.'); return; }
+  finishLogin(admin);
+}
+
 async function login(){
   const pin = document.getElementById('pinInput').value.trim();
   if(pin.length < 4){
@@ -5162,12 +5206,21 @@ function confirmQuickCreditCustomer(){
     return;
   }
 
-  // TODO: یہ customers table میں INSERT ہوگا
-  const newCustomer = {customer_id: nextCustomerId++, name, phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]};
-  customersData.push(newCustomer);
+  // ---------- اہم: پہلے چیک کریں کیا اسی موبائل نمبر کا کوئی کسٹمر پہلے سے موجود ہے —
+  // اگر ہے تو نیا الگ کسٹمر مت بنائیں (ورنہ ایک ہی بندے کے دو الگ الگ ریکارڈ بن جاتے ہیں، پرانا بقایہ نئے میں نظر نہیں آتا) ----------
+  let customer = null;
+  if(phone){
+    const phoneDigits = phone.replace(/\D/g,'');
+    customer = customersData.find(c => c.phone && c.phone.replace(/\D/g,'') === phoneDigits);
+  }
+  if(!customer){
+    // TODO: یہ customers table میں INSERT ہوگا
+    customer = {customer_id: nextCustomerId++, name, phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]};
+    customersData.push(customer);
+  }
 
   populateCustomerDropdown();
-  document.getElementById('customerSelect').value = newCustomer.customer_id;
+  document.getElementById('customerSelect').value = customer.customer_id;
   onCustomerChange();
 
   document.getElementById('quickCreditCustomerModal').classList.remove('show');
@@ -10739,6 +10792,9 @@ document.addEventListener('DOMContentLoaded', () => {
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   applyUiZoom(AppState.settings.uiZoom || 100);
   applyCartTextSettings();
+
+  // ---------- Login اسکرین کی حالت (Trial بینر + PIN یا Quick Enter) ہمیشہ پہلے تیار کر لیں ----------
+  setupLoginScreen();
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
   tryAutoLogin();
