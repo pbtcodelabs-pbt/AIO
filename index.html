@@ -1098,6 +1098,18 @@
 
   .profileEmpty{text-align:center; color:var(--muted); padding:18px 0; font-size:12px; border:1.5px dashed #e2e8f0; border-radius:10px; background:#fff;}
 
+  /* --- سپلائر کے کئی بینک/والیٹ اکاؤنٹس کی فہرست --- */
+  .bankAccCard{background:#fff; border-radius:12px; padding:11px 13px; margin-bottom:9px; box-shadow:0 2px 6px rgba(15,23,42,.06); border:1px solid rgba(0,0,0,.04);}
+  .bankAccCardTop{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .bankAccType{font-size:13.5px; font-weight:800; color:var(--primary-dark);}
+  .bankAccTitle{font-size:11.5px; color:var(--muted); margin-top:1px;}
+  .bankAccBtns{display:flex; gap:4px; flex:0 0 auto;}
+  .bankAccBtns button{width:26px; height:26px; border:none; border-radius:7px; background:#f1f5f9; cursor:pointer; font-size:12px;}
+  .bankAccNumber{font-size:16px; font-weight:800; font-family:'Courier New',monospace; margin-top:6px; color:var(--text);}
+  .bankAccMeta{font-size:11px; color:var(--muted); margin-top:2px;}
+  .bankAccImg{width:100%; border-radius:8px; max-height:120px; object-fit:contain; background:#f8fafc; margin-top:8px;}
+  .addBankAccBtn{width:100%; padding:11px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:10px; color:var(--primary-dark); font-weight:700; cursor:pointer; font-size:13px; margin-bottom:16px;}
+
 
   /* --- Customers/Suppliers لسٹ: کمپیکٹ ایک لائن والی قطاریں (بہت سارے ایک ساتھ نظر آئیں) --- */
   .partyRow{display:flex; align-items:center; gap:8px; background:var(--card); border-radius:10px; padding:8px 10px; margin-bottom:6px; box-shadow:var(--shadow);}
@@ -2024,6 +2036,52 @@
             <div class="profileFigures" id="profileFigures"></div>
             <div id="profileSections"></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD/EDIT SUPPLIER BANK ACCOUNT MODAL (سپلائر کے کئی بینک/والیٹ اکاؤنٹس میں سے ایک شامل/تبدیل کریں) -->
+    <div class="modalOverlay" id="supplierBankAccountModal" onclick="if(event.target===this) closeSupplierBankAccountModal()">
+      <div class="profileBox" style="width:440px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">🏦</div>
+          <div class="pInfo"><div class="pName" id="sbaModalTitle">➕ Add Bank/Wallet Account</div></div>
+          <span class="closeBtn" onclick="closeSupplierBankAccountModal()">✖</span>
+        </div>
+        <div class="profileBody">
+          <select id="sbaType" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;"></select>
+          <input type="text" id="sbaTitle" placeholder="Account Title (account holder's name)"
+                 style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+          <input type="text" id="sbaNumber" placeholder="Account / Mobile Number"
+                 style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+          <input type="text" id="sbaUan" placeholder="UAN Number (for EasyPaisa/JazzCash, optional)"
+                 style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+          <textarea id="sbaNotes" placeholder="Branch, extra notes, etc. (optional)"
+                    style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:50px; margin-bottom:8px;"></textarea>
+          <div id="sbaImagePreview" style="display:none; margin-bottom:8px;">
+            <img id="sbaImageImg" style="width:100%; border-radius:8px; max-height:150px; object-fit:contain; background:#fff;">
+          </div>
+          <button type="button" onclick="attachSupplierBankAccountImage()" style="width:100%; padding:9px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px; margin-bottom:12px;">📷 Attach Chequebook / Wallet Profile Photo</button>
+          <div class="modalBtns">
+            <button class="cancelBtn" onclick="closeSupplierBankAccountModal()">Cancel</button>
+            <button class="checkoutBtn" onclick="saveSupplierBankAccount()">💾 Save Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPLIER POSTER ACCOUNT PICKER (کئی اکاؤنٹس میں سے ٹِک لگا کر منتخب کریں کہ پروفائل پوسٹر میں کون سے شامل ہوں) -->
+    <div class="modalOverlay" id="supplierPosterAccountPickerModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:420px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">🪪</div>
+          <div class="pInfo"><div class="pName">Choose Accounts for Poster</div></div>
+          <span class="closeBtn" onclick="document.getElementById('supplierPosterAccountPickerModal').classList.remove('show')">✖</span>
+        </div>
+        <div class="profileBody">
+          <div class="settingsHint" style="margin-top:0;">Tick which account(s) to include on the shareable profile poster.</div>
+          <div id="posterAccountChecklist" style="margin:10px 0;"></div>
+          <button class="checkoutBtn" onclick="confirmSupplierProfilePoster()">🪪 Generate Poster</button>
         </div>
       </div>
     </div>
@@ -7857,54 +7915,11 @@ function renderSupplierPoSection(supplierId){
     [['all','All'],['pending','Pending'],['received','Received']], profilePoFilter, 'applySupplierPoFilter');
 
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>🏦 Bank Account Details</span></div>
-    <div style="background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.06); border-radius:12px; padding:12px; margin-bottom:14px;">
-      <select id="supplierBankType" onchange="updateSupplierBankField(${s.supplier_id}, 'bankAccountType', this.value)" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <option value="">— Select Bank/Wallet —</option>
-        <option value="EasyPaisa">EasyPaisa</option>
-        <option value="JazzCash">JazzCash</option>
-        <option value="HBL">HBL</option>
-        <option value="UBL">UBL</option>
-        <option value="MCB">MCB</option>
-        <option value="Meezan Bank">Meezan Bank</option>
-        <option value="Allied Bank">Allied Bank</option>
-        <option value="Bank Alfalah">Bank Alfalah</option>
-        <option value="Askari Bank">Askari Bank</option>
-        <option value="Faysal Bank">Faysal Bank</option>
-        <option value="Standard Chartered">Standard Chartered</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <input type="text" id="supplierBankTitle" placeholder="Account Title (account holder's name)" value="${s.bankAccountTitle || ''}"
-             onchange="updateSupplierBankField(${s.supplier_id}, 'bankAccountTitle', this.value)"
-             style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-
-      <div style="display:flex; gap:8px; margin-bottom:8px;">
-        <input type="text" id="supplierBankNumber" placeholder="Account / Mobile Number" value="${s.bankAccountNumber || ''}"
-               onchange="updateSupplierBankField(${s.supplier_id}, 'bankAccountNumber', this.value)"
-               style="flex:1; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <button onclick="openBankLoginPage(${s.supplier_id})" style="flex:0 0 44px; background:var(--primary); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:16px;" title="Go to bank/wallet login page">↗️</button>
-      </div>
-
-      <input type="text" id="supplierBankUan" placeholder="UAN Number (for EasyPaisa/JazzCash, optional)" value="${s.bankAccountUan || ''}"
-             onchange="updateSupplierBankField(${s.supplier_id}, 'bankAccountUan', this.value)"
-             style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-
-      <textarea id="supplierBankNotes" placeholder="Branch, extra notes, etc. (optional)"
-                onchange="updateSupplierBankField(${s.supplier_id}, 'bankAccountNotes', this.value)"
-                style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:50px; margin-bottom:8px;">${s.bankAccountNotes || ''}</textarea>
-
-      <div id="supplierBankImagePreview" style="display:none; margin-bottom:8px;">
-        <img id="supplierBankImageImg" style="width:100%; border-radius:8px; max-height:150px; object-fit:contain; background:#fff;">
-      </div>
-      <button type="button" onclick="attachSupplierBankImage(${s.supplier_id})" style="width:100%; padding:9px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Attach Chequebook / Wallet Profile Photo</button>
-    </div>
+    ${buildSupplierBankAccountsHtml(s)}
     <div class="profileSectionTitle"><span>📦 All Purchase Orders</span><span class="cnt">${orders.length} orders</span></div>
     ${filterBarHtml}
     <div id="profilePoListWrap">${ordersHtml}</div>
   `;
-  document.getElementById('supplierBankType').value = s.bankAccountType || '';
-  updateSupplierBankImagePreview(s);
 }
 
 // ---------- سپلائر کی Transactions ویو — Khatabook طرز: تاریخ+تفصیل، رقم سرخ (ادا شدہ) یا سبز (ریٹرن/کریڈٹ) ----------
@@ -7985,10 +8000,18 @@ function editProfileNickname(){
   else updateSupplierKeywords(rec.supplier_id, val);
 }
 
-// ---------- بینک اکاؤنٹ کی تفصیل محفوظ کریں (Type/Number/Notes) ----------
-function updateSupplierBankField(supplierId, field, value){
-  const s = suppliersData.find(x => x.supplier_id === supplierId);
-  if(s) s[field] = value; // TODO: DB میں suppliers.[field] UPDATE
+// ---------- سپلائر کے کئی بینک/والیٹ اکاؤنٹس — پرانے ڈیٹا (سنگل فیلڈز) کو پہلی بار خودکار array میں منتقل کریں ----------
+function getSupplierBankAccounts(s){
+  if(!s.bankAccounts){
+    s.bankAccounts = [];
+    if(s.bankAccountType || s.bankAccountNumber || s.bankAccountTitle){
+      s.bankAccounts.push({
+        type: s.bankAccountType || '', title: s.bankAccountTitle || '', number: s.bankAccountNumber || '',
+        uan: s.bankAccountUan || '', notes: s.bankAccountNotes || '', image: s.bankAccountImage || null
+      });
+    }
+  }
+  return s.bankAccounts;
 }
 
 // ---------- اکاؤنٹ نمبر پر ٹیپ کرنے سے اسی بینک/والیٹ کے لاگ ان صفحہ پر لے جائیں ----------
@@ -8005,13 +8028,111 @@ const BANK_LOGIN_URLS = {
   'Faysal Bank': 'https://www.faysalbank.com/',
   'Standard Chartered': 'https://www.sc.com/pk/',
 };
-function openBankLoginPage(supplierId){
+
+// ---------- Bank Accounts سیکشن کی مکمل فہرست — ہر اکاؤنٹ کارڈ، ➕ نیا اکاؤنٹ شامل کرنے کا بٹن ----------
+function buildSupplierBankAccountsHtml(s){
+  const accounts = getSupplierBankAccounts(s);
+  const listHtml = accounts.length === 0
+    ? `<div class="profileEmpty">No bank/wallet accounts added yet</div>`
+    : accounts.map((acc, idx) => `
+      <div class="bankAccCard">
+        <div class="bankAccCardTop">
+          <div style="min-width:0;">
+            <div class="bankAccType">${acc.type || 'Bank/Wallet'}</div>
+            ${acc.title ? `<div class="bankAccTitle">${acc.title}</div>` : ''}
+          </div>
+          <div class="bankAccBtns">
+            <button onclick="openBankLoginPageForAccount(${s.supplier_id}, ${idx})" title="Open bank/wallet login page">↗️</button>
+            <button onclick="openEditSupplierBankAccount(${s.supplier_id}, ${idx})" title="Edit">✏️</button>
+            <button onclick="deleteSupplierBankAccount(${s.supplier_id}, ${idx})" title="Delete">🗑️</button>
+          </div>
+        </div>
+        <div class="bankAccNumber">${acc.number || '—'}</div>
+        ${acc.uan ? `<div class="bankAccMeta">UAN: ${acc.uan}</div>` : ''}
+        ${acc.notes ? `<div class="bankAccMeta">${acc.notes}</div>` : ''}
+        ${acc.image ? `<img src="${acc.image}" class="bankAccImg">` : ''}
+      </div>
+    `).join('');
+  return `
+    <div class="profileSectionTitle"><span>🏦 Bank / Wallet Accounts</span><span class="cnt">${accounts.length}</span></div>
+    <div>${listHtml}</div>
+    <button type="button" class="addBankAccBtn" onclick="openAddSupplierBankAccount(${s.supplier_id})">➕ Add Bank/Wallet Account</button>
+  `;
+}
+
+// ---------- Add/Edit Bank Account موڈل ----------
+let editingSupplierBankAccount = { supplierId: null, idx: null };
+let sbaPhotoDataUrl = null;
+function fillSupplierBankAccountModal(acc){
+  document.getElementById('sbaType').innerHTML = `<option value="">— Select Bank/Wallet —</option>` +
+    Object.keys(BANK_LOGIN_URLS).map(b => `<option value="${b}" ${acc.type===b?'selected':''}>${b}</option>`).join('') +
+    `<option value="Other" ${acc.type==='Other'?'selected':''}>Other</option>`;
+  document.getElementById('sbaTitle').value = acc.title || '';
+  document.getElementById('sbaNumber').value = acc.number || '';
+  document.getElementById('sbaUan').value = acc.uan || '';
+  document.getElementById('sbaNotes').value = acc.notes || '';
+  sbaPhotoDataUrl = acc.image || null;
+  const prevWrap = document.getElementById('sbaImagePreview');
+  if(sbaPhotoDataUrl){ document.getElementById('sbaImageImg').src = sbaPhotoDataUrl; prevWrap.style.display = 'block'; }
+  else prevWrap.style.display = 'none';
+}
+function openAddSupplierBankAccount(supplierId){
+  editingSupplierBankAccount = { supplierId, idx: null };
+  document.getElementById('sbaModalTitle').textContent = '➕ Add Bank/Wallet Account';
+  fillSupplierBankAccountModal({});
+  document.getElementById('supplierBankAccountModal').classList.add('show');
+}
+function openEditSupplierBankAccount(supplierId, idx){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
-  if(!s || !s.bankAccountType){
+  const acc = s && getSupplierBankAccounts(s)[idx];
+  if(!acc) return;
+  editingSupplierBankAccount = { supplierId, idx };
+  document.getElementById('sbaModalTitle').textContent = '✏️ Edit Bank/Wallet Account';
+  fillSupplierBankAccountModal(acc);
+  document.getElementById('supplierBankAccountModal').classList.add('show');
+}
+function closeSupplierBankAccountModal(){
+  document.getElementById('supplierBankAccountModal').classList.remove('show');
+}
+function saveSupplierBankAccount(){
+  const s = suppliersData.find(x => x.supplier_id === editingSupplierBankAccount.supplierId);
+  if(!s) return;
+  const type = document.getElementById('sbaType').value;
+  const number = document.getElementById('sbaNumber').value.trim();
+  if(!type || !number){
+    alert('Please select a bank/wallet and enter the account number.');
+    return;
+  }
+  const acc = {
+    type, number,
+    title: document.getElementById('sbaTitle').value.trim(),
+    uan: document.getElementById('sbaUan').value.trim(),
+    notes: document.getElementById('sbaNotes').value.trim(),
+    image: sbaPhotoDataUrl || null
+  };
+  const accounts = getSupplierBankAccounts(s);
+  if(editingSupplierBankAccount.idx === null) accounts.push(acc);
+  else accounts[editingSupplierBankAccount.idx] = acc;
+  closeSupplierBankAccountModal();
+  renderSupplierPoSection(s.supplier_id);
+  persistAllData();
+}
+function deleteSupplierBankAccount(supplierId, idx){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  if(!s) return;
+  if(!confirm('Delete this bank/wallet account?')) return;
+  getSupplierBankAccounts(s).splice(idx, 1);
+  renderSupplierPoSection(supplierId);
+  persistAllData();
+}
+function openBankLoginPageForAccount(supplierId, idx){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  const acc = s && getSupplierBankAccounts(s)[idx];
+  if(!acc || !acc.type){
     alert('Please select the bank/wallet type first.');
     return;
   }
-  const url = BANK_LOGIN_URLS[s.bankAccountType];
+  const url = BANK_LOGIN_URLS[acc.type];
   if(!url){
     alert('No direct login link available for this bank yet — please search for it manually.');
     return;
@@ -8019,9 +8140,8 @@ function openBankLoginPage(supplierId){
   // نوٹ: ہم کبھی خودکار لاگ ان نہیں کر سکتے (نہ کریں گے) — صرف صحیح بینک/والیٹ کا آغاز صفحہ کھلے گا
   window.open(url, '_blank');
 }
-
-// ---------- سپلائر کے اکاؤنٹ/چیک کی تصویر منسلک کریں ----------
-function attachSupplierBankImage(supplierId){
+// ---------- اکاؤنٹ کی تصویر (چیک/QR وغیرہ) منسلک کریں — ابھی محفوظ ہونے سے پہلے ماڈل میں ہی پیش نظارہ ----------
+function attachSupplierBankAccountImage(){
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
@@ -8038,27 +8158,15 @@ function attachSupplierBankImage(supplierId){
         canvas.width = img.width * scale;
         canvas.height = img.height * scale;
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        const s = suppliersData.find(x => x.supplier_id === supplierId);
-        if(s){
-          s.bankAccountImage = canvas.toDataURL('image/jpeg', 0.8); // TODO: DB میں فائل URL کے طور پر محفوظ ہوگی
-          updateSupplierBankImagePreview(s);
-        }
+        sbaPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        document.getElementById('sbaImageImg').src = sbaPhotoDataUrl;
+        document.getElementById('sbaImagePreview').style.display = 'block';
       };
       img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   };
   input.click();
-}
-function updateSupplierBankImagePreview(s){
-  const wrap = document.getElementById('supplierBankImagePreview');
-  if(!wrap) return;
-  if(s.bankAccountImage){
-    document.getElementById('supplierBankImageImg').src = s.bankAccountImage;
-    wrap.style.display = 'block';
-  } else {
-    wrap.style.display = 'none';
-  }
 }
 
 // ---------- سپلائر کو نقد ادائیگی — Payable خودکار کم ہو، Cash in Hand سے خودکار منہا ہو (کسٹمر کے "Collect" کا آئینہ) ----------
@@ -11575,11 +11683,12 @@ async function confirmImageShare(){
 }
 
 // ---------- کسٹمر/سپلائر کی رنگین، شیئر ایبل "پروفائل پوسٹر" — تصویر، نام، موبائل نمبر (سپلائر کے لیے بینک اکاؤنٹ کی تفصیل بھی) ----------
-async function renderPartyProfilePosterToCanvas(party, kind){
+async function renderPartyProfilePosterToCanvas(party, kind, accounts){
+  accounts = accounts || [];
   const canvas = document.createElement('canvas');
   const isSupplier = kind === 'suppliers';
-  const hasBank = isSupplier && (party.bankAccountNumber || party.bankAccountTitle);
-  const W = 640, H = hasBank ? 1000 : 800;
+  const ACC_BLOCK_H = 190; // ---------- ہر اکاؤنٹ کا اندازاً بلاک — کئی اکاؤنٹس ہوں تو پوسٹر خودکار لمبا ہو جائے ----------
+  const W = 640, H = 640 + (accounts.length > 0 ? 40 + accounts.length * ACC_BLOCK_H : 0);
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const cx = W / 2;
@@ -11648,41 +11757,43 @@ async function renderPartyProfilePosterToCanvas(party, kind){
   ctx.font = `800 34px 'Courier New', monospace`;
   ctx.fillText(party.phone || '—', cx, 555);
 
-  let y = 620;
-  if(hasBank){
+  // ---------- ایک یا کئی بینک/والیٹ اکاؤنٹس — ہر ایک کا اپنا کارڈ، سیدھا نیچے سٹیک ہوتے جائیں ----------
+  let y = 610;
+  accounts.forEach((acc, idx) => {
+    const blockH = ACC_BLOCK_H - 30;
     ctx.fillStyle = 'rgba(0,0,0,.18)';
-    roundRectPath(ctx, 50, y, W-100, isSupplier ? 340 : 0, 16);
+    roundRectPath(ctx, 50, y, W-100, blockH, 16);
     ctx.fill();
-    y += 40;
+    let iy = y + 38;
     ctx.fillStyle = accent;
-    ctx.font = `700 18px Poppins, sans-serif`;
-    ctx.fillText('🏦 BANK / WALLET ACCOUNT', cx, y);
-    y += 44;
-    if(party.bankAccountType){
+    ctx.font = `700 16px Poppins, sans-serif`;
+    ctx.fillText(accounts.length > 1 ? `🏦 ACCOUNT ${idx+1}` : '🏦 BANK / WALLET ACCOUNT', cx, iy);
+    iy += 38;
+    if(acc.type){
       ctx.fillStyle = '#ffffff';
-      ctx.font = `800 26px Poppins, sans-serif`;
-      ctx.fillText(party.bankAccountType, cx, y);
-      y += 40;
+      ctx.font = `800 25px Poppins, sans-serif`;
+      ctx.fillText(acc.type, cx, iy);
+      iy += 36;
     }
-    if(party.bankAccountTitle){
-      ctx.fillStyle = 'rgba(255,255,255,.85)';
-      ctx.font = `600 18px Poppins, sans-serif`;
-      ctx.fillText(party.bankAccountTitle, cx, y);
-      y += 34;
-    }
-    if(party.bankAccountNumber){
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `800 30px 'Courier New', monospace`;
-      ctx.fillText(party.bankAccountNumber, cx, y);
-      y += 40;
-    }
-    if(party.bankAccountUan){
+    if(acc.title){
       ctx.fillStyle = 'rgba(255,255,255,.85)';
       ctx.font = `600 16px Poppins, sans-serif`;
-      ctx.fillText(`UAN: ${party.bankAccountUan}`, cx, y);
-      y += 30;
+      ctx.fillText(acc.title, cx, iy);
+      iy += 28;
     }
-  }
+    if(acc.number){
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 27px 'Courier New', monospace`;
+      ctx.fillText(acc.number, cx, iy);
+      iy += 34;
+    }
+    if(acc.uan){
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.font = `600 14px Poppins, sans-serif`;
+      ctx.fillText(`UAN: ${acc.uan}`, cx, iy);
+    }
+    y += ACC_BLOCK_H;
+  });
 
   ctx.fillStyle = 'rgba(0,0,0,.22)';
   roundRectPath(ctx, 50, H - 90, W - 100, 60, 14);
@@ -11697,13 +11808,37 @@ async function renderPartyProfilePosterToCanvas(party, kind){
 async function shareCustomerProfile(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
-  const canvas = await renderPartyProfilePosterToCanvas(c, 'customers');
+  const canvas = await renderPartyProfilePosterToCanvas(c, 'customers', []);
   showImageSharePreview(canvas, `${(c.name||'customer').replace(/\s+/g,'_')}_profile.png`, c.name, `${c.name} — Contact Card`);
 }
+
+// ---------- سپلائر کی پروفائل پوسٹر — اگر ایک سے زیادہ اکاؤنٹ ہوں تو پہلے ٹِک لگا کر منتخب کروائیں ----------
+let pendingPosterSupplierId = null;
 async function shareSupplierProfile(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
-  const canvas = await renderPartyProfilePosterToCanvas(s, 'suppliers');
+  const accounts = getSupplierBankAccounts(s);
+  if(accounts.length <= 1){
+    const canvas = await renderPartyProfilePosterToCanvas(s, 'suppliers', accounts);
+    showImageSharePreview(canvas, `${(s.name||'supplier').replace(/\s+/g,'_')}_profile.png`, s.name, `${s.name} — Supplier Profile`);
+    return;
+  }
+  pendingPosterSupplierId = supplierId;
+  document.getElementById('posterAccountChecklist').innerHTML = accounts.map((acc, idx) => `
+    <label style="display:flex; align-items:center; gap:8px; padding:8px 4px; border-bottom:1px solid #eef2f7;">
+      <input type="checkbox" class="posterAccChk" value="${idx}" checked style="width:18px; height:18px;">
+      <span style="font-size:13px;"><b>${acc.type||'Account'}</b>${acc.number ? ' — ' + acc.number : ''}</span>
+    </label>
+  `).join('');
+  document.getElementById('supplierPosterAccountPickerModal').classList.add('show');
+}
+async function confirmSupplierProfilePoster(){
+  const s = suppliersData.find(x => x.supplier_id === pendingPosterSupplierId);
+  if(!s) return;
+  const accounts = getSupplierBankAccounts(s);
+  const checked = Array.from(document.querySelectorAll('.posterAccChk:checked')).map(el => accounts[parseInt(el.value)]);
+  document.getElementById('supplierPosterAccountPickerModal').classList.remove('show');
+  const canvas = await renderPartyProfilePosterToCanvas(s, 'suppliers', checked);
   showImageSharePreview(canvas, `${(s.name||'supplier').replace(/\s+/g,'_')}_profile.png`, s.name, `${s.name} — Supplier Profile`);
 }
 
