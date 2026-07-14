@@ -3052,6 +3052,16 @@ const AppState = {
   settings: {...DEFAULT_SETTINGS, ...loadFromStorage('settings', DEFAULT_SETTINGS)},
 };
 
+// ---------- 🩹 ون-ٹائم مائیگریشن: اگر یہ ڈیوائس پہلے (پرانے ورژن میں) ٹیسٹ ہو چکی ہے جہاں
+// Package Plans خالی اور perDayRate=0 محفوظ ہو چکے تھے، تو پرانا خالی ڈیٹا نئے ڈیفالٹ پلانز کو
+// چھپا دیتا ہے (localStorage نئے DEFAULT_SETTINGS پر حاوی ہو جاتا ہے)۔ یہاں خودکار ٹھیک کر دیتے ہیں —
+// صرف اس صورت میں جب صاف پتا چلے کہ کبھی جان بوجھ کر کوئی پلان/ریٹ سیٹ نہیں کیا گیا۔ ----------
+if((AppState.settings.subscriptionPlans || []).length === 0 && !AppState.settings.perDayRate){
+  AppState.settings.subscriptionPlans = DEFAULT_SETTINGS.subscriptionPlans.map(p => ({...p}));
+  AppState.settings.perDayRate = DEFAULT_SETTINGS.perDayRate;
+  saveToStorage('settings', AppState.settings);
+}
+
 // ---------- LOGIN LOGIC: PIN کو usersData کے خلاف تصدیق کریں، role خودکار متعین ہوگا ----------
 /* =====================================================================
    📞 ڈویلپر کی رابطہ معلومات — تمام "Chat with Developer" بلبلوں میں استعمال ہوں گی
