@@ -83,13 +83,17 @@
   }
   .roleToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
-  /* --- 🧭 Home Screen کے بڑے نیویگیشن آئیکن --- */
-  .homeIconGrid{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:4px;}
+  /* --- 🧭 Home Screen کے بڑے نیویگیشن آئیکن — اب موضوع کے لحاظ سے گروپ بند (Sales/Inventory/Parties/...) --- */
+  .homeIconGrid{display:flex; flex-direction:column; gap:4px; margin-top:4px;}
+  .homeSectionLabel{font-size:11.5px; font-weight:800; letter-spacing:.4px; color:var(--muted); text-transform:uppercase; margin:14px 2px 8px; opacity:.85;}
+  .homeSectionLabel:first-child{margin-top:2px;}
+  .homeSectionGrid{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;}
   .homeIconTile{
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:18px 8px;
-    background:var(--card); border-radius:16px; box-shadow:0 2px 10px rgba(41,29,10,.08); cursor:pointer; border:none;
+    background:var(--card); border-radius:18px; box-shadow:0 3px 12px rgba(41,29,10,.10), 0 1px 3px rgba(41,29,10,.06);
+    cursor:pointer; border:1px solid rgba(0,0,0,.03); transition:transform .12s ease, box-shadow .12s ease;
   }
-  .homeIconTile:active{transform:scale(0.96); background:#f1f5f9;}
+  .homeIconTile:active{transform:scale(0.96); background:#f1f5f9; box-shadow:0 1px 4px rgba(41,29,10,.10);}
   .homeIconTile .hitIcon{font-size:32px;}
   .homeIconTile .hitLabel{font-size:12px; font-weight:700; color:var(--text); text-align:center;}
   .homeIconTile .hitBadge{
@@ -2974,7 +2978,12 @@ const DEFAULT_SETTINGS = {
   securityCnicHash: '',
   securityDobHash: '',
   // ---------- 📋 محفوظ شدہ جوابی پیغامات — سبسکرپشن پلانز وغیرہ بار بار ٹائپ کیے بغیر ایک ٹیپ میں کاپی کر کے بھیجیں ----------
-  replyTemplates: [],
+  replyTemplates: [
+    {title:'Payment Reminder', text:'Dear Customer, this is a friendly reminder that a payment is due on your account. Please clear it at your earliest convenience. Thank you!'},
+    {title:'Thank You (Payment Received)', text:'Thank you for your payment! We have received it and updated your account. We appreciate your business.'},
+    {title:'Order Confirmed', text:'Your order has been confirmed and is being prepared. We will notify you once it is ready.'},
+    {title:'Out of Stock', text:'Sorry, this item is currently out of stock. We will notify you as soon as it is available again.'},
+  ],
   // ---------- 🗂️ سبسکرپشن پیکج پلانز — ہر کوئی (کسٹمر سمیت) بغیر PIN کے دیکھ سکتا ہے، Login صفحے اور Home دونوں جگہ ----------
   subscriptionPlans: [],
   // ---------- 💰 روزانہ کی شرح — ایک بار سیٹ کریں، تمام پلانز کی قیمت خودکار اسی سے حساب ہو گی۔
@@ -3134,19 +3143,33 @@ function renderSubscriptionBanner(){
 
 // ---------- 🏪 ہوم پیج کا بزنس کارڈ — لوگو، دکان کا نام، مالک کا نام، فون نمبر ----------
 // ---------- 🧭 Home Screen کے بڑے نیویگیشن آئیکن — role کے مطابق مختلف فہرست ----------
-const HOME_TILES_ADMIN = [
-  {icon:'🛒', label:'Billing', screen:'billing'},
-  {icon:'👥', label:'Customers', screen:'customers'},
-  {icon:'🚚', label:'Suppliers', screen:'suppliers'},
-  {icon:'📦', label:'Products', screen:'products'},
-  {icon:'🏷️', label:'Categories', screen:'categories'},
-  {icon:'📊', label:'Dashboard', screen:'dashboard'},
-  {icon:'🧾', label:'Bill History', screen:'billhistory'},
-  {icon:'🔑', label:'Users', screen:'users'},
-  {icon:'⚙️', label:'Settings', screen:'settings'},
-  {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
-  {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
+const HOME_TILE_GROUPS_ADMIN = [
+  { section: '💰 Sales', tiles: [
+    {icon:'🛒', label:'Billing', screen:'billing'},
+    {icon:'🧾', label:'Bill History', screen:'billhistory'},
+  ]},
+  { section: '📦 Inventory', tiles: [
+    {icon:'📦', label:'Products', screen:'products'},
+    {icon:'🏷️', label:'Categories', screen:'categories'},
+  ]},
+  { section: '🧑‍🤝‍🧑 Parties', tiles: [
+    {icon:'👥', label:'Customers', screen:'customers'},
+    {icon:'🚚', label:'Suppliers', screen:'suppliers'},
+  ]},
+  { section: '📊 Insights', tiles: [
+    {icon:'📊', label:'Dashboard', screen:'dashboard'},
+  ]},
+  { section: '⚙️ Management', tiles: [
+    {icon:'🔑', label:'Users', screen:'users'},
+    {icon:'⚙️', label:'Settings', screen:'settings'},
+  ]},
+  { section: '🛠️ Tools', tiles: [
+    {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
+    {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
+  ]},
 ];
+// ---------- پرانی سیدھی فہرست اب بھی موجود ہے — Quick Access Dock وغیرہ کہیں اور اسے استعمال کرتے ہیں ----------
+const HOME_TILES_ADMIN = HOME_TILE_GROUPS_ADMIN.flatMap(g => g.tiles);
 const HOME_TILES_SALESMAN = [
   {icon:'🛒', label:'Billing', screen:'billing'},
   {icon:'🧾', label:'Bill History', screen:'billhistory'},
@@ -3156,13 +3179,20 @@ const HOME_TILES_SALESMAN = [
 function renderHomeIconGrid(){
   const grid = document.getElementById('homeIconGrid');
   if(!grid) return;
-  const tiles = AppState.currentRole === 'admin' ? HOME_TILES_ADMIN : HOME_TILES_SALESMAN;
-  grid.innerHTML = tiles.map(t => `
+  const tileHtml = (t) => `
     <button class="homeIconTile" onclick="${t.action ? t.action + '()' : `goTo('${t.screen}')`}">
       <span class="hitIcon">${t.icon}</span>
       <span class="hitLabel">${t.label}</span>
-    </button>
-  `).join('');
+    </button>`;
+
+  if(AppState.currentRole === 'admin'){
+    grid.innerHTML = HOME_TILE_GROUPS_ADMIN.map(g => `
+      <div class="homeSectionLabel">${g.section}</div>
+      <div class="homeSectionGrid">${g.tiles.map(tileHtml).join('')}</div>
+    `).join('');
+  } else {
+    grid.innerHTML = HOME_TILES_SALESMAN.map(tileHtml).join('');
+  }
 }
 
 function renderHomeBusinessCard(){
@@ -10201,6 +10231,11 @@ function deleteSubscriptionPlan(idx){
   renderDayPresetsInAdmin();
 }
 
+// ---------- Home ٹائل سے یہاں پہنچتے ہیں — پہلے فہرست تازہ بنائیں، پھر modal دکھائیں ----------
+function openReplyTemplatesModal(){
+  renderReplyTemplates();
+  document.getElementById('replyTemplatesModal').classList.add('show');
+}
 function renderReplyTemplates(){
   const wrap = document.getElementById('replyTemplatesWrap');
   if(!wrap) return;
