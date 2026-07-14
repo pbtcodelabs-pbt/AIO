@@ -984,51 +984,81 @@
   .scannerFooter button{width:100%; padding:10px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;}
 
   /* ===================== کسٹمر/سپلائر پروفائل (360° ویو — سب کچھ ایک جگہ) ===================== */
-  .profileBox{background:#fff; border-radius:var(--radius); width:420px; max-width:92vw; max-height:88vh; overflow-y:auto;}
-  .profileHead{background:var(--primary-dark); color:#fff; padding:22px 20px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:2;}
-  .profileHead .pAvatarLg{width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:26px; flex:0 0 56px;}
-  .profileHead .pInfo{flex:1;}
+  .profileBox{background:#fff; border-radius:var(--radius); width:520px; max-width:96vw; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;}
+  .profileHead{background:var(--primary-dark); color:#fff; padding:18px 18px; display:flex; align-items:center; gap:14px; flex:0 0 auto;}
+  .profileHead .pAvatarLg{width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-size:26px; flex:0 0 56px; box-shadow:0 3px 8px rgba(0,0,0,.2);}
+  .profileHead .pInfo{flex:1; min-width:0;}
   .profileHead .pInfo .pName{font-size:17px; font-weight:800;}
-  .profileHead .pInfo .pMeta{font-size:12px; opacity:.85; margin-top:2px;}
+  .profileHead .pInfo .pMeta{font-size:12.5px; opacity:.9; margin-top:2px;}
+  .profileHead .pInfo .pMeta a{color:#fff; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4);}
   .profileHead .closeBtn{cursor:pointer; font-size:18px; opacity:.85;}
+
+  /* --- تھیم: کسٹمر = ہلکا سبز، سپلائر = ہلکا نیلا --- */
+  .profileBox.themeCustomer{background:linear-gradient(180deg, #ecfdf5 0%, #f6fefb 220px, #ffffff 420px);}
+  .profileBox.themeCustomer .profileHead{background:linear-gradient(135deg, #0f766e, #065f52);}
+  .profileBox.themeSupplier{background:linear-gradient(180deg, #eff6ff 0%, #f5f9ff 220px, #ffffff 420px);}
+  .profileBox.themeSupplier .profileHead{background:linear-gradient(135deg, #1d4ed8, #1e3a8a);}
 
   .profileBody{padding:18px 20px;}
 
+  /* --- فوری رابطہ بٹن (کال/واٹس ایپ/ایس ایم ایس/جی میل) — ہیڈر کے بالکل نیچے، ایک پتلی پٹی --- */
+  .profileContactRow{display:flex; gap:6px; padding:9px 14px; background:rgba(0,0,0,.04); flex:0 0 auto;}
+  .profileContactRow a, .profileContactRow span{flex:1; display:flex; flex-direction:column; align-items:center; gap:1px; padding:6px 4px; border-radius:9px; text-decoration:none; font-size:9.5px; font-weight:800;}
+  .profileContactRow .cCall{background:#eef2ff; color:var(--primary-dark);}
+  .profileContactRow .cWhatsapp{background:#dcfce7; color:var(--success);}
+  .profileContactRow .cSms{background:#fff7ed; color:#c2410c;}
+  .profileContactRow .cGmail{background:#fee2e2; color:#b91c1c;}
+  .profileContactRow .cDisabled{background:#f1f5f9; color:var(--muted); opacity:.55; pointer-events:none;}
+
+  /* --- اصل باڈی: بائیں طرف چھوٹے 3D آئیکن بٹنوں کا لمبا کالم + دائیں طرف اسکرول ہونے والا مرکزی حصہ --- */
+  .profileBodyFlex{display:flex; align-items:stretch; flex:1 1 auto; min-height:0;}
+  .profileSidebar{
+    flex:0 0 76px; display:flex; flex-direction:column; align-items:center; gap:10px;
+    padding:16px 8px; background:rgba(0,0,0,.025); overflow-y:auto;
+  }
+  .profileSidebar button{
+    width:58px; height:58px; border:none; border-radius:16px; cursor:pointer; color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 5px 10px -3px rgba(0,0,0,.3);
+    transition:transform .12s ease, box-shadow .12s ease; flex:0 0 auto;
+  }
+  .profileSidebar button:active{transform:scale(.92) translateY(1px); box-shadow:0 2px 5px -2px rgba(0,0,0,.3);}
+  .profileSidebar button .sideIcon{font-size:18px; line-height:1;}
+  .profileSidebar button .sideLabel{font-size:8px; font-weight:800; line-height:1.05; text-align:center; padding:0 2px;}
+  .profileMain{flex:1 1 auto; min-width:0; padding:14px 16px 20px; overflow-y:auto;}
+
   /* --- بالکل اوپر: مالی خلاصہ، ایک نظر میں --- */
-  .profileFigures{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:16px;}
+  .profileFigures{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px;}
   .profileFigures.single{grid-template-columns:1fr;}
-  .pfBox{background:#f8fafc; border-radius:10px; padding:12px; text-align:center;}
+  .pfBox{background:#fff; border-radius:12px; padding:12px; text-align:center; box-shadow:0 2px 8px rgba(15,23,42,.06); border:1px solid rgba(0,0,0,.04);}
   .pfBox .pfLabel{font-size:11px; color:var(--muted); margin-bottom:4px;}
   .pfBox .pfValue{font-size:16px; font-weight:800;}
   .pfBox .pfValue.wallet{color:var(--success);}
   .pfBox .pfValue.receivable{color:var(--danger);}
   .pfBox .pfValue.payable{color:var(--warning);}
 
-  /* --- فوری اقدامات (Deposit/Redeem/Collect/New PO) --- */
-  .profileQuickActions{display:flex; gap:8px; margin-bottom:18px;}
-  .profileQuickActions button{flex:1; padding:10px 6px; border:none; border-radius:9px; font-size:12px; font-weight:700; cursor:pointer;}
-
   /* --- سیکشن ٹیبز: تاریخ / bills / پرچیز orders --- */
   .profileSectionTitle{font-size:13px; font-weight:700; color:var(--text); margin:16px 0 8px; display:flex; justify-content:space-between; align-items:center;}
   .profileSectionTitle .cnt{font-size:11px; color:var(--muted); font-weight:600;}
 
-  .profileListRow{display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:9px; margin-bottom:7px; cursor:pointer;}
+  /* --- Bills/Purchase Orders کے اوپر فلٹر بار: اسٹیٹس ٹیبز + تاریخ کا ڈراپ ڈاؤن --- */
+  .pfFilterBar{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; align-items:center;}
+  .pfStatusTabs{display:flex; gap:4px; background:#fff; padding:3px; border-radius:10px; box-shadow:0 1px 4px rgba(15,23,42,.08); flex:1 1 auto; min-width:150px;}
+  .pfStatusTabs button{flex:1; border:none; background:transparent; padding:6px 4px; border-radius:8px; font-size:10.5px; font-weight:800; color:var(--muted); cursor:pointer; white-space:nowrap;}
+  .pfStatusTabs button.active{background:var(--primary); color:#fff;}
+  .pfDateSelect{padding:7px 8px; border-radius:9px; border:1px solid #dbe1ea; background:#fff; font-size:11px; font-weight:700; color:var(--text); flex:0 0 auto;}
+  .pfCustomRange{display:flex; gap:5px; align-items:center; width:100%; margin-top:2px;}
+  .pfCustomRange input{flex:1; padding:6px 7px; border:1px solid #dbe1ea; border-radius:8px; font-size:11px;}
+  .pfCustomRange button{flex:0 0 auto; padding:6px 12px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-size:11px; font-weight:700; cursor:pointer;}
+
+  .profileListRow{display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#fff; border-radius:10px; margin-bottom:7px; cursor:pointer; box-shadow:0 1px 4px rgba(15,23,42,.05);}
   .profileListRow .plMain{font-size:13px; font-weight:600;}
   .profileListRow .plMeta{font-size:11px; color:var(--muted); margin-top:1px;}
   .profileListRow .plAmount{font-size:13px; font-weight:700; color:var(--primary-dark);}
   .profileListRow .plAmount.pos{color:var(--success);}
   .profileListRow .plAmount.neg{color:var(--danger);}
 
-  .profileEmpty{text-align:center; color:var(--muted); padding:18px 0; font-size:12px; border:1.5px dashed #e2e8f0; border-radius:10px;}
-
-  /* --- کسٹمر/سپلائر پروفائل: فوری رابطہ بٹن (کال/واٹس ایپ/ایس ایم ایس) --- */
-  .profileContactRow{display:flex; gap:8px; margin-bottom:14px;}
-  .profileContactRow a{flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:9px 4px; border-radius:10px; text-decoration:none; font-size:11px; font-weight:700;}
-  .profileContactRow .cCall{background:#eef2ff; color:var(--primary-dark);}
-  .profileContactRow .cWhatsapp{background:#dcfce7; color:var(--success);}
-  .profileContactRow .cSms{background:#fff7ed; color:#c2410c;}
-  .profileContactRow .cGmail{background:#fee2e2; color:#b91c1c;}
-  .profileContactRow .cDisabled{background:#f1f5f9; color:var(--muted); opacity:.6; pointer-events:none;}
+  .profileEmpty{text-align:center; color:var(--muted); padding:18px 0; font-size:12px; border:1.5px dashed #e2e8f0; border-radius:10px; background:#fff;}
 
   /* --- Customers/Suppliers لسٹ: کمپیکٹ ایک لائن والی قطاریں (بہت سارے ایک ساتھ نظر آئیں) --- */
   .partyRow{display:flex; align-items:center; gap:8px; background:var(--card); border-radius:10px; padding:8px 10px; margin-bottom:6px; box-shadow:var(--shadow);}
@@ -1926,8 +1956,8 @@
 
     <!-- PARTY PROFILE MODAL (کسٹمر/سپلائر کی Completed 360° پروفائل — ایک ہی جگہ سب کچھ) -->
     <div class="modalOverlay" id="profileModal" onclick="if(event.target===this) this.classList.remove('show')">
-      <div class="profileBox">
-        <div class="profileHead">
+      <div class="profileBox" id="profileBoxEl">
+        <div class="profileHead" id="profileHeadEl">
           <div class="pAvatarLg" id="profileAvatar">👤</div>
           <div class="pInfo">
             <div class="pName" id="profileName">—</div>
@@ -1936,13 +1966,15 @@
           <span class="closeBtn" onclick="openEditPartyModal()" title="Edit" style="margin-inline-end:6px;">✏️</span>
           <span class="closeBtn" onclick="closeProfileModal()">✖</span>
         </div>
-        <div class="profileBody">
-          <div id="profileEmailRow" style="display:none; align-items:center; gap:6px; margin-bottom:10px;"></div>
-          <div id="profileKeywordRow" style="display:flex; align-items:center; gap:6px; margin-bottom:10px;"></div>
-          <div class="profileContactRow" id="profileContactRow"></div>
-          <div class="profileFigures" id="profileFigures"></div>
-          <div class="profileQuickActions" id="profileQuickActions"></div>
-          <div id="profileSections"></div>
+        <div class="profileContactRow" id="profileContactRow"></div>
+        <div class="profileBodyFlex">
+          <div class="profileSidebar" id="profileQuickActions"></div>
+          <div class="profileMain">
+            <div id="profileEmailRow" style="display:none; align-items:center; gap:6px; margin-bottom:10px;"></div>
+            <div id="profileKeywordRow" style="display:flex; align-items:center; gap:6px; margin-bottom:10px;"></div>
+            <div class="profileFigures" id="profileFigures"></div>
+            <div id="profileSections"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -7245,7 +7277,78 @@ function buildContactButtons(phone, email){
   return phoneHtml + gmailHtml;
 }
 
-// ---------- کسی کسٹمر کے پروفائل سے سیدھا نیا بل شروع کریں ----------
+// ---------- Bills/Purchase Orders کے فلٹر بار کے لیے: تاریخ کی حد نکالیں (Today/This Week/Last Week/This Month/Last Month/This Year/Custom) ----------
+function getDateRangeForKey(key, customFrom, customTo){
+  const now = new Date();
+  const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const today = startOfDay(now);
+  switch(key){
+    case 'today': return {from: today, to: new Date(today.getTime() + 86400000 - 1)};
+    case 'week': {
+      const from = new Date(today); from.setDate(today.getDate() - today.getDay());
+      return {from, to: new Date(from.getTime() + 7*86400000 - 1)};
+    }
+    case 'lastweek': {
+      const from = new Date(today); from.setDate(today.getDate() - today.getDay() - 7);
+      return {from, to: new Date(from.getTime() + 7*86400000 - 1)};
+    }
+    case 'month': {
+      const from = new Date(today.getFullYear(), today.getMonth(), 1);
+      return {from, to: new Date(new Date(today.getFullYear(), today.getMonth()+1, 1).getTime() - 1)};
+    }
+    case 'lastmonth': {
+      const from = new Date(today.getFullYear(), today.getMonth()-1, 1);
+      return {from, to: new Date(new Date(today.getFullYear(), today.getMonth(), 1).getTime() - 1)};
+    }
+    case 'year': {
+      const from = new Date(today.getFullYear(), 0, 1);
+      return {from, to: new Date(new Date(today.getFullYear()+1, 0, 1).getTime() - 1)};
+    }
+    case 'custom': {
+      if(!customFrom || !customTo) return null;
+      const from = new Date(customFrom);
+      const to = new Date(customTo); to.setHours(23,59,59,999);
+      return {from, to};
+    }
+    default: return null; // 'all' — کوئی حد نہیں
+  }
+}
+function isDateInRange(dateVal, range){
+  if(!range) return true;
+  const d = new Date(dateVal);
+  return d >= range.from && d <= range.to;
+}
+// ---------- کسی invoice پر ابھی کتنی رقم باقی ہے (نہ ہونے کی صورت میں credit سے اندازہ) — Pending/Cleared فلٹر کے لیے ----------
+function getInvoiceAmountDue(inv){
+  return (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
+}
+
+let profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
+let profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
+
+// ---------- فلٹر بار کا مشترکہ HTML (Bills اور Purchase Orders دونوں کے لیے استعمال ہوتا ہے) ----------
+function buildFilterBarHtml(prefix, statusOptions, filterState, onChangeFn){
+  const dateOptions = [
+    ['all','All Time'], ['today','Today'], ['week','This Week'], ['lastweek','Last Week'],
+    ['month','This Month'], ['lastmonth','Last Month'], ['year','This Year'], ['custom','Custom Range…']
+  ];
+  const tabsHtml = statusOptions.map(([key,label]) =>
+    `<button class="${filterState.status===key?'active':''}" onclick="${onChangeFn}('status','${key}')">${label}</button>`
+  ).join('');
+  const dateSelectHtml = `<select class="pfDateSelect" onchange="${onChangeFn}('dateKey', this.value)">
+    ${dateOptions.map(([k,l]) => `<option value="${k}" ${filterState.dateKey===k?'selected':''}>${l}</option>`).join('')}
+  </select>`;
+  const customRangeHtml = filterState.dateKey === 'custom' ? `
+    <div class="pfCustomRange">
+      <input type="date" id="${prefix}CustomFrom" value="${filterState.customFrom||''}">
+      <span style="font-size:11px; color:var(--muted);">to</span>
+      <input type="date" id="${prefix}CustomTo" value="${filterState.customTo||''}">
+      <button onclick="${onChangeFn}('customApply', null)">Apply</button>
+    </div>` : '';
+  return `<div class="pfFilterBar"><div class="pfStatusTabs">${tabsHtml}</div>${dateSelectHtml}${customRangeHtml}</div>`;
+}
+
+
 function startNewBillForCustomer(customerId){
   closeProfileModal();
   goTo('billing');
@@ -7260,9 +7363,15 @@ function openCustomerProfile(customerId){
 
   currentProfileId = c.customer_id;
   currentProfileType = 'customers';
+  profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' }; // ---------- ہر بار نیا پروفائل کھلنے پر فلٹر ری سیٹ ----------
+
+  const boxEl = document.getElementById('profileBoxEl');
+  boxEl.classList.remove('themeSupplier'); boxEl.classList.add('themeCustomer');
+
   renderAvatarInto('profileAvatar', c.photo, '👤');
   document.getElementById('profileName').textContent = c.name;
-  document.getElementById('profileMeta').textContent = c.phone ? '📱 ' + c.phone : 'No phone number saved';
+  document.getElementById('profileMeta').innerHTML = c.phone
+    ? `<a href="tel:+${c.phone.replace(/[^0-9]/g,'')}">📱 ${c.phone}</a>` : 'No phone number saved';
   document.getElementById('profileContactRow').innerHTML = buildContactButtons(c.phone);
   document.getElementById('profileEmailRow').style.display = 'none'; // یہ خانہ فی الحال صرف سپلائر پروفائل کے لیے ہے
   document.getElementById('profileKeywordRow').innerHTML = `
@@ -7280,30 +7389,76 @@ function openCustomerProfile(customerId){
     <div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
 
-  // --- فوری اقدامات: New Bill سب سے پہلے (سب سے زیادہ استعمال ہونے والا عمل) ---
-  document.getElementById('profileQuickActions').innerHTML = `
-    <button style="background:var(--primary); color:#fff;" onclick="startNewBillForCustomer(${c.customer_id})">🧾 New Bill</button>
-    <button style="background:#fef2f2; color:var(--danger);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});">📥 Collect</button>
-    <button style="background:#dcfce7; color:var(--success);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});">➕ Wallet</button>
-    <button style="background:#fff7ed; color:#c2410c; flex-basis:100%;" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});">⚖️ Set/Adjust Opening Balance (no bill needed)</button>
+  // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل) ---
+  const sideEl = document.getElementById('profileQuickActions');
+  sideEl.innerHTML = `
+    <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">New Bill</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">Collect</span></button>
+    <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
+    <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
+    ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
   `;
-  if(c.total_receivable > 0){
-    document.getElementById('profileQuickActions').innerHTML += `
-      <button style="background:#fff7ed; color:#c2410c; flex-basis:100%;" onclick="openCustomerReminderModal(${c.customer_id})">📢 Send Payment Reminder</button>
-    `;
-  }
 
-  // --- اس کسٹمر کے تمام bills — مکمل شدہ بھی، منتظر (pending approval) بھی، سب ایک ساتھ تاریخ کے مطابق ---
+  renderCustomerBillsSection(c.customer_id);
+
+  // --- اس کسٹمر نے جو آئٹمز واپس کیے ہیں ---
+  const returnedItems = [];
+  invoicesData.filter(inv => inv.customer_id === customerId).forEach(inv => {
+    inv.items.filter(i => i.returned).forEach(i => {
+      returnedItems.push({invoice_no: inv.invoice_no, name: i.name, qty: i.returnQty, amount: i.returnAmount});
+    });
+  });
+  const returnsHtml = returnedItems.length === 0
+    ? `<div class="profileEmpty">No items returned by this customer</div>`
+    : returnedItems.map(r => `
+        <div class="profileListRow" style="cursor:default;">
+          <div><div class="plMain">↩️ ${r.name}</div><div class="plMeta">${r.invoice_no} | Qty: ${r.qty}</div></div>
+          <div class="plAmount">Rs. ${r.amount.toLocaleString()}</div>
+        </div>`).join('');
+
+  // --- Completed لین دین کی تاریخ (والٹ + وصولی سب ایک جگہ) ---
+  const txnHtml = c.walletHistory.length === 0
+    ? `<div class="profileEmpty">No transactions yet</div>`
+    : c.walletHistory.map(h => {
+        let label;
+        if(h.type === 'deposit') label = '➕ Add to Wallet';
+        else if(h.type === 'redeem') label = '➖ Withdrawn from Wallet';
+        else label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`;
+        return `<div class="profileListRow" style="cursor:default;"><div class="plMain">${label}</div><div class="plAmount">Rs. ${h.amount.toLocaleString()}</div></div>`;
+      }).join('');
+
+  document.getElementById('profileSections').insertAdjacentHTML('beforeend', `
+    <div class="profileSectionTitle"><span>↩️ Returned Items</span><span class="cnt">${returnedItems.length} item(s)</span></div>
+    <div>${returnsHtml}</div>
+    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${c.walletHistory.length} entries</span></div>
+    <div>${txnHtml}</div>
+  `);
+
+  document.getElementById('profileModal').classList.add('show');
+}
+
+// ---------- کسٹمر کے Bills سیکشن کا صرف وہی حصہ بنائیں/دوبارہ بنائیں جو فلٹر سے متاثر ہوتا ہے ----------
+function renderCustomerBillsSection(customerId){
   const completedBills = invoicesData.filter(inv => inv.customer_id === customerId).map(inv => ({
     kind:'invoice', when: inv.created_at, inv
   }));
   const pendingForCustomer = pendingBillsData.filter(p => p.customer_id === customerId && p.status !== 'approved').map(p => ({
     kind:'pending', when: p.submitted_at, p
   }));
-  const allBills = [...completedBills, ...pendingForCustomer].sort((a,b) => new Date(b.when) - new Date(a.when));
+  let allBills = [...completedBills, ...pendingForCustomer].sort((a,b) => new Date(b.when) - new Date(a.when));
+
+  // ---------- اسٹیٹس فلٹر: Pending = ابھی رقم باقی ہے یا منظوری کا انتظار ہے، Cleared = مکمل ادا شدہ ----------
+  if(profileBillFilter.status !== 'all'){
+    allBills = allBills.filter(row => {
+      const isPending = row.kind === 'pending' || getInvoiceAmountDue(row.inv) > 0;
+      return profileBillFilter.status === 'pending' ? isPending : !isPending;
+    });
+  }
+  const range = getDateRangeForKey(profileBillFilter.dateKey, profileBillFilter.customFrom, profileBillFilter.customTo);
+  allBills = allBills.filter(row => isDateInRange(row.when, range));
 
   const billsHtml = allBills.length === 0
-    ? `<div class="profileEmpty">No bills for this customer yet</div>`
+    ? `<div class="profileEmpty">No bills match this filter</div>`
     : allBills.map(row => {
         if(row.kind === 'invoice'){
           const inv = row.inv;
@@ -7326,43 +7481,32 @@ function openCustomerProfile(customerId){
         }
       }).join('');
 
-  // --- Completed لین دین کی تاریخ (والٹ + وصولی سب ایک جگہ) ---
-  const txnHtml = c.walletHistory.length === 0
-    ? `<div class="profileEmpty">No transactions yet</div>`
-    : c.walletHistory.map(h => {
-        let label;
-        if(h.type === 'deposit') label = '➕ Add to Wallet';
-        else if(h.type === 'redeem') label = '➖ Withdrawn from Wallet';
-        else label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`;
-        return `<div class="profileListRow" style="cursor:default;"><div class="plMain">${label}</div><div class="plAmount">Rs. ${h.amount.toLocaleString()}</div></div>`;
-      }).join('');
+  const filterBarHtml = buildFilterBarHtml('profileBills',
+    [['all','All'],['pending','Pending'],['cleared','Cleared']], profileBillFilter, 'applyCustomerBillFilter');
 
-  // --- اس کسٹمر نے جو آئٹمز واپس کیے ہیں، سب ایک جگہ (اگر کوئی ریٹرن نہ ہو تو سیکشن خودکار خالی نظر آئے) ---
-  const returnedItems = [];
-  invoicesData.filter(inv => inv.customer_id === customerId).forEach(inv => {
-    inv.items.filter(i => i.returned).forEach(i => {
-      returnedItems.push({invoice_no: inv.invoice_no, name: i.name, qty: i.returnQty, amount: i.returnAmount});
-    });
-  });
-  const returnsHtml = returnedItems.length === 0
-    ? `<div class="profileEmpty">No items returned by this customer</div>`
-    : returnedItems.map(r => `
-        <div class="profileListRow" style="cursor:default;">
-          <div><div class="plMain">↩️ ${r.name}</div><div class="plMeta">${r.invoice_no} | Qty: ${r.qty}</div></div>
-          <div class="plAmount">Rs. ${r.amount.toLocaleString()}</div>
-        </div>`).join('');
-
-  document.getElementById('profileSections').innerHTML = `
+  const wrap = document.getElementById('profileSections');
+  const existing = document.getElementById('profileBillsBlock');
+  const blockHtml = `<div id="profileBillsBlock">
     <div class="profileSectionTitle"><span>🧾 All Bills</span><span class="cnt">${allBills.length} bills</span></div>
+    ${filterBarHtml}
     <div>${billsHtml}</div>
-    <div class="profileSectionTitle"><span>↩️ Returned Items</span><span class="cnt">${returnedItems.length} item(s)</span></div>
-    <div>${returnsHtml}</div>
-    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${c.walletHistory.length} entries</span></div>
-    <div>${txnHtml}</div>
-  `;
-
-  document.getElementById('profileModal').classList.add('show');
+  </div>`;
+  if(existing) existing.outerHTML = blockHtml;
+  else wrap.innerHTML = blockHtml + wrap.innerHTML;
 }
+
+// ---------- Bills فلٹر بار سے کال ہوتا ہے (اسٹیٹس ٹیب یا تاریخ ڈراپ ڈاؤن بدلنے پر) ----------
+function applyCustomerBillFilter(field, value){
+  if(field === 'customApply'){
+    profileBillFilter.customFrom = document.getElementById('profileBillsCustomFrom').value;
+    profileBillFilter.customTo = document.getElementById('profileBillsCustomTo').value;
+  } else {
+    profileBillFilter[field] = value;
+  }
+  renderCustomerBillsSection(currentProfileId);
+}
+
+// ---------- کسی کسٹمر کے پروفائل سے سیدھا نیا بل شروع کریں ----------
 
 // ---------- سپلائر پروفائل ----------
 // ---------- تاریخ کو 'YYYY-MM-DD' سے 'DD-MM-YYYY' میں بدلیں (پاکستان/برصغیر کا معیاری انداز) ----------
@@ -7502,9 +7646,15 @@ function openSupplierProfile(supplierId){
 
   currentProfileId = s.supplier_id;
   currentProfileType = 'suppliers';
+  profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' }; // ---------- ہر بار نیا پروفائل کھلنے پر فلٹر ری سیٹ ----------
+
+  const boxEl = document.getElementById('profileBoxEl');
+  boxEl.classList.remove('themeCustomer'); boxEl.classList.add('themeSupplier');
+
   renderAvatarInto('profileAvatar', s.photo, '🏭');
   document.getElementById('profileName').textContent = s.name;
-  document.getElementById('profileMeta').textContent = s.phone ? '📱 ' + s.phone : 'No phone number saved';
+  document.getElementById('profileMeta').innerHTML = s.phone
+    ? `<a href="tel:+${s.phone.replace(/[^0-9]/g,'')}">📱 ${s.phone}</a>` : 'No phone number saved';
   document.getElementById('profileContactRow').innerHTML = buildContactButtons(s.phone, s.email);
   document.getElementById('profileKeywordRow').innerHTML = `
     <span style="font-size:12px; color:var(--muted);">🔑</span>
@@ -7528,15 +7678,16 @@ function openSupplierProfile(supplierId){
     <div class="pfBox"><div class="pfLabel">📤 Payable (we owe)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
   `;
 
+  // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم ---
   document.getElementById('profileQuickActions').innerHTML = `
-    <button style="background:#eef2ff; color:var(--primary-dark);" onclick="closeProfileModal(); openPoModal(${s.supplier_id});">📦 New Purchase Order</button>
-    <button style="background:#fef2f2; color:var(--danger);" onclick="openPaySupplierModal(${s.supplier_id});">💵 Pay Supplier</button>
+    <button style="background:linear-gradient(155deg,#3b82f6,#1e3a8a);" onclick="closeProfileModal(); openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">New PO</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">Pay Supplier</span></button>
   `;
 
   // --- 🏦 بینک اکاؤنٹ کی تفصیل ---
   document.getElementById('profileSections').innerHTML = `
     <div class="profileSectionTitle"><span>🏦 Bank Account Details</span></div>
-    <div style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:14px;">
+    <div style="background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.06); border-radius:12px; padding:12px; margin-bottom:14px;">
       <select id="supplierBankType" onchange="updateSupplierBankField(${s.supplier_id}, 'bankAccountType', this.value)" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <option value="">— Select Bank/Wallet —</option>
         <option value="EasyPaisa">EasyPaisa</option>
@@ -7581,11 +7732,42 @@ function openSupplierProfile(supplierId){
   document.getElementById('supplierBankType').value = s.bankAccountType || '';
   updateSupplierBankImagePreview(s);
 
-  // --- اس سپلائر کے تمام پرچیز orders ---
-  const orders = s.purchaseHistory || [];
+  renderSupplierPoSection(s.supplier_id);
+
+  // --- 📜 لین دین کی تاریخ (نقد ادائیگیاں + آئٹم ریٹرن، سب ایک جگہ) ---
+  const ledger = s.ledgerHistory || [];
+  const ledgerHtml = ledger.length === 0
+    ? `<div class="profileEmpty">No transactions yet</div>`
+    : ledger.map(h => {
+        const label = h.type === 'payment' ? '💵 Payment Sent' : h.type === 'return' ? '↩️ Item Return' : h.type;
+        const cls = h.type === 'payment' ? 'neg' : 'pos';
+        return `<div class="profileListRow" style="cursor:default;"><div><div class="plMain">${label}</div><div class="plMeta">${h.date}${h.note ? ' — ' + h.note : ''}</div></div><div class="plAmount ${cls}">Rs. ${h.amount.toLocaleString()}</div></div>`;
+      }).join('');
+
+  document.getElementById('profileSections').insertAdjacentHTML('beforeend', `
+    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${ledger.length} entries</span></div>
+    <div>${ledgerHtml}</div>
+  `);
+
+  document.getElementById('profileModal').classList.add('show');
+}
+
+// ---------- سپلائر کے Purchase Orders سیکشن کا صرف وہی حصہ بنائیں/دوبارہ بنائیں جو فلٹر سے متاثر ہوتا ہے ----------
+function renderSupplierPoSection(supplierId){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  if(!s) return;
+  let orders = (s.purchaseHistory || []).map((po, idx) => ({...po, po_idx: idx}));
+
+  if(profilePoFilter.status !== 'all'){
+    orders = orders.filter(po => profilePoFilter.status === 'pending' ? po.status !== 'received' : po.status === 'received');
+  }
+  const range = getDateRangeForKey(profilePoFilter.dateKey, profilePoFilter.customFrom, profilePoFilter.customTo);
+  orders = orders.filter(po => isDateInRange(po.date, range));
+
   const ordersHtml = orders.length === 0
-    ? `<div class="profileEmpty">No purchase orders from this supplier yet</div>`
-    : orders.map((po, idx) => {
+    ? `<div class="profileEmpty">No purchase orders match this filter</div>`
+    : orders.map(po => {
+        const idx = po.po_idx;
         const isPending = po.status !== 'received';
         const daysPending = daysSince(po.date);
         const statusTag = isPending
@@ -7605,27 +7787,29 @@ function openSupplierProfile(supplierId){
         </div>`;
       }).join('');
 
-  document.getElementById('profileSections').innerHTML += `
+  const filterBarHtml = buildFilterBarHtml('profilePo',
+    [['all','All'],['pending','Pending'],['received','Received']], profilePoFilter, 'applySupplierPoFilter');
+
+  const wrap = document.getElementById('profileSections');
+  const existing = document.getElementById('profilePoBlock');
+  const blockHtml = `<div id="profilePoBlock">
     <div class="profileSectionTitle"><span>📦 All Purchase Orders</span><span class="cnt">${orders.length} orders</span></div>
+    ${filterBarHtml}
     <div>${ordersHtml}</div>
-  `;
+  </div>`;
+  if(existing) existing.outerHTML = blockHtml;
+  else wrap.insertAdjacentHTML('beforeend', blockHtml);
+}
 
-  // --- 📜 لین دین کی تاریخ (نقد ادائیگیاں + آئٹم ریٹرن، سب ایک جگہ) ---
-  const ledger = s.ledgerHistory || [];
-  const ledgerHtml = ledger.length === 0
-    ? `<div class="profileEmpty">No transactions yet</div>`
-    : ledger.map(h => {
-        const label = h.type === 'payment' ? '💵 Payment Sent' : h.type === 'return' ? '↩️ Item Return' : h.type;
-        const cls = h.type === 'payment' ? 'neg' : 'pos';
-        return `<div class="profileListRow" style="cursor:default;"><div><div class="plMain">${label}</div><div class="plMeta">${h.date}${h.note ? ' — ' + h.note : ''}</div></div><div class="plAmount ${cls}">Rs. ${h.amount.toLocaleString()}</div></div>`;
-      }).join('');
-
-  document.getElementById('profileSections').innerHTML += `
-    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${ledger.length} entries</span></div>
-    <div>${ledgerHtml}</div>
-  `;
-
-  document.getElementById('profileModal').classList.add('show');
+// ---------- Purchase Orders فلٹر بار سے کال ہوتا ہے ----------
+function applySupplierPoFilter(field, value){
+  if(field === 'customApply'){
+    profilePoFilter.customFrom = document.getElementById('profilePoCustomFrom').value;
+    profilePoFilter.customTo = document.getElementById('profilePoCustomTo').value;
+  } else {
+    profilePoFilter[field] = value;
+  }
+  renderSupplierPoSection(currentProfileId);
 }
 
 // ---------- سپلائر کا Gmail ایڈریس محفوظ کریں ----------
