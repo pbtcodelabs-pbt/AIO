@@ -1177,6 +1177,7 @@
     </div>
 
     <button onclick="openPackagePlansModal()" style="background:#eef2ff; color:var(--primary-dark); margin-top:10px;">🗂️ View Package Plans</button>
+    <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px;">📤 Share This App</button>
     <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
@@ -1304,6 +1305,7 @@
           <div class="hbcOwnerName" id="hbcOwnerName"></div>
           <div class="hbcPhone" id="hbcPhone"></div>
         </div>
+        <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="margin-right:6px;">📤</button>
         <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
       </div>
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
@@ -2475,6 +2477,9 @@
             <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Developer Gmail</div>
             <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
+            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">App Share Link</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Paste your live GitHub Pages link here. The 📤 Share button on the Login and Home screens will send this link on WhatsApp/etc — update it anytime the link changes, and it updates everywhere automatically.</div>
+            <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Add as many as you like (EasyPaisa, JazzCash, Bank, etc). Customers will see these in Package Plans and can switch between them — useful if they don't have your default wallet.</div>
             <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
@@ -2996,6 +3001,9 @@ const DEFAULT_SETTINGS = {
   devWhatsapp: '923206793793',
   devSms: '03206793793',
   devEmail: 'pbtcodelabs@gmail.com',
+  // ---------- 🔗 ایپ کا لائیو لنک (GitHub Pages وغیرہ) — Login/Home پر 📤 Share بٹن اسی لنک کو
+  // WhatsApp/کسی بھی ایپ پر بھیجتا ہے۔ یہاں سے بدلیں تو ہر جگہ خودکار نیا لنک استعمال ہوگا ----------
+  appShareLink: '',
   // ---------- 🏦 آپ کے اکاؤنٹس — سبسکرپشن کی رقم وصول کرنے کے لیے، کسٹمر Package Plans میں اپنی مرضی کا بینک/والیٹ چن سکے ----------
   devPaymentType: '',
   devPaymentNumber: '',
@@ -3310,6 +3318,25 @@ function openDevChat(context){
   document.getElementById('devChatUidLine').textContent = `Your Device ID: ${uid}`;
   document.getElementById('devChatPanel').classList.toggle('show');
 }
+
+// ---------- 📤 ایپ کا لائیو لنک شیئر کریں — Login اور Home دونوں جگہ سے کال ہوتا ہے۔
+// Web Share API سپورٹ ہو تو یوزر اپنی مرضی کی ایپ (WhatsApp, SMS, Email وغیرہ) چن سکتا ہے،
+// ورنہ سیدھا WhatsApp پر کھل جائے گا۔ لنک Settings > Admin Control > App Share Link سے بدلا جا سکتا ہے۔ ----------
+async function shareAppLink(){
+  const link = AppState.settings.appShareLink;
+  if(!link){
+    alert('Share link not set yet. Go to Home → Settings → Admin Control → "App Share Link" and paste your GitHub Pages link there first.');
+    return;
+  }
+  const text = `Try our AIO POS App — free trial included:\n${link}`;
+  if(navigator.share){
+    try{ await navigator.share({ title: 'AIO POS App', text: text }); }
+    catch(err){ /* یوزر نے شیئر Cancel کر دیا — کوئی ایکشن درکار نہیں */ }
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+}
+
 
 function buildDevChatMessage(){
   const uid = getOrCreateDeviceUID();
@@ -10131,6 +10158,7 @@ async function unlockAdminControl(){
   document.getElementById('devWhatsappInput').value = AppState.settings.devWhatsapp || '';
   document.getElementById('devSmsInput').value = AppState.settings.devSms || '';
   document.getElementById('devEmailInput').value = AppState.settings.devEmail || '';
+  document.getElementById('appShareLinkInput').value = AppState.settings.appShareLink || '';
   // ---------- Payment اکاؤنٹ dropdown خالی ہو تو بھریں (وہی BANK_LOGIN_URLS جو سپلائر اکاؤنٹس میں استعمال ہوتی ہے) ----------
   const payTypeSel = document.getElementById('devPaymentTypeInput');
   if(payTypeSel.options.length <= 1){
@@ -10198,6 +10226,7 @@ async function saveAdminControl(){
   AppState.settings.devWhatsapp = document.getElementById('devWhatsappInput').value.trim();
   AppState.settings.devSms = document.getElementById('devSmsInput').value.trim();
   AppState.settings.devEmail = document.getElementById('devEmailInput').value.trim();
+  AppState.settings.appShareLink = document.getElementById('appShareLinkInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
   persistAllData();
