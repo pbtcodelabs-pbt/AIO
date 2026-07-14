@@ -2569,13 +2569,13 @@
           <div id="papPhotoPreview" onclick="triggerPapPhotoUpload()" style="width:64px; height:64px; border-radius:50%; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:26px; overflow:hidden; border:2px dashed #dbe1ea; cursor:pointer;">👤</div>
         </div>
         <div style="text-align:center; font-size:11px; color:var(--muted); margin-bottom:10px;">Tap the circle to add your photo (optional — shown on the shareable account card)</div>
-        <input type="text" id="papTitle" placeholder="Account Title (e.g. Abdul Hafeez / Shop Account)">
-        <select id="papBankName" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
+        <input type="text" id="papTitle" placeholder="Account Title (e.g. Abdul Hafeez / Shop Account)" oninput="savePapDraft()">
+        <select id="papBankName" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;" onchange="savePapDraft()">
           <option value="">— Select Bank/Wallet —</option>
         </select>
-        <input type="text" id="papNumber" placeholder="Account Number">
+        <input type="text" id="papNumber" placeholder="Account Number" oninput="savePapDraft()">
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px;">
-          <input type="checkbox" id="papShowOnReceipt" style="width:18px; height:18px; margin:0;">
+          <input type="checkbox" id="papShowOnReceipt" style="width:18px; height:18px; margin:0;" onchange="savePapDraft()">
           Show this account on printed bill footer
         </label>
         <div class="modalBtns">
@@ -5643,7 +5643,21 @@ async function triggerPartyPhotoUpload(){
 // ---------- Payment Account کے مالک کی تصویر — Share Card پر دکھانے کے لیے (اختیاری) ----------
 let papPhotoDataUrl = null;
 async function triggerPapPhotoUpload(){
+  // ---------- کیمرہ کے دوران Add Account والا modal عارضی طور پر چھپا دیں (ورنہ دونوں ایک ساتھ نظر آ کر الجھن پیدا کرتے ہیں)،
+  // اور ابھی تک بھری ہوئی تفصیلات کو ایک محفوظ ڈرافٹ میں رکھ لیں — اگر Android کیمرے کی اجازت والے مرحلے پر صفحہ دوبارہ لوڈ کر دے
+  // (کم میموری والے فونز پر عام مسئلہ) تو بھی یہ معلومات ضائع نہ ہوں، دوبارہ کھولنے پر واپس مل جائیں ----------
+  savePapDraft();
+  document.getElementById('addPaymentAccountModal').classList.remove('show');
   await startPhotoCapture('paymentaccount', 'circle', '📷 Account Photo');
+}
+function savePapDraft(){
+  saveToStorage('papDraft', {
+    title: document.getElementById('papTitle').value,
+    bank: document.getElementById('papBankName').value,
+    number: document.getElementById('papNumber').value,
+    showOnReceipt: document.getElementById('papShowOnReceipt').checked,
+    photo: papPhotoDataUrl
+  });
 }
 
 // ---------- مشترکہ کیمرہ اسٹارٹ اپ لاجک — Item اور Party دونوں فوٹو کیپچر کے لیے ایک ہی جگہ سے ----------
@@ -5701,10 +5715,11 @@ async function startPhotoCapture(mode, defaultShape, title){
   }
 
   try{
-    // ---------- پہلے پیچھے والا کیمرہ آزمائیں، نہ ملے تو کوئی بھی دستیاب کیمرہ (کچھ WebViews facingMode سپورٹ نہیں کرتے) ----------
+    // ---------- عام طور پر پیچھے والا کیمرہ (پراڈکٹ وغیرہ کے لیے بہتر)، لیکن بندے کی اپنی تصویر (Party/Payment Account) کے لیے سامنے والا (سیلفی) کیمرہ ترجیح دیں ----------
+    const preferFront = (photoCaptureMode === 'party' || photoCaptureMode === 'paymentaccount');
     let stream;
     try{
-      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal: preferFront ? 'user' : 'environment'}}});
     } catch(innerErr){
       stream = await navigator.mediaDevices.getUserMedia({video:true});
     }
@@ -6092,6 +6107,9 @@ function closeItemPhotoCapture(){
   const img = document.getElementById('itemPhotoStaticImg');
   if(img){ img.style.display = 'none'; img.src = ''; }
   document.getElementById('itemPhotoModal').classList.remove('show');
+  if(photoCaptureMode === 'paymentaccount'){
+    document.getElementById('addPaymentAccountModal').classList.add('show');
+  }
 }
 
 // ---------- Expand/Collapse Card ----------
@@ -9976,13 +9994,35 @@ function renderMyPaymentAccounts(){
       </div>
       <div class="paymentAccInfo">
         <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank">${acc.type || '—'}</span></div>
-        <div class="paymentAccNumber">${acc.number || '—'}</div>
+        <div class="paymentAccNumber" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
       </div>
       <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer" style="border:none; background:none; font-size:18px; padding:4px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
-      <button onclick="shareAccountCard(${idx})" title="Share as a card" style="border:none; background:none; font-size:18px; padding:4px;">🎴</button>
+      <button onclick="shareAccountCard(${idx})" title="Share as a landscape card" style="border:none; background:none; font-size:18px; padding:4px;">🎴</button>
+      <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster" style="border:none; background:none; font-size:18px; padding:4px;">🖼️</button>
       <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
     </div>
   `).join('');
+}
+// ---------- اکاؤنٹ نمبر پر ٹیپ کریں تو کلپ بورڈ میں کاپی ہو جائے ----------
+function copyMyAccountNumber(idx){
+  const acc = AppState.settings.paymentAccounts[idx];
+  if(!acc) return;
+  const doCopy = () => navigator.clipboard && navigator.clipboard.writeText
+    ? navigator.clipboard.writeText(acc.number)
+    : Promise.reject();
+  doCopy().catch(() => {
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = acc.number; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){}
+  }).finally(() => {
+    renderMyPaymentAccounts();
+    const els = document.querySelectorAll('.paymentAccNumber');
+    if(els[idx]){ const orig = els[idx].textContent; els[idx].textContent = '✅ Copied'; setTimeout(() => renderMyPaymentAccounts(), 1200); }
+  });
 }
 
 // ---------- کسی اکاؤنٹ کو بل کے فٹر پر دکھانا/چھپانا ٹوگل کریں ----------
@@ -9999,12 +10039,24 @@ function openAddPaymentAccountModal(){
   const bankSel = document.getElementById('papBankName');
   bankSel.innerHTML = `<option value="">— Select Bank/Wallet —</option>` +
     Object.keys(BANK_LOGIN_URLS).map(bank => `<option value="${bank}">${bank}</option>`).join('');
-  document.getElementById('papTitle').value = '';
-  document.getElementById('papBankName').value = '';
-  document.getElementById('papNumber').value = '';
-  document.getElementById('papShowOnReceipt').checked = false;
-  papPhotoDataUrl = null;
-  document.getElementById('papPhotoPreview').innerHTML = '👤';
+
+  // ---------- اگر کیمرے کے دوران صفحہ دوبارہ لوڈ ہو گیا تھا تو یہاں ابھی نامکمل ڈرافٹ مل سکتا ہے — واپس بھر دیں ----------
+  const draft = loadFromStorage('papDraft', null);
+  if(draft && (draft.title || draft.bank || draft.number || draft.photo)){
+    document.getElementById('papTitle').value = draft.title || '';
+    document.getElementById('papBankName').value = draft.bank || '';
+    document.getElementById('papNumber').value = draft.number || '';
+    document.getElementById('papShowOnReceipt').checked = !!draft.showOnReceipt;
+    papPhotoDataUrl = draft.photo || null;
+    renderAvatarInto('papPhotoPreview', papPhotoDataUrl, '👤');
+  } else {
+    document.getElementById('papTitle').value = '';
+    document.getElementById('papBankName').value = '';
+    document.getElementById('papNumber').value = '';
+    document.getElementById('papShowOnReceipt').checked = false;
+    papPhotoDataUrl = null;
+    document.getElementById('papPhotoPreview').innerHTML = '👤';
+  }
   document.getElementById('addPaymentAccountModal').classList.add('show');
 }
 
@@ -10024,6 +10076,7 @@ function saveNewPaymentAccount(){
     photo: papPhotoDataUrl || null,
     showOnReceipt: document.getElementById('papShowOnReceipt').checked
   });
+  saveToStorage('papDraft', null); // ---------- کامیابی سے سیو ہو گیا، اب ڈرافٹ کی ضرورت نہیں ----------
   document.getElementById('addPaymentAccountModal').classList.remove('show');
   renderMyPaymentAccounts();
 }
@@ -10278,6 +10331,103 @@ function wrapCenteredText(ctx, text, cx, y, maxWidth, lineHeight){
 }
 
 // ---------- کارڈ بنائیں اور Web Share API (یا فال بیک) سے شیئر کر دیں ----------
+// ---------- 🖼️ متبادل ڈیزائن — سیدھا کھڑا (Portrait) "منی پوسٹر" — تصویر اوپر بڑی، نیچے اکاؤنٹ نمبر، سب سے نیچے پیغام —
+// موبائل پروفائل پکچر کی طرح، خاص طور پر تصویر لگی ہو تو اس انداز میں زیادہ خوبصورت لگتا ہے ----------
+async function renderAccountPosterToCanvas(acc){
+  const canvas = document.createElement('canvas');
+  const W = 640, H = 900;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const theme = getAccountCardTheme(acc.type);
+  const cx = W / 2;
+
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, theme.bg1);
+  grad.addColorStop(1, theme.bgDeep || theme.bg2);
+  ctx.fillStyle = grad;
+  roundRectPath(ctx, 0, 0, W, H, 26);
+  ctx.fill();
+
+  ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 3;
+  roundRectPath(ctx, 10, 10, W-20, H-20, 20);
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+
+  // ---------- اوپر بڑی تصویر (پورٹریٹ سٹائل کا مرکزی حصہ) — نہ ہو تو بڑا مونوگرام ----------
+  if(acc.photo){
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cx, 260, 160, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+        ctx.drawImage(img, cx-160, 100, 320, 320);
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(cx, 260, 160, 0, Math.PI*2); ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
+        resolve();
+      };
+      img.onerror = resolve;
+      img.src = acc.photo;
+    });
+  } else {
+    const initials = (acc.type || '?').replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase() || '$';
+    ctx.beginPath(); ctx.arc(cx, 260, 160, 0, Math.PI*2);
+    ctx.fillStyle = theme.bg1; ctx.fill();
+    ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 6; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = `800 96px Poppins, sans-serif`;
+    ctx.fillText(initials, cx, 292);
+  }
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 40px Poppins, sans-serif`;
+  ctx.fillText(acc.name || 'Account Holder', cx, 490);
+
+  if(AppState.settings.businessName){
+    ctx.font = `600 20px Poppins, sans-serif`;
+    ctx.globalAlpha = 0.8;
+    ctx.fillText(AppState.settings.businessName, cx, 522);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.strokeStyle = 'rgba(212,175,55,.5)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx-90, 550); ctx.lineTo(cx+90, 550); ctx.stroke();
+
+  ctx.fillStyle = '#f2d675';
+  ctx.font = `800 42px Poppins, sans-serif`;
+  ctx.fillText(acc.type || '', cx, 610);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 52px 'Courier New', monospace`;
+  ctx.fillText(acc.number || '', cx, 680);
+
+  ctx.fillStyle = 'rgba(0,0,0,.28)';
+  roundRectPath(ctx, 50, H - 130, W - 100, 74, 14);
+  ctx.fill();
+  ctx.fillStyle = '#f2d675';
+  ctx.font = `700 20px Poppins, sans-serif`;
+  wrapCenteredText(ctx, '📸 Please send a screenshot after sending the payment', cx, H - 90, W - 130, 27);
+
+  return canvas;
+}
+async function shareAccountPoster(idx){
+  const acc = AppState.settings.paymentAccounts[idx];
+  if(!acc) return;
+  const canvas = await renderAccountPosterToCanvas(acc);
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the poster.'); return; }
+    const file = new File([blob], `${(acc.type||'account').replace(/\s+/g,'_')}_poster.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({ files:[file], title: acc.type, text: `${acc.name || ''} — ${acc.type} Account` }); }
+      catch(err){ /* منسوخ */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
+}
+
 async function shareAccountCard(idx){
   const acc = AppState.settings.paymentAccounts[idx];
   if(!acc) return;
