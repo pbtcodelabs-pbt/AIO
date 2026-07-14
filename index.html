@@ -1421,11 +1421,7 @@
                     style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
           </div>
 
-          <!-- ---------- اگر منتخب کسٹمر کا پہلے سے کوئی بقایہ ہو تو یہاں صاف نظر آئے — تاکہ نئے بل کے ساتھ ملا کر کل بقایہ کا اندازہ رہے ---------- -->
-          <div id="prevBalanceBox" style="display:none; background:#fff7ed; border:1px solid #fdba74; border-radius:10px; padding:9px 12px; margin-bottom:10px; font-size:12.5px; color:#9a3412;">
-            <div>⚠️ Previous Balance: <b id="prevBalanceAmt">Rs. 0</b></div>
-            <div style="margin-top:2px; font-weight:800;">📊 Total Outstanding After This Bill: <span id="totalOutstandingAmt">Rs. 0</span></div>
-          </div>
+          <!-- ---------- منتخب کسٹمر کا پہلا بقایہ اب نیچے Totals ٹیبل میں ہی مکمل حساب کے ساتھ نظر آتا ہے ---------- -->
 
           <div class="walletBalanceHint" id="walletBalanceHint"></div>
           <div class="autoPaymentNote" id="autoPaymentNote">💵 Cash (Walk-in)</div>
@@ -1450,9 +1446,11 @@
             <div class="row"><span>Subtotal</span><span id="sumSubtotal">Rs. 0</span></div>
             <div class="row"><span>Discount</span><span id="sumDiscount">Rs. 0</span></div>
             <div class="row" id="sumTaxRow" style="display:none;"><span id="sumTaxLabel">Tax</span><span id="sumTax">Rs. 0</span></div>
-            <div class="grand"><span>Grand Total</span><span id="sumGrand">Rs. 0</span></div>
+            <div class="row" id="sumThisBillRow" style="display:none;"><span>This Bill</span><span id="sumThisBill">Rs. 0</span></div>
+            <div class="row" id="sumPrevBalanceRow" style="display:none; color:#c2410c;"><span>⚠️ Previous Balance</span><span id="sumPrevBalance">Rs. 0</span></div>
+            <div class="grand" id="sumGrandRow"><span id="sumGrandLabel">Grand Total</span><span id="sumGrand">Rs. 0</span></div>
             <div class="row" id="sumReceivedRow" style="display:none; color:var(--success);"><span>💵 Received Now</span><span id="sumReceived">Rs. 0</span></div>
-            <div class="row" id="sumBalanceRow" style="display:none; font-weight:800;"><span>📒 Balance Due</span><span id="sumBalance">Rs. 0</span></div>
+            <div class="row" id="sumBalanceRow" style="display:none; font-weight:800;"><span id="sumBalanceLabel">📒 Balance Due</span><span id="sumBalance">Rs. 0</span></div>
           </div>
 
           <!-- ---------- بل سے زیادہ رقم موصول ہو تو (مثلاً 5000 کا نوٹ دیا، بل 3000 کا تھا) — واپسی رقم دکھائیں اور فیصلہ لینے دیں ---------- -->
@@ -4465,14 +4463,35 @@ function renderCart(){
   const taxAmount = AppState.settings.taxEnabled ? Math.round((subtotal - discount) * (AppState.settings.taxPercent || 0) / 100) : 0;
   const grandTotal = subtotal - discount + taxAmount;
 
+  // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
+  const custIdForBalance = document.getElementById('customerSelect')?.value;
+  const customerForBalance = custIdForBalance ? customersData.find(c => c.customer_id == custIdForBalance) : null;
+  const previousBalance = (customerForBalance && customerForBalance.total_receivable > 0) ? customerForBalance.total_receivable : 0;
+  const combinedTotal = grandTotal + previousBalance; // ---------- یہی اصل رقم ہے جو کسٹمر پر واجب ہے، Received/Balance Due/Change اسی کے خلاف حساب ہوں گے ----------
+
   document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(0)}`;
   document.getElementById('sumDiscount').textContent = `Rs. ${discount.toFixed(0)}`;
   document.getElementById('sumTaxRow').style.display = AppState.settings.taxEnabled ? 'flex' : 'none';
   document.getElementById('sumTaxLabel').textContent = `Tax (${AppState.settings.taxPercent || 0}%)`;
   document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(0)}`;
-  document.getElementById('sumGrand').textContent = `Rs. ${grandTotal.toFixed(0)}`;
 
-  // ---------- جزوی ادائیگی + زائد رقم (Change) کا مکمل حساب — سب کچھ یہیں، پرنٹ پریویو پر جانے سے پہلے صاف نظر آئے ----------
+  if(previousBalance > 0){
+    // ---------- پرانا بقایہ موجود ہے — ٹیبل میں "This Bill" اور "Previous Balance" الگ دکھائیں، Grand Total دونوں کا مجموعہ ہو ----------
+    document.getElementById('sumThisBillRow').style.display = 'flex';
+    document.getElementById('sumThisBill').textContent = `Rs. ${grandTotal.toFixed(0)}`;
+    document.getElementById('sumPrevBalanceRow').style.display = 'flex';
+    document.getElementById('sumPrevBalance').textContent = `Rs. ${previousBalance.toFixed(0)}`;
+    document.getElementById('sumGrandLabel').textContent = 'Total Balance';
+    document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due (Total)';
+  } else {
+    document.getElementById('sumThisBillRow').style.display = 'none';
+    document.getElementById('sumPrevBalanceRow').style.display = 'none';
+    document.getElementById('sumGrandLabel').textContent = 'Grand Total';
+    document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due';
+  }
+  document.getElementById('sumGrand').textContent = `Rs. ${combinedTotal.toFixed(0)}`;
+
+  // ---------- جزوی ادائیگی + زائد رقم (Change) کا مکمل حساب — اب پرانے بقایہ سمیت پوری رقم کے خلاف، سب کچھ یہیں صاف نظر آئے ----------
   const receivedHint = document.getElementById('amountReceivedHint');
   const sumReceivedRow = document.getElementById('sumReceivedRow');
   const sumBalanceRow = document.getElementById('sumBalanceRow');
@@ -4482,7 +4501,7 @@ function renderCart(){
   if(receivedHint){
     // ---------- یہاں اوپری حد نہیں لگاتے — کسٹمر بل سے زیادہ رقم بھی دے سکتا ہے (مثلاً 5000 کا نوٹ)، تبھی Change پکڑا جا سکے ----------
     const receivedRaw = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
-    const remaining = grandTotal - receivedRaw; // منفی ہو تو مطلب زائد رقم (Change) بنتی ہے
+    const remaining = combinedTotal - receivedRaw; // منفی ہو تو مطلب زائد رقم (Change) بنتی ہے — پرانے بقایہ سمیت
 
     if(receivedRaw > 0){
       sumReceivedRow.style.display = 'flex';
@@ -4526,21 +4545,6 @@ function renderCart(){
     sumReceivedRow.style.display = 'none';
     sumBalanceRow.style.display = 'none';
     changeDueBox.style.display = 'none';
-  }
-
-  // ---------- منتخب کسٹمر کا پہلے سے موجود بقایہ + اس بل کے بعد کا کل بقایہ — لائیو، پرنٹ پر جانے سے پہلے ہی صاف نظر آئے ----------
-  const prevBalanceBox = document.getElementById('prevBalanceBox');
-  const custIdForBalance = document.getElementById('customerSelect')?.value;
-  const customerForBalance = custIdForBalance ? customersData.find(c => c.customer_id == custIdForBalance) : null;
-  if(customerForBalance && customerForBalance.total_receivable > 0){
-    const receivedRaw2 = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
-    const thisBillRemaining = Math.max(0, grandTotal - receivedRaw2); // اسی بل کا بقایہ حصہ (Change کی صورت میں 0)
-    const totalOutstanding = customerForBalance.total_receivable + thisBillRemaining;
-    document.getElementById('prevBalanceAmt').textContent = `Rs. ${customerForBalance.total_receivable.toLocaleString()}`;
-    document.getElementById('totalOutstandingAmt').textContent = `Rs. ${totalOutstanding.toLocaleString()}`;
-    prevBalanceBox.style.display = 'block';
-  } else {
-    prevBalanceBox.style.display = 'none';
   }
 
   // ---------- منافع کا خفیہ اشارہ — صرف بل بنانے والے کو نظر آئے، کسٹمر یا پرنٹ میں کبھی نہیں ----------
@@ -4772,15 +4776,16 @@ function finalizeInvoice(){
     customer.walletHistory = customer.walletHistory || [];
     customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
   }
-  // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو — اب یہ بل سے زیادہ بھی ہو سکتی ہے (مثلاً 5000 کا نوٹ) ----------
+  // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو — یہ صرف اسی بل کے لیے نہیں بلکہ پرانے بقایہ سمیت پوری واجب الادا رقم کے خلاف لاگو ہوگی ----------
   const dueAfterWallet = Math.max(0, grandTotal - walletApplied);
+  const combinedDueForPayment = previousBalance + dueAfterWallet; // ---------- پرانا بقایہ + اسی بل کا بقایہ حصہ = کل واجب الادا ----------
   const rawReceivedInput = (method === 'credit') ? Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0) : 0;
   const changeToWallet = document.getElementById('changeToWalletChk')?.checked || false;
 
   let cashReceivedNow, remainingDue, changeGiven = 0, changeCreditedToWallet = 0;
-  if(method === 'credit' && rawReceivedInput > dueAfterWallet){
-    // ---------- زائد رقم موصول ہوئی — بل مکمل ادا ہے، فرق یا تو نقد واپس، یا کسٹمر کے Wallet میں ----------
-    const excess = rawReceivedInput - dueAfterWallet;
+  if(method === 'credit' && rawReceivedInput > combinedDueForPayment){
+    // ---------- زائد رقم موصول ہوئی — پرانا بقایہ + یہ بل، دونوں مکمل ادا، فرق یا تو نقد واپس، یا کسٹمر کے Wallet میں ----------
+    const excess = rawReceivedInput - combinedDueForPayment;
     remainingDue = 0;
     if(changeToWallet && customer){
       cashReceivedNow = rawReceivedInput; // ---------- پوری رقم رجسٹر میں رہی، کچھ واپس نہیں دیا ----------
@@ -4789,16 +4794,18 @@ function finalizeInvoice(){
       customer.walletHistory.unshift({type:'deposit', amount:excess, via:'change', date:new Date().toISOString().split('T')[0], note:`Change credited from ${invoice.invoice_no}`});
       changeCreditedToWallet = excess;
     } else {
-      cashReceivedNow = dueAfterWallet; // ---------- صرف بل جتنی رقم رجسٹر میں رہی، باقی نقد واپس دے دی ----------
+      cashReceivedNow = combinedDueForPayment; // ---------- پرانا بقایہ + بل جتنی رقم رجسٹر میں رہی، باقی نقد واپس دے دی ----------
       changeGiven = excess;
     }
   } else {
-    cashReceivedNow = (method === 'credit') ? Math.min(dueAfterWallet, rawReceivedInput) : 0;
-    remainingDue = (method === 'credit') ? Math.max(0, dueAfterWallet - cashReceivedNow) : 0;
+    // ---------- عام صورت — پہلے پرانا بقایہ کم ہوگا (اگر کچھ رقم اس کے لیے بچے)، پھر اسی بل کا حصہ ----------
+    cashReceivedNow = (method === 'credit') ? Math.min(combinedDueForPayment, rawReceivedInput) : 0;
+    remainingDue = (method === 'credit') ? Math.max(0, dueAfterWallet - Math.max(0, cashReceivedNow - previousBalance)) : 0;
   }
 
-  if(customer && method === 'credit' && remainingDue > 0){
-    customer.total_receivable += remainingDue;
+  if(customer && method === 'credit'){
+    // ---------- کسٹمر کا نیا کل بقایہ سیدھا SET کریں (پرانا + یہ بل − وصولی) — increment نہیں، تاکہ پرانے بقایہ پر بھی ادائیگی درست جھلکے ----------
+    customer.total_receivable = Math.max(0, combinedDueForPayment - cashReceivedNow);
     // TODO: customers.total_receivable UPDATE
   }
   invoice.wallet_applied = walletApplied;
