@@ -1651,6 +1651,20 @@
       </div>
     </div>
 
+    <!-- MANAGE CATEGORY PRODUCTS MODAL — چیک باکس لسٹ سے کسی بھی پراڈکٹ کو اس کیٹگری میں شامل/خارج کریں -->
+    <div class="modalOverlay" id="manageCategoryProductsModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox" style="max-width:400px; max-height:82vh; overflow-y:auto;">
+        <h3 id="manageCategoryProductsTitle">📦 Add/Move Products</h3>
+        <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Tick any product to move it into this category. Untick a product that's currently in this category to send it back to Uncategorized. Products already in other categories show where they currently are.</div>
+        <input type="text" id="manageCategoryProductsSearch" placeholder="🔍 Search products..." oninput="renderManageCategoryProductsList()" style="margin-bottom:10px;">
+        <div id="manageCategoryProductsListWrap" style="display:flex; flex-direction:column; gap:6px;"></div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="document.getElementById('manageCategoryProductsModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" onclick="saveManageCategoryProducts()">Save</button>
+        </div>
+      </div>
+    </div>
+
     <!-- PARTIES (Admin only) -->
     <div class="screen admin-only" id="screen-parties">
       <div class="pageTitle" id="partyPageTitle">🧑‍🤝‍🧑 Customers</div>
@@ -5406,6 +5420,52 @@ function filterByCategory(cat){
    🏷️ Categories اسکرین — الگ صفحہ، صرف کیٹگریز کی فہرست اور انتظام
    (پہلے یہ غلطی سے Products والا ہی صفحہ دوبارہ کھول دیتا تھا)
    ===================================================================== */
+// ---------- 📦 کسی کیٹگری میں پراڈکٹس شامل/خارج کریں — پوری فہرست چیک باکس کے ساتھ، جو بھی پراڈکٹ کہیں بھی ہو (Uncategorized یا کسی اور کیٹگری میں) ----------
+let activeManageCategory = null;
+let manageCategoryPendingChanges = {}; // product_id -> true/false (اسی کیٹگری میں ہونا چاہیے یا نہیں)
+function openManageCategoryProductsModal(cat){
+  activeManageCategory = cat;
+  manageCategoryPendingChanges = {};
+  document.getElementById('manageCategoryProductsTitle').textContent = `📦 Add/Move Products into "${cat}"`;
+  document.getElementById('manageCategoryProductsSearch').value = '';
+  renderManageCategoryProductsList();
+  document.getElementById('manageCategoryProductsModal').classList.add('show');
+}
+function renderManageCategoryProductsList(){
+  const wrap = document.getElementById('manageCategoryProductsListWrap');
+  if(!wrap || !activeManageCategory) return;
+  const query = (document.getElementById('manageCategoryProductsSearch').value || '').toLowerCase();
+  const filtered = productsData.filter(p => !query || p.name.toLowerCase().includes(query));
+
+  wrap.innerHTML = filtered.map(p => {
+    const currentCat = p.category && p.category.trim() ? p.category.trim() : 'Uncategorized';
+    const isChecked = (p.product_id in manageCategoryPendingChanges) ? manageCategoryPendingChanges[p.product_id] : (currentCat === activeManageCategory);
+    const whereNote = currentCat === activeManageCategory ? '' : ` <span style="color:var(--muted); font-weight:400;">(currently: ${currentCat})</span>`;
+    return `
+      <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:#f8fafc; border-radius:8px; font-size:13px;">
+        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="manageCategoryPendingChanges[${p.product_id}] = this.checked;" style="width:18px; height:18px; margin:0; flex:0 0 auto;">
+        <span>${p.name}${whereNote}</span>
+      </label>
+    `;
+  }).join('') || `<div style="color:var(--muted); font-size:13px; padding:8px 2px;">No products found.</div>`;
+}
+function saveManageCategoryProducts(){
+  Object.keys(manageCategoryPendingChanges).forEach(pid => {
+    const product = productsData.find(p => p.product_id === Number(pid));
+    if(!product) return;
+    const shouldBeIn = manageCategoryPendingChanges[pid];
+    const currentCat = product.category && product.category.trim() ? product.category.trim() : 'Uncategorized';
+    if(shouldBeIn && currentCat !== activeManageCategory){
+      product.category = activeManageCategory; // ---------- کسی اور کیٹگری/Uncategorized سے اسی میں منتقل ----------
+    } else if(!shouldBeIn && currentCat === activeManageCategory){
+      product.category = ''; // ---------- اَن-ٹِک کیا گیا — واپس Uncategorized ----------
+    }
+  });
+  persistAllData();
+  document.getElementById('manageCategoryProductsModal').classList.remove('show');
+  renderCategoriesScreen();
+}
+
 function renderCategoriesScreen(){
   const wrap = document.getElementById('categoriesListWrap');
   if(!wrap) return;
@@ -5425,17 +5485,20 @@ function renderCategoriesScreen(){
   }
 
   wrap.innerHTML = names.map(cat => `
-    <div class="productCard" style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px;">
-      <div>
-        <div style="font-weight:700;">${cat}</div>
-        <div style="font-size:12px; color:var(--muted);">${counts[cat]} product${counts[cat] === 1 ? '' : 's'}</div>
+    <div class="productCard" style="padding:14px 16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div style="font-weight:700;">${cat}</div>
+          <div style="font-size:12px; color:var(--muted);">${counts[cat]} product${counts[cat] === 1 ? '' : 's'}</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          ${cat !== 'Uncategorized' ? `<button class="btnResetPin" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
+          ${counts[cat] > 0 && cat !== 'Uncategorized'
+            ? `<button class="btnResetPin" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
+            : counts[cat] === 0 ? `<button class="btnResetPin" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
+        </div>
       </div>
-      <div style="display:flex; gap:8px;">
-        ${cat !== 'Uncategorized' ? `<button class="btnResetPin" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
-        ${counts[cat] > 0 && cat !== 'Uncategorized'
-          ? `<button class="btnResetPin" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
-          : counts[cat] === 0 ? `<button class="btnResetPin" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
-      </div>
+      ${cat !== 'Uncategorized' ? `<button class="testPrintBtn" style="margin-top:10px; background:#eef2ff; color:var(--primary-dark);" onclick="openManageCategoryProductsModal('${cat.replace(/'/g,"\\'")}')">📦 Add/Move Products into "${cat}"</button>` : ''}
     </div>
   `).join('');
 }
