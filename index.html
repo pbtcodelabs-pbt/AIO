@@ -1160,7 +1160,11 @@
     .categoryRail{flex-direction:row; overflow-x:auto; overflow-y:visible; max-height:none; flex:0 0 auto; width:100%; order:-1; margin-bottom:4px;}
     .categoryPill{flex:0 0 auto; white-space:nowrap; padding:8px 12px;}
 
-    body{overflow-y:auto;}
+    /* ---------- یہاں پہلے body{overflow-y:auto} تھا — یہی اصل وجہ تھی Reports/My Ads جیسی چھوٹی اسکرینز
+       کے اوپر خالی جگہ + مواد نیچے دبے رہنے کی۔ اس رول نے موبائل پر body کو #mainArea کے ساتھ ایک
+       DOUBLE سکرول کنٹینر بنا دیا تھا — اور موبائل Chrome کا 100vh (ایڈریس بار دکھنے/چھپنے سے بدلتا رہتا ہے)
+       ملا کر body خود کہیں بھی سکرول ہو جاتا، جو ہمارا resetMainAreaScroll ہر بار قابو نہیں کر پاتا تھا۔
+       body کو مستقل بند (overflow:hidden، بنیادی رول سے) رہنے دیں — صرف #mainArea ہی سکرول کرے، بس۔ ---------- */
 
     /* --- حفاظتی جال: چاہے کہیں سے بھی کوئی چیز چوڑائی سے تجاوز کرے، پیج کبھی افقی طور پر نہ کھلے --- */
     html, body{max-width:100vw; overflow-x:hidden;}
@@ -2819,12 +2823,10 @@
 
 <!-- ===================== 📣 MY ADS — تیار شدہ اشتہاری پوسٹر، واٹس ایپ سٹیٹس/دوستوں کو بھیجنے کے لیے ===================== -->
 <div class="screen admin-only" id="screen-myads">
-  <div class="pageTitle">📣 My Ads</div>
-  <div class="settingsHint" style="margin-top:-8px;">A ready-made poster for this app — post it on your WhatsApp Status or send it to friends. Bilingual (English + Urdu) so more people understand it.</div>
-  <div id="myAdsPosterWrap" style="text-align:center; margin:14px 0;">
+  <div id="myAdsPosterWrap" style="text-align:center; margin:6px 0 14px;">
     <div style="padding:60px 0; color:var(--muted); font-size:13px;">Building your poster…</div>
   </div>
-  <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto; font-size:13px;" onclick="shareMyAdsPoster()">📤 Share Poster</button>
+  <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 Share on WhatsApp</button>
 </div>
 
 <!-- 🧾 Products Detail Report Modal -->
