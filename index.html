@@ -213,6 +213,19 @@
   .billingTopBar{margin-bottom:4px;}
   .productGridFull{max-height:none; height:calc(100vh - 310px); margin-bottom:70px;}
 
+  /* ===================== ADVANCE ORDER — FULL PAGE PRODUCT PICKER (بالکل بلنگ اسکرین جیسا) ===================== */
+  .advOrderBanner{
+    position:sticky; top:0; z-index:50; background:linear-gradient(135deg,#c2410c,#9a3412); color:#fff;
+    padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-weight:800; font-size:13.5px; box-shadow:0 2px 8px rgba(154,52,18,.3); margin:-20px -20px 10px;
+  }
+  .advOrderBannerBackBtn{
+    background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.55); border-radius:8px;
+    padding:7px 12px; font-weight:700; cursor:pointer; font-size:12px; flex:0 0 auto; white-space:nowrap;
+  }
+  #advOrderProductGrid.productGridFull{height:calc(100vh - 290px); margin-bottom:78px;}
+  .floatingCartBar.advOrderCartBar{background:#c2410c; box-shadow:0 6px 20px rgba(194,65,12,.4);}
+
   /* --- فلوٹنگ کارٹ بار: نیچے fixed، ہمیشہ نظر آتی ہے --- */
   .floatingCartBar{
     position:fixed; left:16px; right:16px; bottom:16px; z-index:200;
@@ -1207,6 +1220,8 @@
     .floatingCartBar{left:10px; right:10px; bottom:12px; padding:12px 16px; font-size:13px;}
     .cartSheetBox{max-width:100%;}
     .cartWrap{max-height:44vh;}
+    .advOrderBanner{margin:-14px -14px 10px; font-size:12.5px; padding:10px 12px;}
+    #advOrderProductGrid.productGridFull{height:calc(100vh - 255px); margin-bottom:88px;}
 
     /* --- Dashboard: KPI اور health band چھوٹی اسکرین پر 2 کالمز، الرٹس 1 کالم --- */
     .kpiGrid{grid-template-columns:repeat(2,1fr);}
@@ -2560,19 +2575,68 @@
       <div id="advOrderListWrap"></div>
     </div>
 
-    <!-- ---------- Advance Order Add/Edit Modal ---------- -->
-    <div class="modalOverlay" id="advOrderModal" onclick="if(event.target===this) closeAdvanceOrderModal()">
+    <!-- =====================================================================
+         📝 ADVANCE ORDER — FULL PAGE PRODUCT PICKER
+         بالکل بلنگ اسکرین جیسا: کیٹیگری منتخب کریں، پورا کیٹلاگ کارڈز کی شکل میں نظر آئے،
+         ہر کارڈ پر +/- سے مقدار براہ راست بڑھے/گھٹے — کچھ ٹائپ کرنے کی ضرورت نہیں۔
+         فرق صرف اتنا: اوپر واضح نارنجی پٹی بتاتی رہے کہ یہ اصل بل نہیں، رف ایڈوانس آرڈر ہے۔
+         ===================================================================== -->
+    <div class="screen" id="screen-advOrderPicker">
+      <div class="advOrderBanner">
+        <span>📝 ADVANCE ORDER MODE — Approximate Pricing (this is not a real bill)</span>
+        <button type="button" class="advOrderBannerBackBtn" onclick="backFromAdvOrderPicker()">◀ Back</button>
+      </div>
+
+      <div class="searchRow" style="margin-bottom:8px;">
+        <input type="text" id="advOrderGridSearchInput" placeholder="🔍 Search by name or barcode (optional)..." oninput="searchAdvOrderGridItems(this.value)">
+      </div>
+
+      <div class="categoryDropdownWrap" id="advOrderCategoryDropdownWrap" style="margin-bottom:8px;">
+        <button type="button" class="categoryDropdownBtn" id="advOrderCategoryDropdownBtn" onclick="toggleAdvOrderCategoryDropdown(event)">
+          <span id="advOrderCategoryDropdownLabel">📂 All Categories</span>
+          <span class="categoryDropdownArrow">▾</span>
+        </button>
+        <div class="categoryDropdownPanel" id="advOrderCategoryDropdownPanel"></div>
+      </div>
+
+      <!-- پورا بچا ہوا صفحہ صرف پراڈکٹ کارڈز کے لیے، بالکل بلنگ سکرین کی طرح -->
+      <div class="productGrid productGridFull" id="advOrderProductGrid"></div>
+
+      <!-- فلوٹنگ کارٹ بار: نیچے ہمیشہ نظر آتی ہے، دبانے پر ریویو/سیو شیٹ کھلتی ہے -->
+      <div class="floatingCartBar advOrderCartBar" id="advOrderFloatingCartBar" onclick="openAdvOrderCartSheet()">
+        <span id="advOrderFloatingCartText">🛒 No items yet — tap products above to add</span>
+        <span id="advOrderFloatingCartTotal"></span>
+      </div>
+    </div>
+
+    <!-- ---------- Advance Order: کئی ویریئنٹس والا پراڈکٹ دبانے پر — سائز/قسم منتخب کرنے کا پاپ اپ ---------- -->
+    <div class="modalOverlay" id="advOrderChooseVariantModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:380px;">
+        <div class="profileHead" style="position:sticky; top:0; background:#fff; z-index:2; padding-top:4px;">
+          <div class="pAvatarLg" id="advOrderChooseVariantAvatar">📦</div>
+          <div class="pInfo">
+            <div class="pName" id="advOrderChooseVariantProductName">—</div>
+            <div class="pMeta">Select a variant to add</div>
+          </div>
+          <span class="closeBtn" onclick="document.getElementById('advOrderChooseVariantModal').classList.remove('show'); renderAdvOrderProductGrid();">✖</span>
+        </div>
+        <div class="profileBody" id="advOrderChooseVariantList"></div>
+      </div>
+    </div>
+
+    <!-- ---------- Advance Order: Review & Save Sheet (پراڈکٹ پکر سے آئٹم شامل کرنے کے بعد یہاں کسٹمر، ریٹ اور نوٹ چیک کر کے Save کریں) ---------- -->
+    <div class="modalOverlay" id="advOrderModal" onclick="if(event.target===this) closeAdvOrderCartSheet()">
       <div class="modalBoxWide" style="width:460px; max-height:90vh; overflow-y:auto;">
-        <h3 id="advOrderModalTitle">📝 New Advance Order</h3>
+        <h3 id="advOrderModalTitle">📝 New Advance Order — Review &amp; Save</h3>
 
         <input type="text" id="advCustomerName" placeholder="🧑 Customer name" list="advCustomerNameList" style="width:100%; padding:11px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
         <datalist id="advCustomerNameList"></datalist>
         <input type="text" id="advCustomerPhone" placeholder="📞 Phone number (optional, for WhatsApp)" inputmode="tel" style="width:100%; padding:11px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
 
-        <div class="searchRow" style="margin-bottom:8px;">
-          <input type="text" id="advSearchInput" placeholder="🔍 Search item to add..." oninput="searchAdvOrderItems(this.value)">
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <button type="button" onclick="closeAdvOrderCartSheet(); goTo('advOrderPicker');" style="flex:1; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed var(--primary); border-radius:10px; padding:10px; font-weight:700; cursor:pointer; font-size:12.5px;">➕ Add More Items</button>
+          <button type="button" onclick="addCustomAdvOrderItemPrompt()" style="flex:1; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; padding:10px; font-weight:700; cursor:pointer; font-size:12.5px;">✏️ Custom Item</button>
         </div>
-        <div class="searchResults" id="advSearchResults"></div>
 
         <div class="poTableScroll">
           <table class="cartTable" style="margin-bottom:6px;">
@@ -2580,20 +2644,20 @@
             <tbody id="advItemsBody"></tbody>
           </table>
         </div>
-        <div class="emptyCart" id="advEmptyMsg" style="padding:20px 0;">No items added yet — search above to add a rough item</div>
+        <div class="emptyCart" id="advEmptyMsg" style="padding:20px 0;">No items added yet — tap "➕ Add More Items" to pick from the catalog</div>
 
         <div class="totalsBox" style="margin-top:6px;">
           <div class="grand"><span>Approx. Subtotal</span><span id="advGrandTotal">Rs. 0</span></div>
         </div>
         <div style="background:#fff7ed; color:#c2410c; padding:8px 10px; border-radius:8px; font-size:11.5px; margin-top:6px; font-weight:600;">
-          ⚠️ These are approximate prices only. Final rates will be confirmed at the time of delivery and may go up or down.
+          ⚠️ These are approximate prices only. Final rates will be confirmed at the time of delivery and may go up or down. Tap the Qty or Price of any item below to adjust it.
         </div>
 
         <textarea id="advOrderNote" placeholder="Order note (optional, e.g. 'wants delivery Friday')" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
 
         <div class="modalBtns">
-          <button class="cancelBtn" onclick="closeAdvanceOrderModal()">Cancel</button>
-          <button class="saveBtn" onclick="saveAdvanceOrder()">Save Advance Order</button>
+          <button class="cancelBtn" onclick="discardAdvOrderDraft()">🗑️ Discard</button>
+          <button class="saveBtn" onclick="saveAdvanceOrder()">💾 Save Advance Order</button>
         </div>
       </div>
     </div>
@@ -3923,6 +3987,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'billhistory') renderBillHistory();
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
   if(screenName === 'advanceorders') renderAdvanceOrdersScreen();
+  if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'myads') renderMyAdsScreen();
@@ -8540,19 +8605,257 @@ function savePurchaseOrder(){
 let advOrderCart = []; // {variant_id, name, qty, unitPrice, note}
 let editingAdvOrderId = null; // null = نیا آرڈر، ورنہ موجودہ آرڈر ایڈٹ ہو رہا ہے
 let advOrderListFilter = 'all'; // 'all' | 'pending' | 'fulfilled'
+let advOrderMeta = {customerName:'', customerPhone:'', note:''}; // ---------- جب تک ریویو شیٹ بند ہو، کسٹمر کی تفصیل یہاں محفوظ رہے ----------
+let activeAdvOrderCategory = 'all';
+let activeAdvOrderGridSearch = '';
 
+// ---------- "➕ New Advance Order" / "✏️ Edit" پر — بالکل بلنگ سکرین جیسا پورا کیٹلاگ صفحہ کھولیں ----------
 function openAdvanceOrderModal(orderId){
   editingAdvOrderId = orderId || null;
   const existing = orderId ? advanceOrdersData.find(o => o.id === orderId) : null;
 
   advOrderCart = existing ? JSON.parse(JSON.stringify(existing.items)) : [];
+  advOrderMeta = {
+    customerName: existing ? existing.customerName : '',
+    customerPhone: existing ? existing.customerPhone : '',
+    note: existing ? (existing.note || '') : ''
+  };
 
-  document.getElementById('advOrderModalTitle').textContent = existing ? '✏️ Edit Advance Order' : '📝 New Advance Order';
-  document.getElementById('advCustomerName').value = existing ? existing.customerName : '';
-  document.getElementById('advCustomerPhone').value = existing ? existing.customerPhone : '';
-  document.getElementById('advOrderNote').value = existing ? (existing.note || '') : '';
-  document.getElementById('advSearchInput').value = '';
-  document.getElementById('advSearchResults').classList.remove('show');
+  goTo('advOrderPicker');
+}
+
+// ---------- پورا کیٹلاگ صفحہ کھلتے ہی تازہ حالت سے شروع کریں ----------
+function renderAdvOrderPickerScreen(){
+  activeAdvOrderCategory = 'all';
+  activeAdvOrderGridSearch = '';
+  const searchInput = document.getElementById('advOrderGridSearchInput');
+  if(searchInput) searchInput.value = '';
+  renderAdvOrderCategoryRail();
+  renderAdvOrderProductGrid();
+  updateAdvOrderFloatingCartBar();
+}
+
+// ---------- پکر سکرین کا ◀ Back — اگر کچھ آئٹم شامل ہو چکے ہوں تو پہلے پوچھیں ----------
+function backFromAdvOrderPicker(){
+  if(advOrderCart.length > 0 && !confirm('Go back without saving? Your items so far will be lost.')) return;
+  advOrderCart = [];
+  editingAdvOrderId = null;
+  advOrderMeta = {customerName:'', customerPhone:'', note:''};
+  goTo('advanceorders');
+}
+
+// ---------- کیٹیگری ڈراپ ڈاؤن — بالکل بلنگ سکرین جیسا ----------
+function renderAdvOrderCategoryRail(){
+  const panel = document.getElementById('advOrderCategoryDropdownPanel');
+  const label = document.getElementById('advOrderCategoryDropdownLabel');
+  if(!panel) return;
+
+  const counts = {};
+  productsData.forEach(p => {
+    const cat = p.category && p.category.trim() ? p.category.trim() : 'Uncategorized';
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  (customCategories || []).forEach(cat => { if(!(cat in counts)) counts[cat] = 0; });
+  const categories = Object.keys(counts).sort();
+
+  const items = [`<div class="categoryDropdownItem ${activeAdvOrderCategory === 'all' ? 'active' : ''}" onclick="filterAdvOrderCategory('all')"><span>All</span><span class="cdCount">${productsData.length}</span></div>`];
+  categories.forEach(cat => {
+    items.push(`<div class="categoryDropdownItem ${activeAdvOrderCategory === cat ? 'active' : ''}" onclick="filterAdvOrderCategory('${cat.replace(/'/g,"\\'")}')"><span>${cat}</span><span class="cdCount">${counts[cat]}</span></div>`);
+  });
+  panel.innerHTML = items.join('');
+  if(label) label.textContent = activeAdvOrderCategory === 'all' ? '📂 All Categories' : `📂 ${activeAdvOrderCategory}`;
+}
+
+function toggleAdvOrderCategoryDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('advOrderCategoryDropdownWrap');
+  if(!wrap) return;
+  wrap.classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('advOrderCategoryDropdownWrap');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+function filterAdvOrderCategory(cat){
+  activeAdvOrderCategory = cat;
+  renderAdvOrderCategoryRail();
+  renderAdvOrderProductGrid();
+  const wrap = document.getElementById('advOrderCategoryDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
+}
+
+// ---------- سرچ اب صرف اختیاری فلٹر ہے — گرڈ خود ہی نظر آتا رہتا ہے، ٹائپ کرنا لازمی نہیں ----------
+function searchAdvOrderGridItems(query){
+  activeAdvOrderGridSearch = query.trim().toLowerCase();
+  renderAdvOrderProductGrid();
+}
+
+// ---------- پورا کیٹلاگ کارڈز کی شکل میں — بالکل بلنگ سکرین جیسا، ہر کارڈ پر +/- سے مقدار ----------
+function renderAdvOrderProductGrid(){
+  const grid = document.getElementById('advOrderProductGrid');
+  if(!grid) return;
+
+  let flat = getFlatVariants();
+  if(activeAdvOrderCategory !== 'all'){
+    flat = flat.filter(v => v.category === activeAdvOrderCategory);
+  }
+  if(activeAdvOrderGridSearch){
+    flat = flat.filter(v => v.name.toLowerCase().includes(activeAdvOrderGridSearch) || v.barcode.includes(activeAdvOrderGridSearch));
+  }
+
+  if(flat.length === 0){
+    grid.innerHTML = `<div class="placeholder" style="grid-column:1/-1;">No items in this category</div>`;
+    return;
+  }
+
+  // ---------- ویریئنٹس کو پراڈکٹ کے حساب سے یکجا کریں — ایک پراڈکٹ ایک ہی کارڈ ----------
+  const productMap = new Map();
+  flat.forEach(v => {
+    if(!productMap.has(v.product_id)){
+      productMap.set(v.product_id, {
+        product_id: v.product_id,
+        name: productsData.find(p => p.product_id === v.product_id)?.name || v.name,
+        category: v.category,
+        image: null,
+        variants: [],
+      });
+    }
+    const grp = productMap.get(v.product_id);
+    grp.variants.push(v);
+    if(!grp.image && v.image) grp.image = v.image;
+  });
+  const groupedProducts = Array.from(productMap.values()).sort((a,b) => a.name.localeCompare(b.name));
+
+  grid.innerHTML = groupedProducts.map(p => {
+    const isSingleVariant = p.variants.length === 1;
+    const nameFontSize = p.name.length > 18 ? '8.5px' : p.name.length > 13 ? '9.5px' : '10.5px';
+    let priceLabel, qtyBadgeHtml, actionAreaHtml, cardOnClick = '';
+
+    if(isSingleVariant){
+      const v = p.variants[0];
+      const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+      const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
+      const qtyInCart = cartItem ? cartItem.qty : 0;
+      priceLabel = `Rs. ${price}`;
+      qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
+      actionAreaHtml = `
+        <button class="pgMinusBtn" onclick="changeAdvOrderCartQty(${v.variant_id}, -1)">−</button>
+        <button class="pgPlusBtn" onclick="addToAdvOrderCartGrid(${v.variant_id})">+</button>
+      `;
+    } else {
+      const totalQtyInCart = p.variants.reduce((sum, v) => {
+        const ci = advOrderCart.find(c => c.variant_id === v.variant_id);
+        return sum + (ci ? ci.qty : 0);
+      }, 0);
+      priceLabel = `${p.variants.length} variants`;
+      qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
+      actionAreaHtml = `<button class="pgChooseBtn" onclick="openAdvOrderVariantChooser(${p.product_id})">Choose ▾</button>`;
+      cardOnClick = `onclick="openAdvOrderVariantChooser(${p.product_id})"`;
+    }
+
+    return `
+      <div class="productGridCard" data-product-id="${p.product_id}" ${cardOnClick}>
+        <div class="pgImageArea">
+          ${qtyBadgeHtml}
+          ${p.image ? `<img src="${p.image}">` : `<div class="pgPlaceholder">📦</div>`}
+          <div class="pgCaption">
+            <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
+            <div class="pgPrice">${priceLabel}</div>
+          </div>
+        </div>
+        <div class="pgButtonStrip">
+          ${actionAreaHtml}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ---------- کارڈ پر + دبانے سے براہ راست ایڈوانس آرڈر کارٹ میں شامل ہو ----------
+function addToAdvOrderCartGrid(variantId){
+  const v = getFlatVariants().find(f => f.variant_id === variantId);
+  if(!v) return;
+  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  const existing = advOrderCart.find(i => i.variant_id === variantId);
+  if(existing) existing.qty += 1;
+  else advOrderCart.push({variant_id: variantId, name: v.name, qty: 1, unitPrice: price});
+  renderAdvOrderProductGrid();
+  updateAdvOrderFloatingCartBar();
+}
+
+function changeAdvOrderCartQty(variantId, delta){
+  const item = advOrderCart.find(i => i.variant_id === variantId);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty <= 0) advOrderCart = advOrderCart.filter(i => i.variant_id !== variantId);
+  renderAdvOrderProductGrid();
+  updateAdvOrderFloatingCartBar();
+}
+
+// ---------- کئی ویریئنٹس والا پراڈکٹ دبانے پر — سائز/قسم منتخب کرنے کا پاپ اپ ----------
+function openAdvOrderVariantChooser(productId){
+  const product = productsData.find(p => p.product_id === productId);
+  if(!product) return;
+  const flat = getFlatVariants().filter(v => v.product_id === productId);
+
+  document.getElementById('advOrderChooseVariantProductName').textContent = product.name;
+  const firstImg = flat.find(v => v.image)?.image;
+  document.getElementById('advOrderChooseVariantAvatar').innerHTML = firstImg
+    ? `<img src="${firstImg}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`
+    : '📦';
+
+  renderAdvOrderVariantChooserList(productId);
+  document.getElementById('advOrderChooseVariantModal').classList.add('show');
+}
+
+function renderAdvOrderVariantChooserList(productId){
+  const flat = getFlatVariants().filter(v => v.product_id === productId);
+  const list = document.getElementById('advOrderChooseVariantList');
+  const productName = productsData.find(p=>p.product_id===productId)?.name || '';
+
+  list.innerHTML = flat.map(v => {
+    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
+    const qty = cartItem ? cartItem.qty : 0;
+    const label = v.name.replace(new RegExp('^' + productName + '\\s*', 'i'), '') || v.name;
+    return `
+      <div class="variantChooseRow">
+        <div class="variantChooseInfo">
+          <div class="variantChooseLabel">${label}</div>
+          <div class="variantChoosePrice">Rs. ${price}</div>
+        </div>
+        <div class="variantChooseActions">
+          <button class="vMinus" onclick="changeAdvOrderCartQty(${v.variant_id}, -1); renderAdvOrderVariantChooserList(${productId});">−</button>
+          <span class="vQty">${qty}</span>
+          <button class="vPlus" onclick="addToAdvOrderCartGrid(${v.variant_id}); renderAdvOrderVariantChooserList(${productId});">+</button>
+        </div>
+      </div>`;
+  }).join('') + `<button class="collapseCardBtn" style="margin-top:14px;" onclick="document.getElementById('advOrderChooseVariantModal').classList.remove('show'); renderAdvOrderProductGrid();">◀ Done — Back to Catalog</button>`;
+}
+
+// ---------- نیچے فلوٹنگ کارٹ بار کی عبارت اپڈیٹ کریں ----------
+function updateAdvOrderFloatingCartBar(){
+  const textEl = document.getElementById('advOrderFloatingCartText');
+  const totalEl = document.getElementById('advOrderFloatingCartTotal');
+  if(!textEl || !totalEl) return;
+  if(advOrderCart.length === 0){
+    textEl.textContent = '🛒 No items yet — tap products above to add';
+    totalEl.textContent = '';
+    return;
+  }
+  const totalItems = advOrderCart.reduce((s,i) => s + i.qty, 0);
+  const totalAmount = advOrderCart.reduce((s,i) => s + i.qty * i.unitPrice, 0);
+  textEl.textContent = `🛒 ${totalItems} item(s) — tap to review & save`;
+  totalEl.textContent = `Rs. ${totalAmount.toLocaleString()}`;
+}
+
+// ---------- فلوٹنگ کارٹ بار دبانے پر — کسٹمر کی تفصیل، ریٹ اور نوٹ چیک کرنے کی ریویو شیٹ کھولیں ----------
+function openAdvOrderCartSheet(){
+  document.getElementById('advOrderModalTitle').textContent = editingAdvOrderId ? '✏️ Edit Advance Order — Review & Save' : '📝 New Advance Order — Review & Save';
+  document.getElementById('advCustomerName').value = advOrderMeta.customerName;
+  document.getElementById('advCustomerPhone').value = advOrderMeta.customerPhone;
+  document.getElementById('advOrderNote').value = advOrderMeta.note;
 
   // ---------- موجودہ کسٹمرز کے نام suggestion کے طور پر ----------
   document.getElementById('advCustomerNameList').innerHTML =
@@ -8562,55 +8865,31 @@ function openAdvanceOrderModal(orderId){
   document.getElementById('advOrderModal').classList.add('show');
 }
 
-function closeAdvanceOrderModal(){
+// ---------- ریویو شیٹ بند کریں — کارٹ محفوظ رہتا ہے، بس دوبارہ کیٹلاگ نظر آنے لگتا ہے ----------
+function closeAdvOrderCartSheet(){
+  advOrderMeta.customerName = document.getElementById('advCustomerName').value.trim();
+  advOrderMeta.customerPhone = document.getElementById('advCustomerPhone').value.trim();
+  advOrderMeta.note = document.getElementById('advOrderNote').value.trim();
   document.getElementById('advOrderModal').classList.remove('show');
-  editingAdvOrderId = null;
+}
+
+// ---------- پورا آرڈر ہی رد کریں (تصدیق لے کر) ----------
+function discardAdvOrderDraft(){
+  if(!confirm('Discard this advance order? All items will be lost.')) return;
+  document.getElementById('advOrderModal').classList.remove('show');
   advOrderCart = [];
+  editingAdvOrderId = null;
+  advOrderMeta = {customerName:'', customerPhone:'', note:''};
+  goTo('advanceorders');
 }
 
-// ---------- آرڈر میں شامل کرنے کے لیے موجودہ پراڈکٹس میں سے تلاش کریں ----------
-function searchAdvOrderItems(query){
-  const box = document.getElementById('advSearchResults');
-  query = query.trim().toLowerCase();
-  if(!query){ box.classList.remove('show'); box.innerHTML = ''; return; }
-
-  const flat = getFlatVariants().filter(v => v.name.toLowerCase().includes(query));
-  const escaped = query.replace(/'/g,"\\'");
-  let html = flat.slice(0, 8).map(v => `
-    <div class="resultItem" onclick="addToAdvOrderCart(${v.variant_id})">
-      <div><div class="rName">${v.name}</div><div class="rMeta">Stock: ${v.stock} | Retail: Rs. ${v.retail}</div></div>
-    </div>
-  `).join('');
-  // ---------- جو چیز اسٹاک میں موجود ہی نہ ہو، اسے بھی بطور رف/کسٹم آئٹم شامل کیا جا سکے (میلے میں ہر چیز سسٹم میں پہلے سے نہیں ہوتی) ----------
-  html += `
-    <div class="resultItem" onclick="addCustomAdvOrderItem('${escaped}')">
-      <div><div class="rName">➕ Add "${query}" as a rough/custom item</div><div class="rMeta">Not necessarily in inventory yet</div></div>
-    </div>`;
-  box.innerHTML = html;
-  box.classList.add('show');
-}
-
-function addToAdvOrderCart(variantId){
-  const flat = getFlatVariants();
-  const v = flat.find(f => f.variant_id === variantId);
-  if(!v) return;
-
-  const existing = advOrderCart.find(i => i.variant_id === variantId);
-  if(existing) existing.qty += 1;
-  else advOrderCart.push({variant_id: variantId, name: v.name, qty: 1, unitPrice: v.retail});
-
-  document.getElementById('advSearchInput').value = '';
-  document.getElementById('advSearchResults').classList.remove('show');
-  renderAdvOrderCart();
-}
-
-function addCustomAdvOrderItem(name){
-  name = (name || '').trim();
+// ---------- ریویو شیٹ سے رف/کسٹم آئٹم شامل کریں (وہ چیز جو ابھی انوینٹری میں نہ ہو) ----------
+function addCustomAdvOrderItemPrompt(){
+  const name = (prompt('Custom / rough item name:') || '').trim();
   if(!name) return;
   advOrderCart.push({variant_id: null, name, qty: 1, unitPrice: 0});
-  document.getElementById('advSearchInput').value = '';
-  document.getElementById('advSearchResults').classList.remove('show');
   renderAdvOrderCart();
+  updateAdvOrderFloatingCartBar();
 }
 
 function updateAdvItemQty(idx, qty){
@@ -8618,16 +8897,19 @@ function updateAdvItemQty(idx, qty){
   if(!item) return;
   item.qty = Math.max(1, qty);
   renderAdvOrderCart();
+  updateAdvOrderFloatingCartBar();
 }
 function updateAdvItemPrice(idx, price){
   const item = advOrderCart[idx];
   if(!item) return;
   item.unitPrice = Math.max(0, price);
   renderAdvOrderCart();
+  updateAdvOrderFloatingCartBar();
 }
 function removeAdvItem(idx){
   advOrderCart.splice(idx, 1);
   renderAdvOrderCart();
+  updateAdvOrderFloatingCartBar();
 }
 
 function renderAdvOrderCart(){
@@ -8684,9 +8966,12 @@ function saveAdvanceOrder(){
     });
   }
 
-  closeAdvanceOrderModal();
+  document.getElementById('advOrderModal').classList.remove('show');
+  advOrderCart = [];
+  editingAdvOrderId = null;
+  advOrderMeta = {customerName:'', customerPhone:'', note:''};
   persistAllData();
-  renderAdvanceOrdersScreen();
+  goTo('advanceorders');
 }
 
 function setAdvOrderFilter(f){
