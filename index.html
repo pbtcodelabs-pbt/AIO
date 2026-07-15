@@ -347,7 +347,7 @@
   .modalOverlay.show{display:flex;}
   .modalBox{background:#fff; border-radius:var(--radius); padding:24px; width:320px; max-height:88vh; overflow-y:auto; overflow-anchor:none;}
   .modalBox h3, .modalBoxWide h3{margin-bottom:14px; color:var(--primary-dark);}
-  .modalBox input, .modalBoxWide input, .modalBoxWide select{width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;}
+  .modalBox input, .modalBox select, .modalBoxWide input, .modalBoxWide select{width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; background:#fff; color:var(--text);}
   .modalBox .modalBtns, .modalBoxWide .modalBtns{display:flex; gap:8px; margin-top:6px;}
   .modalBox .modalBtns button, .modalBoxWide .modalBtns button{flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:600;}
   .modalBox .saveBtn, .modalBoxWide .saveBtn{background:var(--primary); color:#fff;}
@@ -1185,7 +1185,7 @@
     html, body{max-width:100vw; overflow-x:hidden;}
     #app, #mainArea, .screen{max-width:100vw; overflow-x:hidden;}
     * { max-width: 100%; }
-    input, select, button, textarea{max-width:100%;}
+    input, select, button, textarea{max-width:100%; font-family:inherit;}
 
     /* --- App shell: sidebar اب فکسڈ drawer بن جاتا ہے، مین ایریا پوری چوڑائی لیتا ہے --- */
     #app{grid-template-columns:1fr; grid-template-rows:56px 1fr; height:100vh;}
@@ -2328,13 +2328,14 @@
     <!-- COLLECT RECEIVABLE MODAL (کسٹمر سے اُدھار وصولی) -->
     <div class="modalOverlay" id="collectModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
-        <h3 id="collectModalTitle">📥 Collect Payment</h3>
+        <h3 id="collectModalTitle">💰 Collect Payment</h3>
         <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:12px;" id="collectReceivableHint">Total Receivable: Rs. 0</div>
         <div class="txnTypeToggle">
           <button id="collectCash" class="active" onclick="setCollectMode('cash')">💵 Collect Cash</button>
           <button id="collectWallet" onclick="setCollectMode('wallet')">💳 Deduct from Wallet</button>
         </div>
-        <input type="number" id="collectAmount" placeholder="Enter collected amount" onfocus="this.select()">
+        <input type="number" id="collectAmount" placeholder="Enter collected amount" onfocus="this.select()" oninput="updateCollectRemainingHint()">
+        <div id="collectRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);"></div>
         <textarea id="collectNote" placeholder="Note (e.g. received via EasyPaisa) — optional" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')">📷 Attach Deposit Slip / Screenshot (optional)</button>
         <div id="collectSlipPreview" style="display:none; margin-top:8px; text-align:center;">
@@ -2353,7 +2354,8 @@
       <div class="modalBox">
         <h3>💵 Pay Supplier</h3>
         <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:12px;" id="paySupplierPayableHint">Total Payable: Rs. 0</div>
-        <input type="number" id="paySupplierAmount" placeholder="Enter amount paid" onfocus="this.select()">
+        <input type="number" id="paySupplierAmount" placeholder="Enter amount paid" onfocus="this.select()" oninput="updatePaySupplierRemainingHint()">
+        <div id="paySupplierRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);"></div>
         <select id="paySupplierAccountSelect" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
           <option value="">Cash / No specific account</option>
         </select>
@@ -2378,8 +2380,8 @@
 
       <div class="billStatusTabs">
         <button class="billTabBtn active" id="pmtTab-all" onclick="setPaymentsFilter('all')">📋 All</button>
-        <button class="billTabBtn" id="pmtTab-in" onclick="setPaymentsFilter('in')">📥 Received</button>
-        <button class="billTabBtn" id="pmtTab-out" onclick="setPaymentsFilter('out')">📤 Paid</button>
+        <button class="billTabBtn" id="pmtTab-in" onclick="setPaymentsFilter('in')">💰 Received</button>
+        <button class="billTabBtn" id="pmtTab-out" onclick="setPaymentsFilter('out')">💸 Paid</button>
       </div>
 
       <div class="billCompactBar">
@@ -2400,13 +2402,15 @@
       <div class="modalBox">
         <h3>💳 Record New Payment</h3>
         <div class="txnTypeToggle">
-          <button id="rpDirIn" class="active" onclick="setRecordPaymentDirection('in')">📥 Received (Customer)</button>
-          <button id="rpDirOut" onclick="setRecordPaymentDirection('out')">📤 Paid (Supplier)</button>
+          <button id="rpDirIn" class="active" onclick="setRecordPaymentDirection('in')">💰 Received (Customer)</button>
+          <button id="rpDirOut" onclick="setRecordPaymentDirection('out')">💸 Paid (Supplier)</button>
         </div>
         <select id="rpPartySelect" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="onRecordPaymentPartyChange()">
           <option value="">— Select Customer —</option>
         </select>
-        <input type="number" id="rpAmount" placeholder="Amount" onfocus="this.select()">
+        <div id="rpBalanceHint" style="display:none; padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:10px;"></div>
+        <input type="number" id="rpAmount" placeholder="Amount" onfocus="this.select()" oninput="updateRpRemainingHint()">
+        <div id="rpRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px;"></div>
         <select id="rpMethod" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="onRecordPaymentMethodChange()">
           <option value="Cash">💵 Cash</option>
           <option value="Bank/Wallet">🏦 Bank / Wallet Transfer</option>
@@ -8464,6 +8468,7 @@ function openPaySupplierModal(supplierId){
   document.getElementById('paySupplierPayableHint').textContent = `Total Payable: Rs. ${s.total_payable.toLocaleString()}`;
   document.getElementById('paySupplierAmount').value = '';
   document.getElementById('paySupplierNote').value = '';
+  document.getElementById('paySupplierRemainingHint').style.display = 'none';
   removePaymentSlipImage('paySupplier');
   // ---------- اسی سپلائر کے محفوظ شدہ بینک/والیٹ اکاؤنٹس ڈراپ ڈاؤن میں دکھائیں تاکہ کس اکاؤنٹ میں بھیجا گیا منتخب کیا جا سکے ----------
   const accSel = document.getElementById('paySupplierAccountSelect');
@@ -8476,6 +8481,16 @@ function openPaySupplierModal(supplierId){
 function closePaySupplierModal(){
   document.getElementById('paySupplierModal').classList.remove('show');
   activePaySupplierId = null;
+}
+// ---------- رقم لکھتے ہی فوری بتائیں کہ اس ادائیگی کے بعد سپلائر کا کتنا بقایہ (واجب الادا) رہ جائے گا ----------
+function updatePaySupplierRemainingHint(){
+  const s = suppliersData.find(x => x.supplier_id === activePaySupplierId);
+  const amount = parseFloat(document.getElementById('paySupplierAmount').value) || 0;
+  const hint = document.getElementById('paySupplierRemainingHint');
+  if(!s || amount <= 0){ hint.style.display = 'none'; return; }
+  const remaining = Math.max(0, s.total_payable - amount);
+  hint.style.display = 'block';
+  hint.textContent = `After this payment, remaining payable: Rs. ${remaining.toLocaleString()}` + (amount > s.total_payable ? ' ⚠️ (exceeds current payable)' : '');
 }
 function confirmPaySupplier(){
   const amount = parseFloat(document.getElementById('paySupplierAmount').value) || 0;
@@ -10105,17 +10120,28 @@ function openCollectModal(customerId){
 
   activeCollectCustomerId = customerId;
   activeCollectMode = 'cash';
-  document.getElementById('collectModalTitle').textContent = `📥 ${c.name} — Collect Payment`;
+  document.getElementById('collectModalTitle').textContent = `💰 ${c.name} — Collect Payment`;
   document.getElementById('collectReceivableHint').textContent = `Total Receivable: Rs. ${c.total_receivable.toLocaleString()}`;
   setCollectMode('cash');
   document.getElementById('collectAmount').value = '';
   document.getElementById('collectNote').value = '';
+  document.getElementById('collectRemainingHint').style.display = 'none';
   removePaymentSlipImage('collect');
   document.getElementById('collectModal').classList.add('show');
 }
 function closeCollectModal(){
   document.getElementById('collectModal').classList.remove('show');
   activeCollectCustomerId = null;
+}
+// ---------- رقم لکھتے ہی فوری بتائیں کہ اس وصولی کے بعد کسٹمر کا کتنا بقایہ رہ جائے گا ----------
+function updateCollectRemainingHint(){
+  const c = customersData.find(x => x.customer_id === activeCollectCustomerId);
+  const amount = parseFloat(document.getElementById('collectAmount').value) || 0;
+  const hint = document.getElementById('collectRemainingHint');
+  if(!c || amount <= 0){ hint.style.display = 'none'; return; }
+  const remaining = Math.max(0, c.total_receivable - amount);
+  hint.style.display = 'block';
+  hint.textContent = `After this collection, remaining receivable: Rs. ${remaining.toLocaleString()}` + (amount > c.total_receivable ? ' ⚠️ (exceeds current receivable)' : '');
 }
 function setCollectMode(mode){
   activeCollectMode = mode;
@@ -10224,11 +10250,11 @@ function renderPaymentsScreen(){
   document.getElementById('pmtSummaryBar').innerHTML = `
     <div style="display:flex; gap:10px; margin-bottom:14px;">
       <div style="flex:1; background:#f0fdf4; border-radius:10px; padding:10px 12px;">
-        <div style="font-size:11px; color:#166534; font-weight:700;">📥 Total Received</div>
+        <div style="font-size:11px; color:#166534; font-weight:700;">💰 Total Received</div>
         <div style="font-size:16px; color:#166534; font-weight:800;">Rs. ${totalIn.toLocaleString()}</div>
       </div>
       <div style="flex:1; background:#fef2f2; border-radius:10px; padding:10px 12px;">
-        <div style="font-size:11px; color:var(--danger); font-weight:700;">📤 Total Paid</div>
+        <div style="font-size:11px; color:var(--danger); font-weight:700;">💸 Total Paid</div>
         <div style="font-size:16px; color:var(--danger); font-weight:800;">Rs. ${totalOut.toLocaleString()}</div>
       </div>
     </div>`;
@@ -10242,7 +10268,7 @@ function renderPaymentsScreen(){
     <div class="bankAccCard" style="cursor:pointer;" onclick="viewPaymentDetail(${p.payment_id})">
       <div class="bankAccCardTop">
         <div style="min-width:0;">
-          <div class="bankAccType">${p.direction === 'in' ? '📥 Received from' : '📤 Paid to'} ${p.party_name}</div>
+          <div class="bankAccType">${p.direction === 'in' ? '💰 Received from' : '💸 Paid to'} ${p.party_name}</div>
           <div class="bankAccTitle">${p.date}${p.method ? ' • ' + p.method : ''}${p.account_number ? ' • ' + p.account_number : ''}</div>
         </div>
         <div style="font-weight:800; font-size:16px; color:${p.direction === 'in' ? '#166534' : 'var(--danger)'};">Rs. ${p.amount.toLocaleString()}</div>
@@ -10290,7 +10316,45 @@ function populateRecordPaymentPartyDropdown(){
   onRecordPaymentPartyChange();
 }
 function onRecordPaymentPartyChange(){
+  const partyId = parseInt(document.getElementById('rpPartySelect').value);
+  const hint = document.getElementById('rpBalanceHint');
+  if(!partyId){
+    hint.style.display = 'none';
+  } else if(recordPaymentDirection === 'in'){
+    const c = customersData.find(x => x.customer_id === partyId);
+    hint.style.display = 'block';
+    hint.style.background = '#f0fdf4'; hint.style.color = '#166534';
+    hint.textContent = `Total Receivable (they owe us): Rs. ${(c ? c.total_receivable : 0).toLocaleString()}`;
+  } else {
+    const s = suppliersData.find(x => x.supplier_id === partyId);
+    hint.style.display = 'block';
+    hint.style.background = '#fef2f2'; hint.style.color = 'var(--danger)';
+    hint.textContent = `Total Payable (we owe them): Rs. ${(s ? s.total_payable : 0).toLocaleString()}`;
+  }
+  updateRpRemainingHint();
   onRecordPaymentMethodChange(); // اکاؤنٹس کی فہرست پارٹی بدلنے پر بھی تازہ ہو
+}
+// ---------- رقم لکھتے ہی فوری نیچے دکھائیں کہ اس پیمنٹ کے بعد کتنا بقایہ رہ جائے گا ----------
+function updateRpRemainingHint(){
+  const partyId = parseInt(document.getElementById('rpPartySelect').value);
+  const amount = parseFloat(document.getElementById('rpAmount').value) || 0;
+  const hint = document.getElementById('rpRemainingHint');
+  if(!partyId || amount <= 0){
+    hint.style.display = 'none';
+    return;
+  }
+  let current = 0;
+  if(recordPaymentDirection === 'in'){
+    const c = customersData.find(x => x.customer_id === partyId);
+    current = c ? c.total_receivable : 0;
+  } else {
+    const s = suppliersData.find(x => x.supplier_id === partyId);
+    current = s ? s.total_payable : 0;
+  }
+  const remaining = Math.max(0, current - amount);
+  hint.style.display = 'block';
+  hint.style.background = '#eef2ff'; hint.style.color = 'var(--primary-dark)';
+  hint.textContent = `After this payment, remaining balance: Rs. ${remaining.toLocaleString()}` + (amount > current ? ' ⚠️ (amount exceeds current balance)' : '');
 }
 function onRecordPaymentMethodChange(){
   const method = document.getElementById('rpMethod').value;
@@ -10389,7 +10453,7 @@ function viewPaymentDetail(paymentId){
   if(!p) return;
   const box = document.getElementById('paymentDetailBox');
   box.innerHTML = `
-    <h3>${p.direction === 'in' ? '📥 Payment Received' : '📤 Payment Paid'}</h3>
+    <h3>${p.direction === 'in' ? '💰 Payment Received' : '💸 Payment Paid'}</h3>
     <div style="background:${p.direction === 'in' ? '#f0fdf4' : '#fef2f2'}; border-radius:10px; padding:14px; text-align:center; margin-bottom:12px;">
       <div style="font-size:12px; color:var(--muted); font-weight:700;">${p.direction === 'in' ? 'Received from' : 'Paid to'}</div>
       <div style="font-size:17px; font-weight:800; margin:4px 0;">${p.party_name}</div>
@@ -10410,12 +10474,30 @@ function viewPaymentDetail(paymentId){
 }
 
 // ---------- رسید کو تصویر (canvas) کی شکل میں بنائیں — موجودہ شیئر پریویو پائپ لائن استعمال کریں ----------
-function renderPaymentReceiptToCanvas(p){
+async function renderPaymentReceiptToCanvas(p){
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
   const W = 640;
   let H = 520;
   if(p.account_title || p.account_number) H += 60;
   if(p.note) H += 60;
+
+  // ---------- سلپ/اسکرین شاٹ کی تصویر پہلے سے لوڈ کر لیں تاکہ رسید بننے کے ساتھ ہی اُس کا حتمی سائز/اونچائی معلوم ہو ----------
+  let slipImg = null, slipDrawH = 0;
+  const SLIP_MAX_W = W - 120;
+  if(p.slip_image){
+    try{
+      slipImg = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = p.slip_image;
+      });
+      const scale = Math.min(1, SLIP_MAX_W / slipImg.width);
+      slipDrawH = slipImg.height * scale;
+      H += 50 + slipDrawH + 20; // لیبل + تصویر + نیچے تھوڑی جگہ
+    }catch(e){ slipImg = null; }
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -10468,6 +10550,20 @@ function renderPaymentReceiptToCanvas(p){
     wrapCenteredText(ctx, `📝 ${p.note}`, W/2, y, W-120, 18);
   }
 
+  // ---------- منسلک سلپ/اسکرین شاٹ کی تصویر رسید کے اندر ہی دکھائیں ----------
+  if(slipImg){
+    y += 40;
+    ctx.font = `700 13px Poppins, sans-serif`;
+    ctx.fillStyle = '#334155';
+    ctx.fillText('📎 Attached Slip / Screenshot', W/2, y);
+    y += 16;
+    const drawW = SLIP_MAX_W;
+    ctx.strokeStyle = '#dbe1ea'; ctx.lineWidth = 1;
+    ctx.strokeRect(60, y, drawW, slipDrawH);
+    ctx.drawImage(slipImg, 60, y, drawW, slipDrawH);
+    y += slipDrawH + 10;
+  }
+
   ctx.fillStyle = '#94a3b8';
   ctx.font = `500 11px Poppins, sans-serif`;
   ctx.fillText(`Payment ID: ${p.payment_id}`, W/2, H-20);
@@ -10477,9 +10573,8 @@ function renderPaymentReceiptToCanvas(p){
 async function sharePaymentReceiptImage(paymentId){
   const p = paymentsData.find(x => x.payment_id === paymentId);
   if(!p) return;
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.fontId) || FONT_PRESETS[0];
   try{ await document.fonts.load(`800 24px Poppins`); await document.fonts.ready; }catch(e){}
-  const canvas = renderPaymentReceiptToCanvas(p);
+  const canvas = await renderPaymentReceiptToCanvas(p);
   showImageSharePreview(canvas, `Payment_${p.payment_id}.png`, 'Payment Receipt', `${p.direction === 'in' ? 'Payment received from' : 'Payment paid to'} ${p.party_name}: Rs. ${p.amount.toLocaleString()}`);
 }
 
@@ -11769,6 +11864,7 @@ const THEME_PRESETS = [
 // ---------- Font Presets ----------
 const FONT_PRESETS = [
   {id:'segoe',      label:'Default', family:"'Segoe UI', system-ui, sans-serif"},
+  {id:'calibri',    label:'Calibri',  family:"Calibri, 'Segoe UI', sans-serif"},
   {id:'tahoma',     label:'Classic',  family:"Tahoma, Geneva, sans-serif"},
   {id:'verdana',    label:'Wide',  family:"Verdana, Geneva, sans-serif"},
   {id:'trebuchet',  label:'Modern',   family:"'Trebuchet MS', sans-serif"},
