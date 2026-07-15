@@ -2534,6 +2534,63 @@
       </div>
     </div>
 
+    <!-- =====================================================================
+         📝 ADVANCE ORDERS — میلے/نمائش وغیرہ پر لوگوں سے رف ایڈوانس آرڈر لینے کے لیے
+         (مثال: Element Supply جیسی جگہ پر جا کر دن بھر لوگوں سے آرڈر اکٹھے کریں،
+         اگلے سیل راؤنڈ پر انہیں پرووائیڈ کر دیں۔ یہ اسٹاک یا بل کو فوری متاثر نہیں کرتا —
+         صرف ایک رف فہرست ہے، جسے بعد میں "Fulfill & Bill" سے اصل بل میں بدلا جا سکتا ہے۔)
+         ===================================================================== -->
+    <div class="screen" id="screen-advanceorders">
+      <div class="pageTitle">📝 Advance Orders</div>
+      <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Out at an exhibition/stall? Jot down a rough order for each customer here, then come back later and fulfill each one in the next sale round.</div>
+
+      <div class="partyToolbar">
+        <button onclick="openAdvanceOrderModal()" style="flex:1; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px; font-weight:700; cursor:pointer;">➕ New Advance Order</button>
+        <button onclick="printAdvanceOrdersList()" style="flex:0 0 auto; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; padding:11px 14px; font-weight:700; cursor:pointer;">🖨️ Print List</button>
+      </div>
+
+      <div class="modeToggle" style="width:100%; margin:10px 0;">
+        <button id="advFilterall" class="active" onclick="setAdvOrderFilter('all')" style="flex:1;">All</button>
+        <button id="advFilterpending" onclick="setAdvOrderFilter('pending')" style="flex:1;">⏳ Pending</button>
+        <button id="advFilterfulfilled" onclick="setAdvOrderFilter('fulfilled')" style="flex:1;">✅ Fulfilled</button>
+      </div>
+
+      <div class="billSummaryBar" id="advOrderSummaryBar"></div>
+
+      <div id="advOrderListWrap"></div>
+    </div>
+
+    <!-- ---------- Advance Order Add/Edit Modal ---------- -->
+    <div class="modalOverlay" id="advOrderModal" onclick="if(event.target===this) closeAdvanceOrderModal()">
+      <div class="modalBoxWide" style="width:460px; max-height:90vh; overflow-y:auto;">
+        <h3 id="advOrderModalTitle">📝 New Advance Order</h3>
+
+        <input type="text" id="advCustomerName" placeholder="🧑 Customer name" list="advCustomerNameList" style="width:100%; padding:11px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
+        <datalist id="advCustomerNameList"></datalist>
+        <input type="text" id="advCustomerPhone" placeholder="📞 Phone number (optional, for WhatsApp)" inputmode="tel" style="width:100%; padding:11px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
+
+        <div class="searchRow" style="margin-bottom:8px;">
+          <input type="text" id="advSearchInput" placeholder="🔍 Search item to add..." oninput="searchAdvOrderItems(this.value)">
+        </div>
+        <div class="searchResults" id="advSearchResults"></div>
+
+        <div class="poTableScroll">
+          <table class="cartTable" style="margin-bottom:6px;">
+            <thead><tr><th>Item</th><th>Qty</th><th>Note</th><th></th></tr></thead>
+            <tbody id="advItemsBody"></tbody>
+          </table>
+        </div>
+        <div class="emptyCart" id="advEmptyMsg" style="padding:20px 0;">No items added yet — search above to add a rough item</div>
+
+        <textarea id="advOrderNote" placeholder="Order note (optional, e.g. 'wants delivery Friday')" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
+
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeAdvanceOrderModal()">Cancel</button>
+          <button class="saveBtn" onclick="saveAdvanceOrder()">Save Advance Order</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ---------- یونیورسل پرنٹ ایریا — عام حالت میں چھپا رہتا ہے، صرف window.print() کے وقت نظر آتا ہے۔          -->
     <!-- ---------- Android کا اپنا Print Service نظام (RawBT، Sunmi کا پرنٹر پلگ ان، WiFi/USB پرنٹر ڈرائیورز،      -->
     <!-- ---------- "Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
@@ -3041,6 +3098,8 @@ function persistAllData(){
   if(typeof nextRequestId !== 'undefined') saveToStorage('nextRequestId', nextRequestId);
   if(typeof AppState !== 'undefined') saveToStorage('settings', AppState.settings);
   if(typeof quickDockItems !== 'undefined') saveToStorage('quickDockItems', quickDockItems);
+  if(typeof advanceOrdersData !== 'undefined') saveToStorage('advanceOrders', advanceOrdersData);
+  if(typeof nextAdvOrderId !== 'undefined') saveToStorage('nextAdvOrderId', nextAdvOrderId);
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
 
@@ -3418,6 +3477,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '💰 Sales', tiles: [
     {icon:'🛒', label:'Billing', screen:'billing'},
     {icon:'🧾', label:'Bill History', screen:'billhistory'},
+    {icon:'📝', label:'Advance Orders', screen:'advanceorders'},
   ]},
   { section: '📦 Inventory', tiles: [
     {icon:'📦', label:'Products', screen:'products'},
@@ -3445,6 +3505,7 @@ const HOME_TILES_ADMIN = HOME_TILE_GROUPS_ADMIN.flatMap(g => g.tiles);
 const HOME_TILES_SALESMAN = [
   {icon:'🛒', label:'Billing', screen:'billing'},
   {icon:'🧾', label:'Bill History', screen:'billhistory'},
+  {icon:'📝', label:'Advance Orders', screen:'advanceorders'},
   {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
 ];
 
@@ -3839,6 +3900,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'users') { renderUserList(); renderApprovalList(); }
   if(screenName === 'billhistory') renderBillHistory();
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
+  if(screenName === 'advanceorders') renderAdvanceOrdersScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'myads') renderMyAdsScreen();
@@ -7200,6 +7262,14 @@ const CUSTOMERS_SEED_DATA = [
 let customersData = loadFromStorage('customers', CUSTOMERS_SEED_DATA);
 let nextCustomerId = loadFromStorage('nextCustomerId', 4);
 
+/* =====================================================================
+   📝 ADVANCE ORDERS — رف ایڈوانس آرڈر (بل/اسٹاک کو فوری متاثر نہیں کرتے)
+   {id, customerName, customerPhone, items:[{variant_id, name, qty, unitPrice, note}],
+    note, status:'pending'|'fulfilled', createdAt, fulfilledAt}
+   ===================================================================== */
+let advanceOrdersData = loadFromStorage('advanceOrders', []);
+let nextAdvOrderId = loadFromStorage('nextAdvOrderId', 1);
+
 const SUPPLIERS_SEED_DATA = [
   {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
   {supplier_id:2, name:'Local Grocery Supplier', phone:'923337778889', address:'Lahore', keywords:'', total_payable:6000},
@@ -8438,6 +8508,288 @@ function savePurchaseOrder(){
   renderBillingProductGrid(); // نیا اسٹاک بلنگ گرڈ میں بھی فوراً نظر آئے
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   alert(`✅ Purchase Order sent. Total: Rs. ${total.toLocaleString()}.\nStock will be updated once you confirm the shipment is received.`);
+}
+
+/* =====================================================================
+   📝 ADVANCE ORDERS — نمائش/میلے پر دن بھر کسٹمرز سے رف آرڈر اکٹھے کریں،
+   اگلے سیل راؤنڈ پر ہر ایک کو "Fulfill & Bill" کر کے اصل بل میں بدل دیں۔
+   نوٹ: Save کرنے پر نہ اسٹاک متاثر ہوتا ہے نہ کوئی بل بنتا ہے — یہ صرف ایک رف فہرست ہے۔
+   ===================================================================== */
+let advOrderCart = []; // {variant_id, name, qty, unitPrice, note}
+let editingAdvOrderId = null; // null = نیا آرڈر، ورنہ موجودہ آرڈر ایڈٹ ہو رہا ہے
+let advOrderListFilter = 'all'; // 'all' | 'pending' | 'fulfilled'
+
+function openAdvanceOrderModal(orderId){
+  editingAdvOrderId = orderId || null;
+  const existing = orderId ? advanceOrdersData.find(o => o.id === orderId) : null;
+
+  advOrderCart = existing ? JSON.parse(JSON.stringify(existing.items)) : [];
+
+  document.getElementById('advOrderModalTitle').textContent = existing ? '✏️ Edit Advance Order' : '📝 New Advance Order';
+  document.getElementById('advCustomerName').value = existing ? existing.customerName : '';
+  document.getElementById('advCustomerPhone').value = existing ? existing.customerPhone : '';
+  document.getElementById('advOrderNote').value = existing ? (existing.note || '') : '';
+  document.getElementById('advSearchInput').value = '';
+  document.getElementById('advSearchResults').classList.remove('show');
+
+  // ---------- موجودہ کسٹمرز کے نام suggestion کے طور پر ----------
+  document.getElementById('advCustomerNameList').innerHTML =
+    customersData.filter(c => !c.name.includes('Walk-in')).map(c => `<option value="${c.name}">`).join('');
+
+  renderAdvOrderCart();
+  document.getElementById('advOrderModal').classList.add('show');
+}
+
+function closeAdvanceOrderModal(){
+  document.getElementById('advOrderModal').classList.remove('show');
+  editingAdvOrderId = null;
+  advOrderCart = [];
+}
+
+// ---------- آرڈر میں شامل کرنے کے لیے موجودہ پراڈکٹس میں سے تلاش کریں ----------
+function searchAdvOrderItems(query){
+  const box = document.getElementById('advSearchResults');
+  query = query.trim().toLowerCase();
+  if(!query){ box.classList.remove('show'); box.innerHTML = ''; return; }
+
+  const flat = getFlatVariants().filter(v => v.name.toLowerCase().includes(query));
+  const escaped = query.replace(/'/g,"\\'");
+  let html = flat.slice(0, 8).map(v => `
+    <div class="resultItem" onclick="addToAdvOrderCart(${v.variant_id})">
+      <div><div class="rName">${v.name}</div><div class="rMeta">Stock: ${v.stock} | Retail: Rs. ${v.retail}</div></div>
+    </div>
+  `).join('');
+  // ---------- جو چیز اسٹاک میں موجود ہی نہ ہو، اسے بھی بطور رف/کسٹم آئٹم شامل کیا جا سکے (میلے میں ہر چیز سسٹم میں پہلے سے نہیں ہوتی) ----------
+  html += `
+    <div class="resultItem" onclick="addCustomAdvOrderItem('${escaped}')">
+      <div><div class="rName">➕ Add "${query}" as a rough/custom item</div><div class="rMeta">Not necessarily in inventory yet</div></div>
+    </div>`;
+  box.innerHTML = html;
+  box.classList.add('show');
+}
+
+function addToAdvOrderCart(variantId){
+  const flat = getFlatVariants();
+  const v = flat.find(f => f.variant_id === variantId);
+  if(!v) return;
+
+  const existing = advOrderCart.find(i => i.variant_id === variantId);
+  if(existing) existing.qty += 1;
+  else advOrderCart.push({variant_id: variantId, name: v.name, qty: 1, unitPrice: v.retail, note: ''});
+
+  document.getElementById('advSearchInput').value = '';
+  document.getElementById('advSearchResults').classList.remove('show');
+  renderAdvOrderCart();
+}
+
+function addCustomAdvOrderItem(name){
+  name = (name || '').trim();
+  if(!name) return;
+  advOrderCart.push({variant_id: null, name, qty: 1, unitPrice: 0, note: ''});
+  document.getElementById('advSearchInput').value = '';
+  document.getElementById('advSearchResults').classList.remove('show');
+  renderAdvOrderCart();
+}
+
+function updateAdvItemQty(idx, qty){
+  const item = advOrderCart[idx];
+  if(!item) return;
+  item.qty = Math.max(1, qty);
+  renderAdvOrderCart();
+}
+function updateAdvItemNote(idx, note){
+  const item = advOrderCart[idx];
+  if(!item) return;
+  item.note = note;
+}
+function removeAdvItem(idx){
+  advOrderCart.splice(idx, 1);
+  renderAdvOrderCart();
+}
+
+function renderAdvOrderCart(){
+  const body = document.getElementById('advItemsBody');
+  const emptyMsg = document.getElementById('advEmptyMsg');
+
+  if(advOrderCart.length === 0){
+    body.innerHTML = '';
+    emptyMsg.style.display = 'block';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+
+  body.innerHTML = advOrderCart.map((i, idx) => `
+    <tr>
+      <td>${i.name}</td>
+      <td><input type="number" min="1" value="${i.qty}" style="width:55px;" onfocus="this.select()" onchange="updateAdvItemQty(${idx}, parseInt(this.value)||1)"></td>
+      <td><input type="text" value="${(i.note||'').replace(/"/g,'&quot;')}" placeholder="—" style="width:80px;" onchange="updateAdvItemNote(${idx}, this.value)"></td>
+      <td><button class="removeBtn" onclick="removeAdvItem(${idx})">✖</button></td>
+    </tr>
+  `).join('');
+}
+
+function saveAdvanceOrder(){
+  if(advOrderCart.length === 0){ alert('Please add at least one item.'); return; }
+  const customerName = document.getElementById('advCustomerName').value.trim();
+  if(!customerName){ alert('Please enter the customer\'s name.'); return; }
+  const customerPhone = document.getElementById('advCustomerPhone').value.trim();
+  const note = document.getElementById('advOrderNote').value.trim();
+
+  if(editingAdvOrderId){
+    const order = advanceOrdersData.find(o => o.id === editingAdvOrderId);
+    if(order){
+      order.customerName = customerName;
+      order.customerPhone = customerPhone;
+      order.note = note;
+      order.items = JSON.parse(JSON.stringify(advOrderCart));
+    }
+  } else {
+    advanceOrdersData.unshift({
+      id: nextAdvOrderId++,
+      customerName, customerPhone, note,
+      items: JSON.parse(JSON.stringify(advOrderCart)),
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      fulfilledAt: null
+    });
+  }
+
+  closeAdvanceOrderModal();
+  persistAllData();
+  renderAdvanceOrdersScreen();
+}
+
+function setAdvOrderFilter(f){
+  advOrderListFilter = f;
+  ['all','pending','fulfilled'].forEach(x => document.getElementById('advFilter'+x).classList.toggle('active', x === f));
+  renderAdvanceOrdersScreen();
+}
+
+function deleteAdvanceOrder(orderId){
+  if(!confirm('Delete this advance order? This cannot be undone.')) return;
+  advanceOrdersData = advanceOrdersData.filter(o => o.id !== orderId);
+  persistAllData();
+  renderAdvanceOrdersScreen();
+}
+
+// ---------- اگلے سیل راؤنڈ پر: یہ آرڈر اصل Billing کارٹ میں لوڈ کر دیں تاکہ فوری بل بنایا جا سکے ----------
+function fulfillAdvanceOrder(orderId){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  if(order.status === 'fulfilled'){
+    if(!confirm('This order is already marked fulfilled. Load it into Billing again anyway?')) return;
+  }
+  if(Billing.cart.length > 0 && !confirm('This will replace the items currently in your Billing cart with this order\'s items. Continue?')) return;
+
+  Billing.cart = order.items
+    .filter(i => i.variant_id !== null) // ---------- کسٹم/رف آئٹمز جو انوینٹری میں نہیں، انہیں بل میں شامل نہیں کیا جا سکتا ----------
+    .map(i => ({variant_id: i.variant_id, name: i.name, qty: i.qty, unitPrice: i.unitPrice}));
+
+  const skippedCustom = order.items.filter(i => i.variant_id === null);
+
+  const matchedCustomer = customersData.find(c => c.name.toLowerCase() === order.customerName.toLowerCase());
+
+  order.status = 'fulfilled';
+  order.fulfilledAt = new Date().toISOString();
+  persistAllData();
+  renderAdvanceOrdersScreen();
+
+  goTo('billing');
+  const custSel = document.getElementById('customerSelect');
+  if(custSel){ custSel.value = matchedCustomer ? matchedCustomer.customer_id : ''; }
+  Billing.counterSale = !matchedCustomer;
+  renderCart();
+
+  let msg = `✅ Loaded into Billing cart for ${order.customerName}.`;
+  if(skippedCustom.length > 0){
+    msg += `\n\n⚠️ ${skippedCustom.length} custom/rough item(s) were not in inventory and were skipped — add them manually: ${skippedCustom.map(i=>i.name).join(', ')}`;
+  }
+  alert(msg);
+}
+
+function sendAdvanceOrderWhatsapp(orderId){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  const itemsList = order.items.map(i => `- ${i.name} x${i.qty}${i.note ? ' ('+i.note+')' : ''}`).join('\n');
+  const text = `Dear ${order.customerName},\n\nThank you — here's a copy of the advance order we noted for you:\n\n${itemsList}${order.note ? '\n\nNote: '+order.note : ''}\n\nWe'll have this ready for you in our next round.\n\n${AppState.currentUser?.name || ''}`.trim();
+  if(!order.customerPhone){
+    alert("This customer's phone number wasn't saved for this order.");
+    return;
+  }
+  window.open(`https://wa.me/${order.customerPhone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function renderAdvanceOrdersScreen(){
+  let filtered = advanceOrdersData;
+  if(advOrderListFilter === 'pending') filtered = filtered.filter(o => o.status !== 'fulfilled');
+  else if(advOrderListFilter === 'fulfilled') filtered = filtered.filter(o => o.status === 'fulfilled');
+
+  const totalItems = filtered.reduce((s,o) => s + o.items.reduce((a,i)=>a+i.qty,0), 0);
+  document.getElementById('advOrderSummaryBar').innerHTML = `<span>Advance Orders</span><span>${filtered.length} order(s) • ${totalItems} item(s) total</span>`;
+
+  const wrap = document.getElementById('advOrderListWrap');
+  if(filtered.length === 0){
+    wrap.innerHTML = `<div class="placeholder">No advance orders found</div>`;
+    return;
+  }
+
+  wrap.innerHTML = filtered.map(o => {
+    const isPending = o.status !== 'fulfilled';
+    const statusTag = isPending
+      ? `<span class="pendingStatusTag pending">⏳ PENDING</span>`
+      : `<span class="pendingStatusTag approved">✅ FULFILLED</span>`;
+    const itemsSummary = o.items.map(i => `${i.name} x${i.qty}`).join(', ');
+    const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+    return `
+      <div class="billCard">
+        <div>
+          <div class="bNo">🧑 ${o.customerName} ${statusTag}</div>
+          <div class="bMeta">${when} | ${o.items.length} item(s): ${itemsSummary}</div>
+        </div>
+        <div class="billActions">
+          ${isPending ? `<button class="btnReceiveShipment" onclick="fulfillAdvanceOrder(${o.id})">✅ Fulfill & Bill</button>` : ''}
+          <button class="btnPrint" onclick="openAdvanceOrderModal(${o.id})">✏️ Edit</button>
+          ${o.customerPhone ? `<button class="btnWhatsapp" onclick="sendAdvanceOrderWhatsapp(${o.id})">📱 WhatsApp</button>` : ''}
+          <button class="removeBtn" onclick="deleteAdvanceOrder(${o.id})" style="padding:8px 12px;">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ---------- دن بھر کے پینڈنگ آرڈرز کی پرنٹ فہرست — اگلے سیل راؤنڈ پر ساتھ لے جانے کے لیے،
+// ہر کسٹمر کی الگ فہرست + آخر میں تمام آئٹمز کا مجموعی خلاصہ (تیاری میں آسانی کے لیے) ----------
+function printAdvanceOrdersList(){
+  const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled');
+  if(pending.length === 0){ alert('No pending advance orders to print.'); return; }
+
+  const mm = AppState.settings.paperWidth || 80;
+  applyPrintPageSize(mm);
+
+  // ---------- مجموعی خلاصہ: ہر آئٹم کی کل مقدار (کسٹم آئٹمز الگ سے) ----------
+  const totals = {};
+  pending.forEach(o => o.items.forEach(i => { totals[i.name] = (totals[i.name] || 0) + i.qty; }));
+
+  const customerBlocks = pending.map(o => `
+    <div style="border-top:1px dashed #000; margin:6px 0; padding-top:4px;">
+      <div style="font-weight:800; font-size:12.5px;">${o.customerName}${o.customerPhone ? ' — '+o.customerPhone : ''}</div>
+      ${o.items.map(i => `<div style="font-size:11px;">• ${i.name} x${i.qty}${i.note ? ' ('+i.note+')' : ''}</div>`).join('')}
+      ${o.note ? `<div style="font-size:10.5px; font-style:italic;">Note: ${o.note}</div>` : ''}
+    </div>`).join('');
+
+  const totalsBlock = Object.entries(totals).map(([name, qty]) => `<div style="font-size:11px;">• ${name}: ${qty}</div>`).join('');
+
+  const area = document.getElementById('printReceiptArea');
+  area.innerHTML = `
+    <div style="width:${mm}mm; font-family:'Courier New',monospace; padding:6mm; box-sizing:border-box;">
+      <div style="text-align:center; font-weight:800; font-size:15px;">📝 ADVANCE ORDERS</div>
+      <div style="text-align:center; font-size:11px; margin-top:2px;">${new Date().toLocaleString()}</div>
+      <div style="text-align:center; font-size:11px;">${pending.length} pending order(s)</div>
+      ${customerBlocks}
+      <div style="border-top:2px solid #000; margin:8px 0 4px; font-weight:800; font-size:12.5px;">TOTAL TO PREPARE</div>
+      ${totalsBlock}
+    </div>`;
+  document.body.classList.add('printing-invoice');
+  setTimeout(() => window.print(), 50);
 }
 
 /* =====================================================================
