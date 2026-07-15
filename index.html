@@ -8512,6 +8512,7 @@ function confirmPaySupplier(){
   const accIdx = document.getElementById('paySupplierAccountSelect').value;
   const accounts = getSupplierBankAccounts(s);
   const chosenAcc = accIdx !== '' ? accounts[accIdx] : null;
+  const balanceBefore = s.total_payable;
 
   // TODO: یہاں supplier_payments table میں INSERT ہوگا، suppliers.total_payable UPDATE ہوگا
   s.total_payable -= amount;
@@ -8526,6 +8527,8 @@ function confirmPaySupplier(){
     party_id: s.supplier_id,
     party_name: s.name,
     amount,
+    balance_before: balanceBefore,
+    balance_after: s.total_payable,
     method: chosenAcc ? (chosenAcc.type || 'Bank/Wallet') : 'Cash',
     account_title: chosenAcc ? (chosenAcc.title || chosenAcc.type || '') : '',
     account_number: chosenAcc ? (chosenAcc.number || '') : '',
@@ -10168,6 +10171,7 @@ function saveCollectReceivable(){
   }
 
   // TODO: یہاں receivable_collections table میں INSERT ہوگا، customers.total_receivable UPDATE ہوگا
+  const balanceBefore = c.total_receivable;
   c.total_receivable -= amount;
 
   if(activeCollectMode === 'wallet'){
@@ -10191,6 +10195,8 @@ function saveCollectReceivable(){
     party_id: c.customer_id,
     party_name: c.name,
     amount,
+    balance_before: balanceBefore,
+    balance_after: c.total_receivable,
     method: activeCollectMode === 'wallet' ? 'Wallet' : 'Cash',
     slip_image: paymentSlipImages.collect,
     note: collectNote,
@@ -10410,12 +10416,15 @@ function saveRecordPaymentModal(){
   }
 
   let partyName = '';
+  let balanceBefore = 0, balanceAfter = 0;
   if(recordPaymentDirection === 'in'){
     const c = customersData.find(x => x.customer_id === partyId);
     if(!c) return;
     partyName = c.name;
+    balanceBefore = c.total_receivable || 0;
     // ---------- کسٹمر کے واجب الوصول اور کیش ان ہینڈ کو بھی اپڈیٹ کریں (Collect Payment کی طرح) ----------
     c.total_receivable = Math.max(0, (c.total_receivable || 0) - amount);
+    balanceAfter = c.total_receivable;
     financeDummy.cashInHand += amount;
     c.walletHistory = c.walletHistory || [];
     c.walletHistory.unshift({type:'receivable_collected', amount, via:method==='Cash'?'cash':'bank', date:new Date().toISOString().split('T')[0]});
@@ -10423,7 +10432,9 @@ function saveRecordPaymentModal(){
     const s = suppliersData.find(x => x.supplier_id === partyId);
     if(!s) return;
     partyName = s.name;
+    balanceBefore = s.total_payable || 0;
     s.total_payable = Math.max(0, (s.total_payable || 0) - amount);
+    balanceAfter = s.total_payable;
     financeDummy.cashInHand -= amount;
     s.ledgerHistory = s.ledgerHistory || [];
     s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
@@ -10435,6 +10446,8 @@ function saveRecordPaymentModal(){
     party_id: partyId,
     party_name: partyName,
     amount,
+    balance_before: balanceBefore,
+    balance_after: balanceAfter,
     method: methodLabel,
     account_title: accountTitle,
     account_number: accountNumber,
@@ -10452,6 +10465,7 @@ function viewPaymentDetail(paymentId){
   const p = paymentsData.find(x => x.payment_id === paymentId);
   if(!p) return;
   const box = document.getElementById('paymentDetailBox');
+  const hasBalanceBox = p.balance_before !== undefined && p.balance_after !== undefined;
   box.innerHTML = `
     <h3>${p.direction === 'in' ? '💰 Payment Received' : '💸 Payment Paid'}</h3>
     <div style="background:${p.direction === 'in' ? '#f0fdf4' : '#fef2f2'}; border-radius:10px; padding:14px; text-align:center; margin-bottom:12px;">
@@ -10459,6 +10473,21 @@ function viewPaymentDetail(paymentId){
       <div style="font-size:17px; font-weight:800; margin:4px 0;">${p.party_name}</div>
       <div style="font-size:26px; font-weight:800; color:${p.direction === 'in' ? '#166534' : 'var(--danger)'};">Rs. ${p.amount.toLocaleString()}</div>
     </div>
+    ${hasBalanceBox ? `
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <div style="flex:1; background:#dc2626; color:#fff; border-radius:10px; padding:8px 6px; text-align:center;">
+        <div style="font-size:10.5px; font-weight:700;">Previous Balance</div>
+        <div style="font-size:15px; font-weight:800;">Rs. ${Math.round(p.balance_before).toLocaleString()}</div>
+      </div>
+      <div style="flex:1; background:var(--primary); color:#fff; border-radius:10px; padding:8px 6px; text-align:center;">
+        <div style="font-size:10.5px; font-weight:700;">${p.direction === 'in' ? 'Received' : 'Paid'}</div>
+        <div style="font-size:15px; font-weight:800;">Rs. ${p.amount.toLocaleString()}</div>
+      </div>
+      <div style="flex:1; background:#475569; color:#fff; border-radius:10px; padding:8px 6px; text-align:center;">
+        <div style="font-size:10.5px; font-weight:700;">New Balance</div>
+        <div style="font-size:15px; font-weight:800;">Rs. ${Math.round(p.balance_after).toLocaleString()}</div>
+      </div>
+    </div>` : ''}
     <div class="bankAccMeta">📅 Date: ${p.date}</div>
     <div class="bankAccMeta">💳 Method: ${p.method || 'Cash'}</div>
     ${p.account_title ? `<div class="bankAccMeta">🏦 Account: ${p.account_title}</div>` : ''}
@@ -10477,9 +10506,11 @@ function viewPaymentDetail(paymentId){
 async function renderPaymentReceiptToCanvas(p){
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
   const W = 640;
-  let H = 520;
-  if(p.account_title || p.account_number) H += 60;
-  if(p.note) H += 60;
+  const hasBalanceBox = p.balance_before !== undefined && p.balance_after !== undefined;
+  let H = 400;
+  if(p.account_title || p.account_number) H += 40;
+  if(hasBalanceBox) H += 300;
+  else if(p.note) H += 60; // ---------- بیلنس باکس نہ ہو تو نوٹ الگ سے نیچے دکھایا جاتا ہے (پرانے ریکارڈز کے لیے) ----------
 
   // ---------- سلپ/اسکرین شاٹ کی تصویر پہلے سے لوڈ کر لیں تاکہ رسید بننے کے ساتھ ہی اُس کا حتمی سائز/اونچائی معلوم ہو ----------
   let slipImg = null, slipDrawH = 0;
@@ -10534,7 +10565,7 @@ async function renderPaymentReceiptToCanvas(p){
   ctx.font = `800 34px Poppins, sans-serif`;
   ctx.fillText(`Rs. ${p.amount.toLocaleString()}`, W/2, y+2);
 
-  y += 60;
+  y += 50;
   ctx.font = `500 14px Poppins, sans-serif`;
   ctx.fillStyle = '#475569';
   ctx.fillText(`📅 ${p.date}   •   💳 ${p.method || 'Cash'}`, W/2, y);
@@ -10544,15 +10575,59 @@ async function renderPaymentReceiptToCanvas(p){
     ctx.font = `600 14px Poppins, sans-serif`;
     ctx.fillText(`🏦 ${p.account_title || ''}${p.account_number ? '  '+p.account_number : ''}`, W/2, y);
   }
-  if(p.note){
+
+  // ---------- Previous Balance / Received یا Paid / New Balance — تین رنگین باکس (کسٹمر اور سپلائر دونوں کے لیے) ----------
+  if(hasBalanceBox){
+    y += 36;
+    const boxH = 68, boxGap = 10, rightW = p.note ? 246 : 340, leftW = 246;
+    const totalW = p.note ? (leftW + 20 + rightW) : rightW;
+    const startX = (W - totalW) / 2;
+    const rightX = p.note ? startX + leftW + 20 : startX;
+    const sectionTop = y;
+
+    if(p.note){
+      ctx.fillStyle = '#f0fdf4';
+      roundRectPath(ctx, startX, sectionTop, leftW, boxH*3 + boxGap*2, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#bbf7d0'; ctx.lineWidth = 1;
+      roundRectPath(ctx, startX, sectionTop, leftW, boxH*3 + boxGap*2, 12);
+      ctx.stroke();
+      ctx.fillStyle = '#166534';
+      ctx.font = `700 12px Poppins, sans-serif`;
+      ctx.fillText('📝 Message', startX + leftW/2, sectionTop + 24);
+      ctx.font = `500 13px Poppins, sans-serif`;
+      wrapCenteredText(ctx, p.note, startX + leftW/2, sectionTop + 48, leftW - 28, 17);
+    }
+
+    const boxes = [
+      {label:'Previous Balance', value: p.balance_before, color:'#dc2626'},
+      {label: p.direction === 'in' ? 'Received' : 'Paid', value: p.amount, color: theme.primary},
+      {label:'New Balance', value: p.balance_after, color:'#475569'},
+    ];
+    boxes.forEach((b, i) => {
+      const by = sectionTop + i * (boxH + boxGap);
+      ctx.fillStyle = b.color;
+      roundRectPath(ctx, rightX, by, rightW, boxH, 10);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `600 12px Poppins, sans-serif`;
+      ctx.fillText(b.label, rightX + rightW/2, by + 24);
+      ctx.font = `800 23px Poppins, sans-serif`;
+      ctx.fillText(`Rs. ${Math.round(b.value).toLocaleString()}`, rightX + rightW/2, by + 52);
+    });
+
+    y = sectionTop + boxH*3 + boxGap*2 + 30;
+  } else if(p.note){
     y += 34;
     ctx.font = `500 13px Poppins, sans-serif`;
+    ctx.fillStyle = '#334155';
     wrapCenteredText(ctx, `📝 ${p.note}`, W/2, y, W-120, 18);
+    y += 20;
   }
 
   // ---------- منسلک سلپ/اسکرین شاٹ کی تصویر رسید کے اندر ہی دکھائیں ----------
   if(slipImg){
-    y += 40;
+    y += 20;
     ctx.font = `700 13px Poppins, sans-serif`;
     ctx.fillStyle = '#334155';
     ctx.fillText('📎 Attached Slip / Screenshot', W/2, y);
