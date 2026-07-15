@@ -2576,17 +2576,39 @@
 
         <div class="poTableScroll">
           <table class="cartTable" style="margin-bottom:6px;">
-            <thead><tr><th>Item</th><th>Qty</th><th>Note</th><th></th></tr></thead>
+            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
             <tbody id="advItemsBody"></tbody>
           </table>
         </div>
         <div class="emptyCart" id="advEmptyMsg" style="padding:20px 0;">No items added yet — search above to add a rough item</div>
+
+        <div class="totalsBox" style="margin-top:6px;">
+          <div class="grand"><span>Approx. Subtotal</span><span id="advGrandTotal">Rs. 0</span></div>
+        </div>
+        <div style="background:#fff7ed; color:#c2410c; padding:8px 10px; border-radius:8px; font-size:11.5px; margin-top:6px; font-weight:600;">
+          ⚠️ These are approximate prices only. Final rates will be confirmed at the time of delivery and may go up or down.
+        </div>
 
         <textarea id="advOrderNote" placeholder="Order note (optional, e.g. 'wants delivery Friday')" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
 
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeAdvanceOrderModal()">Cancel</button>
           <button class="saveBtn" onclick="saveAdvanceOrder()">Save Advance Order</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Advance Order Bill-Style Preview (Print / Share جیسے اصل بل کے لیے) ---------- -->
+    <div class="modalOverlay" id="advOrderPreviewModal" onclick="if(event.target===this) closeAdvOrderPreview()">
+      <div class="invoicePreviewBox">
+        <div class="previewHeader">
+          <strong>📝 Advance Order — Approximate Pricing</strong>
+          <span style="cursor:pointer;" onclick="closeAdvOrderPreview()">✖</span>
+        </div>
+        <canvas id="advOrderCanvas"></canvas>
+        <div class="previewActions">
+          <button class="btnPrint" onclick="printAdvOrderPreview()">🖨️ Print</button>
+          <button class="btnWhatsapp" onclick="shareAdvOrderUniversal()">📱 WhatsApp / Share</button>
         </div>
       </div>
     </div>
@@ -8575,7 +8597,7 @@ function addToAdvOrderCart(variantId){
 
   const existing = advOrderCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else advOrderCart.push({variant_id: variantId, name: v.name, qty: 1, unitPrice: v.retail, note: ''});
+  else advOrderCart.push({variant_id: variantId, name: v.name, qty: 1, unitPrice: v.retail});
 
   document.getElementById('advSearchInput').value = '';
   document.getElementById('advSearchResults').classList.remove('show');
@@ -8585,7 +8607,7 @@ function addToAdvOrderCart(variantId){
 function addCustomAdvOrderItem(name){
   name = (name || '').trim();
   if(!name) return;
-  advOrderCart.push({variant_id: null, name, qty: 1, unitPrice: 0, note: ''});
+  advOrderCart.push({variant_id: null, name, qty: 1, unitPrice: 0});
   document.getElementById('advSearchInput').value = '';
   document.getElementById('advSearchResults').classList.remove('show');
   renderAdvOrderCart();
@@ -8597,10 +8619,11 @@ function updateAdvItemQty(idx, qty){
   item.qty = Math.max(1, qty);
   renderAdvOrderCart();
 }
-function updateAdvItemNote(idx, note){
+function updateAdvItemPrice(idx, price){
   const item = advOrderCart[idx];
   if(!item) return;
-  item.note = note;
+  item.unitPrice = Math.max(0, price);
+  renderAdvOrderCart();
 }
 function removeAdvItem(idx){
   advOrderCart.splice(idx, 1);
@@ -8614,18 +8637,25 @@ function renderAdvOrderCart(){
   if(advOrderCart.length === 0){
     body.innerHTML = '';
     emptyMsg.style.display = 'block';
+    document.getElementById('advGrandTotal').textContent = 'Rs. 0';
     return;
   }
   emptyMsg.style.display = 'none';
 
-  body.innerHTML = advOrderCart.map((i, idx) => `
+  let total = 0;
+  body.innerHTML = advOrderCart.map((i, idx) => {
+    const lineTotal = i.qty * i.unitPrice;
+    total += lineTotal;
+    return `
     <tr>
       <td>${i.name}</td>
-      <td><input type="number" min="1" value="${i.qty}" style="width:55px;" onfocus="this.select()" onchange="updateAdvItemQty(${idx}, parseInt(this.value)||1)"></td>
-      <td><input type="text" value="${(i.note||'').replace(/"/g,'&quot;')}" placeholder="—" style="width:80px;" onchange="updateAdvItemNote(${idx}, this.value)"></td>
+      <td><input type="number" min="1" value="${i.qty}" style="width:50px;" onfocus="this.select()" onchange="updateAdvItemQty(${idx}, parseInt(this.value)||1)"></td>
+      <td><input type="number" min="0" value="${i.unitPrice}" style="width:65px;" onfocus="this.select()" onchange="updateAdvItemPrice(${idx}, parseFloat(this.value)||0)"></td>
+      <td>Rs. ${lineTotal.toLocaleString()}</td>
       <td><button class="removeBtn" onclick="removeAdvItem(${idx})">✖</button></td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
+  document.getElementById('advGrandTotal').textContent = 'Rs. ' + total.toLocaleString();
 }
 
 function saveAdvanceOrder(){
@@ -8672,6 +8702,11 @@ function deleteAdvanceOrder(orderId){
   renderAdvanceOrdersScreen();
 }
 
+// ---------- ہر آرڈر کا اندازاً ٹوٹل نکالنے کا مددگار فنکشن ----------
+function advOrderTotal(order){
+  return order.items.reduce((s,i) => s + (i.qty * i.unitPrice), 0);
+}
+
 // ---------- اگلے سیل راؤنڈ پر: یہ آرڈر اصل Billing کارٹ میں لوڈ کر دیں تاکہ فوری بل بنایا جا سکے ----------
 function fulfillAdvanceOrder(orderId){
   const order = advanceOrdersData.find(o => o.id === orderId);
@@ -8700,23 +8735,11 @@ function fulfillAdvanceOrder(orderId){
   Billing.counterSale = !matchedCustomer;
   renderCart();
 
-  let msg = `✅ Loaded into Billing cart for ${order.customerName}.`;
+  let msg = `✅ Loaded into Billing cart for ${order.customerName}.\n\n⚠️ Reminder: these were approximate rates — please confirm today's actual prices before finalizing the bill.`;
   if(skippedCustom.length > 0){
     msg += `\n\n⚠️ ${skippedCustom.length} custom/rough item(s) were not in inventory and were skipped — add them manually: ${skippedCustom.map(i=>i.name).join(', ')}`;
   }
   alert(msg);
-}
-
-function sendAdvanceOrderWhatsapp(orderId){
-  const order = advanceOrdersData.find(o => o.id === orderId);
-  if(!order) return;
-  const itemsList = order.items.map(i => `- ${i.name} x${i.qty}${i.note ? ' ('+i.note+')' : ''}`).join('\n');
-  const text = `Dear ${order.customerName},\n\nThank you — here's a copy of the advance order we noted for you:\n\n${itemsList}${order.note ? '\n\nNote: '+order.note : ''}\n\nWe'll have this ready for you in our next round.\n\n${AppState.currentUser?.name || ''}`.trim();
-  if(!order.customerPhone){
-    alert("This customer's phone number wasn't saved for this order.");
-    return;
-  }
-  window.open(`https://wa.me/${order.customerPhone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 function renderAdvanceOrdersScreen(){
@@ -8725,7 +8748,9 @@ function renderAdvanceOrdersScreen(){
   else if(advOrderListFilter === 'fulfilled') filtered = filtered.filter(o => o.status === 'fulfilled');
 
   const totalItems = filtered.reduce((s,o) => s + o.items.reduce((a,i)=>a+i.qty,0), 0);
-  document.getElementById('advOrderSummaryBar').innerHTML = `<span>Advance Orders</span><span>${filtered.length} order(s) • ${totalItems} item(s) total</span>`;
+  const totalAmount = filtered.reduce((s,o) => s + advOrderTotal(o), 0);
+  document.getElementById('advOrderSummaryBar').innerHTML =
+    `<span>Advance Orders</span><span>${filtered.length} order(s) • ${totalItems} item(s) • Approx. Rs. ${totalAmount.toLocaleString()}</span>`;
 
   const wrap = document.getElementById('advOrderListWrap');
   if(filtered.length === 0){
@@ -8736,28 +8761,246 @@ function renderAdvanceOrdersScreen(){
   wrap.innerHTML = filtered.map(o => {
     const isPending = o.status !== 'fulfilled';
     const statusTag = isPending
-      ? `<span class="pendingStatusTag pending">⏳ PENDING</span>`
+      ? `<span class="pendingStatusTag pending">⏳ PENDING BILL</span>`
       : `<span class="pendingStatusTag approved">✅ FULFILLED</span>`;
     const itemsSummary = o.items.map(i => `${i.name} x${i.qty}`).join(', ');
     const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+    const orderTotal = advOrderTotal(o);
     return `
       <div class="billCard">
         <div>
           <div class="bNo">🧑 ${o.customerName} ${statusTag}</div>
           <div class="bMeta">${when} | ${o.items.length} item(s): ${itemsSummary}</div>
+          <div class="bMeta" style="font-weight:700; color:var(--primary-dark);">Approx. Total: Rs. ${orderTotal.toLocaleString()}</div>
         </div>
         <div class="billActions">
           ${isPending ? `<button class="btnReceiveShipment" onclick="fulfillAdvanceOrder(${o.id})">✅ Fulfill & Bill</button>` : ''}
-          <button class="btnPrint" onclick="openAdvanceOrderModal(${o.id})">✏️ Edit</button>
-          ${o.customerPhone ? `<button class="btnWhatsapp" onclick="sendAdvanceOrderWhatsapp(${o.id})">📱 WhatsApp</button>` : ''}
+          <button class="btnPrint" onclick="openAdvOrderPreview(${o.id})">🧾 Preview Bill</button>
+          <button class="btnHistory" onclick="openAdvanceOrderModal(${o.id})">✏️ Edit</button>
           <button class="removeBtn" onclick="deleteAdvanceOrder(${o.id})" style="padding:8px 12px;">🗑️</button>
         </div>
       </div>`;
   }).join('');
 }
 
+/* =====================================================================
+   📝 Advance Order — بل کی شکل کا Canvas پریویو (اصل انوائس کینوس جیسا)
+   اوپر بڑا واضح بینر: "ADVANCE ORDER — APPROXIMATE PRICING"
+   نیچے صاف اردو/انگریزی وضاحت کہ یہ حتمی قیمت نہیں، ڈلیوری کے وقت تبدیل ہو سکتی ہے
+   ===================================================================== */
+let currentPreviewAdvOrderId = null;
+
+async function openAdvOrderPreview(orderId){
+  const order = advanceOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+  currentPreviewAdvOrderId = orderId;
+  document.getElementById('advOrderPreviewModal').classList.add('show');
+  await new Promise(r => setTimeout(r, 100)); // ---------- modal کے نظر آنے کے بعد canvas ڈرائنگ (کچھ WebViews کے لیے ضروری) ----------
+  await renderAdvOrderToCanvas(order);
+}
+function closeAdvOrderPreview(){
+  document.getElementById('advOrderPreviewModal').classList.remove('show');
+  currentPreviewAdvOrderId = null;
+}
+
+async function renderAdvOrderToCanvas(order){
+  const paperWidthMM = AppState.settings.paperWidth || 80;
+  const pxWidth = paperWidthMM === 80 ? 576 : 384;
+  const canvas = document.getElementById('advOrderCanvas');
+  const scale = pxWidth / 576;
+
+  const noW = Math.round(28 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  const tableLeft = 8, tableRight = pxWidth - 8;
+  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
+  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
+  const rowH = 24, headerH = 22;
+  const tableH = headerH + (order.items.length * rowH);
+
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.fontId) || FONT_PRESETS[0];
+  const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const fscale = (AppState.settings.printFontScale || 100) / 100;
+  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
+
+  // ---------- اونچائی کا حساب پہلے سے — بینر باکس + ڈسکلیمر پیراگراف (کئی لائنوں کا) کے لیے اضافی جگہ ----------
+  const disclaimerLines = [
+    'These are APPROXIMATE prices only, not final.',
+    'Actual rates will be confirmed at the time of',
+    'delivery/next sale round, and may be higher or',
+    'lower than shown here.',
+    '(یہ اندازاً قیمت ہے، حتمی نہیں — اصل ریٹ ڈلیوری کے وقت طے ہوگا)'
+  ];
+  let estimatedHeight = 30 + 26 + 22 + 22 + 54 /* banner box */ + tableH + 26 + 40 /* subtotal */ + (disclaimerLines.length * 15) + 30 + 40;
+  if(AppState.settings.businessAddress) estimatedHeight += 16;
+  if(AppState.settings.businessPhone) estimatedHeight += 16;
+  if(order.customerPhone) estimatedHeight += 16;
+  if(order.note) estimatedHeight += 34;
+
+  canvas.width = pxWidth;
+  canvas.height = estimatedHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, estimatedHeight);
+
+  try{
+    await document.fonts.load(`bold 26px ${canvasFontFamily}`);
+    await document.fonts.load(`16px ${canvasFontFamily}`);
+    await document.fonts.ready;
+  }catch(e){ /* fallback font خودکار */ }
+
+  let y = 30;
+  ctx.textAlign = 'center';
+  ctx.font = F('bold 24px');
+  ctx.fillStyle = '#000';
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 24;
+
+  if(AppState.settings.businessAddress || AppState.settings.businessPhone){
+    ctx.font = F('12px');
+    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16; }
+    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16; }
+  }
+
+  // ---------- بڑا واضح سرخ بینر — ADVANCE ORDER / APPROXIMATE PRICING ----------
+  y += 6;
+  const bannerTop = y, bannerH = 48;
+  ctx.fillStyle = '#fee2e2';
+  ctx.fillRect(tableLeft, bannerTop, tableRight - tableLeft, bannerH);
+  ctx.strokeStyle = '#b91c1c';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
+  ctx.fillStyle = '#b91c1c';
+  ctx.font = F('bold 18px');
+  ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + 22);
+  ctx.font = F('bold 13px');
+  ctx.fillText('⚠️ APPROXIMATE PRICING', pxWidth/2, bannerTop + 40);
+  y = bannerTop + bannerH + 16;
+  ctx.fillStyle = '#000';
+
+  ctx.font = F('bold 15px');
+  const dateObj = new Date(order.createdAt);
+  const dd = String(dateObj.getDate()).padStart(2,'0'), mm2 = String(dateObj.getMonth()+1).padStart(2,'0'), yy = String(dateObj.getFullYear()).slice(-2);
+  ctx.fillText(`Advance Order #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22;
+
+  ctx.font = F('16px');
+  ctx.fillText('Customer: ' + order.customerName, pxWidth/2, y); y += 20;
+  if(order.customerPhone){
+    ctx.font = F('13px');
+    ctx.fillText(order.customerPhone, pxWidth/2, y); y += 20;
+  }
+
+  drawSolidLine(ctx, y, pxWidth); y += 16;
+
+  // ---------- آئٹمز ٹیبل ----------
+  const tableTop = y;
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x)+0.5, tableTop); ctx.lineTo(Math.floor(x)+0.5, tableTop + tableH); ctx.stroke(); });
+  let hLineY = tableTop;
+  const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly)+0.5); ctx.lineTo(tableRight, Math.floor(ly)+0.5); ctx.stroke(); };
+  drawTableHLine(hLineY);
+
+  ctx.font = F('bold 13px');
+  const headerBaseline = tableTop + headerH - 7;
+  ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
+  ctx.textAlign = 'left'; ctx.fillText('Item', colX[1]+4, headerBaseline);
+  ctx.textAlign = 'right';
+  ctx.fillText('Qty', colX[3]-4, headerBaseline);
+  ctx.fillText('Approx.', colX[4]-4, headerBaseline);
+  ctx.fillText('Total', colX[5]-4, headerBaseline);
+  hLineY += headerH;
+  drawTableHLine(hLineY);
+
+  ctx.font = F('bold 14px');
+  const maxItemWidth = itemW - 8;
+  order.items.forEach((item, idx) => {
+    const rowBaseline = hLineY + rowH - 7;
+    let displayName = item.name;
+    ctx.textAlign = 'left';
+    while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
+    if(displayName !== item.name) displayName = displayName.trim() + '…';
+
+    ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
+    ctx.textAlign = 'left'; ctx.fillText(displayName, colX[1]+4, rowBaseline);
+    ctx.textAlign = 'right';
+    ctx.fillText(String(item.qty), colX[3]-4, rowBaseline);
+    ctx.fillText(item.unitPrice.toFixed(0), colX[4]-4, rowBaseline);
+    ctx.fillText((item.qty*item.unitPrice).toFixed(0), colX[5]-4, rowBaseline);
+
+    hLineY += rowH;
+    drawTableHLine(hLineY);
+  });
+
+  y = tableTop + tableH + 26;
+
+  ctx.textAlign = 'right';
+  ctx.font = F('bold 20px');
+  const grandTotal = advOrderTotal(order);
+  ctx.fillText('Approx. Total: Rs. ' + grandTotal.toFixed(0), pxWidth-10, y);
+  y += 30;
+
+  if(order.note){
+    ctx.textAlign = 'left';
+    ctx.font = F('12px');
+    ctx.fillText('Note: ' + order.note, tableLeft, y);
+    y += 22;
+  }
+
+  // ---------- ڈسکلیمر باکس — واضح متن کہ یہ حتمی قیمت نہیں ----------
+  const discTop = y, discH = (disclaimerLines.length * 15) + 12;
+  ctx.fillStyle = '#fff7ed';
+  ctx.fillRect(tableLeft, discTop, tableRight - tableLeft, discH);
+  ctx.strokeStyle = '#c2410c';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(tableLeft+0.5, discTop+0.5, tableRight-tableLeft-1, discH-1);
+  ctx.fillStyle = '#c2410c';
+  ctx.textAlign = 'center';
+  ctx.font = F('11px');
+  let dy = discTop + 16;
+  disclaimerLines.forEach(line => { ctx.fillText(line, pxWidth/2, dy); dy += 15; });
+  y = discTop + discH + 24;
+
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.font = F('13px');
+  ctx.fillText('Thank you — see you in our next round!', pxWidth/2, y);
+}
+
+function printAdvOrderPreview(){
+  const canvas = document.getElementById('advOrderCanvas');
+  if(!canvas) return;
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  document.body.classList.add('printing-invoice');
+  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+}
+
+// ---------- WhatsApp/دیگر ایپس کو اصل بل کی تصویر بھیجیں — ٹیکسٹ میسج نہیں، Web Share API کے ذریعے اصل پرنٹ ایبل بل ----------
+function shareAdvOrderUniversal(){
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order) return;
+  const canvas = document.getElementById('advOrderCanvas');
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the bill image.'); return; }
+    const file = new File([blob], `AdvanceOrder-${order.id}.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({
+          files:[file],
+          title: `Advance Order #${order.id}`,
+          text: `${order.customerName} — Approx. Total: Rs. ${advOrderTotal(order).toLocaleString()} (approximate pricing, subject to change at delivery)`
+        });
+      } catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
+}
+
 // ---------- دن بھر کے پینڈنگ آرڈرز کی پرنٹ فہرست — اگلے سیل راؤنڈ پر ساتھ لے جانے کے لیے،
-// ہر کسٹمر کی الگ فہرست + آخر میں تمام آئٹمز کا مجموعی خلاصہ (تیاری میں آسانی کے لیے) ----------
+// ہر کسٹمر کی الگ فہرست (قیمت سمیت) + آخر میں تمام آئٹمز کا مجموعی خلاصہ اور گرینڈ ٹوٹل ----------
 function printAdvanceOrdersList(){
   const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled');
   if(pending.length === 0){ alert('No pending advance orders to print.'); return; }
@@ -8765,28 +9008,41 @@ function printAdvanceOrdersList(){
   const mm = AppState.settings.paperWidth || 80;
   applyPrintPageSize(mm);
 
-  // ---------- مجموعی خلاصہ: ہر آئٹم کی کل مقدار (کسٹم آئٹمز الگ سے) ----------
+  // ---------- مجموعی خلاصہ: ہر آئٹم کی کل مقدار اور اندازاً مالیت ----------
   const totals = {};
-  pending.forEach(o => o.items.forEach(i => { totals[i.name] = (totals[i.name] || 0) + i.qty; }));
+  pending.forEach(o => o.items.forEach(i => {
+    if(!totals[i.name]) totals[i.name] = {qty:0, amount:0};
+    totals[i.name].qty += i.qty;
+    totals[i.name].amount += i.qty * i.unitPrice;
+  }));
+  const grandTotal = pending.reduce((s,o) => s + advOrderTotal(o), 0);
 
   const customerBlocks = pending.map(o => `
     <div style="border-top:1px dashed #000; margin:6px 0; padding-top:4px;">
       <div style="font-weight:800; font-size:12.5px;">${o.customerName}${o.customerPhone ? ' — '+o.customerPhone : ''}</div>
-      ${o.items.map(i => `<div style="font-size:11px;">• ${i.name} x${i.qty}${i.note ? ' ('+i.note+')' : ''}</div>`).join('')}
+      ${o.items.map(i => `<div style="font-size:11px; display:flex; justify-content:space-between;"><span>• ${i.name} x${i.qty}</span><span>Rs. ${(i.qty*i.unitPrice).toLocaleString()}</span></div>`).join('')}
+      <div style="font-size:11px; font-weight:700; text-align:right;">Order Approx. Total: Rs. ${advOrderTotal(o).toLocaleString()}</div>
       ${o.note ? `<div style="font-size:10.5px; font-style:italic;">Note: ${o.note}</div>` : ''}
     </div>`).join('');
 
-  const totalsBlock = Object.entries(totals).map(([name, qty]) => `<div style="font-size:11px;">• ${name}: ${qty}</div>`).join('');
+  const totalsBlock = Object.entries(totals).map(([name, t]) =>
+    `<div style="font-size:11px; display:flex; justify-content:space-between;"><span>• ${name}: ${t.qty}</span><span>Rs. ${t.amount.toLocaleString()}</span></div>`
+  ).join('');
 
   const area = document.getElementById('printReceiptArea');
   area.innerHTML = `
     <div style="width:${mm}mm; font-family:'Courier New',monospace; padding:6mm; box-sizing:border-box;">
-      <div style="text-align:center; font-weight:800; font-size:15px;">📝 ADVANCE ORDERS</div>
+      <div style="text-align:center; font-weight:800; font-size:15px; color:#b91c1c;">📝 ADVANCE ORDERS</div>
+      <div style="text-align:center; font-weight:700; font-size:11px; color:#b91c1c;">⚠️ APPROXIMATE PRICING — NOT FINAL</div>
       <div style="text-align:center; font-size:11px; margin-top:2px;">${new Date().toLocaleString()}</div>
       <div style="text-align:center; font-size:11px;">${pending.length} pending order(s)</div>
       ${customerBlocks}
       <div style="border-top:2px solid #000; margin:8px 0 4px; font-weight:800; font-size:12.5px;">TOTAL TO PREPARE</div>
       ${totalsBlock}
+      <div style="border-top:1px solid #000; margin:6px 0 4px; font-weight:800; font-size:13px; display:flex; justify-content:space-between;"><span>GRAND TOTAL (approx.)</span><span>Rs. ${grandTotal.toLocaleString()}</span></div>
+      <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; font-size:10px; text-align:center; color:#c2410c;">
+        These are approximate prices only. Final rates will be confirmed at time of delivery and may go up or down.
+      </div>
     </div>`;
   document.body.classList.add('printing-invoice');
   setTimeout(() => window.print(), 50);
