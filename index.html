@@ -101,18 +101,18 @@
   .homeSectionLabel::after{content:''; flex:1; height:2px; border-radius:2px;
     background:linear-gradient(90deg, rgba(15,118,110,.25), rgba(15,118,110,0));}
   .homeSectionLabel:first-child{margin-top:1px;}
-  .homeSectionGrid{display:grid; grid-template-columns:repeat(auto-fit, minmax(68px, 1fr)); gap:7px;}
+  .homeSectionGrid{display:grid; grid-template-columns:repeat(auto-fit, minmax(84px, 1fr)); gap:10px;}
   .homeIconTile{
-    position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
-    padding:9px 4px 7px;
-    background:linear-gradient(160deg, #ffffff 0%, #fbfaf7 100%);
-    border-radius:14px;
+    position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+    padding:14px 6px 11px;
+    background:linear-gradient(160deg, #ffffff 0%, #eef2ef 100%);
+    border-radius:18px;
     box-shadow:
       0 1px 0 rgba(255,255,255,.9) inset,
-      0 -2px 5px rgba(41,29,10,.05) inset,
-      0 5px 10px -5px rgba(41,29,10,.18),
-      0 1px 3px rgba(41,29,10,.08);
-    cursor:pointer; border:1px solid rgba(255,255,255,.6);
+      0 -3px 7px rgba(41,29,10,.07) inset,
+      0 9px 16px -6px rgba(41,29,10,.28),
+      0 3px 6px rgba(41,29,10,.12);
+    cursor:pointer; border:1px solid rgba(255,255,255,.7);
     transition:transform .14s ease, box-shadow .14s ease;
   }
   .homeIconTile:active{
@@ -120,13 +120,17 @@
     box-shadow:0 2px 6px -2px rgba(41,29,10,.18), 0 1px 2px rgba(41,29,10,.08) inset;
   }
   .homeIconTile .hitIconWrap{
-    width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    width:52px; height:52px; border-radius:15px; display:flex; align-items:center; justify-content:center;
     background:linear-gradient(155deg, var(--primary), var(--primary-dark));
-    box-shadow:0 3px 8px -2px rgba(15,118,110,.55), 0 1px 0 rgba(255,255,255,.25) inset;
+    box-shadow:
+      0 5px 12px -3px rgba(15,118,110,.6),
+      0 2px 4px rgba(15,118,110,.35),
+      0 1px 0 rgba(255,255,255,.3) inset,
+      0 -3px 6px rgba(0,0,0,.18) inset;
   }
-  .homeIconTile .hitIcon{font-size:19px; line-height:1; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
+  .homeIconTile .hitIcon{font-size:27px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));}
   .homeIconTile .hitLabel{
-    font-size:10.5px; font-weight:800; color:var(--text); text-align:center; line-height:1.15;
+    font-size:11.5px; font-weight:800; color:var(--text); text-align:center; line-height:1.2;
     text-shadow:0 1px 0 rgba(255,255,255,.7);
   }
   .homeIconTile .hitBadge{
@@ -2804,21 +2808,6 @@
   </div>
 </div>
 
-<!-- ===================== 📑 REPORTS — نیا سیکشن، مستقبل میں مزید رپورٹس یہاں شامل ہوں گی ===================== -->
-<div class="screen admin-only" id="screen-reports">
-  <div class="pageTitle">📑 Reports</div>
-  <div class="settingsCard" style="cursor:pointer; background:linear-gradient(160deg,#ffffff,#f6f9f8); border:1px solid #e2e8f0;" onclick="openProductsReportModal()">
-    <div style="display:flex; align-items:center; gap:14px;">
-      <div style="width:54px; height:54px; flex:0 0 auto; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px;
-        background:linear-gradient(155deg, var(--primary), var(--primary-dark)); box-shadow:0 5px 12px -3px rgba(15,118,110,.5);">🧾</div>
-      <div>
-        <h3 style="margin-bottom:2px;">Products Price List</h3>
-        <div class="settingsHint" style="margin:0;">Every product, grouped by category, with its price — ready to send to customers. Pick one category, several, or all of them. Print or Save as PDF to share.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ===================== 📣 MY ADS — تیار شدہ اشتہاری پوسٹر، واٹس ایپ سٹیٹس/دوستوں کو بھیجنے کے لیے ===================== -->
 <div class="screen admin-only" id="screen-myads">
   <div id="myAdsPosterWrap" style="text-align:center; margin:6px 0 14px;">
@@ -2827,26 +2816,6 @@
   <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 Share on WhatsApp</button>
 </div>
 
-<!-- 🧾 Products Detail Report Modal -->
-<div class="modalOverlay" id="productsReportModal" onclick="if(event.target===this) this.classList.remove('show')">
-  <div class="modalBox" style="max-width:560px;">
-    <h3>🧾 Products Price List</h3>
-    <div class="settingsHint" style="margin-top:0;">Select categories to include, then print — or choose "Save as PDF" in the print dialog to share it.</div>
-
-    <div style="display:flex; align-items:center; gap:8px; margin:10px 0; padding-bottom:8px; border-bottom:1px solid #eef2f7;">
-      <input type="checkbox" id="reportCatAllChk" style="width:18px; height:18px;" onchange="toggleAllReportCategories(this.checked)">
-      <label for="reportCatAllChk" style="font-weight:800; font-size:13.5px; cursor:pointer;">Select All Categories</label>
-    </div>
-    <div id="reportCategoryChecklist" style="display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; margin-bottom:10px;"></div>
-
-    <div id="reportPreviewWrap" style="max-height:340px; overflow-y:auto; border:1px solid #eef2f7; border-radius:10px; padding:8px; background:#f8fafc;"></div>
-
-    <div class="modalBtns" style="margin-top:14px;">
-      <button class="cancelBtn" onclick="document.getElementById('productsReportModal').classList.remove('show')">Close</button>
-      <button class="checkoutBtn" onclick="printProductsReport()">🖨️ Print / Save as PDF</button>
-    </div>
-  </div>
-</div>
     <div class="modalOverlay" id="softResetModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox" style="max-width:360px;">
         <h3 style="color:#c2410c;">🧾 Reset Bills &amp; Transactions</h3>
@@ -3461,9 +3430,6 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '📊 Insights', tiles: [
     {icon:'📊', label:'Dashboard', screen:'dashboard'},
   ]},
-  { section: '📑 Reports', tiles: [
-    {icon:'📑', label:'Reports', screen:'reports'},
-  ]},
   { section: '⚙️ Management', tiles: [
     {icon:'🔑', label:'Users', screen:'users'},
     {icon:'⚙️', label:'Settings', screen:'settings'},
@@ -3875,7 +3841,6 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
-  if(screenName === 'reports') renderReportsScreen();
   if(screenName === 'myads') renderMyAdsScreen();
 
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
@@ -10686,121 +10651,6 @@ function printBarcodeLabels(){
   area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   document.body.classList.add('printing-invoice');
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
-}
-
-/* =====================================================================
-   📑 Reports — 🧾 Products Detail Report (پہلی رپورٹ)
-   ہر پراڈکٹ، کیٹگری کے حساب سے گروپ ہو کر، ساتھ قیمت — پرنٹ/PDF کے قابل۔
-   کیٹگری کا انتخاب (ایک، کئی، یا سب) پرنٹ سے پہلے preview میں فوری اثر دکھاتا ہے۔
-   ===================================================================== */
-function renderReportsScreen(){
-  // ---------- فی الحال کوئی متحرک ڈیٹا درکار نہیں — مستقبل میں مزید رپورٹس کے کارڈز یہیں شامل ہوں گے ----------
-}
-
-// ---------- صرف وہ کیٹگریز جن میں کم از کم ایک پراڈکٹ موجود ہو ----------
-function getAllUsedReportCategories(){
-  const set = new Set();
-  getFlatVariants().forEach(v => set.add(v.category || 'Uncategorized'));
-  return Array.from(set).sort((a,b) => a.localeCompare(b));
-}
-
-function openProductsReportModal(){
-  const cats = getAllUsedReportCategories();
-  const wrap = document.getElementById('reportCategoryChecklist');
-  if(cats.length === 0){
-    wrap.innerHTML = `<div style="color:var(--muted); font-size:12.5px;">No products added yet.</div>`;
-  } else {
-    wrap.innerHTML = cats.map(c => `
-      <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
-        <input type="checkbox" class="reportCatChk" value="${c.replace(/"/g,'&quot;')}" checked onchange="updateProductsReportPreview()">
-        ${c}
-      </label>`).join('');
-  }
-  document.getElementById('reportCatAllChk').checked = true;
-  updateProductsReportPreview();
-  const modalEl = document.getElementById('productsReportModal');
-  modalEl.classList.add('show');
-  // ---------- ماڈل ہمیشہ اوپر سے کھلے — پرانی سکرول پوزیشن (پچھلی دفعہ کی) باقی نہ رہے ----------
-  modalEl.querySelector('.modalBox').scrollTop = 0;
-  document.getElementById('reportPreviewWrap').scrollTop = 0;
-}
-
-// ---------- "Select All" ٹِک/اَن ٹِک ہونے پر تمام کیٹگری چیک باکسز خودکار اسی حالت میں بدلیں ----------
-function toggleAllReportCategories(checked){
-  document.querySelectorAll('.reportCatChk').forEach(cb => cb.checked = checked);
-  updateProductsReportPreview();
-}
-
-// ---------- منتخب کیٹگریز کے حساب سے خوبصورت باکس والا HTML بنائیں — یہی preview اور پرنٹ دونوں میں استعمال ہوگا ----------
-// ---------- سادہ رکھا گیا: صرف کیٹگری کے اندر آئٹمز اور ان کی قیمت — کوئی Stock/Value/Total نہیں (کسٹمر کو بھیجنے کے لیے) ----------
-function buildProductsReportHTML(selectedCats){
-  const flat = getFlatVariants();
-  const grouped = {};
-  flat.forEach(v => {
-    if(!selectedCats.includes(v.category)) return;
-    if(!grouped[v.category]) grouped[v.category] = [];
-    grouped[v.category].push(v);
-  });
-  const catNames = Object.keys(grouped).sort((a,b) => a.localeCompare(b));
-  if(catNames.length === 0){
-    return `<div style="text-align:center; color:#94a3b8; padding:24px 10px; font-size:13px;">No products found for the selected categories.</div>`;
-  }
-  const businessName = AppState.settings.businessName || 'AIO POS';
-  const businessAddr = AppState.settings.businessAddress || '';
-  const businessPhone = AppState.settings.businessPhone || '';
-  const dateStr = new Date().toLocaleDateString();
-
-  let html = `<div style="font-family:Arial, sans-serif; color:#1e293b;">
-    <div style="text-align:center; margin-bottom:6px; padding-bottom:12px; border-bottom:2.5px solid #0f766e;">
-      <div style="font-size:19px; font-weight:800; color:#0b4a45;">${businessName}</div>
-      ${businessAddr ? `<div style="font-size:11.5px; color:#666; margin-top:2px;">${businessAddr}</div>` : ''}
-      ${businessPhone ? `<div style="font-size:11.5px; color:#666;">📞 ${businessPhone}</div>` : ''}
-      <div style="font-size:13.5px; font-weight:700; color:#0f766e; margin-top:8px;">🧾 Products Price List</div>
-      <div style="font-size:11px; color:#888;">${dateStr}</div>
-    </div>`;
-
-  catNames.forEach(cat => {
-    html += `<div style="border:1.5px solid #cbd5e1; border-radius:10px; margin-bottom:12px; overflow:hidden; page-break-inside:avoid;">
-      <div style="background:linear-gradient(135deg,#0f766e,#0b4a45); color:#fff; font-weight:800; font-size:13.5px; padding:8px 12px; display:flex; justify-content:space-between;">
-        <span>🏷️ ${cat}</span><span style="opacity:.85; font-weight:700; font-size:11.5px;">${grouped[cat].length} items</span>
-      </div>
-      <div>`;
-    grouped[cat].forEach((v, idx) => {
-      const price = Number(v.retail || 0);
-      html += `<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 12px; font-size:13px; ${idx % 2 === 1 ? 'background:#f1f5f9;' : ''}">
-        <span>${v.name}</span>
-        <span style="font-weight:800; white-space:nowrap; background:#e7f4f2; color:#0b4a45; padding:3px 10px; border-radius:8px;">Rs. ${price.toLocaleString()}</span>
-      </div>`;
-    });
-    html += `</div></div>`;
-  });
-
-  html += `</div>`;
-  return html;
-}
-
-// ---------- checkboxes بدلتے ہی preview فوری اپڈیٹ، اور "Select All" کی حالت خودکار sync ----------
-function updateProductsReportPreview(){
-  const selected = Array.from(document.querySelectorAll('.reportCatChk:checked')).map(cb => cb.value);
-  const previewEl = document.getElementById('reportPreviewWrap');
-  previewEl.innerHTML = buildProductsReportHTML(selected);
-  previewEl.scrollTop = 0;
-  const allBoxes = document.querySelectorAll('.reportCatChk');
-  document.getElementById('reportCatAllChk').checked = allBoxes.length > 0 && Array.from(allBoxes).every(cb => cb.checked);
-}
-
-// ---------- پرنٹ/PDF: منتخب کیٹگریز کی رپورٹ A4 سائز پیج پر بھیجیں — Print دباؤ میں سے "Save as PDF" چن کر شیئر بھی کیا جا سکتا ہے ----------
-function printProductsReport(){
-  const selected = Array.from(document.querySelectorAll('.reportCatChk:checked')).map(cb => cb.value);
-  if(selected.length === 0){ alert('Please select at least one category.'); return; }
-  const html = buildProductsReportHTML(selected);
-  const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<div style="width:190mm; padding:8mm; box-sizing:border-box;">${html}</div>`;
-  const tag = document.getElementById('dynamicPrintPageStyle');
-  if(tag) tag.textContent = `@page{ size: A4; margin: 10mm; }`;
-  document.body.classList.add('printing-invoice');
-  document.getElementById('productsReportModal').classList.remove('show');
-  setTimeout(() => window.print(), 80);
 }
 
 // ---------- 🧾 Bill & Print Settings کا اپنا الگ صفحہ — دکان کی معلومات، پرنٹر، رسید کا مواد، لکھائی کا سائز، بارکوڈ ----------
