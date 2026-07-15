@@ -2810,6 +2810,16 @@
   </div>
 </div>
 
+<!-- ===================== 📣 MY ADS — تیار شدہ اشتہاری پوسٹر، واٹس ایپ سٹیٹس/دوستوں کو بھیجنے کے لیے ===================== -->
+<div class="screen admin-only" id="screen-myads">
+  <div class="pageTitle">📣 My Ads</div>
+  <div class="settingsHint" style="margin-top:-8px;">A ready-made poster for this app — post it on your WhatsApp Status or send it to friends. Bilingual (English + Urdu) so more people understand it.</div>
+  <div id="myAdsPosterWrap" style="text-align:center; margin:14px 0;">
+    <div style="padding:60px 0; color:var(--muted); font-size:13px;">Building your poster…</div>
+  </div>
+  <button class="checkoutBtn" style="width:100%;" onclick="shareMyAdsPoster()">📤 Share on WhatsApp / Anywhere</button>
+</div>
+
 <!-- 🧾 Products Detail Report Modal -->
 <div class="modalOverlay" id="productsReportModal" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:560px;">
@@ -3447,6 +3457,9 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '📑 Reports', tiles: [
     {icon:'📑', label:'Reports', screen:'reports'},
   ]},
+  { section: '📣 Promote', tiles: [
+    {icon:'📣', label:'My Ads', screen:'myads'},
+  ]},
   { section: '⚙️ Management', tiles: [
     {icon:'🔑', label:'Users', screen:'users'},
     {icon:'⚙️', label:'Settings', screen:'settings'},
@@ -3859,6 +3872,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'reports') renderReportsScreen();
+  if(screenName === 'myads') renderMyAdsScreen();
 
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
   closeSidebar();
@@ -11804,6 +11818,119 @@ async function renderPartyProfilePosterToCanvas(party, kind, accounts){
 
   return canvas;
 }
+
+// ---------- 📣 My Ads — ایپ کے لیے تیار شدہ دو زبانوں (انگلش + اردو) والا اشتہاری پوسٹر ----------
+async function renderMyAdsPosterToCanvas(){
+  const canvas = document.createElement('canvas');
+  const features = [
+    ['🧾', 'Fast Billing & Invoicing', 'تیز بلنگ اور رسیدیں'],
+    ['📦', 'Inventory & Stock Control', 'انوینٹری اور اسٹاک کنٹرول'],
+    ['👥', 'Customer & Supplier Ledger', 'کسٹمر اور سپلائر کا مکمل حساب'],
+    ['📊', 'Dashboard & Reports', 'ڈیش بورڈ اور رپورٹس'],
+    ['🖨️', 'Print & WhatsApp Sharing', 'پرنٹ اور واٹس ایپ شیئرنگ'],
+    ['📴', 'Works Fully Offline', 'مکمل آف لائن کام کرے'],
+    ['🔒', 'Multi-User with Roles', 'کئی صارف، الگ اجازتیں'],
+  ];
+  const W = 700, H = 420 + features.length * 78 + 220;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const cx = W / 2;
+
+  // ---------- خوبصورت رنگ دار گریڈینٹ بیک گراؤنڈ (ایپ کے برانڈ رنگوں سے ملتا ہوا) ----------
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#4c1d95');
+  grad.addColorStop(0.5, '#5b21b6');
+  grad.addColorStop(1, '#0f766e');
+  ctx.fillStyle = grad;
+  roundRectPath(ctx, 0, 0, W, H, 28);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,215,0,.55)'; ctx.lineWidth = 4;
+  roundRectPath(ctx, 12, 12, W-24, H-24, 22);
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+
+  // ---------- اوپر: ایپ کا آئیکن + نام ----------
+  ctx.font = `78px sans-serif`;
+  ctx.fillText('🧾', cx, 130);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `900 46px Poppins, sans-serif`;
+  ctx.fillText('AIO POS & ERP', cx, 195);
+
+  ctx.fillStyle = '#fde68a';
+  ctx.font = `700 20px Poppins, sans-serif`;
+  ctx.fillText('The Complete Business App in Your Pocket', cx, 228);
+  ctx.font = `700 22px 'Noto Nastaliq Urdu', sans-serif`;
+  ctx.fillText('آپ کی جیب میں مکمل کاروباری نظام', cx, 260);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx-140, 290); ctx.lineTo(cx+140, 290); ctx.stroke();
+
+  // ---------- خصوصیات کی فہرست — ہر ایک انگلش کے بعد اردو ترجمہ ----------
+  let y = 350;
+  features.forEach(([icon, en, ur]) => {
+    ctx.fillStyle = 'rgba(255,255,255,.10)';
+    roundRectPath(ctx, 40, y - 40, W - 80, 66, 14);
+    ctx.fill();
+
+    ctx.textAlign = 'left';
+    ctx.font = `36px sans-serif`;
+    ctx.fillText(icon, 62, y + 2);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 21px Poppins, sans-serif`;
+    ctx.fillText(en, 115, y - 6);
+
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#c7d2fe';
+    ctx.font = `600 18px 'Noto Nastaliq Urdu', sans-serif`;
+    ctx.fillText(ur, W - 62, y + 20);
+
+    ctx.textAlign = 'center';
+    y += 78;
+  });
+
+  y += 20;
+  // ---------- Call-to-action باکس ----------
+  ctx.fillStyle = 'rgba(255,215,0,.16)';
+  roundRectPath(ctx, 40, y, W - 80, 150, 18);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,215,0,.6)'; ctx.lineWidth = 2;
+  roundRectPath(ctx, 40, y, W - 80, 150, 18);
+  ctx.stroke();
+
+  ctx.fillStyle = '#fde68a';
+  ctx.font = `900 24px Poppins, sans-serif`;
+  ctx.fillText('🎁 Get This App for Your Business!', cx, y + 40);
+  ctx.font = `700 20px 'Noto Nastaliq Urdu', sans-serif`;
+  ctx.fillText('اپنے کاروبار کے لیے آج ہی رابطہ کریں', cx, y + 72);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `800 26px 'Courier New', monospace`;
+  const waNumber = (AppState.settings.devWhatsapp || AppState.settings.devSms || '0320-6793793');
+  ctx.fillText(`💬 WhatsApp: ${waNumber}`, cx, y + 115);
+
+  ctx.fillStyle = 'rgba(255,255,255,.7)';
+  ctx.font = `600 15px Poppins, sans-serif`;
+  ctx.fillText('pbtcodelabs', cx, H - 22);
+
+  return canvas;
+}
+
+async function renderMyAdsScreen(){
+  const wrap = document.getElementById('myAdsPosterWrap');
+  wrap.innerHTML = `<div style="padding:60px 0; color:var(--muted); font-size:13px;">Building your poster…</div>`;
+  const canvas = await renderMyAdsPosterToCanvas();
+  wrap.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="max-width:100%; border-radius:16px; box-shadow:0 6px 18px rgba(15,23,42,.2);">`;
+}
+
+async function shareMyAdsPoster(){
+  const canvas = await renderMyAdsPosterToCanvas();
+  showImageSharePreview(canvas, 'AIO_POS_ad_poster.png', 'AIO POS & ERP', 'Check out this app for your business!');
+}
+
 
 async function shareCustomerProfile(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
