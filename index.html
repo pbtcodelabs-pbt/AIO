@@ -96,13 +96,8 @@
     background:var(--primary); color:#fff; border:none; border-radius:10px; padding:8px 14px;
     font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
   }
-  #offlineToast{
-    position:fixed; left:50%; bottom:70px; transform:translateX(-50%) translateY(40px); z-index:900;
-    background:#78716c; color:#fff; padding:8px 16px; border-radius:30px; font-size:11.5px; font-weight:700;
-    box-shadow:0 6px 20px rgba(0,0,0,.3); opacity:0; transition:all .3s ease; white-space:nowrap;
-    pointer-events:none; /* ہمیشہ بلاک نہ کرے — یہ صرف اطلاع ہے، بٹن نہیں */
-  }
-  #offlineToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  /* پرانا نچلا "آف لائن" بینر ہٹا دیا گیا — اب اوپر ہیڈر میں چھوٹا سا بیج (#connStatusBadge) استعمال ہوتا ہے،
+     جو کبھی بھی کسی بٹن کے اوپر نہیں آتا اور ہمیشہ ایک ہی جگہ نظر آتا ہے۔ */
 
   /* --- 🧭 Home Screen کے بڑے نیویگیشن آئیکن — اب موضوع کے لحاظ سے گروپ بند (Sales/Inventory/Parties/...) --- */
   /* homeSectionGrid اب auto-fit استعمال کرتا ہے: گروپ میں جتنے آئیکن ہوں وہ خودبخود پوری چوڑائی میں پھیل جاتے ہیں —
@@ -1237,6 +1232,12 @@
       position:sticky; top:0; z-index:600;
     }
     #mobileTopbar .mobileBrand{font-size:16px; font-weight:700; flex:1;}
+    #connStatusBadge{
+      flex:0 0 auto; font-size:10.5px; font-weight:800; padding:3px 10px; border-radius:20px;
+      letter-spacing:.2px; transition:background-color .25s ease, color .25s ease;
+    }
+    #connStatusBadge.online{background:#dbeafe; color:#1d4ed8;}
+    #connStatusBadge.offline{background:#fee2e2; color:#b91c1c;}
     #hamburgerBtn{
       background:rgba(255,255,255,.15); border:none; color:#fff; font-size:20px;
       width:36px; height:36px; border-radius:8px; cursor:pointer;
@@ -1345,7 +1346,6 @@
   <span>🔄 نیا اپڈیٹ دستیاب ہے</span>
   <button onclick="applyPwaUpdate()">ابھی اپڈیٹ کریں</button>
 </div>
-<div id="offlineToast">📴 آف لائن — انٹرنیٹ کے بغیر کام جاری ہے</div>
 
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
@@ -1460,6 +1460,7 @@
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
+    <span id="connStatusBadge" class="online">آن لائن</span>
   </div>
 
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
@@ -13797,14 +13798,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // ---------- آف لائن / آن لائن اسٹیٹس ٹوسٹ ----------
+  // ---------- آف لائن / آن لائن اسٹیٹس — اوپر ہیڈر کے چھوٹے بیج پر ----------
   function updateOnlineStatus(){
-    const t = document.getElementById('offlineToast');
-    if(!t) return;
+    const b = document.getElementById('connStatusBadge');
+    if(!b) return;
     if(navigator.onLine){
-      t.classList.remove('show');
+      b.textContent = 'آن لائن';
+      b.classList.remove('offline');
+      b.classList.add('online');
     } else {
-      t.classList.add('show');
+      b.textContent = 'آف لائن';
+      b.classList.remove('online');
+      b.classList.add('offline');
     }
   }
   window.addEventListener('online', updateOnlineStatus);
