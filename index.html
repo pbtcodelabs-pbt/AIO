@@ -6,7 +6,7 @@
 <title>AIO POS — Skeleton</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
   <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkFJTyBQT1MiLCAic2hvcnRfbmFtZSI6ICJBSU8gUE9TIiwgInN0YXJ0X3VybCI6ICIuIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmYWY3ZjIiLCAidGhlbWVfY29sb3IiOiAiIzBmNzY2ZSIsICJpY29ucyI6IFt7InNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBMU1USWdOVEV5SWo0S0lDQThaR1ZtY3o0S0lDQWdJRHhzYVc1bFlYSkhjbUZrYVdWdWRDQnBaRDBpWnlJZ2VERTlJakFpSUhreFBTSXdJaUI0TWowaU1TSWdlVEk5SWpFaVBnb2dJQ0FnSUNBOGMzUnZjQ0J2Wm1aelpYUTlJakFpSUhOMGIzQXRZMjlzYjNJOUlpTXdaamMyTm1VaUx6NEtJQ0FnSUNBZ1BITjBiM0FnYjJabWMyVjBQU0l4SWlCemRHOXdMV052Ykc5eVBTSWpNR0kwWVRRMUlpOCtDaUFnSUNBOEwyeHBibVZoY2tkeVlXUnBaVzUwUGdvZ0lEd3ZaR1ZtY3o0S0lDQThjbVZqZENCM2FXUjBhRDBpTlRFeUlpQm9aV2xuYUhROUlqVXhNaUlnY25nOUlqRXhNaUlnWm1sc2JEMGlkWEpzS0NObktTSXZQZ29nSUR4MFpYaDBJSGc5SWpJMU5pSWdlVDBpTWpRNElpQm1iMjUwTFdaaGJXbHNlVDBpUVhKcFlXd3NJRWhsYkhabGRHbGpZU3dnYzJGdWN5MXpaWEpwWmlJZ1ptOXVkQzF6YVhwbFBTSXhOalFpSUdadmJuUXRkMlZwWjJoMFBTSTRNREFpSUdacGJHdzlJaU5tWm1abVptWWlJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdSdmJXbHVZVzUwTFdKaGMyVnNhVzVsUFNKdGFXUmtiR1VpUGtGSlR6d3ZkR1Y0ZEQ0S0lDQThkR1Y0ZENCNFBTSXlOVFlpSUhrOUlqTTJNQ0lnWm05dWRDMW1ZVzFwYkhrOUlrRnlhV0ZzTENCSVpXeDJaWFJwWTJFc0lITmhibk10YzJWeWFXWWlJR1p2Ym5RdGMybDZaVDBpTnpJaUlHWnZiblF0ZDJWcFoyaDBQU0kzTURBaUlHWnBiR3c5SWlNMVpXVmhaRFFpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaUlHUnZiV2x1WVc1MExXSmhjMlZzYVc1bFBTSnRhV1JrYkdVaUlHeGxkSFJsY2kxemNHRmphVzVuUFNJeE5DSStVRTlUUEM5MFpYaDBQZ284TDNOMlp6NEsiLCAic2l6ZXMiOiAiMTkyeDE5MiIsICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLCAicHVycG9zZSI6ICJhbnkifSwgeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTFNVElnTlRFeUlqNEtJQ0E4WkdWbWN6NEtJQ0FnSUR4c2FXNWxZWEpIY21Ga2FXVnVkQ0JwWkQwaVp5SWdlREU5SWpBaUlIa3hQU0l3SWlCNE1qMGlNU0lnZVRJOUlqRWlQZ29nSUNBZ0lDQThjM1J2Y0NCdlptWnpaWFE5SWpBaUlITjBiM0F0WTI5c2IzSTlJaU13WmpjMk5tVWlMejRLSUNBZ0lDQWdQSE4wYjNBZ2IyWm1jMlYwUFNJeElpQnpkRzl3TFdOdmJHOXlQU0lqTUdJMFlUUTFJaTgrQ2lBZ0lDQThMMnhwYm1WaGNrZHlZV1JwWlc1MFBnb2dJRHd2WkdWbWN6NEtJQ0E4Y21WamRDQjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2NuZzlJakV4TWlJZ1ptbHNiRDBpZFhKc0tDTm5LU0l2UGdvZ0lEeDBaWGgwSUhnOUlqSTFOaUlnZVQwaU1qUTRJaUJtYjI1MExXWmhiV2xzZVQwaVFYSnBZV3dzSUVobGJIWmxkR2xqWVN3Z2MyRnVjeTF6WlhKcFppSWdabTl1ZEMxemFYcGxQU0l4TmpRaUlHWnZiblF0ZDJWcFoyaDBQU0k0TURBaUlHWnBiR3c5SWlObVptWm1abVlpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaUlHUnZiV2x1WVc1MExXSmhjMlZzYVc1bFBTSnRhV1JrYkdVaVBrRkpUend2ZEdWNGRENEtJQ0E4ZEdWNGRDQjRQU0l5TlRZaUlIazlJak0yTUNJZ1ptOXVkQzFtWVcxcGJIazlJa0Z5YVdGc0xDQklaV3gyWlhScFkyRXNJSE5oYm5NdGMyVnlhV1lpSUdadmJuUXRjMmw2WlQwaU56SWlJR1p2Ym5RdGQyVnBaMmgwUFNJM01EQWlJR1pwYkd3OUlpTTFaV1ZoWkRRaUlIUmxlSFF0WVc1amFHOXlQU0p0YVdSa2JHVWlJR1J2YldsdVlXNTBMV0poYzJWc2FXNWxQU0p0YVdSa2JHVWlJR3hsZEhSbGNpMXpjR0ZqYVc1blBTSXhOQ0krVUU5VFBDOTBaWGgwUGdvOEwzTjJaejRLIiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55In0sIHsic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTVRJZ05URXlJajRLSUNBOFpHVm1jejRLSUNBZ0lEeHNhVzVsWVhKSGNtRmthV1Z1ZENCcFpEMGlaeUlnZURFOUlqQWlJSGt4UFNJd0lpQjRNajBpTVNJZ2VUSTlJakVpUGdvZ0lDQWdJQ0E4YzNSdmNDQnZabVp6WlhROUlqQWlJSE4wYjNBdFkyOXNiM0k5SWlNd1pqYzJObVVpTHo0S0lDQWdJQ0FnUEhOMGIzQWdiMlptYzJWMFBTSXhJaUJ6ZEc5d0xXTnZiRzl5UFNJak1HSTBZVFExSWk4K0NpQWdJQ0E4TDJ4cGJtVmhja2R5WVdScFpXNTBQZ29nSUR3dlpHVm1jejRLSUNBOGNtVmpkQ0IzYVdSMGFEMGlOVEV5SWlCb1pXbG5hSFE5SWpVeE1pSWdjbmc5SWpFeE1pSWdabWxzYkQwaWRYSnNLQ05uS1NJdlBnb2dJRHgwWlhoMElIZzlJakkxTmlJZ2VUMGlNalE0SWlCbWIyNTBMV1poYldsc2VUMGlRWEpwWVd3c0lFaGxiSFpsZEdsallTd2djMkZ1Y3kxelpYSnBaaUlnWm05dWRDMXphWHBsUFNJeE5qUWlJR1p2Ym5RdGQyVnBaMmgwUFNJNE1EQWlJR1pwYkd3OUlpTm1abVptWm1ZaUlIUmxlSFF0WVc1amFHOXlQU0p0YVdSa2JHVWlJR1J2YldsdVlXNTBMV0poYzJWc2FXNWxQU0p0YVdSa2JHVWlQa0ZKVHp3dmRHVjRkRDRLSUNBOGRHVjRkQ0I0UFNJeU5UWWlJSGs5SWpNMk1DSWdabTl1ZEMxbVlXMXBiSGs5SWtGeWFXRnNMQ0JJWld4MlpYUnBZMkVzSUhOaGJuTXRjMlZ5YVdZaUlHWnZiblF0YzJsNlpUMGlOeklpSUdadmJuUXRkMlZwWjJoMFBTSTNNREFpSUdacGJHdzlJaU0xWldWaFpEUWlJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdSdmJXbHVZVzUwTFdKaGMyVnNhVzVsUFNKdGFXUmtiR1VpSUd4bGRIUmxjaTF6Y0dGamFXNW5QU0l4TkNJK1VFOVRQQzkwWlhoMFBnbzhMM04yWno0SyIsICJzaXplcyI6ICI1MTJ4NTEyIiwgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsICJwdXJwb3NlIjogIm1hc2thYmxlIn1dfQ==">
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0f766e">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -82,6 +82,25 @@
     box-shadow:0 6px 20px rgba(0,0,0,.3); opacity:0; transition:all .3s ease; white-space:nowrap;
   }
   .roleToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* --- 🔄 Update Toast — نیا اپڈیٹ آنے پر نیچے نظر آئے، صارف ٹیپ کر کے فوراً اپڈیٹ کر سکے --- */
+  #updateToast{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(80px); z-index:6000;
+    background:#0f172a; color:#fff; padding:12px 16px; border-radius:16px; font-size:13px; font-weight:700;
+    box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; transition:all .3s ease;
+    display:flex; align-items:center; gap:10px; max-width:90vw;
+  }
+  #updateToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #updateToast button{
+    background:var(--primary); color:#fff; border:none; border-radius:10px; padding:8px 14px;
+    font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
+  }
+  #offlineToast{
+    position:fixed; left:50%; top:16px; transform:translateX(-50%) translateY(-40px); z-index:6000;
+    background:#78716c; color:#fff; padding:9px 18px; border-radius:30px; font-size:12px; font-weight:700;
+    box-shadow:0 6px 20px rgba(0,0,0,.3); opacity:0; transition:all .3s ease; white-space:nowrap;
+  }
+  #offlineToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
   /* --- 🧭 Home Screen کے بڑے نیویگیشن آئیکن — اب موضوع کے لحاظ سے گروپ بند (Sales/Inventory/Parties/...) --- */
   /* homeSectionGrid اب auto-fit استعمال کرتا ہے: گروپ میں جتنے آئیکن ہوں وہ خودبخود پوری چوڑائی میں پھیل جاتے ہیں —
@@ -1300,6 +1319,12 @@
   <style id="dynamicPrintPageStyle">@page{ size: 80mm auto; margin: 0; }</style>
 </head>
 <body>
+<!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
+<div id="updateToast">
+  <span>🔄 نیا اپڈیٹ دستیاب ہے</span>
+  <button onclick="applyPwaUpdate()">ابھی اپڈیٹ کریں</button>
+</div>
+<div id="offlineToast">📴 آف لائن — انٹرنیٹ کے بغیر کام جاری ہے</div>
 
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
@@ -13689,6 +13714,82 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+</script>
+
+<!-- ========================================================================
+     🔄 PWA رجسٹریشن: آف لائن سپورٹ + اپڈیٹ کا نظام
+     ====================================================================== -->
+<script>
+(function(){
+  if(!('serviceWorker' in navigator)) return; // پرانا براؤزر — خاموشی سے چھوڑ دیں
+
+  let newWorker;
+  let refreshing = false;
+
+  // ---------- سروس ورکر رجسٹر کریں ----------
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
+
+      // ---------- اگر پہلے سے ایک نیا ورژن انتظار میں موجود ہو (پیج دوبارہ کھلنے پر) ----------
+      if(reg.waiting){
+        newWorker = reg.waiting;
+        showUpdateToast();
+      }
+
+      // ---------- جب بھی نیا ورژن ملے ----------
+      reg.addEventListener('updatefound', () => {
+        newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+            // نیا ورژن تیار ہے اور پرانا ورژن پہلے سے چل رہا ہے — یعنی یہ ایک اپڈیٹ ہے
+            showUpdateToast();
+          }
+        });
+      });
+
+      // ---------- ہر تھوڑی دیر بعد خود بخود چیک کرتے رہیں کہ نیا ورژن تو نہیں آیا ----------
+      setInterval(() => { reg.update(); }, 60 * 1000);
+
+    }).catch((err) => console.warn('Service worker registration failed:', err));
+  });
+
+  // ---------- جب نیا ورژن کنٹرول سنبھال لے تو صفحہ ایک بار خودکار ری لوڈ کریں ----------
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  function showUpdateToast(){
+    const t = document.getElementById('updateToast');
+    if(t) t.classList.add('show');
+  }
+
+  // ---------- "ابھی اپڈیٹ کریں" بٹن دبانے پر — نئے ورژن کو فوراً فعال کریں ----------
+  window.applyPwaUpdate = function(){
+    const t = document.getElementById('updateToast');
+    if(t) t.classList.remove('show');
+    if(newWorker){
+      newWorker.postMessage('SKIP_WAITING');
+    } else {
+      window.location.reload();
+    }
+  };
+
+  // ---------- آف لائن / آن لائن اسٹیٹس ٹوسٹ ----------
+  function updateOnlineStatus(){
+    const t = document.getElementById('offlineToast');
+    if(!t) return;
+    if(navigator.onLine){
+      t.classList.remove('show');
+    } else {
+      t.classList.add('show');
+    }
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+})();
 </script>
 </body>
 </html>
