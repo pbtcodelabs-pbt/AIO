@@ -2,7 +2,7 @@
 <html lang="ur" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>AIO POS — Skeleton</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
   <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
@@ -89,16 +89,18 @@
     background:#0f172a; color:#fff; padding:12px 16px; border-radius:16px; font-size:13px; font-weight:700;
     box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; transition:all .3s ease;
     display:flex; align-items:center; gap:10px; max-width:90vw;
+    pointer-events:none; /* غیر فعال حالت میں یہ کسی بھی ٹیپ کو بلاک نہ کرے */
   }
-  #updateToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #updateToast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
   #updateToast button{
     background:var(--primary); color:#fff; border:none; border-radius:10px; padding:8px 14px;
     font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
   }
   #offlineToast{
-    position:fixed; left:50%; top:16px; transform:translateX(-50%) translateY(-40px); z-index:6000;
-    background:#78716c; color:#fff; padding:9px 18px; border-radius:30px; font-size:12px; font-weight:700;
+    position:fixed; left:50%; bottom:70px; transform:translateX(-50%) translateY(40px); z-index:900;
+    background:#78716c; color:#fff; padding:8px 16px; border-radius:30px; font-size:11.5px; font-weight:700;
     box-shadow:0 6px 20px rgba(0,0,0,.3); opacity:0; transition:all .3s ease; white-space:nowrap;
+    pointer-events:none; /* ہمیشہ بلاک نہ کرے — یہ صرف اطلاع ہے، بٹن نہیں */
   }
   #offlineToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
@@ -254,7 +256,12 @@
   }
 
   /* --- کارٹ/چیک آؤٹ Bottom Sheet --- */
-  .cartSheetBox{background:#fff; border-radius:18px 18px 0 0; width:100%; max-width:480px; max-height:88vh; margin-top:auto; overflow-y:auto; align-self:flex-end;}
+  .cartSheetBox{
+    background:#fff; border-radius:18px 18px 0 0; width:100%; max-width:480px;
+    max-height:88vh; max-height:88dvh; margin-top:auto; overflow-y:auto; align-self:flex-end;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
   #cartSheetModal{align-items:flex-end;}
   .cartSheetHead{display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid #eef1f6; position:sticky; top:0; background:#fff; z-index:2;}
   .cartSheetBody{padding:16px 18px;}
@@ -364,10 +371,14 @@
   /* --- Quick Add Item Popup --- */
   .modalOverlay{position:fixed; inset:0; background:rgba(15,23,42,.55); display:none; align-items:center; justify-content:center; z-index:500;}
   .modalOverlay.show{display:flex;}
-  .modalBox{background:#fff; border-radius:var(--radius); padding:24px; width:320px; max-height:88vh; overflow-y:auto; overflow-anchor:none;}
+  .modalBox{background:#fff; border-radius:var(--radius); padding:24px; width:320px; max-height:88vh; max-height:88dvh; overflow-y:auto; overflow-anchor:none;}
   .modalBox h3, .modalBoxWide h3{margin-bottom:14px; color:var(--primary-dark);}
   .modalBox input, .modalBox select, .modalBoxWide input, .modalBoxWide select{width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; background:#fff; color:var(--text);}
-  .modalBox .modalBtns, .modalBoxWide .modalBtns{display:flex; gap:8px; margin-top:6px;}
+  .modalBox .modalBtns, .modalBoxWide .modalBtns{
+    display:flex; gap:8px; margin-top:6px;
+    position:sticky; bottom:0; background:#fff; padding:10px 0 6px;
+    padding-bottom:calc(6px + env(safe-area-inset-bottom, 0px));
+  }
   .modalBox .modalBtns button, .modalBoxWide .modalBtns button{flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:600;}
   .modalBox .saveBtn, .modalBoxWide .saveBtn{background:var(--primary); color:#fff;}
   .modalBox .cancelBtn, .modalBoxWide .cancelBtn{background:#e2e8f0;}
@@ -688,7 +699,7 @@
   .variantRowActions button{border:none; background:none; cursor:pointer; font-size:14px;}
 
   /* --- New Product Modal --- */
-  .modalBoxWide{background:#fff; border-radius:var(--radius); padding:24px; width:420px; max-height:85vh; overflow-y:auto;}
+  .modalBoxWide{background:#fff; border-radius:var(--radius); padding:24px; width:420px; max-height:85vh; max-height:85dvh; overflow-y:auto;}
   .fieldRow{display:flex; gap:10px;}
   .fieldRow input{flex:1;}
 
@@ -1036,7 +1047,11 @@
   .scannerFooter button{width:100%; padding:10px; border:none; border-radius:8px; background:var(--primary); color:#fff; font-weight:700; cursor:pointer;}
 
   /* ===================== کسٹمر/سپلائر پروفائل (360° ویو — سب کچھ ایک جگہ) ===================== */
-  .profileBox{background:#fff; border-radius:var(--radius); width:520px; max-width:96vw; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;}
+  .profileBox{
+    background:#fff; border-radius:var(--radius); width:520px; max-width:96vw;
+    max-height:90vh; max-height:90dvh; /* dvh پرانے براؤزر میں نظر انداز ہو جاتا ہے، نئے میں صحیح اونچائی دیتا ہے */
+    overflow:hidden; display:flex; flex-direction:column;
+  }
   .profileHead{background:var(--primary-dark); color:#fff; padding:16px 18px; display:flex; align-items:flex-start; gap:14px; flex:0 0 auto;}
   .profileHead .pAvatarLg{width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-size:24px; flex:0 0 52px; box-shadow:0 3px 8px rgba(0,0,0,.2); margin-top:2px;}
   .profileHead .pInfo{flex:1; min-width:0;}
@@ -1070,7 +1085,13 @@
   .profileBox.themeSupplier{background:linear-gradient(180deg, #eff6ff 0%, #f5f9ff 220px, #ffffff 420px);}
   .profileBox.themeSupplier .profileHead{background:linear-gradient(135deg, #1d4ed8, #1e3a8a);}
 
-  .profileBody{padding:18px 20px;}
+  .profileBody{
+    padding:18px 20px;
+    flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    /* نیچے اضافی جگہ — تاکہ آخری بٹن (جیسے "Confirm Receipt") فون کے سسٹم نیویگیشن بار
+       (ہوم/بیک/فارورڈ آئیکنز) کے نیچے کبھی نہ چھپے۔ صفحہ اسکرول ہو کر بٹن نظر آ جائے گا۔ */
+    padding-bottom:calc(18px + env(safe-area-inset-bottom, 0px) + 24px);
+  }
 
   /* --- اصل باڈی: بائیں طرف چھوٹے 3D آئیکن بٹنوں کا گہرے رنگ کا لمبا کالم + دائیں طرف اسکرول ہونے والا مرکزی حصہ --- */
   .profileBodyFlex{display:flex; align-items:stretch; flex:1 1 auto; min-height:0;}
