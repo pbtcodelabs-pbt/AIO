@@ -1774,6 +1774,10 @@
         <input type="text" id="npName" placeholder="Product name (e.g. Lipton Tea)">
         <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off">
         <datalist id="categoryDatalist"></datalist>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <input type="text" id="npBarcode" placeholder="Barcode (scan or type — optional)" style="flex:1; margin-bottom:0;">
+          <button type="button" onclick="openBarcodeScanner('npBarcode')" title="Scan barcode" style="flex:0 0 46px; padding:0; border:1.5px solid #dbe1ea; background:#fff; border-radius:8px; cursor:pointer; font-size:16px;">📷</button>
+        </div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewProductModal()">Cancel</button>
           <button class="saveBtn" id="newProductSaveBtn" onclick="saveNewProduct()">Create + Add First Variant</button>
@@ -4633,8 +4637,10 @@ let nextPendingId = 3;
    ===================================================================== */
 let scannerStream = null;
 let scannerDetectorLoop = null;
+let scannerTargetInputId = null; // null = بلنگ سرچ/سیل موڈ؛ ورنہ اس ID والے فیلڈ میں اسکین شدہ بارکوڈ بھر دیا جائے گا (پراڈکٹ/ویرینٹ فیڈ کرتے وقت)
 
-async function openBarcodeScanner(){
+async function openBarcodeScanner(targetInputId = null){
+  scannerTargetInputId = targetInputId;
   document.getElementById('scannerModal').classList.add('show');
   document.getElementById('manualBarcodeInput').value = '';
   document.getElementById('scannerHint').textContent = 'Starting camera…';
@@ -4678,6 +4684,20 @@ function closeBarcodeScanner(){
 
 function handleScannedBarcode(code){
   closeBarcodeScanner();
+
+  // ---------- اگر یہ اسکین کسی مخصوص فیلڈ کے لیے کھلا تھا (نیا پراڈکٹ / ویرینٹ فیڈ کرتے وقت) تو صرف وہی فیلڈ بھر دیں، بلنگ سرچ نہیں ----------
+  if(scannerTargetInputId){
+    const targetId = scannerTargetInputId;
+    scannerTargetInputId = null;
+    const el = document.getElementById(targetId);
+    if(el){
+      el.value = code;
+      el.dispatchEvent(new Event('change', {bubbles:true}));
+      el.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    return;
+  }
+
   document.getElementById('searchInput').value = code;
   searchItems(code);
 
@@ -6611,7 +6631,12 @@ function renderVariantRow(productId, v){
           : `<button class="variantImgBtn" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Add photo">📷</button>`}
       </td>
       <td><input value="${v.label}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)"></td>
-      <td><input value="${v.barcode}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)"></td>
+      <td>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <input id="variantBarcode-${v.variant_id}" value="${v.barcode}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)" style="flex:1; min-width:50px;">
+          <button type="button" onclick="openBarcodeScanner('variantBarcode-${v.variant_id}')" title="Scan barcode" style="flex:0 0 28px; padding:2px 0; font-size:13px; border:1px solid #dbe1ea; background:#fff; border-radius:6px; cursor:pointer;">📷</button>
+        </div>
+      </td>
       <td><input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)"></td>
       <td><input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)"></td>
       <td><input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></td>
@@ -7308,6 +7333,14 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     inputEl.className = 'expiryInput ' + (tier || '');
     return;
   }
+  if(field === 'barcode'){
+    variant.barcode = (value || '').trim();
+    if(variant.barcode){
+      const dup = getFlatVariants().find(v => v.variant_id !== variantId && v.barcode === variant.barcode);
+      if(dup) alert(`⚠️ This barcode is already saved on "${dup.name}". Barcodes should be unique so scanning finds the correct item.`);
+    }
+    return;
+  }
   // ---------- باقی فیلڈز (label, barcode, purchase, retail, wholesale, location) کا اسی کارڈ میں کوئی اور بصری اثر نہیں —
   // اس لیے کوئی re-render درکار نہیں؛ ڈیٹا خاموشی سے محفوظ ہو چکا (persistAllData ہر 1.5 سیکنڈ بعد خودکار) ----------
 }
@@ -7385,6 +7418,7 @@ function openNewProductModal(productId = null){
     document.getElementById('newProductSaveBtn').textContent = 'Save Changes';
     document.getElementById('npName').value = product.name || '';
     document.getElementById('npCategory').value = product.category || '';
+    document.getElementById('npBarcode').value = product.variants[0]?.barcode || '';
     npProductPhotoDataUrl = product.variants[0]?.image || null;
     renderProductPhotoPreview(npProductPhotoDataUrl);
   } else {
@@ -7392,6 +7426,7 @@ function openNewProductModal(productId = null){
     document.getElementById('newProductSaveBtn').textContent = 'Create + Add First Variant';
     document.getElementById('npName').value = '';
     document.getElementById('npCategory').value = '';
+    document.getElementById('npBarcode').value = '';
     renderProductPhotoPreview(null);
   }
 
@@ -7401,16 +7436,24 @@ function closeNewProductModal(){
   document.getElementById('newProductModal').classList.remove('show');
   document.getElementById('npName').value = '';
   document.getElementById('npCategory').value = '';
+  document.getElementById('npBarcode').value = '';
   npProductPhotoDataUrl = null;
   editingProductId = null;
 }
 function saveNewProduct(){
   const name = document.getElementById('npName').value.trim();
   const category = document.getElementById('npCategory').value.trim();
+  const barcode = document.getElementById('npBarcode').value.trim();
 
   if(!name){
     alert('Please enter product name.');
     return;
+  }
+
+  // ---------- بارکوڈ دیا گیا ہو تو چیک کریں کہ یہ کہیں پہلے سے کسی اور ویرینٹ پر محفوظ تو نہیں — ورنہ اسکین کرتے وقت غلط آئٹم مل سکتا ہے ----------
+  if(barcode){
+    const dup = getFlatVariants().find(v => v.barcode && v.barcode === barcode && !(editingProductId && v.product_id === editingProductId));
+    if(dup && !confirm(`⚠️ This barcode is already saved on "${dup.name}". Barcodes should be unique for scanning to work correctly. Save anyway?`)) return;
   }
 
   // ---------- نئی ٹائپ کی گئی کیٹیگری کو مرکزی فہرست میں بھی محفوظ کر لیں تاکہ آئندہ بلنگ/پراڈکٹ ڈراپ ڈاؤن میں بھی نظر آئے ----------
@@ -7419,12 +7462,15 @@ function saveNewProduct(){
   }
 
   if(editingProductId){
-    // ---------- موجودہ پراڈکٹ ایڈٹ ہو رہا ہے — نام/کیٹیگری/پہلی تصویر اپڈیٹ کریں، variants جوں کے توں رہیں ----------
+    // ---------- موجودہ پراڈکٹ ایڈٹ ہو رہا ہے — نام/کیٹیگری/پہلی تصویر/پہلے ویرینٹ کا بارکوڈ اپڈیٹ کریں، باقی variants جوں کے توں رہیں ----------
     const product = productsData.find(p => p.product_id === editingProductId);
     if(product){
       product.name = name;
       product.category = category;
-      if(product.variants[0]) product.variants[0].image = npProductPhotoDataUrl || product.variants[0].image;
+      if(product.variants[0]){
+        product.variants[0].image = npProductPhotoDataUrl || product.variants[0].image;
+        product.variants[0].barcode = barcode;
+      }
     }
     closeNewProductModal();
     renderProductList(document.getElementById('productSearchInput').value);
@@ -7437,7 +7483,7 @@ function saveNewProduct(){
     product_id: nextProductId++,
     name, category,
     variants: [
-      {variant_id: nextVariantId++, label:'Default', barcode:'', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
+      {variant_id: nextVariantId++, label:'Default', barcode, purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
     ]
   };
   productsData.push(newProduct);
