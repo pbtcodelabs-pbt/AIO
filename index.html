@@ -1752,12 +1752,14 @@
     </div>
 
     <!-- PAST PURCHASE HISTORY POPUP — نیا آئٹم شامل کرتے وقت اگر منتخب کسٹمر یہ پہلے بھی لے چکا ہو تو تمام پرانی تاریخیں/قیمتیں یہاں -->
+    <!-- ---------- اب فہرست خود صرف تاریخ + ریٹ کی مختصر لائنیں دکھاتی ہے۔ پورا بل دیکھنا مجبوری نہیں —
+         ہر لائن کے ساتھ ایک الگ "👁 Preview" بٹن ہے جو صرف مانگنے پر پورا بل کھولے، اور وہاں سے واپس اسی لسٹ پر آیا جا سکتا ہے ---------- -->
     <div class="modalOverlay" id="pastPurchaseModal" onclick="if(event.target===this) closePastPurchaseModal()">
       <div class="modalBox">
         <h3>🔁 Previously Sold This Item</h3>
         <div class="pMeta" id="pastPurchaseItemName" style="font-weight:800; font-size:14px; margin-bottom:2px;">—</div>
         <div class="settingsHint" id="pastPurchaseCount" style="margin-top:0; margin-bottom:10px;">—</div>
-        <div id="pastPurchaseList" style="max-height:320px; overflow-y:auto;"></div>
+        <div id="pastPurchaseList" style="max-height:340px; overflow-y:auto;"></div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closePastPurchaseModal()">Close</button>
         </div>
@@ -2745,7 +2747,7 @@
     </div>
 
     <!-- INVOICE PREVIEW MODAL (Canvas سے پریمیم انوائس رینڈر) -->
-    <div class="modalOverlay" id="invoicePreviewModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="modalOverlay" id="invoicePreviewModal" onclick="if(event.target===this) closeInvoicePreview()">
       <div class="invoicePreviewBox">
         <div class="previewHeader">
           <strong>🖨️ Bill Ready To Print</strong>
@@ -5265,7 +5267,7 @@ function showItemSaleRecord(variantId){
     alert('No previous sale record — this item has not been sold to this customer before.');
     return;
   }
-  renderPastPurchaseModal(item.name, records);
+  renderPastPurchaseModal(item.name, records, matchKey);
 }
 
 // ---------- تاریخ + وقت خوبصورت شکل میں دکھانے کے لیے ----------
@@ -5277,18 +5279,24 @@ function formatPastPurchaseDate(iso){
   return `${datePart} — ${timePart}`;
 }
 
-function renderPastPurchaseModal(itemName, records){
+// ---------- موجودہ ریکارڈ لسٹ کو محفوظ رکھیں تاکہ بل پریویو سے "واپس" آنے پر یہی لسٹ دوبارہ دکھائی جا سکے
+// (پریویو دیکھنا مجبوری نہیں — صرف مانگے پر کھلتا ہے، اور بند کرنے پر اسی لسٹ پر واپسی ہوتی ہے) ----------
+let pastPurchaseModalState = null;
+
+function renderPastPurchaseModal(itemName, records, matchKey){
+  pastPurchaseModalState = {itemName, records, matchKey};
   document.getElementById('pastPurchaseItemName').textContent = itemName;
   document.getElementById('pastPurchaseCount').textContent =
-    `🔁 Sold to this customer ${records.length} time${records.length > 1 ? 's' : ''} before — tap any entry to open that bill`;
+    `🔁 Sold to this customer ${records.length} time${records.length > 1 ? 's' : ''} before — rate history below`;
+  // ---------- ہر لائن: صرف تاریخ + ریٹ (لمبی ڈراپ ڈاؤن جیسی فہرست، خواہ 3 دفعہ بکا ہو یا 100 دفعہ)،
+  // بل دیکھنے کی مجبوری نہیں — چاہیں تو ساتھ والے "👁 Preview" بٹن سے پورا بل بھی دیکھ سکتے ہیں ---------- -->
   document.getElementById('pastPurchaseList').innerHTML = records.map(r => `
-    <div onclick="openPastPurchaseInvoice(${r.invoice_id})"
-         style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 9px; border:1px solid #dbe1ea; border-radius:9px; margin-bottom:6px; cursor:pointer; background:#f8fafc;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border:1px solid #dbe1ea; border-radius:9px; margin-bottom:6px; background:#f8fafc;">
       <div style="min-width:0;">
         <div style="font-weight:700; font-size:12px;">📅 ${formatPastPurchaseDate(r.created_at)}</div>
-        <div style="font-size:11px; color:var(--muted); margin-top:1px;">${r.qty} × Rs. ${r.unitPrice} — ${r.invoice_no || 'Bill'}</div>
+        <div style="font-size:13px; color:var(--primary-dark); font-weight:800; margin-top:2px;">Rs. ${r.unitPrice} <span style="font-weight:500; color:var(--muted); font-size:11px;">(${r.qty} pcs — ${r.invoice_no || 'Bill'})</span></div>
       </div>
-      <div style="flex:0 0 auto; font-size:16px; color:var(--muted);">›</div>
+      <button onclick="openPastPurchaseInvoice(${r.invoice_id})" style="flex:0 0 auto; font-size:11px; font-weight:700; color:var(--primary-dark); background:none; border:1px solid var(--primary); border-radius:7px; padding:6px 10px; cursor:pointer; white-space:nowrap;">👁 Preview</button>
     </div>
   `).join('');
   document.getElementById('pastPurchaseModal').classList.add('show');
@@ -5296,12 +5304,14 @@ function renderPastPurchaseModal(itemName, records){
 
 function closePastPurchaseModal(){
   document.getElementById('pastPurchaseModal').classList.remove('show');
+  pastPurchaseModalState = null;
 }
 
-// ---------- لسٹ میں کسی بھی پرانی انٹری کو ٹچ کرنے پر اسی اصل بل کا پریویو کھل جائے ----------
+// ---------- کسی بھی لائن پر "👁 Preview" دبانے پر اسی اصل بل کا پریویو کھلے — لسٹ کو بند نہیں کیا (صرف عارضی طور پر چھپا دیا)،
+// تاکہ پریویو بند کرنے پر خودکار طور پر اسی لسٹ پر واپسی ہو۔ پریویو میں یہی آئٹم ہائی لائٹ ہو کر نظر آئے گا ----------
 function openPastPurchaseInvoice(invoiceId){
-  closePastPurchaseModal();
-  openInvoicePreview(invoiceId);
+  document.getElementById('pastPurchaseModal').classList.remove('show');
+  openInvoicePreview(invoiceId, pastPurchaseModalState ? pastPurchaseModalState.matchKey : null);
 }
 
 function changeQty(variantId, delta){
@@ -11844,7 +11854,7 @@ function sendApprovalRequest(){
 // ---------- Premium Canvas Invoice Rendering (پرانے ASCII ٹیبل کی بجائے) ----------
 let currentPreviewInvoiceId = null;
 
-async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
+async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
   const pxWidth = paperWidthMM === 80 ? 576 : 384;
   const canvas = document.getElementById('invoiceCanvas');
   const scale = pxWidth / 576;
@@ -11970,13 +11980,20 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80){
   const maxItemWidth = itemW - 8;
   printItems.forEach((item, idx) => {
     const rowBaseline = hLineY + rowH - 7;
+    // ---------- 🔁 Sale Record کی فہرست سے یہاں آیا ہو تو وہی آئٹم پیلے رنگ سے ہائی لائٹ کریں ----------
+    const isHighlighted = highlightMatchKey && getItemMatchKey(item) === highlightMatchKey;
+    if(isHighlighted){
+      ctx.fillStyle = hexToRgba('#facc15', 0.4);
+      ctx.fillRect(tableLeft, hLineY, tableRight - tableLeft, rowH);
+      ctx.fillStyle = '#000';
+    }
 
-    let displayName = item.name;
+    let displayName = (isHighlighted ? '👉 ' : '') + item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){
       displayName = displayName.slice(0, -1);
     }
-    if(displayName !== item.name) displayName = displayName.trim() + '…';
+    if(displayName !== ((isHighlighted ? '👉 ' : '') + item.name)) displayName = displayName.trim() + '…';
 
     ctx.textAlign = 'center';
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
@@ -12085,7 +12102,7 @@ function hexToRgba(hex, alpha){
 }
 
 // ---------- A4 رنگین بزنس انوائس — ایپ کے موجودہ تھیم رنگ اور فونٹ میں، دستخط کی لائن کے ساتھ (WhatsApp شیئرنگ/باضابطہ بلوں کے لیے) ----------
-async function renderInvoiceToA4Canvas(invoice){
+async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const pxWidth = 850;
   const canvas = document.getElementById('invoiceCanvas');
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
@@ -12189,13 +12206,19 @@ async function renderInvoiceToA4Canvas(invoice){
   const maxItemWidth = itemW - 16;
   invoice.items.forEach((item, idx) => {
     if(idx % 2 === 1){ ctx.fillStyle = hexToRgba(theme.primary, 0.05); ctx.fillRect(tableLeft, hLineY, tableRight-tableLeft, rowH); }
+    // ---------- 🔁 Sale Record کی فہرست سے یہاں آیا ہو تو وہی آئٹم پیلے رنگ سے ہائی لائٹ کریں (زیبرا شیڈنگ کے اوپر) ----------
+    const isHighlighted = highlightMatchKey && getItemMatchKey(item) === highlightMatchKey;
+    if(isHighlighted){
+      ctx.fillStyle = hexToRgba('#facc15', 0.45);
+      ctx.fillRect(tableLeft, hLineY, tableRight-tableLeft, rowH);
+    }
     ctx.fillStyle = '#1a1a1a';
     const rowBaseline = hLineY + rowH - 11;
 
-    let displayName = item.name;
+    let displayName = (isHighlighted ? '👉 ' : '') + item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0, -1); }
-    if(displayName !== item.name) displayName = displayName.trim() + '…';
+    if(displayName !== ((isHighlighted ? '👉 ' : '') + item.name)) displayName = displayName.trim() + '…';
 
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = 'left';   ctx.fillText(displayName, colX[1] + 10, rowBaseline);
@@ -12277,26 +12300,36 @@ async function renderInvoiceToA4Canvas(invoice){
 }
 
 // ---------- Invoice Preview Modal کھولنا/بند کرنا ----------
-function openInvoicePreview(invoiceId){
+// ---------- highlightMatchKey (اختیاری) دیا گیا ہو تو بل کے اندر اسی آئٹم کی لائن ہائی لائٹ کر کے دکھائی جائے گی
+// (مثلاً 🔁 Sale Record لسٹ سے "👁 Preview" دبانے پر — تاکہ فوراً نظر آ جائے کہ یہ آئٹم اس بل میں کس ریٹ پر تھا) ----------
+let currentPreviewHighlightKey = null;
+function openInvoicePreview(invoiceId, highlightMatchKey){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
   currentPreviewInvoiceId = invoiceId;
+  currentPreviewHighlightKey = highlightMatchKey || null;
   // ---------- پہلے modal کو نظر آنے دیں (display:flex)، پھر canvas پر ڈرائنگ کریں ----------
   // وجہ: کچھ Android WebView ورژنز میں اگر canvas ابھی display:none والدین کے اندر ہو تو ڈرائنگ
   // صحیح طرح پینٹ نہیں ہوتی (خالی سفید نظر آتا ہے)۔ requestAnimationFrame کچھ WebViews میں کافی نہیں،
   // اس لیے تھوڑی زیادہ تاخیر (setTimeout) دی ہے تاکہ لے آؤٹ مکمل ہو چکا ہو۔
   document.getElementById('invoicePreviewModal').classList.add('show');
   setTimeout(() => {
-    if(AppState.settings.invoiceStyle === 'a4') renderInvoiceToA4Canvas(inv);
-    else renderInvoiceToCanvas(inv, AppState.settings.paperWidth);
+    if(AppState.settings.invoiceStyle === 'a4') renderInvoiceToA4Canvas(inv, currentPreviewHighlightKey);
+    else renderInvoiceToCanvas(inv, AppState.settings.paperWidth, currentPreviewHighlightKey);
   }, 100);
 }
 function closeInvoicePreview(){
   document.getElementById('invoicePreviewModal').classList.remove('show');
   currentPreviewInvoiceId = null;
+  currentPreviewHighlightKey = null;
   // اگر Billing سے آیا تھا تو Bill History بھی تازہ کر دیں
   if(document.getElementById('screen-billhistory').classList.contains('active')){
     renderBillHistory();
+  }
+  // ---------- اگر یہ پریویو 🔁 Sale Record کی فہرست سے کھلا تھا تو بند کرنے پر خودکار طور پر
+  // اسی فہرست پر واپس چلے جائیں (فہرست کا ڈیٹا پہلے سے موجود ہے، دوبارہ لوڈ کرنے کی ضرورت نہیں) ----------
+  if(pastPurchaseModalState){
+    document.getElementById('pastPurchaseModal').classList.add('show');
   }
 }
 
