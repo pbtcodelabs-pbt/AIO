@@ -1615,15 +1615,31 @@
           </div>
         </div>
 
-        <!-- ---------- بل کے سب سے اوپر — کس کسٹمر کا بل بن رہا ہے، صاف نظر آئے اور یہیں سے تبدیل بھی ہو سکے ---------- -->
-        <div id="cartWalkinBanner" style="display:none; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; gap:6px;">🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span></div>
-        <div id="customerSelectRow" style="display:none; gap:8px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
-          <select class="custSelect" id="customerSelect" style="margin-bottom:0;" onchange="onCustomerChange()">
-            <option value="">— Select Customer —</option>
-            <!-- JS سے customer list یہاں لوڈ ہوگی -->
-          </select>
-          <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
-                  style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
+        <!-- ---------- بل کے سب سے اوپر — کس کسٹمر کا بل بن رہا ہے، صاف نظر آئے اور یہیں سے تبدیل بھی ہو سکے۔ Walk-in ہمیشہ ڈیفالٹ منتخب رہتا ہے، جب تک "✖ End" نہ دبائیں یا نیچے سے کوئی کسٹمر منتخب نہ کریں ---------- -->
+        <div id="cartWalkinBanner" style="display:flex; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; justify-content:space-between; gap:6px;">
+          <span id="cartCustomerStatusText">🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span></span>
+          <button type="button" id="cartEndCustomerBtn" onclick="endCustomerSelection()" title="Clear selected customer and go back to Walk-in"
+                  style="display:none; flex:0 0 auto; border:1px solid #f3b985; background:#fff; color:#b45309; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">✖ End</button>
+        </div>
+
+        <!-- ---------- کسٹمر لسٹ ہمیشہ ایکٹو — Walk-in منتخب ہو تب بھی یہیں سے فوراً کسٹمر پکڑ سکتے ہیں۔ سرچ بار اور سٹی/ایریا فلٹر — ہزاروں کسٹمرز میں سے جلدی تلاش کے لیے ---------- -->
+        <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." oninput="filterCustomerSelectOptions()"
+                   style="flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+            <select id="custAreaFilter" onchange="filterCustomerSelectOptions()" title="Filter by City/Area"
+                    style="flex:0 0 120px; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+              <option value="">🗺️ All Areas</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <select class="custSelect" id="customerSelect" style="margin-bottom:0; flex:1 1 auto;" onchange="onCustomerChange()">
+              <option value="">— Select Customer —</option>
+              <!-- JS سے فلٹر شدہ customer list یہاں لوڈ ہوگی -->
+            </select>
+            <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
+                    style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
+          </div>
         </div>
 
         <div class="cartSheetBody">
@@ -1730,6 +1746,19 @@
         <div class="modalBtns">
           <button class="cancelBtn" onclick="document.getElementById('quickCreditCustomerModal').classList.remove('show')">Cancel</button>
           <button class="saveBtn" onclick="confirmQuickCreditCustomer()">Save & Complete Bill</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAST PURCHASE HISTORY POPUP — نیا آئٹم شامل کرتے وقت اگر منتخب کسٹمر یہ پہلے بھی لے چکا ہو تو تمام پرانی تاریخیں/قیمتیں یہاں -->
+    <div class="modalOverlay" id="pastPurchaseModal" onclick="if(event.target===this) closePastPurchaseModal()">
+      <div class="modalBox">
+        <h3>🔁 Previously Sold This Item</h3>
+        <div class="pMeta" id="pastPurchaseItemName" style="font-weight:800; font-size:14px; margin-bottom:2px;">—</div>
+        <div class="settingsHint" id="pastPurchaseCount" style="margin-top:0; margin-bottom:10px;">—</div>
+        <div id="pastPurchaseList" style="max-height:320px; overflow-y:auto;"></div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closePastPurchaseModal()">Close</button>
         </div>
       </div>
     </div>
@@ -5050,6 +5079,8 @@ function addToCart(variantId){
     existing.qty += 1;
   } else {
     Billing.cart.push({variant_id: variantId, name: product.name, qty: 1, unitPrice: price});
+    // ---------- نیا آئٹم پہلی بار اس بل میں شامل ہوا — اگر منتخب کسٹمر کو یہ آئٹم پہلے بھی بیچا جا چکا ہو تو پرانا ریکارڈ دکھائیں ----------
+    maybeShowPastPurchasePopup({variant_id: variantId, name: product.name});
   }
 
   document.getElementById('searchInput').value = '';
@@ -5131,17 +5162,109 @@ function addReverseCalcToCart(){
   const productName = productsData.find(p => p.product_id === ReverseCalc.productId)?.name || v.name;
   const costPerGram = (v.purchase || 0) / grams;
 
-  Billing.cart.push({
-    variant_id: Date.now(), // منفرد نمبر، کسی اصل variant سے نہیں ٹکرائے گا
-    name: `${productName} (loose) ${resultGrams}g`,
-    qty: resultGrams,
-    unitPrice: Math.round(pricePerGram * 100) / 100,
-    costPerUnit: Math.round(costPerGram * 100) / 100
-  });
+  // ---------- اسی پراڈکٹ کا loose/gram آئٹم اگر پہلے سے کارٹ میں موجود ہو تو نیا الگ آئٹم شامل کرنے کے بجائے
+  // اسی ایک آئٹم کو نئی مقدار/قیمت سے اپڈیٹ (اوور رائٹ) کریں — ڈپلیکیشن نہ ہو، ہمیشہ تازہ ترین ویلیو ہی بل میں رہے ----------
+  const existing = Billing.cart.find(c => c.loose_product_id === ReverseCalc.productId);
+  if(existing){
+    existing.name = `${productName} (loose) ${resultGrams}g`;
+    existing.qty = resultGrams;
+    existing.unitPrice = Math.round(pricePerGram * 100) / 100;
+    existing.costPerUnit = Math.round(costPerGram * 100) / 100;
+  } else {
+    Billing.cart.push({
+      variant_id: Date.now(), // منفرد نمبر، کسی اصل variant سے نہیں ٹکرائے گا
+      loose_product_id: ReverseCalc.productId, // اسی پراڈکٹ کے دوبارہ وزن کیے جانے پر پہچان کے لیے — ڈپلیکیٹ روکنے کو
+      name: `${productName} (loose) ${resultGrams}g`,
+      qty: resultGrams,
+      unitPrice: Math.round(pricePerGram * 100) / 100,
+      costPerUnit: Math.round(costPerGram * 100) / 100
+    });
+    // ---------- یہ پراڈکٹ پہلی بار اس بل میں (loose طور پر) شامل ہوا — منتخب کسٹمر کو پہلے بیچا گیا ہو تو پرانا ریکارڈ دکھائیں ----------
+    maybeShowPastPurchasePopup({loose_product_id: ReverseCalc.productId, name: productName});
+  }
 
   document.getElementById('reverseCalcModal').classList.remove('show');
   renderCart();
   renderBillingProductGrid();
+}
+
+/* =====================================================================
+   🔁 PAST PURCHASE HISTORY POPUP — منتخب کسٹمر کو یہ آئٹم پہلے بھی بیچا جا چکا ہو تو
+   ہر پرانی تاریخ اور اس وقت کی قیمت کی مکمل لسٹ دکھائیں (چاہے 1 دفعہ ہو یا 100 دفعہ)۔
+   کسی بھی انٹری کو ٹچ کرنے پر اسی اصل بل کا پریویو کھل جائے گا۔
+   ===================================================================== */
+
+// ---------- کارٹ آئٹم کی شناختی key — عام آئٹم کے لیے variant_id، loose/gram آئٹم کے لیے اصل پراڈکٹ ID (تاکہ مختلف گراموں کے باوجود ایک ہی چیز شناخت ہو) ----------
+function getItemMatchKey(item){
+  return item.loose_product_id ? ('loose_' + item.loose_product_id) : ('variant_' + item.variant_id);
+}
+
+// ---------- منتخب کسٹمر کی مکمل بل ہسٹری میں سے اسی آئٹم کے تمام پرانے ریکارڈز (تاریخ + قیمت) نکالیں ----------
+function findPastPurchases(matchKey, customerId){
+  if(!customerId) return [];
+  const records = [];
+  invoicesData.forEach(inv => {
+    if(inv.customer_id == null || inv.customer_id != customerId) return;
+    (inv.items || []).forEach(it => {
+      if(getItemMatchKey(it) === matchKey){
+        records.push({
+          invoice_id: inv.invoice_id,
+          invoice_no: inv.invoice_no,
+          created_at: inv.created_at,
+          qty: it.qty,
+          unitPrice: it.unitPrice
+        });
+      }
+    });
+  });
+  records.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)); // ---------- تازہ ترین ریکارڈ سب سے اوپر ----------
+  return records;
+}
+
+// ---------- نیا آئٹم پہلی بار اس بل میں شامل ہونے پر — اگر منتخب کسٹمر (Walk-in نہیں) کو یہ پہلے بھی بیچا جا چکا ہو تو پاپ اپ دکھائیں ----------
+function maybeShowPastPurchasePopup(item){
+  const custId = document.getElementById('customerSelect')?.value;
+  if(!custId) return; // Walk-in میں کوئی کسٹمر ہسٹری موجود نہیں
+  const matchKey = getItemMatchKey(item);
+  const records = findPastPurchases(matchKey, custId);
+  if(records.length === 0) return;
+  renderPastPurchaseModal(item.name, records);
+}
+
+// ---------- تاریخ + وقت خوبصورت شکل میں دکھانے کے لیے ----------
+function formatPastPurchaseDate(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '—';
+  const datePart = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  const timePart = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  return `${datePart} — ${timePart}`;
+}
+
+function renderPastPurchaseModal(itemName, records){
+  document.getElementById('pastPurchaseItemName').textContent = itemName;
+  document.getElementById('pastPurchaseCount').textContent =
+    `🔁 Sold to this customer ${records.length} time${records.length > 1 ? 's' : ''} before — tap any entry to open that bill`;
+  document.getElementById('pastPurchaseList').innerHTML = records.map(r => `
+    <div onclick="openPastPurchaseInvoice(${r.invoice_id})"
+         style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid #dbe1ea; border-radius:10px; margin-bottom:8px; cursor:pointer; background:#f8fafc;">
+      <div style="min-width:0;">
+        <div style="font-weight:700; font-size:12.5px;">📅 ${formatPastPurchaseDate(r.created_at)}</div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">${r.qty} × Rs. ${r.unitPrice} — ${r.invoice_no || 'Bill'}</div>
+      </div>
+      <div style="flex:0 0 auto; font-size:18px; color:var(--muted);">›</div>
+    </div>
+  `).join('');
+  document.getElementById('pastPurchaseModal').classList.add('show');
+}
+
+function closePastPurchaseModal(){
+  document.getElementById('pastPurchaseModal').classList.remove('show');
+}
+
+// ---------- لسٹ میں کسی بھی پرانی انٹری کو ٹچ کرنے پر اسی اصل بل کا پریویو کھل جائے ----------
+function openPastPurchaseInvoice(invoiceId){
+  closePastPurchaseModal();
+  openInvoicePreview(invoiceId);
 }
 
 function changeQty(variantId, delta){
@@ -5179,12 +5302,42 @@ function setSaleMode(mode){
 }
 
 // ---------- کارٹ شیٹ کے اندر موجود Walk-in/Retail/Wholesale مرر بٹن اور اوپر والا کسٹمر بینر — ہمیشہ اصل حالت کے مطابق دکھائیں ----------
+// ---------- نوٹ: کسٹمر لسٹ اب ہمیشہ ایکٹو رہتی ہے (Walk-in کے دوران بھی) — صرف اوپر والا status بینر بدلتا ہے ----------
 function syncCartModeControls(){
+  document.getElementById('modeCounterSale')?.classList.toggle('active', Billing.counterSale);
   document.getElementById('cartModeCounterSale').classList.toggle('active', Billing.counterSale);
   document.getElementById('cartModeRetail').classList.toggle('active', Billing.saleMode === 'retail');
   document.getElementById('cartModeWholesale').classList.toggle('active', Billing.saleMode === 'wholesale');
-  document.getElementById('cartWalkinBanner').style.display = Billing.counterSale ? 'flex' : 'none';
-  document.getElementById('customerSelectRow').style.display = Billing.counterSale ? 'none' : 'flex';
+  renderCartCustomerStatus();
+}
+
+// ---------- اوپر status بینر: Walk-in ہو تو "Walk-in Customer" دکھائیں، ورنہ منتخب کسٹمر کا نام + "✖ End" بٹن ----------
+function renderCartCustomerStatus(){
+  const statusText = document.getElementById('cartCustomerStatusText');
+  const endBtn = document.getElementById('cartEndCustomerBtn');
+  if(!statusText || !endBtn) return;
+
+  const custId = document.getElementById('customerSelect')?.value;
+  const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
+
+  if(customer){
+    statusText.innerHTML = `👤 ${customer.name} <span style="font-weight:500; color:var(--muted); font-size:11.5px;">${customer.area ? '(' + customer.area + ')' : ''}</span>`;
+    endBtn.style.display = 'inline-block';
+  } else {
+    statusText.innerHTML = '🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span>';
+    endBtn.style.display = 'none';
+  }
+}
+
+// ---------- منتخب کسٹمر ہٹا کر واپس Walk-in پر — "✖ End" بٹن یا اوپر والا 🚶 سوئچ دونوں یہی کرتے ہیں ----------
+function endCustomerSelection(){
+  Billing.counterSale = true;
+  const sel = document.getElementById('customerSelect');
+  if(sel) sel.value = '';
+  document.getElementById('walletBalanceHint')?.classList.remove('show');
+  syncCartModeControls();
+  renderAutoPaymentNote();
+  renderCart();
 }
 
 // ---------- Render Cart Table + Totals ----------
@@ -5369,9 +5522,15 @@ function closeCartSheet(){
 function onCustomerChange(){
   const custId = document.getElementById('customerSelect').value;
   const hint = document.getElementById('walletBalanceHint');
+
+  // ---------- کسٹمر لسٹ سے کوئی کسٹمر منتخب ہوتے ہی Walk-in خودکار بند ہو جائے؛ خالی سلیکشن پر واپس Walk-in ----------
+  Billing.counterSale = !custId;
+
   if(!custId){
     hint.classList.remove('show');
+    syncCartModeControls();
     renderAutoPaymentNote();
+    renderCart();
     return;
   }
   const customer = customersData.find(c => c.customer_id == custId);
@@ -5381,22 +5540,15 @@ function onCustomerChange(){
   } else {
     hint.classList.remove('show');
   }
+  syncCartModeControls();
   renderAutoPaymentNote();
+  renderCart();
 }
 
-// ---------- Counter Sale ٹوگل: آن ہونے پر کسٹمر منتخب کرنے کی ضرورت نہیں، خودکار نقد ----------
+// ---------- Walk-in سوئچ: عام ٹوگل نہیں — دبانے پر ہمیشہ Walk-in کو ہی ON کرتا ہے (منتخب کسٹمر ہو تو ہٹا دیتا ہے)۔
+// کسٹمر کو دوبارہ منتخب کرنے کے لیے نیچے کی ہمیشہ ایکٹو کسٹمر لسٹ استعمال کریں ----------
 function toggleCounterSale(){
-  Billing.counterSale = !Billing.counterSale;
-  document.getElementById('modeCounterSale').classList.toggle('active', Billing.counterSale);
-  document.getElementById('cartModeCounterSale').classList.toggle('active', Billing.counterSale);
-  document.getElementById('customerSelectRow').style.display = Billing.counterSale ? 'none' : 'flex';
-  document.getElementById('cartWalkinBanner').style.display = Billing.counterSale ? 'flex' : 'none';
-
-  if(Billing.counterSale){
-    document.getElementById('customerSelect').value = '';
-    document.getElementById('walletBalanceHint').classList.remove('show');
-  }
-  renderAutoPaymentNote();
+  endCustomerSelection();
 }
 
 // ---------- بلنگ کے دوران پیمنٹ کا فیصلہ — Counter Sale میں فوری مکمل نقد؛ ورنہ صارف چاہے تو یہیں جزوی رقم درج کر سکتا ہے،
@@ -5601,12 +5753,9 @@ function finalizeInvoice(){
   document.getElementById('customerSelect').value = '';
   document.getElementById('walletBalanceHint').classList.remove('show');
 
-  // ---------- اگلے bill کے لیے Counter Sale ڈیفالٹ پر واپس ----------
+  // ---------- اگلے bill کے لیے Counter Sale (Walk-in) ڈیفالٹ پر واپس — کسٹمر لسٹ ہمیشہ کی طرح ایکٹو رہے گی ----------
   Billing.counterSale = true;
-  document.getElementById('modeCounterSale').classList.add('active');
-  document.getElementById('cartModeCounterSale').classList.add('active');
-  document.getElementById('customerSelectRow').style.display = 'none';
-  document.getElementById('cartWalkinBanner').style.display = 'flex';
+  syncCartModeControls();
   renderAutoPaymentNote();
 
   closeCartSheet();
@@ -5643,10 +5792,7 @@ function submitBillForApproval(customer, method, subtotal){
   document.getElementById('walletBalanceHint').classList.remove('show');
 
   Billing.counterSale = true;
-  document.getElementById('modeCounterSale').classList.add('active');
-  document.getElementById('cartModeCounterSale').classList.add('active');
-  document.getElementById('customerSelectRow').style.display = 'none';
-  document.getElementById('cartWalkinBanner').style.display = 'flex';
+  syncCartModeControls();
   renderAutoPaymentNote();
 
   closeCartSheet();
@@ -7889,6 +8035,12 @@ function buildFilterBarHtml(prefix, statusOptions, filterState, onChangeFn){
 function startNewBillForCustomer(customerId){
   closeProfileModal();
   goTo('billing');
+  // ---------- سرچ/ایریا فلٹر صاف کر کے مکمل کسٹمر لسٹ دوبارہ بنائیں، تاکہ مطلوبہ کسٹمر یقیناً لسٹ میں موجود ہو ----------
+  const searchInp = document.getElementById('custSearchInput');
+  const areaSel = document.getElementById('custAreaFilter');
+  if(searchInp) searchInp.value = '';
+  if(areaSel) areaSel.value = '';
+  populateCustomerDropdown();
   document.getElementById('customerSelect').value = customerId;
   onCustomerChange();
   document.getElementById('searchInput')?.focus();
@@ -9329,9 +9481,13 @@ function fulfillAdvanceOrder(orderId){
   renderAdvanceOrdersScreen();
 
   goTo('billing');
+  document.getElementById('custSearchInput') && (document.getElementById('custSearchInput').value = '');
+  document.getElementById('custAreaFilter') && (document.getElementById('custAreaFilter').value = '');
+  populateCustomerDropdown();
   const custSel = document.getElementById('customerSelect');
   if(custSel){ custSel.value = matchedCustomer ? matchedCustomer.customer_id : ''; }
   Billing.counterSale = !matchedCustomer;
+  syncCartModeControls();
   renderCart();
 
   let msg = `✅ Loaded into Billing cart for ${order.customerName}.\n\n⚠️ Reminder: these were approximate rates — please confirm today's actual prices before finalizing the bill.`;
@@ -10335,16 +10491,45 @@ function saveCollectReceivable(){
   renderPartyList(document.getElementById('partySearchInput').value);
 }
 
-// ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں ----------
+// ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں — ساتھ ساتھ City/Area فلٹر ڈراپ ڈاؤن بھی تازہ کریں ----------
 function populateCustomerDropdown(){
+  const areaSel = document.getElementById('custAreaFilter');
+  if(areaSel){
+    const prevArea = areaSel.value;
+    const areas = [...new Set(
+      customersData.filter(c => !c.name.includes('Walk-in') && c.area && c.area.trim())
+                   .map(c => c.area.trim())
+    )].sort((a,b) => a.localeCompare(b));
+    areaSel.innerHTML = '<option value="">🗺️ All Areas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    areaSel.value = areas.includes(prevArea) ? prevArea : '';
+  }
+  filterCustomerSelectOptions();
+}
+
+// ---------- سرچ باکس (نام/فون) اور City/Area فلٹر کے مطابق کسٹمر لسٹ کو فوراً فلٹر کر کے دکھائیں —
+// ہزاروں کسٹمرز میں سے مطلوبہ کسٹمر جلدی ڈھونڈنے کے لیے (پورا صفحہ اسکرول نہ کرنا پڑے) ----------
+function filterCustomerSelectOptions(){
   const sel = document.getElementById('customerSelect');
-  const walkIn = sel.querySelector('option[value=""]');
-  sel.innerHTML = '';
-  sel.appendChild(walkIn || new Option('— Walk-in Customer —', ''));
-  customersData.forEach(c => {
-    if(c.name.includes('Walk-in')) return; // dummy walk-in entry نظر انداز کریں
-    sel.appendChild(new Option(`${c.name}${c.wallet_balance ? ' (Wallet: Rs.'+c.wallet_balance+')' : ''}`, c.customer_id));
-  });
+  if(!sel) return;
+  const prevValue = sel.value;
+  const searchText = (document.getElementById('custSearchInput')?.value || '').trim().toLowerCase();
+  const areaFilter = document.getElementById('custAreaFilter')?.value || '';
+
+  let list = customersData.filter(c => !c.name.includes('Walk-in'));
+  if(areaFilter) list = list.filter(c => (c.area || '').trim() === areaFilter);
+  if(searchText){
+    list = list.filter(c =>
+      c.name.toLowerCase().includes(searchText) ||
+      (c.phone || '').toLowerCase().includes(searchText)
+    );
+  }
+
+  sel.innerHTML = '<option value="">— Select Customer —</option>' + list.map(c =>
+    `<option value="${c.customer_id}">${c.name}${c.area ? ' — ' + c.area : ''}${c.wallet_balance ? ' (Wallet: Rs.' + c.wallet_balance + ')' : ''}</option>`
+  ).join('');
+
+  // ---------- پہلے سے منتخب کسٹمر اگر اب بھی فلٹر شدہ لسٹ میں موجود ہو تو اسے منتخب ہی رہنے دیں ----------
+  sel.value = (prevValue && list.some(c => c.customer_id == prevValue)) ? prevValue : '';
 }
 
 /* =====================================================================
