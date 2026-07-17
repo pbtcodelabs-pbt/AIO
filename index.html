@@ -193,6 +193,12 @@
      خلاف صرف ٹائمنگ پر مبنی جھگڑا تھا، ہار جاتا تھا۔ یہ CSS پراپرٹی anchoring کو مکمل بند کر دیتی ہے۔ */
   html, body{overflow-anchor:none;}
   #mainArea{overflow-y:auto; padding:20px; overflow-anchor:none;}
+  /* --- اہم فکس: نیچے فلوٹنگ Back/Home/Forward بار (navArrowBar) ہر صفحے (رپورٹس، پراڈکٹس/ویرینٹس، پارٹیز وغیرہ)
+       پر مواد کے اوپر بیٹھتی ہے، مگر #mainArea میں صرف 20px نیچے جگہ تھی — اس لیے آخری بٹن/لائن اس بار
+       کے نیچے چھپ جاتی تھی اور صارف کو کھینچ کر ڈھونڈنی پڑتی تھی۔ اب اتنی جگہ چھوڑی جا رہی ہے کہ صفحے کا
+       آخری عنصر ہمیشہ اس بار سے اوپر مکمل نظر آئے۔ Billing/Advance-Order اسکرینز پر یہ بار پہلے ہی اوپر
+       اٹھی ہوئی ہوتی ہے اور اپنی خود کی جگہ سنبھال لیتی ہے، اس لیے وہاں اضافی پیڈنگ کی ضرورت نہیں۔ */
+  body:not(.billing-active) #mainArea{ padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px)); }
   .screen{overflow-anchor:none;}
 
   /* --- Mobile topbar + sidebar overlay (بڑی اسکرین پر چھپے رہتے ہیں) --- */
@@ -4230,7 +4236,9 @@ function goTo(screenName, _isHistoryNav){
   closeSidebar();
   closeNewActionFab();
   requestAnimationFrame(resetScrollNow); // ---------- مواد اور drawer بند ہونے کے بعد آخری بار یقینی بنائیں ----------
-  document.body.classList.toggle('billing-active', screenName === 'billing');
+  // نوٹ: advOrderPicker میں بھی بلنگ جیسا فلوٹنگ کارٹ بار ہوتا ہے، اس لیے وہاں بھی یہی کلاس لگائیں
+  // تاکہ نیچے کا Back/Home/Forward بار اور + FAB اس کارٹ بار کے اوپر رہیں، اس کے نیچے دب کر نہ رہ جائیں۔
+  document.body.classList.toggle('billing-active', screenName === 'billing' || screenName === 'advOrderPicker');
   document.getElementById('navArrowBar').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
 }
