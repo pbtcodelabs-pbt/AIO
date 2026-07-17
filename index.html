@@ -1367,8 +1367,8 @@
 <body>
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
 <div id="updateToast">
-  <span>🔄 نیا اپڈیٹ دستیاب ہے</span>
-  <button onclick="applyPwaUpdate()">ابھی اپڈیٹ کریں</button>
+  <span>🔄 New update available</span>
+  <button onclick="applyPwaUpdate()">Update Now</button>
 </div>
 
 <!-- ===================== LOGIN SCREEN ===================== -->
@@ -1484,7 +1484,7 @@
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
-    <span id="connStatusBadge" class="online">آن لائن</span>
+    <span id="connStatusBadge" class="online">Online</span>
   </div>
 
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
@@ -2746,68 +2746,68 @@
          📔 MY DIARY — بلنگ سے الگ ذاتی کھاتہ: صرف نام اور بقایہ (کوئی کوڈ/پراڈکٹ نہیں)
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
-      <div class="pageTitle">📔 میری ڈائری</div>
-      <div class="settingsHint" style="margin-top:0;">یہ بلنگ سسٹم سے بالکل الگ ہے — صرف بندوں کے نام اور ان کے بقایہ کا سادہ ذاتی ریکارڈ۔ سرخ = ہم نے دینے ہیں، سبز = ہم نے لینے ہیں۔</div>
+      <div class="pageTitle">📔 My Diary</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. Red = We Owe, Green = We're Owed.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 کل دینے ہیں (Payable)</div>
+          <div class="diaryTotalLabel">🔴 Total Payable</div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
         <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 کل لینے ہیں (Receivable)</div>
+          <div class="diaryTotalLabel">🟢 Total Receivable</div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
       <div class="diaryNetBar" id="diaryNetBar">Net: Rs. 0</div>
 
       <div class="partyToolbar">
-        <input type="text" id="diarySearchInput" placeholder="🔍 نام سے تلاش کریں" oninput="renderMyDiaryList()" style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
-        <button onclick="openDiaryAddModal()" style="flex:0 0 auto; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px 16px; font-weight:700; cursor:pointer;">➕ نیا اندراج</button>
+        <input type="text" id="diarySearchInput" placeholder="🔍 Search by name" oninput="renderMyDiaryList()" style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
+        <button onclick="openDiaryAddModal()" style="flex:0 0 auto; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px 16px; font-weight:700; cursor:pointer;">➕ New Entry</button>
       </div>
 
       <div id="diaryListWrap"></div>
     </div>
 
-    <!-- MY DIARY — نیا اندراج / نام + بقایہ شامل کریں -->
+    <!-- MY DIARY — Add New Entry (name + balance) -->
     <div class="modalOverlay" id="diaryAddModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
-        <h3>➕ نیا ڈائری اندراج</h3>
-        <input type="text" id="diaryNewName" placeholder="بندے کا نام" list="diaryNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
+        <h3>➕ New Diary Entry</h3>
+        <input type="text" id="diaryNewName" placeholder="Person's name" list="diaryNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <datalist id="diaryNameSuggestions"></datalist>
-        <input type="number" id="diaryNewAmount" placeholder="رقم (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="number" id="diaryNewAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 ہم نے دینے ہیں</button>
-          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 ہم نے لینے ہیں</button>
+          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 We Owe</button>
+          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 We're Owed</button>
         </div>
-        <input type="text" id="diaryNewNote" placeholder="نوٹ (اختیاری)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="text" id="diaryNewNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('diaryAddModal').classList.remove('show')">Cancel</button>
-          <button class="saveBtn" onclick="saveDiaryNewEntry()">محفوظ کریں</button>
+          <button class="saveBtn" onclick="saveDiaryNewEntry()">Save</button>
         </div>
       </div>
     </div>
 
-    <!-- MY DIARY — تفصیل / رقم اپڈیٹ / تصفیہ / حذف -->
+    <!-- MY DIARY — Detail / adjust balance / settle / delete -->
     <div class="modalOverlay" id="diaryDetailModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
         <h3 id="diaryDetailName">—</h3>
         <div id="diaryDetailBalance" style="font-size:22px; font-weight:800; text-align:center; margin:8px 0;">Rs. 0</div>
 
-        <input type="number" id="diaryAdjustAmount" placeholder="رقم (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="number" id="diaryAdjustAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions" style="margin-bottom:8px;">
-          <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 مزید دینے ہیں</button>
-          <button class="saveBtn" style="background:var(--success);" onclick="diaryAdjustBalance(1)">🟢 مزید لینے ہیں</button>
+          <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 Add to Owed</button>
+          <button class="saveBtn" style="background:var(--success);" onclick="diaryAdjustBalance(1)">🟢 Add to Receivable</button>
         </div>
         <div class="modalActions" style="margin-bottom:8px;">
-          <button class="saveBtn" style="background:#0284c7;" onclick="diarySettlePartial()">✅ ادائیگی/وصولی ہوئی (بقایہ کم کریں)</button>
+          <button class="saveBtn" style="background:#0284c7;" onclick="diarySettlePartial()">✅ Payment/Collection Made (Reduce Balance)</button>
         </div>
 
         <div id="diaryHistoryList" style="max-height:140px; overflow-y:auto; font-size:12px; color:#64748b; border-top:1px solid #eef1f5; margin-top:6px; padding-top:6px;"></div>
 
         <div class="modalActions" style="margin-top:10px;">
-          <button class="cancelBtn" onclick="document.getElementById('diaryDetailModal').classList.remove('show')">بند کریں</button>
-          <button class="cancelBtn" style="background:#fee2e2; color:var(--danger);" onclick="deleteDiaryEntry()">🗑️ حذف کریں</button>
+          <button class="cancelBtn" onclick="document.getElementById('diaryDetailModal').classList.remove('show')">Close</button>
+          <button class="cancelBtn" style="background:#fee2e2; color:var(--danger);" onclick="deleteDiaryEntry()">🗑️ Delete</button>
         </div>
       </div>
     </div>
@@ -3884,9 +3884,6 @@ function renderSubscriptionBanner(){
 // ---------- 🏪 ہوم پیج کا بزنس کارڈ — لوگو، دکان کا نام، مالک کا نام، فون نمبر ----------
 // ---------- 🧭 Home Screen کے بڑے نیویگیشن آئیکن — role کے مطابق مختلف فہرست ----------
 const HOME_TILE_GROUPS_ADMIN = [
-  { section: '🔴 Liabilities', tiles: [
-    {icon:'📔', label:'My Diary', screen:'mydiary'},
-  ]},
   { section: '💰 Sales', tiles: [
     {icon:'🛒', label:'Billing', screen:'billing'},
     {icon:'🧾', label:'Bill History', screen:'billhistory'},
@@ -3915,6 +3912,9 @@ const HOME_TILE_GROUPS_ADMIN = [
     {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
     {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
     {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
+  ]},
+  { section: '🔴 Liabilities', tiles: [
+    {icon:'📔', label:'My Diary', screen:'mydiary'},
   ]},
 ];
 // ---------- پرانی سیدھی فہرست اب بھی موجود ہے — Quick Access Dock وغیرہ کہیں اور اسے استعمال کرتے ہیں ----------
@@ -4872,7 +4872,7 @@ function renderBillingCategoryRail(){
 // ---------- ڈراپ ڈاؤن کے اندر سے نئی کیٹیگری شامل کریں (ابھی خالی، بعد میں پراڈکٹس اس میں ڈالے جا سکتے ہیں) ----------
 function addNewCategoryFromDropdown(e){
   if(e) e.stopPropagation();
-  const name = (prompt('نئی کیٹیگری کا نام لکھیں:') || '').trim();
+  const name = (prompt('Enter new category name:') || '').trim();
   if(!name) return;
   const exists = Object.prototype.hasOwnProperty.call(
     productsData.reduce((acc,p)=>{ acc[(p.category&&p.category.trim())||'Uncategorized']=1; return acc; }, {}),
@@ -5273,7 +5273,7 @@ function updateReverseCalc(){
   const pricePerGram = price / grams;
 
   document.getElementById('reverseCalcRateLine').textContent =
-    `ریٹ: Rs. ${price} / ${v.label}  (Rs. ${pricePerGram.toFixed(2)} فی گرام)`;
+    `Rate: Rs. ${price} / ${v.label}  (Rs. ${pricePerGram.toFixed(2)} per gram)`;
 
   const amount = parseFloat(document.getElementById('reverseCalcAmount').value) || 0;
   const resultGrams = amount > 0 ? Math.round(amount / pricePerGram) : 0;
@@ -7043,7 +7043,7 @@ async function startPhotoCapture(mode, defaultShape, title){
     captureBtn.textContent = '📷 Take Photo';
     statusText.style.display = 'block';
     statusText.style.color = '#93c5fd';
-    statusText.textContent = 'ℹ️ Live preview یہاں دستیاب نہیں — نیچے "📷 Take Photo" دبائیں، فون کا کیمرہ ایپ کھلے گا۔';
+    statusText.textContent = 'ℹ️ Live preview is not available here — tap "📷 Take Photo" below, your phone\'s camera app will open.';
     return;
   }
 
@@ -7094,8 +7094,8 @@ async function startPhotoCapture(mode, defaultShape, title){
     statusText.style.display = 'block';
     statusText.style.color = '#93c5fd';
     statusText.textContent = isPermissionIssue
-      ? 'ℹ️ کیمرہ پرمیشن بند ہے — نیچے "📷 Take Photo" دبائیں، فون کا کیمرہ ایپ کھلے گا۔'
-      : 'ℹ️ Live preview دستیاب نہیں — نیچے "📷 Take Photo" دبائیں، فون کا کیمرہ ایپ کھلے گا۔';
+      ? 'ℹ️ Camera permission is off — tap "📷 Take Photo" below, your phone\'s camera app will open.'
+      : 'ℹ️ Live preview is not available — tap "📷 Take Photo" below, your phone\'s camera app will open.';
   }
 }
 
@@ -7266,7 +7266,7 @@ function updateRemoveBgUsageText(){
   const used = getRemoveBgUsageCount();
   const remaining = Math.max(0, REMOVE_BG_MONTHLY_LIMIT - used);
   const el = document.getElementById('removeBgUsageText');
-  if(el) el.textContent = `اس مہینے میں تقریباً ${remaining}/${REMOVE_BG_MONTHLY_LIMIT} مفت بیک گراؤنڈ ریموول باقی ہیں`;
+  if(el) el.textContent = `Approximately ${remaining}/${REMOVE_BG_MONTHLY_LIMIT} free background removals left this month`;
 }
 
 // ---------- data URL کو Blob میں تبدیل کریں (API کو فائل بھیجنے کے لیے) ----------
@@ -7302,11 +7302,11 @@ function openRemoveBgWebsite(){
   document.body.removeChild(link);
 
   alert(
-    `✅ یہ تصویر "${filename}" کے نام سے آپ کے فون کے Downloads/Gallery میں محفوظ کر دی گئی ہے۔\n\n` +
-    `اب یہ 3 مرحلے کریں:\n` +
-    `1) remove.bg پر جا کر Downloads فولڈر سے یہی تصویر اپلوڈ کریں\n` +
-    `2) بیک گراؤنڈ ریموو ہونے کے بعد وہاں سے نتیجہ ڈاؤن لوڈ کریں\n` +
-    `3) واپس اس اسکرین پر آ کر "🔄 Retake" پھر "🖼️ Gallery" بٹن دبائیں اور وہی نئی ڈاؤن لوڈ شدہ (بیک گراؤنڈ ریموو شدہ) تصویر منتخب کریں — وہ سیدھا اسی جگہ آ کر لگ جائے گی۔`
+    `✅ This photo has been saved to your phone's Downloads/Gallery as "${filename}".\n\n` +
+    `Now do these 3 steps:\n` +
+    `1) Go to remove.bg and upload this same photo from your Downloads folder\n` +
+    `2) After the background is removed, download the result from there\n` +
+    `3) Come back to this screen and tap "🔄 Retake" then "🖼️ Gallery", and select that same newly downloaded (background-removed) photo — it will drop straight into place here.`
   );
 
   setTimeout(() => {
@@ -7321,7 +7321,7 @@ async function removeBackgroundViaApi(){
   const btn = document.getElementById('removeBgApiBtn');
   const originalLabel = btn.textContent;
   btn.disabled = true;
-  btn.textContent = '⏳ بیک گراؤنڈ ریموو ہو رہا ہے…';
+  btn.textContent = '⏳ Removing background…';
 
   try{
     const formData = new FormData();
@@ -7343,7 +7343,7 @@ async function removeBackgroundViaApi(){
       if(response.status === 402 || response.status === 403){
         alert('Looks like this month\'s 50 free photos are used up (or there\'s an API key issue).\nUse the "🌐 Open remove.bg" button to remove the background manually on their website.\n\nDetails: ' + reason);
       } else {
-        alert('بیک گراؤنڈ ریموو کرنے میں مسئلہ ہوا:\n' + reason);
+        alert('There was a problem removing the background:\n' + reason);
       }
       return;
     }
@@ -7801,7 +7801,7 @@ function countLowStockItems(){
 let expiryAlertDays = loadFromStorage('expiryAlertDays', 30);
 function changeExpiryAlertDays(val){
   if(val === 'custom'){
-    const input = prompt('کتنے دنوں کے اندر ایکسپائری والی آئٹمز دیکھنا چاہتے ہیں؟ (عدد لکھیں)', expiryAlertDays);
+    const input = prompt('Show items expiring within how many days? (enter a number)', expiryAlertDays);
     const num = parseInt(input);
     if(!num || num <= 0){ document.getElementById('expiryWindowSelect').value = expiryAlertDays; return; }
     expiryAlertDays = num;
@@ -7970,7 +7970,7 @@ function renderMyDiaryList(){
   document.getElementById('diaryTotalReceivable').textContent = fmtDiaryAmount(totalReceivable);
   const net = totalReceivable - totalPayable;
   const netBar = document.getElementById('diaryNetBar');
-  netBar.textContent = 'خالص (Net): ' + (net >= 0 ? '🟢 ' : '🔴 ') + fmtDiaryAmount(net);
+  netBar.textContent = 'Net: ' + (net >= 0 ? '🟢 ' : '🔴 ') + fmtDiaryAmount(net);
 
   // ---------- ڈیٹالسٹ (نام تجاویز) بھی ساتھ ہی تازہ کر دیں ---------- 
   const dl = document.getElementById('diaryNameSuggestions');
@@ -7981,14 +7981,14 @@ function renderMyDiaryList(){
   filtered.sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
 
   if(filtered.length === 0){
-    wrap.innerHTML = '<div class="diaryEmptyState">📔 ابھی کوئی اندراج نہیں — اوپر "➕ نیا اندراج" سے شامل کریں۔</div>';
+    wrap.innerHTML = '<div class="diaryEmptyState">📔 No entries yet — add one above with "➕ New Entry".</div>';
     return;
   }
 
   wrap.innerHTML = filtered.map(e => {
     const isOwe = e.balance < 0;
     const cls = isOwe ? 'owe' : 'get';
-    const label = isOwe ? 'دینا ہے' : (e.balance > 0 ? 'لینا ہے' : 'برابر');
+    const label = isOwe ? 'Owes' : (e.balance > 0 ? 'Owed' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
@@ -8018,8 +8018,8 @@ function saveDiaryNewEntry(){
   const name = document.getElementById('diaryNewName').value.trim();
   const amountRaw = parseFloat(document.getElementById('diaryNewAmount').value);
   const note = document.getElementById('diaryNewNote').value.trim();
-  if(!name){ alert('براہ کرم بندے کا نام درج کریں۔'); return; }
-  if(!amountRaw || amountRaw <= 0){ alert('براہ کرم درست رقم درج کریں۔'); return; }
+  if(!name){ alert('Please enter the person\'s name.'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
 
   const signedAmount = diaryNewTypeSelected === 'owe' ? -Math.abs(amountRaw) : Math.abs(amountRaw);
 
@@ -8056,7 +8056,7 @@ function openDiaryDetailModal(id){
       <span>${dateStr}${h.note ? ' — ' + h.note.replace(/</g,'&lt;') : ''}</span>
       <span>${sign} ${fmtDiaryAmount(h.amount)}</span>
     </div>`;
-  }).join('') : '<div>کوئی تفصیل موجود نہیں۔</div>';
+  }).join('') : '<div>No history yet.</div>';
 
   document.getElementById('diaryDetailModal').classList.add('show');
 }
@@ -8064,13 +8064,13 @@ function openDiaryDetailModal(id){
 function renderDiaryDetailBalance(entry){
   const el = document.getElementById('diaryDetailBalance');
   if(entry.balance === 0){
-    el.textContent = 'Rs. 0 — برابر ✅';
+    el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
   } else if(entry.balance < 0){
-    el.textContent = '🔴 دینا ہے: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🔴 Owes: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--danger)';
   } else {
-    el.textContent = '🟢 لینا ہے: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 Owed: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   }
 }
@@ -8080,7 +8080,7 @@ function diaryAdjustBalance(direction){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
   const amt = parseFloat(document.getElementById('diaryAdjustAmount').value);
-  if(!amt || amt <= 0){ alert('براہ کرم درست رقم درج کریں۔'); return; }
+  if(!amt || amt <= 0){ alert('Please enter a valid amount.'); return; }
   const signedAmount = direction * Math.abs(amt);
   entry.balance += signedAmount;
   entry.history.push({amount: signedAmount, note: '', date: new Date().toISOString()});
@@ -8096,11 +8096,11 @@ function diarySettlePartial(){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
   const amt = parseFloat(document.getElementById('diaryAdjustAmount').value);
-  if(!amt || amt <= 0){ alert('براہ کرم درست رقم درج کریں۔'); return; }
+  if(!amt || amt <= 0){ alert('Please enter a valid amount.'); return; }
   const towardsZero = entry.balance < 0 ? Math.min(amt, Math.abs(entry.balance)) : -Math.min(amt, entry.balance);
-  if(entry.balance === 0){ alert('یہ اکاؤنٹ پہلے ہی برابر ہے۔'); return; }
+  if(entry.balance === 0){ alert('This account is already settled.'); return; }
   entry.balance += towardsZero;
-  entry.history.push({amount: towardsZero, note: 'ادائیگی/وصولی', date: new Date().toISOString()});
+  entry.history.push({amount: towardsZero, note: 'Payment/Collection', date: new Date().toISOString()});
   saveToStorage('diary', diaryData);
   document.getElementById('diaryAdjustAmount').value = '';
   renderDiaryDetailBalance(entry);
@@ -8111,7 +8111,7 @@ function diarySettlePartial(){
 function deleteDiaryEntry(){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
-  if(!confirm('کیا آپ واقعی "' + entry.name + '" کا اندراج حذف کرنا چاہتے ہیں؟')) return;
+  if(!confirm('Are you sure you want to delete the entry for "' + entry.name + '"?')) return;
   diaryData = diaryData.filter(e => e.id !== activeDiaryEntryId);
   saveToStorage('diary', diaryData);
   document.getElementById('diaryDetailModal').classList.remove('show');
@@ -9963,7 +9963,7 @@ async function renderAdvOrderToCanvas(order){
     'Actual rates will be confirmed at the time of',
     'delivery/next sale round, and may be higher or',
     'lower than shown here.',
-    '(یہ اندازاً قیمت ہے، حتمی نہیں — اصل ریٹ ڈلیوری کے وقت طے ہوگا)'
+    '(This is an approximate price, not final — actual rate will be set at delivery)'
   ];
   let estimatedHeight = 30 + 26 + 22 + 22 + 54 /* banner box */ + tableH + 26 + 40 /* subtotal */ + (disclaimerLines.length * 15) + 30 + 40;
   if(AppState.settings.businessAddress) estimatedHeight += 16;
@@ -12814,7 +12814,7 @@ const FONT_PRESETS = [
   {id:'manrope',    label:'Manrope',   family:"'Manrope', sans-serif"},
   {id:'comfortaa',  label:'Comfortaa', family:"'Comfortaa', sans-serif"},
   {id:'rubik',      label:'Rubik',     family:"'Rubik', sans-serif"},
-  {id:'nastaleeq',  label:'✒️ نوری نستعلیق', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
+  {id:'nastaleeq',  label:'✒️ Noori Nastaleeq', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
@@ -14475,11 +14475,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const b = document.getElementById('connStatusBadge');
     if(!b) return;
     if(navigator.onLine){
-      b.textContent = 'آن لائن';
+      b.textContent = 'Online';
       b.classList.remove('offline');
       b.classList.add('online');
     } else {
-      b.textContent = 'آف لائن';
+      b.textContent = 'Offline';
       b.classList.remove('online');
       b.classList.add('offline');
     }
