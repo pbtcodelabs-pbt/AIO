@@ -2999,6 +2999,7 @@
           <h3>💳 My Payment Accounts</h3>
           <div class="settingsHint">These will be automatically included in every payment reminder you send to customers, so they can pay you directly without calling to ask for your account number.</div>
           <div id="myPaymentAccountsWrap"></div>
+          <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
           <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
         </div>
 
@@ -3230,6 +3231,11 @@
           <option value="">— Select Bank/Wallet —</option>
         </select>
         <input type="text" id="papNumber" placeholder="Account Number" oninput="savePapDraft()">
+        <div style="display:flex; align-items:center; gap:10px; margin:10px 2px 4px;">
+          <div id="papQrPreview" onclick="triggerPapQrUpload()" style="width:48px; height:48px; border-radius:8px; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:20px; overflow:hidden; border:2px dashed #dbe1ea; cursor:pointer; flex:0 0 auto;">🔳</div>
+          <div style="font-size:11px; color:var(--muted);">Tap to add this account's QR code (from EasyPaisa/Bank app screenshot) — saved at original quality so it always scans correctly</div>
+        </div>
+        <input type="file" id="papQrFileInput" accept="image/*" style="display:none;" onchange="handlePapQrFileSelected(event)">
         <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px;">
           <input type="checkbox" id="papShowOnReceipt" style="width:18px; height:18px; margin:0;" onchange="savePapDraft()">
           Show this account on printed bill footer
@@ -6839,8 +6845,28 @@ function savePapDraft(){
     bank: document.getElementById('papBankName').value,
     number: document.getElementById('papNumber').value,
     showOnReceipt: document.getElementById('papShowOnReceipt').checked,
-    photo: papPhotoDataUrl
+    photo: papPhotoDataUrl,
+    qr: papQrDataUrl
   });
+}
+
+// ---------- نئے اکاؤنٹ کا QR کوڈ — سادہ فائل اپلوڈ، کیمرہ/کراپ/فلٹر پائپ لائن سے الگ رکھا گیا ہے
+// تاکہ QR کی اصل کوالٹی (کرِسپ سیاہ/سفید مربعے) بغیر کسی کمپریشن کے محفوظ رہے اور اسکیننگ ہمیشہ قابلِ اعتماد رہے ----------
+let papQrDataUrl = null;
+function triggerPapQrUpload(){
+  document.getElementById('papQrFileInput').value = '';
+  document.getElementById('papQrFileInput').click();
+}
+function handlePapQrFileSelected(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    papQrDataUrl = reader.result;
+    document.getElementById('papQrPreview').innerHTML = `<img src="${papQrDataUrl}" style="width:100%; height:100%; object-fit:contain; background:#fff;">`;
+    savePapDraft();
+  };
+  reader.readAsDataURL(file);
 }
 
 // ---------- مشترکہ کیمرہ اسٹارٹ اپ لاجک — Item اور Party دونوں فوٹو کیپچر کے لیے ایک ہی جگہ سے ----------
@@ -13160,11 +13186,35 @@ function renderMyPaymentAccounts(){
         <div class="paymentAccNumber" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
       </div>
       <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer" style="border:none; background:none; font-size:18px; padding:4px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
+      <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}" style="border:none; background:none; font-size:18px; padding:4px;">${acc.qr ? '🔳✅' : '🔳'}</button>
       <button onclick="shareAccountCard(${idx})" title="Share as a landscape card" style="border:none; background:none; font-size:18px; padding:4px;">🎴</button>
       <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster" style="border:none; background:none; font-size:18px; padding:4px;">🖼️</button>
       <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
     </div>
   `).join('');
+}
+// ---------- کسی بھی محفوظ شدہ اکاؤنٹ (نیا یا پرانا) میں QR کوڈ شامل/تبدیل کریں — اصل فائل جوں کی توں (کوئی کمپریشن/فلٹر نہیں) تاکہ اسکیننگ ہمیشہ درست کام کرے ----------
+let pendingQrAccountIdx = null;
+function triggerAccountQrUpload(idx){
+  pendingQrAccountIdx = idx;
+  const input = document.getElementById('accountQrFileInput');
+  input.value = '';
+  input.click();
+}
+function handleAccountQrFileSelected(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file || pendingQrAccountIdx === null){ pendingQrAccountIdx = null; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const acc = AppState.settings.paymentAccounts[pendingQrAccountIdx];
+    if(acc){
+      acc.qr = reader.result;
+      renderMyPaymentAccounts();
+      persistAllData();
+    }
+    pendingQrAccountIdx = null;
+  };
+  reader.readAsDataURL(file);
 }
 // ---------- اکاؤنٹ نمبر پر ٹیپ کریں تو کلپ بورڈ میں کاپی ہو جائے ----------
 function copyMyAccountNumber(idx){
@@ -13205,13 +13255,15 @@ function openAddPaymentAccountModal(){
 
   // ---------- اگر کیمرے کے دوران صفحہ دوبارہ لوڈ ہو گیا تھا تو یہاں ابھی نامکمل ڈرافٹ مل سکتا ہے — واپس بھر دیں ----------
   const draft = loadFromStorage('papDraft', null);
-  if(draft && (draft.title || draft.bank || draft.number || draft.photo)){
+  if(draft && (draft.title || draft.bank || draft.number || draft.photo || draft.qr)){
     document.getElementById('papTitle').value = draft.title || '';
     document.getElementById('papBankName').value = draft.bank || '';
     document.getElementById('papNumber').value = draft.number || '';
     document.getElementById('papShowOnReceipt').checked = !!draft.showOnReceipt;
     papPhotoDataUrl = draft.photo || null;
     renderAvatarInto('papPhotoPreview', papPhotoDataUrl, '👤');
+    papQrDataUrl = draft.qr || null;
+    document.getElementById('papQrPreview').innerHTML = papQrDataUrl ? `<img src="${papQrDataUrl}" style="width:100%; height:100%; object-fit:contain; background:#fff;">` : '🔳';
   } else {
     document.getElementById('papTitle').value = '';
     document.getElementById('papBankName').value = '';
@@ -13219,6 +13271,8 @@ function openAddPaymentAccountModal(){
     document.getElementById('papShowOnReceipt').checked = false;
     papPhotoDataUrl = null;
     document.getElementById('papPhotoPreview').innerHTML = '👤';
+    papQrDataUrl = null;
+    document.getElementById('papQrPreview').innerHTML = '🔳';
   }
   document.getElementById('addPaymentAccountModal').classList.add('show');
 }
@@ -13237,9 +13291,11 @@ function saveNewPaymentAccount(){
     number: number,
     name: title || '',
     photo: papPhotoDataUrl || null,
+    qr: papQrDataUrl || null,
     showOnReceipt: document.getElementById('papShowOnReceipt').checked
   });
   saveToStorage('papDraft', null); // ---------- کامیابی سے سیو ہو گیا، اب ڈرافٹ کی ضرورت نہیں ----------
+  papQrDataUrl = null;
   document.getElementById('addPaymentAccountModal').classList.remove('show');
   renderMyPaymentAccounts();
 }
@@ -13466,6 +13522,30 @@ async function renderAccountCardToCanvas(acc){
   ctx.font = `800 19px Poppins, sans-serif`;
   wrapCenteredText(ctx, '📸 Please send a screenshot after sending the payment', cx, H - 65, W - 100, 24);
 
+  // ---------- QR کوڈ — بائیں اوپر کونے میں چھوٹا بیج، تاکہ مرکزی ڈیزائن (تصویر/نام/نمبر) بالکل جوں کا توں رہے ----------
+  if(acc.qr){
+    await new Promise((resolve) => {
+      const qrImg = new Image();
+      qrImg.onload = () => {
+        const qrSize = 84, qrX = 26, qrY = 24;
+        ctx.fillStyle = '#ffffff';
+        roundRectPath(ctx, qrX, qrY, qrSize, qrSize, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 2;
+        roundRectPath(ctx, qrX, qrY, qrSize, qrSize, 8);
+        ctx.stroke();
+        const pad = 6;
+        ctx.save();
+        ctx.imageSmoothingEnabled = false; // ---------- QR کے سیاہ/سفید مربعے دھندلے نہ ہوں — اسکیننگ ہمیشہ درست کام کرے ----------
+        ctx.drawImage(qrImg, qrX+pad, qrY+pad, qrSize-pad*2, qrSize-pad*2);
+        ctx.restore();
+        resolve();
+      };
+      qrImg.onerror = resolve;
+      qrImg.src = acc.qr;
+    });
+  }
+
   return canvas;
 }
 
@@ -13498,7 +13578,7 @@ function wrapCenteredText(ctx, text, cx, y, maxWidth, lineHeight){
 // موبائل پروفائل پکچر کی طرح، خاص طور پر تصویر لگی ہو تو اس انداز میں زیادہ خوبصورت لگتا ہے ----------
 async function renderAccountPosterToCanvas(acc){
   const canvas = document.createElement('canvas');
-  const W = 640, H = 900;
+  const W = 640, H = acc.qr ? 1080 : 900; // ---------- QR موجود ہو تو پوسٹر تھوڑا لمبا کر کے اس کے لیے صاف جگہ بنائی جاتی ہے، باقی تمام عناصر بالکل جوں کے توں رہتے ہیں ----------
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const theme = getAccountCardTheme(acc.type);
@@ -13562,6 +13642,35 @@ async function renderAccountPosterToCanvas(acc){
   ctx.fillStyle = '#ffffff';
   ctx.font = `800 52px 'Courier New', monospace`;
   ctx.fillText(acc.number || '', cx, 680);
+
+  // ---------- Scan to Pay — QR کوڈ کا اپنا صاف سیکشن، نمبر اور نیچے کے پیغام کے درمیان — مرکزی تصویر/نام/نمبر بالکل جوں کے توں رہتے ہیں ----------
+  if(acc.qr){
+    await new Promise((resolve) => {
+      const qrImg = new Image();
+      qrImg.onload = () => {
+        ctx.fillStyle = '#f2d675';
+        ctx.font = `700 24px Poppins, sans-serif`;
+        ctx.fillText('📱 Scan to Pay', cx, 725);
+
+        const qrSize = 190, qrX = cx - qrSize/2, qrY = 745;
+        ctx.fillStyle = '#ffffff';
+        roundRectPath(ctx, qrX, qrY, qrSize, qrSize, 14);
+        ctx.fill();
+        ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 3;
+        roundRectPath(ctx, qrX, qrY, qrSize, qrSize, 14);
+        ctx.stroke();
+
+        const pad = 14;
+        ctx.save();
+        ctx.imageSmoothingEnabled = false; // ---------- QR کے سیاہ/سفید مربعے دھندلے نہ ہوں — بہترین کوالٹی، ہمیشہ درست اسکین ----------
+        ctx.drawImage(qrImg, qrX+pad, qrY+pad, qrSize-pad*2, qrSize-pad*2);
+        ctx.restore();
+        resolve();
+      };
+      qrImg.onerror = resolve;
+      qrImg.src = acc.qr;
+    });
+  }
 
   ctx.fillStyle = 'rgba(0,0,0,.28)';
   roundRectPath(ctx, 50, H - 130, W - 100, 74, 14);
