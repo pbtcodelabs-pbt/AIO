@@ -1710,7 +1710,7 @@
           <!-- ---------- منتخب کسٹمر کا پہلا بقایہ اب نیچے Totals ٹیبل میں ہی مکمل حساب کے ساتھ نظر آتا ہے ---------- -->
 
           <div class="walletBalanceHint" id="walletBalanceHint"></div>
-          <div class="autoPaymentNote" id="autoPaymentNote">💵 Cash (Walk-in)</div>
+          <div class="autoPaymentNote" id="autoPaymentNote" style="display:none;">💵 Cash (Walk-in)</div>
 
           <!-- ---------- جزوی ادائیگی — کریڈٹ موڈ میں کسٹمر ابھی کچھ نقد دے رہا ہو تو یہاں درج کریں،
                باقی خودکار اس کے کھاتے میں بقایہ (Pending) چلا جائے گا ---------- -->
@@ -5675,11 +5675,11 @@ function renderCart(){
       if(Billing.counterSale){
         receivedHint.textContent = (receivedRaw > 0 && remaining > 0)
           ? `Rs. ${remaining.toFixed(0)} short — their Name & Mobile will be asked to save this as a Pending balance.`
-          : `Leave blank for a normal full-cash Walk-in sale.`;
+          : '';
       } else {
         receivedHint.textContent = receivedRaw > 0
           ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
-          : `Leave blank/0 if nothing is being paid right now (full amount goes to Pending).`;
+          : '';
       }
     } else {
       // ---------- زائد رقم موصول ہوئی — Change Due دکھائیں، فیصلہ لینے دیں (نقد واپس یا Wallet میں) ----------
@@ -5797,26 +5797,10 @@ function toggleCounterSale(){
 // ---------- بلنگ کے دوران پیمنٹ کا فیصلہ — Counter Sale میں فوری مکمل نقد؛ ورنہ صارف چاہے تو یہیں جزوی رقم درج کر سکتا ہے،
 // باقی خودکار کسٹمر کے کھاتے میں Pending چلا جاتا ہے (یا بعد میں کسٹمر پروفائل سے "📥 Collect" کر کے بھی طے کیا جا سکتا ہے) ----------
 function renderAutoPaymentNote(){
-  const note = document.getElementById('autoPaymentNote');
   const receivedRow = document.getElementById('amountReceivedRow');
   const receivedHint = document.getElementById('amountReceivedHint');
-  if(!note) return;
-
   receivedRow.style.display = 'flex';
   receivedHint.style.display = 'block';
-
-  if(Billing.counterSale){
-    note.textContent = '💵 Cash (Walk-in) — leave Amount below blank for full cash payment';
-    return;
-  }
-
-  const custId = document.getElementById('customerSelect').value;
-  if(custId){
-    const customer = customersData.find(c => c.customer_id == custId);
-    note.innerHTML = `📒 Enter any cash received now — the rest goes as <b>Pending</b> for ${customer ? customer.name : 'this customer'}`;
-  } else {
-    note.innerHTML = `📒 Enter any cash received now — the rest goes as <b>Pending</b> (name & mobile number will be asked when you complete the bill)`;
-  }
 }
 
 // ---------- تاریخ کے ساتھ دن کا 3-حرفی نام (MON/TUE/WED/THU/FRI/SAT/SUN) — پرنٹ پر دکھانے کے لیے ----------
@@ -12414,6 +12398,44 @@ function sendApprovalRequest(){
 // ---------- Premium Canvas Invoice Rendering (پرانے ASCII ٹیبل کی بجائے) ----------
 let currentPreviewInvoiceId = null;
 
+// ---------- بل کی مکمل ادائیگی تفصیل (Total Bill/Discount/Subtotal, Old Credit/This Bill/Total, Wallet, Paid Now, Final Due) —
+//            دونوں پرنٹ سٹائلز (تھرمل اور A4) میں یکساں استعمال ہوتا ہے تاکہ ترتیب/حساب ہمیشہ ایک جیسا رہے ----------
+function getBillSummaryRows(invoice){
+  const rawSubtotal = (invoice.items || []).reduce((s, i) => s + i.qty * i.unitPrice, 0);
+  const hasDiscount = invoice.discount && invoice.discount > 0;
+  const hasOldCredit = !!(invoice.customer_id && invoice.previous_balance > 0);
+  const walletApplied = invoice.wallet_applied || 0;
+  const cashNow = invoice.cash_received_now !== undefined ? invoice.cash_received_now : Math.max(0, (invoice.paid_now || 0) - walletApplied);
+
+  const rows = [];
+  if(hasDiscount){
+    rows.push(['Total Bill', rawSubtotal]);
+    rows.push(['Discount', -invoice.discount]);
+    rows.push(['Subtotal', invoice.grand_total]);
+  }
+  if(invoice.tax_amount && invoice.tax_amount > 0){
+    rows.push([`Tax (${invoice.tax_percent}%)`, invoice.tax_amount]);
+  }
+
+  let finalLabel, finalValue;
+  if(hasOldCredit){
+    rows.push(['Old Credit', invoice.previous_balance]);
+    rows.push(['This Bill', invoice.grand_total]);
+    rows.push(['Total', invoice.previous_balance + invoice.grand_total]);
+    finalLabel = 'Final Due Amount';
+    finalValue = invoice.new_balance || 0;
+  } else {
+    if(!hasDiscount) rows.push(['This Bill', invoice.grand_total]);
+    finalLabel = 'Final Bill';
+    finalValue = Math.max(0, invoice.grand_total - walletApplied - cashNow);
+  }
+
+  if(walletApplied > 0) rows.push(['Paid via Wallet', walletApplied]);
+  rows.push(['Paid Now', cashNow]);
+
+  return {rows, finalLabel, finalValue};
+}
+
 async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
   const pxWidth = paperWidthMM === 80 ? 576 : 384;
   const canvas = document.getElementById('invoiceCanvas');
@@ -12432,10 +12454,14 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let estimatedHeight = 30 + 26 + 22 + 22 + tableH + 26;
   if(AppState.settings.businessAddress) estimatedHeight += 16;
   if(AppState.settings.businessPhone) estimatedHeight += 16;
-  if(invoice.discount && invoice.discount > 0) estimatedHeight += 44;
-  if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
+  if(invoice.customer_id){
+    const summary = getBillSummaryRows(invoice);
+    estimatedHeight += 38 + (summary.rows.length * 18) + 26 + 24; // Payment Summary باکس (متحرک اونچائی، لائنوں کی تعداد کے مطابق)
+  } else {
+    if(invoice.discount && invoice.discount > 0) estimatedHeight += 44;
+    if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
+  }
   estimatedHeight += 34; // Grand Total لائن
-  if(invoice.customer_id) estimatedHeight += 120; // کسٹمر بیلنس سمری باکس
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
   const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
   if(AppState.settings.printShowPaymentAccount && receiptAccounts.length) estimatedHeight += 20 + (receiptAccounts.length * 16);
@@ -12570,57 +12596,51 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   y = tableTop + tableH + 26;
 
-  // ---------- رعایت ہو تو Subtotal اور Discount الگ سے دکھائیں (شفافیت کے لیے، کسٹمر کا حق ہے) ----------
+  // ---------- رعایت ہو تو Subtotal اور Discount الگ سے دکھائیں — لیکن صرف اسی وقت جب کسٹمر بیلنس باکس نہیں بننا (ورنہ یہ اسی باکس کے اندر نظر آئیں گے) ----------
   ctx.textAlign = 'right';
-  if(invoice.discount && invoice.discount > 0){
-    const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-    ctx.font = F('14px');
-    ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), pxWidth-10, y); y += 20;
-    ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), pxWidth-10, y); y += 24;
-  }
-
-  // ---------- ٹیکس ہو تو الگ لائن میں دکھائیں (فیصد کے ساتھ) ----------
-  if(invoice.tax_amount && invoice.tax_amount > 0){
-    ctx.font = F('14px');
-    ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), pxWidth-10, y); y += 20;
+  if(!invoice.customer_id){
+    if(invoice.discount && invoice.discount > 0){
+      const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+      ctx.font = F('14px');
+      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), pxWidth-10, y); y += 20;
+      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), pxWidth-10, y); y += 24;
+    }
+    if(invoice.tax_amount && invoice.tax_amount > 0){
+      ctx.font = F('14px');
+      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), pxWidth-10, y); y += 20;
+    }
   }
 
   ctx.font = F('bold 20px');
   ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(0), pxWidth-10, y);
   y += 34;
 
-  // ---------- کسٹمر بیلنس سمری — پچھلا بقایہ، اس بل کی رقم، ابھی ادا کیا، نیا بقایہ — سب ایک باکس میں ----------
+  // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ — سب ایک باکس میں ----------
   // یہ اسی وقت محفوظ ہوا تھا جب بل بنا تھا، اس لیے بعد میں کچھ بھی بدلے، یہ ہمیشہ اس دن کی صحیح تصویر دکھائے گا
-  if(invoice.customer_id && invoice.previous_balance !== undefined){
+  if(invoice.customer_id){
+    const summary = getBillSummaryRows(invoice);
     const boxTop = y;
-    const boxH = 100;
+    const boxH = 38 + (summary.rows.length * 18) + 26;
     ctx.strokeStyle = '#000';
     ctx.strokeRect(tableLeft + 0.5, boxTop + 0.5, tableRight - tableLeft, boxH);
     y += 18;
     ctx.font = F('bold 13px');
     ctx.textAlign = 'center';
-    ctx.fillText('Account Summary', pxWidth/2, y); y += 20;
+    ctx.fillText('Payment Summary', pxWidth/2, y); y += 20;
 
     ctx.font = F('13px');
-    ctx.textAlign = 'left';
-    const paidNow = invoice.paid_now || 0;
-    const rows = [
-      ['Previous Balance', 'Rs. ' + invoice.previous_balance.toLocaleString()],
-      ['This Bill', 'Rs. ' + invoice.grand_total.toLocaleString()],
-      ['Paid Now', 'Rs. ' + paidNow.toLocaleString()],
-    ];
-    rows.forEach(([label, val]) => {
+    summary.rows.forEach(([label, val]) => {
       ctx.textAlign = 'left';
       ctx.fillText(label, tableLeft + 10, y);
       ctx.textAlign = 'right';
-      ctx.fillText(val, tableRight - 10, y);
+      ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), tableRight - 10, y);
       y += 18;
     });
     ctx.font = F('bold 14px');
     ctx.textAlign = 'left';
-    ctx.fillText('New Balance Due', tableLeft + 10, y);
+    ctx.fillText(summary.finalLabel, tableLeft + 10, y);
     ctx.textAlign = 'right';
-    ctx.fillText('Rs. ' + (invoice.new_balance || 0).toLocaleString(), tableRight - 10, y);
+    ctx.fillText('Rs. ' + Math.round(summary.finalValue).toLocaleString(), tableRight - 10, y);
     y = boxTop + boxH + 24;
   }
 
@@ -12676,10 +12696,15 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   // ---------- کل اونچائی کا اندازہ ----------
   let estimatedHeight = 120 /*رنگین ہیڈر بینڈ*/ + 30 /*گیپ*/ + 80 /*انوائس ڈیٹیلز باکس*/ + 20 + tableH + 30;
-  if(invoice.discount && invoice.discount > 0) estimatedHeight += 50;
-  if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 26;
+  if(!invoice.customer_id){
+    if(invoice.discount && invoice.discount > 0) estimatedHeight += 50;
+    if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 26;
+  }
   estimatedHeight += 60; // Grand Total باکس
-  if(invoice.customer_id && invoice.previous_balance !== undefined) estimatedHeight += 150;
+  if(invoice.customer_id){
+    const summary = getBillSummaryRows(invoice);
+    estimatedHeight += 24 + 26 + (summary.rows.length * 22) + 40; // Payment Summary باکس (متحرک اونچائی)
+  }
   estimatedHeight += 130; // دستخط کی جگہ
   estimatedHeight += 50; // فوٹر
 
@@ -12795,15 +12820,17 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   ctx.textAlign = 'right';
   ctx.fillStyle = '#1a1a1a';
-  if(invoice.discount && invoice.discount > 0){
-    const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-    ctx.font = `14px ${fontFam}`;
-    ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableRight - 10, y); y += 24;
-    ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), tableRight - 10, y); y += 26;
-  }
-  if(invoice.tax_amount && invoice.tax_amount > 0){
-    ctx.font = `14px ${fontFam}`;
-    ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), tableRight - 10, y); y += 26;
+  if(!invoice.customer_id){
+    if(invoice.discount && invoice.discount > 0){
+      const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+      ctx.font = `14px ${fontFam}`;
+      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableRight - 10, y); y += 24;
+      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), tableRight - 10, y); y += 26;
+    }
+    if(invoice.tax_amount && invoice.tax_amount > 0){
+      ctx.font = `14px ${fontFam}`;
+      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), tableRight - 10, y); y += 26;
+    }
   }
 
   // ---------- Grand Total — رنگین ہائی لائٹ باکس ----------
@@ -12815,9 +12842,10 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.grand_total.toFixed(0), tableRight - 16, y + 30);
   y += 46 + 30;
 
-  // ---------- کسٹمر بیلنس سمری ----------
-  if(invoice.customer_id && invoice.previous_balance !== undefined){
-    const boxTop = y, boxH = 130;
+  // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ ----------
+  if(invoice.customer_id){
+    const summary = getBillSummaryRows(invoice);
+    const boxTop = y, boxH = 24 + 26 + (summary.rows.length * 22) + 40;
     ctx.strokeStyle = hexToRgba(theme.primary, 0.5);
     ctx.lineWidth = 1;
     ctx.strokeRect(tableLeft + 0.5, boxTop + 0.5, tableRight - tableLeft, boxH);
@@ -12825,18 +12853,17 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.font = `bold 15px ${fontFam}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillText('Account Summary', pxWidth/2, y); y += 26;
+    ctx.fillText('Payment Summary', pxWidth/2, y); y += 26;
 
     ctx.font = `14px ${fontFam}`;
-    const paidNow = invoice.paid_now || 0;
-    [['Previous Balance', invoice.previous_balance], ['This Bill', invoice.grand_total], ['Paid Now', paidNow]].forEach(([label, val]) => {
+    summary.rows.forEach(([label, val]) => {
       ctx.textAlign = 'left'; ctx.fillText(label, tableLeft + 16, y);
-      ctx.textAlign = 'right'; ctx.fillText('Rs. ' + val.toLocaleString(), tableRight - 16, y);
+      ctx.textAlign = 'right'; ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), tableRight - 16, y);
       y += 22;
     });
     ctx.font = `bold 15px ${fontFam}`;
-    ctx.textAlign = 'left'; ctx.fillText('New Balance Due', tableLeft + 16, y);
-    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + (invoice.new_balance || 0).toLocaleString(), tableRight - 16, y);
+    ctx.textAlign = 'left'; ctx.fillText(summary.finalLabel, tableLeft + 16, y);
+    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + Math.round(summary.finalValue).toLocaleString(), tableRight - 16, y);
     y = boxTop + boxH + 40;
   }
 
