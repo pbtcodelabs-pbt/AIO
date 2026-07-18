@@ -2052,7 +2052,7 @@
         </div>
         <div class="profileBody">
           <div style="background:#eef2ff; color:var(--primary-dark); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:14px;">
-            Quantity and refund amount can be edited (don't refund the full amount if the item is used). On save, the amount is added to the customer's wallet and the item goes back into stock.
+            Tick the item(s) being returned, then adjust the quantity and refund amount (reduce it if the item is damaged/used). Choose Cash or Wallet as the refund method, then tap Confirm Return — stock is restocked automatically and the amount is deducted from today's sales.
           </div>
           <div id="returnItemsList"></div>
         </div>
@@ -3196,6 +3196,8 @@
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">App Share Link</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Paste your live GitHub Pages link here. The 📤 Share button on the Login and Home screens will send this link on WhatsApp/etc — update it anytime the link changes, and it updates everywhere automatically.</div>
             <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Write your own message here (e.g. "Our app is very good, please use it") — it will be sent along with the link above when the 📤 Share button is pressed.</div>
+            <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
             <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Add as many as you like (EasyPaisa, JazzCash, Bank, etc). Customers will see these in Package Plans and can switch between them — useful if they don't have your default wallet.</div>
             <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
@@ -3761,6 +3763,8 @@ const DEFAULT_SETTINGS = {
   // ---------- 🔗 ایپ کا لائیو لنک (GitHub Pages وغیرہ) — Login/Home پر 📤 Share بٹن اسی لنک کو
   // WhatsApp/کسی بھی ایپ پر بھیجتا ہے۔ یہاں سے بدلیں تو ہر جگہ خودکار نیا لنک استعمال ہوگا ----------
   appShareLink: '',
+  // ---------- 📝 شیئر کرتے وقت لنک کے ساتھ جانے والا تعارفی پیغام — خالی ہو تو ڈیفالٹ پیغام استعمال ہوگا ----------
+  appShareMessage: '',
   // ---------- 🏦 آپ کے اکاؤنٹس — سبسکرپشن کی رقم وصول کرنے کے لیے، کسٹمر Package Plans میں اپنی مرضی کا بینک/والیٹ چن سکے ----------
   devPaymentType: '',
   devPaymentNumber: '',
@@ -4094,7 +4098,8 @@ async function shareAppLink(){
     alert('Share link not set yet. Go to Home → Settings → Admin Control → "App Share Link" and paste your GitHub Pages link there first.');
     return;
   }
-  const text = `Try our AIO POS App — free trial included:\n${link}`;
+  const customMsg = (AppState.settings.appShareMessage || '').trim();
+  const text = customMsg ? `${customMsg}\n${link}` : `Try our AIO POS App — free trial included:\n${link}`;
   if(navigator.share){
     try{ await navigator.share({ title: 'AIO POS App', text: text }); }
     catch(err){ /* یوزر نے شیئر Cancel کر دیا — کوئی ایکشن درکار نہیں */ }
@@ -10695,68 +10700,135 @@ function renderReturnItemModal(invoiceId){
 
   document.getElementById('returnModalMeta').textContent = `${inv.invoice_no} — ${inv.customer_name}`;
 
-  if(!inv.customer_id){
-    document.getElementById('returnItemsList').innerHTML =
-      `<div class="profileEmpty">This is a walk-in customer bill — no registered customer to credit the wallet. Please refund in cash.</div>`;
-    return;
-  }
+  const hasCustomer = !!inv.customer_id;
 
-  document.getElementById('returnItemsList').innerHTML = inv.items.map((item, idx) => {
+  const rows = inv.items.map((item, idx) => {
     if(item.returned){
+      const methodLabel = item.returnMethod === 'wallet' ? 'Wallet' : 'Cash';
       return `
         <div class="profileListRow" style="cursor:default;">
-          <div class="plMain">✅ ${item.name} — Already Returned</div>
+          <div class="plMain">✅ ${item.name} — Returned (${item.returnQty} unit, ${methodLabel})</div>
           <div class="plAmount">Rs. ${item.returnAmount.toLocaleString()}</div>
         </div>`;
     }
     const lineTotal = item.qty * item.unitPrice;
     return `
-      <div class="profileListRow" style="cursor:default; flex-direction:column; align-items:stretch; gap:8px;">
-        <div style="display:flex; justify-content:space-between;">
-          <span class="plMain">${item.name}</span>
-          <span class="plMeta">Sold: ${item.qty} × Rs.${item.unitPrice} = Rs.${lineTotal.toLocaleString()}</span>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <input type="number" min="1" max="${item.qty}" value="${item.qty}" id="retQty_${idx}" onfocus="this.select()" style="width:64px; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
-          <input type="number" min="0" value="${lineTotal}" id="retAmt_${idx}" placeholder="Refund amount" onfocus="this.select()" style="flex:1; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
-          <button class="btnCollect" onclick="confirmReturnItem(${invoiceId}, ${idx})">↩️ Return</button>
+      <div class="profileListRow" style="cursor:default; flex-direction:column; align-items:stretch; gap:8px; border:1px solid #e5e9f0; border-radius:10px; padding:10px; margin-bottom:8px;">
+        <label style="display:flex; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
+          <input type="checkbox" id="retChk_${idx}" style="width:18px; height:18px; flex-shrink:0;" onchange="toggleReturnRow(${idx})">
+          <span style="flex:1;">${item.name}</span>
+          <span class="plMeta" style="font-weight:400;">Sold: ${item.qty} × Rs.${item.unitPrice} = Rs.${lineTotal.toLocaleString()}</span>
+        </label>
+        <div id="retRowBody_${idx}" style="display:none; gap:8px;">
+          <div style="flex:1;">
+            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Return Qty</div>
+            <input type="number" min="1" max="${item.qty}" value="${item.qty}" id="retQty_${idx}" onfocus="this.select()" style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Refund Amount (Rs.)</div>
+            <input type="number" min="0" value="${lineTotal}" id="retAmt_${idx}" placeholder="Refund amount" onfocus="this.select()" style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
+          </div>
         </div>
       </div>`;
   }).join('');
+
+  const anyReturnable = inv.items.some(it => !it.returned);
+
+  const methodBlock = !anyReturnable ? '' : `
+    <div style="margin-top:6px; padding:12px; background:#f7f9fc; border-radius:10px;">
+      <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:var(--primary-dark);">Refund Method</div>
+      <div style="display:flex; gap:16px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="radio" name="retMethod" id="retMethodCash" value="cash" checked> Cash
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; ${hasCustomer ? '' : 'opacity:.4; pointer-events:none;'}">
+          <input type="radio" name="retMethod" id="retMethodWallet" value="wallet" ${hasCustomer ? '' : 'disabled'}> Customer Wallet
+        </label>
+      </div>
+      ${hasCustomer ? '' : `<div style="font-size:11px; color:#c2410c; margin-top:6px;">Walk-in bill — no customer wallet available, refund will be Cash only.</div>`}
+    </div>
+    <button class="btnCollect" style="width:100%; margin-top:12px; padding:12px; justify-content:center;" onclick="confirmBatchReturn(${invoiceId})">↩️ Confirm Return</button>
+  `;
+
+  document.getElementById('returnItemsList').innerHTML = rows + methodBlock;
 }
-function confirmReturnItem(invoiceId, itemIndex){
+function toggleReturnRow(idx){
+  const body = document.getElementById(`retRowBody_${idx}`);
+  const chk = document.getElementById(`retChk_${idx}`);
+  if(body) body.style.display = (chk && chk.checked) ? 'flex' : 'none';
+}
+function confirmBatchReturn(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
-  const item = inv.items[itemIndex];
-  if(!item || item.returned) return;
 
-  const qty = parseInt(document.getElementById(`retQty_${itemIndex}`).value) || 0;
-  const amount = parseFloat(document.getElementById(`retAmt_${itemIndex}`).value) || 0;
+  const walletRadio = document.getElementById('retMethodWallet');
+  const method = (walletRadio && walletRadio.checked) ? 'wallet' : 'cash';
 
-  if(qty <= 0 || qty > item.qty){ alert('Please enter a valid quantity (max ' + item.qty + ').'); return; }
-  if(amount < 0){ alert('Please enter a valid amount.'); return; }
-
-  const customer = customersData.find(c => c.customer_id === inv.customer_id);
-  if(!customer){ alert('Customer record not found.'); return; }
-
-  // ---------- اسٹاک میں Item واپس شامل کریں ----------
-  productsData.forEach(p => {
-    const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-    if(v) v.stock += qty; // TODO: DB میں product_variants.current_stock += qty
+  const selectedIdx = [];
+  inv.items.forEach((item, idx) => {
+    if(item.returned) return;
+    const chk = document.getElementById(`retChk_${idx}`);
+    if(chk && chk.checked) selectedIdx.push(idx);
   });
 
-  // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
-  customer.wallet_balance += amount; // TODO: customers.wallet_balance UPDATE
-  customer.walletHistory.unshift({type:'deposit', amount, date:new Date().toISOString().split('T')[0], note:`Item Return: ${item.name}`});
-  // TODO: یہاں sales_returns table میں INSERT ہوگا
+  if(selectedIdx.length === 0){ alert('Please tick at least one item to return.'); return; }
 
-  item.returned = true;
-  item.returnQty = qty;
-  item.returnAmount = amount;
+  if(method === 'wallet' && !inv.customer_id){ alert('This is a walk-in bill — wallet refund is not available. Please choose Cash.'); return; }
+
+  let customer = null;
+  if(method === 'wallet'){
+    customer = customersData.find(c => c.customer_id === inv.customer_id);
+    if(!customer){ alert('Customer record not found.'); return; }
+  }
+
+  // ---------- پہلے ہر منتخب Item کو ویلیڈیٹ کریں ----------
+  const picks = [];
+  for(const idx of selectedIdx){
+    const item = inv.items[idx];
+    const qty = parseInt(document.getElementById(`retQty_${idx}`).value) || 0;
+    const amount = parseFloat(document.getElementById(`retAmt_${idx}`).value) || 0;
+    if(qty <= 0 || qty > item.qty){ alert(`Please enter a valid quantity for "${item.name}" (max ${item.qty}).`); return; }
+    if(amount < 0){ alert(`Please enter a valid refund amount for "${item.name}".`); return; }
+    picks.push({idx, item, qty, amount});
+  }
+
+  // ---------- اب اسٹاک، والٹ/کیش، اور بل کی مجموعی رقم اپڈیٹ کریں ----------
+  let totalRefund = 0;
+  const returnedNames = [];
+  picks.forEach(({idx, item, qty, amount}) => {
+    // اسٹاک میں Item واپس شامل کریں
+    productsData.forEach(p => {
+      const v = p.variants.find(vv => vv.variant_id === item.variant_id);
+      if(v) v.stock += qty; // TODO: DB میں product_variants.current_stock += qty
+    });
+
+    item.returned = true;
+    item.returnQty = qty;
+    item.returnAmount = amount;
+    item.returnMethod = method;
+
+    totalRefund += amount;
+    returnedNames.push(`${item.name} (${qty})`);
+  });
+
+  if(method === 'wallet'){
+    // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
+    customer.wallet_balance += totalRefund; // TODO: customers.wallet_balance UPDATE
+    customer.walletHistory.unshift({type:'deposit', amount: totalRefund, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
+  } else {
+    // ---------- کیش ریفنڈ — کیش ان ہینڈ سے رقم منہا کریں ----------
+    financeDummy.cashInHand -= totalRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
+  }
+
+  // ---------- بل کی مجموعی رقم میں سے واپس شدہ رقم منہا کریں تاکہ آج کی سیل/آمدن خودکار درست ہو جائے ----------
+  inv.grand_total = Math.max(0, (inv.grand_total || 0) - totalRefund);
+  // TODO: یہاں sales_returns table میں INSERT ہوگا (invoice_id, items, qty, amount, method, date)
 
   renderReturnItemModal(invoiceId);
   document.getElementById('billSearchInput') && renderBillHistory();
-  alert(`✅ ${qty} unit(s) of "${item.name}" returned. Rs. ${amount.toLocaleString()} added to customer\'s wallet.`);
+  if(typeof renderDashboard === 'function') renderDashboard();
+  const methodLabel = method === 'wallet' ? "customer's wallet" : 'cash (deducted from cash in hand)';
+  alert(`✅ Returned: ${returnedNames.join(', ')}.\nRs. ${totalRefund.toLocaleString()} refunded via ${methodLabel}. Stock updated and today's sales adjusted.`);
 }
 
 /* =====================================================================
@@ -13423,6 +13495,7 @@ async function unlockAdminControl(){
   document.getElementById('devSmsInput').value = AppState.settings.devSms || '';
   document.getElementById('devEmailInput').value = AppState.settings.devEmail || '';
   document.getElementById('appShareLinkInput').value = AppState.settings.appShareLink || '';
+  document.getElementById('appShareMessageInput').value = AppState.settings.appShareMessage || '';
   // ---------- Payment اکاؤنٹ dropdown خالی ہو تو بھریں (وہی BANK_LOGIN_URLS جو سپلائر اکاؤنٹس میں استعمال ہوتی ہے) ----------
   const payTypeSel = document.getElementById('devPaymentTypeInput');
   if(payTypeSel.options.length <= 1){
@@ -13491,6 +13564,7 @@ async function saveAdminControl(){
   AppState.settings.devSms = document.getElementById('devSmsInput').value.trim();
   AppState.settings.devEmail = document.getElementById('devEmailInput').value.trim();
   AppState.settings.appShareLink = document.getElementById('appShareLinkInput').value.trim();
+  AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
   persistAllData();
