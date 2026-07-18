@@ -46,6 +46,10 @@
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
+  .welcomeTrialBanner{background:linear-gradient(145deg,#dcfce7,#bbf7d0); border:1.5px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center;}
+  .welcomeTrialBanner .wtbHeadline{font-size:15px; font-weight:800; color:#166534; line-height:1.3;}
+  .welcomeTrialBanner .wtbSubline{font-size:12.5px; font-weight:700; color:#166534; margin-top:4px;}
+  .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7; text-align:right; direction:rtl;}
 
   /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان ---
      نوٹ: نام والی لائن اور آئیکنز کو دو الگ الگ قطاروں میں رکھا گیا ہے تاکہ
@@ -1473,6 +1477,13 @@
   <div class="loginBox">
     <h2 id="loginHeading">🔐 Login</h2>
 
+    <!-- ---------- 🎉 خوش آمدید بینر — بیٹا ٹیسٹنگ کی صاف وضاحت، پہلی نظر میں ---------- -->
+    <div class="welcomeTrialBanner">
+      <div class="wtbHeadline">🎉 Best Billing App — Try it FREE for 30 Days!</div>
+      <div class="wtbSubline">Your 30-Day Free Trial starts now.</div>
+      <div class="wtbUrduNote">یہ ایپ ابھی Beta (آزمائشی) ورژن میں ہے۔ روزانہ Backup لینا نہ بھولیں، اور اپنا پرانا طریقہ بھی ساتھ ساتھ چلاتے رہیں۔ اگر کوئی مسئلہ محسوس ہو — چھوٹا ہو یا بڑا — فوری طور پر ڈویلپر تک پہنچائیں، تاکہ یہ ایپ آپ کے لیے بہترین بن سکے۔</div>
+    </div>
+
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
     <div id="loginSubStatus" style="background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark);"></div>
 
@@ -1491,7 +1502,6 @@
       <button onclick="login()">Enter</button>
     </div>
 
-    <button onclick="openPackagePlansModal()" style="background:#eef2ff; color:var(--primary-dark); margin-top:10px;">🗂️ View Package Plans</button>
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px;">📤 Share This App</button>
     <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
   </div>
@@ -1635,7 +1645,7 @@
           <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now">💾</button>
           <button class="hbcChatBtn admin-only" onclick="document.getElementById('importBackupInputHome').click()" title="Restore Backup">🔄</button>
           <button class="hbcChatBtn" onclick="goTo('myads')" title="My Ads — Promote This App">📣</button>
-          <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
+          <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
       </div>
@@ -4065,7 +4075,7 @@ function verifyAndExtractDays(uid, code){
 }
 
 // ---------- ہر انسٹالیشن کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
-// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 7 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے — تاکہ
+// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 30 دن کا مفت (Beta) ٹرائل بھی شروع ہو جاتا ہے — تاکہ
 // کسی نئے صارف کو فائل کھولتے ہی PIN/Activation کے چکر میں نہ الجھنا پڑے، وہ فوراً ایپ آزما سکے۔
 function getOrCreateDeviceUID(){
   if(AppState.settings.deviceUID) return AppState.settings.deviceUID;
@@ -4073,7 +4083,7 @@ function getOrCreateDeviceUID(){
   AppState.settings.deviceUID = uid;
   if(!AppState.settings.subscriptionExpiry && !AppState.settings.freeTrialGranted){
     const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 7);
+    trialEnd.setDate(trialEnd.getDate() + 30);
     AppState.settings.subscriptionExpiry = trialEnd.toISOString().slice(0,10);
     AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
     AppState.settings.freeTrialGranted = true;
@@ -4170,7 +4180,6 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '🛠️ Tools', tiles: [
     {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
     {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
-    {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
   ]},
   { section: '🔴 Liabilities', tiles: [
     {icon:'📔', label:'My Diary', screen:'mydiary'},
@@ -4183,7 +4192,6 @@ const HOME_TILES_SALESMAN = [
   {icon:'🛒', label:'Billing', screen:'billing'},
   {icon:'🧾', label:'Bill History', screen:'billhistory'},
   {icon:'📝', label:'Advance Orders', screen:'advanceorders'},
-  {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
 ];
 
 function renderHomeIconGrid(){
@@ -4332,7 +4340,7 @@ async function setupLoginScreen(){
         ? `🎁 Free Trial Active — ${days} day${days===1?'':'s'} remaining`
         : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
     } else {
-      statusEl.textContent = `⚠️ Not activated — tap "View Package Plans" below`;
+      statusEl.textContent = `⚠️ Trial ended — please contact the developer to continue.`;
     }
 
     const defaultHash = await hashPin('1234');
@@ -4464,7 +4472,7 @@ function showSubscriptionGate(){
   const exp = AppState.settings.subscriptionExpiry;
   document.getElementById('subGateStatus').textContent = exp
     ? (AppState.settings.isOnFreeTrial
-        ? `Your 7-day free trial ended on ${formatDateDMY(exp)}. Enter an activation code to continue.`
+        ? `Your 30-day free trial ended on ${formatDateDMY(exp)}. Please contact the developer to continue.`
         : `Your subscription expired on ${formatDateDMY(exp)}.`)
     : `This app is not yet activated.`;
   document.getElementById('subscriptionGateScreen').style.display = 'flex';
