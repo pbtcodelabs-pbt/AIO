@@ -1015,11 +1015,15 @@
   .settingsSubLabel:first-of-type{margin-top:0;}
 
   /* --- My Payment Accounts: کارڈ لسٹ + ڈیلیٹ بٹن (لامحدود اکاؤنٹس) --- */
-  .paymentAccCard{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#f8fafc; border:1px solid #e6ebf2; border-radius:10px; padding:10px 12px; margin-bottom:8px;}
+  .paymentAccCard{display:flex; flex-direction:column; gap:8px; background:#f8fafc; border:1px solid #e6ebf2; border-radius:10px; padding:10px 12px; margin-bottom:8px;}
+  .paymentAccTopRow{display:flex; align-items:center; gap:10px; min-width:0;}
+  .paymentAccInfo{min-width:0; overflow:hidden;}
   .paymentAccTitle{font-size:13.5px; font-weight:700; color:var(--text);}
   .paymentAccBank{font-size:11px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 7px; margin-left:6px;}
-  .paymentAccNumber{font-size:12.5px; color:var(--muted); margin-top:2px;}
-  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca; color:var(--danger); border-radius:8px; padding:7px 10px; cursor:pointer; font-size:13px;}
+  .paymentAccNumber{font-size:12.5px; color:var(--muted); margin-top:2px; white-space:normal; word-break:break-all;}
+  .paymentAccActionsRow{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
+  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 9px; border-radius:8px; cursor:pointer;}
+  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:7px 10px; cursor:pointer; font-size:13px;}
 
   /* --- Theme colour swatches --- */
   .themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
@@ -13917,19 +13921,23 @@ function renderMyPaymentAccounts(){
   }
   wrap.innerHTML = accounts.map((acc, idx) => `
     <div class="paymentAccCard">
-      <div onclick="editAccountPhoto(${idx})" title="Tap to add/change photo" style="cursor:pointer; width:36px; height:36px; border-radius:50%; overflow:hidden; flex:0 0 36px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:16px;">
-        ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
+      <div class="paymentAccTopRow">
+        <div onclick="editAccountPhoto(${idx})" title="Tap to add/change photo" style="cursor:pointer; width:44px; height:44px; border-radius:50%; overflow:hidden; flex:0 0 44px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px dashed #c7d2fe;">
+          ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
+        </div>
+        <div class="paymentAccInfo">
+          <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank">${acc.type || '—'}</span></div>
+          <div class="paymentAccNumber paymentAccNumberValue" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
+          <div class="paymentAccNumber" onclick="editAccountIban(${idx})" style="cursor:pointer; text-decoration:underline dotted; font-size:11px; color:var(--primary-dark); font-weight:600;" title="Tap to add/edit IBAN">${acc.iban ? `IBAN: ${acc.iban}` : '➕ Add IBAN Number'}</div>
+        </div>
       </div>
-      <div class="paymentAccInfo">
-        <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank">${acc.type || '—'}</span></div>
-        <div class="paymentAccNumber" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
-        <div class="paymentAccNumber" onclick="editAccountIban(${idx})" style="cursor:pointer; text-decoration:underline dotted; font-size:11px; color:var(--muted);" title="Tap to add/edit IBAN">${acc.iban ? `IBAN: ${acc.iban}` : '➕ Add IBAN Number'}</div>
+      <div class="paymentAccActionsRow">
+        <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
+        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}">${acc.qr ? '🔳✅' : '🔳'}</button>
+        <button onclick="shareAccountCard(${idx})" title="Share as a landscape card">🎴</button>
+        <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster">🖼️</button>
+        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
       </div>
-      <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer" style="border:none; background:none; font-size:18px; padding:4px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
-      <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}" style="border:none; background:none; font-size:18px; padding:4px;">${acc.qr ? '🔳✅' : '🔳'}</button>
-      <button onclick="shareAccountCard(${idx})" title="Share as a landscape card" style="border:none; background:none; font-size:18px; padding:4px;">🎴</button>
-      <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster" style="border:none; background:none; font-size:18px; padding:4px;">🖼️</button>
-      <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
     </div>
   `).join('');
 }
@@ -13973,7 +13981,7 @@ function copyMyAccountNumber(idx){
     }catch(e){}
   }).finally(() => {
     renderMyPaymentAccounts();
-    const els = document.querySelectorAll('.paymentAccNumber');
+    const els = document.querySelectorAll('.paymentAccNumberValue');
     if(els[idx]){ const orig = els[idx].textContent; els[idx].textContent = '✅ Copied'; setTimeout(() => renderMyPaymentAccounts(), 1200); }
   });
 }
@@ -14175,7 +14183,8 @@ async function renderAccountCardToCanvas(acc){
     const c = document.createElement('canvas'); c.id = 'accountCardCanvas'; c.style.display = 'none';
     document.body.appendChild(c); return c;
   })();
-  const W = 800, H = 500;
+  const ibanExtra2 = acc.iban ? 46 : 0; // ---------- IBAN موجود ہو تو کارڈ میں اس کے لیے اضافی جگہ ----------
+  const W = 800, H = 500 + ibanExtra2;
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const theme = getAccountCardTheme(acc.type);
@@ -14277,6 +14286,18 @@ async function renderAccountCardToCanvas(acc){
   ctx.font = `800 46px 'Courier New', monospace`;
   ctx.fillText(acc.number || '', cx, y);
   y += 56;
+
+  // ---------- IBAN نمبر — موجود ہو تو اکاؤنٹ نمبر کے نیچے، اپنی صاف لائن میں ----------
+  if(acc.iban){
+    ctx.fillStyle = '#f2d675';
+    ctx.font = `700 16px Poppins, sans-serif`;
+    ctx.fillText('IBAN', cx, y);
+    y += 22;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 22px 'Courier New', monospace`;
+    ctx.fillText(acc.iban, cx, y);
+    y += 30;
+  }
 
   // ---------- نیچے پیغام والا باکس — پہلے یہ لکھائی بہت باریک تھی، اب موٹی اور بڑی کر دی تاکہ صاف پڑھی جا سکے ----------
   ctx.fillStyle = 'rgba(0,0,0,.28)';
