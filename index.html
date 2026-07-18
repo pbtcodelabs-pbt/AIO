@@ -47,23 +47,34 @@
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
 
-  /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان --- */
+  /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان ---
+     نوٹ: نام والی لائن اور آئیکنز کو دو الگ الگ قطاروں میں رکھا گیا ہے تاکہ
+     زیادہ آئیکنز ہونے پر بھی بزنس نیم کبھی نہ دبے/چھپے ---------- */
   .homeBusinessCard{
-    display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:8px; border-radius:14px;
+    display:flex; flex-direction:column; gap:10px; padding:12px 14px 10px; margin-bottom:8px; border-radius:14px;
     background:linear-gradient(135deg, var(--primary-dark), var(--primary)); color:#fff; box-shadow:0 3px 12px rgba(0,0,0,.15);
+    position:relative;
   }
+  .hbcTopRow{display:flex; align-items:center; gap:12px;}
   .hbcLogoWrap{
-    width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.18); flex:0 0 auto; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; font-size:21px; overflow:hidden; border:2px solid rgba(255,255,255,.4);
+    width:52px; height:52px; border-radius:50%; background:rgba(255,255,255,.18); flex:0 0 auto; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:25px; overflow:hidden; border:2px solid rgba(255,255,255,.4);
   }
   .hbcLogoWrap img{width:100%; height:100%; object-fit:cover;}
   .hbcInfo{min-width:0; flex:1; cursor:pointer;}
-  .hbcBusinessName{font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .hbcOwnerName{font-size:11.5px; opacity:.92; margin-top:1px;}
-  .hbcPhone{font-size:11px; opacity:.85;}
+  .hbcBusinessName{font-size:19px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.25;}
+  .hbcOwnerName{font-size:13px; opacity:.92; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hbcPhone{font-size:12px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* --- ✏️ کارڈ/لوگو ایڈٹ بٹن — کارڈ کے اوپری کونے میں چھوٹا سا ---------- */
+  .hbcEditBtn{
+    position:absolute; top:10px; right:12px; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.22);
+    border:none; color:#fff; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  /* --- آئیکنز کی قطار — بزنس نیم کی لائن سے الگ، نیچے --- */
+  .hbcIconsRow{display:flex; align-items:center; gap:10px; justify-content:flex-end;}
   .hbcChatBtn{
-    width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.2); border:none; color:#fff; font-size:17px;
-    flex:0 0 auto; cursor:pointer;
+    width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.2); border:none; color:#fff; font-size:19px;
+    flex:0 0 auto; cursor:pointer; display:flex; align-items:center; justify-content:center;
   }
 
   /* --- 📅 Subscription Boxes — تین الگ خوبصورت ڈبے، ایک ہی لائن میں، صرف Billing پیج پر --- */
@@ -1542,20 +1553,25 @@
 
       <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
       <div class="homeBusinessCard">
-        <div class="hbcLogoWrap" onclick="triggerBusinessLogoUpload()">
-          <img id="hbcLogoImg" style="display:none;">
-          <span id="hbcLogoPlaceholder">🏪</span>
+        <button class="hbcEditBtn admin-only" onclick="goTo('billsettings')" title="Edit Business Card / Logo">✏️</button>
+        <div class="hbcTopRow">
+          <div class="hbcLogoWrap" onclick="triggerBusinessLogoUpload()" title="Change Logo">
+            <img id="hbcLogoImg" style="display:none;">
+            <span id="hbcLogoPlaceholder">🏪</span>
+          </div>
+          <div class="hbcInfo" onclick="triggerBusinessLogoUpload()">
+            <div class="hbcBusinessName" id="hbcBusinessName">AIO POS</div>
+            <div class="hbcOwnerName" id="hbcOwnerName"></div>
+            <div class="hbcPhone" id="hbcPhone"></div>
+          </div>
         </div>
-        <div class="hbcInfo" onclick="triggerBusinessLogoUpload()">
-          <div class="hbcBusinessName" id="hbcBusinessName">AIO POS</div>
-          <div class="hbcOwnerName" id="hbcOwnerName"></div>
-          <div class="hbcPhone" id="hbcPhone"></div>
+        <div class="hbcIconsRow">
+          <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now">💾</button>
+          <button class="hbcChatBtn admin-only" onclick="document.getElementById('importBackupInputHome').click()" title="Restore Backup">🔄</button>
+          <button class="hbcChatBtn" onclick="goTo('myads')" title="My Ads — Promote This App">📣</button>
+          <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
+          <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
-        <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now" style="margin-right:6px;">💾</button>
-        <button class="hbcChatBtn admin-only" onclick="document.getElementById('importBackupInputHome').click()" title="Restore Backup" style="margin-right:6px;">🔄</button>
-        <button class="hbcChatBtn" onclick="goTo('myads')" title="My Ads — Promote This App" style="margin-right:6px;">📣</button>
-        <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="margin-right:6px;">📤</button>
-        <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
       </div>
       <input type="file" id="importBackupInputHome" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
