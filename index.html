@@ -4311,14 +4311,21 @@ async function shareAppLink(){
 function buildDevChatMessage(){
   const uid = getOrCreateDeviceUID();
   if(devChatContext === 'subscription'){
-    // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ خالی جگہ چھوڑیں ----------
+    // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ عام دلچسپی کا پیغام بھیجیں ----------
     if(selectedPlanDays && selectedPlanPrice){
       return `Sir, I want to subscribe your AIO POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.\n\nMy Device ID:\n${uid}`;
     }
-    return `Sir, I have seen your package plan for subscription of AIO POS. Please give me the subscription code for ___ days.\n\nMy Device ID:\n${uid}`;
+    return buildAdInquiryMessage();
   }
   // ---------- مسئلہ رپورٹ کرنے کا پیغام — اردو میں، خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
   return `محترم ڈیویلپر،\nمیں آپ کی بیٹا ورژن AIO POS استعمال کر رہا ہوں۔ میں نے اس کے اندر یہ مسئلہ محسوس کیا ہے اور میرا مشورہ یہ ہے:\n\n\n\nمیرا Device ID:\n${uid}`;
+}
+
+// ---------- My Ads پوسٹر/اشتہار دیکھ کر رابطہ کرنے والے نئے دلچسپی رکھنے والے کے لیے مختصر، دوستانہ پیغام —
+// "package plan" کا پرانا فرض شدہ حوالہ ہٹا دیا، چونکہ اب کوئی پیڈ پیکج پلان دکھایا نہیں جاتا ----------
+function buildAdInquiryMessage(){
+  const uid = getOrCreateDeviceUID();
+  return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.\n\nMy Device ID:\n${uid}`;
 }
 
 function sendDevChat(channel){
@@ -4489,6 +4496,8 @@ function showSubscriptionGate(){
         : `Your subscription expired on ${formatDateDMY(exp)}.`)
     : `This app is not yet activated.`;
   document.getElementById('subscriptionGateScreen').style.display = 'flex';
+  // ---------- ٹرائل ختم ہوتے ہی سیدھا Package Plans بھی خودکار سامنے آ جائیں — صارف کو الگ سے بٹن ڈھونڈنا نہ پڑے ----------
+  openPackagePlansModal();
 }
 
 function submitActivationCode(){
@@ -15231,12 +15240,13 @@ function renderMyAdsScreen(){
   // ---------- تصویر پر خود کلک نہیں ہو سکتا، اس لیے نیچے اصل کام کرنے والے WhatsApp/Call/SMS بٹن + نمبر دیا گیا ہے ----------
   const rawNumber = (AppState.settings.devWhatsapp || '923206793793').replace(/\D/g, '');
   const displayNumber = '+' + rawNumber;
+  const adInquiryMsg = buildAdInquiryMessage();
   wrap.innerHTML = `
     <img src="${MY_ADS_POSTER_DATAURL}" width="784" height="1328" style="width:100%; max-width:420px; height:auto; aspect-ratio:784/1328; border-radius:16px; box-shadow:0 6px 18px rgba(15,23,42,.2);" onload="window.resetMainAreaScroll && window.resetMainAreaScroll();">
     <div class="adsContactRow">
-      <a class="adsContactBtn adsWhatsapp" href="https://wa.me/${rawNumber}" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a class="adsContactBtn adsWhatsapp" href="https://wa.me/${rawNumber}?text=${encodeURIComponent(adInquiryMsg)}" target="_blank" rel="noopener">💬 WhatsApp</a>
       <a class="adsContactBtn adsCall" href="tel:+${rawNumber}">📞 Call</a>
-      <a class="adsContactBtn adsSms" href="sms:+${rawNumber}">✉️ SMS</a>
+      <a class="adsContactBtn adsSms" href="sms:+${rawNumber}?body=${encodeURIComponent(adInquiryMsg)}">✉️ SMS</a>
     </div>
     <div class="adsContactNumber">${displayNumber}</div>
   `;
