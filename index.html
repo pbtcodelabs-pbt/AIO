@@ -1503,6 +1503,18 @@
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px;">📤 Share This App</button>
+
+    <!-- ---------- سیدھا Login سکرین سے ہی Activation Code لگانے کا آپشن — PIN سے پہلے، تاکہ کنفیوژن نہ ہو ---------- -->
+    <div class="loginHint" style="margin-top:10px;">
+      <a href="javascript:void(0)" onclick="toggleLoginActivationBox()" style="color:var(--primary); font-weight:700; text-decoration:none;">🔑 Have an activation code? Tap here.</a>
+    </div>
+    <div id="loginActivationBox" style="display:none; margin-top:10px; text-align:left;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Activation code (from your developer)</label>
+      <input type="text" id="loginActivationCodeInput" placeholder="6-digit code">
+      <button onclick="activateFromLoginScreen()" style="margin-top:8px;">✅ Activate</button>
+      <div id="loginActivationMsg" style="margin-top:8px; font-size:13px; font-weight:700;"></div>
+    </div>
+
     <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
@@ -4305,7 +4317,8 @@ function buildDevChatMessage(){
     }
     return `Sir, I have seen your package plan for subscription of AIO POS. Please give me the subscription code for ___ days.\n\nMy Device ID:\n${uid}`;
   }
-  return `Sir, I need help with AIO POS.\n\nMy Device ID:\n${uid}`;
+  // ---------- مسئلہ رپورٹ کرنے کا پیغام — اردو میں، خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
+  return `محترم ڈیویلپر،\nمیں آپ کی بیٹا ورژن AIO POS استعمال کر رہا ہوں۔ میں نے اس کے اندر یہ مسئلہ محسوس کیا ہے اور میرا مشورہ یہ ہے:\n\n\n\nمیرا Device ID:\n${uid}`;
 }
 
 function sendDevChat(channel){
@@ -4491,6 +4504,27 @@ function submitActivationCode(){
       goTo('home');
       showRoleToast(AppState.currentRole, AppState.currentUser?.name || '');
     }, 1200);
+  } else {
+    msgEl.style.color = 'var(--danger)';
+    msgEl.textContent = '❌ ' + result.message;
+  }
+}
+
+// ---------- Login سکرین پر ہی سیدھا کوڈ لگانے کا خانہ کھولیں/بند کریں ----------
+function toggleLoginActivationBox(){
+  const box = document.getElementById('loginActivationBox');
+  if(box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+// ---------- PIN درج کیے بغیر ہی، سیدھا Login سکرین سے کوڈ لگا کر ٹرائل/سبسکرپشن فعال کریں ----------
+function activateFromLoginScreen(){
+  const code = document.getElementById('loginActivationCodeInput').value;
+  const result = activateSubscription(code);
+  const msgEl = document.getElementById('loginActivationMsg');
+  if(result.success){
+    msgEl.style.color = 'var(--success)';
+    msgEl.textContent = `✅ Activated! ${result.daysGranted} day(s) added — valid until ${result.expiry}.`;
+    setTimeout(() => { setupLoginScreen(); }, 1000); // ---------- لاگ ان سکرین کی حیثیت (Trial/Subscribed) فوراً تازہ ہو جائے ----------
   } else {
     msgEl.style.color = 'var(--danger)';
     msgEl.textContent = '❌ ' + result.message;
