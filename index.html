@@ -816,6 +816,8 @@
   .expDaySeparator:first-child{margin-top:0;}
 
   /* --- 🧮 Stock Adjustment screen --- */
+  .stockAdjFilterBar{display:flex; gap:8px; margin-bottom:12px;}
+  .stockAdjFilterBar select{flex:1; padding:8px 6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; background:#fff; color:var(--text);}
   .stockAdjHeaderRow{display:flex; gap:8px; padding:0 12px 6px; font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
   .stockAdjColName{flex:2;}
   .stockAdjColSmall{flex:1; text-align:center;}
@@ -2030,9 +2032,21 @@
     <!-- 🧮 STOCK ADJUSTMENT — manual stock/price/low-stock editing for every variant, no Purchase Order needed -->
     <div class="screen admin-only" id="screen-stockadjustment">
       <div class="pageTitle">🧮 Stock Adjustment</div>
-      <div class="settingsHint" style="margin-top:0;">Manually correct Stock, Price, or Low Stock level for any item — no Purchase Order needed. Items with negative stock (oversold) appear at the top in red.</div>
 
-      <input type="text" id="stockAdjSearchInput" placeholder="🔍 Search item name" oninput="renderStockAdjustmentScreen()" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px; margin-bottom:12px;">
+      <input type="text" id="stockAdjSearchInput" placeholder="🔍 Search item name" oninput="renderStockAdjustmentScreen()" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px; margin-bottom:10px;">
+
+      <div class="stockAdjFilterBar">
+        <select id="stockAdjCategoryFilter" onchange="renderStockAdjustmentScreen()">
+          <option value="all">All Categories</option>
+        </select>
+        <select id="stockAdjSortFilter" onchange="renderStockAdjustmentScreen()">
+          <option value="negFirst">Most Negative First</option>
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+          <option value="stockLow">Stock: Low → High</option>
+          <option value="stockHigh">Stock: High → Low</option>
+        </select>
+      </div>
 
       <div class="stockAdjHeaderRow">
         <div class="stockAdjColName">Item</div>
@@ -3537,7 +3551,7 @@
   <div id="myAdsPosterWrap" style="text-align:center; margin:6px 0 14px;">
     <div style="max-width:420px; aspect-ratio:784/1328; margin:0 auto; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; background:#f8fafc; border-radius:16px;">Building your poster…</div>
   </div>
-  <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 Share on WhatsApp</button>
+  <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto 90px; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 Share on WhatsApp</button>
 </div>
 
     <div class="modalOverlay" id="softResetModal" onclick="if(event.target===this) this.classList.remove('show')">
@@ -8776,12 +8790,29 @@ function renderStockAdjustmentScreen(){
   const wrap = document.getElementById('stockAdjustmentListWrap');
   if(!wrap) return;
   const query = (document.getElementById('stockAdjSearchInput')?.value || '').trim().toLowerCase();
+  const catFilter = document.getElementById('stockAdjCategoryFilter')?.value || 'all';
+  const sortMode = document.getElementById('stockAdjSortFilter')?.value || 'negFirst';
+
+  // ---------- کیٹگری ڈراپ ڈاؤن — موجودہ انتخاب برقرار رکھتے ہوئے تازہ فہرست بھر دیں ----------
+  const catSelect = document.getElementById('stockAdjCategoryFilter');
+  if(catSelect && !catSelect.dataset.filled){
+    const cats = [...new Set(productsData.map(p => (p.category && p.category.trim()) ? p.category.trim() : 'Uncategorized'))].sort();
+    catSelect.innerHTML = '<option value="all">All Categories</option>' + cats.map(c => `<option value="${c.replace(/"/g,'&quot;')}">${c}</option>`).join('');
+    catSelect.dataset.filled = '1';
+  }
 
   let list = getLiveVariantList();
   if(query) list = list.filter(item => item.displayName.toLowerCase().includes(query));
+  if(catFilter !== 'all'){
+    list = list.filter(item => ((item.product.category && item.product.category.trim()) ? item.product.category.trim() : 'Uncategorized') === catFilter);
+  }
 
-  // ---------- سب سے زیادہ مائنس میں گیا آئٹم سب سے اوپر (ascending order — منفی نمبر سب سے چھوٹا ہوتا ہے) ----------
-  list.sort((a,b) => a.variant.stock - b.variant.stock);
+  // ---------- منتخب ترتیب کے مطابق فہرست سجائیں ----------
+  if(sortMode === 'az') list.sort((a,b) => a.displayName.localeCompare(b.displayName));
+  else if(sortMode === 'za') list.sort((a,b) => b.displayName.localeCompare(a.displayName));
+  else if(sortMode === 'stockLow') list.sort((a,b) => a.variant.stock - b.variant.stock);
+  else if(sortMode === 'stockHigh') list.sort((a,b) => b.variant.stock - a.variant.stock);
+  else list.sort((a,b) => a.variant.stock - b.variant.stock); // ---------- 'negFirst' ڈیفالٹ — سب سے زیادہ مائنس سب سے اوپر ----------
 
   const anyNegative = getLiveVariantList().some(item => item.variant.stock < 0);
   const resetBtn = document.getElementById('stockAdjResetAllBtn');
