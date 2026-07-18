@@ -96,6 +96,20 @@
     background:var(--primary); color:#fff; border:none; border-radius:10px; padding:8px 14px;
     font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
   }
+  /* --- 💾 Backup Reminder Toast — دن میں تین اوقات (صبح/دوپہر/رات) میں ایپ کھلنے پر ایک بار نظر آئے --- */
+  #backupReminderToast{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(80px); z-index:6000;
+    background:#7c2d12; color:#fff; padding:12px 16px; border-radius:16px; font-size:13px; font-weight:700;
+    box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; transition:all .3s ease;
+    display:flex; align-items:center; gap:10px; max-width:90vw;
+    pointer-events:none;
+  }
+  #backupReminderToast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  #backupReminderToast button{
+    border:none; border-radius:10px; padding:8px 14px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
+  }
+  #backupReminderToast .brtBackupBtn{background:#fff; color:#7c2d12;}
+  #backupReminderToast .brtDismissBtn{background:rgba(255,255,255,.2); color:#fff; padding:8px 10px;}
   /* پرانا نچلا "آف لائن" بینر ہٹا دیا گیا — اب اوپر ہیڈر میں چھوٹا سا بیج (#connStatusBadge) استعمال ہوتا ہے،
      جو کبھی بھی کسی بٹن کے اوپر نہیں آتا اور ہمیشہ ایک ہی جگہ نظر آتا ہے۔ */
 
@@ -1372,6 +1386,13 @@
   <button onclick="applyPwaUpdate()">Update Now</button>
 </div>
 
+<!-- ---------- 💾 Backup Reminder Toast — دن میں تین اوقات پر ایپ کھلنے پر ایک بار نظر آئے ---------- -->
+<div id="backupReminderToast">
+  <span>💾 Don't forget to backup your data today</span>
+  <button class="brtBackupBtn" onclick="backupNowFromReminder()">Backup Now</button>
+  <button class="brtDismissBtn" onclick="dismissBackupReminderToast()">✕</button>
+</div>
+
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
   <div class="loginBox">
@@ -1530,10 +1551,13 @@
           <div class="hbcOwnerName" id="hbcOwnerName"></div>
           <div class="hbcPhone" id="hbcPhone"></div>
         </div>
+        <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now" style="margin-right:6px;">💾</button>
+        <button class="hbcChatBtn admin-only" onclick="document.getElementById('importBackupInputHome').click()" title="Restore Backup" style="margin-right:6px;">🔄</button>
         <button class="hbcChatBtn" onclick="goTo('myads')" title="My Ads — Promote This App" style="margin-right:6px;">📣</button>
         <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="margin-right:6px;">📤</button>
         <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
       </div>
+      <input type="file" id="importBackupInputHome" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
 
       <!-- ---------- 🔍 فوری App Size کنٹرول — پورا Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
@@ -4191,6 +4215,35 @@ function finishLogin(user){
   document.getElementById('app').style.display = 'grid';
   goTo('home'); // ہر role پہلے Home اسکرین پر جائے گا
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
+  if(user.role === 'admin') setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+}
+
+// ---------- 💾 دن میں تین اوقات میں (صبح/دوپہر/رات) ایپ کھلنے پر ایک بار بیک اپ یاد دہانی دکھائیں —
+//            نوٹ: یہ صرف اسی وقت نظر آ سکتی ہے جب صارف خود ایپ کھولے (ویب ایپ بند ہونے کی حالت میں پش نوٹیفیکیشن نہیں بھیج سکتی) ----------
+function checkBackupReminder(){
+  const now = new Date();
+  const hour = now.getHours();
+  let windowName = null;
+  if(hour >= 6 && hour < 11) windowName = 'morning';
+  else if(hour >= 13 && hour < 17) windowName = 'afternoon';
+  else if(hour >= 19 && hour < 23) windowName = 'evening';
+  if(!windowName) return;
+
+  const todayStr = now.toISOString().slice(0, 10);
+  let shown = loadFromStorage('backupReminderShown', {date:'', windows:[]});
+  if(shown.date !== todayStr) shown = {date: todayStr, windows: []};
+  if(shown.windows.includes(windowName)) return;
+
+  shown.windows.push(windowName);
+  saveToStorage('backupReminderShown', shown);
+  document.getElementById('backupReminderToast')?.classList.add('show');
+}
+function dismissBackupReminderToast(){
+  document.getElementById('backupReminderToast')?.classList.remove('show');
+}
+function backupNowFromReminder(){
+  exportBackupData();
+  dismissBackupReminderToast();
 }
 
 // ---------- سادہ Toast — لاگ ان کے بعد چند سیکنڈ کے لیے نظر آئے، خود بخود غائب ہو جائے ----------
