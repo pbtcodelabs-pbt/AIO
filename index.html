@@ -6131,13 +6131,15 @@ function finalizeInvoice(){
   // Counter Sale آف، یا Walk-in میں جزوی ادائیگی: Pending (Credit) — بعد میں کسٹمر پروفائل سے "📥 Collect" کر کے نقد/والٹ سے طے کریں۔
   const method = (Billing.counterSale && !isWalkInPartial) ? 'cash' : 'credit';
 
-  // ---------- اسٹاک کی جانچ: کہیں کوئی Item موجودہ اسٹاک سے زیادہ نہ بک رہا ہو ----------
-  const flatVariants = getFlatVariants();
-  for(const item of Billing.cart){
-    const v = flatVariants.find(f => f.variant_id === item.variant_id);
-    if(v && item.qty > v.stock){
-      alert(`"${item.name}" is low on stock (available: ${v.stock}). Please reduce quantity.`);
-      return;
+  // ---------- اسٹاک کی جانچ: صرف اُس وقت روکیں جب "Track Inventory" آن ہو — ورنہ سٹاک مائنس میں جانے کی اجازت ہے ----------
+  if(AppState.settings.trackInventory){
+    const flatVariants = getFlatVariants();
+    for(const item of Billing.cart){
+      const v = flatVariants.find(f => f.variant_id === item.variant_id);
+      if(v && item.qty > v.stock){
+        alert(`"${item.name}" is low on stock (available: ${v.stock}). Please reduce quantity.`);
+        return;
+      }
     }
   }
 
