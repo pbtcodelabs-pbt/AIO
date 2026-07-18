@@ -770,6 +770,32 @@
   .healthCol .hValue{font-size:13px; font-weight:800; color:var(--primary-dark);}
   .healthCol .hValue.pos{color:var(--success);}
   .healthCol .hValue.neg{color:var(--danger);}
+
+  /* --- Red (money going out) / Green (money coming in) split columns --- */
+  .finSplitWrap{display:flex; gap:10px;}
+  .finSplitCol{flex:1; border-radius:12px; padding:10px 12px; box-shadow:0 2px 8px rgba(41,29,10,.07);}
+  .finSplitCol.finGreen{background:#f0fdf4; border:1.5px solid #86efac;}
+  .finSplitCol.finRed{background:#fef2f2; border:1.5px solid #fca5a5;}
+  .finSplitHead{font-size:11px; font-weight:800; margin-bottom:8px; line-height:1.3;}
+  .finSplitCol.finGreen .finSplitHead{color:#166534;}
+  .finSplitCol.finRed .finSplitHead{color:#991b1b;}
+  .finRow{display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--muted); font-weight:600; padding:3px 0; gap:6px;}
+  .finRow span:last-child{font-weight:800; color:var(--primary-dark); white-space:nowrap;}
+  .finSplitTotal{margin-top:7px; padding-top:7px; border-top:1px dashed rgba(0,0,0,.12); font-size:13px; font-weight:900; text-align:right;}
+  .finSplitCol.finGreen .finSplitTotal{color:var(--success);}
+  .finSplitCol.finRed .finSplitTotal{color:var(--danger);}
+
+  /* --- 💸 Expenditure screen --- */
+  .expFilterBar{display:flex; gap:8px; margin:10px 0; flex-wrap:wrap;}
+  .expFilterBar select, .expFilterBar input[type=date]{flex:1; min-width:120px; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;}
+  .expTotalBar{text-align:center; font-weight:800; font-size:15px; color:var(--primary-dark); background:#eef2ff; border-radius:10px; padding:10px; margin-bottom:14px;}
+  .expRow{display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid #eef1f5; border-radius:12px; padding:12px 14px; margin-bottom:9px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .expRowName{font-weight:700; font-size:14px; color:var(--text);}
+  .expRowSub{font-size:11px; color:var(--muted); margin-top:2px;}
+  .expRowAmount{font-weight:800; font-size:15px; color:var(--danger);}
+  .expEmptyState{text-align:center; color:#94a3b8; padding:40px 10px; font-size:14px;}
+  .expDaySeparator{font-size:11px; font-weight:700; color:var(--muted); margin:14px 0 6px; text-transform:uppercase; letter-spacing:.03em;}
+  .expDaySeparator:first-child{margin-top:0;}
   .lowStockPickRow{display:flex; align-items:center; gap:10px; padding:10px; background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; margin-bottom:8px;}
   .lowStockPickRow .rName{font-weight:700; font-size:13px;}
   .lowStockPickRow .rMeta{font-size:11px; color:var(--muted);}
@@ -1535,6 +1561,7 @@
     <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
     <div class="navItem" data-screen="billhistory" onclick="goTo('billhistory')">🧾 Bill History</div>
     <div class="navItem admin-only" data-screen="mydiary" onclick="goTo('mydiary')">📔 My Diary</div>
+    <div class="navItem admin-only" data-screen="expenditure" onclick="goTo('expenditure')">💸 Expenditure</div>
 
     <div class="navItem admin-only" data-screen="dashboard" onclick="goTo('dashboard')">📊 Dashboard</div>
     <div class="navItem admin-only" data-screen="products" onclick="goTo('products')">📦 Products</div>
@@ -1893,14 +1920,22 @@
       <div class="dashSectionLabel">Quick Overview</div>
       <div class="kpiGrid" id="kpiGrid"></div>
 
-      <!-- ZONE 2: Financial Health — سمری کس طرح بنی، اس کی تفصیل (اسٹاک، نقدی، وصولیاں، واجبات) -->
-      <div class="dashSectionLabel">Financial Health — Breakdown</div>
-      <div class="healthBand">
-        <div class="healthBandTop">
-          <div class="healthCol"><div class="hLabel">📦 Stock Value</div><div class="hValue" id="hlStock">—</div></div>
-          <div class="healthCol"><div class="hLabel">💵 Cash in Hand</div><div class="hValue" id="hlCash">—</div></div>
-          <div class="healthCol"><div class="hLabel">🤝 Receivables (incoming)</div><div class="hValue pos" id="hlReceivable">—</div></div>
-          <div class="healthCol"><div class="hLabel">📤 Payables (outgoing)</div><div class="hValue neg" id="hlPayable">—</div></div>
+      <!-- ZONE 2: Financial Health — کس طرح بنی، اس کی تفصیل (سبز = آنے والے پیسے، سرخ = جانے والے پیسے) -->
+      <div class="dashSectionLabel">Financial Health — Money In vs Money Out</div>
+      <div class="finSplitWrap">
+        <div class="finSplitCol finGreen">
+          <div class="finSplitHead">🟢 Money Coming In / Assets</div>
+          <div class="finRow"><span>📦 Stock Value</span><span id="hlStock">—</span></div>
+          <div class="finRow"><span>💵 Cash in Hand</span><span id="hlCash">—</span></div>
+          <div class="finRow"><span>🤝 Customer Receivables</span><span id="hlReceivable">—</span></div>
+          <div class="finRow"><span>📔 Diary Receivable</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finSplitTotal" id="finGreenTotal">Total: Rs. 0</div>
+        </div>
+        <div class="finSplitCol finRed">
+          <div class="finSplitHead">🔴 Money Going Out / Liabilities</div>
+          <div class="finRow"><span>📤 Supplier Payables</span><span id="hlPayable">—</span></div>
+          <div class="finRow"><span>📔 Diary Payable</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finSplitTotal" id="finRedTotal">Total: Rs. 0</div>
         </div>
       </div>
 
@@ -2814,6 +2849,73 @@
       <div id="diaryListWrap"></div>
     </div>
 
+    <!-- 💸 EXPENDITURE — daily expenses ledger, fully separate from billing -->
+    <div class="screen admin-only" id="screen-expenditure">
+      <div class="pageTitle">💸 Expenditure</div>
+      <div class="settingsHint" style="margin-top:0;">Track your day-to-day business expenses here — separate from purchases/invoices. Every entry you save stays as its own line, even if the item name repeats.</div>
+
+      <div class="expFilterBar">
+        <select id="expFilterPreset" onchange="onExpFilterPresetChange()">
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="thisweek">This Week</option>
+          <option value="thismonth">This Month</option>
+          <option value="prevmonth">Previous Month</option>
+          <option value="thisyear">This Year</option>
+          <option value="prevyear">Previous Year</option>
+          <option value="all">All Time</option>
+          <option value="custom">Custom Range</option>
+        </select>
+      </div>
+      <div class="expFilterBar" id="expCustomRangeBar" style="display:none;">
+        <input type="date" id="expFromDate" onchange="renderExpenseList()">
+        <input type="date" id="expToDate" onchange="renderExpenseList()">
+      </div>
+
+      <div class="expTotalBar" id="expTotalBar">Total: Rs. 0</div>
+
+      <div class="partyToolbar">
+        <input type="text" id="expSearchInput" placeholder="🔍 Search by item name" oninput="renderExpenseList()" style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
+        <button onclick="openExpenseAddModal()" style="flex:0 0 auto; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px 16px; font-weight:700; cursor:pointer;">➕ New Expense</button>
+      </div>
+
+      <div id="expenseListWrap"></div>
+    </div>
+
+    <!-- EXPENDITURE — Add New Expense -->
+    <div class="modalOverlay" id="expenseAddModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox">
+        <h3>➕ New Expense</h3>
+        <input type="text" id="expNewName" placeholder="Item / expense name" list="expenseNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
+        <datalist id="expenseNameSuggestions"></datalist>
+        <input type="number" id="expNewAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="expNewDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="text" id="expNewNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <div class="modalActions">
+          <button class="cancelBtn" onclick="document.getElementById('expenseAddModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" onclick="saveNewExpense()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENDITURE — Edit / Delete Expense -->
+    <div class="modalOverlay" id="expenseEditModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox">
+        <h3>✏️ Edit Expense</h3>
+        <input type="text" id="expEditName" placeholder="Item / expense name" list="expenseNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
+        <input type="number" id="expEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="expEditDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="text" id="expEditNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <div class="modalActions">
+          <button class="cancelBtn" onclick="document.getElementById('expenseEditModal').classList.remove('show')">Cancel</button>
+          <button class="saveBtn" onclick="saveExpenseEdit()">Save</button>
+        </div>
+        <div class="modalActions" style="margin-top:8px;">
+          <button class="cancelBtn" style="background:#fee2e2; color:var(--danger);" onclick="deleteExpenseEntry()">🗑️ Delete</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MY DIARY — Add New Entry (name + balance) -->
     <div class="modalOverlay" id="diaryAddModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
@@ -3590,6 +3692,8 @@ function persistAllData(){
   if(typeof nextPaymentId !== 'undefined') saveToStorage('nextPaymentId', nextPaymentId);
   if(typeof diaryData !== 'undefined') saveToStorage('diary', diaryData);
   if(typeof nextDiaryId !== 'undefined') saveToStorage('nextDiaryId', nextDiaryId);
+  if(typeof expenseData !== 'undefined') saveToStorage('expenses', expenseData);
+  if(typeof nextExpenseId !== 'undefined') saveToStorage('nextExpenseId', nextExpenseId);
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
 
@@ -3623,6 +3727,8 @@ function exportBackupData(){
     approvalRequests: approvalRequests,
     nextProductId, nextVariantId, nextCustomerId, nextSupplierId, nextUserId, nextRequestId,
     settings: AppState.settings,
+    expenses: expenseData,
+    nextExpenseId,
   };
   // ---------- مختصر (compact) فارمیٹ — کوئی اضافی خالی جگہ/لائن بریک نہیں، فائل چھوٹی اور سادہ ----------
   const blob = new Blob([JSON.stringify(backup)], {type:'application/json'});
@@ -3667,6 +3773,8 @@ function importBackupData(event){
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
       if(backup.settings) Object.assign(AppState.settings, backup.settings);
+      if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
+      nextExpenseId = backup.nextExpenseId || nextExpenseId;
 
       persistAllData(); // localStorage میں بھی محفوظ کر دیں (اگر یہاں کام کر رہا ہو تو فائدہ ہوگا)
 
@@ -4001,6 +4109,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   ]},
   { section: '🔴 Liabilities', tiles: [
     {icon:'📔', label:'My Diary', screen:'mydiary'},
+    {icon:'💸', label:'Expenditure', screen:'expenditure'},
   ]},
 ];
 // ---------- پرانی سیدھی فہرست اب بھی موجود ہے — Quick Access Dock وغیرہ کہیں اور اسے استعمال کرتے ہیں ----------
@@ -4434,6 +4543,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'users') { renderUserList(); renderApprovalList(); }
   if(screenName === 'billhistory') renderBillHistory();
   if(screenName === 'mydiary') renderMyDiaryScreen();
+  if(screenName === 'expenditure') renderExpenditureScreen();
   if(screenName === 'purchaseorders') renderPurchaseOrdersScreen();
   if(screenName === 'advanceorders') renderAdvanceOrdersScreen();
   if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
@@ -7846,7 +7956,7 @@ function renderDashDate(){
   if(el) el.textContent = new Date().toLocaleDateString('ur-PK', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
 }
 
-// --- ZONE 2: Financial Health Band (اسٹاک/نقدی/وصولیاں/واجبات چار صاف کالمز میں) ---
+// --- ZONE 2: Financial Health Band (اسٹاک/نقدی/وصولیاں/واجبات — اب ڈائری کے بیلنس بھی شامل، سبز/سرخ دو کالمز میں) ---
 function renderHealthBand(){
   // کل اسٹاک ویلیو = تمام variants کی (purchase price × stock) کا مجموعہ
   let stockValue = 0;
@@ -7856,21 +7966,37 @@ function renderHealthBand(){
   const totalReceivable = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
   const totalPayable = suppliersData.reduce((sum, s) => sum + (s.total_payable || 0), 0);
 
+  // ---------- My Diary کے بیلنس بھی اسی سمری میں شامل — منفی بیلنس = ہم نے دینے ہیں (سرخ)، مثبت = ہم نے لینے ہیں (سبز) ----------
+  let diaryPayable = 0, diaryReceivable = 0;
+  (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
+    if(e.balance < 0) diaryPayable += Math.abs(e.balance);
+    else if(e.balance > 0) diaryReceivable += e.balance;
+  });
+
   document.getElementById('hlStock').textContent = 'Rs. ' + stockValue.toLocaleString();
   document.getElementById('hlCash').textContent = 'Rs. ' + financeDummy.cashInHand.toLocaleString();
   document.getElementById('hlReceivable').textContent = 'Rs. ' + totalReceivable.toLocaleString();
   document.getElementById('hlPayable').textContent = 'Rs. ' + totalPayable.toLocaleString();
+  document.getElementById('hlDiaryReceivable').textContent = 'Rs. ' + diaryReceivable.toLocaleString();
+  document.getElementById('hlDiaryPayable').textContent = 'Rs. ' + diaryPayable.toLocaleString();
 
-  // ---------- سب سے اہم سمری: کل اثاثے (اسٹاک + نقدی + وصولیاں) − کل واجبات (ادائیگیاں) = صافی پوزیشن ----------
-  const totalAssets = stockValue + financeDummy.cashInHand + totalReceivable;
-  const netPosition = totalAssets - totalPayable;
+  // ---------- سبز کالم (آنے والے پیسے) اور سرخ کالم (جانے والے پیسے) کے اپنے اپنے ٹوٹل ----------
+  const greenTotal = stockValue + financeDummy.cashInHand + totalReceivable + diaryReceivable;
+  const redTotal = totalPayable + diaryPayable;
+  document.getElementById('finGreenTotal').textContent = 'Total: Rs. ' + greenTotal.toLocaleString();
+  document.getElementById('finRedTotal').textContent = 'Total: Rs. ' + redTotal.toLocaleString();
+
+  // ---------- سب سے اہم سمری: کل اثاثے (اسٹاک + نقدی + وصولیاں + ڈائری وصولیاں) − کل واجبات (ادائیگیاں + ڈائری واجبات) = صافی پوزیشن ----------
+  const totalAssets = greenTotal;
+  const totalLiabilities = redTotal;
+  const netPosition = totalAssets - totalLiabilities;
 
   const hero = document.getElementById('netPositionHero');
   hero.classList.toggle('negative', netPosition < 0);
   document.getElementById('nphValue').textContent =
     `Rs. ${Math.abs(netPosition).toLocaleString()} ${netPosition >= 0 ? '📈 Profit' : '📉 Loss'}`;
   document.getElementById('nphBreakdown').textContent =
-    `Assets: Rs. ${totalAssets.toLocaleString()} (Stock + Cash + Receivables)  −  Liabilities: Rs. ${totalPayable.toLocaleString()} (Payables)`;
+    `Assets: Rs. ${totalAssets.toLocaleString()} (Stock + Cash + Receivables + Diary)  −  Liabilities: Rs. ${totalLiabilities.toLocaleString()} (Payables + Diary)`;
 }
 
 // --- ZONE 1: KPI Cards (بنیادی نمبرز + الرٹس کی گنتی، سب ایک نظر میں) ---
@@ -8277,6 +8403,201 @@ function deleteDiaryEntry(){
   saveToStorage('diary', diaryData);
   document.getElementById('diaryDetailModal').classList.remove('show');
   renderMyDiaryList();
+}
+
+// =====================================================================
+// 💸 EXPENDITURE — JS Logic (بلنگ سے مکمل الگ، روزمرہ خرچوں کی سادہ فہرست —
+// یہ ایک بیلنس لیجر نہیں بلکہ ہر Save ایک نئی، مستقل انٹری بناتا ہے، چاہے نام دہرایا جائے)
+// =====================================================================
+let expenseData = loadFromStorage('expenses', []);
+let nextExpenseId = loadFromStorage('nextExpenseId', 1);
+let activeExpenseEntryId = null;
+
+function fmtExpAmount(n){
+  return 'Rs. ' + Math.abs(Math.round(n)).toLocaleString('en-US');
+}
+
+// ---------- مقامی تاریخ (YYYY-MM-DD) — toISOString کی طرح UTC میں شفٹ نہیں ہوتی ----------
+function toLocalDateStr(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ---------- منتخب فلٹر پریسیٹ کے مطابق from/to تاریخ کی حد نکالیں (دونوں شامل — inclusive) ----------
+function computeExpDateRange(preset){
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let from = null, to = null;
+
+  if(preset === 'today'){
+    from = today; to = today;
+  } else if(preset === 'yesterday'){
+    const y = new Date(today); y.setDate(y.getDate()-1);
+    from = y; to = y;
+  } else if(preset === 'thisweek'){
+    const start = new Date(today); start.setDate(start.getDate() - start.getDay()); // اتوار سے شروع
+    from = start; to = today;
+  } else if(preset === 'thismonth'){
+    from = new Date(today.getFullYear(), today.getMonth(), 1); to = today;
+  } else if(preset === 'prevmonth'){
+    from = new Date(today.getFullYear(), today.getMonth()-1, 1);
+    to = new Date(today.getFullYear(), today.getMonth(), 0);
+  } else if(preset === 'thisyear'){
+    from = new Date(today.getFullYear(), 0, 1); to = today;
+  } else if(preset === 'prevyear'){
+    from = new Date(today.getFullYear()-1, 0, 1);
+    to = new Date(today.getFullYear()-1, 11, 31);
+  } else if(preset === 'custom'){
+    const fromVal = document.getElementById('expFromDate')?.value;
+    const toVal = document.getElementById('expToDate')?.value;
+    from = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+    to = toVal ? new Date(toVal + 'T00:00:00') : null;
+  }
+  // 'all' → from/to دونوں null یعنی کوئی حد نہیں
+
+  return {
+    fromStr: from ? toLocalDateStr(from) : null,
+    toStr: to ? toLocalDateStr(to) : null
+  };
+}
+
+function onExpFilterPresetChange(){
+  const preset = document.getElementById('expFilterPreset').value;
+  document.getElementById('expCustomRangeBar').style.display = preset === 'custom' ? 'flex' : 'none';
+  renderExpenseList();
+}
+
+function renderExpenditureScreen(){
+  // ---------- ڈیفالٹ فلٹر ہمیشہ "Today" پر کھلے ----------
+  const presetEl = document.getElementById('expFilterPreset');
+  if(presetEl && !presetEl.dataset.initDone){
+    presetEl.value = 'today';
+    presetEl.dataset.initDone = '1';
+  }
+  const dateEl = document.getElementById('expNewDate');
+  if(dateEl) dateEl.value = toLocalDateStr(new Date());
+  renderExpenseList();
+}
+
+function renderExpenseList(){
+  const wrap = document.getElementById('expenseListWrap');
+  if(!wrap) return;
+  const preset = document.getElementById('expFilterPreset')?.value || 'today';
+  const query = (document.getElementById('expSearchInput')?.value || '').trim().toLowerCase();
+  const {fromStr, toStr} = computeExpDateRange(preset);
+
+  // ---------- ہر بار تازہ ترین ناموں کی فہرست ڈیٹالسٹ میں ڈالیں (سجیشن/آٹو کمپلیٹ کے لیے) ----------
+  const dl = document.getElementById('expenseNameSuggestions');
+  if(dl){
+    const uniqueNames = [...new Set(expenseData.map(e => (e.name||'').trim()).filter(Boolean))];
+    dl.innerHTML = uniqueNames.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+  }
+
+  let filtered = expenseData.filter(e => {
+    if(fromStr && e.date < fromStr) return false;
+    if(toStr && e.date > toStr) return false;
+    if(query && !(e.name||'').toLowerCase().includes(query)) return false;
+    return true;
+  });
+
+  const total = filtered.reduce((sum, e) => sum + (e.amount||0), 0);
+  document.getElementById('expTotalBar').textContent = '💸 Total: ' + fmtExpAmount(total) + ` (${filtered.length} ${filtered.length===1?'entry':'entries'})`;
+
+  // ---------- نئی تاریخ سب سے اوپر ----------
+  filtered.sort((a,b) => (b.date + b.createdAt) > (a.date + a.createdAt) ? 1 : -1);
+
+  if(filtered.length === 0){
+    wrap.innerHTML = '<div class="expEmptyState">💸 No expenses in this range yet — add one above with "➕ New Expense".</div>';
+    return;
+  }
+
+  // ---------- تاریخ کے مطابق گروپ بنا کر دن کا الگ الگ عنوان دکھائیں ----------
+  let lastDate = null;
+  const rowsHtml = filtered.map(e => {
+    let sepHtml = '';
+    if(e.date !== lastDate){
+      lastDate = e.date;
+      const d = new Date(e.date + 'T00:00:00');
+      sepHtml = `<div class="expDaySeparator">${d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short', year:'numeric'})}</div>`;
+    }
+    return sepHtml + `
+      <div class="expRow" onclick="openExpenseEditModal(${e.id})">
+        <div>
+          <div class="expRowName">${(e.name||'').replace(/</g,'&lt;')}</div>
+          ${e.note ? `<div class="expRowSub">${e.note.replace(/</g,'&lt;')}</div>` : ''}
+        </div>
+        <div class="expRowAmount">${fmtExpAmount(e.amount)}</div>
+      </div>`;
+  });
+  wrap.innerHTML = rowsHtml.join('');
+}
+
+function openExpenseAddModal(){
+  document.getElementById('expNewName').value = '';
+  document.getElementById('expNewAmount').value = '';
+  document.getElementById('expNewDate').value = toLocalDateStr(new Date());
+  document.getElementById('expNewNote').value = '';
+  document.getElementById('expenseAddModal').classList.add('show');
+}
+
+// ---------- نئی خرچہ انٹری — ہمیشہ ایک نئی، الگ لائن بنتی ہے، چاہے نام پہلے سے موجود ہو (جان بوجھ کر — ڈپلیکیٹ اندراج مسئلہ نہیں) ----------
+function saveNewExpense(){
+  const name = document.getElementById('expNewName').value.trim();
+  const amountRaw = parseFloat(document.getElementById('expNewAmount').value);
+  const date = document.getElementById('expNewDate').value || toLocalDateStr(new Date());
+  const note = document.getElementById('expNewNote').value.trim();
+  if(!name){ alert('Please enter the item / expense name.'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
+
+  expenseData.push({
+    id: nextExpenseId++,
+    name, amount: Math.abs(amountRaw), date, note,
+    createdAt: new Date().toISOString()
+  });
+  saveToStorage('expenses', expenseData);
+  saveToStorage('nextExpenseId', nextExpenseId);
+  document.getElementById('expenseAddModal').classList.remove('show');
+  renderExpenseList();
+}
+
+function openExpenseEditModal(id){
+  const entry = expenseData.find(e => e.id === id);
+  if(!entry) return;
+  activeExpenseEntryId = id;
+  document.getElementById('expEditName').value = entry.name;
+  document.getElementById('expEditAmount').value = entry.amount;
+  document.getElementById('expEditDate').value = entry.date;
+  document.getElementById('expEditNote').value = entry.note || '';
+  document.getElementById('expenseEditModal').classList.add('show');
+}
+
+function saveExpenseEdit(){
+  const entry = expenseData.find(e => e.id === activeExpenseEntryId);
+  if(!entry) return;
+  const name = document.getElementById('expEditName').value.trim();
+  const amountRaw = parseFloat(document.getElementById('expEditAmount').value);
+  const date = document.getElementById('expEditDate').value;
+  if(!name){ alert('Please enter the item / expense name.'); return; }
+  if(!amountRaw || amountRaw <= 0){ alert('Please enter a valid amount.'); return; }
+  if(!date){ alert('Please pick a date.'); return; }
+
+  entry.name = name;
+  entry.amount = Math.abs(amountRaw);
+  entry.date = date;
+  entry.note = document.getElementById('expEditNote').value.trim();
+
+  saveToStorage('expenses', expenseData);
+  document.getElementById('expenseEditModal').classList.remove('show');
+  renderExpenseList();
+}
+
+function deleteExpenseEntry(){
+  const entry = expenseData.find(e => e.id === activeExpenseEntryId);
+  if(!entry) return;
+  if(!confirm('Delete this expense entry ("' + entry.name + '")?')) return;
+  expenseData = expenseData.filter(e => e.id !== activeExpenseEntryId);
+  saveToStorage('expenses', expenseData);
+  document.getElementById('expenseEditModal').classList.remove('show');
+  renderExpenseList();
 }
 
 function recordPaymentEntry(entry){
