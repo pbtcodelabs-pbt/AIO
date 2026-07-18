@@ -3407,6 +3407,7 @@
           <option value="">— Select Bank/Wallet —</option>
         </select>
         <input type="text" id="papNumber" placeholder="Account Number" oninput="savePapDraft()">
+        <input type="text" id="papIban" placeholder="IBAN Number (optional)" oninput="savePapDraft()">
         <div style="display:flex; align-items:center; gap:10px; margin:10px 2px 4px;">
           <div id="papQrPreview" onclick="triggerPapQrUpload()" style="width:48px; height:48px; border-radius:8px; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:20px; overflow:hidden; border:2px dashed #dbe1ea; cursor:pointer; flex:0 0 auto;">🔳</div>
           <div style="font-size:11px; color:var(--muted);">Tap to add this account's QR code (from EasyPaisa/Bank app screenshot) — saved at original quality so it always scans correctly</div>
@@ -7066,6 +7067,7 @@ function savePapDraft(){
     title: document.getElementById('papTitle').value,
     bank: document.getElementById('papBankName').value,
     number: document.getElementById('papNumber').value,
+    iban: document.getElementById('papIban').value,
     showOnReceipt: document.getElementById('papShowOnReceipt').checked,
     photo: papPhotoDataUrl,
     qr: papQrDataUrl
@@ -7147,7 +7149,7 @@ async function startPhotoCapture(mode, defaultShape, title){
 
   try{
     // ---------- عام طور پر پیچھے والا کیمرہ (پراڈکٹ وغیرہ کے لیے بہتر)، لیکن بندے کی اپنی تصویر (Party/Payment Account) کے لیے سامنے والا (سیلفی) کیمرہ ترجیح دیں ----------
-    const preferFront = (photoCaptureMode === 'party' || photoCaptureMode === 'paymentaccount');
+    const preferFront = (photoCaptureMode === 'party' || photoCaptureMode === 'paymentaccount' || photoCaptureMode === 'paymentaccount-edit');
     let stream;
     try{
       stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal: preferFront ? 'user' : 'environment'}}});
@@ -7298,6 +7300,8 @@ function showPhotoPreview(){
 
 function retakePhoto(){
   if(photoCaptureMode === 'party') triggerPartyPhotoUpload();
+  else if(photoCaptureMode === 'paymentaccount') triggerPapPhotoUpload();
+  else if(photoCaptureMode === 'paymentaccount-edit') editAccountPhoto(editingAccountPhotoIdx);
   else triggerImageUpload(itemPhotoTargetProductId, itemPhotoTargetVariantId);
 }
 
@@ -7315,6 +7319,19 @@ function confirmPhoto(){
       papPhotoDataUrl = capturedPhotoDataUrl;
       renderAvatarInto('papPhotoPreview', papPhotoDataUrl, '👤');
     }
+    closeItemPhotoCapture();
+    return;
+  }
+  if(photoCaptureMode === 'paymentaccount-edit'){
+    if(capturedPhotoDataUrl && editingAccountPhotoIdx !== null){
+      const acc = AppState.settings.paymentAccounts[editingAccountPhotoIdx];
+      if(acc){
+        acc.photo = capturedPhotoDataUrl;
+        renderMyPaymentAccounts();
+        persistAllData();
+      }
+    }
+    editingAccountPhotoIdx = null;
     closeItemPhotoCapture();
     return;
   }
@@ -13900,12 +13917,13 @@ function renderMyPaymentAccounts(){
   }
   wrap.innerHTML = accounts.map((acc, idx) => `
     <div class="paymentAccCard">
-      <div style="width:36px; height:36px; border-radius:50%; overflow:hidden; flex:0 0 36px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:16px;">
+      <div onclick="editAccountPhoto(${idx})" title="Tap to add/change photo" style="cursor:pointer; width:36px; height:36px; border-radius:50%; overflow:hidden; flex:0 0 36px; background:#eef2ff; display:flex; align-items:center; justify-content:center; font-size:16px;">
         ${acc.photo ? `<img src="${acc.photo}" style="width:100%; height:100%; object-fit:cover;">` : '👤'}
       </div>
       <div class="paymentAccInfo">
         <div class="paymentAccTitle">${acc.name || 'Untitled'} <span class="paymentAccBank">${acc.type || '—'}</span></div>
         <div class="paymentAccNumber" onclick="copyMyAccountNumber(${idx})" style="cursor:pointer; text-decoration:underline dotted;" title="Tap to copy">${acc.number || '—'}</div>
+        <div class="paymentAccNumber" onclick="editAccountIban(${idx})" style="cursor:pointer; text-decoration:underline dotted; font-size:11px; color:var(--muted);" title="Tap to add/edit IBAN">${acc.iban ? `IBAN: ${acc.iban}` : '➕ Add IBAN Number'}</div>
       </div>
       <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer" style="border:none; background:none; font-size:18px; padding:4px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
       <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}" style="border:none; background:none; font-size:18px; padding:4px;">${acc.qr ? '🔳✅' : '🔳'}</button>
@@ -13960,6 +13978,24 @@ function copyMyAccountNumber(idx){
   });
 }
 
+// ---------- کسی بھی محفوظ شدہ اکاؤنٹ (نیا یا پرانا) میں IBAN نمبر شامل/تبدیل کریں — پکا مستقل خانہ، ہر اکاؤنٹ کے لیے ----------
+function editAccountIban(idx){
+  const acc = AppState.settings.paymentAccounts[idx];
+  if(!acc) return;
+  const entered = prompt('Enter IBAN Number for ' + (acc.name || acc.type || 'this account') + ':', acc.iban || '');
+  if(entered === null) return; // ---------- یوزر نے Cancel دبایا ----------
+  acc.iban = entered.trim();
+  renderMyPaymentAccounts();
+  persistAllData();
+}
+
+// ---------- کسی بھی محفوظ شدہ اکاؤنٹ (نیا یا پرانا) کی تصویر شامل/تبدیل کریں — وہی کیمرہ/کراپ پائپ لائن Add Account فارم جیسی ----------
+let editingAccountPhotoIdx = null;
+async function editAccountPhoto(idx){
+  editingAccountPhotoIdx = idx;
+  await startPhotoCapture('paymentaccount-edit', 'circle', '📷 Account Photo');
+}
+
 // ---------- کسی اکاؤنٹ کو بل کے فٹر پر دکھانا/چھپانا ٹوگل کریں ----------
 function toggleAccountShowOnReceipt(idx){
   const acc = AppState.settings.paymentAccounts[idx];
@@ -13981,6 +14017,7 @@ function openAddPaymentAccountModal(){
     document.getElementById('papTitle').value = draft.title || '';
     document.getElementById('papBankName').value = draft.bank || '';
     document.getElementById('papNumber').value = draft.number || '';
+    document.getElementById('papIban').value = draft.iban || '';
     document.getElementById('papShowOnReceipt').checked = !!draft.showOnReceipt;
     papPhotoDataUrl = draft.photo || null;
     renderAvatarInto('papPhotoPreview', papPhotoDataUrl, '👤');
@@ -13990,6 +14027,7 @@ function openAddPaymentAccountModal(){
     document.getElementById('papTitle').value = '';
     document.getElementById('papBankName').value = '';
     document.getElementById('papNumber').value = '';
+    document.getElementById('papIban').value = '';
     document.getElementById('papShowOnReceipt').checked = false;
     papPhotoDataUrl = null;
     document.getElementById('papPhotoPreview').innerHTML = '👤';
@@ -14004,6 +14042,7 @@ function saveNewPaymentAccount(){
   const title = document.getElementById('papTitle').value.trim();
   const bank = document.getElementById('papBankName').value;
   const number = document.getElementById('papNumber').value.trim();
+  const iban = document.getElementById('papIban').value.trim();
   if(!bank || !number){
     alert('Please select a bank/wallet and enter the account number.');
     return;
@@ -14011,6 +14050,7 @@ function saveNewPaymentAccount(){
   AppState.settings.paymentAccounts.push({
     type: bank,
     number: number,
+    iban: iban || '',
     name: title || '',
     photo: papPhotoDataUrl || null,
     qr: papQrDataUrl || null,
@@ -14302,7 +14342,8 @@ function wrapCenteredText(ctx, text, cx, y, maxWidth, lineHeight){
 // موبائل پروفائل پکچر کی طرح، خاص طور پر تصویر لگی ہو تو اس انداز میں زیادہ خوبصورت لگتا ہے ----------
 async function renderAccountPosterToCanvas(acc){
   const canvas = document.createElement('canvas');
-  const W = 640, H = acc.qr ? 1080 : 900; // ---------- QR موجود ہو تو پوسٹر تھوڑا لمبا کر کے اس کے لیے صاف جگہ بنائی جاتی ہے، باقی تمام عناصر بالکل جوں کے توں رہتے ہیں ----------
+  const ibanExtra = acc.iban ? 60 : 0; // ---------- IBAN موجود ہو تو پوسٹر میں اس کے لیے اضافی جگہ ----------
+  const W = 640, H = (acc.qr ? 1080 : 900) + ibanExtra; // ---------- QR موجود ہو تو پوسٹر تھوڑا لمبا کر کے اس کے لیے صاف جگہ بنائی جاتی ہے، باقی تمام عناصر بالکل جوں کے توں رہتے ہیں ----------
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const theme = getAccountCardTheme(acc.type);
@@ -14390,6 +14431,16 @@ async function renderAccountPosterToCanvas(acc){
   ctx.font = `800 52px 'Courier New', monospace`;
   ctx.fillText(acc.number || '', cx, 680);
 
+  // ---------- IBAN نمبر — موجود ہو تو اکاؤنٹ نمبر کے نیچے، اپنی صاف لائن میں ----------
+  if(acc.iban){
+    ctx.fillStyle = '#f2d675';
+    ctx.font = `700 22px Poppins, sans-serif`;
+    ctx.fillText('IBAN', cx, 715);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 26px 'Courier New', monospace`;
+    ctx.fillText(acc.iban, cx, 745);
+  }
+
   // ---------- Scan to Pay — QR کوڈ کا اپنا صاف سیکشن، نمبر اور نیچے کے پیغام کے درمیان — مرکزی تصویر/نام/نمبر بالکل جوں کے توں رہتے ہیں ----------
   if(acc.qr){
     await new Promise((resolve) => {
@@ -14397,9 +14448,9 @@ async function renderAccountPosterToCanvas(acc){
       qrImg.onload = () => {
         ctx.fillStyle = '#f2d675';
         ctx.font = `700 24px Poppins, sans-serif`;
-        ctx.fillText('📱 Scan to Pay', cx, 725);
+        ctx.fillText('📱 Scan to Pay', cx, 725 + ibanExtra);
 
-        const qrSize = 190, qrX = cx - qrSize/2, qrY = 745;
+        const qrSize = 190, qrX = cx - qrSize/2, qrY = 745 + ibanExtra;
         ctx.fillStyle = '#ffffff';
         roundRectPath(ctx, qrX, qrY, qrSize, qrSize, 14);
         ctx.fill();
