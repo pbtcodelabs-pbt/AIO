@@ -2179,9 +2179,6 @@
           <span class="closeBtn" onclick="closeReturnItemModal()">✖</span>
         </div>
         <div class="profileBody">
-          <div style="background:#eef2ff; color:var(--primary-dark); padding:10px 12px; border-radius:8px; font-size:12px; margin-bottom:14px;">
-            Tick the item(s) being returned, then adjust the quantity and refund amount (reduce it if the item is damaged/used). Choose Cash or Wallet as the refund method, then tap Confirm Return — stock is restocked automatically and the amount is deducted from today's sales.
-          </div>
           <div id="returnItemsList"></div>
         </div>
       </div>
@@ -5587,7 +5584,7 @@ function addToCart(variantId){
   if(existing){
     existing.qty += 1;
   } else {
-    Billing.cart.push({variant_id: variantId, name: product.name, qty: 1, unitPrice: price});
+    Billing.cart.push({variant_id: variantId, name: product.name, qty: 1, unitPrice: price, unit: product.unit || 'pcs'});
     // ---------- پہلے یہاں خودکار پاپ اپ آتا تھا — اب یہ بل بنانے میں رکاوٹ نہیں بنے گا؛ کسٹمر کا پرانا ریکارڈ دیکھنا ہو تو کارٹ میں ہر آئٹم کے ساتھ 🔁 Sale Record بٹن سے مانگے پر دیکھا جا سکتا ہے ----------
   }
 
@@ -5691,7 +5688,8 @@ function addReverseCalcToCart(){
       name: `${productName} (loose) ${resultGrams}g`,
       qty: resultGrams,
       unitPrice: Math.round(pricePerGram * 100) / 100,
-      costPerUnit: Math.round(costPerGram * 100) / 100
+      costPerUnit: Math.round(costPerGram * 100) / 100,
+      unit: 'g'
     });
     // ---------- پہلے یہاں خودکار پاپ اپ آتا تھا — اب مانگے پر ہی کارٹ کے 🔁 Sale Record بٹن سے دکھایا جائے گا ----------
   }
@@ -11321,21 +11319,26 @@ function renderReturnItemModal(invoiceId){
         </div>`;
     }
     const lineTotal = item.qty * item.unitPrice;
+    const unitLabel = item.unit || 'pcs';
     return `
       <div class="profileListRow" style="cursor:default; flex-direction:column; align-items:stretch; gap:8px; border:1px solid #e5e9f0; border-radius:10px; padding:10px; margin-bottom:8px;">
         <label style="display:flex; align-items:center; gap:8px; font-weight:600; cursor:pointer;">
           <input type="checkbox" id="retChk_${idx}" style="width:18px; height:18px; flex-shrink:0;" onchange="toggleReturnRow(${idx})">
           <span style="flex:1;">${item.name}</span>
-          <span class="plMeta" style="font-weight:400;">Sold: ${item.qty} × Rs.${item.unitPrice} = Rs.${lineTotal.toLocaleString()}</span>
+          <span class="plMeta" style="font-weight:400;">Sold: ${item.qty} ${unitLabel} × Rs.${item.unitPrice} = Rs.${lineTotal.toLocaleString()}</span>
         </label>
         <div id="retRowBody_${idx}" style="display:none; gap:8px;">
           <div style="flex:1;">
-            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Return Qty</div>
-            <input type="number" min="1" max="${item.qty}" value="${item.qty}" id="retQty_${idx}" onfocus="this.select()" style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
+            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Return Qty (${unitLabel})</div>
+            <input type="number" min="1" max="${item.qty}" value="${item.qty}" id="retQty_${idx}" onfocus="this.select()" oninput="updateReturnRowTotal(${idx})" style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
           </div>
           <div style="flex:1;">
-            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Refund Amount (Rs.)</div>
-            <input type="number" min="0" value="${lineTotal}" id="retAmt_${idx}" placeholder="Refund amount" onfocus="this.select()" style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
+            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Rate per ${unitLabel} (Rs.)</div>
+            <input type="number" min="0" value="${item.unitPrice}" id="retRate_${idx}" onfocus="this.select()" oninput="updateReturnRowTotal(${idx})" style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px;">
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:11px; color:#8a94a6; margin-bottom:3px;">Total Refund (Rs.)</div>
+            <input type="number" min="0" value="${lineTotal}" id="retAmt_${idx}" readonly style="width:100%; padding:8px; border:1px solid #dbe1ea; border-radius:8px; background:#f7f9fc; font-weight:700; color:var(--primary-dark);">
           </div>
         </div>
       </div>`;
@@ -11365,6 +11368,17 @@ function toggleReturnRow(idx){
   const body = document.getElementById(`retRowBody_${idx}`);
   const chk = document.getElementById(`retChk_${idx}`);
   if(body) body.style.display = (chk && chk.checked) ? 'flex' : 'none';
+}
+
+// ---------- Return Qty یا Rate بدلنے پر Total Refund خودکار دوبارہ حساب کریں (qty × rate) ----------
+function updateReturnRowTotal(idx){
+  const qtyEl = document.getElementById(`retQty_${idx}`);
+  const rateEl = document.getElementById(`retRate_${idx}`);
+  const amtEl = document.getElementById(`retAmt_${idx}`);
+  if(!qtyEl || !rateEl || !amtEl) return;
+  const qty = parseFloat(qtyEl.value) || 0;
+  const rate = parseFloat(rateEl.value) || 0;
+  amtEl.value = Math.round(qty * rate * 100) / 100;
 }
 function confirmBatchReturn(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
@@ -11438,6 +11452,92 @@ function confirmBatchReturn(invoiceId){
   if(typeof renderDashboard === 'function') renderDashboard();
   const methodLabel = method === 'wallet' ? "customer's wallet" : 'cash (deducted from cash in hand)';
   alert(`✅ Returned: ${returnedNames.join(', ')}.\nRs. ${totalRefund.toLocaleString()} refunded via ${methodLabel}. Stock updated and today's sales adjusted.`);
+
+  // ---------- واپسی کی الگ رسید (Return Receipt) بنا کر واٹس ایپ/شیئر کے لیے تیار کر دیں ----------
+  renderReturnReceiptToCanvas(inv, picks, totalRefund, method).then(canvas => {
+    showImageSharePreview(canvas, `Return_${inv.invoice_no.replace(/[#\/]/g,'-')}.png`, 'Return Receipt', `Return receipt for ${inv.invoice_no}`);
+  });
+}
+
+// ---------- واپسی کی الگ، شیئر ایبل رسید — اصل بل نمبر کا حوالہ، واپس ہونے والے آئٹمز (مقدار × ریٹ)، کل رقم اور طریقہ ----------
+async function renderReturnReceiptToCanvas(inv, picks, totalRefund, method){
+  const W = 600;
+  const rowH = 34;
+  const headerH = 175;
+  const footerH = 90;
+  const H = headerH + picks.length * rowH + footerH;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W / 2;
+  let y = 42;
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#0f172a';
+  ctx.font = "800 20px Poppins, sans-serif";
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', cx, y);
+  y += 32;
+
+  ctx.fillStyle = '#fee2e2';
+  ctx.fillRect(0, y - 24, W, 46);
+  ctx.fillStyle = '#dc2626';
+  ctx.font = "900 24px Poppins, sans-serif";
+  ctx.fillText('↩ RETURN RECEIPT', cx, y + 7);
+  y += 50;
+
+  ctx.fillStyle = '#334155';
+  ctx.font = "600 13px Poppins, sans-serif";
+  ctx.fillText(`Original Bill: ${inv.invoice_no}`, cx, y);
+  y += 20;
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}`, cx, y);
+  y += 26;
+
+  ctx.textAlign = 'left';
+  ctx.font = "700 11px Poppins, sans-serif";
+  ctx.fillStyle = '#64748b';
+  ctx.fillText('ITEM', 20, y);
+  ctx.textAlign = 'right';
+  ctx.fillText('QTY', W - 260, y);
+  ctx.fillText('RATE', W - 160, y);
+  ctx.fillText('AMOUNT', W - 20, y);
+  y += 12;
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W - 20, y); ctx.stroke();
+  y += 24;
+
+  ctx.font = "600 13px Poppins, sans-serif";
+  picks.forEach(({item, qty, amount}) => {
+    const rate = qty > 0 ? Math.round((amount / qty) * 100) / 100 : 0;
+    const unitLabel = item.unit || 'pcs';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText(item.name.length > 24 ? item.name.slice(0, 22) + '…' : item.name, 20, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${qty} ${unitLabel}`, W - 260, y);
+    ctx.fillText(`${rate}`, W - 160, y);
+    ctx.fillText(`Rs.${amount.toLocaleString()}`, W - 20, y);
+    y += rowH;
+  });
+
+  y += 4;
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W - 20, y); ctx.stroke();
+  y += 34;
+
+  ctx.textAlign = 'right';
+  ctx.font = "900 19px Poppins, sans-serif";
+  ctx.fillStyle = '#dc2626';
+  ctx.fillText(`Total Refund: Rs. ${totalRefund.toLocaleString()}`, W - 20, y);
+  y += 24;
+  ctx.font = "600 12.5px Poppins, sans-serif";
+  ctx.fillStyle = '#334155';
+  ctx.fillText(`Refunded via: ${method === 'wallet' ? 'Customer Wallet' : 'Cash'}`, W - 20, y);
+
+  return canvas;
 }
 
 /* =====================================================================
@@ -13144,7 +13244,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
   const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
   const rowH = 24, headerH = 22;
-  const tableH = headerH + (invoice.items.length * rowH);
+  const returnedNoteExtra = 14; // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
+  const returnedItemsCount = invoice.items.filter(it => (it.returnQty || 0) > 0).length;
+  const tableH = headerH + (invoice.items.length * rowH) + (returnedItemsCount * returnedNoteExtra);
 
   // ---------- کل اونچائی پہلے سے حساب لگائیں — canvas.width/height صرف ایک بار سیٹ ہوں ----------
   // (پہلے یہ درمیان میں بار بار بدلتے تھے جو کچھ Android WebView ورژنز میں پینٹنگ خراب کر دیتا ہے)
@@ -13158,6 +13260,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(invoice.discount && invoice.discount > 0) estimatedHeight += 44;
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
   }
+  const totalReturnedAmt = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
+  if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += 34; // Grand Total لائن
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
   const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
@@ -13271,6 +13375,12 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.fillStyle = '#000';
     }
 
+    // ---------- کچھ یا سارا Item واپس ہو چکا ہو تو باقی ماندہ مقدار/رقم دکھائیں، اصل (فروخت شدہ) رقم نہیں —
+    // ورنہ Grand Total اور اس لائن کے ٹوٹل میں تضاد نظر آتا ہے (مثلاً یہاں 80 مگر Grand Total میں 0) ----------
+    const returnedQty = item.returnQty || 0;
+    const remainingQty = Math.max(0, item.qty - returnedQty);
+    const isFullyReturned = returnedQty > 0 && remainingQty === 0;
+
     let displayName = (isHighlighted ? '👉 ' : '') + item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){
@@ -13278,16 +13388,28 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     }
     if(displayName !== ((isHighlighted ? '👉 ' : '') + item.name)) displayName = displayName.trim() + '…';
 
+    ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = 'left';
     ctx.fillText(displayName, colX[1] + 4, rowBaseline);
     ctx.textAlign = 'right';
-    ctx.fillText(String(item.qty), colX[3] - 4, rowBaseline);
+    ctx.fillText(String(remainingQty), colX[3] - 4, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), colX[4] - 4, rowBaseline);
-    ctx.fillText((item.qty*item.unitPrice).toFixed(0), colX[5] - 4, rowBaseline);
+    ctx.fillText((remainingQty*item.unitPrice).toFixed(0), colX[5] - 4, rowBaseline);
+    ctx.fillStyle = '#000';
 
     hLineY += rowH;
+    // ---------- واپس شدہ مقدار کا نوٹ — آئٹم کے نیچے مدہم چھوٹی لائن میں، اس کے لیے اضافی جگہ پہلے سے شمار کی جا چکی ہے ----------
+    if(returnedQty > 0){
+      ctx.font = F('11px');
+      ctx.fillStyle = '#9ca3af';
+      ctx.textAlign = 'left';
+      ctx.fillText(`↩ ${returnedQty} Returned`, colX[1] + 4, hLineY + 10);
+      ctx.fillStyle = '#000';
+      ctx.font = F('bold 14px');
+      hLineY += returnedNoteExtra;
+    }
     drawTableHLine(hLineY); // ---------- ہر آئٹم کے بعد افقی لائن — ہر ڈبہ مکمل بند ----------
   });
 
@@ -13306,6 +13428,19 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.font = F('14px');
       ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), pxWidth-10, y); y += 20;
     }
+  }
+
+  // ---------- کوئی Item واپس ہوا ہو تو اصل بل کی رقم اور واپسی کی رقم الگ الگ دکھائیں، تاکہ Grand Total کیوں کم ہوا یہ صاف نظر آئے ----------
+  if(totalReturnedAmt > 0){
+    const alreadyShowedSubtotal = !invoice.customer_id && invoice.discount && invoice.discount > 0;
+    if(!alreadyShowedSubtotal){
+      const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+      ctx.font = F('14px');
+      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(0), pxWidth-10, y); y += 20;
+    }
+    ctx.fillStyle = '#dc2626';
+    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(0), pxWidth-10, y); y += 24;
+    ctx.fillStyle = '#000';
   }
 
   ctx.font = F('bold 20px');
@@ -13389,7 +13524,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
   const colX = [tableLeft, tableLeft+noW, tableLeft+noW+itemW, tableLeft+noW+itemW+qtyW, tableLeft+noW+itemW+qtyW+priceW, tableRight];
   const headerRowH = 34, rowH = 32;
-  const tableH = headerRowH + (invoice.items.length * rowH);
+  const returnedNoteExtraA4 = 18; // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
+  const returnedItemsCountA4 = invoice.items.filter(it => (it.returnQty || 0) > 0).length;
+  const tableH = headerRowH + (invoice.items.length * rowH) + (returnedItemsCountA4 * returnedNoteExtraA4);
 
   // ---------- کل اونچائی کا اندازہ ----------
   let estimatedHeight = 120 /*رنگین ہیڈر بینڈ*/ + 30 /*گیپ*/ + 80 /*انوائس ڈیٹیلز باکس*/ + 20 + tableH + 30;
@@ -13397,6 +13534,8 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     if(invoice.discount && invoice.discount > 0) estimatedHeight += 50;
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 26;
   }
+  const totalReturnedAmtA4 = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
+  if(totalReturnedAmtA4 > 0) estimatedHeight += 56; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += 60; // Grand Total باکس
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
@@ -13497,19 +13636,35 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.fillStyle = '#1a1a1a';
     const rowBaseline = hLineY + rowH - 11;
 
+    // ---------- کچھ یا سارا Item واپس ہو چکا ہو تو باقی ماندہ مقدار/رقم دکھائیں ----------
+    const returnedQtyA4 = item.returnQty || 0;
+    const remainingQtyA4 = Math.max(0, item.qty - returnedQtyA4);
+    const isFullyReturnedA4 = returnedQtyA4 > 0 && remainingQtyA4 === 0;
+
     let displayName = (isHighlighted ? '👉 ' : '') + item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0, -1); }
     if(displayName !== ((isHighlighted ? '👉 ' : '') + item.name)) displayName = displayName.trim() + '…';
 
+    if(isFullyReturnedA4) ctx.fillStyle = '#9ca3af';
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = 'left';   ctx.fillText(displayName, colX[1] + 10, rowBaseline);
     ctx.textAlign = 'right';
-    ctx.fillText(String(item.qty), colX[3] - 10, rowBaseline);
+    ctx.fillText(String(remainingQtyA4), colX[3] - 10, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), colX[4] - 10, rowBaseline);
-    ctx.fillText((item.qty*item.unitPrice).toFixed(0), colX[5] - 10, rowBaseline);
+    ctx.fillText((remainingQtyA4*item.unitPrice).toFixed(0), colX[5] - 10, rowBaseline);
+    ctx.fillStyle = '#1a1a1a';
 
     hLineY += rowH;
+    if(returnedQtyA4 > 0){
+      ctx.font = `italic 12px ${fontFam}`;
+      ctx.fillStyle = '#9ca3af';
+      ctx.textAlign = 'left';
+      ctx.fillText(`↩ ${returnedQtyA4} Returned`, colX[1] + 10, hLineY + 13);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `13px ${fontFam}`;
+      hLineY += returnedNoteExtraA4;
+    }
     drawTHLine(hLineY);
   });
 
@@ -13528,6 +13683,19 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
       ctx.font = `14px ${fontFam}`;
       ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), tableRight - 10, y); y += 26;
     }
+  }
+
+  // ---------- کوئی Item واپس ہوا ہو تو اصل بل کی رقم اور واپسی کی رقم الگ الگ دکھائیں ----------
+  if(totalReturnedAmtA4 > 0){
+    const alreadyShowedSubtotalA4 = !invoice.customer_id && invoice.discount && invoice.discount > 0;
+    if(!alreadyShowedSubtotalA4){
+      const originalSubtotalA4 = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+      ctx.font = `14px ${fontFam}`;
+      ctx.fillText('Subtotal: Rs. ' + originalSubtotalA4.toFixed(0), tableRight - 10, y); y += 24;
+    }
+    ctx.fillStyle = '#dc2626';
+    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmtA4.toFixed(0), tableRight - 10, y); y += 26;
+    ctx.fillStyle = '#1a1a1a';
   }
 
   // ---------- Grand Total — رنگین ہائی لائٹ باکس ----------
