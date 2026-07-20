@@ -15,7 +15,7 @@
 <!-- ---------- Google Fonts (7 پیارے انگلش فونٹس — صرف ہلکے وزن، ایپ کو بھاری نہیں کرتے) ---------- -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&family=Nunito:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Manrope:wght@400;600;700&family=Comfortaa:wght@400;600;700&family=Rubik:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&family=Nunito:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Manrope:wght@400;600;700&family=Comfortaa:wght@400;600;700&family=Rubik:wght@400;600;700&family=Archivo+Black&family=Anton&family=Bebas+Neue&family=Fjalla+One&display=swap" rel="stylesheet">
 <style>
   /* ===================== THEME VARIABLES (بعد میں Theme Selector یہاں تبدیل کرے گا) ===================== */
   :root{
@@ -3183,15 +3183,15 @@
         <div class="previewStyleControls">
           <div class="pscRow">
             <span class="pscLabel">🔠 Text</span>
-            <button onclick="adjustPreviewStyle('printFontScale', -5, 70, 150)">A−</button>
+            <button onclick="adjustPreviewStyle('printFontScale', -5, 70, 260)">A−</button>
             <span class="pscValue" id="pscFontScaleVal">100%</span>
-            <button onclick="adjustPreviewStyle('printFontScale', 5, 70, 150)">A+</button>
+            <button onclick="adjustPreviewStyle('printFontScale', 5, 70, 260)">A+</button>
           </div>
           <div class="pscRow">
             <span class="pscLabel">↕ Row</span>
-            <button onclick="adjustPreviewStyle('printRowScale', -10, 70, 150)">−</button>
+            <button onclick="adjustPreviewStyle('printRowScale', -10, 70, 220)">−</button>
             <span class="pscValue" id="pscRowScaleVal">100%</span>
-            <button onclick="adjustPreviewStyle('printRowScale', 10, 70, 150)">+</button>
+            <button onclick="adjustPreviewStyle('printRowScale', 10, 70, 220)">+</button>
           </div>
           <div class="pscRow">
             <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁 Bold</button>
@@ -3200,6 +3200,16 @@
           <div class="pscRow">
             <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅ Left</button>
             <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔ Center</button>
+          </div>
+          <div class="pscRow">
+            <span class="pscLabel">.00 Decimals</span>
+            <button onclick="adjustPreviewStyle('priceDecimals', -1, 0, 4)">−</button>
+            <span class="pscValue" id="pscDecimalsVal">0</span>
+            <button onclick="adjustPreviewStyle('priceDecimals', 1, 0, 4)">+</button>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🅰️ Font</span>
+            <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
           </div>
         </div>
 
@@ -4204,6 +4214,8 @@ const DEFAULT_SETTINGS = {
   printRowScale: 100,            // 70–150 (%) — آئٹمز ٹیبل کی ہر لائن کی اونچائی (↕ Row)
   printBoldItems: true,          // آئٹم کے نام بولڈ ہوں یا باریک (Thin)
   printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
+  printFontId: 'segoe',           // پرنٹ کے لیے مخصوص فونٹ سٹائل — عام ایپ کے فونٹ سے الگ، صرف رسید پر اثر انداز
+  priceDecimals: 0,               // قیمتوں کے بعد کتنے ڈیسیمل پوائنٹ دکھائیں (کریانہ/میڈیکل جیسے کاروبار کے لیے)
 };
 const AppState = {
   currentUser: null,
@@ -13657,7 +13669,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // وہ صرف پکسلز چھاپتا ہے، بالکل ویسے ہی جیسے اسکرین پر نظر آتے ہیں۔
   // صرف نستعلیق کا استثناء ہے: اس کا پیچیدہ عمودی اسٹرکچر چھوٹے تھرمل ڈاٹس پر دھندلا سکتا ہے، اس لیے
   // نستعلیق منتخب ہونے پر پرنٹ خودکار طور پر صاف Arial پر چلا جاتا ہے (باقی سب فونٹ جوں کے توں پرنٹ ہوں گے)۔
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.fontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
   // ---------- Settings کے "🔠 Print Text Size" سلائیڈر کے مطابق — پورے بل کی لکھائی کا سائز اسی تناسب سے بڑا/چھوٹا ہوتا ہے ----------
   const fscale = (AppState.settings.printFontScale || 100) / 100;
@@ -13738,6 +13750,11 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
   const itemAlign = AppState.settings.printItemAlign === 'center' ? 'center' : 'left';
   const itemNameX = itemAlign === 'center' ? (colX[1] + colX[2]) / 2 : colX[1] + 4;
+  const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
+  // ---------- Center منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم کے وسط میں آ جائیں، ورنہ ہمیشہ کی طرح دائیں طرف ----------
+  const qtyX = itemAlign === 'center' ? (colX[2] + colX[3]) / 2 : colX[3] - 4;
+  const priceX = itemAlign === 'center' ? (colX[3] + colX[4]) / 2 : colX[4] - 4;
+  const totalX = itemAlign === 'center' ? (colX[4] + colX[5]) / 2 : colX[5] - 4;
   ctx.font = F(itemFontWeight + '14px');
   const maxItemWidth = itemW - 8;
   printItems.forEach((item, idx) => {
@@ -13768,10 +13785,10 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.fillText(displayName, itemNameX, rowBaseline);
-    ctx.textAlign = 'right';
-    ctx.fillText(String(remainingQty), colX[3] - 4, rowBaseline);
-    ctx.fillText(item.unitPrice.toFixed(0), colX[4] - 4, rowBaseline);
-    ctx.fillText((remainingQty*item.unitPrice).toFixed(0), colX[5] - 4, rowBaseline);
+    ctx.textAlign = itemAlign === 'center' ? 'center' : 'right';
+    ctx.fillText(String(remainingQty), qtyX, rowBaseline);
+    ctx.fillText(item.unitPrice.toFixed(decimals), priceX, rowBaseline);
+    ctx.fillText((remainingQty*item.unitPrice).toFixed(decimals), totalX, rowBaseline);
     ctx.fillStyle = '#000';
 
     hLineY += rowH;
@@ -13796,12 +13813,12 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(invoice.discount && invoice.discount > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), pxWidth-10, y); y += 20;
-      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), pxWidth-10, y); y += 24;
+      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(decimals), pxWidth-10, y); y += 20;
+      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(decimals), pxWidth-10, y); y += 24;
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
-      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), pxWidth-10, y); y += 20;
+      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), pxWidth-10, y); y += 20;
     }
   }
 
@@ -13811,15 +13828,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(!alreadyShowedSubtotal){
       const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(0), pxWidth-10, y); y += 20;
+      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(decimals), pxWidth-10, y); y += 20;
     }
     ctx.fillStyle = '#dc2626';
-    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(0), pxWidth-10, y); y += 24;
+    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(decimals), pxWidth-10, y); y += 24;
     ctx.fillStyle = '#000';
   }
 
   ctx.font = F('bold 20px');
-  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(0), pxWidth-10, y);
+  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), pxWidth-10, y);
   y += 34;
 
   // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ — سب ایک باکس میں ----------
@@ -13926,7 +13943,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, estimatedHeight);
 
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.fontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
   try{
     await document.fonts.load(`bold 30px ${fontFam}`);
@@ -14166,11 +14183,28 @@ function syncPreviewStyleControls(){
   const align = AppState.settings.printItemAlign || 'left';
   document.getElementById('pscAlignLeftBtn').classList.toggle('active', align === 'left');
   document.getElementById('pscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('pscDecimalsVal').textContent = AppState.settings.priceDecimals ?? 0;
+
+  const fontSelect = document.getElementById('pscFontFamilySelect');
+  if(fontSelect){
+    if(!fontSelect.dataset.filled){
+      fontSelect.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+      fontSelect.dataset.filled = '1';
+    }
+    fontSelect.value = AppState.settings.printFontId || 'segoe';
+  }
+}
+
+// ---------- پرنٹ کے لیے فونٹ سٹائل — یہ صرف رسید پر لاگو ہوتا ہے، پوری ایپ کا فونٹ نہیں بدلتا ----------
+function setPreviewFontFamily(fontId){
+  AppState.settings.printFontId = fontId;
+  persistAllData();
+  rerenderInvoicePreview();
 }
 
 // ---------- 🔠 Text اور ↕ Row کے +/- بٹن — دونوں ایک ہی فنکشن سے، بس setting کی چابی اور حد الگ ----------
 function adjustPreviewStyle(settingKey, delta, min, max){
-  const current = AppState.settings[settingKey] || 100;
+  const current = AppState.settings[settingKey] ?? 100;
   const next = Math.max(min, Math.min(max, current + delta));
   AppState.settings[settingKey] = next;
   persistAllData();
@@ -14393,6 +14427,12 @@ const FONT_PRESETS = [
   {id:'tahoma',     label:'Classic',  family:"Tahoma, Geneva, sans-serif"},
   {id:'verdana',    label:'Wide',  family:"Verdana, Geneva, sans-serif"},
   {id:'trebuchet',  label:'Modern',   family:"'Trebuchet MS', sans-serif"},
+  {id:'arial',      label:'Arial', family:"Arial, Helvetica, sans-serif"},
+  {id:'arialblack', label:'Arial Black', family:"'Arial Black', Arial, sans-serif"},
+  {id:'arialnarrow',label:'Arial Narrow', family:"'Arial Narrow', Arial, sans-serif"},
+  {id:'timesnr',    label:'Times New Roman', family:"'Times New Roman', Times, serif"},
+  {id:'georgia',    label:'Georgia', family:"Georgia, serif"},
+  {id:'couriernew', label:'Courier New', family:"'Courier New', Courier, monospace"},
   // ---------- 7 پیارے گوگل فونٹس — CDN سے، ہلکے (صرف 400/600/700 ویٹ) ----------
   {id:'poppins',    label:'Poppins',   family:"'Poppins', sans-serif"},
   {id:'inter',      label:'Inter',     family:"'Inter', sans-serif"},
@@ -14401,6 +14441,12 @@ const FONT_PRESETS = [
   {id:'manrope',    label:'Manrope',   family:"'Manrope', sans-serif"},
   {id:'comfortaa',  label:'Comfortaa', family:"'Comfortaa', sans-serif"},
   {id:'rubik',      label:'Rubik',     family:"'Rubik', sans-serif"},
+  // ---------- 💪 اصل موٹے/بولڈ ڈسپلے فونٹس — یہ اپنی ڈیزائن سے ہی بولڈ ہیں (صرف ایک ہی، بھاری وزن میں بنتے ہیں)،
+  // اس لیے باقی سب سے صاف الگ اور نمایاں نظر آتے ہیں، دور سے بھی فرق پتا چلے ----------
+  {id:'archivoblack', label:'💪 Archivo Black', family:"'Archivo Black', sans-serif"},
+  {id:'anton',         label:'💪 Anton (سب سے موٹا)', family:"'Anton', sans-serif"},
+  {id:'bebasneue',     label:'💪 Bebas Neue (لمبے بڑے حروف)', family:"'Bebas Neue', sans-serif"},
+  {id:'fjallaone',     label:'💪 Fjalla One', family:"'Fjalla One', sans-serif"},
   {id:'nastaleeq',  label:'✒️ Noori Nastaleeq', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
 ];
 
