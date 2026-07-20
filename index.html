@@ -214,17 +214,7 @@
 
   /* --- Sidebar --- */
   #sidebar{background:var(--primary-dark); color:#fff; display:flex; flex-direction:column; padding:16px 0;}
-  /* --- 🔍 یونیورسل سرچ بار (سائیڈبار میں سب سے اوپر) --- */
-  .appSearchWrap{padding:0 16px 12px; position:relative;}
-  .appSearchWrap input{
-    width:100%; padding:10px 12px; border:none; border-radius:10px; font-size:13px;
-    background:rgba(255,255,255,.14); color:#fff;
-  }
-  .appSearchWrap input::placeholder{color:rgba(255,255,255,.65);}
-  .appSearchWrap input:focus{outline:2px solid rgba(255,255,255,.4); background:rgba(255,255,255,.2);}
-  #appSearchResults{display:none; position:absolute; left:16px; right:16px; top:calc(100% - 6px); z-index:50;
-    background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.35); max-height:340px; overflow-y:auto;}
-  #appSearchResults.show{display:block;}
+  /* --- 🔍 یونیورسل سرچ کے نتائج کی قطاریں — استعمال ہوتی ہیں #globalSearchBar کے اندر (نیچے دیکھیں) --- */
   .appSearchRow{display:flex; flex-direction:column; gap:2px; padding:10px 14px; cursor:pointer; border-bottom:1px solid #f1f4f8; text-align:left;}
   .appSearchRow:last-child{border-bottom:none;}
   .appSearchRow:active{background:#f7f9fc;}
@@ -254,6 +244,7 @@
 
   /* --- Mobile topbar + sidebar overlay (بڑی اسکرین پر چھپے رہتے ہیں) --- */
   #mobileTopbar{display:none;}
+  #globalSearchBar{display:none;}
   #sidebarOverlay{display:none;}
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
@@ -1388,7 +1379,7 @@
     input, select, button, textarea{max-width:100%; font-family:inherit;}
 
     /* --- App shell: sidebar اب فکسڈ drawer بن جاتا ہے، مین ایریا پوری چوڑائی لیتا ہے --- */
-    #app{grid-template-columns:1fr; grid-template-rows:56px 1fr; height:100vh;}
+    #app{grid-template-columns:1fr; grid-template-rows:56px auto 1fr; height:100vh;}
 
     #mobileTopbar{
       display:flex; align-items:center; gap:12px; padding:0 16px;
@@ -1407,6 +1398,26 @@
       width:36px; height:36px; border-radius:8px; cursor:pointer;
     }
 
+    /* --- 🔎 App Search — ہمیشہ نظر آنے والی پٹی، Topbar کے بالکل نیچے، ہر سکرین پر ایک جیسی —
+         جامنی/نیلگوں پس منظر تاکہ پراڈکٹ سرچ باکسز (جو سفید ہوتے ہیں) سے کبھی مکس نہ ہو --- */
+    #globalSearchBar{
+      display:flex; align-items:center; gap:8px; padding:8px 14px;
+      background:#312e81; grid-column:1; grid-row:2;
+      position:sticky; top:56px; z-index:590;
+    }
+    #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px;}
+    #globalSearchBar input{
+      flex:1; min-width:0; padding:8px 12px; border:none; border-radius:20px; font-size:12.5px;
+      background:rgba(255,255,255,.16); color:#fff;
+    }
+    #globalSearchBar input::placeholder{color:rgba(255,255,255,.65);}
+    #globalSearchBar input:focus{outline:2px solid rgba(255,255,255,.45); background:rgba(255,255,255,.22);}
+    #globalSearchBar #appSearchResults{
+      display:none; position:absolute; left:14px; right:14px; top:calc(100% + 2px); z-index:591;
+      background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.35); max-height:min(60vh,380px); overflow-y:auto;
+    }
+    #globalSearchBar #appSearchResults.show{display:block;}
+
     #sidebar{
       position:fixed; top:0; right:-260px; bottom:0; width:240px; z-index:800;
       transition:right .25s ease; box-shadow:-4px 0 20px rgba(0,0,0,.2);
@@ -1419,7 +1430,7 @@
     }
     #sidebarOverlay.show{display:block;}
 
-    #mainArea{grid-column:1; grid-row:2; padding:14px; overflow-x:hidden;}
+    #mainArea{grid-column:1; grid-row:3; padding:14px; overflow-x:hidden;}
 
     /* --- Billing screen: سرچ/کارٹ اوپر، چیک آؤٹ نیچے --- */
     .productGridFull{height:calc(100vh - 275px); margin-bottom:80px;}
@@ -1652,18 +1663,20 @@
     <span id="connStatusBadge" class="online">Online</span>
   </div>
 
+  <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
+       پراڈکٹ سرچ باکسز سے بالکل الگ (رنگ/جگہ دونوں مختلف) تاکہ کبھی مکس نہ ہو ---------- -->
+  <div id="globalSearchBar">
+    <span class="gsbIcon">🔎</span>
+    <input type="text" id="appSearchInput" placeholder="App Search — find any screen or setting..." oninput="renderAppSearchResults(this.value)" autocomplete="off">
+    <div id="appSearchResults"></div>
+  </div>
+
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
   <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- ---------- SIDEBAR NAV ---------- -->
   <div id="sidebar">
     <div class="brand">🧾 AIO POS</div>
-
-    <!-- ---------- 🔍 یونیورسل سرچ — پوری ایپ میں کوئی بھی سیٹنگ/سکرین تلاش کریں، ٹیپ کر کے سیدھا وہیں پہنچ جائیں ---------- -->
-    <div class="appSearchWrap">
-      <input type="text" id="appSearchInput" placeholder="🔍 Search settings, screens..." oninput="renderAppSearchResults(this.value)" autocomplete="off">
-      <div id="appSearchResults"></div>
-    </div>
 
     <div class="navItem" data-screen="home" onclick="goTo('home')">🏠 Home</div>
     <div class="navItem" data-screen="billing" onclick="goTo('billing')">🛒 Billing</div>
@@ -4922,10 +4935,6 @@ function acknowledgeRejection(pendingId){
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebarOverlay').classList.toggle('show');
-  // ---------- سائیڈبار کھلتے ہی سرچ باکس خالی/بند کر دیں تاکہ ہر بار تازہ حالت میں کھلے ----------
-  const si = document.getElementById('appSearchInput');
-  if(si) si.value = '';
-  document.getElementById('appSearchResults')?.classList.remove('show');
 }
 function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
@@ -4993,7 +5002,10 @@ function goToAppSearchResult(idx){
   const matches = window.__lastAppSearchMatches || [];
   const item = matches[idx];
   if(!item) return;
-  closeSidebar();
+  // ---------- نتیجہ منتخب کرتے ہی سرچ باکس صاف اور نتائج کی فہرست بند — اگلی بار تازہ حالت میں کھلے ----------
+  const si = document.getElementById('appSearchInput');
+  if(si) si.value = '';
+  document.getElementById('appSearchResults')?.classList.remove('show');
   if(item.action && typeof window[item.action] === 'function'){
     window[item.action]();
   } else if(item.screen){
