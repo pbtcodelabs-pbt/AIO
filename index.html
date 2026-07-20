@@ -1061,6 +1061,13 @@
   /* --- Invoice Preview Modal (Canvas render شدہ نظارہ) --- */
   .invoicePreviewBox{background:#fff; border-radius:var(--radius); padding:0; width:340px; max-height:85vh; overflow-y:auto;}
   .invoicePreviewBox .previewHeader{padding:14px 18px; border-bottom:1px solid #eef1f6; display:flex; justify-content:space-between; align-items:center;}
+  .previewStyleControls{display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #eef1f6;}
+  .pscRow{display:flex; align-items:center; gap:4px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:4px 6px;}
+  .pscLabel{font-size:11px; font-weight:700; color:var(--muted); margin-right:2px;}
+  .pscRow button{border:none; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:12px; padding:4px 9px; border-radius:6px; cursor:pointer;}
+  .pscValue{font-size:11px; font-weight:700; color:var(--text); min-width:32px; text-align:center;}
+  .pscToggleBtn{border:none; background:#fff !important; color:var(--muted) !important; font-weight:600 !important; padding:5px 10px !important; border-radius:6px; cursor:pointer;}
+  .pscToggleBtn.active{background:var(--primary) !important; color:#fff !important;}
   .invoicePreviewBox canvas{width:100%; display:block;}
   .previewActions{display:flex; gap:8px; padding:14px 18px;}
   .previewActions button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;}
@@ -3128,6 +3135,31 @@
           <strong>🖨️ Bill Ready To Print</strong>
           <span style="cursor:pointer;" onclick="closeInvoicePreview()">✖</span>
         </div>
+
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے ---------- -->
+        <div class="previewStyleControls">
+          <div class="pscRow">
+            <span class="pscLabel">🔠 Text</span>
+            <button onclick="adjustPreviewStyle('printFontScale', -5, 70, 150)">A−</button>
+            <span class="pscValue" id="pscFontScaleVal">100%</span>
+            <button onclick="adjustPreviewStyle('printFontScale', 5, 70, 150)">A+</button>
+          </div>
+          <div class="pscRow">
+            <span class="pscLabel">↕ Row</span>
+            <button onclick="adjustPreviewStyle('printRowScale', -10, 70, 150)">−</button>
+            <span class="pscValue" id="pscRowScaleVal">100%</span>
+            <button onclick="adjustPreviewStyle('printRowScale', 10, 70, 150)">+</button>
+          </div>
+          <div class="pscRow">
+            <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁 Bold</button>
+            <button id="pscThinBtn" class="pscToggleBtn" onclick="togglePreviewBold()">Thin</button>
+          </div>
+          <div class="pscRow">
+            <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅ Left</button>
+            <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔ Center</button>
+          </div>
+        </div>
+
         <canvas id="invoiceCanvas"></canvas>
         <div class="previewActions">
           <button class="btnPrint" onclick="printCurrentInvoice()">🖨️ Print</button>
@@ -4054,6 +4086,9 @@ const DEFAULT_SETTINGS = {
   printShowPaymentAccount: false, // فوٹر میں وہ Payment Accounts دکھائیں جن پر "Show on Receipt" ✅ ٹِک ہو
   printShowBranding: false,     // فوٹر میں چھوٹی سی "Powered by AIO POS" لائن
   printFontScale: 100,          // 85–130 (%) — پورے پرنٹ شدہ بل کی لکھائی کا سائز
+  printRowScale: 100,            // 70–150 (%) — آئٹمز ٹیبل کی ہر لائن کی اونچائی (↕ Row)
+  printBoldItems: true,          // آئٹم کے نام بولڈ ہوں یا باریک (Thin)
+  printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
 };
 const AppState = {
   currentUser: null,
@@ -13376,8 +13411,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const tableLeft = 8, tableRight = pxWidth - 8;
   const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
   const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
-  const rowH = 24, headerH = 22;
-  const returnedNoteExtra = 14; // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
+  const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
+  const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
+  const returnedNoteExtra = Math.round(14 * rowScale); // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
   const returnedItemsCount = invoice.items.filter(it => (it.returnQty || 0) > 0).length;
   const tableH = headerH + (invoice.items.length * rowH) + (returnedItemsCount * returnedNoteExtra);
 
@@ -13483,7 +13519,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   // ---------- ہیڈر لائن ----------
   ctx.font = F('bold 13px');
-  const headerBaseline = tableTop + headerH - 7;
+  const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
   ctx.textAlign = 'center';
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
   ctx.textAlign = 'left';
@@ -13496,10 +13532,13 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   drawTableHLine(hLineY);
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
-  ctx.font = F('bold 14px');
+  const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
+  const itemAlign = AppState.settings.printItemAlign === 'center' ? 'center' : 'left';
+  const itemNameX = itemAlign === 'center' ? (colX[1] + colX[2]) / 2 : colX[1] + 4;
+  ctx.font = F(itemFontWeight + '14px');
   const maxItemWidth = itemW - 8;
   printItems.forEach((item, idx) => {
-    const rowBaseline = hLineY + rowH - 7;
+    const rowBaseline = hLineY + rowH - Math.round(7 * rowScale);
     // ---------- 🔁 Sale Record کی فہرست سے یہاں آیا ہو تو وہی آئٹم پیلے رنگ سے ہائی لائٹ کریں ----------
     const isHighlighted = highlightMatchKey && getItemMatchKey(item) === highlightMatchKey;
     if(isHighlighted){
@@ -13524,8 +13563,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
-    ctx.textAlign = 'left';
-    ctx.fillText(displayName, colX[1] + 4, rowBaseline);
+    ctx.textAlign = itemAlign;
+    ctx.fillText(displayName, itemNameX, rowBaseline);
     ctx.textAlign = 'right';
     ctx.fillText(String(remainingQty), colX[3] - 4, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), colX[4] - 4, rowBaseline);
@@ -13540,7 +13579,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.textAlign = 'left';
       ctx.fillText(`↩ ${returnedQty} Returned`, colX[1] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
-      ctx.font = F('bold 14px');
+      ctx.font = F(itemFontWeight + '14px');
       hLineY += returnedNoteExtra;
     }
     drawTableHLine(hLineY); // ---------- ہر آئٹم کے بعد افقی لائن — ہر ڈبہ مکمل بند ----------
@@ -13893,6 +13932,7 @@ function openInvoicePreview(invoiceId, highlightMatchKey){
   if(!inv) return;
   currentPreviewInvoiceId = invoiceId;
   currentPreviewHighlightKey = highlightMatchKey || null;
+  syncPreviewStyleControls();
   // ---------- پہلے modal کو نظر آنے دیں (display:flex)، پھر canvas پر ڈرائنگ کریں ----------
   // وجہ: کچھ Android WebView ورژنز میں اگر canvas ابھی display:none والدین کے اندر ہو تو ڈرائنگ
   // صحیح طرح پینٹ نہیں ہوتی (خالی سفید نظر آتا ہے)۔ requestAnimationFrame کچھ WebViews میں کافی نہیں،
@@ -13903,6 +13943,52 @@ function openInvoicePreview(invoiceId, highlightMatchKey){
     else renderInvoiceToCanvas(inv, AppState.settings.paperWidth, currentPreviewHighlightKey);
   }, 100);
 }
+
+// ---------- پرنٹ پریویو کو موجودہ سیٹنگز کے مطابق دوبارہ کھینچیں — ہر لائیو کنٹرول کے بعد یہی بلایا جاتا ہے ----------
+function rerenderInvoicePreview(){
+  if(!currentPreviewInvoiceId) return;
+  const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
+  if(!inv) return;
+  if(AppState.settings.invoiceStyle === 'a4') renderInvoiceToA4Canvas(inv, currentPreviewHighlightKey);
+  else renderInvoiceToCanvas(inv, AppState.settings.paperWidth, currentPreviewHighlightKey);
+}
+
+// ---------- کنٹرول بٹنوں پر لیبل/ہائی لائٹ کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں، ہر بار پریویو کھلنے پر ----------
+function syncPreviewStyleControls(){
+  document.getElementById('pscFontScaleVal').textContent = (AppState.settings.printFontScale || 100) + '%';
+  document.getElementById('pscRowScaleVal').textContent = (AppState.settings.printRowScale || 100) + '%';
+  const isBold = AppState.settings.printBoldItems !== false;
+  document.getElementById('pscBoldBtn').classList.toggle('active', isBold);
+  document.getElementById('pscThinBtn').classList.toggle('active', !isBold);
+  const align = AppState.settings.printItemAlign || 'left';
+  document.getElementById('pscAlignLeftBtn').classList.toggle('active', align === 'left');
+  document.getElementById('pscAlignCenterBtn').classList.toggle('active', align === 'center');
+}
+
+// ---------- 🔠 Text اور ↕ Row کے +/- بٹن — دونوں ایک ہی فنکشن سے، بس setting کی چابی اور حد الگ ----------
+function adjustPreviewStyle(settingKey, delta, min, max){
+  const current = AppState.settings[settingKey] || 100;
+  const next = Math.max(min, Math.min(max, current + delta));
+  AppState.settings[settingKey] = next;
+  persistAllData();
+  syncPreviewStyleControls();
+  rerenderInvoicePreview();
+}
+
+function togglePreviewBold(){
+  AppState.settings.printBoldItems = !(AppState.settings.printBoldItems !== false);
+  persistAllData();
+  syncPreviewStyleControls();
+  rerenderInvoicePreview();
+}
+
+function setPreviewAlign(align){
+  AppState.settings.printItemAlign = align;
+  persistAllData();
+  syncPreviewStyleControls();
+  rerenderInvoicePreview();
+}
+
 function closeInvoicePreview(){
   document.getElementById('invoicePreviewModal').classList.remove('show');
   currentPreviewInvoiceId = null;
