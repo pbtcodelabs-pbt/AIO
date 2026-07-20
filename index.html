@@ -2259,6 +2259,7 @@
                 <button id="shapeCircle" class="shapeToggleBtn" onclick="setPhotoShape('circle')">⚪ Circle</button>
               </div>
               <button id="enhanceToggle" class="shapeToggleBtn" onclick="togglePhotoEnhance()" style="flex:1;">✨ Enhance</button>
+              <button id="switchCameraBtn" class="shapeToggleBtn" onclick="switchCameraFacing()" style="flex:0 0 46px;" title="Switch front/back camera">🔄</button>
             </div>
             <div id="photoLivePreviewWrap" style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.06); border-radius:8px; padding:6px 8px;">
               <div id="photoLivePreviewCard" class="photoLivePreviewCard">
@@ -7219,6 +7220,7 @@ let capturedPhotoDataUrl = null;
 let photoShape = 'rect';
 let photoEnhance = false;
 let photoCaptureMode = 'item'; // 'item' = پراڈکٹ ویریئنٹ فوٹو | 'party' = کسٹمر/سپلائر پروفائل فوٹو
+let currentCameraFacing = 'environment'; // ---------- 'user' = سامنے (سیلفی) | 'environment' = پیچھے — 🔄 بٹن سے دستی تبدیلی کے لیے یاد رکھا جاتا ہے ----------
 let liveCameraAvailable = false; // اندرونی صفحے کا لائیو کیمرہ چل رہا ہے یا نہیں — نہ چلے تو Capture بٹن خودکار فون کا اصل کیمرہ ایپ کھولے گا
 let staticPhotoLoaded = false; // گیلری/فون کیمرہ سے آئی جامد (static) تصویر ابھی ایڈٹ اسکرین میں لوڈ ہے (کراپ/برائٹنس/شکل ابھی بھی سب کام کریں گے)
 
@@ -7452,11 +7454,13 @@ async function startPhotoCapture(mode, defaultShape, title){
   }
 
   try{
-    // ---------- عام طور پر پیچھے والا کیمرہ (پراڈکٹ وغیرہ کے لیے بہتر)، لیکن بندے کی اپنی تصویر (Party/Payment Account) کے لیے سامنے والا (سیلفی) کیمرہ ترجیح دیں ----------
+    // ---------- عام طور پر پیچھے والا کیمرہ (پراڈکٹ وغیرہ کے لیے بہتر)، لیکن بندے کی اپنی تصویر (Party/Payment Account) کے لیے سامنے والا (سیلفی) کیمرہ ترجیح دیں —
+    // یوزر 🔄 بٹن سے کسی بھی وقت دستی طور پر بدل سکتا ہے، وہی انتخاب یاد رکھا جاتا ہے ----------
     const preferFront = (photoCaptureMode === 'party' || photoCaptureMode === 'paymentaccount' || photoCaptureMode === 'paymentaccount-edit');
+    currentCameraFacing = preferFront ? 'user' : 'environment';
     let stream;
     try{
-      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal: preferFront ? 'user' : 'environment'}}});
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal: currentCameraFacing}}});
     } catch(innerErr){
       stream = await navigator.mediaDevices.getUserMedia({video:true});
     }
@@ -7853,6 +7857,45 @@ function stopItemPhotoStream(){
   if(itemPhotoStream){ itemPhotoStream.getTracks().forEach(t => t.stop()); itemPhotoStream = null; }
   itemPhotoTrack = null;
 }
+
+// ---------- 🔄 بٹن — کسی بھی وقت سامنے/پیچھے کیمرہ میں دستی تبدیلی (ہر موڈ کی ڈیفالٹ ترجیح کے باوجود) ----------
+async function switchCameraFacing(){
+  if(!liveCameraAvailable) return; // ---------- لائیو کیمرہ چل ہی نہیں رہا تو کچھ بدلنے کو نہیں ----------
+  const statusText = document.getElementById('cameraStatusText');
+  const captureBtn = document.getElementById('captureBtnMain');
+  currentCameraFacing = (currentCameraFacing === 'user') ? 'environment' : 'user';
+
+  stopItemPhotoStream();
+  liveCameraAvailable = false;
+  captureBtn.disabled = true;
+  statusText.style.display = 'block';
+  statusText.style.color = '#fbbf24';
+  statusText.textContent = '⏳ Switching camera…';
+
+  try{
+    let stream;
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal: currentCameraFacing}}});
+    } catch(innerErr){
+      stream = await navigator.mediaDevices.getUserMedia({video:true});
+    }
+    itemPhotoStream = stream;
+    const video = document.getElementById('itemPhotoVideo');
+    video.srcObject = itemPhotoStream;
+    itemPhotoTrack = itemPhotoStream.getVideoTracks()[0];
+    video.onloadedmetadata = () => {
+      liveCameraAvailable = true;
+      captureBtn.disabled = false;
+      captureBtn.textContent = '📸 Capture';
+      statusText.style.display = 'none';
+      startLivePreviewLoop();
+    };
+  }catch(e){
+    statusText.style.color = '#fca5a5';
+    statusText.textContent = '❌ Could not switch camera on this device.';
+  }
+}
+
 function closeItemPhotoCapture(){
   stopItemPhotoStream();
   staticPhotoLoaded = false;
