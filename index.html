@@ -815,7 +815,18 @@
   .expDaySeparator{font-size:11px; font-weight:700; color:var(--muted); margin:14px 0 6px; text-transform:uppercase; letter-spacing:.03em;}
   .expDaySeparator:first-child{margin-top:0;}
 
-  /* --- 🧮 Stock Adjustment screen --- */
+  /* --- 🧑‍🤝‍🧑 بلنگ کا نیا کسٹمر پکر — باریک نام + سبز (والٹ) / سرخ (بقایہ) چھوٹی گولیاں، پرانی موٹی نیٹو ڈراپ ڈاؤن لسٹ کی جگہ --- */
+  .custPickList{max-height:168px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; background:#fff;}
+  .custPickRow{display:flex; align-items:center; gap:6px; padding:7px 10px; cursor:pointer; border-bottom:1px solid #f1f4f8; font-size:12px; font-weight:400; color:var(--text);}
+  .custPickRow:last-child{border-bottom:none;}
+  .custPickRow:active{background:#f7f9fc;}
+  .custPickRow.selected{background:#eef2ff;}
+  .custPickRow .custPickName{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .custPickRow .custPickArea{color:var(--muted); font-size:10.5px; margin-left:2px;}
+  .custBalancePill{flex:0 0 auto; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:99px; white-space:nowrap;}
+  .custBalancePill.pillWallet{background:#dcfce7; color:#166534;}
+  .custBalancePill.pillDue{background:#fee2e2; color:#991b1b;}
+  .custPickEmpty{padding:12px; text-align:center; color:#94a3b8; font-size:12px;}
   .stockAdjFilterBar{display:flex; gap:8px; margin-bottom:12px;}
   .stockAdjFilterBar select{flex:1; padding:8px 6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; background:#fff; color:var(--text);}
   .stockAdjHeaderRow{display:flex; gap:8px; padding:0 12px 6px; font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
@@ -1789,10 +1800,11 @@
             </select>
           </div>
           <div style="display:flex; gap:8px;">
-            <select class="custSelect" id="customerSelect" style="margin-bottom:0; flex:1 1 auto;" onchange="onCustomerChange()">
+            <select class="custSelect" id="customerSelect" style="display:none;" onchange="onCustomerChange()">
               <option value="">— Select Customer —</option>
-              <!-- JS سے فلٹر شدہ customer list یہاں لوڈ ہوگی -->
+              <!-- یہ اب پوشیدہ ہے — صرف موجودہ منتخب کسٹمر کی ID رکھنے کے لیے، باقی سب کوڈ اسی سے پڑھتا ہے -->
             </select>
+            <div id="customerSelectListWrap" class="custPickList" style="flex:1 1 auto;"></div>
             <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
                     style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
           </div>
@@ -11945,6 +11957,7 @@ function populateCustomerDropdown(){
 // ہزاروں کسٹمرز میں سے مطلوبہ کسٹمر جلدی ڈھونڈنے کے لیے (پورا صفحہ اسکرول نہ کرنا پڑے) ----------
 function filterCustomerSelectOptions(){
   const sel = document.getElementById('customerSelect');
+  const listWrap = document.getElementById('customerSelectListWrap');
   if(!sel) return;
   const prevValue = sel.value;
   const searchText = (document.getElementById('custSearchInput')?.value || '').trim().toLowerCase();
@@ -11959,12 +11972,43 @@ function filterCustomerSelectOptions(){
     );
   }
 
+  // ---------- پوشیدہ select — باقی سارا کوڈ اسی کی value پڑھتا ہے، اسے تبدیل کرنے کی ضرورت نہیں ----------
   sel.innerHTML = '<option value="">— Select Customer —</option>' + list.map(c =>
     `<option value="${c.customer_id}">${c.name}${c.area ? ' — ' + c.area : ''}${c.wallet_balance ? ' (Wallet: Rs.' + c.wallet_balance + ')' : ''}</option>`
   ).join('');
 
   // ---------- پہلے سے منتخب کسٹمر اگر اب بھی فلٹر شدہ لسٹ میں موجود ہو تو اسے منتخب ہی رہنے دیں ----------
   sel.value = (prevValue && list.some(c => c.customer_id == prevValue)) ? prevValue : '';
+
+  // ---------- نئی، باریک نام والی لسٹ — سبز گولی (والٹ ہمارے پاس، ہم نے دینے ہیں) اور سرخ گولی (بقایہ، ہم نے لینے ہیں)، دونوں ایک ساتھ بھی نظر آ سکتی ہیں ----------
+  if(listWrap){
+    if(list.length === 0){
+      listWrap.innerHTML = '<div class="custPickEmpty">No customers found</div>';
+    } else {
+      listWrap.innerHTML = list.map(c => {
+        const isSelected = String(c.customer_id) === String(sel.value);
+        const walletAmt = c.wallet_balance || 0;
+        const dueAmt = c.total_receivable || 0;
+        const pills = [];
+        if(walletAmt > 0) pills.push(`<span class="custBalancePill pillWallet">💰 Rs.${walletAmt.toLocaleString()}</span>`);
+        if(dueAmt > 0) pills.push(`<span class="custBalancePill pillDue">Due Rs.${dueAmt.toLocaleString()}</span>`);
+        return `
+          <div class="custPickRow ${isSelected ? 'selected' : ''}" onclick="selectCustomerFromList(${c.customer_id})">
+            <span class="custPickName">${c.name}${c.area ? `<span class="custPickArea">— ${c.area}</span>` : ''}</span>
+            ${pills.join('')}
+          </div>`;
+      }).join('');
+    }
+  }
+}
+
+// ---------- نئی کسٹمر لسٹ میں سے کسی نام پر ٹیپ — بالکل وہی رویہ جو نیٹو select کے onchange پر ہوتا تھا ----------
+function selectCustomerFromList(customerId){
+  const sel = document.getElementById('customerSelect');
+  if(!sel) return;
+  sel.value = customerId;
+  onCustomerChange();
+  filterCustomerSelectOptions(); // ---------- منتخب لائن کو ہائی لائٹ کرنے کے لیے لسٹ دوبارہ بنائیں ----------
 }
 
 /* =====================================================================
