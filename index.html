@@ -3415,6 +3415,8 @@
         <div class="settingsCard">
           <h3>💾 Backup Your Data</h3>
           <div class="settingsHint">Since opening this file directly in Chrome doesn't reliably auto-save between sessions, use this instead: tap "Export" before closing the app to download a backup file, then tap "Import" next time you open the app to bring everything back.</div>
+          <div class="settingsHint" style="background:#fff7ed; color:#9a3412;">📁 Backups always save to your phone's <b>Downloads</b> folder — Android/Chrome doesn't let a web app choose a different folder automatically. To avoid confusion, always open this app from the <b>same one link</b> (your GitHub Pages URL), and check "Last Backup" below before closing the app.</div>
+          <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
           <div class="backupBtnGrid">
             <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
               <span class="backupBtnIcon">⬇️</span>
@@ -3906,6 +3908,11 @@ function exportBackupData(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+
+  // ---------- آخری بیک اپ کب اور کس نام سے لیا گیا — Settings میں ہمیشہ صاف نظر آئے تاکہ صحیح فائل پہچاننا آسان ہو ----------
+  AppState.settings.lastBackupFileName = fileName;
+  AppState.settings.lastBackupAt = new Date().toISOString();
+  persistAllData();
 
   showBackupConfirmModal('export', fileName, {
     products: productsData.length, customers: customersData.length, invoices: invoicesData.length
@@ -4490,18 +4497,6 @@ async function login(){
   if(pin.length < 4){
     alert('Please enter your PIN (at least 4 digits).');
     return;
-  }
-
-  // ---------- 🆘 ہنگامی رسائی کوڈ — صرف اُس صارف کے لیے جو اپنی اصل PIN اور Security سوالات دونوں بھول چکا ہو۔
-  // یہ کسی کا کوئی ڈیٹا نہیں بدلتا، صرف موجودہ Admin اکاؤنٹ میں براہ راست لاگ ان کر دیتا ہے تاکہ نئی PIN سیٹ کی جا سکے۔
-  // (بعد میں ہٹا دیا جائے گا — یہ صرف عارضی ہے) ----------
-  if(pin === '911911'){
-    const adminUser = usersData.find(u => u.role === 'admin' && u.is_active) || usersData.find(u => u.role === 'admin');
-    if(adminUser){
-      alert('🆘 Emergency access used. Please go to Settings right away: set a new PIN + new security answers, and take an Export Backup immediately.');
-      finishLogin(adminUser);
-      return;
-    }
   }
 
   // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
@@ -14322,8 +14317,29 @@ function renderStorageUsage(){
   barEl.style.background = pct >= 90 ? 'var(--danger)' : pct >= 70 ? '#f59e0b' : 'var(--primary)';
 }
 
+// ---------- آخری بیک اپ کب/کس نام سے لیا گیا — Settings کھلتے ہی صاف نظر آئے ----------
+function renderLastBackupStatus(){
+  const el = document.getElementById('lastBackupStatus');
+  if(!el) return;
+  const fileName = AppState.settings.lastBackupFileName;
+  const at = AppState.settings.lastBackupAt;
+  if(!fileName || !at){
+    el.innerHTML = '⚠️ No backup taken yet on this device. Tap "Export Backup" below now.';
+    el.style.background = '#fef2f2';
+    el.style.color = 'var(--danger)';
+    return;
+  }
+  const d = new Date(at);
+  const dateStr = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const timeStr = d.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  el.innerHTML = `✅ Last backup: <b>${fileName}</b><br>${dateStr} at ${timeStr} — look for this exact file in Downloads to restore.`;
+  el.style.background = '#eef2ff';
+  el.style.color = 'var(--primary-dark)';
+}
+
 function renderSettingsScreen(){
   renderStorageUsage();
+  renderLastBackupStatus();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
 
