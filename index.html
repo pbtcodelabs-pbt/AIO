@@ -816,7 +816,11 @@
   .expDaySeparator:first-child{margin-top:0;}
 
   /* --- 🧑‍🤝‍🧑 بلنگ کا نیا کسٹمر پکر — باریک نام + سبز (والٹ) / سرخ (بقایہ) چھوٹی گولیاں، پرانی موٹی نیٹو ڈراپ ڈاؤن لسٹ کی جگہ --- */
-  .custPickList{max-height:168px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; background:#fff;}
+  .custTriggerBox{flex:1 1 auto; display:flex; align-items:center; justify-content:space-between; gap:6px; padding:8px 10px; border:1px solid #dbe1ea; border-radius:8px; background:#fff; font-size:12.5px; color:var(--text); cursor:pointer; min-width:0;}
+  .custTriggerBox .custTriggerText{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .custTriggerBox .custTriggerChevron{flex:0 0 auto; color:var(--muted); font-size:11px;}
+  .custPickList{display:none; max-height:168px; overflow-y:auto; border:1px solid #dbe1ea; border-radius:8px; background:#fff; margin-top:2px;}
+  .custPickList.open{display:block;}
   .custPickRow{display:flex; align-items:center; gap:6px; padding:7px 10px; cursor:pointer; border-bottom:1px solid #f1f4f8; font-size:12px; font-weight:400; color:var(--text);}
   .custPickRow:last-child{border-bottom:none;}
   .custPickRow:active{background:#f7f9fc;}
@@ -1789,10 +1793,11 @@
                   style="display:none; flex:0 0 auto; border:1px solid #f3b985; background:#fff; color:#b45309; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">✖ End</button>
         </div>
 
-        <!-- ---------- کسٹمر لسٹ ہمیشہ ایکٹو — Walk-in منتخب ہو تب بھی یہیں سے فوراً کسٹمر پکڑ سکتے ہیں۔ سرچ بار اور سٹی/ایریا فلٹر — ہزاروں کسٹمرز میں سے جلدی تلاش کے لیے ---------- -->
+        <!-- ---------- کسٹمر لسٹ — اب ایک عام ڈراپ ڈاؤن کی طرح: بند حالت میں صرف ایک لائن جگہ لیتی ہے، ٹیپ کرنے پر ہی نیچے کھلتی ہے۔
+             Walk-in منتخب ہو تب بھی یہیں سے فوراً کسٹمر پکڑ سکتے ہیں۔ سرچ بار اور سٹی/ایریا فلٹر — ہزاروں کسٹمرز میں سے جلدی تلاش کے لیے ---------- -->
         <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
           <div style="display:flex; gap:6px;">
-            <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." oninput="filterCustomerSelectOptions()"
+            <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
                    style="flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
             <select id="custAreaFilter" onchange="filterCustomerSelectOptions()" title="Filter by City/Area"
                     style="flex:0 0 120px; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
@@ -1804,11 +1809,16 @@
               <option value="">— Select Customer —</option>
               <!-- یہ اب پوشیدہ ہے — صرف موجودہ منتخب کسٹمر کی ID رکھنے کے لیے، باقی سب کوڈ اسی سے پڑھتا ہے -->
             </select>
-            <div id="customerSelectListWrap" class="custPickList" style="flex:1 1 auto;"></div>
+            <div id="customerTriggerBox" class="custTriggerBox" onclick="toggleCustomerList()">
+              <span class="custTriggerText">— Select Customer —</span>
+              <span class="custTriggerChevron">▾</span>
+            </div>
             <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
                     style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
           </div>
+          <div id="customerSelectListWrap" class="custPickList"></div>
         </div>
+
 
         <div class="cartSheetBody">
           <div class="cartWrap">
@@ -2044,6 +2054,11 @@
     <!-- 🧮 STOCK ADJUSTMENT — manual stock/price/low-stock editing for every variant, no Purchase Order needed -->
     <div class="screen admin-only" id="screen-stockadjustment">
       <div class="pageTitle">🧮 Stock Adjustment</div>
+
+      <label style="display:flex; align-items:center; gap:8px; background:#eef2ff; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; font-weight:700; color:var(--primary-dark); cursor:pointer;">
+        <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:18px; height:18px; margin:0;">
+        📦 Track Inventory (block sales when stock is out — turn OFF to let sales go negative)
+      </label>
 
       <input type="text" id="stockAdjSearchInput" placeholder="🔍 Search item name" oninput="renderStockAdjustmentScreen()" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px; margin-bottom:10px;">
 
@@ -5880,6 +5895,8 @@ function endCustomerSelection(){
   Billing.counterSale = true;
   const sel = document.getElementById('customerSelect');
   if(sel) sel.value = '';
+  updateCustomerTriggerLabel();
+  closeCustomerList();
   document.getElementById('walletBalanceHint')?.classList.remove('show');
   syncCartModeControls();
   renderAutoPaymentNote();
@@ -6069,6 +6086,7 @@ function closeCartSheet(){
 function onCustomerChange(){
   const custId = document.getElementById('customerSelect').value;
   const hint = document.getElementById('walletBalanceHint');
+  updateCustomerTriggerLabel();
 
   // ---------- کسٹمر لسٹ سے کوئی کسٹمر منتخب ہوتے ہی Walk-in خودکار بند ہو جائے؛ خالی سلیکشن پر واپس Walk-in ----------
   Billing.counterSale = !custId;
@@ -8799,6 +8817,8 @@ function getLiveVariantList(){
 function renderStockAdjustmentScreen(){
   const wrap = document.getElementById('stockAdjustmentListWrap');
   if(!wrap) return;
+  const trackChk = document.getElementById('stockAdjTrackInventoryChk');
+  if(trackChk) trackChk.checked = !!AppState.settings.trackInventory;
   const query = (document.getElementById('stockAdjSearchInput')?.value || '').trim().toLowerCase();
   const catFilter = document.getElementById('stockAdjCategoryFilter')?.value || 'all';
   const sortMode = document.getElementById('stockAdjSortFilter')?.value || 'negFirst';
@@ -11951,10 +11971,35 @@ function populateCustomerDropdown(){
     areaSel.value = areas.includes(prevArea) ? prevArea : '';
   }
   filterCustomerSelectOptions();
+  updateCustomerTriggerLabel();
 }
 
 // ---------- سرچ باکس (نام/فون) اور City/Area فلٹر کے مطابق کسٹمر لسٹ کو فوراً فلٹر کر کے دکھائیں —
 // ہزاروں کسٹمرز میں سے مطلوبہ کسٹمر جلدی ڈھونڈنے کے لیے (پورا صفحہ اسکرول نہ کرنا پڑے) ----------
+// ---------- کسٹمر لسٹ کھولیں/بند کریں — ڈیفالٹ بند تاکہ بل کے آئٹمز کے لیے پوری جگہ محفوظ رہے ----------
+function openCustomerList(){
+  document.getElementById('customerSelectListWrap')?.classList.add('open');
+}
+function closeCustomerList(){
+  document.getElementById('customerSelectListWrap')?.classList.remove('open');
+}
+function toggleCustomerList(){
+  const wrap = document.getElementById('customerSelectListWrap');
+  if(!wrap) return;
+  wrap.classList.contains('open') ? closeCustomerList() : openCustomerList();
+}
+
+// ---------- اوپر کا مختصر ٹرگر باکس — منتخب کسٹمر کا نام یا "— Select Customer —" دکھائے، بند حالت میں بھی صاف پتا چلے ----------
+function updateCustomerTriggerLabel(){
+  const sel = document.getElementById('customerSelect');
+  const textEl = document.querySelector('#customerTriggerBox .custTriggerText');
+  if(!sel || !textEl) return;
+  const custId = sel.value;
+  if(!custId){ textEl.textContent = '— Select Customer —'; return; }
+  const c = customersData.find(cc => String(cc.customer_id) === String(custId));
+  textEl.textContent = c ? c.name : '— Select Customer —';
+}
+
 function filterCustomerSelectOptions(){
   const sel = document.getElementById('customerSelect');
   const listWrap = document.getElementById('customerSelectListWrap');
@@ -12008,7 +12053,8 @@ function selectCustomerFromList(customerId){
   if(!sel) return;
   sel.value = customerId;
   onCustomerChange();
-  filterCustomerSelectOptions(); // ---------- منتخب لائن کو ہائی لائٹ کرنے کے لیے لسٹ دوبارہ بنائیں ----------
+  filterCustomerSelectOptions(); // ---------- اگلی بار دوبارہ کھلے تو منتخب لائن صحیح ہائی لائٹ ہو ----------
+  closeCustomerList(); // ---------- منتخب کرتے ہی لسٹ بند، بل کے لیے پوری جگہ واپس ----------
 }
 
 /* =====================================================================
@@ -15637,6 +15683,11 @@ function setTaxPercent(val){
 function toggleTrackInventory(checked){
   AppState.settings.trackInventory = checked;
   persistAllData();
+  // ---------- Settings اور Stock Adjustment دونوں جگہ یہی ٹوگل نظر آتا ہے — دونوں ہمیشہ ایک ساتھ اپڈیٹ رہیں ----------
+  const chkA = document.getElementById('trackInventoryChk');
+  const chkB = document.getElementById('stockAdjTrackInventoryChk');
+  if(chkA) chkA.checked = checked;
+  if(chkB) chkB.checked = checked;
 }
 
 // ---------- ٹیسٹ پرنٹ بھیجیں — اصل پرنٹ ڈائیلاگ کھلے گا (کسی بھی منسلک/جوڑے گئے پرنٹر پر ٹیسٹ صفحہ جائے گا) ----------
