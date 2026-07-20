@@ -3938,6 +3938,10 @@ function exportBackupData(){
     nextPaymentId,
     advanceOrders: advanceOrdersData,
     nextAdvOrderId,
+    // ---------- مکمل آڈٹ کے بعد ملیں: یہ دو بھی پہلے بیک اپ میں شامل نہیں تھیں ----------
+    customCategories: customCategories,      // خود بنائی ہوئی کیٹگریز کی فہرست
+    expiryAlertDays: expiryAlertDays,          // ایکسپائری الرٹ کتنے دن پہلے آئے
+    quickDockItems: quickDockItems,            // ہوم اسکرین کا Quick Access Dock کی ترتیب
   };
   // ---------- مختصر (compact) فارمیٹ — کوئی اضافی خالی جگہ/لائن بریک نہیں، فائل چھوٹی اور سادہ ----------
   const blob = new Blob([JSON.stringify(backup)], {type:'application/json'});
@@ -4024,6 +4028,10 @@ function proceedWithImport(){
       nextPaymentId = backup.nextPaymentId || nextPaymentId;
       if(typeof advanceOrdersData !== 'undefined'){ advanceOrdersData.length = 0; advanceOrdersData.push(...(backup.advanceOrders || [])); }
       nextAdvOrderId = backup.nextAdvOrderId || nextAdvOrderId;
+      // ---------- مکمل آڈٹ کے بعد ملیں: یہ دو بھی بحال کریں ----------
+      if(typeof customCategories !== 'undefined' && backup.customCategories){ customCategories.length = 0; customCategories.push(...backup.customCategories); }
+      if(backup.expiryAlertDays != null) expiryAlertDays = backup.expiryAlertDays;
+      if(typeof quickDockItems !== 'undefined' && backup.quickDockItems){ quickDockItems.length = 0; quickDockItems.push(...backup.quickDockItems); }
 
       persistAllData(); // localStorage میں بھی محفوظ کر دیں (اگر یہاں کام کر رہا ہو تو فائدہ ہوگا)
 
