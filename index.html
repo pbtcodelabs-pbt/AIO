@@ -3708,7 +3708,8 @@
     </div>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
-    <button class="checkoutBtn" style="margin-top:14px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
+    <button class="checkoutBtn" style="margin-top:14px; background:#7c3aed;" onclick="sharePackagePlansPoster()">🖼️ Share as Poster</button>
+    <button class="checkoutBtn" style="margin-top:10px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
 </div>
@@ -4266,6 +4267,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '🛠️ Tools', tiles: [
     {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
     {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
+    {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
   ]},
   { section: '🔴 Liabilities', tiles: [
     {icon:'📔', label:'My Diary', screen:'mydiary'},
@@ -14772,6 +14774,97 @@ function renderPackagePlansView(){
       <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${priceLabel}</div>
     </div>`;
   }).join('');
+}
+
+// ---------- 📦 Subscription Plans کا خوبصورت، فوری شیئر ایبل پوسٹر — کسٹمر پوچھے تو ایک ٹیپ میں WhatsApp پر بھیج دیں ----------
+async function sharePackagePlansPoster(){
+  const plans = AppState.settings.subscriptionPlans || [];
+  const rate = AppState.settings.perDayRate || 0;
+  const devAccounts = AppState.settings.devPaymentAccounts || [];
+  const acc = devAccounts[devPaymentSelectedIdx] || devAccounts[0] || null;
+
+  const W = 640;
+  const rowH = 62;
+  const headerH = 190;
+  const accountH = acc ? 90 : 0;
+  const footerH = 90;
+  const H = headerH + Math.max(plans.length, 1) * rowH + accountH + footerH;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // ---------- پس منظر ----------
+  const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  let y = 0;
+  ctx.fillStyle = theme.primary;
+  ctx.fillRect(0, 0, W, headerH);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = "800 26px Poppins, sans-serif";
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', W/2, 55);
+  ctx.font = "900 30px Poppins, sans-serif";
+  ctx.fillText('📦 Subscription Plans', W/2, 105);
+  ctx.font = "600 14px Poppins, sans-serif";
+  ctx.fillText('Choose the plan that suits you best', W/2, 135);
+  if(rate > 0){
+    ctx.font = "600 13px Poppins, sans-serif";
+    ctx.fillText(`(or any custom duration — Rs. ${rate}/day)`, W/2, 160);
+  }
+
+  y = headerH + 20;
+  ctx.textAlign = 'left';
+  if(plans.length === 0){
+    ctx.fillStyle = '#64748b';
+    ctx.font = "600 15px Poppins, sans-serif";
+    ctx.textAlign = 'center';
+    ctx.fillText('Contact us for pricing details', W/2, y + 20);
+    y += rowH;
+  } else {
+    plans.forEach((p, idx) => {
+      const price = p.price != null ? p.price : (rate > 0 ? p.days * rate : null);
+      const priceLabel = price != null ? 'Rs. ' + price.toLocaleString() : '—';
+      const rowY = y + idx * rowH;
+      ctx.fillStyle = idx % 2 === 0 ? '#f8fafc' : '#ffffff';
+      ctx.fillRect(30, rowY, W - 60, rowH - 10);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = "800 19px Poppins, sans-serif";
+      ctx.textAlign = 'left';
+      ctx.fillText(formatPlanDaysLabel(p.days), 52, rowY + 34);
+      ctx.fillStyle = theme.primary;
+      ctx.font = "800 20px Poppins, sans-serif";
+      ctx.textAlign = 'right';
+      ctx.fillText(priceLabel, W - 52, rowY + 34);
+    });
+    y += plans.length * rowH;
+  }
+
+  y += 10;
+  if(acc){
+    ctx.fillStyle = '#fff7ed';
+    ctx.fillRect(30, y, W - 60, accountH - 15);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#9a3412';
+    ctx.font = "700 14px Poppins, sans-serif";
+    ctx.fillText('💳 Send Payment To:', 50, y + 30);
+    ctx.fillStyle = '#7c2d12';
+    ctx.font = "700 16px Poppins, sans-serif";
+    ctx.fillText(`${acc.type}: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}`, 50, y + 56);
+    y += accountH;
+  }
+
+  ctx.fillStyle = theme.primaryDark || '#0b4a45';
+  ctx.fillRect(0, H - footerH, W, footerH);
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.font = "700 15px Poppins, sans-serif";
+  const contactNum = '+' + (AppState.settings.devWhatsapp || '923206793793').replace(/\D/g, '');
+  ctx.fillText(`💬 Questions? WhatsApp us: ${contactNum}`, W/2, H - footerH/2 + 6);
+
+  showImageSharePreview(canvas, 'Subscription_Plans.png', 'Subscription Plans', 'Here are our subscription plans:');
 }
 
 function renderDayPresetsInAdmin(){
