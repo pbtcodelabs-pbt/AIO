@@ -1061,13 +1061,6 @@
   /* --- Invoice Preview Modal (Canvas render شدہ نظارہ) --- */
   .invoicePreviewBox{background:#fff; border-radius:var(--radius); padding:0; width:340px; max-height:85vh; overflow-y:auto;}
   .invoicePreviewBox .previewHeader{padding:14px 18px; border-bottom:1px solid #eef1f6; display:flex; justify-content:space-between; align-items:center;}
-  .previewStyleControls{display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #eef1f6;}
-  .pscRow{display:flex; align-items:center; gap:4px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:4px 6px;}
-  .pscLabel{font-size:11px; font-weight:700; color:var(--muted); margin-right:2px;}
-  .pscRow button{border:none; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:12px; padding:4px 9px; border-radius:6px; cursor:pointer;}
-  .pscValue{font-size:11px; font-weight:700; color:var(--text); min-width:32px; text-align:center;}
-  .pscToggleBtn{border:none; background:#fff !important; color:var(--muted) !important; font-weight:600 !important; padding:5px 10px !important; border-radius:6px; cursor:pointer;}
-  .pscToggleBtn.active{background:var(--primary) !important; color:#fff !important;}
   .invoicePreviewBox canvas{width:100%; display:block;}
   .previewActions{display:flex; gap:8px; padding:14px 18px;}
   .previewActions button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;}
@@ -3135,31 +3128,6 @@
           <strong>🖨️ Bill Ready To Print</strong>
           <span style="cursor:pointer;" onclick="closeInvoicePreview()">✖</span>
         </div>
-
-        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے ---------- -->
-        <div class="previewStyleControls">
-          <div class="pscRow">
-            <span class="pscLabel">🔠 Text</span>
-            <button onclick="adjustPreviewStyle('printFontScale', -5, 70, 150)">A−</button>
-            <span class="pscValue" id="pscFontScaleVal">100%</span>
-            <button onclick="adjustPreviewStyle('printFontScale', 5, 70, 150)">A+</button>
-          </div>
-          <div class="pscRow">
-            <span class="pscLabel">↕ Row</span>
-            <button onclick="adjustPreviewStyle('printRowScale', -10, 70, 150)">−</button>
-            <span class="pscValue" id="pscRowScaleVal">100%</span>
-            <button onclick="adjustPreviewStyle('printRowScale', 10, 70, 150)">+</button>
-          </div>
-          <div class="pscRow">
-            <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁 Bold</button>
-            <button id="pscThinBtn" class="pscToggleBtn" onclick="togglePreviewBold()">Thin</button>
-          </div>
-          <div class="pscRow">
-            <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅ Left</button>
-            <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔ Center</button>
-          </div>
-        </div>
-
         <canvas id="invoiceCanvas"></canvas>
         <div class="previewActions">
           <button class="btnPrint" onclick="printCurrentInvoice()">🖨️ Print</button>
@@ -3415,8 +3383,6 @@
         <div class="settingsCard">
           <h3>💾 Backup Your Data</h3>
           <div class="settingsHint">Since opening this file directly in Chrome doesn't reliably auto-save between sessions, use this instead: tap "Export" before closing the app to download a backup file, then tap "Import" next time you open the app to bring everything back.</div>
-          <div class="settingsHint" style="background:#fff7ed; color:#9a3412;">📁 Backups always save to your phone's <b>Downloads</b> folder — Android/Chrome doesn't let a web app choose a different folder automatically. To avoid confusion, always open this app from the <b>same one link</b> (your GitHub Pages URL), and check "Last Backup" below before closing the app.</div>
-          <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
           <div class="backupBtnGrid">
             <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
               <span class="backupBtnIcon">⬇️</span>
@@ -3710,8 +3676,7 @@
     </div>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
-    <button class="checkoutBtn" style="margin-top:14px; background:#7c3aed;" onclick="sharePackagePlansPoster()">🖼️ Share as Poster</button>
-    <button class="checkoutBtn" style="margin-top:10px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
+    <button class="checkoutBtn" style="margin-top:14px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
 </div>
@@ -3888,14 +3853,6 @@ function exportBackupData(){
     settings: AppState.settings,
     expenses: expenseData,
     nextExpenseId,
-    // ---------- اہم فکس: My Diary، Payments، اور Advance Orders پہلے کبھی بیک اپ میں شامل ہی نہیں تھے —
-    // یعنی ان تینوں کا ڈیٹا صرف اسی ایک براؤزر/اوریجن میں محفوظ تھا اور بیک اپ لینے سے بھی محفوظ نہیں ہو رہا تھا ----------
-    diary: diaryData,
-    nextDiaryId,
-    payments: paymentsData,
-    nextPaymentId,
-    advanceOrders: advanceOrdersData,
-    nextAdvOrderId,
   };
   // ---------- مختصر (compact) فارمیٹ — کوئی اضافی خالی جگہ/لائن بریک نہیں، فائل چھوٹی اور سادہ ----------
   const blob = new Blob([JSON.stringify(backup)], {type:'application/json'});
@@ -3908,11 +3865,6 @@ function exportBackupData(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
-  // ---------- آخری بیک اپ کب اور کس نام سے لیا گیا — Settings میں ہمیشہ صاف نظر آئے تاکہ صحیح فائل پہچاننا آسان ہو ----------
-  AppState.settings.lastBackupFileName = fileName;
-  AppState.settings.lastBackupAt = new Date().toISOString();
-  persistAllData();
 
   showBackupConfirmModal('export', fileName, {
     products: productsData.length, customers: customersData.length, invoices: invoicesData.length
@@ -3947,13 +3899,6 @@ function importBackupData(event){
       if(backup.settings) Object.assign(AppState.settings, backup.settings);
       if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
-      // ---------- اہم فکس: My Diary، Payments، اور Advance Orders بحال کریں — پہلے یہ بیک اپ میں شامل ہی نہیں تھے ----------
-      if(typeof diaryData !== 'undefined'){ diaryData.length = 0; diaryData.push(...(backup.diary || [])); }
-      nextDiaryId = backup.nextDiaryId || nextDiaryId;
-      if(typeof paymentsData !== 'undefined'){ paymentsData.length = 0; paymentsData.push(...(backup.payments || [])); }
-      nextPaymentId = backup.nextPaymentId || nextPaymentId;
-      if(typeof advanceOrdersData !== 'undefined'){ advanceOrdersData.length = 0; advanceOrdersData.push(...(backup.advanceOrders || [])); }
-      nextAdvOrderId = backup.nextAdvOrderId || nextAdvOrderId;
 
       persistAllData(); // localStorage میں بھی محفوظ کر دیں (اگر یہاں کام کر رہا ہو تو فائدہ ہوگا)
 
@@ -4109,9 +4054,6 @@ const DEFAULT_SETTINGS = {
   printShowPaymentAccount: false, // فوٹر میں وہ Payment Accounts دکھائیں جن پر "Show on Receipt" ✅ ٹِک ہو
   printShowBranding: false,     // فوٹر میں چھوٹی سی "Powered by AIO POS" لائن
   printFontScale: 100,          // 85–130 (%) — پورے پرنٹ شدہ بل کی لکھائی کا سائز
-  printRowScale: 100,            // 70–150 (%) — آئٹمز ٹیبل کی ہر لائن کی اونچائی (↕ Row)
-  printBoldItems: true,          // آئٹم کے نام بولڈ ہوں یا باریک (Thin)
-  printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
 };
 const AppState = {
   currentUser: null,
@@ -4289,7 +4231,6 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '🛠️ Tools', tiles: [
     {icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
     {icon:'📋', label:'Reply Templates', action:'openReplyTemplatesModal'},
-    {icon:'🗂️', label:'Package Plans', action:'openPackagePlansModal'},
   ]},
   { section: '🔴 Liabilities', tiles: [
     {icon:'📔', label:'My Diary', screen:'mydiary'},
@@ -13435,9 +13376,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const tableLeft = 8, tableRight = pxWidth - 8;
   const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
   const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
-  const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
-  const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
-  const returnedNoteExtra = Math.round(14 * rowScale); // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
+  const rowH = 24, headerH = 22;
+  const returnedNoteExtra = 14; // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
   const returnedItemsCount = invoice.items.filter(it => (it.returnQty || 0) > 0).length;
   const tableH = headerH + (invoice.items.length * rowH) + (returnedItemsCount * returnedNoteExtra);
 
@@ -13543,7 +13483,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   // ---------- ہیڈر لائن ----------
   ctx.font = F('bold 13px');
-  const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
+  const headerBaseline = tableTop + headerH - 7;
   ctx.textAlign = 'center';
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
   ctx.textAlign = 'left';
@@ -13556,13 +13496,10 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   drawTableHLine(hLineY);
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
-  const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
-  const itemAlign = AppState.settings.printItemAlign === 'center' ? 'center' : 'left';
-  const itemNameX = itemAlign === 'center' ? (colX[1] + colX[2]) / 2 : colX[1] + 4;
-  ctx.font = F(itemFontWeight + '14px');
+  ctx.font = F('bold 14px');
   const maxItemWidth = itemW - 8;
   printItems.forEach((item, idx) => {
-    const rowBaseline = hLineY + rowH - Math.round(7 * rowScale);
+    const rowBaseline = hLineY + rowH - 7;
     // ---------- 🔁 Sale Record کی فہرست سے یہاں آیا ہو تو وہی آئٹم پیلے رنگ سے ہائی لائٹ کریں ----------
     const isHighlighted = highlightMatchKey && getItemMatchKey(item) === highlightMatchKey;
     if(isHighlighted){
@@ -13587,8 +13524,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
-    ctx.textAlign = itemAlign;
-    ctx.fillText(displayName, itemNameX, rowBaseline);
+    ctx.textAlign = 'left';
+    ctx.fillText(displayName, colX[1] + 4, rowBaseline);
     ctx.textAlign = 'right';
     ctx.fillText(String(remainingQty), colX[3] - 4, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), colX[4] - 4, rowBaseline);
@@ -13603,7 +13540,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.textAlign = 'left';
       ctx.fillText(`↩ ${returnedQty} Returned`, colX[1] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
-      ctx.font = F(itemFontWeight + '14px');
+      ctx.font = F('bold 14px');
       hLineY += returnedNoteExtra;
     }
     drawTableHLine(hLineY); // ---------- ہر آئٹم کے بعد افقی لائن — ہر ڈبہ مکمل بند ----------
@@ -13956,7 +13893,6 @@ function openInvoicePreview(invoiceId, highlightMatchKey){
   if(!inv) return;
   currentPreviewInvoiceId = invoiceId;
   currentPreviewHighlightKey = highlightMatchKey || null;
-  syncPreviewStyleControls();
   // ---------- پہلے modal کو نظر آنے دیں (display:flex)، پھر canvas پر ڈرائنگ کریں ----------
   // وجہ: کچھ Android WebView ورژنز میں اگر canvas ابھی display:none والدین کے اندر ہو تو ڈرائنگ
   // صحیح طرح پینٹ نہیں ہوتی (خالی سفید نظر آتا ہے)۔ requestAnimationFrame کچھ WebViews میں کافی نہیں،
@@ -13967,52 +13903,6 @@ function openInvoicePreview(invoiceId, highlightMatchKey){
     else renderInvoiceToCanvas(inv, AppState.settings.paperWidth, currentPreviewHighlightKey);
   }, 100);
 }
-
-// ---------- پرنٹ پریویو کو موجودہ سیٹنگز کے مطابق دوبارہ کھینچیں — ہر لائیو کنٹرول کے بعد یہی بلایا جاتا ہے ----------
-function rerenderInvoicePreview(){
-  if(!currentPreviewInvoiceId) return;
-  const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
-  if(!inv) return;
-  if(AppState.settings.invoiceStyle === 'a4') renderInvoiceToA4Canvas(inv, currentPreviewHighlightKey);
-  else renderInvoiceToCanvas(inv, AppState.settings.paperWidth, currentPreviewHighlightKey);
-}
-
-// ---------- کنٹرول بٹنوں پر لیبل/ہائی لائٹ کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں، ہر بار پریویو کھلنے پر ----------
-function syncPreviewStyleControls(){
-  document.getElementById('pscFontScaleVal').textContent = (AppState.settings.printFontScale || 100) + '%';
-  document.getElementById('pscRowScaleVal').textContent = (AppState.settings.printRowScale || 100) + '%';
-  const isBold = AppState.settings.printBoldItems !== false;
-  document.getElementById('pscBoldBtn').classList.toggle('active', isBold);
-  document.getElementById('pscThinBtn').classList.toggle('active', !isBold);
-  const align = AppState.settings.printItemAlign || 'left';
-  document.getElementById('pscAlignLeftBtn').classList.toggle('active', align === 'left');
-  document.getElementById('pscAlignCenterBtn').classList.toggle('active', align === 'center');
-}
-
-// ---------- 🔠 Text اور ↕ Row کے +/- بٹن — دونوں ایک ہی فنکشن سے، بس setting کی چابی اور حد الگ ----------
-function adjustPreviewStyle(settingKey, delta, min, max){
-  const current = AppState.settings[settingKey] || 100;
-  const next = Math.max(min, Math.min(max, current + delta));
-  AppState.settings[settingKey] = next;
-  persistAllData();
-  syncPreviewStyleControls();
-  rerenderInvoicePreview();
-}
-
-function togglePreviewBold(){
-  AppState.settings.printBoldItems = !(AppState.settings.printBoldItems !== false);
-  persistAllData();
-  syncPreviewStyleControls();
-  rerenderInvoicePreview();
-}
-
-function setPreviewAlign(align){
-  AppState.settings.printItemAlign = align;
-  persistAllData();
-  syncPreviewStyleControls();
-  rerenderInvoicePreview();
-}
-
 function closeInvoicePreview(){
   document.getElementById('invoicePreviewModal').classList.remove('show');
   currentPreviewInvoiceId = null;
@@ -14317,29 +14207,8 @@ function renderStorageUsage(){
   barEl.style.background = pct >= 90 ? 'var(--danger)' : pct >= 70 ? '#f59e0b' : 'var(--primary)';
 }
 
-// ---------- آخری بیک اپ کب/کس نام سے لیا گیا — Settings کھلتے ہی صاف نظر آئے ----------
-function renderLastBackupStatus(){
-  const el = document.getElementById('lastBackupStatus');
-  if(!el) return;
-  const fileName = AppState.settings.lastBackupFileName;
-  const at = AppState.settings.lastBackupAt;
-  if(!fileName || !at){
-    el.innerHTML = '⚠️ No backup taken yet on this device. Tap "Export Backup" below now.';
-    el.style.background = '#fef2f2';
-    el.style.color = 'var(--danger)';
-    return;
-  }
-  const d = new Date(at);
-  const dateStr = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-  const timeStr = d.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-  el.innerHTML = `✅ Last backup: <b>${fileName}</b><br>${dateStr} at ${timeStr} — look for this exact file in Downloads to restore.`;
-  el.style.background = '#eef2ff';
-  el.style.color = 'var(--primary-dark)';
-}
-
 function renderSettingsScreen(){
   renderStorageUsage();
-  renderLastBackupStatus();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
 
@@ -14817,97 +14686,6 @@ function renderPackagePlansView(){
       <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${priceLabel}</div>
     </div>`;
   }).join('');
-}
-
-// ---------- 📦 Subscription Plans کا خوبصورت، فوری شیئر ایبل پوسٹر — کسٹمر پوچھے تو ایک ٹیپ میں WhatsApp پر بھیج دیں ----------
-async function sharePackagePlansPoster(){
-  const plans = AppState.settings.subscriptionPlans || [];
-  const rate = AppState.settings.perDayRate || 0;
-  const devAccounts = AppState.settings.devPaymentAccounts || [];
-  const acc = devAccounts[devPaymentSelectedIdx] || devAccounts[0] || null;
-
-  const W = 640;
-  const rowH = 62;
-  const headerH = 190;
-  const accountH = acc ? 90 : 0;
-  const footerH = 90;
-  const H = headerH + Math.max(plans.length, 1) * rowH + accountH + footerH;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // ---------- پس منظر ----------
-  const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, W, H);
-
-  let y = 0;
-  ctx.fillStyle = theme.primary;
-  ctx.fillRect(0, 0, W, headerH);
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#fff';
-  ctx.font = "800 26px Poppins, sans-serif";
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', W/2, 55);
-  ctx.font = "900 30px Poppins, sans-serif";
-  ctx.fillText('📦 Subscription Plans', W/2, 105);
-  ctx.font = "600 14px Poppins, sans-serif";
-  ctx.fillText('Choose the plan that suits you best', W/2, 135);
-  if(rate > 0){
-    ctx.font = "600 13px Poppins, sans-serif";
-    ctx.fillText(`(or any custom duration — Rs. ${rate}/day)`, W/2, 160);
-  }
-
-  y = headerH + 20;
-  ctx.textAlign = 'left';
-  if(plans.length === 0){
-    ctx.fillStyle = '#64748b';
-    ctx.font = "600 15px Poppins, sans-serif";
-    ctx.textAlign = 'center';
-    ctx.fillText('Contact us for pricing details', W/2, y + 20);
-    y += rowH;
-  } else {
-    plans.forEach((p, idx) => {
-      const price = p.price != null ? p.price : (rate > 0 ? p.days * rate : null);
-      const priceLabel = price != null ? 'Rs. ' + price.toLocaleString() : '—';
-      const rowY = y + idx * rowH;
-      ctx.fillStyle = idx % 2 === 0 ? '#f8fafc' : '#ffffff';
-      ctx.fillRect(30, rowY, W - 60, rowH - 10);
-      ctx.fillStyle = '#0f172a';
-      ctx.font = "800 19px Poppins, sans-serif";
-      ctx.textAlign = 'left';
-      ctx.fillText(formatPlanDaysLabel(p.days), 52, rowY + 34);
-      ctx.fillStyle = theme.primary;
-      ctx.font = "800 20px Poppins, sans-serif";
-      ctx.textAlign = 'right';
-      ctx.fillText(priceLabel, W - 52, rowY + 34);
-    });
-    y += plans.length * rowH;
-  }
-
-  y += 10;
-  if(acc){
-    ctx.fillStyle = '#fff7ed';
-    ctx.fillRect(30, y, W - 60, accountH - 15);
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#9a3412';
-    ctx.font = "700 14px Poppins, sans-serif";
-    ctx.fillText('💳 Send Payment To:', 50, y + 30);
-    ctx.fillStyle = '#7c2d12';
-    ctx.font = "700 16px Poppins, sans-serif";
-    ctx.fillText(`${acc.type}: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}`, 50, y + 56);
-    y += accountH;
-  }
-
-  ctx.fillStyle = theme.primaryDark || '#0b4a45';
-  ctx.fillRect(0, H - footerH, W, footerH);
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center';
-  ctx.font = "700 15px Poppins, sans-serif";
-  const contactNum = '+' + (AppState.settings.devWhatsapp || '923206793793').replace(/\D/g, '');
-  ctx.fillText(`💬 Questions? WhatsApp us: ${contactNum}`, W/2, H - footerH/2 + 6);
-
-  showImageSharePreview(canvas, 'Subscription_Plans.png', 'Subscription Plans', 'Here are our subscription plans:');
 }
 
 function renderDayPresetsInAdmin(){
