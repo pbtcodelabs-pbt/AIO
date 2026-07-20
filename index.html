@@ -1399,19 +1399,28 @@
     }
 
     /* --- 🔎 App Search — ہمیشہ نظر آنے والی پٹی، Topbar کے بالکل نیچے، ہر سکرین پر ایک جیسی —
-         جامنی/نیلگوں پس منظر تاکہ پراڈکٹ سرچ باکسز (جو سفید ہوتے ہیں) سے کبھی مکس نہ ہو --- */
+         گہرا سیاہ/نیوی پس منظر (کسی بھی تھیم پریسٹ کے رنگ سے میل نہیں کھاتا) + چمکتی/گلوئنگ لکھائی
+         تاکہ یہ ہمیشہ الگ اور نمایاں نظر آئے، چاہے صارف نے کوئی سا بھی تھیم رنگ لگا رکھا ہو --- */
     #globalSearchBar{
       display:flex; align-items:center; gap:8px; padding:8px 14px;
-      background:#312e81; grid-column:1; grid-row:2;
+      background:linear-gradient(135deg,#05060f,#000000); grid-column:1; grid-row:2;
       position:sticky; top:56px; z-index:590;
+      border-top:1px solid rgba(255,214,10,.25); border-bottom:1px solid rgba(255,214,10,.25);
+      box-shadow:0 0 14px rgba(255,214,10,.12) inset;
     }
-    #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px;}
+    #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px; filter:drop-shadow(0 0 4px rgba(255,214,10,.7));}
     #globalSearchBar input{
-      flex:1; min-width:0; padding:8px 12px; border:none; border-radius:20px; font-size:12.5px;
-      background:rgba(255,255,255,.16); color:#fff;
+      flex:1; min-width:0; padding:8px 12px; border-radius:20px; font-size:12.5px;
+      background:rgba(255,255,255,.08); color:#ffd60a;
+      border:1px solid rgba(255,214,10,.35);
+      animation:gsbGlow 2.4s ease-in-out infinite;
     }
-    #globalSearchBar input::placeholder{color:rgba(255,255,255,.65);}
-    #globalSearchBar input:focus{outline:2px solid rgba(255,255,255,.45); background:rgba(255,255,255,.22);}
+    #globalSearchBar input::placeholder{color:rgba(255,214,10,.6); text-shadow:0 0 4px rgba(255,214,10,.35);}
+    #globalSearchBar input:focus{outline:2px solid rgba(255,214,10,.6); background:rgba(255,255,255,.14);}
+    @keyframes gsbGlow{
+      0%,100%{text-shadow:0 0 3px rgba(255,214,10,.35), 0 0 8px rgba(255,214,10,.2);}
+      50%{text-shadow:0 0 8px rgba(255,214,10,.9), 0 0 18px rgba(255,214,10,.55);}
+    }
     #globalSearchBar #appSearchResults{
       display:none; position:absolute; left:14px; right:14px; top:calc(100% + 2px); z-index:591;
       background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.35); max-height:min(60vh,380px); overflow-y:auto;
@@ -1595,7 +1604,7 @@
     <div id="recoveryStep1">
       <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">What were you called as a child? (Nickname)</label>
       <div id="recoveryNicknameHint" style="font-size:11.5px; color:var(--primary-dark); font-weight:700; margin-bottom:6px;"></div>
-      <input type="text" id="recoveryNicknameInput" placeholder="e.g. Fija" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
+      <input type="text" id="recoveryNicknameInput" placeholder="e.g. Mithoo" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
       <button class="checkoutBtn" style="margin-top:14px;" onclick="verifyPinRecovery()">Verify</button>
       <div id="recoveryError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
     </div>
@@ -3538,7 +3547,7 @@
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering this correctly. No need to contact anyone. A short hint (first...last letter) will be shown automatically to jog your memory. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
-            <input type="text" id="securityNicknameInput" placeholder="What were you called as a child? (e.g. Fija)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <input type="text" id="securityNicknameInput" placeholder="What were you called as a child? (e.g. Mithoo)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
 
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
@@ -14787,6 +14796,9 @@ async function unlockAdminControl(){
   renderDevPaymentAccountsList();
   document.getElementById('perDayRateInput').value = AppState.settings.perDayRate || '';
   renderDayPresetsInAdmin();
+  // ---------- سیکیورٹی: یہ باکس ہمیشہ خالی کھلے، چاہے پچھلی بار کچھ ٹائپ کر کے سیو کیا گیا ہو —
+  // ورنہ ٹائپ کیا گیا جواب اسکرین پر نظر آتا رہتا ہے جو مقصد کے خلاف ہے ----------
+  document.getElementById('securityNicknameInput').value = '';
 }
 
 // ---------- Admin Control میں موجودہ Payment Accounts کی فہرست دکھائیں (ہر ایک کے ساتھ حذف کا بٹن) ----------
@@ -14833,6 +14845,7 @@ async function saveAdminControl(){
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
+  document.getElementById('securityNicknameInput').value = '';
   persistAllData();
   document.getElementById('adminSaveMsg').textContent = '✅ Saved!';
   setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
