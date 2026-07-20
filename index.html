@@ -1587,16 +1587,15 @@
 </div>
 
 <!-- 🔐 SUBSCRIPTION GATE — سبسکرپشن ختم/غیر فعال ہونے پر یہ صفحہ لاگ ان کے بعد نظر آئے گا -->
-<!-- 🆘 PIN RECOVERY MODAL — دونوں (CNIC + DOB) درست ہوں تو خود نیا PIN بنا سکیں، Admin سے رابطہ کیے بغیر -->
+<!-- 🆘 PIN RECOVERY MODAL — بچپن کے نک نیم کا آسان سوال صحیح ہو تو خود نیا PIN بنا سکیں، Admin سے رابطہ کیے بغیر -->
 <div class="modalOverlay" id="pinRecoveryModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:380px;">
     <h3>🆘 Recover Admin PIN</h3>
-    <div class="settingsHint">Answer both security questions correctly to set a brand new Admin PIN right here.</div>
+    <div class="settingsHint">Answer your security question correctly to set a brand new Admin PIN right here.</div>
     <div id="recoveryStep1">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">CNIC Number</label>
-      <input type="text" id="recoveryCnicInput" placeholder="e.g. 3520112345671" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Date of Birth</label>
-      <input type="date" id="recoveryDobInput" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">What were you called as a child? (Nickname)</label>
+      <div id="recoveryNicknameHint" style="font-size:11.5px; color:var(--primary-dark); font-weight:700; margin-bottom:6px;"></div>
+      <input type="text" id="recoveryNicknameInput" placeholder="e.g. Fija" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
       <button class="checkoutBtn" style="margin-top:14px;" onclick="verifyPinRecovery()">Verify</button>
       <div id="recoveryError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
     </div>
@@ -3538,9 +3537,8 @@
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering both of these correctly. No need to contact anyone. (For security, these two boxes always show blank when you reopen this screen — that does NOT mean they weren't saved.)</div>
-            <input type="text" id="securityCnicInput" placeholder="CNIC Number (e.g. 3520112345671)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
-            <input type="date" id="securityDobInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering this correctly. No need to contact anyone. A short hint (first...last letter) will be shown automatically to jog your memory. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
+            <input type="text" id="securityNicknameInput" placeholder="What were you called as a child? (e.g. Fija)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
 
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
@@ -4170,8 +4168,8 @@ const DEFAULT_SETTINGS = {
   // چاہے rate/plans میں پہلے سے کچھ بھی موجود ہو — اس لیے migration ہمیشہ صحیح چلتی ہے ----------
   settingsVersion: 2,
   // ---------- 🆘 PIN Recovery — اگر Admin PIN بالکل بھول جائیں تو یہ دونوں چیزیں درست بتانے پر نیا PIN خود بنا سکیں گے ----------
-  securityCnicHash: '',
-  securityDobHash: '',
+  securityNicknameHash: '',
+  securityNicknameHint: '',
   // ---------- 📋 محفوظ شدہ جوابی پیغامات — سبسکرپشن پلانز وغیرہ بار بار ٹائپ کیے بغیر ایک ٹیپ میں کاپی کر کے بھیجیں ----------
   replyTemplates: [
     {title:'Payment Reminder', text:'Dear Customer, this is a friendly reminder that a payment is due on your account. Please clear it at your earliest convenience. Thank you!'},
@@ -14840,19 +14838,20 @@ async function saveAdminControl(){
   setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
 }
 
-// ---------- CNIC/DOB کو محفوظ شکل میں رکھنے کے لیے ایک جیسا فارمیٹ بنائیں (صرف ہندسے) پھر hash کریں ----------
-function normalizeSecurityAnswer(value){
-  return String(value).replace(/[^0-9]/g, '');
+// ---------- نک نیم کو محفوظ شکل میں رکھنے کے لیے ایک جیسا فارمیٹ بنائیں (چھوٹے/بڑے حروف، خالی جگہ کا فرق نہ ہو) پھر hash کریں ----------
+function normalizeNicknameAnswer(value){
+  return String(value).trim().toLowerCase().replace(/\s+/g, '');
 }
 
 async function saveSecurityRecoveryInfo(){
-  const cnic = document.getElementById('securityCnicInput').value.trim();
-  const dob = document.getElementById('securityDobInput').value.trim();
-  if(cnic){
-    AppState.settings.securityCnicHash = await hashPin(normalizeSecurityAnswer(cnic));
-  }
-  if(dob){
-    AppState.settings.securityDobHash = await hashPin(normalizeSecurityAnswer(dob));
+  const nickname = document.getElementById('securityNicknameInput').value.trim();
+  if(nickname){
+    AppState.settings.securityNicknameHash = await hashPin(normalizeNicknameAnswer(nickname));
+    // ---------- یاد دلانے کے لیے چھوٹا سا ہنٹ خودکار بنائیں — صرف پہلا اور آخری حرف، پورا نام نہیں (پلین ٹیکسٹ میں محفوظ) ----------
+    const clean = nickname.trim();
+    AppState.settings.securityNicknameHint = clean.length > 1
+      ? `${clean[0].toUpperCase()}...${clean[clean.length - 1].toUpperCase()}`
+      : clean.toUpperCase();
   }
   persistAllData();
 }
@@ -14861,32 +14860,33 @@ async function saveSecurityRecoveryInfo(){
    🆘 PIN Recovery — Login صفحے پر "Forgot your PIN" سے کھلتا ہے
    ===================================================================== */
 function openPinRecoveryModal(){
-  document.getElementById('recoveryCnicInput').value = '';
-  document.getElementById('recoveryDobInput').value = '';
+  document.getElementById('recoveryNicknameInput').value = '';
   document.getElementById('recoveryNewPinInput').value = '';
   document.getElementById('recoveryError').textContent = '';
   document.getElementById('recoveryStep1').style.display = 'block';
   document.getElementById('recoveryStep2').style.display = 'none';
 
   // ---------- اگر Recovery کبھی سیٹ اپ ہی نہ کی گئی ہو تو صاف بتائیں کہ یہ ممکن نہیں ----------
-  if(!AppState.settings.securityCnicHash || !AppState.settings.securityDobHash){
+  const hintEl = document.getElementById('recoveryNicknameHint');
+  if(!AppState.settings.securityNicknameHash){
     document.getElementById('recoveryError').textContent = '❌ Recovery info was never set up on this device. Please contact your developer for help.';
+    hintEl.textContent = '';
+  } else {
+    hintEl.textContent = AppState.settings.securityNicknameHint ? `💡 Hint: ${AppState.settings.securityNicknameHint}` : '';
   }
   document.getElementById('pinRecoveryModal').classList.add('show');
 }
 
 async function verifyPinRecovery(){
-  const cnic = document.getElementById('recoveryCnicInput').value.trim();
-  const dob = document.getElementById('recoveryDobInput').value.trim();
-  if(!cnic || !dob){
-    document.getElementById('recoveryError').textContent = '❌ Please fill in both fields.';
+  const nickname = document.getElementById('recoveryNicknameInput').value.trim();
+  if(!nickname){
+    document.getElementById('recoveryError').textContent = '❌ Please enter your childhood nickname.';
     return;
   }
-  const cnicHash = await hashPin(normalizeSecurityAnswer(cnic));
-  const dobHash = await hashPin(normalizeSecurityAnswer(dob));
+  const nicknameHash = await hashPin(normalizeNicknameAnswer(nickname));
 
-  if(cnicHash !== AppState.settings.securityCnicHash || dobHash !== AppState.settings.securityDobHash){
-    document.getElementById('recoveryError').textContent = '❌ These do not match our records. Please try again.';
+  if(nicknameHash !== AppState.settings.securityNicknameHash){
+    document.getElementById('recoveryError').textContent = '❌ This does not match our records. Please try again.';
     return;
   }
   document.getElementById('recoveryError').textContent = '';
