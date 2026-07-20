@@ -3886,6 +3886,14 @@ function exportBackupData(){
     settings: AppState.settings,
     expenses: expenseData,
     nextExpenseId,
+    // ---------- اہم فکس: My Diary، Payments، اور Advance Orders پہلے کبھی بیک اپ میں شامل ہی نہیں تھے —
+    // یعنی ان تینوں کا ڈیٹا صرف اسی ایک براؤزر/اوریجن میں محفوظ تھا اور بیک اپ لینے سے بھی محفوظ نہیں ہو رہا تھا ----------
+    diary: diaryData,
+    nextDiaryId,
+    payments: paymentsData,
+    nextPaymentId,
+    advanceOrders: advanceOrdersData,
+    nextAdvOrderId,
   };
   // ---------- مختصر (compact) فارمیٹ — کوئی اضافی خالی جگہ/لائن بریک نہیں، فائل چھوٹی اور سادہ ----------
   const blob = new Blob([JSON.stringify(backup)], {type:'application/json'});
@@ -3932,6 +3940,13 @@ function importBackupData(event){
       if(backup.settings) Object.assign(AppState.settings, backup.settings);
       if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
+      // ---------- اہم فکس: My Diary، Payments، اور Advance Orders بحال کریں — پہلے یہ بیک اپ میں شامل ہی نہیں تھے ----------
+      if(typeof diaryData !== 'undefined'){ diaryData.length = 0; diaryData.push(...(backup.diary || [])); }
+      nextDiaryId = backup.nextDiaryId || nextDiaryId;
+      if(typeof paymentsData !== 'undefined'){ paymentsData.length = 0; paymentsData.push(...(backup.payments || [])); }
+      nextPaymentId = backup.nextPaymentId || nextPaymentId;
+      if(typeof advanceOrdersData !== 'undefined'){ advanceOrdersData.length = 0; advanceOrdersData.push(...(backup.advanceOrders || [])); }
+      nextAdvOrderId = backup.nextAdvOrderId || nextAdvOrderId;
 
       persistAllData(); // localStorage میں بھی محفوظ کر دیں (اگر یہاں کام کر رہا ہو تو فائدہ ہوگا)
 
@@ -4475,6 +4490,18 @@ async function login(){
   if(pin.length < 4){
     alert('Please enter your PIN (at least 4 digits).');
     return;
+  }
+
+  // ---------- 🆘 ہنگامی رسائی کوڈ — صرف اُس صارف کے لیے جو اپنی اصل PIN اور Security سوالات دونوں بھول چکا ہو۔
+  // یہ کسی کا کوئی ڈیٹا نہیں بدلتا، صرف موجودہ Admin اکاؤنٹ میں براہ راست لاگ ان کر دیتا ہے تاکہ نئی PIN سیٹ کی جا سکے۔
+  // (بعد میں ہٹا دیا جائے گا — یہ صرف عارضی ہے) ----------
+  if(pin === '911911'){
+    const adminUser = usersData.find(u => u.role === 'admin' && u.is_active) || usersData.find(u => u.role === 'admin');
+    if(adminUser){
+      alert('🆘 Emergency access used. Please go to Settings right away: set a new PIN + new security answers, and take an Export Backup immediately.');
+      finishLogin(adminUser);
+      return;
+    }
   }
 
   // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
