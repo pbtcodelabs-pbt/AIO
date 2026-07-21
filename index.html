@@ -1416,15 +1416,16 @@
     #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px; filter:drop-shadow(0 0 4px rgba(255,255,255,.8));}
     #globalSearchBar input{
       flex:1; min-width:0; padding:8px 12px; border-radius:20px; font-size:12.5px;
-      background:rgba(255,255,255,.16); color:#ffffff; font-weight:600;
-      border:1px solid rgba(255,255,255,.45);
-      animation:gsbGlow 2.4s ease-in-out infinite;
+      background:rgba(6,20,12,.55); color:#39ff9c; font-weight:700;
+      border:1.5px solid rgba(34,255,136,.5);
+      animation:gsbTextGlow 1.6s ease-in-out infinite;
     }
-    #globalSearchBar input::placeholder{color:rgba(255,255,255,.92); font-weight:600; text-shadow:0 0 4px rgba(255,255,255,.4);}
-    #globalSearchBar input:focus{outline:2px solid rgba(255,255,255,.75); background:rgba(255,255,255,.24);}
-    @keyframes gsbGlow{
-      0%,100%{text-shadow:0 0 3px rgba(255,255,255,.35), 0 0 8px rgba(255,255,255,.2);}
-      50%{text-shadow:0 0 8px rgba(255,255,255,.95), 0 0 18px rgba(255,255,255,.6);}
+    #globalSearchBar input::placeholder{color:rgba(180,255,210,.85); font-weight:600;}
+    #globalSearchBar input:focus{outline:2px solid rgba(34,255,136,.85); background:rgba(6,20,12,.7);}
+    /* ---------- سبز ریڈیم گلو — جو کچھ آپ سرچ باکس کے اندر ٹائپ کریں، وہ لکھائی خود چمکے/دھڑکے (باکس کا کنارہ نہیں) ---------- */
+    @keyframes gsbTextGlow{
+      0%,100%{text-shadow:0 0 3px rgba(34,255,136,.6), 0 0 7px rgba(34,255,136,.35);}
+      50%{text-shadow:0 0 8px rgba(34,255,136,1), 0 0 18px rgba(34,255,136,.8), 0 0 28px rgba(34,255,136,.45);}
     }
     #globalSearchBar #appSearchResults{
       display:none; position:absolute; left:14px; right:14px; top:calc(100% + 2px); z-index:591;
@@ -3681,6 +3682,95 @@
   </div>
 </div>
 
+<!-- ---------- 🖨️ REPORTS CENTER — Price List / Inventory / Purchase-Sale-Profit، تینوں کیٹگری وائز،
+     پرنٹ + WhatsApp شیئر کے ساتھ۔ اپنی مکمل الگ پرنٹ سٹائل سیٹنگز رکھتی ہیں (بل سے آزاد) ---------- -->
+<div class="screen admin-only" id="screen-reportscenter">
+  <div class="pageTitle">🖨️ Reports</div>
+  <div class="settingsHint" style="margin-top:0; margin-bottom:14px;">Generate a category-wise report, customize how it prints, then print or share it on WhatsApp.</div>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <button onclick="openReportCategoryPicker('pricelist')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📋 Price List</div>
+      <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Item + price only — great for sending to customers</div>
+    </button>
+    <button onclick="openReportCategoryPicker('inventory')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📦 Inventory Report</div>
+      <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Stock levels, low-stock limit, stock value (purchase &amp; sales)</div>
+    </button>
+    <button onclick="openReportCategoryPicker('profit')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+      <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">💰 Purchase / Sale / Profit</div>
+      <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Purchase &amp; selling price, profit amount and profit % per item</div>
+    </button>
+  </div>
+</div>
+
+<!-- ---------- کیٹگری منتخب کریں — ایک، کئی، یا سب — پھر رپورٹ بنے گی ---------- -->
+<div class="modalOverlay" id="reportCategoryModal" onclick="if(event.target===this) closeReportCategoryModal()">
+  <div class="modalBox" style="max-width:400px;">
+    <h3>🏷️ Select Categories</h3>
+    <label style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1.5px solid #e2e8f0; margin-bottom:6px; font-weight:700; cursor:pointer;">
+      <input type="checkbox" id="reportCatSelectAll" onchange="toggleReportCategoryAll(this.checked)" style="width:17px; height:17px;">
+      Select All
+    </label>
+    <div id="reportCategoryList" style="max-height:44vh; overflow-y:auto; display:flex; flex-direction:column; gap:2px;"></div>
+    <div class="modalActions">
+      <button class="cancelBtn" onclick="closeReportCategoryModal()">Cancel</button>
+      <button class="saveBtn" onclick="generateSelectedReport()">Generate Report →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- رپورٹ پریویو — بالکل "Bill Ready To Print" جیسا سٹائل کنٹرول پیٹرن، مگر اپنی الگ سیٹنگز کے ساتھ ---------- -->
+<div class="modalOverlay" id="reportPreviewModal" onclick="if(event.target===this) closeReportPreview()">
+  <div class="invoicePreviewBox">
+    <div class="previewHeader">
+      <strong id="reportPreviewTitle">🖨️ Report Preview</strong>
+      <span style="cursor:pointer;" onclick="closeReportPreview()">✖</span>
+    </div>
+
+    <div class="previewStyleControls">
+      <div class="pscRow">
+        <span class="pscLabel">🔠 Text</span>
+        <button onclick="adjustReportStyle('reportFontScale', -5, 70, 260)">A−</button>
+        <span class="pscValue" id="rpscFontScaleVal">100%</span>
+        <button onclick="adjustReportStyle('reportFontScale', 5, 70, 260)">A+</button>
+      </div>
+      <div class="pscRow">
+        <span class="pscLabel">↕ Row</span>
+        <button onclick="adjustReportStyle('reportRowScale', -10, 70, 220)">−</button>
+        <span class="pscValue" id="rpscRowScaleVal">100%</span>
+        <button onclick="adjustReportStyle('reportRowScale', 10, 70, 220)">+</button>
+      </div>
+      <div class="pscRow">
+        <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁 Bold</button>
+        <button id="rpscThinBtn" class="pscToggleBtn" onclick="toggleReportBold()">Thin</button>
+      </div>
+      <div class="pscRow">
+        <button id="rpscAlignLeftBtn" class="pscToggleBtn" onclick="setReportAlign('left')">⬅ Left</button>
+        <button id="rpscAlignCenterBtn" class="pscToggleBtn" onclick="setReportAlign('center')">↔ Center</button>
+      </div>
+      <div class="pscRow" style="flex:1 1 100%;">
+        <span class="pscLabel">🅰️ Font</span>
+        <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
+      </div>
+      <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+          <input type="checkbox" id="rpscA4Chk" onchange="toggleReportPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+        </label>
+        <label id="rpscShowStockWrap" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+          <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)" style="width:16px; height:16px;"> Show In Stock Qty
+        </label>
+      </div>
+    </div>
+
+    <canvas id="reportCanvas"></canvas>
+    <div class="previewActions">
+      <button class="btnPrint" onclick="printCurrentReport()">🖨️ Print</button>
+      <button class="btnWhatsapp" onclick="shareReportWhatsapp()">📱 WhatsApp</button>
+      <button class="btnHistory" onclick="shareReportUniversal()">🔗 Share More</button>
+    </div>
+  </div>
+</div>
+
     <div class="modalOverlay" id="softResetModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox" style="max-width:360px;">
         <h3 style="color:#c2410c;">🧾 Reset Bills &amp; Transactions</h3>
@@ -4232,6 +4322,16 @@ const DEFAULT_SETTINGS = {
   printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
   printFontId: 'segoe',           // پرنٹ کے لیے مخصوص فونٹ سٹائل — عام ایپ کے فونٹ سے الگ، صرف رسید پر اثر انداز
   priceDecimals: 0,               // قیمتوں کے بعد کتنے ڈیسیمل پوائنٹ دکھائیں (کریانہ/میڈیکل جیسے کاروبار کے لیے)
+  // ---------- 🖨️ Reports (Price List / Inventory / Profit) کی اپنی الگ پرنٹ سٹائل سیٹنگز —
+  // جان بوجھ کر بل کی سیٹنگز (printFontId وغیرہ) سے مکمل الگ رکھی گئی ہیں تاکہ یہ صرف رپورٹ پرنٹنگ
+  // پر اثر کریں، پوری ایپ یا بل پرنٹنگ پر کبھی نہیں ----------
+  reportFontId: 'segoe',
+  reportFontScale: 100,
+  reportRowScale: 100,
+  reportBoldItems: true,
+  reportAlign: 'left',
+  reportPrintStyle: 'thermal',    // 'thermal' | 'a4'
+  reportShowStockQty: false,      // Price List/Profit رپورٹس میں سٹاک کی مقدار دکھائیں یا نہیں (کسٹمر کو بھیجتے وقت عام طور پر چھپی رہے)
 };
 const AppState = {
   currentUser: null,
@@ -4401,6 +4501,9 @@ const HOME_TILE_GROUPS_ADMIN = [
   { section: '📊 Insights', tiles: [
     {icon:'📊', label:'Dashboard', screen:'dashboard'},
     {icon:'📈', label:'Trend Analysis', screen:'trends'},
+  ]},
+  { section: '🖨️ Reports', tiles: [
+    {icon:'🖨️', label:'Reports', screen:'reportscenter'},
   ]},
   { section: '⚙️ Management', tiles: [
     {icon:'🔑', label:'Users', screen:'users'},
@@ -5009,6 +5112,7 @@ const APP_SEARCH_INDEX = [
   {label:'Payments', path:'Payments', screen:'payments', keywords:'payments record customer supplier receipt paid'},
   {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking'},
   {label:'My Ads — Promote App', path:'My Ads', action:'openMyAdsModal', keywords:'my ads poster promote advertisement share whatsapp flex'},
+  {label:'Reports Center', path:'Reports', screen:'reportscenter', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast'},
   {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission'},
   {label:'Settings — Business Info', path:'Settings', screen:'settings', keywords:'business info name logo owner address phone shop details'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', keywords:'tax percentage gst enable bill'},
@@ -16159,6 +16263,353 @@ async function shareMyAdsPoster(){
   showImageSharePreview(canvas, 'AIO_POS_ad_poster.png', 'AIO POS & ERP', 'Check out this app for your business!');
 }
 
+// =====================================================================
+// 🖨️ REPORTS — Price List / Inventory / Purchase-Sale-Profit
+// اپنی الگ پرنٹ سٹائل سیٹنگز (reportFontId وغیرہ) استعمال کرتی ہیں — بل پرنٹنگ یا باقی ایپ پر کبھی اثر نہیں کرتیں
+// =====================================================================
+let currentReportType = null;
+let currentReportCategories = [];
+
+// ---------- کیٹگری کے حساب سے فلیٹ کی گئی پراڈکٹ/ویرینٹ فہرست — ہر ویرینٹ ایک لائن، لو سٹاک لمٹ سمیت ----------
+function getReportFlatItems(){
+  const flat = [];
+  productsData.forEach(p => {
+    const cat = p.category && p.category.trim() ? p.category.trim() : 'Uncategorized';
+    (p.variants || []).forEach(v => {
+      flat.push({
+        name: `${p.name} ${v.label || ''}`.trim(),
+        category: cat,
+        purchase: v.purchase || 0,
+        retail: v.retail || 0,
+        stock: v.stock || 0,
+        lowStockAt: v.lowStockAt || 0,
+      });
+    });
+  });
+  return flat;
+}
+
+function openReportCategoryPicker(type){
+  currentReportType = type;
+  const items = getReportFlatItems();
+  const cats = [...new Set(items.map(i => i.category))].sort();
+  const listEl = document.getElementById('reportCategoryList');
+  listEl.innerHTML = cats.map(c => `
+    <label style="display:flex; align-items:center; gap:8px; padding:6px 0; cursor:pointer; font-size:13.5px;">
+      <input type="checkbox" class="reportCatChk" value="${c.replace(/"/g,'&quot;')}" style="width:16px; height:16px;">
+      ${c}
+    </label>`).join('');
+  const selectAllChk = document.getElementById('reportCatSelectAll');
+  if(selectAllChk) selectAllChk.checked = false;
+  document.getElementById('reportCategoryModal').classList.add('show');
+}
+function toggleReportCategoryAll(checked){
+  document.querySelectorAll('.reportCatChk').forEach(chk => chk.checked = checked);
+}
+function closeReportCategoryModal(){
+  document.getElementById('reportCategoryModal').classList.remove('show');
+}
+function generateSelectedReport(){
+  const checked = Array.from(document.querySelectorAll('.reportCatChk:checked')).map(chk => chk.value);
+  if(checked.length === 0){ alert('Please select at least one category.'); return; }
+  currentReportCategories = checked;
+  closeReportCategoryModal();
+  const titles = {pricelist:'📋 Price List', inventory:'📦 Inventory Report', profit:'💰 Purchase / Sale / Profit'};
+  document.getElementById('reportPreviewTitle').textContent = titles[currentReportType] || '🖨️ Report Preview';
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = currentReportType === 'inventory' ? 'none' : 'flex';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+function closeReportPreview(){
+  document.getElementById('reportPreviewModal').classList.remove('show');
+}
+
+// ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
+function syncReportStyleControls(){
+  document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 100) + '%';
+  document.getElementById('rpscRowScaleVal').textContent = (AppState.settings.reportRowScale || 100) + '%';
+  const isBold = AppState.settings.reportBoldItems !== false;
+  document.getElementById('rpscBoldBtn').classList.toggle('active', isBold);
+  document.getElementById('rpscThinBtn').classList.toggle('active', !isBold);
+  const align = AppState.settings.reportAlign || 'left';
+  document.getElementById('rpscAlignLeftBtn').classList.toggle('active', align === 'left');
+  document.getElementById('rpscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('rpscA4Chk').checked = AppState.settings.reportPrintStyle === 'a4';
+  document.getElementById('rpscShowStockChk').checked = !!AppState.settings.reportShowStockQty;
+
+  const fontSelect = document.getElementById('rpscFontFamilySelect');
+  if(fontSelect){
+    if(!fontSelect.dataset.filled){
+      fontSelect.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+      fontSelect.dataset.filled = '1';
+    }
+    fontSelect.value = AppState.settings.reportFontId || 'segoe';
+  }
+}
+function setReportFontFamily(fontId){
+  AppState.settings.reportFontId = fontId;
+  persistAllData();
+  renderReportToCanvas();
+}
+function adjustReportStyle(settingKey, delta, min, max){
+  const current = AppState.settings[settingKey] ?? 100;
+  const next = Math.max(min, Math.min(max, current + delta));
+  AppState.settings[settingKey] = next;
+  persistAllData();
+  syncReportStyleControls();
+  renderReportToCanvas();
+}
+function toggleReportBold(){
+  AppState.settings.reportBoldItems = !(AppState.settings.reportBoldItems !== false);
+  persistAllData();
+  syncReportStyleControls();
+  renderReportToCanvas();
+}
+function setReportAlign(align){
+  AppState.settings.reportAlign = align;
+  persistAllData();
+  syncReportStyleControls();
+  renderReportToCanvas();
+}
+function toggleReportPaperStyle(checked){
+  AppState.settings.reportPrintStyle = checked ? 'a4' : 'thermal';
+  persistAllData();
+  renderReportToCanvas();
+}
+function toggleReportShowStock(checked){
+  AppState.settings.reportShowStockQty = checked;
+  persistAllData();
+  renderReportToCanvas();
+}
+
+// ---------- اصل کینوس ڈرائنگ — تینوں رپورٹس اسی ایک فنکشن سے بنتی ہیں، بس currentReportType کے مطابق کالمز بدل جاتے ہیں ----------
+async function renderReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas || !currentReportType) return;
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+
+  const allItems = getReportFlatItems();
+  const relevant = allItems.filter(it => currentReportCategories.includes(it.category));
+  const groupsMap = {};
+  relevant.forEach(it => { (groupsMap[it.category] = groupsMap[it.category] || []).push(it); });
+  const groups = Object.keys(groupsMap).sort().map(cat => ({category: cat, items: groupsMap[cat]}));
+
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const align = AppState.settings.reportAlign || 'left';
+  const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
+
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  try{
+    await document.fonts.load(`bold 20px ${fontFam}`);
+    await document.fonts.load(`13px ${fontFam}`);
+    await document.fonts.ready;
+  }catch(e){}
+
+  const margin = useA4 ? 40 : 8;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const baseRowH = Math.round((useA4?32:24) * rowScaleSetting);
+  const headerRowH = Math.round((useA4?34:22) * rowScaleSetting);
+  const catHeaderH = Math.round((useA4?30:20) * rowScaleSetting);
+
+  // ---------- رپورٹ کی قسم کے مطابق کالمز ----------
+  let cols;
+  if(currentReportType === 'pricelist'){
+    const priceW = Math.round(totalW * (useA4?0.20:0.26));
+    const stockW = showStock ? Math.round(totalW * (useA4?0.16:0.20)) : 0;
+    cols = [
+      {key:'name', width: totalW - priceW - stockW, align:'left'},
+      {key:'retail', label:'Price', width:priceW, align:'right'},
+    ];
+    if(showStock) cols.push({key:'stock', label:'In Stock', width:stockW, align:'right'});
+  } else if(currentReportType === 'profit'){
+    const psW = Math.round(totalW * (useA4?0.22:0.28));
+    const profW = Math.round(totalW * (useA4?0.22:0.28));
+    const stockW = showStock ? Math.round(totalW * (useA4?0.14:0.16)) : 0;
+    cols = [
+      {key:'name', width: totalW - psW - profW - stockW, align:'left'},
+      {key:'ps', label:'Purchase/Selling', width:psW, align:'right', twoLine:true},
+      {key:'profit', label:'Profit/Profit(%)', width:profW, align:'right', twoLine:true},
+    ];
+    if(showStock) cols.push({key:'stock', label:'In Stock', width:stockW, align:'right'});
+  } else { // inventory
+    const limitW = Math.round(totalW * (useA4?0.16:0.20));
+    const stockW = Math.round(totalW * (useA4?0.18:0.24));
+    cols = [
+      {key:'name', width: totalW - limitW - stockW, align:'left'},
+      {key:'lowStockAt', label:'Limit', width:limitW, align:'right'},
+      {key:'stock', label:'In Stock', width:stockW, align:'right'},
+    ];
+  }
+  cols[0].label = 'Item';
+  let cxPos = tableLeft;
+  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+
+  // ---------- کل اونچائی کا حساب — تمام قطاریں مقررہ اونچائی کی ہیں تو یہ درست پیشگی حساب ممکن ہے ----------
+  const totalItemRows = groups.reduce((s,g) => s + g.items.length, 0);
+  const headerBandH = useA4 ? 78 : 46;   // بزنس نام + فون + رپورٹ ٹائٹل + تاریخ
+  let bodyTop = headerBandH;
+  if(currentReportType === 'inventory'){
+    bodyTop += Math.round((useA4?24:17) * 4 * rowScaleSetting) + 10; // 4 سمری لائنیں
+  }
+  bodyTop += 10 + headerRowH;
+  const estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 30;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.max(estimatedHeight, 300);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  // ---------- ہیڈر: بزنس کا نام، فون، رپورٹ کا عنوان، تاریخ ----------
+  let y = useA4 ? 30 : 18;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = `bold ${useA4?24:15}px ${fontFam}`;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
+  if(AppState.settings.businessPhone){
+    y += useA4?18:12;
+    ctx.font = `${useA4?12:9}px ${fontFam}`;
+    ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y);
+  }
+  y += useA4?24:15;
+  const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report'};
+  ctx.font = `bold ${useA4?20:13}px ${fontFam}`;
+  ctx.fillText(titles[currentReportType] || 'Report', pxWidth/2, y);
+
+  y += useA4?20:14;
+  ctx.textAlign = 'left';
+  ctx.font = `${useA4?12:9}px ${fontFam}`;
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  ctx.fillText(`Date : ${dstr}`, tableLeft, y);
+
+  // ---------- انوینٹری رپورٹ کی سمری — Total Items (All Categories) + In Stock + دونوں Stock Values ----------
+  if(currentReportType === 'inventory'){
+    const totalItemsCount = totalItemRows;
+    const totalStock = relevant.reduce((s,it)=>s+it.stock,0);
+    const stockValPurchase = relevant.reduce((s,it)=>s+(it.purchase*it.stock),0);
+    const stockValSales = relevant.reduce((s,it)=>s+(it.retail*it.stock),0);
+    const lineH = Math.round((useA4?24:17)*rowScaleSetting);
+    ctx.font = `bold ${useA4?14:10}px ${fontFam}`;
+    y += lineH; ctx.fillText(`Total Items (All Categories): ${totalItemsCount}`, tableLeft, y);
+    y += lineH; ctx.fillText(`In Stock: ${totalStock.toFixed(2)}`, tableLeft, y);
+    y += lineH; ctx.fillText(`Stock Value Purchase: ${stockValPurchase.toFixed(2)}`, tableLeft, y);
+    y += lineH; ctx.fillText(`Stock Value Sales: ${stockValSales.toFixed(2)}`, tableLeft, y);
+  }
+  y += 10;
+
+  // ---------- ٹیبل ہیڈر ----------
+  const headerTop = y;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
+  ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = `bold ${useA4?13:9.5}px ${fontFam}`;
+  cols.forEach(c => {
+    ctx.textAlign = c.align === 'right' ? 'right' : 'left';
+    const tx = c.align === 'right' ? c.x + c.width - 6 : c.x + 6;
+    ctx.fillText(c.label, tx, headerTop + headerRowH/2 + 4);
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
+  y = headerTop + headerRowH;
+
+  // ---------- ہر کیٹگری کا گروپ اور اس کے آئٹمز ----------
+  groups.forEach(g => {
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(tableLeft, y, totalW, catHeaderH);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `bold ${useA4?13:10}px ${fontFam}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(`${g.category}(${g.items.length})`, tableLeft+6, y + catHeaderH/2 + 4);
+    y += catHeaderH;
+    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(tableLeft, y); ctx.lineTo(tableRight, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tableLeft, y+2); ctx.lineTo(tableRight, y+2); ctx.stroke();
+    y += 5;
+
+    g.items.forEach((it) => {
+      const rh = baseRowH;
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
+
+      ctx.fillStyle = '#1a1a1a';
+      cols.forEach(c => {
+        if(c.key === 'name'){
+          ctx.font = `${bold ? 'bold ' : ''}${useA4?13:10}px ${fontFam}`;
+          ctx.textAlign = align === 'center' ? 'center' : 'left';
+          const tx = align === 'center' ? c.x + c.width/2 : c.x + 6;
+          ctx.fillText(String(it.name), tx, y + rh/2 + 4);
+        } else if(c.key === 'retail'){
+          ctx.font = `${useA4?13:10}px ${fontFam}`;
+          ctx.textAlign = 'right';
+          ctx.fillText(Number(it.retail).toFixed(2), c.x + c.width - 6, y + rh/2 + 4);
+        } else if(c.key === 'stock'){
+          ctx.font = `${useA4?13:10}px ${fontFam}`;
+          ctx.textAlign = 'right';
+          ctx.fillText(Number(it.stock).toFixed(2), c.x + c.width - 6, y + rh/2 + 4);
+        } else if(c.key === 'lowStockAt'){
+          ctx.font = `${useA4?13:10}px ${fontFam}`;
+          ctx.textAlign = 'right';
+          ctx.fillText(String(it.lowStockAt), c.x + c.width - 6, y + rh/2 + 4);
+        } else if(c.key === 'ps'){
+          ctx.font = `${useA4?11:8.5}px ${fontFam}`;
+          ctx.textAlign = 'right';
+          ctx.fillText(Number(it.purchase).toFixed(2), c.x + c.width - 6, y + rh/2 - 3);
+          ctx.fillText(Number(it.retail).toFixed(2), c.x + c.width - 6, y + rh/2 + 11);
+        } else if(c.key === 'profit'){
+          const profit = it.retail - it.purchase;
+          const profitPct = it.purchase > 0 ? (profit / it.purchase * 100) : 0;
+          ctx.font = `${useA4?11:8.5}px ${fontFam}`;
+          ctx.textAlign = 'right';
+          ctx.fillText(profit.toFixed(2), c.x + c.width - 6, y + rh/2 - 3);
+          ctx.fillText(profitPct.toFixed(2)+'%', c.x + c.width - 6, y + rh/2 + 11);
+        }
+      });
+      y += rh;
+    });
+  });
+}
+
+// ---------- پرنٹ — بالکل بل/انوائس والے یونیورسل پرنٹ پائپ لائن کے ذریعے (Android کا اپنا Print Service) ----------
+function printCurrentReport(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  applyPrintPageSize(AppState.settings.reportPrintStyle === 'a4' ? 210 : (AppState.settings.paperWidth || 80));
+  const area = document.getElementById('printReceiptArea');
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  document.body.classList.add('printing-invoice');
+  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+}
+
+// ---------- شیئر — فون کا نیٹو شیئر مینو کھلتا ہے (WhatsApp، WhatsApp Business، یا کوئی بھی ایپ منتخب کی جا سکتی ہے) ----------
+function shareReportImage(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the report image.'); return; }
+    const file = new File([blob], 'Report.png', {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'Report'}); }
+      catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
+}
+function shareReportWhatsapp(){ shareReportImage(); }
+function shareReportUniversal(){ shareReportImage(); }
 
 async function shareCustomerProfile(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
