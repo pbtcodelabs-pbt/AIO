@@ -16540,13 +16540,14 @@ async function renderReportToCanvas(){
     bodyTop += (summaryLineH * 4) + 10;
   }
   bodyTop += 10 + headerRowH;
-  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 30;
+  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 50;
   // ---------- فوٹر: پیمنٹ اکاؤنٹ + QR (اگر فعال ہو) — سائز محدود رکھا تاکہ رپورٹ غیرضروری لمبی/ڈبل صفحہ نہ بنے ----------
   const footerQrSize = useA4 ? 90 : 64;
   if(payAcc){
-    estimatedHeight += Math.round(fsFooter * 1.8) * 3 + 14; // پیغام + عنوان + نمبر کی 3 لائنیں
-    if(qrImg) estimatedHeight += footerQrSize + 10;
+    estimatedHeight += Math.round(fsFooter * 1.8) * 3 + 30;
+    if(qrImg) estimatedHeight += footerQrSize + 20;
   }
+  estimatedHeight += Math.round(40 * fontScale); // ---------- اضافی حفاظتی مارجن — زوم جتنا بڑا ہو، اتنا ہی تھوڑا اضافی نیچے خالی رکھیں تاکہ کبھی بھی مواد کٹے نہیں ----------
 
   canvas.width = pxWidth;
   canvas.height = Math.max(estimatedHeight, 300);
@@ -16610,9 +16611,8 @@ async function renderReportToCanvas(){
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${fsHeader}px ${fontFam}`;
   cols.forEach(c => {
-    ctx.textAlign = c.key === 'name' ? 'left' : 'right';
-    const tx = c.key === 'name' ? c.x + 6 : c.x + c.width - 6;
-    ctx.fillText(c.label, tx, headerTop + headerRowH/2 + 4);
+    ctx.textAlign = colTextAlign;
+    ctx.fillText(c.label, colTextX(c), headerTop + headerRowH/2 + 4);
     ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
   });
   ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
@@ -16698,7 +16698,8 @@ async function renderReportToCanvas(){
   }
 }
 
-function printCurrentReport(){
+async function printCurrentReport(){
+  await renderReportToCanvas(); // ---------- حفاظتی وجہ: یقینی بنائیں کہ کینوس بالکل تازہ اور مکمل ڈرا ہو چکا ہے، خاص طور پر ابھی ابھی زوم/سٹائل بدلنے کے فوری بعد پرنٹ دبانے کی صورت میں ----------
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
   applyPrintPageSize(AppState.settings.reportPrintStyle === 'a4' ? 210 : (AppState.settings.paperWidth || 80));
@@ -16709,7 +16710,8 @@ function printCurrentReport(){
 }
 
 // ---------- شیئر — فون کا نیٹو شیئر مینو کھلتا ہے (WhatsApp، WhatsApp Business، یا کوئی بھی ایپ منتخب کی جا سکتی ہے) ----------
-function shareReportImage(){
+async function shareReportImage(){
+  await renderReportToCanvas(); // ---------- یہاں بھی وہی حفاظتی وجہ — کبھی پرانا/ادھورا کینوس شیئر نہ ہو ----------
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
   canvas.toBlob(async (blob) => {
