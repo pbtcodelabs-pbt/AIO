@@ -34,7 +34,7 @@
     --font:'Segoe UI', system-ui, sans-serif;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:var(--font); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
+  body{font-family:var(--font); background:var(--bg); color:var(--text); height:100vh; height:100dvh; overflow:hidden;}
 
   /* ===================== LOGIN SCREEN ===================== */
   #loginScreen{
@@ -210,7 +210,7 @@
   .devChatOption .devChatIcon{font-size:18px;}
 
   /* ===================== APP SHELL ===================== */
-  #app{display:none; height:100vh; grid-template-columns:220px 1fr;}
+  #app{display:none; height:100vh; height:100dvh; grid-template-columns:220px 1fr;}
 
   /* --- Sidebar --- */
   #sidebar{background:var(--primary-dark); color:#fff; display:flex; flex-direction:column; padding:16px 0;}
@@ -1368,9 +1368,10 @@
     .categoryRail{flex-direction:row; overflow-x:auto; overflow-y:visible; max-height:none; flex:0 0 auto; width:100%; order:-1; margin-bottom:4px;}
     .categoryPill{flex:0 0 auto; white-space:nowrap; padding:8px 12px;}
 
-    /* ---------- body کا overflow-y:auto واپس بحال — اسے ہٹانے سے مواد مکمل ناقابلِ رسائی ہو گیا تھا
-       (پہلے کم از کم سلائیڈ کر کے نظر آ جاتا تھا)۔ اصل وجہ ابھی حل طلب ہے، دوبارہ تحقیق ضروری ---------- */
-    body{overflow-y:auto;}
+    /* ---------- اصل فکس: body کو overflow:hidden رکھیں — scrolling صرف #mainArea کے اندر ہو
+       body پر overflow-y:auto لگانے سے scrolling body level پر ہوتی تھی جس کی وجہ سے
+       goTo() میں resetMainAreaScroll کام نہیں کرتا تھا — نئی اسکرین نیچے چھپی رہتی تھی ---------- */
+    body{overflow:hidden;}
 
     /* --- حفاظتی جال: چاہے کہیں سے بھی کوئی چیز چوڑائی سے تجاوز کرے، پیج کبھی افقی طور پر نہ کھلے --- */
     html, body{max-width:100vw; overflow-x:hidden;}
@@ -1378,8 +1379,9 @@
     * { max-width: 100%; }
     input, select, button, textarea{max-width:100%; font-family:inherit;}
 
-    /* --- App shell: sidebar اب فکسڈ drawer بن جاتا ہے، مین ایریا پوری چوڑائی لیتا ہے --- */
-    #app{grid-template-columns:1fr; grid-template-rows:56px auto 1fr; height:100vh;}
+    /* --- App shell: sidebar اب فکسڈ drawer بن جاتا ہے، مین ایریا پوری چوڑائی لیتا ہے ---
+       100dvh = dynamic viewport height — موبائل براузر کے URL bar کو ہٹا کر اصل نظر آنے والی اونچائی --- */
+    #app{grid-template-columns:1fr; grid-template-rows:56px auto 1fr; height:100vh; height:100dvh; overflow:hidden;}
 
     #mobileTopbar{
       display:flex; align-items:center; gap:12px; padding:0 16px;
@@ -1439,7 +1441,9 @@
     }
     #sidebarOverlay.show{display:block;}
 
-    #mainArea{grid-column:1; grid-row:3; padding:14px; overflow-x:hidden;}
+    /* min-height:0 ضروری ہے CSS Grid میں — بغیر اس کے grid item اپنے content سے چھوٹا نہیں ہوتا
+       overscroll-behavior:contain — scroll کو mainArea تک محدود رکھیں، bounce سے body تک نہ پہنچے */
+    #mainArea{grid-column:1; grid-row:3; padding:14px; overflow-x:hidden; overflow-y:auto; min-height:0; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;}
 
     /* --- Billing screen: سرچ/کارٹ اوپر، چیک آؤٹ نیچے --- */
     .productGridFull{height:calc(100vh - 275px); margin-bottom:80px;}
@@ -4829,12 +4833,26 @@ function logout(){
 
 // ---------- NAVIGATION LOGIC ----------
 // ---------- مین اسکرولنگ ایریا کو ہمیشہ اوپر پر لے آئیں — کئی جگہ سے استعمال ہوتا ہے (goTo, dock بند ہونے پر وغیرہ) ----------
+// نوٹ: scrolling اب صرف #mainArea کے اندر ہے (body overflow:hidden ہے موبائل پر بھی)
+// اس لیے صرف mainArea.scrollTop=0 کافی ہے — body/window scroll ہمیشہ 0 ہی رہے گی
 window.resetMainAreaScroll = function(){
   const mainAreaEl = document.getElementById('mainArea');
-  if(mainAreaEl) mainAreaEl.scrollTop = 0;
+  if(mainAreaEl){ mainAreaEl.scrollTop = 0; }
   document.documentElement.scrollTop = 0;
   document.body.scrollTop = 0;
   window.scrollTo(0, 0);
+  // موبائل براؤزر کبھی کبھی render کے بعد scroll restore کرتے ہیں
+  // اس لیے 2 اضافی تاخیری کلیئر — پہلا next paint کے بعد، دوسرا 120ms پر
+  requestAnimationFrame(function(){
+    if(mainAreaEl){ mainAreaEl.scrollTop = 0; }
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  });
+  setTimeout(function(){
+    if(mainAreaEl){ mainAreaEl.scrollTop = 0; }
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, 120);
 };
 
 // ---------- Back/Forward نیویگیشن کے لیے اسکرین ہسٹری — goTo() ہر حقیقی نیویگیشن پر خودکار ریکارڈ کرتا ہے ----------
