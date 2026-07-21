@@ -1734,7 +1734,7 @@
         <div class="hbcIconsRow">
           <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now">💾</button>
           <button class="hbcChatBtn admin-only" onclick="document.getElementById('importBackupInputHome').click()" title="Restore Backup">🔄</button>
-          <button class="hbcChatBtn" onclick="goTo('myads')" title="My Ads — Promote This App">📣</button>
+          <button class="hbcChatBtn" onclick="openMyAdsModal()" title="My Ads — Promote This App">📣</button>
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
@@ -3671,12 +3671,15 @@
 </div>
 
 <!-- ===================== 📣 MY ADS — تیار شدہ اشتہاری پوسٹر، واٹس ایپ سٹیٹس/دوستوں کو بھیجنے کے لیے ===================== -->
-<div class="screen admin-only" id="screen-myads">
-  <div id="myAdsPosterWrap" style="text-align:center; margin:6px 0 14px;">
-    <div style="max-width:420px; aspect-ratio:784/1328; margin:0 auto; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; background:#f8fafc; border-radius:16px;">Building your poster…</div>
+<div class="modalOverlay" id="myAdsModal" onclick="if(event.target===this) closeMyAdsModal()">
+  <div class="modalBox" style="width:100%; max-width:440px; text-align:center; position:relative;">
+    <button onclick="closeMyAdsModal()" style="position:absolute; top:10px; left:10px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text);">✕</button>
+    <div id="myAdsPosterWrap" style="margin:6px 0 14px;">
+      <div style="max-width:380px; aspect-ratio:784/1328; margin:0 auto; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:13px; background:#f8fafc; border-radius:16px;">Building your poster…</div>
+    </div>
+    <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 Share on WhatsApp</button>
+    <input type="file" id="myAdsPosterFileInput" accept="image/*" style="display:none;" onchange="handleMyAdsPosterUpload(event)">
   </div>
-  <button class="checkoutBtn" style="width:auto; padding:10px 22px; display:block; margin:0 auto 90px; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 Share on WhatsApp</button>
-  <input type="file" id="myAdsPosterFileInput" accept="image/*" style="display:none;" onchange="handleMyAdsPosterUpload(event)">
 </div>
 
     <div class="modalOverlay" id="softResetModal" onclick="if(event.target===this) this.classList.remove('show')">
@@ -4916,7 +4919,6 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
-  if(screenName === 'myads') renderMyAdsScreen();
   if(screenName === 'payments') renderPaymentsScreen();
   if(screenName === 'trends') renderTrendsScreen();
 
@@ -5007,7 +5009,7 @@ const APP_SEARCH_INDEX = [
   {label:'Purchase Orders', path:'Purchase Orders', screen:'purchaseorders', keywords:'purchase order po restock get from low stock'},
   {label:'Payments', path:'Payments', screen:'payments', keywords:'payments record customer supplier receipt paid'},
   {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking'},
-  {label:'My Ads — Promote App', path:'My Ads', screen:'myads', keywords:'my ads poster promote advertisement share whatsapp flex'},
+  {label:'My Ads — Promote App', path:'My Ads', action:'openMyAdsModal', keywords:'my ads poster promote advertisement share whatsapp flex'},
   {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission'},
   {label:'Settings — Business Info', path:'Settings', screen:'settings', keywords:'business info name logo owner address phone shop details'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', keywords:'tax percentage gst enable bill'},
@@ -16063,18 +16065,30 @@ function getMyAdsPosterCanvas(){
   });
 }
 
-function renderMyAdsScreen(){
+// ---------- My Ads اب #mainArea کے اندر ایک "اسکرین" کی بجائے ایک مکمل الگ فکسڈ (position:fixed) modalOverlay ہے —
+// بالکل اسی طرح جیسے ایپ میں پہلے سے موجود دیگر تمام modals (cartSheetModal, quickAddModal وغیرہ) کام کرتے ہیں،
+// جو کبھی بھی خراب نہیں ہوئے۔ یہ #app کے CSS Grid لے آؤٹ سے مکمل آزاد ہے، اس لیے mainArea کا وہ پرانا،
+// بار بار واپس آنے والا اسکرول/اونچائی کا مسئلہ یہاں سرے سے پیدا ہی نہیں ہو سکتا ----------
+function openMyAdsModal(){
+  document.getElementById('myAdsModal').classList.add('show');
+  renderMyAdsModalContent();
+}
+function closeMyAdsModal(){
+  document.getElementById('myAdsModal').classList.remove('show');
+}
+
+function renderMyAdsModalContent(){
   const wrap = document.getElementById('myAdsPosterWrap');
   const posterURL = getActiveMyAdsPosterURL();
   const isCustom = !!AppState.settings.myAdsPosterOverride;
-  const renderToken = (renderMyAdsScreen._token = (renderMyAdsScreen._token || 0) + 1);
+  const renderToken = (renderMyAdsModalContent._token = (renderMyAdsModalContent._token || 0) + 1);
   // ---------- اہم فکس: تصویر کو DOM میں ڈالنے سے پہلے ہی پوری طرح decode() کر لیتے ہیں —
   // پرانے طریقے میں <img> فوری طور پر DOM میں شامل ہو جاتی تھی مگر بڑی base64 تصویر ڈی کوڈ ہونے میں وقت لگاتی،
   // اسی دوران صفحہ خالی/ادھورا نظر آتا اور ڈی کوڈ مکمل ہونے پر اچانک لے آؤٹ بدلنے سے صفحہ نیچے کھسک جاتا تھا —
   // اسی لیے یوزر کو نیچے سے مینوئل سلیکٹ کر کے اوپر لانا پڑتا تھا۔ اب decode() مکمل ہونے کے بعد ہی <img> شامل ہوتی ہے،
   // تو براؤزر پہلے سے تیار (cached) تصویر فوری، مکمل طور پر پینٹ کرتا ہے — کوئی دیر/جھٹکا نہیں ----------
   preloadMyAdsPoster(posterURL).then((img) => {
-    if(renderToken !== renderMyAdsScreen._token) return; // ---------- یوزر جلدی سے دوسری اسکرین پر جا چکا ہو تو پرانا رزلٹ نظرانداز ----------
+    if(renderToken !== renderMyAdsModalContent._token) return; // ---------- یوزر جلدی سے دوسری اسکرین پر جا چکا ہو تو پرانا رزلٹ نظرانداز ----------
     // ---------- تصویر پر خود کلک نہیں ہو سکتا، اس لیے نیچے اصل کام کرنے والے WhatsApp/Call/SMS بٹن + نمبر دیا گیا ہے ----------
     const rawNumber = (AppState.settings.devWhatsapp || '923206793793').replace(/\D/g, '');
     const displayNumber = '+' + rawNumber;
@@ -16120,7 +16134,7 @@ function handleMyAdsPosterUpload(event){
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       AppState.settings.myAdsPosterOverride = canvas.toDataURL('image/jpeg', 0.85);
       persistAllData();
-      renderMyAdsScreen();
+      renderMyAdsModalContent();
     };
     img.src = e.target.result;
   };
@@ -16131,7 +16145,7 @@ function handleMyAdsPosterUpload(event){
 function resetMyAdsPoster(){
   AppState.settings.myAdsPosterOverride = '';
   persistAllData();
-  renderMyAdsScreen();
+  renderMyAdsModalContent();
 }
 
 async function shareMyAdsPoster(){
