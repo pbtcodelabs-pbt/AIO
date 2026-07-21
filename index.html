@@ -3704,6 +3704,14 @@
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">💰 Purchase / Sale / Profit</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Purchase &amp; selling price, profit amount and profit % per item</div>
       </button>
+      <button onclick="openReportCategoryPicker('lowstock')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">⚠️ Low Stock Items</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Only items at or below their low-stock limit, category-wise</div>
+      </button>
+      <button onclick="openTodaySaleReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📅 Today's Sale Report</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Bills, sales, payments, expenses &amp; best-sellers for today</div>
+      </button>
     </div>
   </div>
 </div>
@@ -16359,16 +16367,28 @@ function generateSelectedReport(){
   if(checked.length === 0){ alert('Please select at least one category.'); return; }
   currentReportCategories = checked;
   closeReportCategoryModal();
-  const titles = {pricelist:'📋 Price List', inventory:'📦 Inventory Report', profit:'💰 Purchase / Sale / Profit'};
+  const titles = {pricelist:'📋 Price List', inventory:'📦 Inventory Report', profit:'💰 Purchase / Sale / Profit', lowstock:'⚠️ Low Stock Items', todaysale:"📅 Today's Sale Report"};
   document.getElementById('reportPreviewTitle').textContent = titles[currentReportType] || '🖨️ Report Preview';
   const showStockWrap = document.getElementById('rpscShowStockWrap');
-  if(showStockWrap) showStockWrap.style.display = currentReportType === 'inventory' ? 'none' : 'flex';
+  if(showStockWrap) showStockWrap.style.display = (currentReportType === 'inventory' || currentReportType === 'lowstock' || currentReportType === 'todaysale') ? 'none' : 'flex';
   syncReportStyleControls();
   document.getElementById('reportPreviewModal').classList.add('show');
   setTimeout(() => renderReportToCanvas(), 100);
 }
 function closeReportPreview(){
   document.getElementById('reportPreviewModal').classList.remove('show');
+}
+
+// ---------- 📅 Today's Sale Report — کیٹگری کی ضرورت نہیں (پراڈکٹ کیٹگری بیسڈ نہیں)، سیدھا پریویو کھلتی ہے ----------
+function openTodaySaleReport(){
+  currentReportType = 'todaysale';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "📅 Today's Sale Report";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
 }
 
 // ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
@@ -16444,11 +16464,13 @@ function toggleReportShowStock(checked){
 async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
+  if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
 
   const allItems = getReportFlatItems();
-  const relevant = allItems.filter(it => currentReportCategories.includes(it.category));
+  let relevant = allItems.filter(it => currentReportCategories.includes(it.category));
+  if(currentReportType === 'lowstock') relevant = relevant.filter(it => it.stock <= it.lowStockAt); // ---------- صرف وہ آئٹمز جن کا سٹاک لمٹ تک یا اس سے نیچے آ چکا ہے ----------
   const groupsMap = {};
   relevant.forEach(it => { (groupsMap[it.category] = groupsMap[it.category] || []).push(it); });
   const groups = Object.keys(groupsMap).sort().map(cat => ({category: cat, items: groupsMap[cat]}));
@@ -16551,6 +16573,8 @@ async function renderReportToCanvas(){
   let bodyTop = headerBandH;
   if(currentReportType === 'inventory'){
     bodyTop += (summaryLineH * 4) + 10;
+  } else if(currentReportType === 'lowstock'){
+    bodyTop += summaryLineH + 10;
   }
   bodyTop += 10 + headerRowH;
   let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 50;
@@ -16584,7 +16608,7 @@ async function renderReportToCanvas(){
     ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y);
   }
   y += Math.round(fsSubtitle * 1.7);
-  const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report'};
+  const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report', lowstock:'Low Stock Items'};
   ctx.font = `bold ${fsSubtitle}px ${fontFam}`;
   ctx.fillText(titles[currentReportType] || 'Report', pxWidth/2, y);
 
@@ -16606,6 +16630,9 @@ async function renderReportToCanvas(){
     y += summaryLineH; ctx.fillText(`In Stock: ${totalStock.toFixed(2)}`, tableLeft, y);
     y += summaryLineH; ctx.fillText(`Stock Value Purchase: ${stockValPurchase.toFixed(2)}`, tableLeft, y);
     y += summaryLineH; ctx.fillText(`Stock Value Sales: ${stockValSales.toFixed(2)}`, tableLeft, y);
+  } else if(currentReportType === 'lowstock'){
+    ctx.font = `bold ${fsSummary}px ${fontFam}`;
+    y += summaryLineH; ctx.fillText(`Total Low Stock Items: ${totalItemRows}`, tableLeft, y);
   }
   y += 10;
 
@@ -16676,6 +16703,216 @@ async function renderReportToCanvas(){
       y += rh;
     });
   });
+}
+
+// ---------- 📅 Today's Sale Report — بلنگ، پیمنٹس، اخراجات اور ڈائری سے آج کا خلاصہ + سب سے زیادہ بکنے والے آئٹمز اوپر ----------
+async function renderTodaySaleReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+
+  const todayStr = toLocalDateStr(new Date());
+
+  // ---------- آج کے بل ----------
+  const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr);
+  const totalBills = todayInvoices.length;
+  const totalSales = todayInvoices.reduce((s, inv) => s + (inv.grand_total || 0), 0);
+
+  // ---------- آج کی پیمنٹس (کسٹمر سے وصولی + سپلائر کو ادائیگی) ----------
+  const todayPayments = (paymentsData || []).filter(p => p.date === todayStr);
+  const customerPaymentsReceived = todayPayments.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s,p) => s + (p.amount||0), 0);
+  const supplierPaymentsMade = todayPayments.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s,p) => s + (p.amount||0), 0);
+
+  // ---------- آج کے اخراجات ----------
+  const todayExpenses = (typeof expenseData !== 'undefined' ? expenseData : []).filter(e => e.date === todayStr).reduce((s,e) => s + (e.amount||0), 0);
+
+  // ---------- اوپننگ کیش (Settings سے) ----------
+  const openingCash = AppState.settings.openingCashBalance || 0;
+
+  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب) + سپلائرز کا کل بقایہ (Liabilities) ----------
+  let diaryPayable = 0, diaryReceivable = 0;
+  (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
+    if(e.balance < 0) diaryPayable += Math.abs(e.balance);
+    else if(e.balance > 0) diaryReceivable += e.balance;
+  });
+  const totalSupplierPayable = (suppliersData || []).reduce((s,sup) => s + (sup.total_payable || 0), 0);
+  const totalLiabilities = totalSupplierPayable + diaryPayable;
+
+  // ---------- آئٹم وائز فروخت — سب سے زیادہ بکنے والا سب سے اوپر ----------
+  const itemQtyMap = {};
+  todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
+    itemQtyMap[it.name] = (itemQtyMap[it.name] || 0) + (it.qty || 0);
+  }));
+  const soldItems = Object.keys(itemQtyMap).map(name => ({name, qty: itemQtyMap[name]})).sort((a,b) => b.qty - a.qty);
+
+  // ---------- فونٹ سکیل — باقی رپورٹس جیسی ہی سیٹنگز ----------
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const align = AppState.settings.reportAlign || 'left';
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  try{
+    await document.fonts.load(`bold 20px ${fontFam}`);
+    await document.fonts.load(`13px ${fontFam}`);
+    await document.fonts.ready;
+  }catch(e){}
+
+  const logoURL = AppState.settings.businessLogo || '';
+  const logoImg = await new Promise((resolve) => {
+    if(!logoURL){ resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = logoURL;
+  });
+
+  const base = useA4 ? 2.3 : 1.65;
+  const fsTitle    = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(13 * base * fontScale);
+  const fsSmall    = Math.round(9  * base * fontScale);
+  const fsSummary  = Math.round(10 * base * fontScale);
+  const fsHeader   = Math.round(9.5* base * fontScale);
+  const fsItem     = Math.round(10 * base * fontScale);
+
+  const margin = useA4 ? 40 : 8;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const baseRowH   = Math.round(fsItem    * 2.3 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader  * 2.6 * rowScaleSetting);
+  const summaryLineH = Math.round(fsSummary * 1.9 * rowScaleSetting);
+  const logoH = logoImg ? (useA4 ? 100 : 60) : 0;
+  const logoW = logoImg ? Math.round(logoH * (logoImg.naturalWidth / logoImg.naturalHeight)) : 0;
+
+  // ---------- کالمز: آئٹم | فروخت شدہ مقدار ----------
+  const qtyW = Math.round(totalW * (useA4?0.22:0.28));
+  const cols = [
+    {key:'name', label:'Item', width: totalW - qtyW},
+    {key:'qty', label:'Qty Sold', width: qtyW},
+  ];
+  let cxPos = tableLeft;
+  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+  const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
+  const colTextAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
+
+  // ---------- کل اونچائی کا حساب — 9 سمری لائنیں + آئٹم ٹیبل ----------
+  let headerBandH = useA4 ? 78 : 46;
+  if(logoImg) headerBandH += logoH + 8;
+  if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
+  const summaryLinesCount = 9;
+  let bodyTop = headerBandH + (summaryLineH * summaryLinesCount) + 16 + headerRowH;
+  let estimatedHeight = bodyTop + (soldItems.length * baseRowH) + 50;
+  estimatedHeight += Math.round(40 * fontScale);
+  if(soldItems.length === 0) estimatedHeight += baseRowH + 20; // ---------- "آج کوئی فروخت نہیں" کا پیغام دکھانے کی جگہ ----------
+
+  canvas.width = pxWidth;
+  canvas.height = Math.max(estimatedHeight, 300);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  // ---------- ہیڈر ----------
+  let y = useA4 ? 16 : 10;
+  if(logoImg){
+    ctx.drawImage(logoImg, pxWidth/2 - logoW/2, y, logoW, logoH);
+    y += logoH + 8;
+  }
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = `bold ${fsTitle}px ${fontFam}`;
+  y += fsTitle;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
+  if(AppState.settings.businessAddress){
+    y += Math.round(fsSmall * 1.6);
+    ctx.font = `${fsSmall}px ${fontFam}`;
+    ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y);
+  }
+  if(AppState.settings.businessPhone){
+    y += Math.round(fsSmall * 1.6);
+    ctx.font = `${fsSmall}px ${fontFam}`;
+    ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y);
+  }
+  y += Math.round(fsSubtitle * 1.7);
+  ctx.font = `bold ${fsSubtitle}px ${fontFam}`;
+  ctx.fillText("Today's Sale Report", pxWidth/2, y);
+
+  y += Math.round(fsSmall * 2);
+  ctx.textAlign = 'left';
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  ctx.fillText(`Date : ${dstr}`, tableLeft, y);
+  y += 10;
+
+  // ---------- سمری لائنیں ----------
+  const summaryRows = [
+    [`Total Bills`, String(totalBills)],
+    [`Total Sales`, `Rs. ${totalSales.toLocaleString()}`],
+    [`Payments Received (Customers)`, `Rs. ${customerPaymentsReceived.toLocaleString()}`],
+    [`Payments Made (Suppliers)`, `Rs. ${supplierPaymentsMade.toLocaleString()}`],
+    [`Today's Expenses`, `Rs. ${todayExpenses.toLocaleString()}`],
+    [`Opening Cash`, `Rs. ${openingCash.toLocaleString()}`],
+    [`Diary Receivable`, `Rs. ${diaryReceivable.toLocaleString()}`],
+    [`Diary Payable`, `Rs. ${diaryPayable.toLocaleString()}`],
+    [`Total Liabilities`, `Rs. ${totalLiabilities.toLocaleString()}`],
+  ];
+  ctx.font = `bold ${fsSummary}px ${fontFam}`;
+  summaryRows.forEach(([label, value]) => {
+    y += summaryLineH;
+    ctx.textAlign = 'left';
+    ctx.fillText(label + ':', tableLeft, y);
+    ctx.textAlign = 'right';
+    ctx.fillText(value, tableRight, y);
+  });
+  y += 10;
+
+  // ---------- ٹیبل ہیڈر ----------
+  const headerTop = y;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
+  ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = `bold ${fsHeader}px ${fontFam}`;
+  cols.forEach(c => {
+    ctx.textAlign = colTextAlign;
+    ctx.fillText(c.label, colTextX(c), headerTop + headerRowH/2 + 4);
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
+  y = headerTop + headerRowH;
+
+  // ---------- آئٹمز — سب سے زیادہ بکنے والا سب سے اوپر ----------
+  if(soldItems.length === 0){
+    const rh = baseRowH;
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+    ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+    ctx.fillStyle = '#64748b';
+    ctx.font = `${fsItem}px ${fontFam}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('No sales recorded today', pxWidth/2, y + rh/2 + fsItem*0.32);
+    y += rh;
+  } else {
+    soldItems.forEach((it) => {
+      const rh = baseRowH;
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
+      ctx.fillStyle = '#1a1a1a';
+      ctx.textAlign = colTextAlign;
+      cols.forEach(c => {
+        if(c.key === 'name'){
+          ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
+          ctx.fillText(String(it.name), colTextX(c), y + rh/2 + fsItem*0.32);
+        } else if(c.key === 'qty'){
+          ctx.font = `${fsItem}px ${fontFam}`;
+          ctx.fillText(String(it.qty), colTextX(c), y + rh/2 + fsItem*0.32);
+        }
+      });
+      y += rh;
+    });
+  }
 }
 
 async function printCurrentReport(){
