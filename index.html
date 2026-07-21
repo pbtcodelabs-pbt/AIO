@@ -3633,7 +3633,7 @@
         </label>
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
           <input type="checkbox" id="printShowPaymentAccountChk" onchange="updatePrintToggle('printShowPaymentAccount', this.checked)" style="width:18px; height:18px; margin:0;">
-          <span style="font-size:13px;">Show Payment Account(s) marked "🧾" in footer, so customers can pay you — tick which accounts in My Payment Accounts</span>
+          <span style="font-size:13px;">Show Payment Account(s) marked "🧾" in footer, so customers can pay you — tick which accounts in My Payment Accounts. If the first shown account has a QR code saved, it's also printed below so customers can scan to pay directly.</span>
         </label>
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0;">
           <input type="checkbox" id="printShowBrandingChk" onchange="updatePrintToggle('printShowBranding', this.checked)" style="width:18px; height:18px; margin:0;">
@@ -3766,9 +3766,6 @@
         </label>
         <label id="rpscShowStockWrap" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
           <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)" style="width:16px; height:16px;"> Show In Stock Qty
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
-          <input type="checkbox" id="rpscPayAccChk" onchange="toggleReportShowPaymentAccount(this.checked)" style="width:16px; height:16px;"> 💳 Show Payment Account
         </label>
       </div>
     </div>
@@ -4345,7 +4342,6 @@ const DEFAULT_SETTINGS = {
   reportAlign: 'left',
   reportPrintStyle: 'thermal',    // 'thermal' | 'a4'
   reportShowStockQty: false,      // Price List/Profit رپورٹس میں سٹاک کی مقدار دکھائیں یا نہیں (کسٹمر کو بھیجتے وقت عام طور پر چھپی رہے)
-  reportShowPaymentAccount: false, // رپورٹ کے فوٹر پر منتخب پیمنٹ اکاؤنٹ (Receipt پر دکھانے کے لیے مارک شدہ) + اس کا QR کوڈ دکھائیں
 };
 const AppState = {
   currentUser: null,
@@ -13778,6 +13774,17 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const canvas = document.getElementById('invoiceCanvas');
   const scale = pxWidth / 576;
 
+  // ---------- پیمنٹ اکاؤنٹ + QR — اگر فعال ہو تو پہلے ہی لوڈ کر لیتے ہیں تاکہ اونچائی کا حساب پہلے سے درست ہو ----------
+  const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
+  const receiptQrURL = (AppState.settings.printShowPaymentAccount && receiptAccounts.length && receiptAccounts[0].qr) ? receiptAccounts[0].qr : '';
+  const receiptQrImg = await new Promise((resolve) => {
+    if(!receiptQrURL){ resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = receiptQrURL;
+  });
+
   // ---------- ٹیبل کالمز کی چوڑائی — پیپر سائز کے تناسب سے، تاکہ 58mm اور 80mm دونوں پر صحیح فٹ ہوں ----------
   const noW = Math.round(28 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
   const tableLeft = 8, tableRight = pxWidth - 8;
@@ -13805,8 +13812,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += 34; // Grand Total لائن
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
-  const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
   if(AppState.settings.printShowPaymentAccount && receiptAccounts.length) estimatedHeight += 20 + (receiptAccounts.length * 16);
+  if(receiptQrImg) estimatedHeight += 90; // ---------- QR کوڈ کے لیے اضافی جگہ (سکین ہو سکنے والا مناسب سائز) ----------
   if(AppState.settings.printShowBranding) estimatedHeight += 20;
   estimatedHeight += 40; // فوٹر + مارجن
 
@@ -14035,6 +14042,24 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       y += 16;
       ctx.fillText(`💳 ${acc.type || ''}: ${acc.number || ''}`, pxWidth/2, y);
     });
+    if(receiptQrImg){
+      y += 12;
+      const qrSize = 80;
+      const qrX = pxWidth/2 - qrSize/2;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(qrX-4, y-4, qrSize+8, qrSize+8);
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeRect(qrX-4, y-4, qrSize+8, qrSize+8);
+      ctx.save();
+      ctx.imageSmoothingEnabled = false; // ---------- QR کے مربعے دھندلے نہ ہوں — سکیننگ ہمیشہ درست کام کرے ----------
+      ctx.drawImage(receiptQrImg, qrX, y, qrSize, qrSize);
+      ctx.restore();
+      y += qrSize;
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = F('10px');
+      y += 14;
+      ctx.fillText('Scan to Pay', pxWidth/2, y);
+    }
   }
   if(AppState.settings.printShowBranding){
     y += 18;
@@ -16363,7 +16388,6 @@ function syncReportStyleControls(){
   document.getElementById('rpscAlignRightBtn').classList.toggle('active', align === 'right');
   document.getElementById('rpscA4Chk').checked = AppState.settings.reportPrintStyle === 'a4';
   document.getElementById('rpscShowStockChk').checked = !!AppState.settings.reportShowStockQty;
-  document.getElementById('rpscPayAccChk').checked = !!AppState.settings.reportShowPaymentAccount;
 
   const fontSelect = document.getElementById('rpscFontFamilySelect');
   if(fontSelect){
@@ -16417,11 +16441,6 @@ function toggleReportShowStock(checked){
   persistAllData();
   renderReportToCanvas();
 }
-function toggleReportShowPaymentAccount(checked){
-  AppState.settings.reportShowPaymentAccount = checked;
-  persistAllData();
-  renderReportToCanvas();
-}
 
 // ---------- اصل کینوس ڈرائنگ — تینوں رپورٹس اسی ایک فنکشن سے بنتی ہیں، بس currentReportType کے مطابق کالمز بدل جاتے ہیں ----------
 async function renderReportToCanvas(){
@@ -16443,11 +16462,6 @@ async function renderReportToCanvas(){
   const bold = AppState.settings.reportBoldItems !== false;
   const align = AppState.settings.reportAlign || 'left'; // ---------- اب یہ ہر کالم (نام + قیمتیں + سٹاک وغیرہ) پر یکساں لاگو ہوتا ہے ----------
   const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
-  const showPayAcc = !!AppState.settings.reportShowPaymentAccount;
-  // ---------- نوٹ: پہلے یہاں غلطی سے acc.showOnReceipt (جو صرف بل کی سیٹنگ ہے) کی شرط لگی ہوئی تھی —
-  // اسی لیے یوزر کے "Show Payment Account" ٹِک کرنے کے باوجود کچھ نظر نہیں آ رہا تھا (ان کا اکاؤنٹ
-  // showOnReceipt پر کبھی آن نہیں کیا گیا تھا)۔ اب رپورٹ کا اپنا ٹِک ہی کافی ہے — پہلا محفوظ شدہ اکاؤنٹ دکھائیں ----------
-  const payAcc = showPayAcc ? (AppState.settings.paymentAccounts || [])[0] : null;
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
@@ -16457,10 +16471,11 @@ async function renderReportToCanvas(){
     await document.fonts.ready;
   }catch(e){}
 
-  // ---------- بزنس لوگو اور فوٹر QR — ڈرائنگ سے پہلے ہی decode کر لیتے ہیں تاکہ اونچائی کا حساب پہلے سے درست ہو
+  // ---------- بزنس لوگو — ڈرائنگ سے پہلے ہی decode کر لیتے ہیں تاکہ اونچائی کا حساب پہلے سے درست ہو
   // اور بیچ میں canvas.height دوبارہ سیٹ نہ کرنی پڑے (ورنہ ڈرائنگ صاف ہو جاتی ہے) ----------
+  // ---------- نوٹ: پیمنٹ اکاؤنٹ/QR فوٹر یہاں سے ہٹا دیا گیا — رپورٹس صرف ریکارڈ چیک کرنے کے لیے ہیں،
+  // پیمنٹ اکاؤنٹ کی جگہ اصل بل کی رسید پر ہونی چاہیے (وہاں شامل کر دیا گیا ہے) ----------
   const logoURL = AppState.settings.businessLogo || '';
-  const qrURL = (payAcc && payAcc.qr) ? payAcc.qr : '';
   const loadImg = (src) => new Promise((resolve) => {
     if(!src){ resolve(null); return; }
     const img = new Image();
@@ -16468,7 +16483,7 @@ async function renderReportToCanvas(){
     img.onerror = () => resolve(null);
     img.src = src;
   });
-  const [logoImg, qrImg] = await Promise.all([loadImg(logoURL), loadImg(qrURL)]);
+  const logoImg = await loadImg(logoURL);
 
   // ---------- تمام فونٹ سائز یہاں ایک جگہ، fontScale سے ضرب کر کے — رو کی اونچائیاں بھی انہی سے اخذ ہوتی ہیں
   // تاکہ زوم بڑھانے پر لکھائی اور لائن کی جگہ ساتھ ساتھ بڑھیں، ایک دوسرے پر چڑھیں نہیں ----------
@@ -16541,12 +16556,6 @@ async function renderReportToCanvas(){
   }
   bodyTop += 10 + headerRowH;
   let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 50;
-  // ---------- فوٹر: پیمنٹ اکاؤنٹ + QR (اگر فعال ہو) — سائز محدود رکھا تاکہ رپورٹ غیرضروری لمبی/ڈبل صفحہ نہ بنے ----------
-  const footerQrSize = useA4 ? 90 : 64;
-  if(payAcc){
-    estimatedHeight += Math.round(fsFooter * 1.8) * 3 + 30;
-    if(qrImg) estimatedHeight += footerQrSize + 20;
-  }
   estimatedHeight += Math.round(40 * fontScale); // ---------- اضافی حفاظتی مارجن — زوم جتنا بڑا ہو، اتنا ہی تھوڑا اضافی نیچے خالی رکھیں تاکہ کبھی بھی مواد کٹے نہیں ----------
 
   canvas.width = pxWidth;
@@ -16669,33 +16678,6 @@ async function renderReportToCanvas(){
       y += rh;
     });
   });
-
-  // ---------- فوٹر: پیمنٹ اکاؤنٹ کی تفصیل + QR کوڈ (اگر فعال ہو) ----------
-  if(payAcc){
-    y += 16;
-    ctx.textAlign = 'center';
-    ctx.font = `bold ${fsFooter}px ${fontFam}`;
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillText('Please send your payment to this account:', pxWidth/2, y);
-    y += Math.round(fsFooter * 1.8);
-    ctx.font = `${fsFooter}px ${fontFam}`;
-    ctx.fillText(`${payAcc.name || ''} — ${payAcc.type || ''}`, pxWidth/2, y);
-    y += Math.round(fsFooter * 1.8);
-    ctx.font = `bold ${fsFooter}px ${fontFam}`;
-    ctx.fillText(payAcc.number || '', pxWidth/2, y);
-    if(qrImg){
-      y += 10;
-      const qrX = pxWidth/2 - footerQrSize/2;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(qrX-4, y-4, footerQrSize+8, footerQrSize+8);
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.strokeRect(qrX-4, y-4, footerQrSize+8, footerQrSize+8);
-      ctx.save();
-      ctx.imageSmoothingEnabled = false; // ---------- QR کے مربعے دھندلے نہ ہوں — سکیننگ ہمیشہ درست کام کرے ----------
-      ctx.drawImage(qrImg, qrX, y, footerQrSize, footerQrSize);
-      ctx.restore();
-    }
-  }
 }
 
 async function printCurrentReport(){
