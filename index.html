@@ -3736,9 +3736,9 @@
       <div class="pscRow" style="flex:1 1 100%;">
         <span class="pscLabel">🔠 Zoom</span>
         <span style="font-size:11px; color:var(--muted);">A</span>
-        <input type="range" id="rpscFontScaleSlider" min="100" max="400" step="10" value="150" oninput="setReportZoom(this.value)" style="flex:1;">
+        <input type="range" id="rpscFontScaleSlider" min="100" max="400" step="10" value="100" oninput="setReportZoom(this.value)" style="flex:1;">
         <span style="font-size:19px; color:var(--muted);">A</span>
-        <span class="pscValue" id="rpscFontScaleVal" style="min-width:44px; text-align:right;">150%</span>
+        <span class="pscValue" id="rpscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
       </div>
       <div class="pscRow">
         <span class="pscLabel">↕ Row</span>
@@ -3753,22 +3753,28 @@
       <div class="pscRow">
         <button id="rpscAlignLeftBtn" class="pscToggleBtn" onclick="setReportAlign('left')">⬅ Left</button>
         <button id="rpscAlignCenterBtn" class="pscToggleBtn" onclick="setReportAlign('center')">↔ Center</button>
+        <button id="rpscAlignRightBtn" class="pscToggleBtn" onclick="setReportAlign('right')">➡ Right</button>
       </div>
       <div class="pscRow" style="flex:1 1 100%;">
         <span class="pscLabel">🅰️ Font</span>
         <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
       </div>
-      <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px;">
+      <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
         <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
           <input type="checkbox" id="rpscA4Chk" onchange="toggleReportPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
         </label>
         <label id="rpscShowStockWrap" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
           <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)" style="width:16px; height:16px;"> Show In Stock Qty
         </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+          <input type="checkbox" id="rpscPayAccChk" onchange="toggleReportShowPaymentAccount(this.checked)" style="width:16px; height:16px;"> 💳 Show Payment Account
+        </label>
       </div>
     </div>
 
-    <canvas id="reportCanvas"></canvas>
+    <div style="overflow-y:auto; max-height:52vh; border-top:1px solid #eee;">
+      <canvas id="reportCanvas"></canvas>
+    </div>
     <div class="previewActions">
       <button class="btnPrint" onclick="printCurrentReport()">🖨️ Print</button>
       <button class="btnWhatsapp" onclick="shareReportWhatsapp()">📱 WhatsApp</button>
@@ -4332,12 +4338,13 @@ const DEFAULT_SETTINGS = {
   // جان بوجھ کر بل کی سیٹنگز (printFontId وغیرہ) سے مکمل الگ رکھی گئی ہیں تاکہ یہ صرف رپورٹ پرنٹنگ
   // پر اثر کریں، پوری ایپ یا بل پرنٹنگ پر کبھی نہیں ----------
   reportFontId: 'segoe',
-  reportFontScale: 150,
-  reportRowScale: 130,
+  reportFontScale: 100,
+  reportRowScale: 100,
   reportBoldItems: true,
   reportAlign: 'left',
   reportPrintStyle: 'thermal',    // 'thermal' | 'a4'
   reportShowStockQty: false,      // Price List/Profit رپورٹس میں سٹاک کی مقدار دکھائیں یا نہیں (کسٹمر کو بھیجتے وقت عام طور پر چھپی رہے)
+  reportShowPaymentAccount: false, // رپورٹ کے فوٹر پر منتخب پیمنٹ اکاؤنٹ (Receipt پر دکھانے کے لیے مارک شدہ) + اس کا QR کوڈ دکھائیں
 };
 const AppState = {
   currentUser: null,
@@ -16342,18 +16349,20 @@ function closeReportPreview(){
 
 // ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
 function syncReportStyleControls(){
-  document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 150) + '%';
+  document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 100) + '%';
   const zoomSlider = document.getElementById('rpscFontScaleSlider');
-  if(zoomSlider) zoomSlider.value = AppState.settings.reportFontScale || 150;
-  document.getElementById('rpscRowScaleVal').textContent = (AppState.settings.reportRowScale || 130) + '%';
+  if(zoomSlider) zoomSlider.value = AppState.settings.reportFontScale || 100;
+  document.getElementById('rpscRowScaleVal').textContent = (AppState.settings.reportRowScale || 100) + '%';
   const isBold = AppState.settings.reportBoldItems !== false;
   document.getElementById('rpscBoldBtn').classList.toggle('active', isBold);
   document.getElementById('rpscThinBtn').classList.toggle('active', !isBold);
   const align = AppState.settings.reportAlign || 'left';
   document.getElementById('rpscAlignLeftBtn').classList.toggle('active', align === 'left');
   document.getElementById('rpscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('rpscAlignRightBtn').classList.toggle('active', align === 'right');
   document.getElementById('rpscA4Chk').checked = AppState.settings.reportPrintStyle === 'a4';
   document.getElementById('rpscShowStockChk').checked = !!AppState.settings.reportShowStockQty;
+  document.getElementById('rpscPayAccChk').checked = !!AppState.settings.reportShowPaymentAccount;
 
   const fontSelect = document.getElementById('rpscFontFamilySelect');
   if(fontSelect){
@@ -16370,7 +16379,7 @@ function setReportFontFamily(fontId){
   renderReportToCanvas();
 }
 function setReportZoom(pct){
-  const clamped = Math.max(100, Math.min(400, Number(pct) || 150));
+  const clamped = Math.max(100, Math.min(400, Number(pct) || 100));
   AppState.settings.reportFontScale = clamped;
   const label = document.getElementById('rpscFontScaleVal');
   if(label) label.textContent = clamped + '%';
@@ -16407,6 +16416,11 @@ function toggleReportShowStock(checked){
   persistAllData();
   renderReportToCanvas();
 }
+function toggleReportShowPaymentAccount(checked){
+  AppState.settings.reportShowPaymentAccount = checked;
+  persistAllData();
+  renderReportToCanvas();
+}
 
 // ---------- اصل کینوس ڈرائنگ — تینوں رپورٹس اسی ایک فنکشن سے بنتی ہیں، بس currentReportType کے مطابق کالمز بدل جاتے ہیں ----------
 async function renderReportToCanvas(){
@@ -16423,11 +16437,13 @@ async function renderReportToCanvas(){
 
   // ---------- 🔠 فونٹ سکیل — پہلے یہ سیٹنگ صرف % لیبل میں دکھتی تھی، اصل کینوس فونٹ سائز پر کبھی لاگو نہیں ہوتی تھی
   // (یہی اصل وجہ تھی کہ زوم سلائیڈر بڑھانے پر بھی رپورٹ چھوٹی رہتی تھی) — اب ہر فونٹ سائز اسی سے ضرب ہوتا ہے ----------
-  const fontScale = (AppState.settings.reportFontScale || 150) / 100;
-  const rowScaleSetting = (AppState.settings.reportRowScale || 130) / 100;
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
-  const align = AppState.settings.reportAlign || 'left';
+  const align = AppState.settings.reportAlign || 'left'; // ---------- اب یہ ہر کالم (نام + قیمتیں + سٹاک وغیرہ) پر یکساں لاگو ہوتا ہے ----------
   const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
+  const showPayAcc = !!AppState.settings.reportShowPaymentAccount;
+  const payAcc = showPayAcc ? (AppState.settings.paymentAccounts || []).find(a => a.showOnReceipt) : null;
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
@@ -16437,9 +16453,22 @@ async function renderReportToCanvas(){
     await document.fonts.ready;
   }catch(e){}
 
+  // ---------- بزنس لوگو اور فوٹر QR — ڈرائنگ سے پہلے ہی decode کر لیتے ہیں تاکہ اونچائی کا حساب پہلے سے درست ہو
+  // اور بیچ میں canvas.height دوبارہ سیٹ نہ کرنی پڑے (ورنہ ڈرائنگ صاف ہو جاتی ہے) ----------
+  const logoURL = AppState.settings.businessLogo || '';
+  const qrURL = (payAcc && payAcc.qr) ? payAcc.qr : '';
+  const loadImg = (src) => new Promise((resolve) => {
+    if(!src){ resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+  const [logoImg, qrImg] = await Promise.all([loadImg(logoURL), loadImg(qrURL)]);
+
   // ---------- تمام فونٹ سائز یہاں ایک جگہ، fontScale سے ضرب کر کے — رو کی اونچائیاں بھی انہی سے اخذ ہوتی ہیں
   // تاکہ زوم بڑھانے پر لکھائی اور لائن کی جگہ ساتھ ساتھ بڑھیں، ایک دوسرے پر چڑھیں نہیں ----------
-  const base = useA4 ? 1.55 : 1; // A4 پر تھوڑا بڑا بیس، تھرمل کاغذ کی چوڑائی محدود ہے
+  const base = useA4 ? 2.3 : 1.65; // ---------- پہلے 100% زوم پر لکھائی بہت باریک تھی — اب 100% خود ہی آرام سے پڑھنے لائق ----------
   const fsTitle    = Math.round(15 * base * fontScale);
   const fsSubtitle = Math.round(13 * base * fontScale);
   const fsSmall    = Math.round(9  * base * fontScale);
@@ -16448,6 +16477,7 @@ async function renderReportToCanvas(){
   const fsCatHead  = Math.round(10 * base * fontScale);
   const fsItem     = Math.round(10 * base * fontScale);
   const fsItemSm   = Math.round(8.5* base * fontScale);
+  const fsFooter   = Math.round(9.5* base * fontScale);
 
   const margin = useA4 ? 40 : 8;
   const tableLeft = margin, tableRight = pxWidth - margin;
@@ -16456,6 +16486,8 @@ async function renderReportToCanvas(){
   const headerRowH = Math.round(fsHeader  * 2.6 * rowScaleSetting);
   const catHeaderH = Math.round(fsCatHead * 2.3 * rowScaleSetting);
   const summaryLineH = Math.round(fsSummary * 1.9 * rowScaleSetting);
+  const logoH = logoImg ? Math.min(useA4 ? 100 : 60, Math.round((useA4?100:60))) : 0;
+  const logoW = logoImg ? Math.round(logoH * (logoImg.naturalWidth / logoImg.naturalHeight)) : 0;
 
   // ---------- رپورٹ کی قسم کے مطابق کالمز ----------
   let cols;
@@ -16463,42 +16495,54 @@ async function renderReportToCanvas(){
     const priceW = Math.round(totalW * (useA4?0.20:0.28));
     const stockW = showStock ? Math.round(totalW * (useA4?0.16:0.22)) : 0;
     cols = [
-      {key:'name', width: totalW - priceW - stockW, align:'left'},
-      {key:'retail', label:'Price', width:priceW, align:'right'},
+      {key:'name', width: totalW - priceW - stockW},
+      {key:'retail', label:'Price', width:priceW},
     ];
-    if(showStock) cols.push({key:'stock', label:'In Stock', width:stockW, align:'right'});
+    if(showStock) cols.push({key:'stock', label:'In Stock', width:stockW});
   } else if(currentReportType === 'profit'){
     const psW = Math.round(totalW * (useA4?0.22:0.30));
     const profW = Math.round(totalW * (useA4?0.22:0.30));
-    const stockW = showStock ? Math.round(totalW * (useA4?0.14:0.18)) : 0;
+    const stockW = showStock ? Math.round(totalW * (useA4?0.14:0.16)) : 0;
     cols = [
-      {key:'name', width: totalW - psW - profW - stockW, align:'left'},
-      {key:'ps', label:'Purchase/Selling', width:psW, align:'right', twoLine:true},
-      {key:'profit', label:'Profit/Profit(%)', width:profW, align:'right', twoLine:true},
+      {key:'name', width: totalW - psW - profW - stockW},
+      {key:'ps', label:'Purchase/Selling', width:psW, twoLine:true},
+      {key:'profit', label:'Profit/Profit(%)', width:profW, twoLine:true},
     ];
-    if(showStock) cols.push({key:'stock', label:'In Stock', width:stockW, align:'right'});
+    if(showStock) cols.push({key:'stock', label:'In Stock', width:stockW});
   } else { // inventory
-    const limitW = Math.round(totalW * (useA4?0.16:0.22));
-    const stockW = Math.round(totalW * (useA4?0.18:0.26));
+    const limitW = Math.round(totalW * (useA4?0.16:0.20));
+    const stockW = Math.round(totalW * (useA4?0.18:0.24));
     cols = [
-      {key:'name', width: totalW - limitW - stockW, align:'left'},
-      {key:'lowStockAt', label:'Limit', width:limitW, align:'right'},
-      {key:'stock', label:'In Stock', width:stockW, align:'right'},
+      {key:'name', width: totalW - limitW - stockW},
+      {key:'lowStockAt', label:'Limit', width:limitW},
+      {key:'stock', label:'In Stock', width:stockW},
     ];
   }
   cols[0].label = 'Item';
   let cxPos = tableLeft;
   cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
 
+  // ---------- ہر کالم کے اندر متن کہاں رکھا جائے — اب یہ صرف نام نہیں، ہر کالم پر یکساں لاگو ----------
+  const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
+  const colTextAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
+
   // ---------- کل اونچائی کا حساب — تمام قطاریں مقررہ اونچائی کی ہیں تو یہ درست پیشگی حساب ممکن ہے ----------
   const totalItemRows = groups.reduce((s,g) => s + g.items.length, 0);
-  const headerBandH = Math.round((fsTitle + fsSmall + fsSubtitle + fsSmall) * 1.9) + (useA4?24:16);
+  let headerBandH = useA4 ? 78 : 46;   // بزنس نام + فون + رپورٹ ٹائٹل + تاریخ
+  if(logoImg) headerBandH += logoH + 8;
+  if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
   let bodyTop = headerBandH;
   if(currentReportType === 'inventory'){
     bodyTop += (summaryLineH * 4) + 10;
   }
   bodyTop += 10 + headerRowH;
-  const estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 30;
+  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 30;
+  // ---------- فوٹر: پیمنٹ اکاؤنٹ + QR (اگر فعال ہو) — سائز محدود رکھا تاکہ رپورٹ غیرضروری لمبی/ڈبل صفحہ نہ بنے ----------
+  const footerQrSize = useA4 ? 90 : 64;
+  if(payAcc){
+    estimatedHeight += Math.round(fsFooter * 1.8) * 3 + 14; // پیغام + عنوان + نمبر کی 3 لائنیں
+    if(qrImg) estimatedHeight += footerQrSize + 10;
+  }
 
   canvas.width = pxWidth;
   canvas.height = Math.max(estimatedHeight, 300);
@@ -16506,12 +16550,22 @@ async function renderReportToCanvas(){
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
-  // ---------- ہیڈر: بزنس کا نام، فون، رپورٹ کا عنوان، تاریخ ----------
-  let y = useA4 ? 30 : 18;
+  // ---------- ہیڈر: بزنس لوگو، نام، پتہ، فون، رپورٹ کا عنوان، تاریخ ----------
+  let y = useA4 ? 16 : 10;
+  if(logoImg){
+    ctx.drawImage(logoImg, pxWidth/2 - logoW/2, y, logoW, logoH);
+    y += logoH + 8;
+  }
   ctx.textAlign = 'center';
   ctx.fillStyle = '#1a1a1a';
   ctx.font = `bold ${fsTitle}px ${fontFam}`;
+  y += fsTitle;
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
+  if(AppState.settings.businessAddress){
+    y += Math.round(fsSmall * 1.6);
+    ctx.font = `${fsSmall}px ${fontFam}`;
+    ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y);
+  }
   if(AppState.settings.businessPhone){
     y += Math.round(fsSmall * 1.6);
     ctx.font = `${fsSmall}px ${fontFam}`;
@@ -16552,9 +16606,9 @@ async function renderReportToCanvas(){
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${fsHeader}px ${fontFam}`;
   cols.forEach(c => {
-    ctx.textAlign = c.align === 'right' ? 'right' : 'left';
-    const tx = c.align === 'right' ? c.x + c.width - 6 : c.x + 6;
-    ctx.fillText(c.label, tx, headerTop + headerRowH/2 + fsHeader*0.32);
+    ctx.textAlign = c.key === 'name' ? 'left' : 'right';
+    const tx = c.key === 'name' ? c.x + 6 : c.x + c.width - 6;
+    ctx.fillText(c.label, tx, headerTop + headerRowH/2 + 4);
     ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
   });
   ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
@@ -16567,7 +16621,7 @@ async function renderReportToCanvas(){
     ctx.fillStyle = '#0f172a';
     ctx.font = `bold ${fsCatHead}px ${fontFam}`;
     ctx.textAlign = 'left';
-    ctx.fillText(`${g.category}(${g.items.length})`, tableLeft+6, y + catHeaderH/2 + fsCatHead*0.32);
+    ctx.fillText(`${g.category}(${g.items.length})`, tableLeft+6, y + catHeaderH/2 + 4);
     y += catHeaderH;
     ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(tableLeft, y); ctx.lineTo(tableRight, y); ctx.stroke();
@@ -16581,44 +16635,65 @@ async function renderReportToCanvas(){
       cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
 
       ctx.fillStyle = '#1a1a1a';
+      ctx.textAlign = colTextAlign;
       cols.forEach(c => {
+        const cx = colTextX(c);
         if(c.key === 'name'){
           ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
-          ctx.textAlign = align === 'center' ? 'center' : 'left';
-          const tx = align === 'center' ? c.x + c.width/2 : c.x + 6;
-          ctx.fillText(String(it.name), tx, y + rh/2 + fsItem*0.32);
+          ctx.fillText(String(it.name), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'retail'){
           ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.textAlign = 'right';
-          ctx.fillText(Number(it.retail).toFixed(2), c.x + c.width - 6, y + rh/2 + fsItem*0.32);
+          ctx.fillText(Number(it.retail).toFixed(2), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'stock'){
           ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.textAlign = 'right';
-          ctx.fillText(Number(it.stock).toFixed(2), c.x + c.width - 6, y + rh/2 + fsItem*0.32);
+          ctx.fillText(Number(it.stock).toFixed(2), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'lowStockAt'){
           ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.textAlign = 'right';
-          ctx.fillText(String(it.lowStockAt), c.x + c.width - 6, y + rh/2 + fsItem*0.32);
+          ctx.fillText(String(it.lowStockAt), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'ps'){
           ctx.font = `${fsItemSm}px ${fontFam}`;
-          ctx.textAlign = 'right';
-          ctx.fillText(Number(it.purchase).toFixed(2), c.x + c.width - 6, y + rh/2 - fsItemSm*0.35);
-          ctx.fillText(Number(it.retail).toFixed(2), c.x + c.width - 6, y + rh/2 + fsItemSm*1.05);
+          ctx.fillText(Number(it.purchase).toFixed(2), cx, y + rh/2 - fsItemSm*0.35);
+          ctx.fillText(Number(it.retail).toFixed(2), cx, y + rh/2 + fsItemSm*1.05);
         } else if(c.key === 'profit'){
           const profit = it.retail - it.purchase;
           const profitPct = it.purchase > 0 ? (profit / it.purchase * 100) : 0;
           ctx.font = `${fsItemSm}px ${fontFam}`;
-          ctx.textAlign = 'right';
-          ctx.fillText(profit.toFixed(2), c.x + c.width - 6, y + rh/2 - fsItemSm*0.35);
-          ctx.fillText(profitPct.toFixed(2)+'%', c.x + c.width - 6, y + rh/2 + fsItemSm*1.05);
+          ctx.fillText(profit.toFixed(2), cx, y + rh/2 - fsItemSm*0.35);
+          ctx.fillText(profitPct.toFixed(2)+'%', cx, y + rh/2 + fsItemSm*1.05);
         }
       });
       y += rh;
     });
   });
+
+  // ---------- فوٹر: پیمنٹ اکاؤنٹ کی تفصیل + QR کوڈ (اگر فعال ہو) ----------
+  if(payAcc){
+    y += 16;
+    ctx.textAlign = 'center';
+    ctx.font = `bold ${fsFooter}px ${fontFam}`;
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillText('Please send your payment to this account:', pxWidth/2, y);
+    y += Math.round(fsFooter * 1.8);
+    ctx.font = `${fsFooter}px ${fontFam}`;
+    ctx.fillText(`${payAcc.name || ''} — ${payAcc.type || ''}`, pxWidth/2, y);
+    y += Math.round(fsFooter * 1.8);
+    ctx.font = `bold ${fsFooter}px ${fontFam}`;
+    ctx.fillText(payAcc.number || '', pxWidth/2, y);
+    if(qrImg){
+      y += 10;
+      const qrX = pxWidth/2 - footerQrSize/2;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(qrX-4, y-4, footerQrSize+8, footerQrSize+8);
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeRect(qrX-4, y-4, footerQrSize+8, footerQrSize+8);
+      ctx.save();
+      ctx.imageSmoothingEnabled = false; // ---------- QR کے مربعے دھندلے نہ ہوں — سکیننگ ہمیشہ درست کام کرے ----------
+      ctx.drawImage(qrImg, qrX, y, footerQrSize, footerQrSize);
+      ctx.restore();
+    }
+  }
 }
 
-// ---------- پرنٹ — بالکل بل/انوائس والے یونیورسل پرنٹ پائپ لائن کے ذریعے (Android کا اپنا Print Service) ----------
 function printCurrentReport(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
