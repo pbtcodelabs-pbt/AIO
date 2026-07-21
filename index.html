@@ -878,6 +878,7 @@
   #printReceiptArea{display:none;}
   @media print{
     body.printing-invoice > *:not(#printReceiptArea){display:none !important;}
+    body.printing-invoice .modalOverlay{display:none !important;} /* ---------- اضافی حفاظتی تالا — کوئی بھی کھلا ہوا پاپ اپ پرنٹ میں کبھی شامل نہیں ہونا چاہیے ---------- */
     #printReceiptArea{display:block !important; width:100%;}
     #printReceiptArea img{width:100%; display:block;}
   }
@@ -16443,7 +16444,10 @@ async function renderReportToCanvas(){
   const align = AppState.settings.reportAlign || 'left'; // ---------- اب یہ ہر کالم (نام + قیمتیں + سٹاک وغیرہ) پر یکساں لاگو ہوتا ہے ----------
   const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
   const showPayAcc = !!AppState.settings.reportShowPaymentAccount;
-  const payAcc = showPayAcc ? (AppState.settings.paymentAccounts || []).find(a => a.showOnReceipt) : null;
+  // ---------- نوٹ: پہلے یہاں غلطی سے acc.showOnReceipt (جو صرف بل کی سیٹنگ ہے) کی شرط لگی ہوئی تھی —
+  // اسی لیے یوزر کے "Show Payment Account" ٹِک کرنے کے باوجود کچھ نظر نہیں آ رہا تھا (ان کا اکاؤنٹ
+  // showOnReceipt پر کبھی آن نہیں کیا گیا تھا)۔ اب رپورٹ کا اپنا ٹِک ہی کافی ہے — پہلا محفوظ شدہ اکاؤنٹ دکھائیں ----------
+  const payAcc = showPayAcc ? (AppState.settings.paymentAccounts || [])[0] : null;
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
