@@ -3716,7 +3716,7 @@
 
     <!-- ADD PAYMENT ACCOUNT MODAL -->
     <!-- IMAGE SHARE PREVIEW MODAL — کارڈ/پوسٹر بنانے کے فوراً بعد یہاں دکھایا جائے، سیدھا شیئر شیٹ پر نہیں کودنا ---------- -->
-    <div class="modalOverlay" id="imageSharePreviewModal" onclick="if(event.target===this) closeImageSharePreview()">
+    <div class="modalOverlay" id="imageSharePreviewModal" style="z-index:960;" onclick="if(event.target===this) closeImageSharePreview()">
       <div class="modalBox" style="max-width:360px; text-align:center;">
         <h3 id="imageSharePreviewTitle">Preview</h3>
         <img id="imageSharePreviewImg" style="width:100%; border-radius:12px; margin:8px 0; box-shadow:0 4px 14px rgba(0,0,0,.18);">
@@ -16088,20 +16088,19 @@ function renderMyAdsModalContent(){
   // تو براؤزر پہلے سے تیار (cached) تصویر فوری، مکمل طور پر پینٹ کرتا ہے — کوئی دیر/جھٹکا نہیں ----------
   preloadMyAdsPoster(posterURL).then((img) => {
     if(renderToken !== renderMyAdsModalContent._token) return; // ---------- یوزر جلدی سے دوسری اسکرین پر جا چکا ہو تو پرانا رزلٹ نظرانداز ----------
-    // ---------- تصویر پر خود کلک نہیں ہو سکتا، اس لیے نیچے اصل کام کرنے والا WhatsApp بٹن دیا گیا ہے
-    // (پہلے یہاں WhatsApp/Call/SMS + نمبر + ایک اضافی "Share on WhatsApp" بٹن بھی تھا — صارف کی رائے پر
-    // صرف ایک WhatsApp بٹن رکھا گیا ہے، باقی سب ہٹا دیے تاکہ نہ ڈبلنگ رہے نہ غیرضروری چیزیں) ----------
-    const rawNumber = (AppState.settings.devWhatsapp || '923206793793').replace(/\D/g, '');
-    const adInquiryMsg = buildAdInquiryMessage();
+    // ---------- تصویر پر خود کلک نہیں ہو سکتا، اس لیے نیچے اصل کام کرنے والا WhatsApp بٹن دیا گیا ہے —
+    // یہ بٹن اب پوسٹر کی اصل تصویر شیئر کرتا ہے (فون کے شیئر مینو کے ذریعے، جہاں سے WhatsApp یا
+    // WhatsApp Business دونوں میں سے کوئی بھی منتخب کیا جا سکتا ہے) — پہلے غلطی سے یہ ڈیویلپر کے
+    // اپنے نمبر پر ایک انکوائری میسج بھیج دیتا تھا، جو اس بٹن کا مقصد نہیں تھا، اب ٹھیک کر دیا ----------
     // ---------- کسٹم پوسٹر کا اپنا اصل تناسب (aspect ratio) ہو سکتا ہے — ڈیفالٹ پوسٹر کا مقررہ 784x1328 تناسب اس پر مسلط نہیں کرتے ----------
     const natW = img.naturalWidth || 784, natH = img.naturalHeight || 1328;
     wrap.innerHTML = `
       <img src="${posterURL}" width="${natW}" height="${natH}" style="width:100%; max-width:380px; height:auto; aspect-ratio:${natW}/${natH}; max-height:52vh; object-fit:contain; border-radius:16px; box-shadow:0 6px 18px rgba(15,23,42,.2);">
       <div style="display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
-        <a class="checkoutBtn" style="width:auto; padding:9px 20px; font-size:13px; background:#25D366; text-decoration:none; display:inline-block;" href="https://wa.me/${rawNumber}?text=${encodeURIComponent(adInquiryMsg)}" target="_blank" rel="noopener">💬 WhatsApp</a>
+        <button class="checkoutBtn" style="width:auto; padding:9px 20px; font-size:13px; background:#25D366;" onclick="shareMyAdsPoster()">💬 WhatsApp</button>
         <button class="checkoutBtn" style="width:auto; padding:9px 20px; font-size:13px; background:#6366f1;" onclick="triggerMyAdsPosterUpload()">🖼️ Change Poster</button>
       </div>
-      ${isCustom ? `<button class="checkoutBtn" style="width:auto; padding:7px 16px; font-size:12px; background:#64748b; margin-top:8px;" onclick="resetMyAdsPoster()">↩️ Reset to Default</button>` : ''}
+      <button class="checkoutBtn" style="width:auto; padding:7px 16px; font-size:12px; background:#16a34a; margin-top:8px;" onclick="saveMyAdsPoster()">💾 Save</button>
     `;
     // ---------- اب بھی حفاظتی طور پر ایک بار اوپر لے آئیں (مثلاً اگر پچھلی اسکرین کا سکرول کسی وجہ سے باقی رہ گیا ہو) ----------
     if(window.resetMainAreaScroll) window.resetMainAreaScroll();
@@ -16141,6 +16140,13 @@ function resetMyAdsPoster(){
   AppState.settings.myAdsPosterOverride = '';
   persistAllData();
   renderMyAdsModalContent();
+}
+
+// ---------- نوٹ: نئی پوسٹر گیلری سے چنتے ہی خودکار محفوظ ہو چکی ہوتی ہے (handleMyAdsPosterUpload میں) —
+// یہ بٹن صرف یوزر کو واضح تسلی دینے کے لیے ہے کہ تبدیلی محفوظ ہو گئی، اور مکمل ہونے پر مودال بند کر دیتا ہے ----------
+function saveMyAdsPoster(){
+  persistAllData();
+  closeMyAdsModal();
 }
 
 async function shareMyAdsPoster(){
