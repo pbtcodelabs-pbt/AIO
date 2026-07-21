@@ -6668,7 +6668,7 @@ function finalizeInvoice(){
     }
   } else {
     // ---------- عام صورت — پہلے پرانا بقایہ کم ہوگا (اگر کچھ رقم اس کے لیے بچے)، پھر اسی بل کا حصہ ----------
-    cashReceivedNow = (method === 'credit') ? Math.min(combinedDueForPayment, rawReceivedInput) : 0;
+    cashReceivedNow = (method === 'credit') ? Math.max(0, Math.min(combinedDueForPayment, rawReceivedInput)) : 0;
     remainingDue = (method === 'credit') ? Math.max(0, dueAfterWallet - Math.max(0, cashReceivedNow - previousBalance)) : 0;
   }
 
