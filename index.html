@@ -1404,27 +1404,27 @@
     }
 
     /* --- 🔎 App Search — ہمیشہ نظر آنے والی پٹی، Topbar کے بالکل نیچے، ہر سکرین پر ایک جیسی —
-         گہرا سیاہ/نیوی پس منظر (کسی بھی تھیم پریسٹ کے رنگ سے میل نہیں کھاتا) + چمکتی/گلوئنگ لکھائی
-         تاکہ یہ ہمیشہ الگ اور نمایاں نظر آئے، چاہے صارف نے کوئی سا بھی تھیم رنگ لگا رکھا ہو --- */
+         روشن نیلا پس منظر + سفید، صاف نظر آنے والی چمکتی لکھائی (صارف کی پسند کے مطابق،
+         پہلے والا گہرا سیاہ+سنہری کمبی نیشن مدھم/بدصورت لگ رہا تھا) --- */
     #globalSearchBar{
       display:flex; align-items:center; gap:8px; padding:8px 14px;
-      background:linear-gradient(135deg,#05060f,#000000); grid-column:1; grid-row:2;
+      background:linear-gradient(135deg,#1d4ed8,#2563eb); grid-column:1; grid-row:2;
       position:sticky; top:56px; z-index:590;
-      border-top:1px solid rgba(255,214,10,.25); border-bottom:1px solid rgba(255,214,10,.25);
-      box-shadow:0 0 14px rgba(255,214,10,.12) inset;
+      border-top:1px solid rgba(255,255,255,.3); border-bottom:1px solid rgba(255,255,255,.3);
+      box-shadow:0 0 14px rgba(37,99,235,.35) inset;
     }
-    #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px; filter:drop-shadow(0 0 4px rgba(255,214,10,.7));}
+    #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px; filter:drop-shadow(0 0 4px rgba(255,255,255,.8));}
     #globalSearchBar input{
       flex:1; min-width:0; padding:8px 12px; border-radius:20px; font-size:12.5px;
-      background:rgba(255,255,255,.08); color:#ffd60a;
-      border:1px solid rgba(255,214,10,.35);
+      background:rgba(255,255,255,.16); color:#ffffff; font-weight:600;
+      border:1px solid rgba(255,255,255,.45);
       animation:gsbGlow 2.4s ease-in-out infinite;
     }
-    #globalSearchBar input::placeholder{color:rgba(255,214,10,.6); text-shadow:0 0 4px rgba(255,214,10,.35);}
-    #globalSearchBar input:focus{outline:2px solid rgba(255,214,10,.6); background:rgba(255,255,255,.14);}
+    #globalSearchBar input::placeholder{color:rgba(255,255,255,.92); font-weight:600; text-shadow:0 0 4px rgba(255,255,255,.4);}
+    #globalSearchBar input:focus{outline:2px solid rgba(255,255,255,.75); background:rgba(255,255,255,.24);}
     @keyframes gsbGlow{
-      0%,100%{text-shadow:0 0 3px rgba(255,214,10,.35), 0 0 8px rgba(255,214,10,.2);}
-      50%{text-shadow:0 0 8px rgba(255,214,10,.9), 0 0 18px rgba(255,214,10,.55);}
+      0%,100%{text-shadow:0 0 3px rgba(255,255,255,.35), 0 0 8px rgba(255,255,255,.2);}
+      50%{text-shadow:0 0 8px rgba(255,255,255,.95), 0 0 18px rgba(255,255,255,.6);}
     }
     #globalSearchBar #appSearchResults{
       display:none; position:absolute; left:14px; right:14px; top:calc(100% + 2px); z-index:591;
@@ -5027,9 +5027,14 @@ function renderAppSearchResults(query){
   const q = query.trim().toLowerCase();
   if(!q){ wrap.classList.remove('show'); wrap.innerHTML = ''; return; }
 
-  const matches = APP_SEARCH_INDEX.filter(item =>
-    item.label.toLowerCase().includes(q) || item.keywords.includes(q)
-  ).slice(0, 8);
+  // ---------- ڈیپ سرچ: پورا جملہ لفظ بہ لفظ توڑ کر، ہر لفظ کا لیبل+پاتھ+کی ورڈز میں کہیں بھی ہونا
+  // ضروری ہے (سب الفاظ ملیں تب ہی میچ) — اس طرح لفظوں کی ترتیب مختلف ہونے پر بھی صحیح چیز مل جاتی ہے،
+  // اور جو چیز واقعی موجود نہیں اس کے غلط نتائج بھی سامنے نہیں آتے ----------
+  const qWords = q.split(/\s+/).filter(Boolean);
+  const matches = APP_SEARCH_INDEX.filter(item => {
+    const haystack = (item.label + ' ' + item.path + ' ' + item.keywords).toLowerCase();
+    return qWords.every((w) => haystack.includes(w));
+  }).slice(0, 8);
 
   if(matches.length === 0){
     wrap.innerHTML = '<div class="appSearchEmpty">No matches — try a different word</div>';
