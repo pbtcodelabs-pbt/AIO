@@ -14087,12 +14087,18 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
       ctx.font = F(isFinal ? 'bold 15px' : 'bold 13px'); // ---------- عام لائنیں بھی تھوڑی موٹی، فائنل لائن مزید نمایاں ----------
       ctx.fillStyle = '#000';
-      ctx.textAlign = 'left';
-      ctx.fillText(label, sumLeft + 8, rowTop + sumRowH/2 + 5);
-      ctx.textAlign = 'right';
-      ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), sumRight - 8, rowTop + sumRowH/2 + 5);
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
+      if(headerItemAlign === 'center'){
+        // ---------- بل کا Center کمانڈ منتخب ہو تو یہ باکس بھی اسی کمانڈ کے ساتھ کام کرے — ایک ہی درمیانی لائن میں لیبل+رقم ----------
+        ctx.textAlign = 'center';
+        ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumLeft + sumBoxW/2, rowTop + sumRowH/2 + 5);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillText(label, sumLeft + 8, rowTop + sumRowH/2 + 5);
+        ctx.textAlign = 'right';
+        ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), sumRight - 8, rowTop + sumRowH/2 + 5);
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
+      }
       rowTop += sumRowH;
       ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
