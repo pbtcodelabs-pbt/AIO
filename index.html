@@ -3234,6 +3234,10 @@
             <span class="pscLabel">🅰️ Font</span>
             <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
           </div>
+          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
+            <span class="pscLabel">🎨 Bill Theme</span>
+            <div id="pscColorSwatches" style="display:flex; gap:8px;"></div>
+          </div>
         </div>
 
         <canvas id="invoiceCanvas"></canvas>
@@ -3774,6 +3778,10 @@
       <div class="pscRow" style="flex:1 1 100%;">
         <span class="pscLabel">🅰️ Font</span>
         <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
+      </div>
+      <div class="pscRow" style="flex:1 1 100%; gap:8px;">
+        <span class="pscLabel">🎨 Bill Theme</span>
+        <div id="rpscColorSwatches" style="display:flex; gap:8px;"></div>
       </div>
       <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
         <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
@@ -4345,6 +4353,7 @@ const DEFAULT_SETTINGS = {
   printRowScale: 100,            // 70–150 (%) — آئٹمز ٹیبل کی ہر لائن کی اونچائی (↕ Row)
   printBoldItems: true,          // آئٹم کے نام بولڈ ہوں یا باریک (Thin)
   printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
+  receiptColorId: 'green',       // بل/رپورٹ کی سکرین/شیئر رنگت — 6 مقررہ ہلکے رنگوں میں سے ایک (RECEIPT_COLOR_PRESETS)
   printFontId: 'segoe',           // پرنٹ کے لیے مخصوص فونٹ سٹائل — عام ایپ کے فونٹ سے الگ، صرف رسید پر اثر انداز
   priceDecimals: 0,               // قیمتوں کے بعد کتنے ڈیسیمل پوائنٹ دکھائیں (کریانہ/میڈیکل جیسے کاروبار کے لیے)
   // ---------- 🖨️ Reports (Price List / Inventory / Profit) کی اپنی الگ پرنٹ سٹائل سیٹنگز —
@@ -13823,6 +13832,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const scale = pxWidth / 576;
   // ---------- سکرین/شیئر کے لیے تھیم رنگ — پرنٹ کے وقت الگ سے سیاہ/سفید میں بدل دیا جاتا ہے (printCurrentInvoice دیکھیں) ----------
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  const rc = getReceiptColor(); // ---------- بل کے اپنے 6 ہلکے رنگوں میں سے منتخب شدہ ----------
 
   // ---------- پیمنٹ اکاؤنٹ + QR — اگر فعال ہو تو پہلے ہی لوڈ کر لیتے ہیں تاکہ اونچائی کا حساب پہلے سے درست ہو ----------
   const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
@@ -13899,7 +13909,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let y = 30;
   ctx.textAlign = 'center';
   ctx.font = F('bold 26px');
-  ctx.fillStyle = theme.primaryDark || '#000';
+  ctx.fillStyle = rc.text;
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 26;
 
   // ---------- دکان کا پتہ/فون ہو تو دکھائیں ----------
@@ -13938,7 +13948,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // ---------- آئٹمز ٹیبل — مکمل باریک ٹھوس گرڈ (باکس والا)، ہر کالم پر عمودی لائن، ہر آئٹم پر افقی لائن ----------
   // کالمز کی ترتیب: #  |  Item  |  Qty  |  Price  |  Total
   const tableTop = y;
-  ctx.fillStyle = hexToRgba(theme.primary || '#0f766e', 0.12); // ---------- ہیڈر کی قطار پر ہلکا تھیم رنگ — سکرین/شیئر کے لیے ----------
+  ctx.fillStyle = rc.bg; // ---------- منتخب شدہ ہلکا رنگ — صارف اپنی مرضی سے 6 میں سے چن سکتا ہے ----------
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerH);
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 1;
@@ -13956,15 +13966,32 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const headerPriceX = colCenterX(colX[3], colX[4]);
   const headerTotalX = colCenterX(colX[4], colX[5]);
   const ctxAlignForItems = headerItemAlign; // ---------- 'left'/'center'/'right' سیدھا ctx.textAlign کے طور پر استعمال ہو سکتا ہے ----------
-  ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
+  // ---------- ہر کیپشن کا فونٹ اس کے اپنے کالم کی چوڑائی میں فٹ ہونے تک خود بخود چھوٹا ہوتا ہے — زوم جتنا بھی بڑا ہو، کبھی کالم سے باہر نہیں نکلے گا ----------
+  const fitHeaderFont = (text, maxWidth) => {
+    let px = Math.round(17 * fscale);
+    ctx.font = `bold ${px}px ${canvasFontFamily}`;
+    while(ctx.measureText(text).width > maxWidth && px > 7){
+      px -= 1;
+      ctx.font = `bold ${px}px ${canvasFontFamily}`;
+    }
+  };
+  ctx.fillStyle = rc.text; // ---------- منتخب رنگ کے مطابق گہرا متن ----------
+  // ---------- نوٹ: پہلے یہاں ہلکا shadowBlur گلو تھا — صارف کو یہ "دھندلا/مدھم" محسوس ہوا، اسی لیے ہٹا دیا۔
+  // اب کیپشن بالکل صاف، ٹھوس اور روشن (بغیر کسی دھندلاہٹ کے) ----------
   ctx.textAlign = 'center';
+  fitHeaderFont('#', colX[1]-colX[0]-6);
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
   ctx.textAlign = ctxAlignForItems;
+  fitHeaderFont('Item', colX[2]-colX[1]-8);
   ctx.fillText('Item', headerItemNameX, headerBaseline);
+  fitHeaderFont('Qty', colX[3]-colX[2]-8);
   ctx.fillText('Qty', headerQtyX, headerBaseline);
+  fitHeaderFont('Price', colX[4]-colX[3]-8);
   ctx.fillText('Price', headerPriceX, headerBaseline);
+  fitHeaderFont('Total', colX[5]-colX[4]-8);
   ctx.fillText('Total', headerTotalX, headerBaseline);
+
   hLineY += headerH;
   drawTableHLine(hLineY);
 
@@ -13977,8 +14004,18 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const qtyX = headerQtyX;
   const priceX = headerPriceX;
   const totalX = headerTotalX;
-  ctx.font = F(itemFontWeight + '14px');
+  ctx.font = F(itemFontWeight + '18px');
   const maxItemWidth = itemW - 8;
+  const rowFontPx = Math.round(18 * fscale);
+  // ---------- Qty/Price/Total کا فونٹ بھی اپنے کالم میں فٹ ہونے تک خود بخود چھوٹا ہو — زوم جتنا بڑا ہو، کبھی کالم سے باہر نہ نکلے ----------
+  const fitBodyFont = (text, maxWidth) => {
+    let px = rowFontPx;
+    ctx.font = `${itemFontWeight}${px}px ${canvasFontFamily}`;
+    while(ctx.measureText(text).width > maxWidth && px > 7){
+      px -= 1;
+      ctx.font = `${itemFontWeight}${px}px ${canvasFontFamily}`;
+    }
+  };
   printItems.forEach((item, idx) => {
     const rowBaseline = hLineY + rowH - Math.round(7 * rowScale);
     // ---------- 🔁 Sale Record کی فہرست سے یہاں آیا ہو تو وہی آئٹم پیلے رنگ سے ہائی لائٹ کریں ----------
@@ -14004,12 +14041,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
+    ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`;
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.fillText(displayName, itemNameX, rowBaseline);
-    ctx.fillText(String(remainingQty), qtyX, rowBaseline);
-    ctx.fillText(item.unitPrice.toFixed(decimals), priceX, rowBaseline);
-    ctx.fillText((remainingQty*item.unitPrice).toFixed(decimals), totalX, rowBaseline);
+    const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
+    fitBodyFont(qtyText, (colX[3]-colX[2])-8); ctx.fillText(qtyText, qtyX, rowBaseline);
+    fitBodyFont(priceText, (colX[4]-colX[3])-8); ctx.fillText(priceText, priceX, rowBaseline);
+    fitBodyFont(totalText, (colX[5]-colX[4])-8); ctx.fillText(totalText, totalX, rowBaseline);
+    ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
     ctx.fillStyle = '#000';
 
     hLineY += rowH;
@@ -14020,7 +14060,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.textAlign = 'left';
       ctx.fillText(`↩ ${returnedQty} Returned`, colX[1] + 4, hLineY + 10);
       ctx.fillStyle = '#000';
-      ctx.font = F(itemFontWeight + '14px');
+      ctx.font = F(itemFontWeight + '18px');
       hLineY += returnedNoteExtra;
     }
     drawTableHLine(hLineY); // ---------- ہر آئٹم کے بعد افقی لائن — ہر ڈبہ مکمل بند ----------
@@ -14090,7 +14130,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     const allSummaryRows = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
     allSummaryRows.forEach(([label, val, isFinal], idx) => {
       if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
-      ctx.font = F(isFinal ? 'bold 15px' : 'bold 13px'); // ---------- عام لائنیں بھی تھوڑی موٹی، فائنل لائن مزید نمایاں ----------
+      ctx.font = F(isFinal ? 'bold 17px' : 'bold 15px'); // ---------- عام لائنیں بھی تھوڑی موٹی، فائنل لائن مزید نمایاں ----------
       ctx.fillStyle = '#000';
       if(headerItemAlign === 'center'){
         // ---------- بل کا Center کمانڈ منتخب ہو تو یہ باکس بھی اسی کمانڈ کے ساتھ کام کرے — ایک ہی درمیانی لائن میں لیبل+رقم ----------
@@ -14195,7 +14235,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   estimatedHeight += 60; // Grand Total باکس
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    estimatedHeight += 24 + 26 + (summary.rows.length * 22) + 40; // Payment Summary باکس (متحرک اونچائی)
+    estimatedHeight += 24 + 34 + ((summary.rows.length + 1) * 28) + 8 + 40; // Payment Summary باکس (متحرک اونچائی)
   }
   estimatedHeight += 130; // دستخط کی جگہ
   estimatedHeight += 50; // فوٹر
@@ -14256,7 +14296,13 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   y += 70 + 26;
 
-  // ---------- آئٹمز ٹیبل — رنگین ہیڈر، باریک گرڈ ----------
+  // ---------- آئٹمز ٹیبل — رنگین ہیڈر، باریک گرڈ — اب مکمل 3-طرفہ الائنمنٹ (Left/Center/Right)، تھرمل بل جیسی ہی ----------
+  const a4Align = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
+  const a4ColCenterX = (a, b) => a4Align === 'center' ? (a + b) / 2 : (a4Align === 'right' ? b - 10 : a + 10);
+  const a4ItemNameX = a4ColCenterX(colX[1], colX[2]);
+  const a4QtyX = a4ColCenterX(colX[2], colX[3]);
+  const a4PriceX = a4ColCenterX(colX[3], colX[4]);
+  const a4TotalX = a4ColCenterX(colX[4], colX[5]);
   const tableTop = y;
   ctx.fillStyle = theme.primary;
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerRowH);
@@ -14264,11 +14310,11 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.font = `bold 14px ${fontFam}`;
   const headerBaseline = tableTop + headerRowH - 11;
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = 'left';   ctx.fillText('Item', colX[1] + 10, headerBaseline);
-  ctx.textAlign = 'right';
-  ctx.fillText('Qty', colX[3] - 10, headerBaseline);
-  ctx.fillText('Price', colX[4] - 10, headerBaseline);
-  ctx.fillText('Total', colX[5] - 10, headerBaseline);
+  ctx.textAlign = a4Align;
+  ctx.fillText('Item', a4ItemNameX, headerBaseline);
+  ctx.fillText('Qty', a4QtyX, headerBaseline);
+  ctx.fillText('Price', a4PriceX, headerBaseline);
+  ctx.fillText('Total', a4TotalX, headerBaseline);
 
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 1;
@@ -14304,11 +14350,11 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
     if(isFullyReturnedA4) ctx.fillStyle = '#9ca3af';
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
-    ctx.textAlign = 'left';   ctx.fillText(displayName, colX[1] + 10, rowBaseline);
-    ctx.textAlign = 'right';
-    ctx.fillText(String(remainingQtyA4), colX[3] - 10, rowBaseline);
-    ctx.fillText(item.unitPrice.toFixed(0), colX[4] - 10, rowBaseline);
-    ctx.fillText((remainingQtyA4*item.unitPrice).toFixed(0), colX[5] - 10, rowBaseline);
+    ctx.textAlign = a4Align;
+    ctx.fillText(displayName, a4ItemNameX, rowBaseline);
+    ctx.fillText(String(remainingQtyA4), a4QtyX, rowBaseline);
+    ctx.fillText(item.unitPrice.toFixed(0), a4PriceX, rowBaseline);
+    ctx.fillText((remainingQtyA4*item.unitPrice).toFixed(0), a4TotalX, rowBaseline);
     ctx.fillStyle = '#1a1a1a';
 
     hLineY += rowH;
@@ -14363,28 +14409,53 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.grand_total.toFixed(0), tableRight - 16, y + 30);
   y += 46 + 30;
 
-  // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ ----------
+  // ---------- بل کی مکمل ادائیگی تفصیل — تھرمل بل جیسا ہی تنگ، بارڈر والا، الائنمنٹ کے مطابق ----------
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    const boxTop = y, boxH = 24 + 26 + (summary.rows.length * 22) + 40;
-    ctx.strokeStyle = hexToRgba(theme.primary, 0.5);
-    ctx.lineWidth = 1;
-    ctx.strokeRect(tableLeft + 0.5, boxTop + 0.5, tableRight - tableLeft, boxH);
+    const sumBoxW = Math.round((tableRight - tableLeft) * 0.7);
+    const sumLeft = tableLeft + Math.round(((tableRight - tableLeft) - sumBoxW) / 2);
+    const sumRight = sumLeft + sumBoxW;
+    const sumLabelW = Math.round(sumBoxW * 0.62);
+    const sumValueX = sumLeft + sumLabelW;
+    const sumRowH = 28;
+    const boxTop = y;
+    const titleH = 34;
+    const allSummaryRowsA4 = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
+    const boxH = titleH + (allSummaryRowsA4.length * sumRowH) + 8;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
     y += 24;
     ctx.font = `bold 15px ${fontFam}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillText('Payment Summary', pxWidth/2, y); y += 26;
+    ctx.fillText('Payment Summary', pxWidth/2, y); y += 10;
 
-    ctx.font = `14px ${fontFam}`;
-    summary.rows.forEach(([label, val]) => {
-      ctx.textAlign = 'left'; ctx.fillText(label, tableLeft + 16, y);
-      ctx.textAlign = 'right'; ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), tableRight - 16, y);
-      y += 22;
+    let rowTop = boxTop + titleH;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
+
+    allSummaryRowsA4.forEach(([label, val, isFinal], idx) => {
+      if(idx % 2 === 1){ ctx.fillStyle = hexToRgba(theme.primary, 0.06); ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
+      ctx.font = `${isFinal ? 'bold 17px' : 'bold 14px'} ${fontFam}`;
+      ctx.fillStyle = '#1a1a1a';
+      if(a4Align === 'center'){
+        ctx.textAlign = 'center';
+        ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumLeft + sumBoxW/2, rowTop + sumRowH/2 + 6);
+      } else if(a4Align === 'right'){
+        ctx.textAlign = 'right';
+        ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumRight - 12, rowTop + sumRowH/2 + 6);
+      } else {
+        ctx.textAlign = 'left';
+        ctx.fillText(label, sumLeft + 12, rowTop + sumRowH/2 + 6);
+        ctx.textAlign = 'right';
+        ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), sumRight - 12, rowTop + sumRowH/2 + 6);
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
+      }
+      rowTop += sumRowH;
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
     });
-    ctx.font = `bold 15px ${fontFam}`;
-    ctx.textAlign = 'left'; ctx.fillText(summary.finalLabel, tableLeft + 16, y);
-    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + Math.round(summary.finalValue).toLocaleString(), tableRight - 16, y);
     y = boxTop + boxH + 40;
   }
 
@@ -14462,6 +14533,26 @@ function syncPreviewStyleControls(){
     }
     fontSelect.value = AppState.settings.printFontId || 'segoe';
   }
+
+  const swatchWrap = document.getElementById('pscColorSwatches');
+  if(swatchWrap){
+    try{
+      swatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
+      swatchWrap.querySelectorAll('button').forEach(btn => {
+        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
+        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
+      });
+    }catch(e){ console.error('swatch render failed', e); }
+  }
+}
+
+function setReceiptColor(colorId){
+  AppState.settings.receiptColorId = colorId;
+  persistAllData();
+  syncPreviewStyleControls();
+  syncReportStyleControls();
+  if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
+  if(document.getElementById('reportPreviewModal')?.classList.contains('show')) renderReportToCanvas();
 }
 
 // ---------- پرنٹ کے لیے فونٹ سٹائل — یہ صرف رسید پر لاگو ہوتا ہے، پوری ایپ کا فونٹ نہیں بدلتا ----------
@@ -14709,6 +14800,21 @@ function shareInvoiceUniversal(){
    ===================================================================== */
 
 // ---------- Theme Presets (ہر تھیم صرف 2 رنگ متعین کرتی ہے، باقی سب CSS variables سے خودکار بنتے ہیں) ----------
+// ---------- 🖨️ رسید/رپورٹ کے لیے مخصوص ہلکے رنگ — مرکزی ایپ تھیم سے جان بوجھ کر الگ اور محدود (صرف 6)،
+// تاکہ صارف کے مطابق "بہت زیادہ رنگ نہ ہوں" — بل/رپورٹ کا پس منظر + لکھائی کا رنگ اسی سے آتا ہے،
+// سکرین اور WhatsApp شیئر کے لیے، پرنٹ ہمیشہ سیاہ/سفید ہی رہتا ہے (canvasToGrayscale) ----------
+const RECEIPT_COLOR_PRESETS = [
+  {id:'green',    name:'Green',    bg:'#dcf5e3', text:'#065f2b'},
+  {id:'blue',     name:'Blue',     bg:'#dbeafe', text:'#1e3a8a'},
+  {id:'peach',    name:'Peach',    bg:'#fef3e2', text:'#9a3412'},
+  {id:'lavender', name:'Lavender', bg:'#ede9fe', text:'#5b21b6'},
+  {id:'pink',     name:'Pink',     bg:'#fce7f3', text:'#9d174d'},
+  {id:'gray',     name:'Gray',     bg:'#f1f5f9', text:'#334155'},
+];
+function getReceiptColor(){
+  return RECEIPT_COLOR_PRESETS.find(c => c.id === AppState.settings.receiptColorId) || RECEIPT_COLOR_PRESETS[0];
+}
+
 const THEME_PRESETS = [
   {id:'teal',   name:'Teal (Default)',  primary:'#0f766e', primaryDark:'#0b4a45'},
   {id:'brass',  name:'Brass',           primary:'#b45309', primaryDark:'#78350f'},
@@ -16526,6 +16632,17 @@ function syncReportStyleControls(){
     }
     fontSelect.value = AppState.settings.reportFontId || 'segoe';
   }
+
+  const rSwatchWrap = document.getElementById('rpscColorSwatches');
+  if(rSwatchWrap){
+    try{
+      rSwatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
+      rSwatchWrap.querySelectorAll('button').forEach(btn => {
+        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
+        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
+      });
+    }catch(e){ console.error('report swatch render failed', e); }
+  }
 }
 function setReportFontFamily(fontId){
   AppState.settings.reportFontId = fontId;
@@ -16698,13 +16815,14 @@ async function renderReportToCanvas(){
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
   // ---------- ہیڈر: بزنس لوگو، نام، پتہ، فون، رپورٹ کا عنوان، تاریخ ----------
+  const rc = getReceiptColor(); // ---------- منتخب شدہ ہلکا رنگ — بل کی طرح رپورٹس پر بھی ----------
   let y = useA4 ? 16 : 10;
   if(logoImg){
     ctx.drawImage(logoImg, pxWidth/2 - logoW/2, y, logoW, logoH);
     y += logoH + 8;
   }
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#1a1a1a';
+  ctx.fillStyle = rc.text;
   ctx.font = `bold ${fsTitle}px ${fontFam}`;
   y += fsTitle;
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
@@ -16749,7 +16867,7 @@ async function renderReportToCanvas(){
 
   // ---------- ٹیبل ہیڈر ----------
   const headerTop = y;
-  ctx.fillStyle = '#f1f5f9';
+  ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
   ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
@@ -16924,13 +17042,14 @@ async function renderTodaySaleReportToCanvas(){
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
   // ---------- ہیڈر ----------
+  const rc = getReceiptColor();
   let y = useA4 ? 16 : 10;
   if(logoImg){
     ctx.drawImage(logoImg, pxWidth/2 - logoW/2, y, logoW, logoH);
     y += logoH + 8;
   }
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#1a1a1a';
+  ctx.fillStyle = rc.text;
   ctx.font = `bold ${fsTitle}px ${fontFam}`;
   y += fsTitle;
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
@@ -16980,7 +17099,7 @@ async function renderTodaySaleReportToCanvas(){
 
   // ---------- ٹیبل ہیڈر ----------
   const headerTop = y;
-  ctx.fillStyle = '#f1f5f9';
+  ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
   ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
