@@ -1094,6 +1094,13 @@
   /* ===================== SETTINGS SCREEN ===================== */
   .settingsWrap{display:flex; flex-direction:column; gap:16px; max-width:640px;}
   .settingsCard{background:var(--card); border-radius:var(--radius); padding:20px 22px; box-shadow:0 2px 10px rgba(41,29,10,.07);}
+  /* ---------- سرچ سے ایگزیکٹ سیکشن تک لے جانے کے بعد اسے چند سیکنڈ کے لیے نمایاں چمکائیں — تاکہ نئے یوزر کو صاف نظر آئے یہی چیز ہے جو اس نے ڈھونڈی تھی ---------- */
+  .searchHighlightPulse{animation:searchHighlightPulseAnim 2.6s ease-out; position:relative; z-index:1;}
+  @keyframes searchHighlightPulseAnim{
+    0%{box-shadow:0 0 0 4px rgba(37,99,235,.85), 0 0 24px rgba(37,99,235,.5);}
+    70%{box-shadow:0 0 0 4px rgba(37,99,235,.5), 0 0 18px rgba(37,99,235,.3);}
+    100%{box-shadow:0 2px 10px rgba(41,29,10,.07);}
+  }
 
   /* --- Backup Export/Import بٹن: بڑے، خوبصورت، واضح --- */
   .backupBtnGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;}
@@ -3428,7 +3435,7 @@
         </div>
 
         <!-- --- تھیم اور ظاہری شکل --- -->
-        <div class="settingsCard">
+        <div class="settingsCard" id="settingsCardTheme">
           <h3>🎨 Theme & Appearance</h3>
           <div class="settingsHint">As soon as you pick a colour, the whole app — buttons, header, sidebar, everything — instantly changes to that colour.</div>
 
@@ -3454,7 +3461,7 @@
         </div>
 
         <!-- --- ٹیکس Settings — پاکستان کے عام کاؤنٹر بلوں پر لازمی نہیں، اس لیے مکمل اختیاری اور ڈیفالٹ بند --- -->
-        <div class="settingsCard">
+        <div class="settingsCard" id="settingsCardTax">
           <h3>🧾 Tax Settings</h3>
           <div class="settingsHint">Most retail shops in Pakistan don't add tax on the counter bill — leave this off unless your business specifically needs it. If you turn it on, this percentage is added as a separate line on every new bill going forward (past bills are unaffected).</div>
           <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
@@ -3480,7 +3487,7 @@
 
         <!-- --- 💾 بیک اپ (Export/Import) — چونکہ فون میں براہ راست HTML کھولنے پر خودکار محفوظ ہونا قابلِ بھروسہ نہیں،
              یہی سب سے پکا طریقہ ہے کہ آپ کا ڈیٹا (پراڈکٹس، کسٹمرز، بل) محفوظ رہے اور اگلی بار واپس لایا جا سکے --- -->
-        <div class="settingsCard">
+        <div class="settingsCard" id="settingsCardBackup">
           <h3>💾 Backup Your Data</h3>
           <div class="settingsHint">Since opening this file directly in Chrome doesn't reliably auto-save between sessions, use this instead: tap "Export" before closing the app to download a backup file, then tap "Import" next time you open the app to bring everything back.</div>
           <div class="settingsHint" style="background:#fff7ed; color:#9a3412;">📁 Backups always save to your phone's <b>Downloads</b> folder — Android/Chrome doesn't let a web app choose a different folder automatically. To avoid confusion, always open this app from the <b>same one link</b> (your GitHub Pages URL), and check "Last Backup" below before closing the app.</div>
@@ -3501,7 +3508,7 @@
         </div>
 
         <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
-        <div class="settingsCard">
+        <div class="settingsCard" id="settingsCardPaymentAccounts">
           <h3>💳 My Payment Accounts</h3>
           <div class="settingsHint">These will be automatically included in every payment reminder you send to customers, so they can pay you directly without calling to ask for your account number.</div>
           <div id="myPaymentAccountsWrap"></div>
@@ -3597,7 +3604,7 @@
       </div>
 
       <!-- --- پرنٹر Settings --- -->
-      <div class="settingsCard">
+      <div class="settingsCard" id="settingsCardPrinter">
         <h3>🖨️ Printer Settings</h3>
         <div class="settingsHint">Printing works through your phone's own Print system. When you tap Print, Android shows every printer it knows about — Bluetooth thermal printers (via an app like RawBT), Sunmi's built-in printer, WiFi/USB printers, or "Save as PDF". If your printer doesn't appear, install its print-service app from Play Store once — after that it'll show up automatically here and in every other app.</div>
 
@@ -3641,7 +3648,7 @@
       </div>
 
       <!-- --- 🔠 پرنٹ کی لکھائی کا سائز --- -->
-      <div class="settingsCard">
+      <div class="settingsCard" id="settingsCardPrintTextSize">
         <h3>🔠 Print Text Size</h3>
         <div class="settingsHint">Make the printed receipt's writing bigger or smaller across the board.</div>
         <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
@@ -5132,13 +5139,13 @@ const APP_SEARCH_INDEX = [
   {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast'},
   {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission'},
   {label:'Settings — Business Info', path:'Settings', screen:'settings', keywords:'business info name logo owner address phone shop details'},
-  {label:'Settings — Tax', path:'Settings', screen:'settings', keywords:'tax percentage gst enable bill'},
-  {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', keywords:'backup export import restore data save json downloads last backup'},
-  {label:'Settings — Theme Color', path:'Settings', screen:'settings', keywords:'theme color colour appearance look design purple teal blue'},
+  {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
+  {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', anchor:'settingsCardBackup', keywords:'backup export import restore data save json downloads last backup'},
+  {label:'Settings — Theme Color', path:'Settings', screen:'settings', anchor:'settingsCardTheme', keywords:'theme color colour appearance look design purple teal blue'},
   {label:'Settings — Admin PIN / Password', path:'Settings', screen:'settings', keywords:'admin pin password change security cnic dob recovery login'},
-  {label:'Settings — Print / Paper Size', path:'Bill & Print Settings', screen:'billsettings', keywords:'print paper size thermal 58mm 80mm receipt font invoice style a4'},
-  {label:'Settings — Payment Accounts', path:'Settings', screen:'settings', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive'},
-  {label:'Settings — Storage Usage', path:'Settings', screen:'settings', keywords:'storage usage space full device limit photos'},
+  {label:'Settings — Print / Paper Size', path:'Bill & Print Settings', screen:'billsettings', anchor:'settingsCardPrinter', keywords:'print paper size thermal 58mm 80mm receipt font invoice style a4'},
+  {label:'Settings — Payment Accounts', path:'Settings', screen:'settings', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive'},
+  {label:'Settings — Storage Usage', path:'Settings', screen:'settings', anchor:'storageUsageCard', keywords:'storage usage space full device limit photos'},
   {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply'},
   {label:'Package Plans', path:'Home → Tools', action:'openPackagePlansModal', keywords:'package plans subscription price days activation code'},
 ];
@@ -5170,7 +5177,7 @@ function renderAppSearchResults(query){
   wrap.classList.add('show');
 }
 
-function goToAppSearchResult(idx){
+function goToAppSearchResult(idx, query){
   const matches = window.__lastAppSearchMatches || [];
   const item = matches[idx];
   if(!item) return;
@@ -5183,6 +5190,39 @@ function goToAppSearchResult(idx){
   } else if(item.screen){
     goTo(item.screen);
   }
+  // ---------- ہر سرچ نتیجے کے لیے خودکار — کسی anchor کی دستی وائرنگ کی ضرورت نہیں۔ جو لفظ ٹائپ ہوا (یا نہ ہونے پر
+  // آئٹم کا اپنا لیبل) اسی سے منزل کی سکرین/مودال میں سب سے قریبی ملتا جلتا عنصر خود ڈھونڈ کر نمایاں کیا جاتا ہے ----------
+  highlightSearchTarget(query || item.label);
+}
+
+// ---------- منزل پر پہنچ کر، جو ٹائپ کیا گیا تھا اس سے ملتا جلتا سب سے بہترین عنصر (ہیڈنگ/لیبل/بٹن) خود ڈھونڈیں،
+// اس کے قریب ترین "کارڈ" نما کنٹینر تک سکرول کریں اور چند سیکنڈ نمایاں چمکائیں — ہر سرچ انٹری کے لیے یکساں کام کرتا ہے ----------
+function highlightSearchTarget(query){
+  if(!query) return;
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!words.length) return;
+  setTimeout(() => {
+    const openModal = document.querySelector('.modalOverlay.show .modalBox, .modalOverlay.show .invoicePreviewBox');
+    const scope = openModal || document.querySelector('.screen.active') || document.getElementById('mainArea') || document;
+    const candidates = Array.from(scope.querySelectorAll(
+      'h3, h4, .pageTitle, .settingsCard, .settingsSubLabel, .homeIconTile, label, button, .settingsHint'
+    ));
+    let best = null, bestScore = 0;
+    candidates.forEach(el => {
+      const text = (el.textContent || '').trim().toLowerCase();
+      if(!text) return;
+      let score = 0;
+      words.forEach(w => { if(text.includes(w)) score++; });
+      // ---------- چھوٹے، مخصوص عناصر (ہیڈنگ/لیبل) کو ترجیح — پورے بڑے پیراگراف پر میچ کم اہم ----------
+      if(score > 0 && text.length < 60) score += 0.5;
+      if(score > bestScore){ bestScore = score; best = el; }
+    });
+    if(!best) return;
+    const target = best.closest('.settingsCard') || best.closest('.homeIconTile') || best;
+    target.scrollIntoView({behavior:'smooth', block:'center'});
+    target.classList.add('searchHighlightPulse');
+    setTimeout(() => target.classList.remove('searchHighlightPulse'), 2600);
+  }, 220);
 }
 
 /* =====================================================================
@@ -13810,7 +13850,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   if(AppState.settings.businessPhone) estimatedHeight += 16;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    estimatedHeight += 38 + (summary.rows.length * 18) + 26 + 24; // Payment Summary باکس (متحرک اونچائی، لائنوں کی تعداد کے مطابق)
+    estimatedHeight += 18 + 26 + ((summary.rows.length + 1) * 22) + 6 + 24; // Payment Summary باکس (متحرک اونچائی، لائنوں کی تعداد کے مطابق)
   } else {
     if(invoice.discount && invoice.discount > 0) estimatedHeight += 44;
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
@@ -14010,32 +14050,46 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), pxWidth-10, y);
   y += 34;
 
-  // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ — سب ایک باکس میں ----------
+  // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ — سب ایک باکس میں
+  // اب باقاعدہ 2-کالمی ٹیبل کی طرح (اوپر آئٹمز ٹیبل جیسی ہی لکیریں + ہلکی متبادل شیڈنگ) — لیبل اور رقم اب قریب قریب،
+  // پوری چوڑائی میں دور دور نہیں — پڑھنے اور ملانے میں آسانی کے لیے ----------
   // یہ اسی وقت محفوظ ہوا تھا جب بل بنا تھا، اس لیے بعد میں کچھ بھی بدلے، یہ ہمیشہ اس دن کی صحیح تصویر دکھائے گا
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
+    const sumLabelW = Math.round((tableRight - tableLeft) * 0.62);
+    const sumValueX = tableLeft + sumLabelW;
+    const sumValueW = (tableRight - tableLeft) - sumLabelW;
+    const sumRowH = 22;
     const boxTop = y;
-    const boxH = 38 + (summary.rows.length * 18) + 26;
-    ctx.strokeStyle = '#000';
+    const titleH = 26;
+    const boxH = titleH + ((summary.rows.length + 1) * sumRowH) + 6;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
     ctx.strokeRect(tableLeft + 0.5, boxTop + 0.5, tableRight - tableLeft, boxH);
     y += 18;
     ctx.font = F('bold 13px');
     ctx.textAlign = 'center';
-    ctx.fillText('Payment Summary', pxWidth/2, y); y += 20;
+    ctx.fillStyle = '#000';
+    ctx.fillText('Payment Summary', pxWidth/2, y); y += 8;
 
-    ctx.font = F('13px');
-    summary.rows.forEach(([label, val]) => {
+    let rowTop = boxTop + titleH;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(tableLeft, rowTop); ctx.lineTo(tableRight, rowTop); ctx.stroke();
+
+    const allSummaryRows = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
+    allSummaryRows.forEach(([label, val, isFinal], idx) => {
+      if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(tableLeft+0.5, rowTop+0.5, tableRight-tableLeft-1, sumRowH); }
+      ctx.font = F(isFinal ? 'bold 14px' : '13px');
+      ctx.fillStyle = '#000';
       ctx.textAlign = 'left';
-      ctx.fillText(label, tableLeft + 10, y);
+      ctx.fillText(label, tableLeft + 8, rowTop + sumRowH/2 + 5);
       ctx.textAlign = 'right';
-      ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), tableRight - 10, y);
-      y += 18;
+      ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), tableRight - 8, rowTop + sumRowH/2 + 5);
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
+      rowTop += sumRowH;
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tableLeft, rowTop); ctx.lineTo(tableRight, rowTop); ctx.stroke();
     });
-    ctx.font = F('bold 14px');
-    ctx.textAlign = 'left';
-    ctx.fillText(summary.finalLabel, tableLeft + 10, y);
-    ctx.textAlign = 'right';
-    ctx.fillText('Rs. ' + Math.round(summary.finalValue).toLocaleString(), tableRight - 10, y);
     y = boxTop + boxH + 24;
   }
 
