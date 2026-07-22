@@ -16972,6 +16972,7 @@ async function renderTodaySaleReportToCanvas(){
   if(!canvas) return;
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
 
   const todayStr = toLocalDateStr(new Date());
 
@@ -16991,14 +16992,12 @@ async function renderTodaySaleReportToCanvas(){
   // ---------- اوپننگ کیش (Settings سے) ----------
   const openingCash = AppState.settings.openingCashBalance || 0;
 
-  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب) + سپلائرز کا کل بقایہ (Liabilities) ----------
+  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب) ----------
   let diaryPayable = 0, diaryReceivable = 0;
   (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
     if(e.balance < 0) diaryPayable += Math.abs(e.balance);
     else if(e.balance > 0) diaryReceivable += e.balance;
   });
-  const totalSupplierPayable = (suppliersData || []).reduce((s,sup) => s + (sup.total_payable || 0), 0);
-  const totalLiabilities = totalSupplierPayable + diaryPayable;
 
   // ---------- آئٹم وائز فروخت — سب سے زیادہ بکنے والا سب سے اوپر ----------
   const itemQtyMap = {};
@@ -17012,6 +17011,7 @@ async function renderTodaySaleReportToCanvas(){
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
   const align = AppState.settings.reportAlign || 'left';
+  const decimals = AppState.settings.reportPriceDecimals ?? 0;
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
   try{
@@ -17057,20 +17057,73 @@ async function renderTodaySaleReportToCanvas(){
   const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
   const colTextAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
 
-  // ---------- کل اونچائی کا حساب — 9 سمری لائنیں + آئٹم ٹیبل ----------
+  // ---------- لفظوں کو خانے کی چوڑائی میں فٹ ہونے تک اگلی لائن میں لے جانے والا فنکشن — کبھی خانے سے باہر نہیں نکلتا ----------
+  const wrapLines = (text, maxWidth, font) => {
+    ctx.font = font;
+    const words = String(text).split(' ');
+    const lines = [];
+    let cur = '';
+    words.forEach(w => {
+      const test = cur ? cur + ' ' + w : w;
+      if(ctx.measureText(test).width > maxWidth && cur){
+        lines.push(cur);
+        cur = w;
+      } else {
+        cur = test;
+      }
+    });
+    if(cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  };
+
+  const money = (v) => 'Rs. ' + Number(v).toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // ---------- Cash In / Cash Out کا ڈیٹا — ہر آئٹم کا لیبل اور رقم ----------
+  const cashInItems = [
+    ['Opening Cash', openingCash],
+    ['Total Sales', totalSales],
+    ['Payments Received (Customers)', customerPaymentsReceived],
+    ['Diary Receivable', diaryReceivable],
+  ];
+  const cashOutItems = [
+    [`Today's Expenses`, todayExpenses],
+    ['Payments Made (Suppliers)', supplierPaymentsMade],
+    ['Diary Payable', diaryPayable],
+    ['', null],
+  ];
+  const cashInTotal = cashInItems.reduce((s,[,v]) => s + v, 0);
+  const cashOutTotal = cashOutItems.reduce((s,[,v]) => s + (v||0), 0);
+  const colW = totalW / 2;
+  const cellPadding = 8;
+  const labelFontPx = fsSummary, valueFontPx = Math.round(fsSummary * 1.05);
+  const lineGap = Math.round(fsSummary * 1.35);
+
+  // ---------- ہر قطار کی اونچائی پہلے سے ناپ لیں (لیبل کی جتنی لائنیں بھی بنیں + رقم کی 1 لائن) —
+  // Cash In اور Cash Out دونوں کالمز کی جو بھی سب سے زیادہ اونچی ہو، پوری قطار اتنی ہی اونچی ہوگی ----------
+  const rowLineCounts = [];
+  for(let i = 0; i < cashInItems.length; i++){
+    const inLines = cashInItems[i][0] ? wrapLines(cashInItems[i][0], colW - cellPadding*2, `${labelFontPx}px ${fontFam}`).length : 0;
+    const outLines = cashOutItems[i][0] ? wrapLines(cashOutItems[i][0], colW - cellPadding*2, `${labelFontPx}px ${fontFam}`).length : 0;
+    const inTotalLines = inLines ? inLines + 1 : 0; // +1 رقم کی لائن کے لیے
+    const outTotalLines = outLines ? outLines + 1 : 0;
+    rowLineCounts.push(Math.max(inTotalLines, outTotalLines, 1));
+  }
+  const cashRowHeights = rowLineCounts.map(n => n * lineGap + 10);
+  const cashHeaderRowH = summaryLineH;
+  const cashTotalRowH = summaryLineH;
+  const cashTableH = cashHeaderRowH + cashRowHeights.reduce((s,h) => s+h, 0) + cashTotalRowH;
+
+  // ---------- کل اونچائی کا حساب ----------
   let headerBandH = useA4 ? 78 : 46;
   if(logoImg) headerBandH += logoH + 8;
   if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
-  const cashTableRows = 1 + 4 + 1; // ---------- ہیڈر لائن + 4 آئٹم لائنیں + ٹوٹل لائن ----------
-  const summaryBlockLines = 1 /*Total Bills*/ + cashTableRows + 1 /*Net لائن*/;
-  let bodyTop = headerBandH + (summaryLineH * summaryBlockLines) + 40 + headerRowH;
+  let bodyTop = headerBandH + summaryLineH + 8 + cashTableH + Math.round(fsSummary*2) + 40 + headerRowH;
   let estimatedHeight = bodyTop + (soldItems.length * baseRowH) + 50;
   estimatedHeight += Math.round(40 * fontScale);
   if(soldItems.length === 0) estimatedHeight += baseRowH + 20; // ---------- "آج کوئی فروخت نہیں" کا پیغام دکھانے کی جگہ ----------
 
   canvas.width = pxWidth;
   canvas.height = Math.max(estimatedHeight, 300);
-  const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
@@ -17108,75 +17161,73 @@ async function renderTodaySaleReportToCanvas(){
   ctx.fillText(`Date : ${dstr}`, tableLeft, y);
   y += 10;
 
-  // ---------- سمری: پہلے کل بل، پھر کیش اِن/کیش آؤٹ کا باقاعدہ دو کالمی، بارڈر والا ٹیبل، آخر میں خالص نیٹ لائن ----------
+  // ---------- Total Bills ----------
   ctx.font = `bold ${fsSummary}px ${fontFam}`;
   y += summaryLineH;
   ctx.textAlign = 'left'; ctx.fillText('Total Bills:', tableLeft, y);
   ctx.textAlign = 'right'; ctx.fillText(String(totalBills), tableRight, y);
   y += 8;
 
-  const cashInItems = [
-    ['Opening Cash', openingCash],
-    ['Total Sales', totalSales],
-    ['Payments Received (Customers)', customerPaymentsReceived],
-    ['Diary Receivable', diaryReceivable],
-  ];
-  const cashOutItems = [
-    [`Today's Expenses`, todayExpenses],
-    ['Payments Made (Suppliers)', supplierPaymentsMade],
-    ['Diary Payable', diaryPayable],
-    ['', null],
-  ];
-  const cashInTotal = cashInItems.reduce((s,[,v]) => s + v, 0);
-  const cashOutTotal = cashOutItems.reduce((s,[,v]) => s + (v||0), 0);
-  const colW = totalW / 2;
-  const cashRowH = summaryLineH;
-
+  // ---------- Cash In / Cash Out ٹیبل ----------
   const cashTableTop = y;
-  // ---------- ہیڈر: 🟢 Cash In | 🔴 Cash Out ----------
-  ctx.fillStyle = '#dcfce7'; ctx.fillRect(tableLeft, cashTableTop, colW, cashRowH);
-  ctx.fillStyle = '#fee2e2'; ctx.fillRect(tableLeft+colW, cashTableTop, colW, cashRowH);
+  ctx.fillStyle = '#dcfce7'; ctx.fillRect(tableLeft, cashTableTop, colW, cashHeaderRowH);
+  ctx.fillStyle = '#fee2e2'; ctx.fillRect(tableLeft+colW, cashTableTop, colW, cashHeaderRowH);
   ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3;
-  ctx.strokeRect(tableLeft+0.5, cashTableTop+0.5, totalW, cashRowH);
-  ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, cashTableTop); ctx.lineTo(tableLeft+colW+0.5, cashTableTop+cashRowH); ctx.stroke();
+  ctx.strokeRect(tableLeft+0.5, cashTableTop+0.5, totalW, cashHeaderRowH);
+  ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, cashTableTop); ctx.lineTo(tableLeft+colW+0.5, cashTableTop+cashHeaderRowH); ctx.stroke();
   ctx.font = `bold ${fsSummary}px ${fontFam}`;
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#065f2b'; ctx.fillText('🟢 Cash In', tableLeft+colW/2, cashTableTop+cashRowH/2+5);
-  ctx.fillStyle = '#991b1b'; ctx.fillText('🔴 Cash Out', tableLeft+colW+colW/2, cashTableTop+cashRowH/2+5);
+  ctx.fillStyle = '#065f2b'; ctx.fillText('🟢 Cash In', tableLeft+colW/2, cashTableTop+cashHeaderRowH/2+5);
+  ctx.fillStyle = '#991b1b'; ctx.fillText('🔴 Cash Out', tableLeft+colW+colW/2, cashTableTop+cashHeaderRowH/2+5);
 
-  let rowY = cashTableTop + cashRowH;
-  ctx.font = `${fsSummary}px ${fontFam}`;
+  let rowY = cashTableTop + cashHeaderRowH;
   for(let i = 0; i < cashInItems.length; i++){
+    const rh = cashRowHeights[i];
     ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-    ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, cashRowH);
-    ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+cashRowH); ctx.stroke();
+    ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, rh);
+    ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+rh); ctx.stroke();
     const [inLabel, inVal] = cashInItems[i];
     const [outLabel, outVal] = cashOutItems[i];
-    ctx.fillStyle = '#1a1a1a';
     if(inLabel){
-      ctx.textAlign = 'left'; ctx.fillText(inLabel, tableLeft+6, rowY+cashRowH/2+4);
-      ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(inVal).toLocaleString(), tableLeft+colW-6, rowY+cashRowH/2+4);
+      const lines = wrapLines(inLabel, colW - cellPadding*2, `${labelFontPx}px ${fontFam}`);
+      let ly = rowY + lineGap;
+      ctx.font = `${labelFontPx}px ${fontFam}`;
+      ctx.fillStyle = '#1a1a1a';
+      ctx.textAlign = 'left';
+      lines.forEach(line => { ctx.fillText(line, tableLeft+cellPadding, ly); ly += lineGap; });
+      ctx.font = `bold ${valueFontPx}px ${fontFam}`;
+      ctx.fillStyle = '#065f2b';
+      ctx.textAlign = 'right';
+      ctx.fillText(money(inVal), tableLeft+colW-cellPadding, ly);
     }
     if(outLabel){
-      ctx.textAlign = 'left'; ctx.fillText(outLabel, tableLeft+colW+6, rowY+cashRowH/2+4);
-      ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(outVal).toLocaleString(), tableRight-6, rowY+cashRowH/2+4);
+      const lines = wrapLines(outLabel, colW - cellPadding*2, `${labelFontPx}px ${fontFam}`);
+      let ly = rowY + lineGap;
+      ctx.font = `${labelFontPx}px ${fontFam}`;
+      ctx.fillStyle = '#1a1a1a';
+      ctx.textAlign = 'left';
+      lines.forEach(line => { ctx.fillText(line, tableLeft+colW+cellPadding, ly); ly += lineGap; });
+      ctx.font = `bold ${valueFontPx}px ${fontFam}`;
+      ctx.fillStyle = '#991b1b';
+      ctx.textAlign = 'right';
+      ctx.fillText(money(outVal), tableRight-cellPadding, ly);
     }
-    rowY += cashRowH;
+    rowY += rh;
   }
   // ---------- ٹوٹل لائن ----------
   ctx.fillStyle = '#f1f5f9';
-  ctx.fillRect(tableLeft, rowY, totalW, cashRowH);
+  ctx.fillRect(tableLeft, rowY, totalW, cashTotalRowH);
   ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3;
-  ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, cashRowH);
-  ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+cashRowH); ctx.stroke();
+  ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, cashTotalRowH);
+  ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+cashTotalRowH); ctx.stroke();
   ctx.font = `bold ${fsSummary}px ${fontFam}`;
   ctx.fillStyle = '#065f2b';
-  ctx.textAlign = 'left'; ctx.fillText('Total', tableLeft+6, rowY+cashRowH/2+4);
-  ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(cashInTotal).toLocaleString(), tableLeft+colW-6, rowY+cashRowH/2+4);
+  ctx.textAlign = 'left'; ctx.fillText('Total', tableLeft+cellPadding, rowY+cashTotalRowH/2+4);
+  ctx.textAlign = 'right'; ctx.fillText(money(cashInTotal), tableLeft+colW-cellPadding, rowY+cashTotalRowH/2+4);
   ctx.fillStyle = '#991b1b';
-  ctx.textAlign = 'left'; ctx.fillText('Total', tableLeft+colW+6, rowY+cashRowH/2+4);
-  ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(cashOutTotal).toLocaleString(), tableRight-6, rowY+cashRowH/2+4);
-  rowY += cashRowH;
+  ctx.textAlign = 'left'; ctx.fillText('Total', tableLeft+colW+cellPadding, rowY+cashTotalRowH/2+4);
+  ctx.textAlign = 'right'; ctx.fillText(money(cashOutTotal), tableRight-cellPadding, rowY+cashTotalRowH/2+4);
+  rowY += cashTotalRowH;
   y = rowY + Math.round(fsSummary*0.9);
 
   // ---------- خالص نیٹ — منافع میں ہیں یا ڈیبٹ میں ----------
@@ -17185,10 +17236,10 @@ async function renderTodaySaleReportToCanvas(){
   ctx.font = `bold ${Math.round(fsSummary*1.35)}px ${fontFam}`;
   ctx.fillStyle = netIsProfit ? '#065f2b' : '#991b1b';
   ctx.textAlign = 'center';
-  ctx.fillText(`${netIsProfit ? 'Net: Profit' : 'Net: Debit'}  Rs. ${Math.abs(Math.round(netAmount)).toLocaleString()}`, pxWidth/2, y);
+  ctx.fillText(`${netIsProfit ? 'Net: Profit' : 'Net: Debit'}  ${money(Math.abs(netAmount))}`, pxWidth/2, y);
   y += Math.round(fsSummary*1.1);
 
-  // ---------- ٹیبل ہیڈر ----------
+  // ---------- ٹیبل ہیڈر (آئٹم فروخت) ----------
   const headerTop = y;
   ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
