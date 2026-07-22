@@ -16884,9 +16884,9 @@ async function renderReportToCanvas(){
     const stockValSales = relevant.reduce((s,it)=>s+(it.retail*it.stock),0);
     ctx.font = `bold ${fsSummary}px ${fontFam}`;
     y += summaryLineH; ctx.fillText(`Total Items (All Categories): ${totalItemsCount}`, tableLeft, y);
-    y += summaryLineH; ctx.fillText(`In Stock: ${totalStock.toFixed(2)}`, tableLeft, y);
-    y += summaryLineH; ctx.fillText(`Stock Value Purchase: ${stockValPurchase.toFixed(2)}`, tableLeft, y);
-    y += summaryLineH; ctx.fillText(`Stock Value Sales: ${stockValSales.toFixed(2)}`, tableLeft, y);
+    y += summaryLineH; ctx.fillText(`In Stock: ${totalStock.toFixed(decimals)}`, tableLeft, y);
+    y += summaryLineH; ctx.fillText(`Stock Value Purchase: ${stockValPurchase.toFixed(decimals)}`, tableLeft, y);
+    y += summaryLineH; ctx.fillText(`Stock Value Sales: ${stockValSales.toFixed(decimals)}`, tableLeft, y);
   } else if(currentReportType === 'lowstock'){
     ctx.font = `bold ${fsSummary}px ${fontFam}`;
     y += summaryLineH; ctx.fillText(`Total Low Stock Items: ${totalItemRows}`, tableLeft, y);
@@ -16941,7 +16941,7 @@ async function renderReportToCanvas(){
           ctx.fillText(Number(it.retail).toFixed(decimals), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'stock'){
           ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.fillText(Number(it.stock).toFixed(2), cx, y + rh/2 + fsItem*0.32);
+          ctx.fillText(Number(it.stock).toFixed(decimals), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'lowStockAt'){
           ctx.font = `${fsItem}px ${fontFam}`;
           ctx.fillText(String(it.lowStockAt), cx, y + rh/2 + fsItem*0.32);
