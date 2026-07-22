@@ -3203,17 +3203,17 @@
 
         <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے ---------- -->
         <div class="previewStyleControls">
-          <div class="pscRow">
+          <div class="pscRow" style="flex:1 1 100%;">
             <span class="pscLabel">🔠 Text</span>
-            <button onclick="adjustPreviewStyle('printFontScale', -5, 70, 260)">A−</button>
-            <span class="pscValue" id="pscFontScaleVal">100%</span>
-            <button onclick="adjustPreviewStyle('printFontScale', 5, 70, 260)">A+</button>
+            <span style="font-size:11px; color:var(--muted);">A</span>
+            <input type="range" id="pscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPreviewZoom('printFontScale', this.value)" style="flex:1;">
+            <span style="font-size:19px; color:var(--muted);">A</span>
+            <span class="pscValue" id="pscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
           </div>
-          <div class="pscRow">
+          <div class="pscRow" style="flex:1 1 100%;">
             <span class="pscLabel">↕ Row</span>
-            <button onclick="adjustPreviewStyle('printRowScale', -10, 70, 220)">−</button>
-            <span class="pscValue" id="pscRowScaleVal">100%</span>
-            <button onclick="adjustPreviewStyle('printRowScale', 10, 70, 220)">+</button>
+            <input type="range" id="pscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPreviewZoom('printRowScale', this.value)" style="flex:1;">
+            <span class="pscValue" id="pscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
           </div>
           <div class="pscRow">
             <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁 Bold</button>
@@ -3222,6 +3222,7 @@
           <div class="pscRow">
             <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅ Left</button>
             <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔ Center</button>
+            <button id="pscAlignRightBtn" class="pscToggleBtn" onclick="setPreviewAlign('right')">➡ Right</button>
           </div>
           <div class="pscRow">
             <span class="pscLabel">.00 Decimals</span>
@@ -13820,6 +13821,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const pxWidth = paperWidthMM === 80 ? 576 : 384;
   const canvas = document.getElementById('invoiceCanvas');
   const scale = pxWidth / 576;
+  // ---------- سکرین/شیئر کے لیے تھیم رنگ — پرنٹ کے وقت الگ سے سیاہ/سفید میں بدل دیا جاتا ہے (printCurrentInvoice دیکھیں) ----------
+  const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
 
   // ---------- پیمنٹ اکاؤنٹ + QR — اگر فعال ہو تو پہلے ہی لوڈ کر لیتے ہیں تاکہ اونچائی کا حساب پہلے سے درست ہو ----------
   const receiptAccounts = (AppState.settings.paymentAccounts || []).filter(a => a.showOnReceipt);
@@ -13896,7 +13899,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let y = 30;
   ctx.textAlign = 'center';
   ctx.font = F('bold 26px');
-  ctx.fillStyle = '#000';
+  ctx.fillStyle = theme.primaryDark || '#000';
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 26;
 
   // ---------- دکان کا پتہ/فون ہو تو دکھائیں ----------
@@ -13935,6 +13938,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // ---------- آئٹمز ٹیبل — مکمل باریک ٹھوس گرڈ (باکس والا)، ہر کالم پر عمودی لائن، ہر آئٹم پر افقی لائن ----------
   // کالمز کی ترتیب: #  |  Item  |  Qty  |  Price  |  Total
   const tableTop = y;
+  ctx.fillStyle = hexToRgba(theme.primary || '#0f766e', 0.12); // ---------- ہیڈر کی قطار پر ہلکا تھیم رنگ — سکرین/شیئر کے لیے ----------
+  ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerH);
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 1;
   colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x) + 0.5, tableTop); ctx.lineTo(Math.floor(x) + 0.5, tableTop + tableH); ctx.stroke(); });
@@ -13943,19 +13948,20 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly) + 0.5); ctx.lineTo(tableRight, Math.floor(ly) + 0.5); ctx.stroke(); };
   drawTableHLine(hLineY); // اوپر کی باؤنڈری
 
-  // ---------- ہیڈر لائن — اب یہ بھی وہی الائنمنٹ (Left/Center) اپناتی ہے جو نیچے آئٹمز کی لائنیں اپناتی ہیں ----------
-  const headerItemAlign = AppState.settings.printItemAlign === 'center' ? 'center' : 'left';
-  const headerItemNameX = headerItemAlign === 'center' ? (colX[1] + colX[2]) / 2 : colX[1] + 4;
-  const headerQtyX = headerItemAlign === 'center' ? (colX[2] + colX[3]) / 2 : colX[3] - 4;
-  const headerPriceX = headerItemAlign === 'center' ? (colX[3] + colX[4]) / 2 : colX[4] - 4;
-  const headerTotalX = headerItemAlign === 'center' ? (colX[4] + colX[5]) / 2 : colX[5] - 4;
+  // ---------- ہیڈر لائن — اب مکمل 3-طرفہ الائنمنٹ (Left/Center/Right)، چاروں کالمز پر یکساں لاگو ----------
+  const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
+  const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 4 : a + 4);
+  const headerItemNameX = colCenterX(colX[1], colX[2]);
+  const headerQtyX = colCenterX(colX[2], colX[3]);
+  const headerPriceX = colCenterX(colX[3], colX[4]);
+  const headerTotalX = colCenterX(colX[4], colX[5]);
+  const ctxAlignForItems = headerItemAlign; // ---------- 'left'/'center'/'right' سیدھا ctx.textAlign کے طور پر استعمال ہو سکتا ہے ----------
   ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
   ctx.textAlign = 'center';
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = headerItemAlign;
+  ctx.textAlign = ctxAlignForItems;
   ctx.fillText('Item', headerItemNameX, headerBaseline);
-  ctx.textAlign = headerItemAlign === 'center' ? 'center' : 'right';
   ctx.fillText('Qty', headerQtyX, headerBaseline);
   ctx.fillText('Price', headerPriceX, headerBaseline);
   ctx.fillText('Total', headerTotalX, headerBaseline);
@@ -13967,7 +13973,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const itemAlign = headerItemAlign;
   const itemNameX = headerItemNameX;
   const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
-  // ---------- Center منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم کے وسط میں آ جائیں، ورنہ ہمیشہ کی طرح دائیں طرف ----------
+  // ---------- Center/Right منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم میں اسی طرف آئیں ----------
   const qtyX = headerQtyX;
   const priceX = headerPriceX;
   const totalX = headerTotalX;
@@ -14001,7 +14007,6 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.fillText(displayName, itemNameX, rowBaseline);
-    ctx.textAlign = itemAlign === 'center' ? 'center' : 'right';
     ctx.fillText(String(remainingQty), qtyX, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(decimals), priceX, rowBaseline);
     ctx.fillText((remainingQty*item.unitPrice).toFixed(decimals), totalX, rowBaseline);
@@ -14091,6 +14096,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
         // ---------- بل کا Center کمانڈ منتخب ہو تو یہ باکس بھی اسی کمانڈ کے ساتھ کام کرے — ایک ہی درمیانی لائن میں لیبل+رقم ----------
         ctx.textAlign = 'center';
         ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumLeft + sumBoxW/2, rowTop + sumRowH/2 + 5);
+      } else if(headerItemAlign === 'right'){
+        ctx.textAlign = 'right';
+        ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumRight - 8, rowTop + sumRowH/2 + 5);
       } else {
         ctx.textAlign = 'left';
         ctx.fillText(label, sumLeft + 8, rowTop + sumRowH/2 + 5);
@@ -14432,13 +14440,18 @@ function rerenderInvoicePreview(){
 // ---------- کنٹرول بٹنوں پر لیبل/ہائی لائٹ کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں، ہر بار پریویو کھلنے پر ----------
 function syncPreviewStyleControls(){
   document.getElementById('pscFontScaleVal').textContent = (AppState.settings.printFontScale || 100) + '%';
+  const fontSlider = document.getElementById('pscFontScaleSlider');
+  if(fontSlider) fontSlider.value = AppState.settings.printFontScale || 100;
   document.getElementById('pscRowScaleVal').textContent = (AppState.settings.printRowScale || 100) + '%';
+  const rowSlider = document.getElementById('pscRowScaleSlider');
+  if(rowSlider) rowSlider.value = AppState.settings.printRowScale || 100;
   const isBold = AppState.settings.printBoldItems !== false;
   document.getElementById('pscBoldBtn').classList.toggle('active', isBold);
   document.getElementById('pscThinBtn').classList.toggle('active', !isBold);
   const align = AppState.settings.printItemAlign || 'left';
   document.getElementById('pscAlignLeftBtn').classList.toggle('active', align === 'left');
   document.getElementById('pscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('pscAlignRightBtn').classList.toggle('active', align === 'right');
   document.getElementById('pscDecimalsVal').textContent = AppState.settings.priceDecimals ?? 0;
 
   const fontSelect = document.getElementById('pscFontFamilySelect');
@@ -14454,6 +14467,18 @@ function syncPreviewStyleControls(){
 // ---------- پرنٹ کے لیے فونٹ سٹائل — یہ صرف رسید پر لاگو ہوتا ہے، پوری ایپ کا فونٹ نہیں بدلتا ----------
 function setPreviewFontFamily(fontId){
   AppState.settings.printFontId = fontId;
+  persistAllData();
+  rerenderInvoicePreview();
+}
+
+// ---------- 🔠 Text اور ↕ Row کی سلائیڈ بار — پرانے +/- بٹنوں کی جگہ، ڈریگ کر کے فوری بڑا/چھوٹا ----------
+function setPreviewZoom(settingKey, val){
+  const min = settingKey === 'printRowScale' ? 70 : 70;
+  const max = settingKey === 'printRowScale' ? 220 : 260;
+  const clamped = Math.max(min, Math.min(max, Number(val) || 100));
+  AppState.settings[settingKey] = clamped;
+  const label = document.getElementById(settingKey === 'printRowScale' ? 'pscRowScaleVal' : 'pscFontScaleVal');
+  if(label) label.textContent = clamped + '%';
   persistAllData();
   rerenderInvoicePreview();
 }
@@ -14499,12 +14524,31 @@ function closeInvoicePreview(){
 
 // ---------- Print — Android کے اپنے Print Service نظام کے ذریعے (RawBT/Sunmi پلگ ان/WiFi/USB/PDF سب اسی سے کام کریں گے) ----------
 // ---------- کسی ایک برانڈ کا SDK نہیں چاہیے — window.print() خودکار وہی ڈائیلاگ کھولتا ہے جو صارف کے فون پر جو بھی پرنٹر ایپ/سروس نصب ہو اسے دکھاتا ہے ----------
+// ---------- سکرین/شیئر رنگین رہے، مگر جو کاغذ پر پرنٹ ہو وہ ہمیشہ سیاہ/سفید — تھرمل پرنٹر ویسے بھی رنگین نہیں کرتا، اور رنگین
+// پرنٹر پر بھی سیاہی ضائع نہیں ہونی چاہیے۔ اصل رنگین کینوس کو چھیڑے بغیر ایک نئی سیاہ/سفید کاپی بنا کر صرف اسی کو پرنٹ بھیجتے ہیں ----------
+function canvasToGrayscale(sourceCanvas){
+  const gray = document.createElement('canvas');
+  gray.width = sourceCanvas.width;
+  gray.height = sourceCanvas.height;
+  const gctx = gray.getContext('2d');
+  gctx.drawImage(sourceCanvas, 0, 0);
+  const imgData = gctx.getImageData(0, 0, gray.width, gray.height);
+  const d = imgData.data;
+  for(let i = 0; i < d.length; i += 4){
+    const lum = Math.round(0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]);
+    d[i] = d[i+1] = d[i+2] = lum;
+  }
+  gctx.putImageData(imgData, 0, 0);
+  return gray;
+}
+
 function printCurrentInvoice(){
   const canvas = document.getElementById('invoiceCanvas');
   if(!canvas) return;
+  const printCanvas = canvasToGrayscale(canvas);
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   document.body.classList.add('printing-invoice');
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
 }
@@ -16986,9 +17030,10 @@ async function printCurrentReport(){
   await renderReportToCanvas(); // ---------- حفاظتی وجہ: یقینی بنائیں کہ کینوس بالکل تازہ اور مکمل ڈرا ہو چکا ہے، خاص طور پر ابھی ابھی زوم/سٹائل بدلنے کے فوری بعد پرنٹ دبانے کی صورت میں ----------
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
+  const printCanvas = canvasToGrayscale(canvas); // ---------- کاغذ پر ہمیشہ سیاہ/سفید — سکرین/شیئر کا رنگین ورژن الگ ----------
   applyPrintPageSize(AppState.settings.reportPrintStyle === 'a4' ? 210 : (AppState.settings.paperWidth || 80));
   const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   document.body.classList.add('printing-invoice');
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
 }
