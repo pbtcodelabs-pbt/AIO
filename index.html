@@ -3760,11 +3760,16 @@
         <span style="font-size:19px; color:var(--muted);">A</span>
         <span class="pscValue" id="rpscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
       </div>
-      <div class="pscRow">
+      <div class="pscRow" style="flex:1 1 100%;">
         <span class="pscLabel">↕ Row</span>
-        <button onclick="adjustReportStyle('reportRowScale', -10, 70, 260)">−</button>
-        <span class="pscValue" id="rpscRowScaleVal">100%</span>
-        <button onclick="adjustReportStyle('reportRowScale', 10, 70, 260)">+</button>
+        <input type="range" id="rpscRowScaleSlider" min="70" max="260" step="5" value="100" oninput="setReportRowZoom(this.value)" style="flex:1;">
+        <span class="pscValue" id="rpscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+      </div>
+      <div class="pscRow">
+        <span class="pscLabel">.00 Decimals</span>
+        <button onclick="adjustReportStyle('reportPriceDecimals', -1, 0, 4)">−</button>
+        <span class="pscValue" id="rpscDecimalsVal">0</span>
+        <button onclick="adjustReportStyle('reportPriceDecimals', 1, 0, 4)">+</button>
       </div>
       <div class="pscRow">
         <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁 Bold</button>
@@ -4366,6 +4371,7 @@ const DEFAULT_SETTINGS = {
   reportAlign: 'left',
   reportPrintStyle: 'thermal',    // 'thermal' | 'a4'
   reportShowStockQty: false,      // Price List/Profit رپورٹس میں سٹاک کی مقدار دکھائیں یا نہیں (کسٹمر کو بھیجتے وقت عام طور پر چھپی رہے)
+  reportPriceDecimals: 0,         // رپورٹس میں قیمتوں کے بعد ڈیسیمل پوائنٹس — بل کی طرح، ڈیفالٹ 0
 };
 const AppState = {
   currentUser: null,
@@ -16614,6 +16620,9 @@ function syncReportStyleControls(){
   const zoomSlider = document.getElementById('rpscFontScaleSlider');
   if(zoomSlider) zoomSlider.value = AppState.settings.reportFontScale || 100;
   document.getElementById('rpscRowScaleVal').textContent = (AppState.settings.reportRowScale || 100) + '%';
+  const rowSlider = document.getElementById('rpscRowScaleSlider');
+  if(rowSlider) rowSlider.value = AppState.settings.reportRowScale || 100;
+  document.getElementById('rpscDecimalsVal').textContent = AppState.settings.reportPriceDecimals ?? 0;
   const isBold = AppState.settings.reportBoldItems !== false;
   document.getElementById('rpscBoldBtn').classList.toggle('active', isBold);
   document.getElementById('rpscThinBtn').classList.toggle('active', !isBold);
@@ -16653,6 +16662,14 @@ function setReportZoom(pct){
   const clamped = Math.max(100, Math.min(400, Number(pct) || 100));
   AppState.settings.reportFontScale = clamped;
   const label = document.getElementById('rpscFontScaleVal');
+  if(label) label.textContent = clamped + '%';
+  persistAllData();
+  renderReportToCanvas();
+}
+function setReportRowZoom(pct){
+  const clamped = Math.max(70, Math.min(260, Number(pct) || 100));
+  AppState.settings.reportRowScale = clamped;
+  const label = document.getElementById('rpscRowScaleVal');
   if(label) label.textContent = clamped + '%';
   persistAllData();
   renderReportToCanvas();
@@ -16710,6 +16727,7 @@ async function renderReportToCanvas(){
   const bold = AppState.settings.reportBoldItems !== false;
   const align = AppState.settings.reportAlign || 'left'; // ---------- اب یہ ہر کالم (نام + قیمتیں + سٹاک وغیرہ) پر یکساں لاگو ہوتا ہے ----------
   const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
+  const decimals = AppState.settings.reportPriceDecimals ?? 0; // ---------- بل کی طرح — رپورٹ کی قیمتوں کے ڈیسیمل پوائنٹس کنٹرول ----------
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
@@ -16792,7 +16810,17 @@ async function renderReportToCanvas(){
   // ---------- ہر کالم کے اندر متن کہاں رکھا جائے — اب یہ صرف نام نہیں، ہر کالم پر یکساں لاگو ----------
   const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
   const colTextAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
-
+  // ---------- Purchase/Selling اور Profit/Profit% جیسے دو لائنوں والے کالمز زوم بڑھانے پر ساتھ والے کالم میں نہ چڑھیں —
+  // فونٹ خود بخود اپنے کالم کی چوڑائی میں فٹ ہونے تک چھوٹا ہوتا ہے ----------
+  const fitReportCellFont = (text, maxWidth, basePx) => {
+    let px = basePx;
+    ctx.font = `${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > 7){
+      px -= 1;
+      ctx.font = `${px}px ${fontFam}`;
+    }
+    return px;
+  };
   // ---------- کل اونچائی کا حساب — تمام قطاریں مقررہ اونچائی کی ہیں تو یہ درست پیشگی حساب ممکن ہے ----------
   const totalItemRows = groups.reduce((s,g) => s + g.items.length, 0);
   let headerBandH = useA4 ? 78 : 46;   // بزنس نام + فون + رپورٹ ٹائٹل + تاریخ
@@ -16910,7 +16938,7 @@ async function renderReportToCanvas(){
           ctx.fillText(String(it.name), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'retail'){
           ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.fillText(Number(it.retail).toFixed(2), cx, y + rh/2 + fsItem*0.32);
+          ctx.fillText(Number(it.retail).toFixed(decimals), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'stock'){
           ctx.font = `${fsItem}px ${fontFam}`;
           ctx.fillText(Number(it.stock).toFixed(2), cx, y + rh/2 + fsItem*0.32);
@@ -16918,15 +16946,19 @@ async function renderReportToCanvas(){
           ctx.font = `${fsItem}px ${fontFam}`;
           ctx.fillText(String(it.lowStockAt), cx, y + rh/2 + fsItem*0.32);
         } else if(c.key === 'ps'){
-          ctx.font = `${fsItemSm}px ${fontFam}`;
-          ctx.fillText(Number(it.purchase).toFixed(2), cx, y + rh/2 - fsItemSm*0.35);
-          ctx.fillText(Number(it.retail).toFixed(2), cx, y + rh/2 + fsItemSm*1.05);
+          const purchaseTxt = Number(it.purchase).toFixed(decimals), retailTxt2 = Number(it.retail).toFixed(decimals);
+          const psFit = Math.min(fitReportCellFont(purchaseTxt, c.width-8, fsItemSm), fitReportCellFont(retailTxt2, c.width-8, fsItemSm));
+          ctx.font = `${psFit}px ${fontFam}`;
+          ctx.fillText(purchaseTxt, cx, y + rh/2 - fsItemSm*0.35);
+          ctx.fillText(retailTxt2, cx, y + rh/2 + fsItemSm*1.05);
         } else if(c.key === 'profit'){
           const profit = it.retail - it.purchase;
           const profitPct = it.purchase > 0 ? (profit / it.purchase * 100) : 0;
-          ctx.font = `${fsItemSm}px ${fontFam}`;
-          ctx.fillText(profit.toFixed(2), cx, y + rh/2 - fsItemSm*0.35);
-          ctx.fillText(profitPct.toFixed(2)+'%', cx, y + rh/2 + fsItemSm*1.05);
+          const profitTxt = profit.toFixed(decimals), profitPctTxt = profitPct.toFixed(2)+'%';
+          const profFit = Math.min(fitReportCellFont(profitTxt, c.width-8, fsItemSm), fitReportCellFont(profitPctTxt, c.width-8, fsItemSm));
+          ctx.font = `${profFit}px ${fontFam}`;
+          ctx.fillText(profitTxt, cx, y + rh/2 - fsItemSm*0.35);
+          ctx.fillText(profitPctTxt, cx, y + rh/2 + fsItemSm*1.05);
         }
       });
       y += rh;
@@ -17029,8 +17061,9 @@ async function renderTodaySaleReportToCanvas(){
   let headerBandH = useA4 ? 78 : 46;
   if(logoImg) headerBandH += logoH + 8;
   if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
-  const summaryLinesCount = 9;
-  let bodyTop = headerBandH + (summaryLineH * summaryLinesCount) + 16 + headerRowH;
+  const cashTableRows = 1 + 4 + 1; // ---------- ہیڈر لائن + 4 آئٹم لائنیں + ٹوٹل لائن ----------
+  const summaryBlockLines = 1 /*Total Bills*/ + cashTableRows + 1 /*Net لائن*/;
+  let bodyTop = headerBandH + (summaryLineH * summaryBlockLines) + 40 + headerRowH;
   let estimatedHeight = bodyTop + (soldItems.length * baseRowH) + 50;
   estimatedHeight += Math.round(40 * fontScale);
   if(soldItems.length === 0) estimatedHeight += baseRowH + 20; // ---------- "آج کوئی فروخت نہیں" کا پیغام دکھانے کی جگہ ----------
@@ -17075,27 +17108,85 @@ async function renderTodaySaleReportToCanvas(){
   ctx.fillText(`Date : ${dstr}`, tableLeft, y);
   y += 10;
 
-  // ---------- سمری لائنیں ----------
-  const summaryRows = [
-    [`Total Bills`, String(totalBills)],
-    [`Total Sales`, `Rs. ${totalSales.toLocaleString()}`],
-    [`Payments Received (Customers)`, `Rs. ${customerPaymentsReceived.toLocaleString()}`],
-    [`Payments Made (Suppliers)`, `Rs. ${supplierPaymentsMade.toLocaleString()}`],
-    [`Today's Expenses`, `Rs. ${todayExpenses.toLocaleString()}`],
-    [`Opening Cash`, `Rs. ${openingCash.toLocaleString()}`],
-    [`Diary Receivable`, `Rs. ${diaryReceivable.toLocaleString()}`],
-    [`Diary Payable`, `Rs. ${diaryPayable.toLocaleString()}`],
-    [`Total Liabilities`, `Rs. ${totalLiabilities.toLocaleString()}`],
-  ];
+  // ---------- سمری: پہلے کل بل، پھر کیش اِن/کیش آؤٹ کا باقاعدہ دو کالمی، بارڈر والا ٹیبل، آخر میں خالص نیٹ لائن ----------
   ctx.font = `bold ${fsSummary}px ${fontFam}`;
-  summaryRows.forEach(([label, value]) => {
-    y += summaryLineH;
-    ctx.textAlign = 'left';
-    ctx.fillText(label + ':', tableLeft, y);
-    ctx.textAlign = 'right';
-    ctx.fillText(value, tableRight, y);
-  });
-  y += 10;
+  y += summaryLineH;
+  ctx.textAlign = 'left'; ctx.fillText('Total Bills:', tableLeft, y);
+  ctx.textAlign = 'right'; ctx.fillText(String(totalBills), tableRight, y);
+  y += 8;
+
+  const cashInItems = [
+    ['Opening Cash', openingCash],
+    ['Total Sales', totalSales],
+    ['Payments Received (Customers)', customerPaymentsReceived],
+    ['Diary Receivable', diaryReceivable],
+  ];
+  const cashOutItems = [
+    [`Today's Expenses`, todayExpenses],
+    ['Payments Made (Suppliers)', supplierPaymentsMade],
+    ['Diary Payable', diaryPayable],
+    ['', null],
+  ];
+  const cashInTotal = cashInItems.reduce((s,[,v]) => s + v, 0);
+  const cashOutTotal = cashOutItems.reduce((s,[,v]) => s + (v||0), 0);
+  const colW = totalW / 2;
+  const cashRowH = summaryLineH;
+
+  const cashTableTop = y;
+  // ---------- ہیڈر: 🟢 Cash In | 🔴 Cash Out ----------
+  ctx.fillStyle = '#dcfce7'; ctx.fillRect(tableLeft, cashTableTop, colW, cashRowH);
+  ctx.fillStyle = '#fee2e2'; ctx.fillRect(tableLeft+colW, cashTableTop, colW, cashRowH);
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, cashTableTop+0.5, totalW, cashRowH);
+  ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, cashTableTop); ctx.lineTo(tableLeft+colW+0.5, cashTableTop+cashRowH); ctx.stroke();
+  ctx.font = `bold ${fsSummary}px ${fontFam}`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#065f2b'; ctx.fillText('🟢 Cash In', tableLeft+colW/2, cashTableTop+cashRowH/2+5);
+  ctx.fillStyle = '#991b1b'; ctx.fillText('🔴 Cash Out', tableLeft+colW+colW/2, cashTableTop+cashRowH/2+5);
+
+  let rowY = cashTableTop + cashRowH;
+  ctx.font = `${fsSummary}px ${fontFam}`;
+  for(let i = 0; i < cashInItems.length; i++){
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+    ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, cashRowH);
+    ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+cashRowH); ctx.stroke();
+    const [inLabel, inVal] = cashInItems[i];
+    const [outLabel, outVal] = cashOutItems[i];
+    ctx.fillStyle = '#1a1a1a';
+    if(inLabel){
+      ctx.textAlign = 'left'; ctx.fillText(inLabel, tableLeft+6, rowY+cashRowH/2+4);
+      ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(inVal).toLocaleString(), tableLeft+colW-6, rowY+cashRowH/2+4);
+    }
+    if(outLabel){
+      ctx.textAlign = 'left'; ctx.fillText(outLabel, tableLeft+colW+6, rowY+cashRowH/2+4);
+      ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(outVal).toLocaleString(), tableRight-6, rowY+cashRowH/2+4);
+    }
+    rowY += cashRowH;
+  }
+  // ---------- ٹوٹل لائن ----------
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(tableLeft, rowY, totalW, cashRowH);
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, cashRowH);
+  ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+cashRowH); ctx.stroke();
+  ctx.font = `bold ${fsSummary}px ${fontFam}`;
+  ctx.fillStyle = '#065f2b';
+  ctx.textAlign = 'left'; ctx.fillText('Total', tableLeft+6, rowY+cashRowH/2+4);
+  ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(cashInTotal).toLocaleString(), tableLeft+colW-6, rowY+cashRowH/2+4);
+  ctx.fillStyle = '#991b1b';
+  ctx.textAlign = 'left'; ctx.fillText('Total', tableLeft+colW+6, rowY+cashRowH/2+4);
+  ctx.textAlign = 'right'; ctx.fillText('Rs. '+Math.round(cashOutTotal).toLocaleString(), tableRight-6, rowY+cashRowH/2+4);
+  rowY += cashRowH;
+  y = rowY + Math.round(fsSummary*0.9);
+
+  // ---------- خالص نیٹ — منافع میں ہیں یا ڈیبٹ میں ----------
+  const netAmount = cashInTotal - cashOutTotal;
+  const netIsProfit = netAmount >= 0;
+  ctx.font = `bold ${Math.round(fsSummary*1.35)}px ${fontFam}`;
+  ctx.fillStyle = netIsProfit ? '#065f2b' : '#991b1b';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${netIsProfit ? 'Net: Profit' : 'Net: Debit'}  Rs. ${Math.abs(Math.round(netAmount)).toLocaleString()}`, pxWidth/2, y);
+  y += Math.round(fsSummary*1.1);
 
   // ---------- ٹیبل ہیڈر ----------
   const headerTop = y;
