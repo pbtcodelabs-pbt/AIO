@@ -13943,29 +13943,34 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly) + 0.5); ctx.lineTo(tableRight, Math.floor(ly) + 0.5); ctx.stroke(); };
   drawTableHLine(hLineY); // اوپر کی باؤنڈری
 
-  // ---------- ہیڈر لائن ----------
+  // ---------- ہیڈر لائن — اب یہ بھی وہی الائنمنٹ (Left/Center) اپناتی ہے جو نیچے آئٹمز کی لائنیں اپناتی ہیں ----------
+  const headerItemAlign = AppState.settings.printItemAlign === 'center' ? 'center' : 'left';
+  const headerItemNameX = headerItemAlign === 'center' ? (colX[1] + colX[2]) / 2 : colX[1] + 4;
+  const headerQtyX = headerItemAlign === 'center' ? (colX[2] + colX[3]) / 2 : colX[3] - 4;
+  const headerPriceX = headerItemAlign === 'center' ? (colX[3] + colX[4]) / 2 : colX[4] - 4;
+  const headerTotalX = headerItemAlign === 'center' ? (colX[4] + colX[5]) / 2 : colX[5] - 4;
   ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
   ctx.textAlign = 'center';
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = 'left';
-  ctx.fillText('Item', colX[1] + 4, headerBaseline);
-  ctx.textAlign = 'right';
-  ctx.fillText('Qty', colX[3] - 4, headerBaseline);
-  ctx.fillText('Price', colX[4] - 4, headerBaseline);
-  ctx.fillText('Total', colX[5] - 4, headerBaseline);
+  ctx.textAlign = headerItemAlign;
+  ctx.fillText('Item', headerItemNameX, headerBaseline);
+  ctx.textAlign = headerItemAlign === 'center' ? 'center' : 'right';
+  ctx.fillText('Qty', headerQtyX, headerBaseline);
+  ctx.fillText('Price', headerPriceX, headerBaseline);
+  ctx.fillText('Total', headerTotalX, headerBaseline);
   hLineY += headerH;
   drawTableHLine(hLineY);
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
   const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
-  const itemAlign = AppState.settings.printItemAlign === 'center' ? 'center' : 'left';
-  const itemNameX = itemAlign === 'center' ? (colX[1] + colX[2]) / 2 : colX[1] + 4;
+  const itemAlign = headerItemAlign;
+  const itemNameX = headerItemNameX;
   const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
   // ---------- Center منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم کے وسط میں آ جائیں، ورنہ ہمیشہ کی طرح دائیں طرف ----------
-  const qtyX = itemAlign === 'center' ? (colX[2] + colX[3]) / 2 : colX[3] - 4;
-  const priceX = itemAlign === 'center' ? (colX[3] + colX[4]) / 2 : colX[4] - 4;
-  const totalX = itemAlign === 'center' ? (colX[4] + colX[5]) / 2 : colX[5] - 4;
+  const qtyX = headerQtyX;
+  const priceX = headerPriceX;
+  const totalX = headerTotalX;
   ctx.font = F(itemFontWeight + '14px');
   const maxItemWidth = itemW - 8;
   printItems.forEach((item, idx) => {
@@ -14056,15 +14061,17 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // یہ اسی وقت محفوظ ہوا تھا جب بل بنا تھا، اس لیے بعد میں کچھ بھی بدلے، یہ ہمیشہ اس دن کی صحیح تصویر دکھائے گا
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    const sumLabelW = Math.round((tableRight - tableLeft) * 0.62);
-    const sumValueX = tableLeft + sumLabelW;
-    const sumValueW = (tableRight - tableLeft) - sumLabelW;
+    const sumBoxW = Math.round((tableRight - tableLeft) * 0.78); // ---------- پوری چوڑائی کی بجائے تنگ، درمیان میں ----------
+    const sumLeft = tableLeft + Math.round(((tableRight - tableLeft) - sumBoxW) / 2);
+    const sumRight = sumLeft + sumBoxW;
+    const sumLabelW = Math.round(sumBoxW * 0.62);
+    const sumValueX = sumLeft + sumLabelW;
     const sumRowH = 22;
     const boxTop = y;
     const titleH = 26;
     const boxH = titleH + ((summary.rows.length + 1) * sumRowH) + 6;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.strokeRect(tableLeft + 0.5, boxTop + 0.5, tableRight - tableLeft, boxH);
+    ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
     y += 18;
     ctx.font = F('bold 13px');
     ctx.textAlign = 'center';
@@ -14073,22 +14080,22 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
     let rowTop = boxTop + titleH;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(tableLeft, rowTop); ctx.lineTo(tableRight, rowTop); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
 
     const allSummaryRows = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
     allSummaryRows.forEach(([label, val, isFinal], idx) => {
-      if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(tableLeft+0.5, rowTop+0.5, tableRight-tableLeft-1, sumRowH); }
-      ctx.font = F(isFinal ? 'bold 14px' : '13px');
+      if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
+      ctx.font = F(isFinal ? 'bold 15px' : 'bold 13px'); // ---------- عام لائنیں بھی تھوڑی موٹی، فائنل لائن مزید نمایاں ----------
       ctx.fillStyle = '#000';
       ctx.textAlign = 'left';
-      ctx.fillText(label, tableLeft + 8, rowTop + sumRowH/2 + 5);
+      ctx.fillText(label, sumLeft + 8, rowTop + sumRowH/2 + 5);
       ctx.textAlign = 'right';
-      ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), tableRight - 8, rowTop + sumRowH/2 + 5);
+      ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), sumRight - 8, rowTop + sumRowH/2 + 5);
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       rowTop += sumRowH;
       ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(tableLeft, rowTop); ctx.lineTo(tableRight, rowTop); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
     });
     y = boxTop + boxH + 24;
   }
