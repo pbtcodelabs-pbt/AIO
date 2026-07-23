@@ -3798,7 +3798,7 @@
       </div>
     </div>
 
-    <div style="overflow-y:auto; max-height:52vh; border-top:1px solid #eee;">
+    <div id="reportCanvasScrollWrap" style="overflow-y:auto; max-height:52vh; border-top:1px solid #eee;">
       <canvas id="reportCanvas"></canvas>
     </div>
     <div class="previewActions">
@@ -16964,6 +16964,8 @@ async function renderReportToCanvas(){
       y += rh;
     });
   });
+  const scrollWrap = document.getElementById('reportCanvasScrollWrap');
+  if(scrollWrap) scrollWrap.scrollTop = 0; // ---------- ہر دوبارہ ڈرائنگ کے بعد اوپر سے دکھائیں — عنوان کبھی نہ کٹے/چھپے، خاص طور پر A4 پر سوئچ کرنے پر ----------
 }
 
 // ---------- 📅 Today's Sale Report — بلنگ، پیمنٹس، اخراجات اور ڈائری سے آج کا خلاصہ + سب سے زیادہ بکنے والے آئٹمز اوپر ----------
@@ -17285,6 +17287,8 @@ async function renderTodaySaleReportToCanvas(){
       y += rh;
     });
   }
+  const scrollWrap2 = document.getElementById('reportCanvasScrollWrap');
+  if(scrollWrap2) scrollWrap2.scrollTop = 0;
 }
 
 async function printCurrentReport(){
