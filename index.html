@@ -16379,12 +16379,20 @@ async function confirmImageShare(){
 }
 
 // ---------- کسٹمر/سپلائر کی رنگین، شیئر ایبل "پروفائل پوسٹر" — تصویر، نام، موبائل نمبر (سپلائر کے لیے بینک اکاؤنٹ کی تفصیل بھی) ----------
-async function renderPartyProfilePosterToCanvas(party, kind, accounts){
+async function renderPartyProfilePosterToCanvas(party, kind, accounts, dueAmount, note){
   accounts = accounts || [];
-  const canvas = document.createElement('canvas');
   const isSupplier = kind === 'suppliers';
+  const hasDue = !isSupplier && dueAmount > 0;
+  const hasNote = note && note.trim().length > 0;
   const ACC_BLOCK_H = 190; // ---------- ہر اکاؤنٹ کا اندازاً بلاک — کئی اکاؤنٹس ہوں تو پوسٹر خودکار لمبا ہو جائے ----------
-  const W = 640, H = 640 + (accounts.length > 0 ? 40 + accounts.length * ACC_BLOCK_H : 0);
+  const hasQr = accounts.some(a => a.qr);
+  const QR_EXTRA = hasQr ? 130 : 0; // ---------- QR والے اکاؤنٹ کے بلاک میں تھوڑی زیادہ جگہ ----------
+  const DUE_H = hasDue ? 130 : 0;
+  // ---------- نوٹ کی لمبائی کے مطابق اونچائی — اندازاً ہر ~30 حروف ایک لائن ----------
+  const noteLines = hasNote ? Math.ceil(note.trim().length / 34) : 0;
+  const NOTE_H = hasNote ? 70 + (noteLines * 26) : 0;
+  const canvas = document.createElement('canvas');
+  const W = 640, H = 640 + DUE_H + NOTE_H + (accounts.length > 0 ? 40 + accounts.length * ACC_BLOCK_H + (hasQr ? QR_EXTRA : 0) : 0);
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const cx = W / 2;
@@ -16453,10 +16461,31 @@ async function renderPartyProfilePosterToCanvas(party, kind, accounts){
   ctx.font = `800 34px 'Courier New', monospace`;
   ctx.fillText(party.phone || '—', cx, 555);
 
-  // ---------- ایک یا کئی بینک/والیٹ اکاؤنٹس — ہر ایک کا اپنا کارڈ، سیدھا نیچے سٹیک ہوتے جائیں ----------
   let y = 610;
+
+  // ---------- بقایہ رقم — صرف کسٹمر کے لیے، اگر کچھ بقایہ ہو تو نمایاں دکھائیں ----------
+  if(hasDue){
+    ctx.fillStyle = 'rgba(220,38,38,.28)';
+    roundRectPath(ctx, 50, y, W-100, DUE_H-20, 16);
+    ctx.fill();
+    ctx.fillStyle = '#fecaca';
+    ctx.font = `700 17px Poppins, sans-serif`;
+    ctx.fillText('💰 TOTAL AMOUNT DUE', cx, y+40);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `800 40px Poppins, sans-serif`;
+    ctx.fillText('Rs. ' + dueAmount.toLocaleString(), cx, y+90);
+    y += DUE_H;
+  }
+
+  // ---------- ایک یا کئی بینک/والیٹ اکاؤنٹس — ہر ایک کا اپنا کارڈ، سیدھا نیچے سٹیک ہوتے جائیں ----------
+  await Promise.all(accounts.filter(a => a.qr).map(a => new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => { a.qrImg = img; resolve(); };
+    img.onerror = () => { a.qr = null; resolve(); };
+    img.src = a.qr;
+  })));
   accounts.forEach((acc, idx) => {
-    const blockH = ACC_BLOCK_H - 30;
+    const blockH = (ACC_BLOCK_H - 30) + (acc.qr ? QR_EXTRA : 0);
     ctx.fillStyle = 'rgba(0,0,0,.18)';
     roundRectPath(ctx, 50, y, W-100, blockH, 16);
     ctx.fill();
@@ -16487,9 +16516,36 @@ async function renderPartyProfilePosterToCanvas(party, kind, accounts){
       ctx.fillStyle = 'rgba(255,255,255,.85)';
       ctx.font = `600 14px Poppins, sans-serif`;
       ctx.fillText(`UAN: ${acc.uan}`, cx, iy);
+      iy += 24;
     }
-    y += ACC_BLOCK_H;
+    if(acc.qr){
+      iy += 10;
+      const qrSize = 100;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(cx-qrSize/2-5, iy, qrSize+10, qrSize+10);
+      ctx.drawImage(acc.qrImg, cx-qrSize/2, iy+5, qrSize, qrSize);
+      iy += qrSize + 20;
+      ctx.fillStyle = accent;
+      ctx.font = `600 13px Poppins, sans-serif`;
+      ctx.fillText('Scan to Pay', cx, iy);
+    }
+    y += blockH + 30;
   });
+
+  // ---------- صارف کا اپنا لکھا ہوا نوٹ/ریمائنڈر پیغام — اگر دیا گیا ہو ----------
+  if(hasNote){
+    const noteBoxH = NOTE_H - 20;
+    ctx.fillStyle = 'rgba(255,255,255,.14)';
+    roundRectPath(ctx, 50, y, W-100, noteBoxH, 16);
+    ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.font = `700 15px Poppins, sans-serif`;
+    ctx.fillText('📝 NOTE', cx, y+32);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `600 19px Poppins, sans-serif`;
+    wrapCenteredText(ctx, note.trim(), cx, y+66, W-140, 26);
+    y += NOTE_H;
+  }
 
   ctx.fillStyle = 'rgba(0,0,0,.22)';
   roundRectPath(ctx, 50, H - 90, W - 100, 60, 14);
@@ -17418,8 +17474,13 @@ function shareReportUniversal(){ shareReportImage(); }
 async function shareCustomerProfile(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
-  const canvas = await renderPartyProfilePosterToCanvas(c, 'customers', []);
-  showImageSharePreview(canvas, `${(c.name||'customer').replace(/\s+/g,'_')}_profile.png`, c.name, `${c.name} — Contact Card`);
+  // ---------- ہمارا اپنا پیمنٹ اکاؤنٹ — جو "Show on Receipt" کے لیے نشان زد ہے، تاکہ کسٹمر اسی پر ادائیگی بھیج سکے ----------
+  const businessAccounts = (AppState.settings.paymentAccounts || [])
+    .filter(a => a.showOnReceipt)
+    .map(a => ({type: a.type, title: a.name, number: a.number, qr: a.qr}));
+  const note = prompt('Add a note/reminder message to include on this poster? (optional)', '') || '';
+  const canvas = await renderPartyProfilePosterToCanvas(c, 'customers', businessAccounts, c.total_receivable || 0, note);
+  showImageSharePreview(canvas, `${(c.name||'customer').replace(/\\s+/g,'_')}_profile.png`, c.name, `${c.name} — Payment Reminder`);
 }
 
 // ---------- سپلائر کی پروفائل پوسٹر — اگر ایک سے زیادہ اکاؤنٹ ہوں تو پہلے ٹِک لگا کر منتخب کروائیں ----------
