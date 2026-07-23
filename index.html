@@ -14047,7 +14047,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const tableTop = y;
   ctx.fillStyle = rc.bg; // ---------- منتخب شدہ ہلکا رنگ — صارف اپنی مرضی سے 6 میں سے چن سکتا ہے ----------
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerH);
-  ctx.strokeStyle = '#000';
+  ctx.strokeStyle = rc.border;
   ctx.lineWidth = 1;
   colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x) + 0.5, tableTop); ctx.lineTo(Math.floor(x) + 0.5, tableTop + tableH); ctx.stroke(); });
 
@@ -14212,7 +14212,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     const boxTop = y;
     const titleH = Math.round(26 * rowScale);
     const boxH = titleH + ((summary.rows.length + 1) * sumRowH) + 6;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
     y += 18;
     ctx.font = F('bold 13px');
@@ -14221,7 +14221,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillText('Payment Summary', pxWidth/2, y); y += 8;
 
     let rowTop = boxTop + titleH;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
 
     const allSummaryRows = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
@@ -14245,7 +14245,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
         ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       }
       rowTop += sumRowH;
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
     });
     y = boxTop + boxH + 24;
@@ -14293,7 +14293,7 @@ function drawSolidLine(ctx, y, width){
   ctx.beginPath();
   ctx.moveTo(8, Math.floor(y) + 0.5);
   ctx.lineTo(width - 8, Math.floor(y) + 0.5);
-  ctx.strokeStyle = '#000';
+  ctx.strokeStyle = rc.border;
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.restore();
@@ -14311,6 +14311,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const pxWidth = 850;
   const canvas = document.getElementById('invoiceCanvas');
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  const rc = getReceiptColor(); // ---------- بارڈر کا رنگ اب پس منظر کے رنگ سے متضاد (contrast) — بل کی طرح یہاں بھی ----------
   // ---------- بگ فکس: پہلے یہاں Text/Row زوم سلائیڈرز کا سرے سے کوئی اثر نہیں تھا — اب دونوں مکمل کام کریں گے ----------
   const fscale = (AppState.settings.printFontScale || 100) / 100;
   const rowScale = (AppState.settings.printRowScale || 100) / 100;
@@ -14422,7 +14423,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillText('Price', a4PriceX, headerBaseline);
   ctx.fillText('Total', a4TotalX, headerBaseline);
 
-  ctx.strokeStyle = '#000';
+  ctx.strokeStyle = rc.border;
   ctx.lineWidth = 1;
   colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x)+0.5, tableTop); ctx.lineTo(Math.floor(x)+0.5, tableTop+tableH); ctx.stroke(); });
   let hLineY = tableTop;
@@ -14530,7 +14531,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     const titleH = Math.round(34 * rowScale);
     const allSummaryRowsA4 = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
     const boxH = titleH + (allSummaryRowsA4.length * sumRowH) + 8;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
     y += 24;
     ctx.font = F('bold 15px');
@@ -14539,7 +14540,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.fillText('Payment Summary', pxWidth/2, y); y += 10;
 
     let rowTop = boxTop + titleH;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
 
     allSummaryRowsA4.forEach(([label, val, isFinal], idx) => {
@@ -14561,7 +14562,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
         ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       }
       rowTop += sumRowH;
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
     });
     y = boxTop + boxH + 40;
@@ -14569,7 +14570,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   // ---------- دستخط کی جگہ ----------
   y += Math.round(60*fscale);
-  ctx.strokeStyle = '#666';
+  ctx.strokeStyle = rc.border;
   ctx.beginPath();
   ctx.moveTo(tableRight - 220, y);
   ctx.lineTo(tableRight, y);
@@ -14912,12 +14913,12 @@ function shareInvoiceUniversal(){
 // تاکہ صارف کے مطابق "بہت زیادہ رنگ نہ ہوں" — بل/رپورٹ کا پس منظر + لکھائی کا رنگ اسی سے آتا ہے،
 // سکرین اور WhatsApp شیئر کے لیے، پرنٹ ہمیشہ سیاہ/سفید ہی رہتا ہے (canvasToGrayscale) ----------
 const RECEIPT_COLOR_PRESETS = [
-  {id:'green',    name:'Green',    bg:'#dcf5e3', text:'#065f2b'},
-  {id:'blue',     name:'Blue',     bg:'#dbeafe', text:'#1e3a8a'},
-  {id:'peach',    name:'Peach',    bg:'#fef3e2', text:'#9a3412'},
-  {id:'lavender', name:'Lavender', bg:'#ede9fe', text:'#5b21b6'},
-  {id:'pink',     name:'Pink',     bg:'#fce7f3', text:'#9d174d'},
-  {id:'gray',     name:'Gray',     bg:'#f1f5f9', text:'#334155'},
+  {id:'green',    name:'Green',    bg:'#dcf5e3', text:'#065f2b', border:'#c2410c'}, // سبز پس منظر — نارنجی/کورل بارڈر (متضاد)
+  {id:'blue',     name:'Blue',     bg:'#dbeafe', text:'#1e3a8a', border:'#b45309'}, // نیلا پس منظر — کہرا بارڈر
+  {id:'peach',    name:'Peach',    bg:'#fef3e2', text:'#9a3412', border:'#15803d'}, // پیچ پس منظر — سبز بارڈر
+  {id:'lavender', name:'Lavender', bg:'#ede9fe', text:'#5b21b6', border:'#b45309'}, // لیوینڈر پس منظر — سنہری بارڈر
+  {id:'pink',     name:'Pink',     bg:'#fce7f3', text:'#9d174d', border:'#0f766e'}, // پنک پس منظر — سبزی مائل نیلا بارڈر
+  {id:'gray',     name:'Gray',     bg:'#f1f5f9', text:'#334155', border:'#3730a3'}, // گرے پس منظر — گہرا نیلا بارڈر
 ];
 function getReceiptColor(){
   return RECEIPT_COLOR_PRESETS.find(c => c.id === AppState.settings.receiptColorId) || RECEIPT_COLOR_PRESETS[0];
@@ -17055,7 +17056,7 @@ async function renderReportToCanvas(){
   const headerTop = y;
   ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
-  ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 1.5;
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${fsHeader}px ${fontFam}`;
@@ -17076,7 +17077,7 @@ async function renderReportToCanvas(){
     ctx.textAlign = 'left';
     ctx.fillText(`${g.category}(${g.items.length})`, tableLeft+6, y + catHeaderH/2 + 4);
     y += catHeaderH;
-    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+    ctx.strokeStyle = rc.border; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(tableLeft, y); ctx.lineTo(tableRight, y); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(tableLeft, y+2); ctx.lineTo(tableRight, y+2); ctx.stroke();
     y += 5;
@@ -17332,7 +17333,7 @@ async function renderTodaySaleReportToCanvas(){
   const cashTableTop = y;
   ctx.fillStyle = '#dcfce7'; ctx.fillRect(tableLeft, cashTableTop, colW, cashHeaderRowH);
   ctx.fillStyle = '#fee2e2'; ctx.fillRect(tableLeft+colW, cashTableTop, colW, cashHeaderRowH);
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3;
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 1.3;
   ctx.strokeRect(tableLeft+0.5, cashTableTop+0.5, totalW, cashHeaderRowH);
   ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, cashTableTop); ctx.lineTo(tableLeft+colW+0.5, cashTableTop+cashHeaderRowH); ctx.stroke();
   ctx.font = `bold ${fsSummary}px ${fontFam}`;
@@ -17377,7 +17378,7 @@ async function renderTodaySaleReportToCanvas(){
   // ---------- ٹوٹل لائن ----------
   ctx.fillStyle = '#f1f5f9';
   ctx.fillRect(tableLeft, rowY, totalW, cashTotalRowH);
-  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.3;
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 1.3;
   ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, cashTotalRowH);
   ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+cashTotalRowH); ctx.stroke();
   ctx.font = `bold ${fsSummary}px ${fontFam}`;
@@ -17403,7 +17404,7 @@ async function renderTodaySaleReportToCanvas(){
   const headerTop = y;
   ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
-  ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 1.5;
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${fsHeader}px ${fontFam}`;
