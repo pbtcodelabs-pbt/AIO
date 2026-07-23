@@ -1423,7 +1423,14 @@
       border-top:1px solid rgba(255,255,255,.3); border-bottom:1px solid rgba(255,255,255,.3);
       box-shadow:0 0 14px rgba(37,99,235,.35) inset;
     }
-    #globalSearchBar .gsbIcon{flex:0 0 auto; font-size:14px; filter:drop-shadow(0 0 4px rgba(255,255,255,.8));}
+    #globalSearchBar .gsbIcon{
+      flex:0 0 auto; width:30px; height:30px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(145deg,#3b82f6,#1e40af);
+      box-shadow: 0 2px 4px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5), inset 0 -1px 2px rgba(0,0,0,.3);
+      border:1px solid rgba(255,255,255,.25);
+    }
+    #globalSearchBar .gsbIcon svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
     #globalSearchBar input{
       flex:1; min-width:0; padding:8px 12px; border-radius:20px; font-size:12.5px;
       background:rgba(6,20,12,.55); color:#39ff9c; font-weight:700;
@@ -1690,7 +1697,12 @@
   <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
        پراڈکٹ سرچ باکسز سے بالکل الگ (رنگ/جگہ دونوں مختلف) تاکہ کبھی مکس نہ ہو ---------- -->
   <div id="globalSearchBar">
-    <span class="gsbIcon">🔎</span>
+    <span class="gsbIcon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </span>
     <input type="text" id="appSearchInput" placeholder="App Search — find any screen or setting..." oninput="renderAppSearchResults(this.value)" autocomplete="off">
     <div id="appSearchResults"></div>
   </div>
