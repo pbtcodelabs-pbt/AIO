@@ -5090,7 +5090,7 @@ function goTo(screenName, _isHistoryNav){
 
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); }
-  if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); }
+  if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
       '🧑‍💼 Salesman: ' + AppState.currentUser.name + renderTodaysBillBadge();

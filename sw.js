@@ -6,7 +6,7 @@
 // صرف اس صورت میں cache استعمال ہوگا جب ڈیوائس واقعی آف لائن ہو — یہی وہ چیز ہے جو "پرانی فائل اٹکی رہنے"
 // والے شکوک کو ہمیشہ کے لیے ختم کر دیتی ہے۔
 
-const CACHE_VERSION = 'aio-pos-v241';
+const CACHE_VERSION = 'aio-pos-v242';
 const CACHE_NAME = `aio-pos-cache-${CACHE_VERSION}`;
 
 self.addEventListener('install', () => {
