@@ -16897,6 +16897,52 @@ function toggleReportShowStock(checked){
   renderReportToCanvas();
 }
 
+// ---------- تمام رپورٹس میں مشترکہ ہیڈر ڈرائنگ فنکشن — لیبل خانے کی چوڑائی میں نہ آئے تو پہلے فونٹ خودکار چھوٹا کریں،
+// پھر بھی نہ آئے تو '/' یا خالی جگہ پر دوسری لائن میں لے جائیں — زوم جتنا بھی بڑھایا جائے، لیبلز کبھی ایک دوسرے پر نہیں چڑھتے ----------
+function renderReportHeaderCells(ctx, cols, headerTop, headerRowH, colTextAlign, colTextX, fsHeader, fontFamily){
+  cols.forEach(c => {
+    ctx.textAlign = colTextAlign;
+    const maxW = Math.max(c.width - 8, 10);
+    const fitFont = (text, basePx) => {
+      let px = basePx;
+      ctx.font = `bold ${px}px ${fontFamily}`;
+      while(ctx.measureText(text).width > maxW && px > 7){
+        px -= 1;
+        ctx.font = `bold ${px}px ${fontFamily}`;
+      }
+      return px;
+    };
+    // ---------- لیبل کو دو حصوں میں توڑنے کی جگہ تلاش کریں — پہلے '/' پر، ورنہ خالی جگہ پر ----------
+    let splitIdx = c.label.indexOf('/');
+    let sep = '/';
+    if(splitIdx === -1){ splitIdx = c.label.indexOf(' '); sep = ' '; }
+    const canSplit = splitIdx > -1;
+    const line1Full = canSplit ? c.label.slice(0, splitIdx) : c.label;
+    const line2Full = canSplit ? c.label.slice(splitIdx + (sep==='/'?1:1)) : '';
+
+    let usesTwoLines = !!c.twoLine;
+    let px = fitFont(c.label, fsHeader);
+    if(!usesTwoLines && ctx.measureText(c.label).width > maxW && canSplit){
+      usesTwoLines = true; // ---------- ایک لائن میں فٹ نہیں ہو رہا تو خودکار طور پر دوسری لائن میں لے جائیں ----------
+    }
+
+    if(usesTwoLines && canSplit){
+      const px1 = fitFont(line1Full, fsHeader);
+      const px2 = fitFont(line2Full, fsHeader);
+      px = Math.min(px1, px2);
+      ctx.font = `bold ${px}px ${fontFamily}`;
+      const lineH = Math.round(px * 1.35);
+      const midY = headerTop + headerRowH/2 + 4;
+      ctx.fillText(line1Full, colTextX(c), midY - lineH/2);
+      ctx.fillText(line2Full, colTextX(c), midY + lineH/2);
+    } else {
+      ctx.font = `bold ${px}px ${fontFamily}`;
+      ctx.fillText(c.label, colTextX(c), headerTop + headerRowH/2 + 4);
+    }
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+}
+
 // ---------- اصل کینوس ڈرائنگ — تینوں رپورٹس اسی ایک فنکشن سے بنتی ہیں، بس currentReportType کے مطابق کالمز بدل جاتے ہیں ----------
 async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
@@ -16960,7 +17006,7 @@ async function renderReportToCanvas(){
   const tableLeft = margin, tableRight = pxWidth - margin;
   const totalW = tableRight - tableLeft;
   const baseRowH   = Math.round(fsItem    * 2.3 * rowScaleSetting);
-  const headerRowH = Math.round(fsHeader  * 2.6 * rowScaleSetting);
+  let headerRowH = Math.round(fsHeader  * 2.6 * rowScaleSetting);
   const catHeaderH = Math.round(fsCatHead * 2.3 * rowScaleSetting);
   const summaryLineH = Math.round(fsSummary * 1.9 * rowScaleSetting);
   const logoH = logoImg ? Math.min(useA4 ? 100 : 60, Math.round((useA4?100:60))) : 0;
@@ -16998,6 +17044,11 @@ async function renderReportToCanvas(){
   cols[0].label = 'Item';
   let cxPos = tableLeft;
   cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+  // ---------- اگر کسی کالم کا لیبل ممکنہ طور پر دو لائنوں میں جا سکتا ہو (جیسے Purchase/Selling یا In Stock) تو
+  // ہیڈر کی قطار پہلے سے ہی اتنی اونچی رکھیں کہ زوم بڑھانے پر بھی متن نہ ٹکرائے/نہ کٹے ----------
+  if(cols.some(c => c.twoLine || /[\/ ]/.test(c.label))){
+    headerRowH = Math.round(fsHeader * 3.7 * rowScaleSetting);
+  }
 
   // ---------- ہر کالم کے اندر متن کہاں رکھا جائے — اب یہ صرف نام نہیں، ہر کالم پر یکساں لاگو ----------
   const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
@@ -17093,11 +17144,7 @@ async function renderReportToCanvas(){
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${fsHeader}px ${fontFam}`;
-  cols.forEach(c => {
-    ctx.textAlign = colTextAlign;
-    ctx.fillText(c.label, colTextX(c), headerTop + headerRowH/2 + 4);
-    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
-  });
+  renderReportHeaderCells(ctx, cols, headerTop, headerRowH, colTextAlign, colTextX, fsHeader, fontFam);
   ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
   y = headerTop + headerRowH;
 
@@ -17235,7 +17282,7 @@ async function renderTodaySaleReportToCanvas(){
   const tableLeft = margin, tableRight = pxWidth - margin;
   const totalW = tableRight - tableLeft;
   const baseRowH   = Math.round(fsItem    * 2.3 * rowScaleSetting);
-  const headerRowH = Math.round(fsHeader  * 2.6 * rowScaleSetting);
+  let headerRowH = Math.round(fsHeader  * 2.6 * rowScaleSetting);
   const summaryLineH = Math.round(fsSummary * 1.9 * rowScaleSetting);
   const logoH = logoImg ? (useA4 ? 100 : 60) : 0;
   const logoW = logoImg ? Math.round(logoH * (logoImg.naturalWidth / logoImg.naturalHeight)) : 0;
@@ -17250,6 +17297,10 @@ async function renderTodaySaleReportToCanvas(){
   cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
   const colTextX = (c) => align === 'center' ? c.x + c.width/2 : (align === 'right' ? c.x + c.width - 6 : c.x + 6);
   const colTextAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
+  // ---------- "Qty Sold" جیسے دو لفظوں والے ہیڈر بھی زوم بڑھانے پر نہ ٹکرائیں — پہلے سے جگہ رکھ لیں ----------
+  if(cols.some(c => c.twoLine || /[\/ ]/.test(c.label))){
+    headerRowH = Math.round(fsHeader * 3.7 * rowScaleSetting);
+  }
 
   // ---------- لفظوں کو خانے کی چوڑائی میں فٹ ہونے تک اگلی لائن میں لے جانے والا فنکشن — کبھی خانے سے باہر نہیں نکلتا ----------
   const wrapLines = (text, maxWidth, font) => {
@@ -17441,11 +17492,7 @@ async function renderTodaySaleReportToCanvas(){
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
   ctx.fillStyle = '#0f172a';
   ctx.font = `bold ${fsHeader}px ${fontFam}`;
-  cols.forEach(c => {
-    ctx.textAlign = colTextAlign;
-    ctx.fillText(c.label, colTextX(c), headerTop + headerRowH/2 + 4);
-    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
-  });
+  renderReportHeaderCells(ctx, cols, headerTop, headerRowH, colTextAlign, colTextX, fsHeader, fontFam);
   ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
   y = headerTop + headerRowH;
 
