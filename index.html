@@ -4277,6 +4277,7 @@ function refreshAllScreens(){
   safe(() => renderProductList());
   safe(() => renderBillingCategoryRail());
   safe(() => renderBillingProductGrid());
+  safe(() => renderCart()); // ---------- بگ فکس: کارٹ کا مواد بھی تازہ ہونا چاہیے، صرف پراڈکٹ گرڈ کے بیجز نہیں ----------
   safe(() => renderPartyList());
   safe(() => renderDashboard());
   safe(() => renderPurchaseOrdersScreen());
@@ -6632,6 +6633,7 @@ function renderFloatingCartBar(){
 
 function openCartSheet(){
   document.getElementById('cartSheetModal').classList.add('show');
+  renderCart(); // ---------- بگ فکس: پہلے یہ نہیں بلایا جاتا تھا — تازہ پیج لوڈ کے بعد کارٹ خالی ہی دکھتا رہتا تھا حالانکہ Billing.cart میں آئٹمز موجود تھے ----------
   applyCartTextSettings();
   syncCartModeControls();
 }
@@ -14602,10 +14604,12 @@ function openInvoicePreview(invoiceId, highlightMatchKey){
   // صحیح طرح پینٹ نہیں ہوتی (خالی سفید نظر آتا ہے)۔ requestAnimationFrame کچھ WebViews میں کافی نہیں،
   // اس لیے تھوڑی زیادہ تاخیر (setTimeout) دی ہے تاکہ لے آؤٹ مکمل ہو چکا ہو۔
   document.getElementById('invoicePreviewModal').classList.add('show');
-  setTimeout(() => {
+  const doRender = () => {
     if(AppState.settings.invoiceStyle === 'a4') renderInvoiceToA4Canvas(inv, currentPreviewHighlightKey);
     else renderInvoiceToCanvas(inv, AppState.settings.paperWidth, currentPreviewHighlightKey);
-  }, 100);
+  };
+  setTimeout(doRender, 220);
+  setTimeout(doRender, 500); // ---------- حفاظتی دوسری کوشش — کچھ Android WebViews پر پہلی کوشش کے وقت لے آؤٹ ابھی مکمل نہیں ہوتا (صرف ہیڈر نظر آتا، نیچے خالی رہ جاتا) ----------
 }
 
 // ---------- پرنٹ پریویو کو موجودہ سیٹنگز کے مطابق دوبارہ کھینچیں — ہر لائیو کنٹرول کے بعد یہی بلایا جاتا ہے ----------
