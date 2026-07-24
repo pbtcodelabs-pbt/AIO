@@ -6454,6 +6454,7 @@ function endCustomerSelection(){
 let billingDraftCustomerRestored = false;
 function renderCart(){
   saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
+  renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
   if(!billingDraftCustomerRestored && Billing.cart.length > 0){
     billingDraftCustomerRestored = true;
     const savedCustId = loadFromStorage('billingCustomerDraft', '');
@@ -14295,7 +14296,7 @@ function drawSolidLine(ctx, y, width){
   ctx.beginPath();
   ctx.moveTo(8, Math.floor(y) + 0.5);
   ctx.lineTo(width - 8, Math.floor(y) + 0.5);
-  ctx.strokeStyle = rc.border;
+  ctx.strokeStyle = getReceiptColor().border;
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.restore();
