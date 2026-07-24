@@ -13961,19 +13961,23 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let estimatedHeight = 30 + 26 + 22 + 22 + tableH + 26;
   if(AppState.settings.businessAddress) estimatedHeight += 16;
   if(AppState.settings.businessPhone) estimatedHeight += 16;
+  let summaryBlockH = 0, accountBlockH = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    estimatedHeight += 18 + Math.round(26*rowScale) + ((summary.rows.length + 1) * Math.round(22*rowScale)) + 6 + 24; // Payment Summary باکس (متحرک اونچائی، لائنوں کی تعداد کے مطابق)
+    summaryBlockH = Math.round(26*rowScale) + ((summary.rows.length + 1) * Math.round(22*rowScale)) + 6;
   } else {
     if(invoice.discount && invoice.discount > 0) estimatedHeight += 44;
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
   }
+  if(receiptAccounts.length){
+    accountBlockH = 18 + (receiptAccounts.length * 30);
+    if(receiptQrImg) accountBlockH += 96;
+  }
+  estimatedHeight += Math.max(summaryBlockH, accountBlockH) + 24; // ---------- اب دونوں ساتھ ساتھ ہیں، جمع نہیں کرنے، جو بھی اونچا ہو وہی حساب میں شمار ----------
   const totalReturnedAmt = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
   if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += 34; // Grand Total لائن
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
-  if(receiptAccounts.length) estimatedHeight += 20 + (receiptAccounts.length * 16);
-  if(receiptQrImg) estimatedHeight += 90; // ---------- QR کوڈ کے لیے اضافی جگہ (سکین ہو سکنے والا مناسب سائز) ----------
   if(AppState.settings.printShowBranding) estimatedHeight += 20;
   estimatedHeight += 40; // فوٹر + مارجن
 
@@ -14200,28 +14204,28 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), pxWidth-10, y);
   y += 34;
 
-  // ---------- بل کی مکمل ادائیگی تفصیل — پرانا بقایہ، اس بل کی رقم، رعایت، والٹ، ابھی ادا کیا، نیا بقایہ — سب ایک باکس میں
-  // اب باقاعدہ 2-کالمی ٹیبل کی طرح (اوپر آئٹمز ٹیبل جیسی ہی لکیریں + ہلکی متبادل شیڈنگ) — لیبل اور رقم اب قریب قریب،
-  // پوری چوڑائی میں دور دور نہیں — پڑھنے اور ملانے میں آسانی کے لیے ----------
-  // یہ اسی وقت محفوظ ہوا تھا جب بل بنا تھا، اس لیے بعد میں کچھ بھی بدلے، یہ ہمیشہ اس دن کی صحیح تصویر دکھائے گا
+  // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
+  // بائیں طرف بچنے والی جگہ (Item کالم جتنی) میں پیمنٹ اکاؤنٹ + QR کوڈ ساتھ ساتھ — بل غیرضروری لمبا نہ ہو ----------
+  let paymentBoxTop = y;
+  let summaryBottom = y, accountBottom = y;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    const sumBoxW = Math.round((tableRight - tableLeft) * 0.78); // ---------- پوری چوڑائی کی بجائے تنگ، درمیان میں ----------
-    const sumLeft = tableLeft + Math.round(((tableRight - tableLeft) - sumBoxW) / 2);
-    const sumRight = sumLeft + sumBoxW;
-    const sumLabelW = Math.round(sumBoxW * 0.62);
+    const sumLeft = colX[2]; // ---------- Qty کالم کے شروع سے — یعنی اوپر Qty+Price+Total جتنی ہی چوڑائی ----------
+    const sumRight = tableRight;
+    const sumBoxW = sumRight - sumLeft;
+    const sumLabelW = Math.round(sumBoxW * 0.5);
     const sumValueX = sumLeft + sumLabelW;
-    const sumRowH = Math.round(22 * rowScale); // ---------- بگ فکس: پہلے یہ فکسڈ 22px تھا، Row سلائیڈر کے ساتھ نہیں بڑھتا تھا ----------
-    const boxTop = y;
+    const sumRowH = Math.round(22 * rowScale);
+    const boxTop = paymentBoxTop;
     const titleH = Math.round(26 * rowScale);
     const boxH = titleH + ((summary.rows.length + 1) * sumRowH) + 6;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
     ctx.strokeRect(sumLeft + 0.5, boxTop + 0.5, sumBoxW, boxH);
-    y += 18;
-    ctx.font = F('bold 13px');
+    let ty = boxTop + 18;
+    ctx.font = F('bold 12px');
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    ctx.fillText('Payment Summary', pxWidth/2, y); y += 8;
+    ctx.fillText('Payment Summary', sumLeft + sumBoxW/2, ty);
 
     let rowTop = boxTop + titleH;
     ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
@@ -14230,20 +14234,19 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     const allSummaryRows = [...summary.rows, [summary.finalLabel, summary.finalValue, true]];
     allSummaryRows.forEach(([label, val, isFinal], idx) => {
       if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
-      ctx.font = F(isFinal ? 'bold 17px' : 'bold 15px'); // ---------- عام لائنیں بھی تھوڑی موٹی، فائنل لائن مزید نمایاں ----------
+      ctx.font = F(isFinal ? 'bold 13px' : 'bold 11px'); // ---------- خانہ اب تنگ ہے، اسی مناسبت سے فونٹ بھی تھوڑا چھوٹا ----------
       ctx.fillStyle = '#000';
       if(headerItemAlign === 'center'){
-        // ---------- بل کا Center کمانڈ منتخب ہو تو یہ باکس بھی اسی کمانڈ کے ساتھ کام کرے — ایک ہی درمیانی لائن میں لیبل+رقم ----------
         ctx.textAlign = 'center';
-        ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumLeft + sumBoxW/2, rowTop + sumRowH/2 + 5);
+        ctx.fillText(`${label}: ${Math.round(val).toLocaleString()}`, sumLeft + sumBoxW/2, rowTop + sumRowH/2 + 4);
       } else if(headerItemAlign === 'right'){
         ctx.textAlign = 'right';
-        ctx.fillText(`${label}:  Rs. ${Math.round(val).toLocaleString()}`, sumRight - 8, rowTop + sumRowH/2 + 5);
+        ctx.fillText(`${label}: ${Math.round(val).toLocaleString()}`, sumRight - 6, rowTop + sumRowH/2 + 4);
       } else {
         ctx.textAlign = 'left';
-        ctx.fillText(label, sumLeft + 8, rowTop + sumRowH/2 + 5);
+        ctx.fillText(label, sumLeft + 6, rowTop + sumRowH/2 + 4);
         ctx.textAlign = 'right';
-        ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), sumRight - 8, rowTop + sumRowH/2 + 5);
+        ctx.fillText(Math.round(val).toLocaleString(), sumRight - 6, rowTop + sumRowH/2 + 4);
         ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       }
@@ -14251,38 +14254,47 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
     });
-    y = boxTop + boxH + 24;
+    summaryBottom = boxTop + boxH;
   }
+
+  // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع ----------
+  if(receiptAccounts.length){
+    const leftCx = (tableLeft + colX[2]) / 2;
+    let ly = paymentBoxTop + 18;
+    ctx.textAlign = 'center';
+    ctx.font = F('bold 11px');
+    ctx.fillStyle = '#000';
+    receiptAccounts.forEach(acc => {
+      ctx.fillText(`💳 ${acc.type || ''}`, leftCx, ly); ly += 15;
+      ctx.fillText(acc.number || '', leftCx, ly); ly += 15;
+    });
+    if(receiptQrImg){
+      ly += 6;
+      const qrSize = Math.min(76, (colX[2] - tableLeft) - 20);
+      const qrX = leftCx - qrSize/2;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(qrX-4, ly-4, qrSize+8, qrSize+8);
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeRect(qrX-4, ly-4, qrSize+8, qrSize+8);
+      ctx.save();
+      ctx.imageSmoothingEnabled = false; // ---------- QR کے مربعے دھندلے نہ ہوں — سکیننگ ہمیشہ درست کام کرے ----------
+      ctx.drawImage(receiptQrImg, qrX, ly, qrSize, qrSize);
+      ctx.restore();
+      ly += qrSize + 14;
+      ctx.font = F('10px');
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillText('Scan to Pay', leftCx, ly);
+      ly += 6;
+    }
+    accountBottom = ly;
+  }
+
+  y = Math.max(summaryBottom, accountBottom, paymentBoxTop) + 24;
 
   ctx.textAlign = 'center';
   ctx.font = F('13px');
   ctx.fillText('Thank you for your purchase!', pxWidth/2, y);
 
-  if(receiptAccounts.length){
-    ctx.font = F('bold 12px');
-    receiptAccounts.forEach(acc => {
-      y += 16;
-      ctx.fillText(`💳 ${acc.type || ''}: ${acc.number || ''}`, pxWidth/2, y);
-    });
-    if(receiptQrImg){
-      y += 12;
-      const qrSize = 80;
-      const qrX = pxWidth/2 - qrSize/2;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(qrX-4, y-4, qrSize+8, qrSize+8);
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.strokeRect(qrX-4, y-4, qrSize+8, qrSize+8);
-      ctx.save();
-      ctx.imageSmoothingEnabled = false; // ---------- QR کے مربعے دھندلے نہ ہوں — سکیننگ ہمیشہ درست کام کرے ----------
-      ctx.drawImage(receiptQrImg, qrX, y, qrSize, qrSize);
-      ctx.restore();
-      y += qrSize;
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = F('10px');
-      y += 14;
-      ctx.fillText('Scan to Pay', pxWidth/2, y);
-    }
-  }
   if(AppState.settings.printShowBranding){
     y += 18;
     ctx.font = F('10px');
