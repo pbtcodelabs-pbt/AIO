@@ -13970,8 +13970,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += 20;
   }
   if(receiptAccounts.length){
-    accountBlockH = 18 + (receiptAccounts.length * 30);
-    if(receiptQrImg) accountBlockH += 96;
+    accountBlockH = receiptAccounts.reduce((s,a) => s + 32 + (a.name ? 16 : 0), 0);
+    if(receiptQrImg) accountBlockH += 10 + 92 + 12 + 14 + 8;
   }
   estimatedHeight += Math.max(summaryBlockH, accountBlockH) + 24; // ---------- اب دونوں ساتھ ساتھ ہیں، جمع نہیں کرنے، جو بھی اونچا ہو وہی حساب میں شمار ----------
   const totalReturnedAmt = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
@@ -14207,7 +14207,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
   // بائیں طرف بچنے والی جگہ (Item کالم جتنی) میں پیمنٹ اکاؤنٹ + QR کوڈ ساتھ ساتھ — بل غیرضروری لمبا نہ ہو ----------
   let paymentBoxTop = y;
-  let summaryBottom = y, accountBottom = y;
+  let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
     const sumLeft = colX[2]; // ---------- Qty کالم کے شروع سے — یعنی اوپر Qty+Price+Total جتنی ہی چوڑائی ----------
@@ -14255,22 +14255,38 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
     });
     summaryBottom = boxTop + boxH;
+    summaryBlockHForCentering = boxH;
   }
 
-  // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع ----------
+  // ---------- بائیں طرف — پیمنٹ اکاؤنٹ + QR، Payment Summary کے بالکل ساتھ، اسی اونچائی پر شروع، عمودی طور پر درمیان میں ----------
   if(receiptAccounts.length){
     const leftCx = (tableLeft + colX[2]) / 2;
-    let ly = paymentBoxTop + 18;
+    const lineH = 16;
+    const qrSize = Math.min(92, (colX[2] - tableLeft) - 16);
+    // ---------- پہلے پورے بلاک کی اونچائی معلوم کر لیں تاکہ اسے دستیاب جگہ میں عمودی طور پر درمیان میں رکھ سکیں ----------
+    let blockH = 0;
+    receiptAccounts.forEach(acc => {
+      blockH += lineH; // type
+      if(acc.name) blockH += lineH; // account holder کا نام
+      blockH += lineH; // number
+    });
+    if(receiptQrImg) blockH += 10 + qrSize + 12 + 14 + 8;
+    const availH = Math.max(blockH, (summaryBlockHForCentering || blockH));
+    let ly = paymentBoxTop + Math.max(0, (availH - blockH) / 2) + lineH;
     ctx.textAlign = 'center';
-    ctx.font = F('bold 11px');
     ctx.fillStyle = '#000';
     receiptAccounts.forEach(acc => {
-      ctx.fillText(`💳 ${acc.type || ''}`, leftCx, ly); ly += 15;
-      ctx.fillText(acc.number || '', leftCx, ly); ly += 15;
+      ctx.font = F('bold 11px');
+      ctx.fillText(`💳 ${acc.type || ''}`, leftCx, ly); ly += lineH;
+      if(acc.name){
+        ctx.font = F('10px'); // ---------- اکاؤنٹ ہولڈر کا نام — صاف، ہمارا اپنا بنایا ہوا متن (QR تصویر کے اندر موجود دھندلے نام پر انحصار نہیں) ----------
+        ctx.fillText(acc.name, leftCx, ly); ly += lineH;
+      }
+      ctx.font = F('bold 12px');
+      ctx.fillText(acc.number || '', leftCx, ly); ly += lineH;
     });
     if(receiptQrImg){
       ly += 6;
-      const qrSize = Math.min(76, (colX[2] - tableLeft) - 20);
       const qrX = leftCx - qrSize/2;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(qrX-4, ly-4, qrSize+8, qrSize+8);
