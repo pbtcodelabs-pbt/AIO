@@ -1670,7 +1670,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO268</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO269</span>
     </div>
   </div>
 
@@ -5301,10 +5301,9 @@ function goTo(screenName, _isHistoryNav){
 
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
   closeSidebar();
-  closeNewActionFab();
   requestAnimationFrame(resetScrollNow); // ---------- مواد اور drawer بند ہونے کے بعد آخری بار یقینی بنائیں ----------
   // نوٹ: advOrderPicker میں بھی بلنگ جیسا فلوٹنگ کارٹ بار ہوتا ہے، اس لیے وہاں بھی یہی کلاس لگائیں
-  // تاکہ نیچے کا Back/Home/Forward بار اور + FAB اس کارٹ بار کے اوپر رہیں، اس کے نیچے دب کر نہ رہ جائیں۔
+  // تاکہ نیچے کا Back/Home/Forward بار اس کارٹ بار کے اوپر رہے، اس کے نیچے دب کر نہ رہ جائے۔
   document.body.classList.toggle('billing-active', screenName === 'billing' || screenName === 'advOrderPicker');
   document.getElementById('navArrowBar').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
