@@ -1697,7 +1697,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO253</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO255</span>
     </div>
   </div>
 
@@ -17257,6 +17257,10 @@ async function renderReportToCanvas(){
 
   // ---------- کل اونچائی کا حساب — تمام قطاریں مقررہ اونچائی کی ہیں تو یہ درست پیشگی حساب ممکن ہے ----------
   const totalItemRows = groups.reduce((s,g) => s + g.items.length, 0);
+  // ---------- Purchase/Selling اور Profit/Profit% جیسے کالمز میں دو سطریں دکھائی جاتی ہیں — ایسی رپورٹس میں
+  // قطار کی اونچائی خودکار زیادہ رکھی جاتی ہے تاکہ دوسری لائن اگلی قطار میں نہ چڑھے (زوم بڑھانے پر بھی) ----------
+  const needsTwoLineRow = cols.some(c => c.key === 'ps' || c.key === 'profit');
+  const itemRowH = needsTwoLineRow ? Math.round(baseRowH * 1.7) : baseRowH;
   let headerBandH = useA4 ? 78 : 46;   // بزنس نام + فون + رپورٹ ٹائٹل + تاریخ
   if(logoImg) headerBandH += logoH + 8;
   if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
@@ -17270,7 +17274,7 @@ async function renderReportToCanvas(){
     bodyTop += summaryLineH + 10;
   }
   bodyTop += 10 + headerRowH;
-  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * baseRowH) + 50;
+  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * itemRowH) + 50;
   estimatedHeight += Math.round(40 * fontScale); // ---------- اضافی حفاظتی مارجن — زوم جتنا بڑا ہو، اتنا ہی تھوڑا اضافی نیچے خالی رکھیں تاکہ کبھی بھی مواد کٹے نہیں ----------
 
   canvas.width = pxWidth;
@@ -17351,7 +17355,7 @@ async function renderReportToCanvas(){
     y += 5;
 
     g.items.forEach((it) => {
-      const rh = baseRowH;
+      const rh = itemRowH;
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
       ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
       cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
@@ -17753,6 +17757,17 @@ async function renderTodaySaleReportToCanvas(){
 // ---------- A4 رپورٹ کے لیے حقیقی ملٹی کالم PDF — پرانے طریقے میں وہی تنگ تھرمل سائز کا کینوس محض بڑے صفحے میں
 // درمیان میں رکھ دیا جاتا تھا (سائیڈوں پہ خالی جگہ رہ جاتی تھی)۔ اب اصل ڈیٹا سے PDF میں سیدھا متن لکھا جاتا ہے،
 // اور مواد کے حساب سے خودکار 1 سے 4 کالمز میں تقسیم ہو کر پورے صفحے کی چوڑائی/مارجن درست طریقے سے استعمال ہوتے ہیں ----------
+// ---------- jsPDF کے بلٹ اِن فونٹ صرف لاطینی حروف سپورٹ کرتے ہیں — اردو/عربی رسم الخط بالکل نہیں،
+// اسی وجہ سے وہ ناقابلِ فہم علامتیں (مثلاً þåþ•þ•þí) نظر آ رہی تھیں۔ چونکہ صحیح شکل میں اردو دکھانا
+// (خاص طور پر جڑے ہوئے حروف کے ساتھ) اس ہلکے PDF نظام میں فی الحال ممکن نہیں، اس لیے صاف علامتوں کی
+// بجائے وہ حصہ ہٹا کر نام کا باقی (لاطینی) حصہ دکھایا جاتا ہے — مکمل غائب ہونے سے بہتر ہے۔
+// نوٹ: یہ صرف PDF پرنٹ پر لاگو ہے — اسکرین، تھرمل پرنٹ اور WhatsApp شیئر میں اردو ہمیشہ ٹھیک نظر آتی ہے
+// (وہ کینوس/ڈیوائس کے اپنے فونٹ استعمال کرتے ہیں، جو مکمل یونیکوڈ سپورٹ کرتا ہے) ----------
+function stripUnrenderableForPdf(text){
+  const cleaned = String(text || '').replace(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, '').replace(/\s+/g, ' ').trim();
+  return cleaned || '(Urdu name)';
+}
+
 function buildMultiColumnReportPdf(orientation){
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
@@ -17765,6 +17780,13 @@ function buildMultiColumnReportPdf(orientation){
   const [br, bgc, bb] = hexToRgb(rc.border);
   const [fr, fg, fb] = hexToRgb(rc.bg);
   const [tr, tg, tb] = hexToRgb(rc.text);
+  // ---------- ہلکا زیبرا شیڈ — تھیم کے پس منظر رنگ کا ہی بہت ہلکا ورژن، تاکہ ایک قطار دوسری سے الگ نظر آئے
+  // اور کوئی آئٹم غلطی سے پچھلی/اگلی قطار کے ساتھ نہ پڑھا جائے ----------
+  const zebraR = Math.round(255 - (255-fr)*0.35), zebraG = Math.round(255 - (255-fg)*0.35), zebraB = Math.round(255 - (255-fb)*0.35);
+
+  // ---------- صارف کے اپنے Zoom/Row سلائیڈرز اب PDF پر بھی لاگو ہوتے ہیں ----------
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScale = (AppState.settings.reportRowScale || 100) / 100;
 
   // ---------- ڈیٹا اکٹھا کریں — وہی منطق جو کینوس رینڈرر میں استعمال ہوتی ہے ----------
   const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
@@ -17804,11 +17826,11 @@ function buildMultiColumnReportPdf(orientation){
   pdf.setTextColor(tr, tg, tb);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(16);
-  pdf.text(AppState.settings.businessName || 'AIO POS', pageW / 2, y + 6, {align:'center'});
+  pdf.text(stripUnrenderableForPdf(AppState.settings.businessName || 'AIO POS'), pageW / 2, y + 6, {align:'center'});
   y += 9;
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
-  if(AppState.settings.businessAddress){ pdf.text(AppState.settings.businessAddress, pageW/2, y, {align:'center'}); y += 5; }
+  if(AppState.settings.businessAddress){ pdf.text(stripUnrenderableForPdf(AppState.settings.businessAddress), pageW/2, y, {align:'center'}); y += 5; }
   if(AppState.settings.businessPhone){ pdf.text(AppState.settings.businessPhone, pageW/2, y, {align:'center'}); y += 5; }
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(12);
@@ -17827,7 +17849,10 @@ function buildMultiColumnReportPdf(orientation){
     g.items.forEach(it => flatRows.push({type:'item', item:it}));
   });
 
-  const rowH = 5.2, colHeaderH = 6, colGap = 4;
+  const fontPt = Math.round(7.5 * fontScale * 10) / 10;
+  const rowH = Math.round(5.2 * rowScale * 10) / 10;
+  const colHeaderH = Math.round(6 * rowScale * 10) / 10;
+  const colGap = 5;
   const usableH = pageH - headerBottom - marginMM;
   const rowsPerColumn = Math.max(3, Math.floor((usableH - colHeaderH) / rowH));
   const maxCols = orientation === 'landscape' ? 4 : 2;
@@ -17839,28 +17864,39 @@ function buildMultiColumnReportPdf(orientation){
     const nameW = w * (1 - fields.reduce((s, f) => s + f.frac, 0));
     pdf.setFillColor(fr, fg, fb);
     pdf.rect(x, yy, w, colHeaderH, 'F');
-    pdf.setDrawColor(br, bgc, bb);
-    pdf.setLineWidth(0.3);
-    pdf.rect(x, yy, w, colHeaderH);
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(7.5);
+    pdf.setFontSize(fontPt);
     pdf.setTextColor(tr, tg, tb);
-    pdf.text('Item', x + 1.5, yy + colHeaderH - 2);
+    pdf.text('Item', x + 1.5, yy + colHeaderH - colHeaderH*0.3);
     let fx = x + nameW;
+    const fieldXs = [];
     fields.forEach(f => {
       const fw = w * f.frac;
-      pdf.text(f.label, fx + fw - 1.5, yy + colHeaderH - 2, {align:'right'});
+      fieldXs.push(fx);
+      pdf.text(f.label, fx + fw - 1.5, yy + colHeaderH - colHeaderH*0.3, {align:'right'});
       fx += fw;
     });
-    return nameW;
+    return {nameW, fieldXs};
   };
 
   let colIdx = 0, rowInCol = 0, colY = headerBottom;
   let colX = marginMM;
-  let nameW = drawColumnHeader(colX, colY, colW);
+  let hdr = drawColumnHeader(colX, colY, colW);
+  let nameW = hdr.nameW, fieldXs = hdr.fieldXs;
   let curY = colY + colHeaderH;
+  let colTopY = colY;
+
+  // ---------- ہر کالم کا باکس مکمل ہونے پر گول کونوں والا بارڈر اور اندرونی عمودی لکیریں کھینچیں ----------
+  const finalizeColumnBox = () => {
+    pdf.setDrawColor(br, bgc, bb);
+    pdf.setLineWidth(0.45);
+    pdf.roundedRect(colX, colTopY, colW, curY - colTopY, 2.2, 2.2, 'S');
+    pdf.setLineWidth(0.2);
+    fieldXs.forEach(fx => { pdf.line(fx, colTopY + colHeaderH, fx, curY); });
+  };
 
   const startNewColumn = () => {
+    finalizeColumnBox();
     colIdx++;
     if(colIdx >= numCols){
       pdf.addPage('a4', orientation);
@@ -17868,7 +17904,9 @@ function buildMultiColumnReportPdf(orientation){
       colY = marginMM;
     }
     colX = marginMM + colIdx * (colW + colGap);
-    nameW = drawColumnHeader(colX, colY, colW);
+    colTopY = colY;
+    hdr = drawColumnHeader(colX, colY, colW);
+    nameW = hdr.nameW; fieldXs = hdr.fieldXs;
     curY = colY + colHeaderH;
     rowInCol = 0;
   };
@@ -17879,22 +17917,30 @@ function buildMultiColumnReportPdf(orientation){
       pdf.setFillColor(230, 230, 230);
       pdf.rect(colX, curY, colW, rowH, 'F');
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(7.5);
+      pdf.setFontSize(fontPt);
       pdf.setTextColor(tr, tg, tb);
-      pdf.text(row.text, colX + 1.5, curY + rowH - 1.6);
+      pdf.text(row.text, colX + 1.5, curY + rowH - rowH*0.3);
     } else {
+      if(rowInCol % 2 === 1){
+        pdf.setFillColor(zebraR, zebraG, zebraB);
+        pdf.rect(colX, curY, colW, rowH, 'F');
+      }
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(7.5);
+      pdf.setFontSize(fontPt);
       pdf.setTextColor(20, 20, 20);
-      let txt = row.item.name;
+      const safeName = stripUnrenderableForPdf(row.item.name);
+      let txt = safeName;
       const maxTxtW = nameW - 3;
       while(pdf.getTextWidth(txt) > maxTxtW && txt.length > 3){ txt = txt.slice(0, -1); }
-      if(txt !== row.item.name) txt = txt.slice(0, -1) + '…';
-      pdf.text(txt, colX + 1.5, curY + rowH - 1.6);
+      if(txt !== safeName) txt = txt.slice(0, -1) + '…';
+      pdf.text(txt, colX + 1.5, curY + rowH - rowH*0.3);
       let fx = colX + nameW;
       fields.forEach(f => {
         const fw = colW * f.frac;
-        pdf.text(f.get(row.item), fx + fw - 1.5, curY + rowH - 1.6, {align:'right'});
+        let vtxt = f.get(row.item);
+        const maxVW = fw - 3;
+        while(pdf.getTextWidth(vtxt) > maxVW && vtxt.length > 2){ vtxt = vtxt.slice(0, -1); }
+        pdf.text(vtxt, fx + fw - 1.5, curY + rowH - rowH*0.3, {align:'right'});
         fx += fw;
       });
     }
@@ -17904,6 +17950,163 @@ function buildMultiColumnReportPdf(orientation){
     curY += rowH;
     rowInCol++;
   });
+  finalizeColumnBox();
+
+  return pdf;
+}
+
+// ---------- Today's Sale Report کا اپنا PDF — کیش سمری اوپر پورے صفحے کی چوڑائی میں، نیچے فروخت شدہ آئٹمز
+// وہی ملٹی کالم منطق استعمال کرتے ہوئے تاکہ باقی رپورٹس جیسا ہی یکساں انداز ہو ----------
+function buildTodaySalePdf(orientation){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210;
+  const pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 10;
+
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  const [tr, tg, tb] = hexToRgb(rc.text);
+  const zebraR = Math.round(255 - (255-fr)*0.35), zebraG = Math.round(255 - (255-fg)*0.35), zebraB = Math.round(255 - (255-fb)*0.35);
+  const decimals = AppState.settings.reportPriceDecimals ?? 0;
+  const fmt = (n) => Number(n || 0).toFixed(decimals);
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScale = (AppState.settings.reportRowScale || 100) / 100;
+
+  const todayStr = toLocalDateStr(new Date());
+  const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr);
+  const totalBills = todayInvoices.length;
+  const totalSales = todayInvoices.reduce((s, inv) => s + (inv.grand_total || 0), 0);
+  const todayPayments = (paymentsData || []).filter(p => p.date === todayStr);
+  const customerPaymentsReceived = todayPayments.filter(p => p.direction === 'in' && p.party_type === 'customer').reduce((s,p) => s + (p.amount||0), 0);
+  const supplierPaymentsMade = todayPayments.filter(p => p.direction === 'out' && p.party_type === 'supplier').reduce((s,p) => s + (p.amount||0), 0);
+  const todayExpenses = (typeof expenseData !== 'undefined' ? expenseData : []).filter(e => e.date === todayStr).reduce((s,e) => s + (e.amount||0), 0);
+  const openingCash = AppState.settings.openingCashBalance || 0;
+  const cashIn = openingCash + totalSales + customerPaymentsReceived;
+  const cashOut = supplierPaymentsMade + todayExpenses;
+  const netCash = cashIn - cashOut;
+  const itemQtyMap = {};
+  todayInvoices.forEach(inv => (inv.items || []).forEach(it => { itemQtyMap[it.name] = (itemQtyMap[it.name] || 0) + (it.qty || 0); }));
+  const soldItems = Object.keys(itemQtyMap).map(name => ({name, qty: itemQtyMap[name]})).sort((a,b) => b.qty - a.qty);
+
+  let y = marginMM;
+  pdf.setTextColor(tr, tg, tb);
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
+  pdf.text(stripUnrenderableForPdf(AppState.settings.businessName || 'AIO POS'), pageW / 2, y + 6, {align:'center'});
+  y += 9;
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
+  if(AppState.settings.businessAddress){ pdf.text(stripUnrenderableForPdf(AppState.settings.businessAddress), pageW/2, y, {align:'center'}); y += 5; }
+  if(AppState.settings.businessPhone){ pdf.text(AppState.settings.businessPhone, pageW/2, y, {align:'center'}); y += 5; }
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12);
+  pdf.text("Today's Sale Report", pageW / 2, y + 3, {align:'center'});
+  y += 9;
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}  |  Bills: ${totalBills}`, marginMM, y);
+  y += 6;
+
+  const summaryRows = [
+    ['Opening Cash', fmt(openingCash)],
+    ['Sales Today', fmt(totalSales)],
+    ['Customer Payments In', fmt(customerPaymentsReceived)],
+    ['Supplier Payments Out', `-${fmt(supplierPaymentsMade)}`],
+    ['Expenses', `-${fmt(todayExpenses)}`],
+    ['Net Cash', fmt(netCash)],
+  ];
+  const sumRowH = Math.round(6 * rowScale * 10) / 10;
+  const sumFontPt = Math.round(9 * fontScale * 10) / 10;
+  pdf.setFontSize(sumFontPt);
+  const sumTop = y;
+  summaryRows.forEach((row, i) => {
+    const isLast = i === summaryRows.length - 1;
+    const ry = y + i * sumRowH;
+    pdf.setFillColor(isLast ? fr : (i % 2 === 1 ? zebraR : 255), isLast ? fg : (i % 2 === 1 ? zebraG : 255), isLast ? fb : (i % 2 === 1 ? zebraB : 255));
+    pdf.rect(marginMM, ry, pageW - marginMM * 2, sumRowH, 'F');
+    pdf.setFont('helvetica', isLast ? 'bold' : 'normal');
+    pdf.setTextColor(tr, tg, tb);
+    pdf.text(row[0], marginMM + 2, ry + sumRowH*0.7);
+    pdf.text(row[1], pageW - marginMM - 2, ry + sumRowH*0.7, {align:'right'});
+  });
+  pdf.setDrawColor(br, bgc, bb); pdf.setLineWidth(0.45);
+  pdf.roundedRect(marginMM, sumTop, pageW - marginMM*2, summaryRows.length * sumRowH, 2.2, 2.2, 'S');
+  for(let i=1; i<summaryRows.length; i++){
+    pdf.setLineWidth(0.15);
+    pdf.line(marginMM, sumTop + i*sumRowH, pageW - marginMM, sumTop + i*sumRowH);
+  }
+  y += summaryRows.length * sumRowH + 6;
+
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10);
+  pdf.setTextColor(tr, tg, tb);
+  pdf.text('Items Sold Today', marginMM, y);
+  y += 4;
+  const headerBottom = y;
+
+  const fontPt = Math.round(7.5 * fontScale * 10) / 10;
+  const rowH = Math.round(5.2 * rowScale * 10) / 10;
+  const colHeaderH = Math.round(6 * rowScale * 10) / 10;
+  const colGap = 5;
+  const usableH = pageH - headerBottom - marginMM;
+  const rowsPerColumn = Math.max(3, Math.floor((usableH - colHeaderH) / rowH));
+  const maxCols = orientation === 'landscape' ? 4 : 2;
+  const neededCols = Math.ceil(soldItems.length / rowsPerColumn) || 1;
+  const numCols = Math.min(Math.max(neededCols, 1), maxCols);
+  const colW = (pageW - marginMM * 2 - colGap * (numCols - 1)) / numCols;
+
+  const drawHeader = (x, yy, w) => {
+    const nameW = w * 0.65;
+    pdf.setFillColor(fr, fg, fb);
+    pdf.rect(x, yy, w, colHeaderH, 'F');
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(fontPt);
+    pdf.setTextColor(tr, tg, tb);
+    pdf.text('Item', x + 1.5, yy + colHeaderH - colHeaderH*0.3);
+    pdf.text('Qty', x + w - 1.5, yy + colHeaderH - colHeaderH*0.3, {align:'right'});
+    return nameW;
+  };
+
+  let colIdx = 0, rowInCol = 0, colY = headerBottom;
+  let colX = marginMM;
+  let nameW = drawHeader(colX, colY, colW);
+  let curY = colY + colHeaderH;
+  let colTopY = colY;
+
+  const finalizeColumnBox = () => {
+    pdf.setDrawColor(br, bgc, bb); pdf.setLineWidth(0.45);
+    pdf.roundedRect(colX, colTopY, colW, curY - colTopY, 2.2, 2.2, 'S');
+    pdf.setLineWidth(0.2);
+    pdf.line(colX + nameW, colTopY + colHeaderH, colX + nameW, curY);
+  };
+
+  const startNewColumn = () => {
+    finalizeColumnBox();
+    colIdx++;
+    if(colIdx >= numCols){ pdf.addPage('a4', orientation); colIdx = 0; colY = marginMM; }
+    colX = marginMM + colIdx * (colW + colGap);
+    colTopY = colY;
+    nameW = drawHeader(colX, colY, colW);
+    curY = colY + colHeaderH;
+    rowInCol = 0;
+  };
+  soldItems.forEach((item, idx) => {
+    if(rowInCol >= rowsPerColumn) startNewColumn();
+    if(idx % 2 === 1){
+      pdf.setFillColor(zebraR, zebraG, zebraB);
+      pdf.rect(colX, curY, colW, rowH, 'F');
+    }
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(fontPt); pdf.setTextColor(20, 20, 20);
+    const safeName = stripUnrenderableForPdf(item.name);
+    let txt = safeName;
+    const maxTxtW = nameW - 3;
+    while(pdf.getTextWidth(txt) > maxTxtW && txt.length > 3){ txt = txt.slice(0, -1); }
+    if(txt !== safeName) txt = txt.slice(0, -1) + '…';
+    pdf.text(txt, colX + 1.5, curY + rowH - rowH*0.3);
+    pdf.text(String(item.qty), colX + colW - 1.5, curY + rowH - rowH*0.3, {align:'right'});
+    pdf.setDrawColor(br, bgc, bb); pdf.setLineWidth(0.15);
+    pdf.line(colX, curY + rowH, colX + colW, curY + rowH);
+    curY += rowH;
+    rowInCol++;
+  });
+  finalizeColumnBox();
 
   return pdf;
 }
@@ -17924,46 +18127,9 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-
-    // ---------- Today's Sale Report کیٹگری بیسڈ نہیں (اپنا الگ لے آؤٹ ہے) — اس کے لیے پرانا سکیل شدہ کینوس ہی رہنے دیں،
-    // باقی سب رپورٹس (Price List/Inventory/Profit/Low Stock) اب اصل ملٹی کالم PDF استعمال کرتی ہیں ----------
-    if(currentReportType !== 'todaysale'){
-      const pdf = buildMultiColumnReportPdf(orientation);
-      const blobUrl = pdf.output('bloburl');
-      window.open(blobUrl, '_blank');
-      return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
-    const pageW = orientation === 'landscape' ? 297 : 210;
-    const pageH = orientation === 'landscape' ? 210 : 297;
-    const marginMM = 12;
-    const availW = pageW - marginMM * 2;
-    const availH = pageH - marginMM * 2;
-    let drawW = availW;
-    let drawH = drawW * (canvas.height / canvas.width);
-    if(drawH > availH){ const scale = availH / drawH; drawH = availH; drawW = drawW * scale; }
-    const offsetX = marginMM + (availW - drawW) / 2;
-    const offsetY = marginMM + (availH - drawH) / 2;
-
-    // ---------- صارف کی اپنی منتخب کردہ Bill Theme رنگ سکیم استعمال کریں — بالکل ویسی ہی جیسی رپورٹ میں نظر آ رہی ہے،
-    // تاکہ PDF بھی اسی برانڈ کے ساتھ پروفیشنل اور رنگین نظر آئے (تھرمل کی طرح سیاہ/سفید نہیں) ----------
-    const rc = getReceiptColor();
-    const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
-    const [br, bgc, bb] = hexToRgb(rc.border);
-    const [fr, fg, fb] = hexToRgb(rc.bg);
-
-    pdf.setFillColor(fr, fg, fb);
-    pdf.rect(0, 0, pageW, pageH, 'F'); // ---------- پورے صفحے پر ہلکا تھیم رنگ کا پس منظر ----------
-
-    const cardPad = 5;
-    pdf.setFillColor(255, 255, 255);
-    pdf.setDrawColor(br, bgc, bb);
-    pdf.setLineWidth(1.1);
-    pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
-
-    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH); // ---------- اصل رنگین کینوس — گرے اسکیل نہیں ----------
+    // ---------- اب سب رپورٹس (Price List/Inventory/Profit/Low Stock/Today's Sale) ایک ہی یکساں
+    // ملٹی کالم PDF نظام استعمال کرتی ہیں — کوئی پرانا سکیل شدہ کینوس والا راستہ باقی نہیں رہا ----------
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
     const blobUrl = pdf.output('bloburl');
     window.open(blobUrl, '_blank');
     return;
