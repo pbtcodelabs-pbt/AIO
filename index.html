@@ -1394,7 +1394,11 @@
     input, select, button, textarea{max-width:100%; font-family:inherit;}
 
     /* --- App shell: sidebar اب فکسڈ drawer بن جاتا ہے، مین ایریا پوری چوڑائی لیتا ہے --- */
-    #app{grid-template-columns:1fr; grid-template-rows:56px auto 1fr; height:100vh;}
+    /* ---------- نوٹ: پہلے یہاں صرف 3 rows تھیں (56px auto 1fr) — نیا 🔍 Zoom بار بغیر کسی مخصوص row کے
+    شامل کیا گیا تھا، اس لیے Grid نے اسے خودکار ایک "implicit" چوتھی row میں رکھ دیا جو 100vh کی مقررہ اونچائی
+    سے باہر، ناقابلِ رسائی جگہ پر جا گری — کوڈ میں موجود تھا مگر عملی طور پر کبھی نظر نہیں آ رہا تھا۔
+    اب اس کے لیے باقاعدہ چوتھی row بنا دی گئی ہے۔ ---------- */
+    #app{grid-template-columns:1fr; grid-template-rows:56px auto auto 1fr; height:100vh;}
 
     #mobileTopbar{
       display:flex; align-items:center; gap:12px; padding:0 16px;
@@ -1450,6 +1454,13 @@
     }
     #globalSearchBar #appSearchResults.show{display:block;}
 
+    /* ---------- 🔍 App Size زوم بار — سرچ بار کے بالکل نیچے، اپنی مخصوص grid row میں، سٹِکی —
+    ہر صفحے پر ہمیشہ نظر آئے، بالکل سرچ بار کی طرح ---------- */
+    #globalUiZoomBar{
+      grid-column:1; grid-row:3;
+      position:sticky; top:calc(56px + 54px); z-index:588;
+    }
+
     #sidebar{
       position:fixed; top:0; right:-260px; bottom:0; width:240px; z-index:800;
       transition:right .25s ease; box-shadow:-4px 0 20px rgba(0,0,0,.2);
@@ -1462,7 +1473,7 @@
     }
     #sidebarOverlay.show{display:block;}
 
-    #mainArea{grid-column:1; grid-row:3; padding:14px; overflow-x:hidden;}
+    #mainArea{grid-column:1; grid-row:4; padding:14px; overflow-x:hidden;}
 
     /* --- Billing screen: سرچ/کارٹ اوپر، چیک آؤٹ نیچے --- */
     .productGridFull{height:calc(100vh - 275px); margin-bottom:80px;}
@@ -1697,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO255</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO257</span>
     </div>
   </div>
 
@@ -14844,6 +14855,60 @@ function triggerPrint(){
   requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => window.print(), 60)));
 }
 
+// ---------- PDF کو نئے ٹیب میں کھولتے وقت خالی Chrome PDF ویور کی بجائے اپنا Print/WhatsApp/Share بار ساتھ دیں —
+// تاکہ پریویو دیکھنے کے بعد وہیں سے حتمی پرنٹ/شیئر کیا جا سکے، ایپ میں واپس آنے کی ضرورت نہ پڑے ----------
+function openPdfWithActions(pdf, filenameBase){
+  const blobUrl = pdf.output('bloburl');
+  const win = window.open('', '_blank');
+  if(!win){
+    alert('نیا ٹیب نہیں کھل سکا — براہ کرم اس سائٹ کے لیے پاپ اپ کی اجازت دیں، پھر دوبارہ کوشش کریں۔');
+    window.open(blobUrl, '_blank'); // ---------- حفاظتی متبادل — کم از کم PDF تو نظر آ جائے ----------
+    return;
+  }
+  win.document.open();
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${filenameBase}</title>
+    <style>
+      html,body{margin:0; height:100%; font-family:Arial,sans-serif; background:#eef1f5;}
+      #pdfFrame{width:100%; height:calc(100% - 66px); border:none; display:block;}
+      #actionBar{position:fixed; bottom:0; left:0; right:0; height:66px; display:flex; gap:8px;
+        padding:10px 12px; background:#fff; border-top:1px solid #e2e8f0; box-sizing:border-box;}
+      #actionBar button{flex:1; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; gap:6px;}
+      #printBtnX{background:#16a34a; color:#fff;}
+      #waBtnX{background:#dcfce7; color:#166534;}
+      #shareBtnX{background:#eef2ff; color:#3730a3;}
+    </style></head>
+    <body>
+      <iframe id="pdfFrame" src="${blobUrl}"></iframe>
+      <div id="actionBar">
+        <button id="printBtnX">🖨️ Print</button>
+        <button id="waBtnX">📱 WhatsApp</button>
+        <button id="shareBtnX">🔗 Share More</button>
+      </div>
+    </body></html>`);
+  win.document.close();
+
+  win.document.getElementById('printBtnX').onclick = () => {
+    const frame = win.document.getElementById('pdfFrame');
+    try{ frame.contentWindow.focus(); frame.contentWindow.print(); }
+    catch(e){ win.print(); }
+  };
+  const shareHandler = async () => {
+    try{
+      const resp = await fetch(blobUrl);
+      const blob = await resp.blob();
+      const file = new File([blob], filenameBase + '.pdf', {type:'application/pdf'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:filenameBase});
+      } else {
+        win.location.href = blobUrl; // ---------- شیئر سپورٹ نہ ہونے کی صورت میں کم از کم PDF کھول دیں ----------
+      }
+    }catch(e){ /* یوزر نے شیئر منسوخ کر دی، یا سپورٹ نہیں — خاموشی سے واپس */ }
+  };
+  win.document.getElementById('waBtnX').onclick = shareHandler;
+  win.document.getElementById('shareBtnX').onclick = shareHandler;
+}
+
 function printCurrentInvoice(){
   const canvas = document.getElementById('invoiceCanvas');
   if(!canvas) return;
@@ -14885,8 +14950,7 @@ function printCurrentInvoice(){
     pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
 
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
-    const blobUrl = pdf.output('bloburl');
-    window.open(blobUrl, '_blank');
+    openPdfWithActions(pdf, 'Invoice');
     return;
   }
 
@@ -18130,8 +18194,7 @@ async function printCurrentReport(){
     // ---------- اب سب رپورٹس (Price List/Inventory/Profit/Low Stock/Today's Sale) ایک ہی یکساں
     // ملٹی کالم PDF نظام استعمال کرتی ہیں — کوئی پرانا سکیل شدہ کینوس والا راستہ باقی نہیں رہا ----------
     const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
-    const blobUrl = pdf.output('bloburl');
-    window.open(blobUrl, '_blank');
+    openPdfWithActions(pdf, 'Report');
     return;
   }
 
