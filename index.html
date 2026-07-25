@@ -1708,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO260</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO261</span>
     </div>
   </div>
 
@@ -14905,11 +14905,45 @@ async function printCurrentInvoice(){
   const useA4Print = AppState.settings.invoicePrintStyle === 'a4';
 
   if(useA4Print){
-    // ---------- اب A4 پر "🖨️ Print" اور "📤 Print/Share A4 PDF" دونوں بٹن ایک ہی قابلِ اعتماد راستے پر جاتے ہیں —
-    // خالی/بے سمت Chrome PDF ٹیب کھولنے کے بجائے سیدھا Android کی نیٹو شیئر شیٹ کھلتی ہے، جس میں
-    // Print خود بخود WhatsApp/دیگر ایپس کے ساتھ ایک آپشن کے طور پر موجود ہوتا ہے — یوزر کو الگ سے
-    // کسی ایسے پیج پر نہیں جانا پڑتا جہاں پرنٹ/شیئر کا کوئی واضح بٹن نظر نہ آئے ----------
-    await shareInvoicePdf();
+    // ---------- بل کے لیے بھی وہی قابلِ اعتماد PDF راستہ جو رپورٹس میں استعمال ہو رہا ہے — Chrome کا
+    // اپنا PDF ویور کھلتا ہے جہاں یوزر پورٹریٹ/لینڈسکیپ کا اصل صفحہ دیکھ سکے۔ اسی ویور کے اوپری حصے میں
+    // خود Chrome کے 🖨️ پرنٹ اور ⋮/📤 شیئر آئیکن موجود ہوتے ہیں۔ فوری، بغیر دیکھے شیئر کرنے کے لیے
+    // نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں، جو سیدھا نیٹو شیئر شیٹ کھولتا ہے ----------
+    if(!window.jspdf){
+      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const orientation = AppState.settings.invoiceOrientation === 'landscape' ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+    const pageW = orientation === 'landscape' ? 297 : 210;
+    const pageH = orientation === 'landscape' ? 210 : 297;
+    const marginMM = 12;
+    const availW = pageW - marginMM * 2;
+    const availH = pageH - marginMM * 2;
+    let drawW = availW;
+    let drawH = drawW * (canvas.height / canvas.width);
+    if(drawH > availH){ const scale = availH / drawH; drawH = availH; drawW = drawW * scale; }
+    const offsetX = marginMM + (availW - drawW) / 2;
+    const offsetY = marginMM + (availH - drawH) / 2;
+
+    const rc = getReceiptColor();
+    const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+    const [br, bgc, bb] = hexToRgb(rc.border);
+    const [fr, fg, fb] = hexToRgb(rc.bg);
+
+    pdf.setFillColor(fr, fg, fb);
+    pdf.rect(0, 0, pageW, pageH, 'F');
+
+    const cardPad = 5;
+    pdf.setFillColor(255, 255, 255);
+    pdf.setDrawColor(br, bgc, bb);
+    pdf.setLineWidth(1.1);
+    pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
+
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    const blobUrl = pdf.output('bloburl');
+    window.open(blobUrl, '_blank');
     return;
   }
 
@@ -18164,11 +18198,19 @@ async function printCurrentReport(){
   const useA4Print = AppState.settings.reportPrintStyle === 'a4';
 
   if(useA4Print){
-    // ---------- اب A4 پر "🖨️ Print" اور "📤 Print/Share A4 PDF" دونوں بٹن ایک ہی قابلِ اعتماد راستے پر جاتے ہیں —
-    // خالی/بے سمت Chrome PDF ٹیب کھولنے کے بجائے سیدھا Android کی نیٹو شیئر شیٹ کھلتی ہے، جس میں
-    // Print خود بخود WhatsApp/دیگر ایپس کے ساتھ ایک آپشن کے طور پر موجود ہوتا ہے — یوزر کو الگ سے
-    // کسی ایسے پیج پر نہیں جانا پڑتا جہاں پرنٹ/شیئر کا کوئی واضح بٹن نظر نہ آئے ----------
-    await shareReportPdf();
+    // ---------- A4 پر "🖨️ Print" دبانے پر اصل PDF بنا کر دکھائیں — یہی واحد قابلِ اعتماد طریقہ ہے
+    // جس میں یوزر پورٹریٹ/لینڈسکیپ کا اصل صفحہ اپنی آنکھوں سے دیکھ سکے (Chrome کا اپنا PDF ویور کھلتا ہے)۔
+    // اسی PDF ویور کے اوپری حصے میں خود Chrome کے اپنے 🖨️ پرنٹ اور ⋮/📤 شیئر آئیکن موجود ہوتے ہیں —
+    // اگر سکرول کرنے پر یہ اوپری بار چھپ جائے تو تھوڑا اوپر سکرول کرتے ہی دوبارہ نظر آ جاتی ہے۔
+    // فوری، بغیر دیکھے شیئر کرنے کے لیے نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں،
+    // جو سیدھا Android کی نیٹو شیئر شیٹ کھولتا ہے ----------
+    if(!window.jspdf){
+      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      return;
+    }
+    const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
+    window.open(pdf.output('bloburl'), '_blank');
     return;
   }
 
