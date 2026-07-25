@@ -1697,7 +1697,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO252</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO253</span>
     </div>
   </div>
 
@@ -1712,6 +1712,15 @@
     </span>
     <input type="text" id="appSearchInput" placeholder="App Search — find any screen or setting..." oninput="renderAppSearchResults(this.value)" autocomplete="off">
     <div id="appSearchResults"></div>
+  </div>
+
+  <!-- ---------- 🔍 فوری App Size کنٹرول — اب ہر صفحے پر نظر آتا ہے (پہلے صرف Home پر تھا)، Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
+  <div id="globalUiZoomBar" style="display:flex; align-items:center; gap:8px; background:var(--card); border-bottom:1px solid #e2e8f0; padding:6px 12px;">
+    <span style="font-size:13px;">🔍</span>
+    <span style="font-size:11px; color:var(--muted);">A</span>
+    <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
+    <span style="font-size:16px; color:var(--muted);">A</span>
+    <span class="uiZoomValueLabel" style="font-size:11px; font-weight:700; color:var(--primary); min-width:34px; text-align:right;">100%</span>
   </div>
 
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
@@ -1773,15 +1782,6 @@
       </div>
       <input type="file" id="importBackupInputHome" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
-
-      <!-- ---------- 🔍 فوری App Size کنٹرول — پورا Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
-      <div style="display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid #e2e8f0; border-radius:10px; padding:8px 12px; margin:8px 0;">
-        <span style="font-size:13px;">🔍</span>
-        <span style="font-size:11px; color:var(--muted);">A</span>
-        <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
-        <span style="font-size:16px; color:var(--muted);">A</span>
-        <span class="uiZoomValueLabel" style="font-size:11px; font-weight:700; color:var(--primary); min-width:34px; text-align:right;">100%</span>
-      </div>
 
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
       <div class="subBoxRow" id="subBoxRow" style="display:none;">
@@ -17750,6 +17750,164 @@ async function renderTodaySaleReportToCanvas(){
   if(scrollWrap2) scrollWrap2.scrollTop = 0;
 }
 
+// ---------- A4 رپورٹ کے لیے حقیقی ملٹی کالم PDF — پرانے طریقے میں وہی تنگ تھرمل سائز کا کینوس محض بڑے صفحے میں
+// درمیان میں رکھ دیا جاتا تھا (سائیڈوں پہ خالی جگہ رہ جاتی تھی)۔ اب اصل ڈیٹا سے PDF میں سیدھا متن لکھا جاتا ہے،
+// اور مواد کے حساب سے خودکار 1 سے 4 کالمز میں تقسیم ہو کر پورے صفحے کی چوڑائی/مارجن درست طریقے سے استعمال ہوتے ہیں ----------
+function buildMultiColumnReportPdf(orientation){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210;
+  const pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 10;
+
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  const [tr, tg, tb] = hexToRgb(rc.text);
+
+  // ---------- ڈیٹا اکٹھا کریں — وہی منطق جو کینوس رینڈرر میں استعمال ہوتی ہے ----------
+  const showStock = currentReportType === 'inventory' || !!AppState.settings.reportShowStockQty;
+  const allItems = getReportFlatItems();
+  let relevant = allItems.filter(it => currentReportCategories.includes(it.category));
+  if(currentReportType === 'lowstock') relevant = relevant.filter(it => it.stock <= it.lowStockAt);
+  const groupsMap = {};
+  relevant.forEach(it => { (groupsMap[it.category] = groupsMap[it.category] || []).push(it); });
+  const groups = Object.keys(groupsMap).sort().map(cat => ({category: cat, items: groupsMap[cat]}));
+  const decimals = AppState.settings.reportPriceDecimals ?? 0;
+  const fmt = (n) => Number(n||0).toFixed(decimals);
+
+  const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report', lowstock:'Low Stock Items'};
+  let fields;
+  if(currentReportType === 'pricelist'){
+    fields = [{label:'Price', frac:0.28, get:(it)=>fmt(it.retail)}];
+    if(showStock) fields.push({label:'Stock', frac:0.22, get:(it)=>String(it.stock)});
+  } else if(currentReportType === 'profit'){
+    fields = [
+      {label:'Pur/Sell', frac:0.30, get:(it)=>`${fmt(it.purchase)}/${fmt(it.retail)}`},
+      {label:'Profit', frac:0.26, get:(it)=>{
+        const profit = (it.retail||0) - (it.purchase||0);
+        const pct = it.purchase ? (profit / it.purchase * 100) : 0;
+        return `${fmt(profit)}/${pct.toFixed(0)}%`;
+      }},
+    ];
+    if(showStock) fields.push({label:'Stock', frac:0.16, get:(it)=>String(it.stock)});
+  } else { // inventory / lowstock
+    fields = [
+      {label:'Limit', frac:0.22, get:(it)=>String(it.lowStockAt)},
+      {label:'Stock', frac:0.24, get:(it)=>String(it.stock)},
+    ];
+  }
+
+  // ---------- ہیڈر بلاک — پورے صفحے کی چوڑائی میں، بیچ میں ----------
+  let y = marginMM;
+  pdf.setTextColor(tr, tg, tb);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(16);
+  pdf.text(AppState.settings.businessName || 'AIO POS', pageW / 2, y + 6, {align:'center'});
+  y += 9;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  if(AppState.settings.businessAddress){ pdf.text(AppState.settings.businessAddress, pageW/2, y, {align:'center'}); y += 5; }
+  if(AppState.settings.businessPhone){ pdf.text(AppState.settings.businessPhone, pageW/2, y, {align:'center'}); y += 5; }
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
+  pdf.text(titles[currentReportType] || 'Report', pageW / 2, y + 3, {align:'center'});
+  y += 9;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8.5);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, marginMM, y);
+  y += 4;
+  const headerBottom = y;
+
+  // ---------- فلیٹ رو لسٹ — کیٹگری ہیڈر اور آئٹمز ایک ہی ترتیب میں ----------
+  const flatRows = [];
+  groups.forEach(g => {
+    flatRows.push({type:'cat', text:`${g.category} (${g.items.length})`});
+    g.items.forEach(it => flatRows.push({type:'item', item:it}));
+  });
+
+  const rowH = 5.2, colHeaderH = 6, colGap = 4;
+  const usableH = pageH - headerBottom - marginMM;
+  const rowsPerColumn = Math.max(3, Math.floor((usableH - colHeaderH) / rowH));
+  const maxCols = orientation === 'landscape' ? 4 : 2;
+  const neededCols = Math.ceil(flatRows.length / rowsPerColumn) || 1;
+  const numCols = Math.min(Math.max(neededCols, 1), maxCols);
+  const colW = (pageW - marginMM * 2 - colGap * (numCols - 1)) / numCols;
+
+  const drawColumnHeader = (x, yy, w) => {
+    const nameW = w * (1 - fields.reduce((s, f) => s + f.frac, 0));
+    pdf.setFillColor(fr, fg, fb);
+    pdf.rect(x, yy, w, colHeaderH, 'F');
+    pdf.setDrawColor(br, bgc, bb);
+    pdf.setLineWidth(0.3);
+    pdf.rect(x, yy, w, colHeaderH);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(7.5);
+    pdf.setTextColor(tr, tg, tb);
+    pdf.text('Item', x + 1.5, yy + colHeaderH - 2);
+    let fx = x + nameW;
+    fields.forEach(f => {
+      const fw = w * f.frac;
+      pdf.text(f.label, fx + fw - 1.5, yy + colHeaderH - 2, {align:'right'});
+      fx += fw;
+    });
+    return nameW;
+  };
+
+  let colIdx = 0, rowInCol = 0, colY = headerBottom;
+  let colX = marginMM;
+  let nameW = drawColumnHeader(colX, colY, colW);
+  let curY = colY + colHeaderH;
+
+  const startNewColumn = () => {
+    colIdx++;
+    if(colIdx >= numCols){
+      pdf.addPage('a4', orientation);
+      colIdx = 0;
+      colY = marginMM;
+    }
+    colX = marginMM + colIdx * (colW + colGap);
+    nameW = drawColumnHeader(colX, colY, colW);
+    curY = colY + colHeaderH;
+    rowInCol = 0;
+  };
+
+  flatRows.forEach(row => {
+    if(rowInCol >= rowsPerColumn) startNewColumn();
+    if(row.type === 'cat'){
+      pdf.setFillColor(230, 230, 230);
+      pdf.rect(colX, curY, colW, rowH, 'F');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(tr, tg, tb);
+      pdf.text(row.text, colX + 1.5, curY + rowH - 1.6);
+    } else {
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(20, 20, 20);
+      let txt = row.item.name;
+      const maxTxtW = nameW - 3;
+      while(pdf.getTextWidth(txt) > maxTxtW && txt.length > 3){ txt = txt.slice(0, -1); }
+      if(txt !== row.item.name) txt = txt.slice(0, -1) + '…';
+      pdf.text(txt, colX + 1.5, curY + rowH - 1.6);
+      let fx = colX + nameW;
+      fields.forEach(f => {
+        const fw = colW * f.frac;
+        pdf.text(f.get(row.item), fx + fw - 1.5, curY + rowH - 1.6, {align:'right'});
+        fx += fw;
+      });
+    }
+    pdf.setDrawColor(br, bgc, bb);
+    pdf.setLineWidth(0.15);
+    pdf.line(colX, curY + rowH, colX + colW, curY + rowH);
+    curY += rowH;
+    rowInCol++;
+  });
+
+  return pdf;
+}
+
 async function printCurrentReport(){
   await renderReportToCanvas(); // ---------- حفاظتی وجہ: یقینی بنائیں کہ کینوس بالکل تازہ اور مکمل ڈرا ہو چکا ہے، خاص طور پر ابھی ابھی زوم/سٹائل بدلنے کے فوری بعد پرنٹ دبانے کی صورت میں ----------
   const canvas = document.getElementById('reportCanvas');
@@ -17765,8 +17923,18 @@ async function printCurrentReport(){
       alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
       return;
     }
-    const { jsPDF } = window.jspdf;
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
+
+    // ---------- Today's Sale Report کیٹگری بیسڈ نہیں (اپنا الگ لے آؤٹ ہے) — اس کے لیے پرانا سکیل شدہ کینوس ہی رہنے دیں،
+    // باقی سب رپورٹس (Price List/Inventory/Profit/Low Stock) اب اصل ملٹی کالم PDF استعمال کرتی ہیں ----------
+    if(currentReportType !== 'todaysale'){
+      const pdf = buildMultiColumnReportPdf(orientation);
+      const blobUrl = pdf.output('bloburl');
+      window.open(blobUrl, '_blank');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
     const pageW = orientation === 'landscape' ? 297 : 210;
     const pageH = orientation === 'landscape' ? 210 : 297;
