@@ -1708,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO264</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO266</span>
     </div>
   </div>
 
@@ -2635,6 +2635,14 @@
             Check the actual delivered quantity/price against what was ordered. Add anything extra that arrived, remove anything missing. Stock only updates after you confirm below.
           </div>
 
+          <!-- ---------- ہر خانے کا عنوان — واضح کریں کہ کون سا باکس کس چیز کے لیے ہے ---------- -->
+          <div style="display:flex; align-items:center; gap:8px; padding:0 0 4px; margin-top:4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid #e2e8f0;">
+            <span style="flex:1;">Item</span>
+            <span style="width:55px; text-align:center;">Qty<br>Received</span>
+            <span style="width:75px; text-align:center;">Cost<br>Price</span>
+            <span style="width:70px; text-align:right;">Line<br>Total</span>
+            <span style="width:28px; text-align:center;">✖</span>
+          </div>
           <div id="receiveShipmentItemsList"></div>
 
           <div class="searchRow" style="margin-top:10px;">
@@ -10767,7 +10775,7 @@ function confirmPaySupplier(){
   s.ledgerHistory = s.ledgerHistory || [];
   s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
 
-  recordPaymentEntry({
+  const savedPayment = recordPaymentEntry({
     direction: 'out',
     party_type: 'supplier',
     party_id: s.supplier_id,
@@ -10786,7 +10794,7 @@ function confirmPaySupplier(){
   persistAllData();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
   openSupplierProfile(s.supplier_id); // پروفائل فوراً تازہ ترین حالت میں دوبارہ کھلے
-  alert(`✅ Rs. ${amount.toLocaleString()} payment to ${s.name} recorded.`);
+  sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
 /* =====================================================================
@@ -13414,7 +13422,7 @@ function saveCollectReceivable(){
   });
 
   const collectNote = document.getElementById('collectNote').value.trim();
-  recordPaymentEntry({
+  const savedPayment = recordPaymentEntry({
     direction: 'in',
     party_type: 'customer',
     party_id: c.customer_id,
@@ -13429,6 +13437,7 @@ function saveCollectReceivable(){
 
   closeCollectModal();
   renderPartyList(document.getElementById('partySearchInput').value);
+  sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
 // ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں — ساتھ ساتھ City/Area فلٹر ڈراپ ڈاؤن بھی تازہ کریں ----------
@@ -13752,7 +13761,7 @@ function saveRecordPaymentModal(){
     s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
   }
 
-  recordPaymentEntry({
+  const savedPayment = recordPaymentEntry({
     direction: recordPaymentDirection,
     party_type: recordPaymentDirection === 'in' ? 'customer' : 'supplier',
     party_id: partyId,
@@ -13769,7 +13778,8 @@ function saveRecordPaymentModal(){
 
   closeRecordPaymentModal();
   renderPaymentsScreen();
-  alert(`✅ Rs. ${amount.toLocaleString()} payment recorded.`);
+  // ---------- بل/PO کی طرح — Save کے فوراً بعد خودکار طور پر خوبصورت رسید پوسٹر دکھائیں (خالی alert کی بجائے) ----------
+  sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
 // ---------- رسید کی تفصیل دیکھیں — تصویر، اکاؤنٹ، نوٹ سمیت مکمل ریکارڈ + WhatsApp پر شیئر کا آپشن ----------
@@ -13819,10 +13829,16 @@ async function renderPaymentReceiptToCanvas(p){
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
   const W = 640;
   const hasBalanceBox = p.balance_before !== undefined && p.balance_after !== undefined;
-  let H = 400;
+  let H = 400 + 90; // ---------- +90: اوپر کسٹمر/سپلائر کی تصویر (یا خالی دائرہ) کے لیے اضافی جگہ ----------
   if(p.account_title || p.account_number) H += 40;
   if(hasBalanceBox) H += 300;
   else if(p.note) H += 60; // ---------- بیلنس باکس نہ ہو تو نوٹ الگ سے نیچے دکھایا جاتا ہے (پرانے ریکارڈز کے لیے) ----------
+  H += 30; // ---------- نیچے "کسی الجھن کی صورت میں رابطہ کریں" کی لائن کے لیے جگہ ----------
+
+  // ---------- کسٹمر/سپلائر کا محفوظ شدہ ریکارڈ — تصویر یہیں سے ملے گی ----------
+  const party = p.party_type === 'customer'
+    ? customersData.find(c => c.customer_id === p.party_id)
+    : suppliersData.find(s => s.supplier_id === p.party_id);
 
   // ---------- سلپ/اسکرین شاٹ کی تصویر پہلے سے لوڈ کر لیں تاکہ رسید بننے کے ساتھ ہی اُس کا حتمی سائز/اونچائی معلوم ہو ----------
   let slipImg = null, slipDrawH = 0;
@@ -13839,6 +13855,19 @@ async function renderPaymentReceiptToCanvas(p){
       slipDrawH = slipImg.height * scale;
       H += 50 + slipDrawH + 20; // لیبل + تصویر + نیچے تھوڑی جگہ
     }catch(e){ slipImg = null; }
+  }
+
+  // ---------- کسٹمر/سپلائر کی تصویر بھی پہلے سے لوڈ کر لیں (موجود ہو تو) ----------
+  let partyImg = null;
+  if(party && party.photo){
+    try{
+      partyImg = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = party.photo;
+      });
+    }catch(e){ partyImg = null; }
   }
 
   const canvas = document.createElement('canvas');
@@ -13860,7 +13889,24 @@ async function renderPaymentReceiptToCanvas(p){
   ctx.fillText(p.direction === 'in' ? 'Payment Receipt — Received' : 'Payment Receipt — Paid', W/2, 76);
   ctx.globalAlpha = 1;
 
-  let y = 150;
+  // ---------- کسٹمر/سپلائر کی تصویر — ہیڈر کے نیچے، بارڈر کے ساتھ گول دائرے میں۔ تصویر موجود نہ ہو تو خالی دائرہ ----------
+  const avatarCx = W/2, avatarCy = 110, avatarR = 50;
+  if(partyImg){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(avatarCx, avatarCy, avatarR, 0, Math.PI*2); ctx.closePath(); ctx.clip();
+    // ---------- تصویر کو دائرے میں مرکز میں فٹ کریں (crop، سٹریچ نہیں) ----------
+    const s = Math.max((avatarR*2)/partyImg.width, (avatarR*2)/partyImg.height);
+    const dw = partyImg.width*s, dh = partyImg.height*s;
+    ctx.drawImage(partyImg, avatarCx-dw/2, avatarCy-dh/2, dw, dh);
+    ctx.restore();
+  } else {
+    ctx.beginPath(); ctx.arc(avatarCx, avatarCy, avatarR, 0, Math.PI*2);
+    ctx.fillStyle = '#f1f5f9'; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(avatarCx, avatarCy, avatarR, 0, Math.PI*2);
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5; ctx.stroke();
+
+  let y = 110 + avatarR + 40;
   ctx.fillStyle = '#334155';
   ctx.font = `600 14px Poppins, sans-serif`;
   ctx.fillText(p.direction === 'in' ? 'Received From' : 'Paid To', W/2, y);
@@ -13950,6 +13996,12 @@ async function renderPaymentReceiptToCanvas(p){
     ctx.drawImage(slipImg, 60, y, drawW, slipDrawH);
     y += slipDrawH + 10;
   }
+
+  // ---------- اگر ریکارڈ میں کوئی الجھن ہو تو رابطہ کرنے کی واضح دعوت ----------
+  y += 26;
+  ctx.font = `600 12.5px Poppins, sans-serif`;
+  ctx.fillStyle = '#64748b';
+  ctx.fillText('❓ If any queries or discrepancy in this record, please contact us.', W/2, y);
 
   ctx.fillStyle = '#94a3b8';
   ctx.font = `500 11px Poppins, sans-serif`;
