@@ -1641,7 +1641,7 @@
     <div id="recoveryStep1">
       <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">What were you called as a child? (Nickname)</label>
       <div id="recoveryNicknameHint" style="font-size:11.5px; color:var(--primary-dark); font-weight:700; margin-bottom:6px;"></div>
-      <input type="text" id="recoveryNicknameInput" placeholder="e.g. Mithoo" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
+      <input type="password" id="recoveryNicknameInput" placeholder="e.g. Mithoo" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
       <button class="checkoutBtn" style="margin-top:14px;" onclick="verifyPinRecovery()">Verify</button>
       <div id="recoveryError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
     </div>
@@ -1708,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO257</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO259</span>
     </div>
   </div>
 
@@ -3302,6 +3302,10 @@
         <div class="previewActions" id="pscBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
+        <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
+        <div class="previewActions" id="pscA4ShareRow" style="padding-top:0; display:none;">
+          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareInvoicePdf()">📤 Print/Share A4 PDF</button>
+        </div>
       </div>
     </div>
 
@@ -3622,7 +3626,7 @@
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering this correctly. No need to contact anyone. A short hint (first...last letter) will be shown automatically to jog your memory. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
-            <input type="text" id="securityNicknameInput" placeholder="What were you called as a child? (e.g. Mithoo)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <input type="password" id="securityNicknameInput" placeholder="What were you called as a child? (e.g. Mithoo)" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
 
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
@@ -3873,6 +3877,10 @@
     <!-- ---------- تھرمل رول کے لیے — بغیر کسی اضافی ایپ کے سیدھا بلوٹوتھ پرنٹر سے پرنٹ — A4 پر یہ متعلقہ نہیں (PDF راستہ استعمال ہوتا ہے) ---------- -->
     <div class="previewActions" id="rpBtPrintRow" style="padding-top:0;">
       <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('reportCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+    </div>
+    <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
+    <div class="previewActions" id="rpA4ShareRow" style="padding-top:0; display:none;">
+      <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareReportPdf()">📤 Print/Share A4 PDF</button>
     </div>
   </div>
 </div>
@@ -14738,6 +14746,8 @@ function syncPreviewStyleControls(){
   if(iOrientRow) iOrientRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'flex' : 'none';
   const iBtRow = document.getElementById('pscBtPrintRow');
   if(iBtRow) iBtRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'none' : 'flex';
+  const iShareRow = document.getElementById('pscA4ShareRow');
+  if(iShareRow) iShareRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'flex' : 'none';
   setInvoiceOrientation(AppState.settings.invoiceOrientation || 'portrait');
 }
 
@@ -14855,58 +14865,38 @@ function triggerPrint(){
   requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => window.print(), 60)));
 }
 
-// ---------- PDF کو نئے ٹیب میں کھولتے وقت خالی Chrome PDF ویور کی بجائے اپنا Print/WhatsApp/Share بار ساتھ دیں —
-// تاکہ پریویو دیکھنے کے بعد وہیں سے حتمی پرنٹ/شیئر کیا جا سکے، ایپ میں واپس آنے کی ضرورت نہ پڑے ----------
-function openPdfWithActions(pdf, filenameBase){
-  const blobUrl = pdf.output('bloburl');
-  const win = window.open('', '_blank');
-  if(!win){
-    alert('نیا ٹیب نہیں کھل سکا — براہ کرم اس سائٹ کے لیے پاپ اپ کی اجازت دیں، پھر دوبارہ کوشش کریں۔');
-    window.open(blobUrl, '_blank'); // ---------- حفاظتی متبادل — کم از کم PDF تو نظر آ جائے ----------
-    return;
+// ---------- A4 PDF کو براہ راست شیئر کریں — Android کی اپنی نیٹو شیئر شیٹ کھلتی ہے، جس میں عام طور پر
+// Print، WhatsApp، اور دوسری ایپس سب ایک ساتھ موجود ہوتی ہیں۔ یہ کسی کسٹم ویور کی ضرورت نہیں —
+// پچھلی کوشش (iframe میں PDF دکھانا) Android Chrome پر ناکام ہو گئی تھی، یہ اس سے کہیں زیادہ قابلِ اعتماد ہے ----------
+async function shareInvoicePdf(){
+  if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+  const canvas = document.getElementById('invoiceCanvas');
+  if(!canvas) return;
+  const { jsPDF } = window.jspdf;
+  const orientation = AppState.settings.invoiceOrientation === 'landscape' ? 'landscape' : 'portrait';
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210, pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 12;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM + (availH-drawH)/2;
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
+  pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
+  pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  const blob = pdf.output('blob');
+  const file = new File([blob], 'Invoice.pdf', {type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:'Invoice'}); }
+    catch(e){ /* یوزر نے منسوخ کر دی */ }
+  } else {
+    window.open(pdf.output('bloburl'), '_blank'); // ---------- شیئر سپورٹ نہ ہونے کی صورت میں کم از کم PDF کھول دیں ----------
   }
-  win.document.open();
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${filenameBase}</title>
-    <style>
-      html,body{margin:0; height:100%; font-family:Arial,sans-serif; background:#eef1f5;}
-      #pdfFrame{width:100%; height:calc(100% - 66px); border:none; display:block;}
-      #actionBar{position:fixed; bottom:0; left:0; right:0; height:66px; display:flex; gap:8px;
-        padding:10px 12px; background:#fff; border-top:1px solid #e2e8f0; box-sizing:border-box;}
-      #actionBar button{flex:1; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer;
-        display:flex; align-items:center; justify-content:center; gap:6px;}
-      #printBtnX{background:#16a34a; color:#fff;}
-      #waBtnX{background:#dcfce7; color:#166534;}
-      #shareBtnX{background:#eef2ff; color:#3730a3;}
-    </style></head>
-    <body>
-      <iframe id="pdfFrame" src="${blobUrl}"></iframe>
-      <div id="actionBar">
-        <button id="printBtnX">🖨️ Print</button>
-        <button id="waBtnX">📱 WhatsApp</button>
-        <button id="shareBtnX">🔗 Share More</button>
-      </div>
-    </body></html>`);
-  win.document.close();
-
-  win.document.getElementById('printBtnX').onclick = () => {
-    const frame = win.document.getElementById('pdfFrame');
-    try{ frame.contentWindow.focus(); frame.contentWindow.print(); }
-    catch(e){ win.print(); }
-  };
-  const shareHandler = async () => {
-    try{
-      const resp = await fetch(blobUrl);
-      const blob = await resp.blob();
-      const file = new File([blob], filenameBase + '.pdf', {type:'application/pdf'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file], title:filenameBase});
-      } else {
-        win.location.href = blobUrl; // ---------- شیئر سپورٹ نہ ہونے کی صورت میں کم از کم PDF کھول دیں ----------
-      }
-    }catch(e){ /* یوزر نے شیئر منسوخ کر دی، یا سپورٹ نہیں — خاموشی سے واپس */ }
-  };
-  win.document.getElementById('waBtnX').onclick = shareHandler;
-  win.document.getElementById('shareBtnX').onclick = shareHandler;
 }
 
 function printCurrentInvoice(){
@@ -14950,7 +14940,8 @@ function printCurrentInvoice(){
     pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
 
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
-    openPdfWithActions(pdf, 'Invoice');
+    const blobUrl = pdf.output('bloburl');
+    window.open(blobUrl, '_blank');
     return;
   }
 
@@ -17006,6 +16997,8 @@ function syncReportStyleControls(){
   if(orientRow) orientRow.style.display = AppState.settings.reportPrintStyle === 'a4' ? 'flex' : 'none';
   const btRow = document.getElementById('rpBtPrintRow');
   if(btRow) btRow.style.display = AppState.settings.reportPrintStyle === 'a4' ? 'none' : 'flex';
+  const shareRow = document.getElementById('rpA4ShareRow');
+  if(shareRow) shareRow.style.display = AppState.settings.reportPrintStyle === 'a4' ? 'flex' : 'none';
   setReportOrientation(AppState.settings.reportOrientation || 'portrait');
 
   const fontSelect = document.getElementById('rpscFontFamilySelect');
@@ -17076,6 +17069,8 @@ function toggleReportPaperStyle(checked){
   if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
   const btRow = document.getElementById('rpBtPrintRow');
   if(btRow) btRow.style.display = checked ? 'none' : 'flex';
+  const shareRow = document.getElementById('rpA4ShareRow');
+  if(shareRow) shareRow.style.display = checked ? 'flex' : 'none';
   renderReportToCanvas();
 }
 function setReportOrientation(orient){
@@ -17102,6 +17097,8 @@ function toggleInvoicePaperStyle(checked){
   if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
   const btRow = document.getElementById('pscBtPrintRow');
   if(btRow) btRow.style.display = checked ? 'none' : 'flex';
+  const shareRow = document.getElementById('pscA4ShareRow');
+  if(shareRow) shareRow.style.display = checked ? 'flex' : 'none';
   if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
 }
 function setInvoiceOrientation(orient){
@@ -18175,6 +18172,22 @@ function buildTodaySalePdf(orientation){
   return pdf;
 }
 
+// ---------- رپورٹ کا A4 PDF براہ راست شیئر کریں — Android کی نیٹو شیئر شیٹ میں Print/WhatsApp/دیگر ایپس سب مل جاتی ہیں ----------
+async function shareReportPdf(){
+  if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+  await renderReportToCanvas();
+  const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const blob = pdf.output('blob');
+  const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:'Report'}); }
+    catch(e){ /* یوزر نے منسوخ کر دی */ }
+  } else {
+    window.open(pdf.output('bloburl'), '_blank');
+  }
+}
+
 async function printCurrentReport(){
   await renderReportToCanvas(); // ---------- حفاظتی وجہ: یقینی بنائیں کہ کینوس بالکل تازہ اور مکمل ڈرا ہو چکا ہے، خاص طور پر ابھی ابھی زوم/سٹائل بدلنے کے فوری بعد پرنٹ دبانے کی صورت میں ----------
   const canvas = document.getElementById('reportCanvas');
@@ -18194,7 +18207,8 @@ async function printCurrentReport(){
     // ---------- اب سب رپورٹس (Price List/Inventory/Profit/Low Stock/Today's Sale) ایک ہی یکساں
     // ملٹی کالم PDF نظام استعمال کرتی ہیں — کوئی پرانا سکیل شدہ کینوس والا راستہ باقی نہیں رہا ----------
     const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
-    openPdfWithActions(pdf, 'Report');
+    const blobUrl = pdf.output('bloburl');
+    window.open(blobUrl, '_blank');
     return;
   }
 
