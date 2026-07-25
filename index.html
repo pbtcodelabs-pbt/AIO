@@ -1695,7 +1695,7 @@
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
     <!-- ---------- بہت چھوٹا، غیر نمایاں بلڈ نمبر — صرف اس لیے تاکہ فون پر واقعی کون سا ورژن لوڈ ہوا ہے یہ فوراً چیک ہو سکے ---------- -->
-    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO249</span>
+    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO251</span>
     <span id="connStatusBadge" class="online">Online</span>
   </div>
 
@@ -3274,7 +3274,7 @@
           <button class="btnHistory" onclick="shareInvoiceUniversal()">🔗 Share More</button>
         </div>
         <div class="previewActions" style="padding-top:0;">
-          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth()">🔵 Try Direct Bluetooth Print (no app needed)</button>
+          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
       </div>
     </div>
@@ -3826,6 +3826,14 @@
           <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)" style="width:16px; height:16px;"> Show In Stock Qty
         </label>
       </div>
+      <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
+      <div id="rpscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
+        <span class="pscLabel">📐 Page</span>
+        <div style="display:flex; gap:6px; flex:1;">
+          <button type="button" id="rpscOrientPortraitBtn" onclick="setReportOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
+          <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
+        </div>
+      </div>
     </div>
 
     <div id="reportCanvasScrollWrap" class="invoicePreviewScrollArea">
@@ -3835,6 +3843,10 @@
       <button class="btnPrint" onclick="printCurrentReport()">🖨️ Print</button>
       <button class="btnWhatsapp" onclick="shareReportWhatsapp()">📱 WhatsApp</button>
       <button class="btnHistory" onclick="shareReportUniversal()">🔗 Share More</button>
+    </div>
+    <!-- ---------- تھرمل رول کے لیے — بغیر کسی اضافی ایپ کے سیدھا بلوٹوتھ پرنٹر سے پرنٹ — A4 پر یہ متعلقہ نہیں (PDF راستہ استعمال ہوتا ہے) ---------- -->
+    <div class="previewActions" id="rpBtPrintRow" style="padding-top:0;">
+      <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('reportCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
     </div>
   </div>
 </div>
@@ -4401,6 +4413,7 @@ const DEFAULT_SETTINGS = {
   reportBoldItems: true,
   reportAlign: 'left',
   reportPrintStyle: 'thermal',    // 'thermal' | 'a4'
+  reportOrientation: 'portrait',  // 'portrait' | 'landscape' — صرف A4 پرنٹ پر لاگو ہوتا ہے
   reportShowStockQty: false,      // Price List/Profit رپورٹس میں سٹاک کی مقدار دکھائیں یا نہیں (کسٹمر کو بھیجتے وقت عام طور پر چھپی رہے)
   reportPriceDecimals: 0,         // رپورٹس میں قیمتوں کے بعد ڈیسیمل پوائنٹس — بل کی طرح، ڈیفالٹ 0
 };
@@ -14828,7 +14841,8 @@ window.addEventListener('afterprint', () => {
 // اکثر سستے تھرمل پرنٹرز صرف Classic Bluetooth (SPP) استعمال کرتے ہیں — براؤزر کی سیکیورٹی پابندیوں کی وجہ سے
 // کوئی بھی ویب سائٹ (ہماری ایپ سمیت) Classic Bluetooth تک براہ راست نہیں پہنچ سکتی، صرف BLE تک پہنچ سکتی ہے۔
 // اگر یہ ناکام ہو تو نیچے دیا گیا پیغام صاف بتا دے گا کہ عام "Print" بٹن (RawBT/Thermer کے ذریعے) استعمال کریں۔
-async function printViaWebBluetooth(){
+async function printViaWebBluetooth(canvasId){
+  canvasId = canvasId || 'invoiceCanvas';
   if(!navigator.bluetooth){
     alert('❌ This browser/device does not support direct Bluetooth printing (Web Bluetooth API not available). Please use the regular 🖨️ Print button instead (via RawBT or Thermer).');
     return;
@@ -14865,7 +14879,7 @@ async function printViaWebBluetooth(){
       return;
     }
 
-    const canvas = document.getElementById('invoiceCanvas');
+    const canvas = document.getElementById(canvasId);
     const bytes = canvasToEscPosRaster(canvas, AppState.settings.paperWidth);
 
     // ---------- BLE میں ایک وقت میں محدود ڈیٹا ہی بھیجا جا سکتا ہے، اس لیے چھوٹے ٹکڑوں میں بھیجیں ----------
@@ -16858,6 +16872,11 @@ function syncReportStyleControls(){
   document.getElementById('rpscAlignRightBtn').classList.toggle('active', align === 'right');
   document.getElementById('rpscA4Chk').checked = AppState.settings.reportPrintStyle === 'a4';
   document.getElementById('rpscShowStockChk').checked = !!AppState.settings.reportShowStockQty;
+  const orientRow = document.getElementById('rpscOrientRow');
+  if(orientRow) orientRow.style.display = AppState.settings.reportPrintStyle === 'a4' ? 'flex' : 'none';
+  const btRow = document.getElementById('rpBtPrintRow');
+  if(btRow) btRow.style.display = AppState.settings.reportPrintStyle === 'a4' ? 'none' : 'flex';
+  setReportOrientation(AppState.settings.reportOrientation || 'portrait');
 
   const fontSelect = document.getElementById('rpscFontFamilySelect');
   if(fontSelect){
@@ -16923,7 +16942,23 @@ function setReportAlign(align){
 function toggleReportPaperStyle(checked){
   AppState.settings.reportPrintStyle = checked ? 'a4' : 'thermal';
   persistAllData();
+  const orientRow = document.getElementById('rpscOrientRow');
+  if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
+  const btRow = document.getElementById('rpBtPrintRow');
+  if(btRow) btRow.style.display = checked ? 'none' : 'flex';
   renderReportToCanvas();
+}
+function setReportOrientation(orient){
+  AppState.settings.reportOrientation = orient;
+  persistAllData();
+  const pBtn = document.getElementById('rpscOrientPortraitBtn');
+  const lBtn = document.getElementById('rpscOrientLandscapeBtn');
+  if(pBtn && lBtn){
+    const activeStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid var(--primary); background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);';
+    const inactiveStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;';
+    pBtn.style.cssText = orient === 'portrait' ? activeStyle : inactiveStyle;
+    lBtn.style.cssText = orient === 'landscape' ? activeStyle : inactiveStyle;
+  }
 }
 function toggleReportShowStock(checked){
   AppState.settings.reportShowStockQty = checked;
@@ -17644,17 +17679,36 @@ async function printCurrentReport(){
       return;
     }
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageW = 210, pageH = 297, marginMM = 10;
+    const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+    const pageW = orientation === 'landscape' ? 297 : 210;
+    const pageH = orientation === 'landscape' ? 210 : 297;
+    const marginMM = 12;
     const availW = pageW - marginMM * 2;
     const availH = pageH - marginMM * 2;
     let drawW = availW;
-    let drawH = drawW * (printCanvas.height / printCanvas.width);
+    let drawH = drawW * (canvas.height / canvas.width);
     if(drawH > availH){ const scale = availH / drawH; drawH = availH; drawW = drawW * scale; }
     const offsetX = marginMM + (availW - drawW) / 2;
-    pdf.setDrawColor(203, 213, 225);
-    pdf.roundedRect(offsetX - 1, marginMM - 1, drawW + 2, drawH + 2, 3, 3);
-    pdf.addImage(printCanvas.toDataURL('image/png'), 'PNG', offsetX, marginMM, drawW, drawH);
+    const offsetY = marginMM + (availH - drawH) / 2;
+
+    // ---------- صارف کی اپنی منتخب کردہ Bill Theme رنگ سکیم استعمال کریں — بالکل ویسی ہی جیسی رپورٹ میں نظر آ رہی ہے،
+    // تاکہ PDF بھی اسی برانڈ کے ساتھ پروفیشنل اور رنگین نظر آئے (تھرمل کی طرح سیاہ/سفید نہیں) ----------
+    const rc = getReceiptColor();
+    const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+    const [br, bgc, bb] = hexToRgb(rc.border);
+    const [fr, fg, fb] = hexToRgb(rc.bg);
+
+    pdf.setFillColor(fr, fg, fb);
+    pdf.rect(0, 0, pageW, pageH, 'F'); // ---------- پورے صفحے پر ہلکا تھیم رنگ کا پس منظر ----------
+
+    const cardPad = 5;
+    pdf.setFillColor(255, 255, 255);
+    pdf.setDrawColor(br, bgc, bb);
+    pdf.setLineWidth(1.1);
+    pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
+
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH); // ---------- اصل رنگین کینوس — گرے اسکیل نہیں ----------
     const blobUrl = pdf.output('bloburl');
     window.open(blobUrl, '_blank');
     return;
