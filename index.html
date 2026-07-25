@@ -509,7 +509,8 @@
   .productGridCard.negativeStock{box-shadow:0 0 0 2.5px var(--danger) inset, 3px 3px 7px rgba(41,29,10,.16);}
   .productGridCard.negativeStock .pgName, .productGridCard.negativeStock .pgPrice{color:var(--danger);}
   .productGridCard.lowStockCard{box-shadow:0 0 0 2px var(--warning) inset, 3px 3px 7px rgba(41,29,10,.16);}
-  .pgStockBadge{position:absolute; left:4px; bottom:4px; font-size:9px; font-weight:800; padding:2px 6px; border-radius:6px; color:#fff; z-index:3; text-shadow:none;}
+  .pgStockBadge{position:absolute; top:4px; right:4px; font-size:9px; font-weight:800; padding:2px 6px; border-radius:6px; color:#fff; z-index:3; text-shadow:none;}
+  .pgStockBadge.stacked{ top:30px; } /* اگر کارٹ کوانٹٹی بیج بھی اسی کونے پر ہو تو نیچے سرک جائے، اوپر تلے نہ آئیں */
   .pgStockBadge.outBadge{background:var(--danger);}
   .pgStockBadge.negBadge{background:var(--danger); box-shadow:0 0 0 1px #fff inset;}
   .pgStockBadge.lowBadge{background:var(--warning);}
@@ -1670,7 +1671,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO269</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO270</span>
     </div>
   </div>
 
@@ -6229,12 +6230,13 @@ function renderBillingProductGrid(){
       const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
       outOfStockClass = isNegative ? 'negativeStock' : outOfStock ? 'outOfStock' : '';
       lowStockClass = isLow ? 'lowStockCard' : '';
-      stockBadgeHtml = isNegative ? `<div class="pgStockBadge negBadge">Stock: ${v.stock}</div>`
-        : outOfStock ? `<div class="pgStockBadge outBadge">Out of Stock</div>`
-        : isLow ? `<div class="pgStockBadge lowBadge">Low: ${v.stock}</div>`
-        : `<div class="pgStockBadge normalBadge">Qty: ${v.stock}</div>`;
       const cartItem = Billing.cart.find(c => c.variant_id === v.variant_id);
       const qtyInCart = cartItem ? cartItem.qty : 0;
+      const stackedCls = qtyInCart > 0 ? ' stacked' : '';
+      stockBadgeHtml = isNegative ? `<div class="pgStockBadge negBadge${stackedCls}">Stock: ${v.stock}</div>`
+        : outOfStock ? `<div class="pgStockBadge outBadge${stackedCls}">Out of Stock</div>`
+        : isLow ? `<div class="pgStockBadge lowBadge${stackedCls}">Low: ${v.stock}</div>`
+        : `<div class="pgStockBadge normalBadge${stackedCls}">Qty: ${v.stock}</div>`;
       priceLabel = `Rs. ${price}`;
       qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
       actionAreaHtml = `
@@ -6253,10 +6255,11 @@ function renderBillingProductGrid(){
       const totalStockAllVariants = p.variants.reduce((sum, v) => sum + v.stock, 0);
       outOfStockClass = anyNegative ? 'negativeStock' : allOutOfStock ? 'outOfStock' : '';
       lowStockClass = anyLow ? 'lowStockCard' : '';
-      stockBadgeHtml = anyNegative ? `<div class="pgStockBadge negBadge">Stock: ${totalStockAllVariants}</div>`
-        : allOutOfStock ? `<div class="pgStockBadge outBadge">Out of Stock</div>`
-        : anyLow ? `<div class="pgStockBadge lowBadge">Low Stock</div>`
-        : `<div class="pgStockBadge normalBadge">Qty: ${totalStockAllVariants}</div>`;
+      const stackedCls2 = totalQtyInCart > 0 ? ' stacked' : '';
+      stockBadgeHtml = anyNegative ? `<div class="pgStockBadge negBadge${stackedCls2}">Stock: ${totalStockAllVariants}</div>`
+        : allOutOfStock ? `<div class="pgStockBadge outBadge${stackedCls2}">Out of Stock</div>`
+        : anyLow ? `<div class="pgStockBadge lowBadge${stackedCls2}">Low Stock</div>`
+        : `<div class="pgStockBadge normalBadge${stackedCls2}">Qty: ${totalStockAllVariants}</div>`;
       priceLabel = `${p.variants.length} variants`;
       qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
       actionAreaHtml = `<button class="pgChooseBtn" onclick="openVariantChooser(${p.product_id})">Choose ▾</button>`;
@@ -10848,11 +10851,12 @@ function renderPoBrowseList(){
       const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
       outOfStockClass = outOfStock ? 'outOfStock' : '';
       lowStockClass = isLow ? 'lowStockCard' : '';
-      stockBadgeHtml = outOfStock ? `<div class="pgStockBadge outBadge">Out of Stock</div>`
-        : isLow ? `<div class="pgStockBadge lowBadge">Low: ${v.stock}</div>`
-        : `<div class="pgStockBadge normalBadge">Qty: ${v.stock}</div>`;
       const cartItem = poCart.find(c => c.variant_id === v.variant_id);
       const qtyInCart = cartItem ? cartItem.qty : 0;
+      const stackedCls = qtyInCart > 0 ? ' stacked' : '';
+      stockBadgeHtml = outOfStock ? `<div class="pgStockBadge outBadge${stackedCls}">Out of Stock</div>`
+        : isLow ? `<div class="pgStockBadge lowBadge${stackedCls}">Low: ${v.stock}</div>`
+        : `<div class="pgStockBadge normalBadge${stackedCls}">Qty: ${v.stock}</div>`;
       priceLabel = `Rs. ${v.purchase}`;
       qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
       actionAreaHtml = `
@@ -10869,9 +10873,10 @@ function renderPoBrowseList(){
       const totalStockAllVariants = p.variants.reduce((sum, v) => sum + v.stock, 0);
       outOfStockClass = allOutOfStock ? 'outOfStock' : '';
       lowStockClass = anyLow ? 'lowStockCard' : '';
-      stockBadgeHtml = allOutOfStock ? `<div class="pgStockBadge outBadge">Out of Stock</div>`
-        : anyLow ? `<div class="pgStockBadge lowBadge">Low Stock</div>`
-        : `<div class="pgStockBadge normalBadge">Qty: ${totalStockAllVariants}</div>`;
+      const stackedCls2 = totalQtyInCart > 0 ? ' stacked' : '';
+      stockBadgeHtml = allOutOfStock ? `<div class="pgStockBadge outBadge${stackedCls2}">Out of Stock</div>`
+        : anyLow ? `<div class="pgStockBadge lowBadge${stackedCls2}">Low Stock</div>`
+        : `<div class="pgStockBadge normalBadge${stackedCls2}">Qty: ${totalStockAllVariants}</div>`;
       priceLabel = `${p.variants.length} variants`;
       qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
       actionAreaHtml = `<button class="pgChooseBtn" onclick="openPoVariantChooser(${p.product_id})">Choose ▾</button>`;
