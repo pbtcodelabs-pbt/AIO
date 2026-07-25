@@ -1694,9 +1694,11 @@
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
-    <!-- ---------- بہت چھوٹا، غیر نمایاں بلڈ نمبر — صرف اس لیے تاکہ فون پر واقعی کون سا ورژن لوڈ ہوا ہے یہ فوراً چیک ہو سکے ---------- -->
-    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO251</span>
-    <span id="connStatusBadge" class="online">Online</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+      <span id="connStatusBadge" class="online">Online</span>
+      <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO252</span>
+    </div>
   </div>
 
   <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
@@ -3263,6 +3265,19 @@
             <span class="pscLabel">🎨 Bill Theme</span>
             <div id="pscColorSwatches" style="display:flex; gap:8px;"></div>
           </div>
+          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+              <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+            </label>
+          </div>
+          <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
+          <div id="pscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
+            <span class="pscLabel">📐 Page</span>
+            <div style="display:flex; gap:6px; flex:1;">
+              <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
+              <button type="button" id="pscOrientLandscapeBtn" onclick="setInvoiceOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
+            </div>
+          </div>
         </div>
 
         <div class="invoicePreviewScrollArea">
@@ -3273,7 +3288,7 @@
           <button class="btnWhatsapp" onclick="shareInvoiceWhatsapp()">📱 WhatsApp</button>
           <button class="btnHistory" onclick="shareInvoiceUniversal()">🔗 Share More</button>
         </div>
-        <div class="previewActions" style="padding-top:0;">
+        <div class="previewActions" id="pscBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
       </div>
@@ -4414,6 +4429,8 @@ const DEFAULT_SETTINGS = {
   reportAlign: 'left',
   reportPrintStyle: 'thermal',    // 'thermal' | 'a4'
   reportOrientation: 'portrait',  // 'portrait' | 'landscape' — صرف A4 پرنٹ پر لاگو ہوتا ہے
+  invoicePrintStyle: 'thermal',   // 'thermal' | 'a4' — بل کے لیے، رپورٹ سیٹنگ سے بالکل الگ
+  invoiceOrientation: 'portrait', // 'portrait' | 'landscape' — صرف بل کے A4 پرنٹ پر لاگو ہوتا ہے
   reportShowStockQty: false,      // Price List/Profit رپورٹس میں سٹاک کی مقدار دکھائیں یا نہیں (کسٹمر کو بھیجتے وقت عام طور پر چھپی رہے)
   reportPriceDecimals: 0,         // رپورٹس میں قیمتوں کے بعد ڈیسیمل پوائنٹس — بل کی طرح، ڈیفالٹ 0
 };
@@ -14705,6 +14722,12 @@ function syncPreviewStyleControls(){
       });
     }catch(e){ console.error('swatch render failed', e); }
   }
+  document.getElementById('pscA4Chk').checked = AppState.settings.invoicePrintStyle === 'a4';
+  const iOrientRow = document.getElementById('pscOrientRow');
+  if(iOrientRow) iOrientRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'flex' : 'none';
+  const iBtRow = document.getElementById('pscBtPrintRow');
+  if(iBtRow) iBtRow.style.display = AppState.settings.invoicePrintStyle === 'a4' ? 'none' : 'flex';
+  setInvoiceOrientation(AppState.settings.invoiceOrientation || 'portrait');
 }
 
 function setReceiptColor(colorId){
@@ -14824,6 +14847,49 @@ function triggerPrint(){
 function printCurrentInvoice(){
   const canvas = document.getElementById('invoiceCanvas');
   if(!canvas) return;
+  const useA4Print = AppState.settings.invoicePrintStyle === 'a4';
+
+  if(useA4Print){
+    // ---------- بل کے لیے بھی وہی قابلِ اعتماد PDF راستہ جو رپورٹس میں استعمال ہو رہا ہے —
+    // Android کے لائیو پرنٹ پائپ لائن پر بالکل انحصار نہیں، اس لیے پیچھے کھلا ہوا موڈل کبھی شامل نہیں ہو سکتا ----------
+    if(!window.jspdf){
+      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const orientation = AppState.settings.invoiceOrientation === 'landscape' ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+    const pageW = orientation === 'landscape' ? 297 : 210;
+    const pageH = orientation === 'landscape' ? 210 : 297;
+    const marginMM = 12;
+    const availW = pageW - marginMM * 2;
+    const availH = pageH - marginMM * 2;
+    let drawW = availW;
+    let drawH = drawW * (canvas.height / canvas.width);
+    if(drawH > availH){ const scale = availH / drawH; drawH = availH; drawW = drawW * scale; }
+    const offsetX = marginMM + (availW - drawW) / 2;
+    const offsetY = marginMM + (availH - drawH) / 2;
+
+    const rc = getReceiptColor();
+    const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+    const [br, bgc, bb] = hexToRgb(rc.border);
+    const [fr, fg, fb] = hexToRgb(rc.bg);
+
+    pdf.setFillColor(fr, fg, fb);
+    pdf.rect(0, 0, pageW, pageH, 'F');
+
+    const cardPad = 5;
+    pdf.setFillColor(255, 255, 255);
+    pdf.setDrawColor(br, bgc, bb);
+    pdf.setLineWidth(1.1);
+    pdf.roundedRect(offsetX - cardPad, offsetY - cardPad, drawW + cardPad * 2, drawH + cardPad * 2, 7, 7, 'FD');
+
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+    const blobUrl = pdf.output('bloburl');
+    window.open(blobUrl, '_blank');
+    return;
+  }
+
   const printCanvas = canvasToGrayscale(canvas);
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
@@ -16964,6 +17030,27 @@ function toggleReportShowStock(checked){
   AppState.settings.reportShowStockQty = checked;
   persistAllData();
   renderReportToCanvas();
+}
+function toggleInvoicePaperStyle(checked){
+  AppState.settings.invoicePrintStyle = checked ? 'a4' : 'thermal';
+  persistAllData();
+  const orientRow = document.getElementById('pscOrientRow');
+  if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
+  const btRow = document.getElementById('pscBtPrintRow');
+  if(btRow) btRow.style.display = checked ? 'none' : 'flex';
+  if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
+}
+function setInvoiceOrientation(orient){
+  AppState.settings.invoiceOrientation = orient;
+  persistAllData();
+  const pBtn = document.getElementById('pscOrientPortraitBtn');
+  const lBtn = document.getElementById('pscOrientLandscapeBtn');
+  if(pBtn && lBtn){
+    const activeStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid var(--primary); background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);';
+    const inactiveStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;';
+    pBtn.style.cssText = orient === 'portrait' ? activeStyle : inactiveStyle;
+    lBtn.style.cssText = orient === 'landscape' ? activeStyle : inactiveStyle;
+  }
 }
 
 // ---------- تمام رپورٹس میں مشترکہ ہیڈر ڈرائنگ فنکشن — لیبل خانے کی چوڑائی میں نہ آئے تو پہلے فونٹ خودکار چھوٹا کریں،
