@@ -1546,6 +1546,9 @@
        بغیر اس کے، پرنٹ سسٹم صفحے کا سائز A4/Letter سمجھ کر رسید کو چھوٹا کر کے سکیڑ دیتا تھا،
        اسی وجہ سے پرنٹ آؤٹ پٹ بہت چھوٹا آ رہا تھا۔ JS سے ہر پرنٹ سے پہلے اپڈیٹ ہوتا ہے (applyPrintPageSize) ---------- -->
   <style id="dynamicPrintPageStyle">@page{ size: 80mm auto; margin: 0; }</style>
+  <!-- ---------- A4 رپورٹس کے لیے — اصل PDF بنانے کے لیے، تاکہ Android کے window.print() پائپ لائن کے
+  مسائل (کھلا ہوا موڈل پرنٹ میں دہرانا) سے مکمل طور پر بچا جا سکے — PDF ایک بالکل الگ، قابلِ اعتماد راستہ ہے ---------- -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
@@ -1692,7 +1695,7 @@
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
     <!-- ---------- بہت چھوٹا، غیر نمایاں بلڈ نمبر — صرف اس لیے تاکہ فون پر واقعی کون سا ورژن لوڈ ہوا ہے یہ فوراً چیک ہو سکے ---------- -->
-    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO248</span>
+    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO249</span>
     <span id="connStatusBadge" class="online">Online</span>
   </div>
 
@@ -17631,13 +17634,36 @@ async function printCurrentReport(){
   if(!canvas) return;
   const printCanvas = canvasToGrayscale(canvas); // ---------- کاغذ پر ہمیشہ سیاہ/سفید — سکرین/شیئر کا رنگین ورژن الگ ----------
   const useA4Print = AppState.settings.reportPrintStyle === 'a4';
-  applyPrintPageSize(useA4Print ? 210 : (AppState.settings.paperWidth || 80));
+
+  if(useA4Print){
+    // ---------- A4 کے لیے اصل PDF بنائیں اور نئے ٹیب میں کھولیں — یہ ہماری اپنی لائیو اسکرین (موڈل وغیرہ)
+    // پر بالکل انحصار نہیں کرتا، اس لیے پیچھے کھلا ہوا موڈل کبھی پرنٹ میں شامل نہیں ہو سکتا۔
+    // Chrome کا اپنا PDF ویور کھلے گا، جہاں سے پرنٹ/شیئر بٹن مکمل بھروسے کے ساتھ کام کرتا ہے۔ ----------
+    if(!window.jspdf){
+      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = 210, pageH = 297, marginMM = 10;
+    const availW = pageW - marginMM * 2;
+    const availH = pageH - marginMM * 2;
+    let drawW = availW;
+    let drawH = drawW * (printCanvas.height / printCanvas.width);
+    if(drawH > availH){ const scale = availH / drawH; drawH = availH; drawW = drawW * scale; }
+    const offsetX = marginMM + (availW - drawW) / 2;
+    pdf.setDrawColor(203, 213, 225);
+    pdf.roundedRect(offsetX - 1, marginMM - 1, drawW + 2, drawH + 2, 3, 3);
+    pdf.addImage(printCanvas.toDataURL('image/png'), 'PNG', offsetX, marginMM, drawW, drawH);
+    const blobUrl = pdf.output('bloburl');
+    window.open(blobUrl, '_blank');
+    return;
+  }
+
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  // ---------- A4 پر رپورٹ ایک صاف، راؤنڈ کارنر والے بل کارڈ کی طرح نظر آئے — تھرمل رول پر یہ ضرورت نہیں (سیدھا کنارے تک) ----------
-  area.innerHTML = useA4Print
-    ? `<div style="border:1px solid #cbd5e1; border-radius:14px; overflow:hidden;"><img src="${printCanvas.toDataURL('image/png')}" style="width:100%; display:block;" onload="this.dispatchEvent(new Event('printready'))"></div>`
-    : `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
