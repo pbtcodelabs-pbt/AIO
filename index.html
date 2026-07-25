@@ -1708,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO266</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO267</span>
     </div>
   </div>
 
@@ -2292,10 +2292,23 @@
           <div id="npPhotoPreview" style="width:72px; height:72px; border-radius:50%; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:30px; overflow:hidden; border:2px solid #dbe1ea;">👤</div>
           <button type="button" onclick="triggerPartyPhotoUpload()" style="padding:6px 14px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Add Photo</button>
         </div>
-        <input type="text" id="npPartyName" placeholder="Name">
-        <input type="text" id="npPartyPhone" placeholder="Mobile number (for WhatsApp)">
+        <div style="position:relative;">
+          <input type="text" id="npPartyName" placeholder="Name" autocomplete="off" oninput="filterPartyNameOptions()" onfocus="filterPartyNameOptions()">
+          <!-- ---------- ملتے جلتے موجودہ ناموں کی فہرست — نام ڈپلیکیٹ ہو سکتا ہے، بس یاد دہانی کے لیے ---------- -->
+          <div id="npPartyNameListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:82;"></div>
+        </div>
+        <div style="position:relative;">
+          <input type="text" id="npPartyPhone" placeholder="Mobile number (for WhatsApp)" autocomplete="off" inputmode="tel" oninput="filterPartyPhoneOptions()" onfocus="filterPartyPhoneOptions()">
+          <!-- ---------- ملتے جلتے/ٹکراتے نمبروں کی فہرست — نمبر ڈپلیکیٹ نہیں ہونا چاہیے، اس لیے صاف وارننگ ---------- -->
+          <div id="npPartyPhoneListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:81;"></div>
+        </div>
+        <div id="npPartyPhoneWarning" style="display:none; background:#fef2f2; color:var(--danger); font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:8px; margin-top:-6px; margin-bottom:8px;"></div>
         <input type="text" id="npPartyAddress" placeholder="Address (optional)">
-        <input type="text" id="npPartyArea" placeholder="🗺️ Area / City / Route (e.g. Gulberg, Lahore)">
+        <div style="position:relative;">
+          <input type="text" id="npPartyArea" placeholder="🗺️ Area / City / Route (e.g. Gulberg, Lahore)" autocomplete="off" oninput="filterPartyAreaOptions()" onfocus="filterPartyAreaOptions()">
+          <!-- ---------- پہلے سے موجود ایریا/سٹی ناموں کی فہرست — ڈپلیکیٹ (FP, F.P, FP2 وغیرہ) بننے سے بچانے کے لیے ---------- -->
+          <div id="npPartyAreaListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:80;"></div>
+        </div>
         <input type="text" id="npPartyKeywords" placeholder="Nickname / Keyword for search (e.g. Jago, Peshawar)">
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewPartyModal()">Cancel</button>
@@ -13141,6 +13154,9 @@ function resetNewPartyForm(){
   ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords'].forEach(id => document.getElementById(id).value = '');
   npPhotoDataUrl = null;
   renderAvatarInto('npPhotoPreview', null, '👤');
+  closePartyFormDropdowns();
+  const warnBox = document.getElementById('npPartyPhoneWarning');
+  if(warnBox) warnBox.style.display = 'none';
 }
 
 // ---------- نیا کسٹمر/سپلائر شامل کریں ----------
@@ -13171,9 +13187,116 @@ function openEditPartyModal(){
   document.getElementById('npPartyKeywords').value = p.keywords || '';
   npPhotoDataUrl = p.photo || null;
   renderAvatarInto('npPhotoPreview', p.photo, isCustomer ? '👤' : '🏭');
+  closePartyFormDropdowns();
+  const warnBox = document.getElementById('npPartyPhoneWarning');
+  if(warnBox) warnBox.style.display = 'none';
 
   document.getElementById('newPartyModal').classList.add('show');
 }
+
+// ---------- کسٹمر/سپلائر فارم — نام، ایریا، فون تینوں کے لیے ملتے جلتے/موجودہ ریکارڈز کی فہرست،
+// تاکہ ایک ہی چیز مختلف ہجے/سپیسنگ کے ساتھ بار بار الگ الگ محفوظ نہ ہو ----------
+function getActivePartyPool(){
+  const isCustomer = currentPartyTab === 'customers';
+  return {
+    list: isCustomer ? customersData : suppliersData,
+    idField: isCustomer ? 'customer_id' : 'supplier_id',
+    isCustomer
+  };
+}
+function closePartyFormDropdowns(){
+  ['npPartyNameListWrap','npPartyAreaListWrap','npPartyPhoneListWrap'].forEach(id => {
+    document.getElementById(id)?.classList.remove('open');
+  });
+}
+
+// ---------- نام — ملتے جلتے موجودہ نام دکھائیں (ڈپلیکیٹ نام کی اجازت ہے، بس یاد دہانی) ----------
+function filterPartyNameOptions(){
+  const wrap = document.getElementById('npPartyNameListWrap');
+  if(!wrap) return;
+  const text = document.getElementById('npPartyName').value.trim().toLowerCase();
+  if(!text){ wrap.classList.remove('open'); return; }
+  const {list} = getActivePartyPool();
+  const matches = list.filter(p => p.name && p.name.toLowerCase().includes(text) &&
+    (editingPartyId === null || p[getActivePartyPool().idField] !== editingPartyId)).slice(0, 8);
+  if(matches.length === 0){ wrap.classList.remove('open'); return; }
+  wrap.innerHTML = matches.map(p => `
+    <div class="custPickRow" onclick="document.getElementById('npPartyName').value='${(p.name||'').replace(/'/g,"\\'")}'; closePartyFormDropdowns();">
+      <span class="custPickName">⚠️ ${p.name}${p.area ? `<span class="custPickArea">— ${p.area}</span>` : ''}</span>
+      ${p.phone ? `<span style="font-size:10.5px; color:var(--muted);">${p.phone}</span>` : ''}
+    </div>`).join('');
+  wrap.classList.add('open');
+}
+
+// ---------- سٹی/ایریا — پہلے سے موجود تمام ایریا (کسٹمرز + سپلائرز دونوں سے) دکھائیں تاکہ
+// FP, F.P, FP2 جیسی مختلف ہجوں سے ایک ہی ایریا کئی بار نہ بنے ----------
+function filterPartyAreaOptions(){
+  const wrap = document.getElementById('npPartyAreaListWrap');
+  if(!wrap) return;
+  const text = document.getElementById('npPartyArea').value.trim().toLowerCase();
+  const allAreas = [...customersData, ...suppliersData]
+    .map(p => (p.area || '').trim())
+    .filter(a => a);
+  // ---------- بغیر حروفِ کیس کی تفریق کے ڈپلیکیٹ ہٹائیں، پہلی نظر آنے والی ہجے کو رکھیں ----------
+  const seen = new Set();
+  const uniqueAreas = [];
+  allAreas.forEach(a => {
+    const key = a.toLowerCase();
+    if(!seen.has(key)){ seen.add(key); uniqueAreas.push(a); }
+  });
+  const matches = (text ? uniqueAreas.filter(a => a.toLowerCase().includes(text)) : uniqueAreas).slice(0, 10);
+  if(matches.length === 0){ wrap.classList.remove('open'); return; }
+  wrap.innerHTML = matches.map(a => `
+    <div class="custPickRow" onclick="document.getElementById('npPartyArea').value='${a.replace(/'/g,"\\'")}'; closePartyFormDropdowns();">
+      <span class="custPickName">${a}</span>
+    </div>`).join('');
+  wrap.classList.add('open');
+}
+
+// ---------- فون نمبر — ملتے جلتے نمبر بطور تجویز، اور اگر بالکل وہی نمبر پہلے سے موجود ہو تو صاف وارننگ
+// (فون نمبر ڈپلیکیٹ نہیں ہونا چاہیے) ----------
+function filterPartyPhoneOptions(){
+  const wrap = document.getElementById('npPartyPhoneListWrap');
+  const warnBox = document.getElementById('npPartyPhoneWarning');
+  if(!wrap || !warnBox) return;
+  const raw = document.getElementById('npPartyPhone').value.trim();
+  const digits = raw.replace(/[^0-9]/g, '');
+  const {list, idField} = getActivePartyPool();
+  const others = list.filter(p => editingPartyId === null || p[idField] !== editingPartyId);
+
+  if(!digits || digits.length < 4){
+    wrap.classList.remove('open');
+    warnBox.style.display = 'none';
+    return;
+  }
+
+  // ---------- بالکل ایک جیسا نمبر — واضح سرخ وارننگ ----------
+  const exactMatch = others.find(p => (p.phone || '').replace(/[^0-9]/g, '') === digits);
+  if(exactMatch){
+    warnBox.style.display = 'block';
+    warnBox.textContent = `⚠️ This number is already saved for "${exactMatch.name}". Please check before saving.`;
+  } else {
+    warnBox.style.display = 'none';
+  }
+
+  // ---------- ملتے جلتے نمبر (جزوی میچ) بطور تجویز ----------
+  const matches = others.filter(p => (p.phone || '').replace(/[^0-9]/g, '').includes(digits) && p !== exactMatch).slice(0, 6);
+  if(matches.length === 0){ wrap.classList.remove('open'); return; }
+  wrap.innerHTML = matches.map(p => `
+    <div class="custPickRow" onclick="document.getElementById('npPartyPhone').value='${(p.phone||'').replace(/'/g,"\\'")}'; filterPartyPhoneOptions(); closePartyFormDropdowns();">
+      <span class="custPickName">${p.name}</span>
+      <span style="font-size:10.5px; color:var(--muted);">${p.phone}</span>
+    </div>`).join('');
+  wrap.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  ['npPartyNameListWrap','npPartyAreaListWrap','npPartyPhoneListWrap'].forEach(id => {
+    const wrap = document.getElementById(id);
+    if(!wrap || !wrap.classList.contains('open')) return;
+    const inputId = id.replace('ListWrap', '');
+    if(!wrap.contains(e.target) && e.target.id !== inputId) wrap.classList.remove('open');
+  });
+});
 
 function closeNewPartyModal(){
   document.getElementById('newPartyModal').classList.remove('show');
@@ -13193,6 +13316,14 @@ function saveNewParty(){
   if(!name){
     alert('Please enter a name.');
     return;
+  }
+
+  // ---------- محفوظ کرنے سے پہلے آخری چیک — فون نمبر ڈپلیکیٹ نہیں ہونا چاہیے ----------
+  if(phone){
+    const digits = phone.replace(/[^0-9]/g, '');
+    const {list, idField} = getActivePartyPool();
+    const dup = list.find(p => (editingPartyId === null || p[idField] !== editingPartyId) && (p.phone || '').replace(/[^0-9]/g, '') === digits);
+    if(dup && !confirm(`This number is already saved for "${dup.name}". Save anyway?`)) return;
   }
 
   if(editingPartyId !== null){
