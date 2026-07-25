@@ -1708,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO263</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO264</span>
     </div>
   </div>
 
@@ -3524,6 +3524,81 @@
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="aopA4ShareRow" style="padding-top:0; display:none;">
           <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareAdvOrderPdf()">📤 Print/Share A4 PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Purchase Order / Goods Received Bill-Style Preview — بل/رپورٹ/ایڈوانس آرڈر کے یکساں کنٹرول پینل کے ساتھ ---------- -->
+    <div class="modalOverlay" id="poPreviewModal" onclick="if(event.target===this) closePoPreview()">
+      <div class="invoicePreviewBox">
+        <div class="previewHeader">
+          <strong>📦 Purchase Order</strong>
+          <span style="cursor:pointer;" onclick="closePoPreview()">✖</span>
+        </div>
+
+        <div class="previewStyleControls">
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🔠 Text</span>
+            <span style="font-size:11px; color:var(--muted);">A</span>
+            <input type="range" id="popscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPoZoom('poFontScale', this.value)" style="flex:1;">
+            <span style="font-size:19px; color:var(--muted);">A</span>
+            <span class="pscValue" id="popscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">↕ Row</span>
+            <input type="range" id="popscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPoZoom('poRowScale', this.value)" style="flex:1;">
+            <span class="pscValue" id="popscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          </div>
+          <div class="pscRow">
+            <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁 Bold</button>
+            <button id="popscThinBtn" class="pscToggleBtn" onclick="togglePoBold()">Thin</button>
+          </div>
+          <div class="pscRow">
+            <button id="popscAlignLeftBtn" class="pscToggleBtn" onclick="setPoAlign('left')">⬅ Left</button>
+            <button id="popscAlignCenterBtn" class="pscToggleBtn" onclick="setPoAlign('center')">↔ Center</button>
+            <button id="popscAlignRightBtn" class="pscToggleBtn" onclick="setPoAlign('right')">➡ Right</button>
+          </div>
+          <div class="pscRow">
+            <span class="pscLabel">.00 Decimals</span>
+            <button onclick="adjustPoStyle('poPriceDecimals', -1, 0, 4)">−</button>
+            <span class="pscValue" id="popscDecimalsVal">0</span>
+            <button onclick="adjustPoStyle('poPriceDecimals', 1, 0, 4)">+</button>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🅰️ Font</span>
+            <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
+            <span class="pscLabel">🎨 Bill Theme</span>
+            <div id="popscColorSwatches" style="display:flex; gap:8px;"></div>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+              <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+            </label>
+          </div>
+          <div id="popscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
+            <span class="pscLabel">📐 Page</span>
+            <div style="display:flex; gap:6px; flex:1;">
+              <button type="button" id="popscOrientPortraitBtn" onclick="setPoOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
+              <button type="button" id="popscOrientLandscapeBtn" onclick="setPoOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="invoicePreviewScrollArea">
+          <canvas id="poCanvas"></canvas>
+        </div>
+        <div class="previewActions">
+          <button class="btnPrint" onclick="printPoPreview()">🖨️ Print</button>
+          <button class="btnWhatsapp" onclick="sharePoWhatsapp()">📱 WhatsApp</button>
+          <button class="btnHistory" onclick="sharePoUniversal()" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share More</button>
+        </div>
+        <div class="previewActions" id="poBtPrintRow" style="padding-top:0;">
+          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('poCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+        </div>
+        <div class="previewActions" id="poA4ShareRow" style="padding-top:0; display:none;">
+          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="sharePoPdf()">📤 Print/Share A4 PDF</button>
         </div>
       </div>
     </div>
@@ -10197,6 +10272,7 @@ function renderPurchaseOrdersScreen(){
           <div class="bMeta">${po.date} | ${po.items.length} item(s) | Rs. ${po.total.toLocaleString()}</div>
         </div>
         <div class="billActions">
+          <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ Print</button>
           ${isPending
             ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 Receive Shipment</button>
                <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>`
@@ -11090,7 +11166,8 @@ function savePurchaseOrder(){
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
   renderBillingProductGrid(); // نیا اسٹاک بلنگ گرڈ میں بھی فوراً نظر آئے
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
-  alert(`✅ Purchase Order sent. Total: Rs. ${total.toLocaleString()}.\nStock will be updated once you confirm the shipment is received.`);
+  // ---------- بل/ایڈوانس آرڈر کی طرح — Save کے فوراً بعد پرنٹ ایبل پریویو دکھائیں (خالی alert کی بجائے) ----------
+  openPoPreview(s.supplier_id, 0);
 }
 
 /* =====================================================================
@@ -12060,6 +12137,380 @@ function shareAdvOrderUniversal(){
   }, 'image/png');
 }
 
+/* =====================================================================
+   📦 Purchase Order / Goods Received — بل کی شکل کا Canvas پریویو
+   ایک ہی پریویو نظام دونوں کے لیے استعمال ہوتا ہے: آرڈر جاری کرتے وقت (📦 PURCHASE ORDER)
+   اور شپمنٹ موصول ہونے پر (✅ GOODS RECEIVED) — بس بینر/تاریخ خودکار بدل جاتی ہے۔
+   بالکل بل/رپورٹ/ایڈوانس آرڈر جیسا مکمل کنٹرول پینل، A4 PDF، پرنٹ/شیئر ----------
+   ===================================================================== */
+let currentPreviewPoSupplierId = null;
+let currentPreviewPoIdx = null;
+
+function openPoPreview(supplierId, poIdx){
+  currentPreviewPoSupplierId = supplierId;
+  currentPreviewPoIdx = poIdx;
+  document.getElementById('poPreviewModal').classList.add('show');
+  syncPoStyleControls();
+  setTimeout(() => rerenderPoPreview(), 100); // ---------- modal کے نظر آنے کے بعد canvas ڈرائنگ ----------
+}
+function closePoPreview(){
+  document.getElementById('poPreviewModal').classList.remove('show');
+  currentPreviewPoSupplierId = null;
+  currentPreviewPoIdx = null;
+}
+function getCurrentPreviewPo(){
+  const s = suppliersData.find(x => x.supplier_id === currentPreviewPoSupplierId);
+  const po = s ? (s.purchaseHistory || [])[currentPreviewPoIdx] : null;
+  return (s && po) ? {s, po} : null;
+}
+
+async function renderPoToCanvas(){
+  const ref = getCurrentPreviewPo();
+  const canvas = document.getElementById('poCanvas');
+  if(!ref || !canvas) return;
+  const {s, po} = ref;
+  const received = po.status === 'received';
+
+  const useA4 = AppState.settings.poPrintStyle === 'a4';
+  const paperWidthMM = AppState.settings.paperWidth || 80;
+  const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
+  const baseScale = pxWidth / 576;
+
+  const fscale = (AppState.settings.poFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.poRowScale || 100) / 100;
+  const bold = AppState.settings.poBoldItems !== false;
+  const align = AppState.settings.poAlign || 'left';
+  const decimals = AppState.settings.poPriceDecimals ?? 0;
+  const scale = baseScale * fscale;
+  const rc = getReceiptColor();
+
+  const noW = Math.round(28 * scale), qtyW = Math.round(55 * scale), priceW = Math.round(80 * scale), totalW = Math.round(90 * scale);
+  const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
+  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
+  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
+  const rowH = Math.round(24 * scale * rowScaleSetting), headerH = Math.round(22 * scale * rowScaleSetting);
+  const tableH = headerH + (po.items.length * rowH);
+
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.poFontId) || FONT_PRESETS[0];
+  const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
+  const fmt = (n) => (Number(n)||0).toFixed(decimals);
+
+  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH;
+  if(useA4) estimatedHeight += 60;
+  if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
+  if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
+  if(s.phone) estimatedHeight += 16 * scale;
+  if(received && po.receivedDate) estimatedHeight += 20 * scale;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.round(estimatedHeight);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  try{
+    await document.fonts.load(`bold 26px ${canvasFontFamily}`);
+    await document.fonts.load(`16px ${canvasFontFamily}`);
+    await document.fonts.ready;
+  }catch(e){}
+
+  let y = 30 * scale;
+  ctx.textAlign = 'center';
+  ctx.font = F('bold 24px');
+  ctx.fillStyle = '#000';
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 24 * scale;
+
+  if(AppState.settings.businessAddress || AppState.settings.businessPhone){
+    ctx.font = F('12px');
+    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16 * scale; }
+    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16 * scale; }
+  }
+
+  // ---------- بینر — آرڈر ابھی جاری ہوا ہے یا مال موصول ہو چکا، تھیم رنگ سے ہم آہنگ ----------
+  y += 6 * scale;
+  const bannerTop = y, bannerH = 48 * scale;
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, bannerTop, tableRight - tableLeft, bannerH);
+  ctx.strokeStyle = rc.border;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
+  ctx.fillStyle = rc.border;
+  ctx.font = F('bold 18px');
+  ctx.fillText(received ? '✅ GOODS RECEIVED' : '📦 PURCHASE ORDER', pxWidth/2, bannerTop + 22 * scale);
+  ctx.font = F('bold 13px');
+  ctx.fillText(received ? 'Stock updated' : 'Pending — not yet received', pxWidth/2, bannerTop + 40 * scale);
+  y = bannerTop + bannerH + 16 * scale;
+  ctx.fillStyle = '#000';
+
+  ctx.font = F('bold 15px');
+  ctx.fillText('Supplier: ' + s.name, pxWidth/2, y); y += 20 * scale;
+  if(s.phone){
+    ctx.font = F('13px');
+    ctx.fillText(s.phone, pxWidth/2, y); y += 20 * scale;
+  }
+  ctx.font = F('13px');
+  ctx.fillText('Order Date: ' + po.date, pxWidth/2, y); y += 18 * scale;
+  if(received && po.receivedDate){
+    ctx.fillText('Received: ' + po.receivedDate, pxWidth/2, y); y += 18 * scale;
+  }
+
+  drawSolidLine(ctx, y, pxWidth); y += 16 * scale;
+
+  // ---------- آئٹمز ٹیبل ----------
+  const tableTop = y;
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x)+0.5, tableTop); ctx.lineTo(Math.floor(x)+0.5, tableTop + tableH); ctx.stroke(); });
+  let hLineY = tableTop;
+  const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly)+0.5); ctx.lineTo(tableRight, Math.floor(ly)+0.5); ctx.stroke(); };
+  drawTableHLine(hLineY);
+
+  ctx.font = F('bold 13px');
+  const headerBaseline = tableTop + headerH - 7 * scale;
+  ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
+  ctx.textAlign = align; ctx.fillText('Item', align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), headerBaseline);
+  ctx.textAlign = 'right';
+  ctx.fillText('Qty', colX[3]-4, headerBaseline);
+  ctx.fillText('Cost', colX[4]-4, headerBaseline);
+  ctx.fillText('Total', colX[5]-4, headerBaseline);
+  hLineY += headerH;
+  drawTableHLine(hLineY);
+
+  ctx.font = F('bold 14px');
+  const maxItemWidth = itemW - 8;
+  po.items.forEach((item, idx) => {
+    const rowBaseline = hLineY + rowH - 7 * scale;
+    let displayName = item.name;
+    ctx.textAlign = 'left';
+    while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
+    if(displayName !== item.name) displayName = displayName.trim() + '…';
+
+    ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
+    ctx.textAlign = align;
+    ctx.fillText(displayName, align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), rowBaseline);
+    ctx.textAlign = 'right';
+    ctx.fillText(String(item.qty), colX[3]-4, rowBaseline);
+    ctx.fillText(fmt(item.cost), colX[4]-4, rowBaseline);
+    ctx.fillText(fmt(item.qty*item.cost), colX[5]-4, rowBaseline);
+
+    hLineY += rowH;
+    drawTableHLine(hLineY);
+  });
+
+  y = tableTop + tableH + 26 * scale;
+
+  ctx.textAlign = 'right';
+  ctx.font = F('bold 20px');
+  ctx.fillText('Grand Total: Rs. ' + fmt(po.total), pxWidth-(10*scale), y);
+  y += 30 * scale;
+
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.font = F('13px');
+  ctx.fillText(received ? 'Thank you — stock has been updated.' : 'This order is pending receipt.', pxWidth/2, y); y += 20 * scale;
+
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH;
+    ctx.putImageData(imgData, 0, 0);
+  }
+}
+
+async function rerenderPoPreview(){ await renderPoToCanvas(); }
+
+function syncPoStyleControls(){
+  document.getElementById('popscFontScaleVal').textContent = (AppState.settings.poFontScale || 100) + '%';
+  const fontSlider = document.getElementById('popscFontScaleSlider');
+  if(fontSlider) fontSlider.value = AppState.settings.poFontScale || 100;
+  document.getElementById('popscRowScaleVal').textContent = (AppState.settings.poRowScale || 100) + '%';
+  const rowSlider = document.getElementById('popscRowScaleSlider');
+  if(rowSlider) rowSlider.value = AppState.settings.poRowScale || 100;
+  const isBold = AppState.settings.poBoldItems !== false;
+  document.getElementById('popscBoldBtn').classList.toggle('active', isBold);
+  document.getElementById('popscThinBtn').classList.toggle('active', !isBold);
+  const align = AppState.settings.poAlign || 'left';
+  document.getElementById('popscAlignLeftBtn').classList.toggle('active', align === 'left');
+  document.getElementById('popscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('popscAlignRightBtn').classList.toggle('active', align === 'right');
+  document.getElementById('popscDecimalsVal').textContent = AppState.settings.poPriceDecimals ?? 0;
+
+  const fontSelect = document.getElementById('popscFontFamilySelect');
+  if(fontSelect){
+    if(!fontSelect.dataset.filled){
+      fontSelect.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+      fontSelect.dataset.filled = '1';
+    }
+    fontSelect.value = AppState.settings.poFontId || 'segoe';
+  }
+
+  const swatchWrap = document.getElementById('popscColorSwatches');
+  if(swatchWrap){
+    try{
+      swatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
+      swatchWrap.querySelectorAll('button').forEach(btn => {
+        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
+        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
+      });
+    }catch(e){ console.error('swatch render failed', e); }
+  }
+  document.getElementById('popscA4Chk').checked = AppState.settings.poPrintStyle === 'a4';
+  const orientRow = document.getElementById('popscOrientRow');
+  if(orientRow) orientRow.style.display = AppState.settings.poPrintStyle === 'a4' ? 'flex' : 'none';
+  const btRow = document.getElementById('poBtPrintRow');
+  if(btRow) btRow.style.display = AppState.settings.poPrintStyle === 'a4' ? 'none' : 'flex';
+  const shareRow = document.getElementById('poA4ShareRow');
+  if(shareRow) shareRow.style.display = AppState.settings.poPrintStyle === 'a4' ? 'flex' : 'none';
+  setPoOrientation(AppState.settings.poOrientation || 'portrait');
+}
+
+function setPoZoom(settingKey, val){
+  const min = 70, max = settingKey === 'poRowScale' ? 220 : 260;
+  const clamped = Math.max(min, Math.min(max, Number(val) || 100));
+  AppState.settings[settingKey] = clamped;
+  const label = document.getElementById(settingKey === 'poRowScale' ? 'popscRowScaleVal' : 'popscFontScaleVal');
+  if(label) label.textContent = clamped + '%';
+  persistAllData();
+  rerenderPoPreview();
+}
+function adjustPoStyle(settingKey, delta, min, max){
+  const current = AppState.settings[settingKey] ?? 0;
+  const next = Math.max(min, Math.min(max, current + delta));
+  AppState.settings[settingKey] = next;
+  persistAllData();
+  syncPoStyleControls();
+  rerenderPoPreview();
+}
+function togglePoBold(){
+  AppState.settings.poBoldItems = !(AppState.settings.poBoldItems !== false);
+  persistAllData();
+  syncPoStyleControls();
+  rerenderPoPreview();
+}
+function setPoAlign(align){
+  AppState.settings.poAlign = align;
+  persistAllData();
+  syncPoStyleControls();
+  rerenderPoPreview();
+}
+function setPoFontFamily(fontId){
+  AppState.settings.poFontId = fontId;
+  persistAllData();
+  rerenderPoPreview();
+}
+function togglePoPaperStyle(checked){
+  AppState.settings.poPrintStyle = checked ? 'a4' : 'thermal';
+  persistAllData();
+  syncPoStyleControls();
+  rerenderPoPreview();
+}
+function setPoOrientation(orient){
+  AppState.settings.poOrientation = orient;
+  persistAllData();
+  const pBtn = document.getElementById('popscOrientPortraitBtn');
+  const lBtn = document.getElementById('popscOrientLandscapeBtn');
+  if(pBtn && lBtn){
+    const activeStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid var(--primary); background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);';
+    const inactiveStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;';
+    pBtn.style.cssText = orient === 'portrait' ? activeStyle : inactiveStyle;
+    lBtn.style.cssText = orient === 'landscape' ? activeStyle : inactiveStyle;
+  }
+}
+
+function buildPoPdf(){
+  const canvas = document.getElementById('poCanvas');
+  const { jsPDF } = window.jspdf;
+  const orientation = AppState.settings.poOrientation === 'landscape' ? 'landscape' : 'portrait';
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210, pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 12;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM + (availH-drawH)/2;
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
+  pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
+  pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  return pdf;
+}
+async function sharePoPdf(){
+  if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+  await rerenderPoPreview();
+  const pdf = buildPoPdf();
+  const blob = pdf.output('blob');
+  const file = new File([blob], 'PurchaseOrder.pdf', {type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:'Purchase Order'}); }
+    catch(e){ /* یوزر نے منسوخ کر دی */ }
+  } else {
+    window.open(pdf.output('bloburl'), '_blank');
+  }
+}
+async function printPoPreview(){
+  await rerenderPoPreview();
+  const canvas = document.getElementById('poCanvas');
+  if(!canvas) return;
+  const useA4Print = AppState.settings.poPrintStyle === 'a4';
+
+  if(useA4Print){
+    if(!window.jspdf){
+      alert('PDF library not loaded — check your internet connection and try again.');
+      return;
+    }
+    const pdf = buildPoPdf();
+    window.open(pdf.output('bloburl'), '_blank');
+    return;
+  }
+
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+function sharePoWhatsapp(){
+  const ref = getCurrentPreviewPo();
+  if(!ref) return;
+  const {s, po} = ref;
+  if(!s.phone){
+    alert("This supplier's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
+    return;
+  }
+  const digits = s.phone.replace(/[^0-9]/g, '');
+  const text = `${po.status === 'received' ? 'Goods Received' : 'Purchase Order'} — ${s.name} — Total: Rs. ${po.total.toLocaleString()}`;
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+}
+function sharePoUniversal(){
+  const ref = getCurrentPreviewPo();
+  if(!ref) return;
+  const {s, po} = ref;
+  const canvas = document.getElementById('poCanvas');
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the image.'); return; }
+    const file = new File([blob], `PurchaseOrder.png`, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({
+          files:[file],
+          title: po.status === 'received' ? 'Goods Received' : 'Purchase Order',
+          text: `${s.name} — Total: Rs. ${po.total.toLocaleString()}`
+        });
+      } catch(err){ /* یوزر نے شیئر منسوخ کیا */ }
+    } else {
+      const dataUrl = canvas.toDataURL('image/png');
+      const win = window.open();
+      if(win) win.document.write(`<img src="${dataUrl}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
+}
+
 // ---------- دن بھر کے پینڈنگ آرڈرز کی پرنٹ فہرست — اگلے سیل راؤنڈ پر ساتھ لے جانے کے لیے،
 // ہر کسٹمر کی الگ فہرست (قیمت سمیت) + آخر میں تمام آئٹمز کا مجموعی خلاصہ اور گرینڈ ٹوٹل ----------
 function printAdvanceOrdersList(){
@@ -12335,11 +12786,13 @@ function confirmShipmentReceipt(){
   if(receiveShipmentBillPhoto) po.billPhoto = receiveShipmentBillPhoto;
   // TODO: DB میں purchase_orders.status='received', receipt_photo_url اپڈیٹ ہوگا
 
+  const receivedSupplierId = activeReceiveSupplierId, receivedPoIdx = activeReceivePoIdx;
   closeReceiveShipmentModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
   renderBillingProductGrid();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
-  alert(`✅ Shipment received. Stock updated.${diff !== 0 ? ` Payable adjusted by Rs. ${diff.toLocaleString()}.` : ''}`);
+  // ---------- بل/ایڈوانس آرڈر کی طرح — Confirm کے فوراً بعد پرنٹ ایبل "Goods Received" پریویو دکھائیں ----------
+  openPoPreview(receivedSupplierId, receivedPoIdx);
 }
 
 /* =====================================================================
