@@ -3419,10 +3419,11 @@
       </div>
     </div>
 
-    <!-- ---------- یونیورسل پرنٹ ایریا — عام حالت میں چھپا رہتا ہے، صرف window.print() کے وقت نظر آتا ہے۔          -->
-    <!-- ---------- Android کا اپنا Print Service نظام (RawBT، Sunmi کا پرنٹر پلگ ان، WiFi/USB پرنٹر ڈرائیورز،      -->
-    <!-- ---------- "Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
-    <div id="printReceiptArea"></div>
+    <!-- ---------- یونیورسل پرنٹ ایریا یہاں سے ہٹا کر body کے آخر میں براہ راست منتقل کر دیا گیا ہے —
+    وجہ: یہ پہلے #app/#mainArea کے اندر نیسٹڈ تھا، اس لیے پرنٹ کے وقت جب #app کو چھپایا جاتا تھا
+    تو اس کے اندر موجود ہونے کی وجہ سے یہ بھی چھپ جاتا تھا (چاہے اپنے اوپر display:block !important کیوں نہ لگا ہو —
+    کسی بھی اوپر والے parent کا display:none ہمیشہ اندر کے ہر عنصر کو غیر مرئی کر دیتا ہے) — یہی وہ اصل وجہ تھی
+    جس کی وجہ سے پرنٹ میں رپورٹ کی بجائے پیچھے کھلا ہوا موڈل (زوم/رو سلائیڈرز وغیرہ) نظر آ رہا تھا۔ ---------- -->
 
     <!-- EDIT/DELETE APPROVAL REQUEST MODAL (Salesman کے لیے) -->
     <div class="modalOverlay" id="requestActionModal" onclick="if(event.target===this) this.classList.remove('show')">
@@ -11626,7 +11627,7 @@ function printAdvOrderPreview(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
-  document.body.classList.add('printing-invoice');
+  enterPrintMode();
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
 }
 
@@ -11700,7 +11701,7 @@ function printAdvanceOrdersList(){
         These are approximate prices only. Final rates will be confirmed at time of delivery and may go up or down.
       </div>
     </div>`;
-  document.body.classList.add('printing-invoice');
+  enterPrintMode();
   setTimeout(() => window.print(), 50);
 }
 
@@ -14775,6 +14776,27 @@ function canvasToGrayscale(sourceCanvas){
   return gray;
 }
 
+// ---------- پرنٹ موڈ میں داخل ہونے کا مشترکہ طریقہ — صرف CSS @media print پر انحصار نہیں کرتے،
+// کیونکہ کچھ Android پرنٹ سروسز اصل میں @media print کا اطلاق کیے بغیر سکرین کا موجودہ حال ہی
+// کیپچر کر لیتی ہیں۔ اس لیے یہاں JS سے بھی براہ راست #app اور کوئی بھی کھلا ہوا موڈل چھپا دیا جاتا ہے —
+// یہ CSS اصول کے ساتھ ایک اضافی حفاظتی تہہ ہے، اور afterprint پر خودکار واپس آ جاتا ہے ----------
+let _printHiddenEls = [];
+function enterPrintMode(){
+  document.body.classList.add('printing-invoice');
+  _printHiddenEls = [];
+  const app = document.getElementById('app');
+  if(app){ _printHiddenEls.push([app, app.style.display]); app.style.display = 'none'; }
+  document.querySelectorAll('.modalOverlay.show').forEach(m => {
+    _printHiddenEls.push([m, m.style.display]);
+    m.style.display = 'none';
+  });
+}
+function exitPrintMode(){
+  document.body.classList.remove('printing-invoice');
+  _printHiddenEls.forEach(([el, disp]) => { el.style.display = disp; });
+  _printHiddenEls = [];
+}
+
 function printCurrentInvoice(){
   const canvas = document.getElementById('invoiceCanvas');
   if(!canvas) return;
@@ -14782,12 +14804,13 @@ function printCurrentInvoice(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
-  document.body.classList.add('printing-invoice');
+  enterPrintMode();
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
 }
 window.addEventListener('afterprint', () => {
-  document.body.classList.remove('printing-invoice');
+  exitPrintMode();
 });
+
 
 // ---------- براہ راست Bluetooth پرنٹنگ — کوئی RawBT/Thermer جیسی ایپ درکار نہیں ----------
 // ---------- اہم حد: یہ صرف اُن پرنٹرز پر کام کرے گا جو BLE (Bluetooth Low Energy) سپورٹ کرتے ہوں۔
@@ -15260,7 +15283,7 @@ function printBarcodeLabels(){
 
   const area = document.getElementById('printReceiptArea');
   area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
-  document.body.classList.add('printing-invoice');
+  enterPrintMode();
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
 }
 
@@ -16948,6 +16971,7 @@ async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
+  const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
 
@@ -17064,11 +17088,48 @@ async function renderReportToCanvas(){
     }
     return px;
   };
+  // ---------- بزنس نام، پتہ، فون اور رپورٹ ٹائٹل جیسے سینٹرڈ الفاظ زوم بڑھانے پر کبھی کینوس کے کناروں سے باہر نہ نکلیں —
+  // پہلے فونٹ خودکار تھوڑا چھوٹا ہو، پھر بھی پوری لائن میں جگہ نہ بنے تو ضرورت پڑنے پر دوسری لائن میں ٹوٹ جائیں ----------
+  const fitCenteredLines = (text, maxWidth, basePx, weight) => {
+    const w = weight ? weight + ' ' : '';
+    const minPx = Math.max(Math.round(basePx * 0.55), 7);
+    let px = basePx;
+    ctx.font = `${w}${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > minPx){
+      px -= 1;
+      ctx.font = `${w}${px}px ${fontFam}`;
+    }
+    if(ctx.measureText(text).width <= maxWidth) return {lines:[text], px, weight:w};
+    const words = String(text).split(' ');
+    const lines = []; let cur = '';
+    words.forEach(word => {
+      const test = cur ? cur + ' ' + word : word;
+      if(ctx.measureText(test).width > maxWidth && cur){ lines.push(cur); cur = word; }
+      else cur = test;
+    });
+    if(cur) lines.push(cur);
+    return {lines, px, weight:w};
+  };
+  const drawCenteredLines = (result, centerX, startY, lineGapMult) => {
+    ctx.font = `${result.weight}${result.px}px ${fontFam}`;
+    const lineH = Math.round(result.px * (lineGapMult || 1.25));
+    result.lines.forEach((line, i) => ctx.fillText(line, centerX, startY + i*lineH));
+    return startY + (result.lines.length - 1) * lineH;
+  };
+  const nameFit = fitCenteredLines(AppState.settings.businessName || 'AIO POS', totalW, fsTitle, 'bold');
+  const addrFit = AppState.settings.businessAddress ? fitCenteredLines(AppState.settings.businessAddress, totalW, fsSmall) : null;
+  const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
+  const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report', lowstock:'Low Stock Items'};
+  const titleFit = fitCenteredLines(titles[currentReportType] || 'Report', totalW, fsSubtitle, 'bold');
+
   // ---------- کل اونچائی کا حساب — تمام قطاریں مقررہ اونچائی کی ہیں تو یہ درست پیشگی حساب ممکن ہے ----------
   const totalItemRows = groups.reduce((s,g) => s + g.items.length, 0);
   let headerBandH = useA4 ? 78 : 46;   // بزنس نام + فون + رپورٹ ٹائٹل + تاریخ
   if(logoImg) headerBandH += logoH + 8;
   if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
+  // ---------- اگر مندرجہ بالا میں سے کوئی بھی متن دوسری لائن میں ٹوٹ جائے تو اتنی ہی اضافی جگہ ہیڈر بینڈ میں شامل کریں ----------
+  const extraWrapLines = (nameFit.lines.length - 1) + (addrFit ? addrFit.lines.length - 1 : 0) + (phoneFit ? phoneFit.lines.length - 1 : 0) + (titleFit.lines.length - 1);
+  headerBandH += extraWrapLines * Math.round(fsTitle * 1.3);
   let bodyTop = headerBandH;
   if(currentReportType === 'inventory'){
     bodyTop += (summaryLineH * 4) + 10;
@@ -17081,7 +17142,6 @@ async function renderReportToCanvas(){
 
   canvas.width = pxWidth;
   canvas.height = Math.max(estimatedHeight, 300);
-  const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
 
@@ -17094,23 +17154,18 @@ async function renderReportToCanvas(){
   }
   ctx.textAlign = 'center';
   ctx.fillStyle = rc.text;
-  ctx.font = `bold ${fsTitle}px ${fontFam}`;
   y += fsTitle;
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
-  if(AppState.settings.businessAddress){
+  y = drawCenteredLines(nameFit, pxWidth/2, y, 1.25);
+  if(addrFit){
     y += Math.round(fsSmall * 1.6);
-    ctx.font = `${fsSmall}px ${fontFam}`;
-    ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y);
+    y = drawCenteredLines(addrFit, pxWidth/2, y, 1.25);
   }
-  if(AppState.settings.businessPhone){
+  if(phoneFit){
     y += Math.round(fsSmall * 1.6);
-    ctx.font = `${fsSmall}px ${fontFam}`;
-    ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y);
+    y = drawCenteredLines(phoneFit, pxWidth/2, y, 1.25);
   }
   y += Math.round(fsSubtitle * 1.7);
-  const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report', lowstock:'Low Stock Items'};
-  ctx.font = `bold ${fsSubtitle}px ${fontFam}`;
-  ctx.fillText(titles[currentReportType] || 'Report', pxWidth/2, y);
+  y = drawCenteredLines(titleFit, pxWidth/2, y, 1.25);
 
   y += Math.round(fsSmall * 2);
   ctx.textAlign = 'left';
@@ -17359,9 +17414,41 @@ async function renderTodaySaleReportToCanvas(){
   const cashTableH = cashHeaderRowH + cashRowHeights.reduce((s,h) => s+h, 0) + cashTotalRowH;
 
   // ---------- کل اونچائی کا حساب ----------
+  const fitCenteredLines = (text, maxWidth, basePx, weight) => {
+    const w = weight ? weight + ' ' : '';
+    const minPx = Math.max(Math.round(basePx * 0.55), 7);
+    let px = basePx;
+    ctx.font = `${w}${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > minPx){
+      px -= 1;
+      ctx.font = `${w}${px}px ${fontFam}`;
+    }
+    if(ctx.measureText(text).width <= maxWidth) return {lines:[text], px, weight:w};
+    const words = String(text).split(' ');
+    const lines = []; let cur = '';
+    words.forEach(word => {
+      const test = cur ? cur + ' ' + word : word;
+      if(ctx.measureText(test).width > maxWidth && cur){ lines.push(cur); cur = word; }
+      else cur = test;
+    });
+    if(cur) lines.push(cur);
+    return {lines, px, weight:w};
+  };
+  const drawCenteredLines = (result, centerX, startY, lineGapMult) => {
+    ctx.font = `${result.weight}${result.px}px ${fontFam}`;
+    const lineH = Math.round(result.px * (lineGapMult || 1.25));
+    result.lines.forEach((line, i) => ctx.fillText(line, centerX, startY + i*lineH));
+    return startY + (result.lines.length - 1) * lineH;
+  };
+  const nameFit = fitCenteredLines(AppState.settings.businessName || 'AIO POS', totalW, fsTitle, 'bold');
+  const addrFit = AppState.settings.businessAddress ? fitCenteredLines(AppState.settings.businessAddress, totalW, fsSmall) : null;
+  const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
+  const titleFit = fitCenteredLines("Today's Sale Report", totalW, fsSubtitle, 'bold');
   let headerBandH = useA4 ? 78 : 46;
   if(logoImg) headerBandH += logoH + 8;
   if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
+  const extraWrapLines = (nameFit.lines.length - 1) + (addrFit ? addrFit.lines.length - 1 : 0) + (phoneFit ? phoneFit.lines.length - 1 : 0) + (titleFit.lines.length - 1);
+  headerBandH += extraWrapLines * Math.round(fsTitle * 1.3);
   let bodyTop = headerBandH + summaryLineH + 8 + cashTableH + Math.round(fsSummary*2) + 40 + headerRowH;
   let estimatedHeight = bodyTop + (soldItems.length * baseRowH) + 50;
   estimatedHeight += Math.round(40 * fontScale);
@@ -17535,10 +17622,14 @@ async function printCurrentReport(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
   const printCanvas = canvasToGrayscale(canvas); // ---------- کاغذ پر ہمیشہ سیاہ/سفید — سکرین/شیئر کا رنگین ورژن الگ ----------
-  applyPrintPageSize(AppState.settings.reportPrintStyle === 'a4' ? 210 : (AppState.settings.paperWidth || 80));
+  const useA4Print = AppState.settings.reportPrintStyle === 'a4';
+  applyPrintPageSize(useA4Print ? 210 : (AppState.settings.paperWidth || 80));
   const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
-  document.body.classList.add('printing-invoice');
+  // ---------- A4 پر رپورٹ ایک صاف، راؤنڈ کارنر والے بل کارڈ کی طرح نظر آئے — تھرمل رول پر یہ ضرورت نہیں (سیدھا کنارے تک) ----------
+  area.innerHTML = useA4Print
+    ? `<div style="border:1px solid #cbd5e1; border-radius:14px; overflow:hidden;"><img src="${printCanvas.toDataURL('image/png')}" style="width:100%; display:block;" onload="this.dispatchEvent(new Event('printready'))"></div>`
+    : `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  enterPrintMode();
   area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
 }
 
@@ -17653,7 +17744,9 @@ function updateOpeningCashBalance(value){
 // یہی وہ فکس ہے جو رسید کو A4 میں سکڑنے سے روک کر اصل سائز میں پرنٹ ہونے دیتا ہے ----------
 function applyPrintPageSize(mm){
   const tag = document.getElementById('dynamicPrintPageStyle');
-  if(tag) tag.textContent = `@page{ size: ${mm}mm auto; margin: 0; }`;
+  const isA4 = mm === 210; // ---------- A4 شیٹ کے لیے کاغذ کے کنارے تک بالکل چپکا ہوا پرنٹ عجیب لگتا ہے —
+  // تھرمل رول پیپر کے برعکس، A4 پر ایک مناسب سفید مارجن اور راؤنڈ کارنر والا صاف بل جیسا لے آؤٹ چاہیے ----------
+  if(tag) tag.textContent = `@page{ size: ${mm}mm auto; margin: ${isA4 ? '10mm' : '0'}; }`;
 }
 
 function setPaperWidth(mm){
@@ -17722,7 +17815,7 @@ function testPrint(){
       <div style="border-top:1px dashed #000; margin:8px 0;"></div>
       <div style="text-align:center; font-size:11px;">If this printed correctly,<br>your printer is ready to use.</div>
     </div>`;
-  document.body.classList.add('printing-invoice');
+  enterPrintMode();
   setTimeout(() => window.print(), 50);
 }
 
@@ -17867,5 +17960,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', updateOnlineStatus);
 })();
 </script>
+<!-- ---------- یونیورسل پرنٹ ایریا — عام حالت میں چھپا رہتا ہے، صرف window.print() کے وقت نظر آتا ہے۔
+یہ جان بوجھ کر body کا براہ راست بچہ (direct child) ہے، #app کے اندر نیسٹڈ نہیں — تاکہ پرنٹ کے وقت
+#app کو چھپانے سے یہ خود بخود اس کے ساتھ نہ چھپ جائے (پہلے یہی اصل وجہ تھی کہ پرنٹ میں رپورٹ کی
+بجائے پیچھے کھلا ہوا موڈل نظر آ رہا تھا)۔ ---------- -->
+<!-- ---------- Android کا اپنا Print Service نظام (RawBT، Sunmi کا پرنٹر پلگ ان، WiFi/USB پرنٹر ڈرائیورز،
+"Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
+<div id="printReceiptArea"></div>
 </body>
 </html>
