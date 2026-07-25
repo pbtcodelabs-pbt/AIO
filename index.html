@@ -633,54 +633,24 @@
   .quickDockEditRow.dragging{box-shadow:0 4px 10px rgba(0,0,0,.25); background:#eef2ff; z-index:10;}
   .quickDockEmptyMsg{font-size:11px; color:var(--muted); padding:10px 4px; text-align:center;}
 
-  /* ===================== New Action FAB (نیچے بائیں + بٹن — New Bill/Customer/Supplier) ===================== */
-  .newActionFab{
-    position:fixed; left:16px; bottom:16px; z-index:260;
-    display:flex; flex-direction:column-reverse; align-items:flex-start; gap:10px;
-  }
-  body.billing-active .newActionFab{ bottom:90px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
-  .newActionFabMain{
-    width:52px; height:52px; border-radius:50%; background:var(--primary); color:#fff; border:none;
-    font-size:26px; font-weight:700; line-height:1; box-shadow:0 6px 16px rgba(15,118,110,.4); cursor:pointer;
-    display:flex; align-items:center; justify-content:center; transition:transform .2s ease, background .2s ease; flex:0 0 auto;
-  }
-  .newActionFab.open .newActionFabMain{ transform:rotate(45deg); background:var(--primary-dark); }
-
   /* ---------- ◀ Back / 🏠 Home / ▶ Forward — نیچے وسط میں ایک کمپیکٹ، چھوٹا، 3D بار،
        Home اسکرین پر خود بخود چھپ جاتا ہے (وہاں ضرورت نہیں) ---------- */
   .navArrowBar{
-    position:fixed; left:50%; bottom:10px; transform:translateX(-50%); z-index:260; display:none;
-    gap:8px; background:rgba(255,255,255,.7); backdrop-filter:blur(6px); padding:5px; border-radius:20px;
+    position:fixed; left:50%; bottom:6px; transform:translateX(-50%); z-index:260; display:none;
+    gap:6px; background:rgba(255,255,255,.7); backdrop-filter:blur(6px); padding:4px; border-radius:18px;
     box-shadow:0 4px 14px rgba(15,23,42,.18);
   }
-  body.billing-active .navArrowBar{ bottom:84px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
+  body.billing-active .navArrowBar{ bottom:80px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
   .navArrowBar button{
-    width:34px; height:34px; border-radius:50%; border:none; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; font-size:15px; color:#fff;
+    width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff;
     background:linear-gradient(155deg, var(--primary), var(--primary-dark));
     box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 3px 7px -2px rgba(0,0,0,.35);
     transition:transform .12s ease, opacity .12s ease;
   }
   .navArrowBar button:active{ transform:scale(.9); }
-  .navArrowBar button#navHomeBtn{ width:38px; height:38px; font-size:17px; background:linear-gradient(155deg,#c2790f,#8a560a); }
+  .navArrowBar button#navHomeBtn{ width:34px; height:34px; font-size:15px; background:linear-gradient(155deg,#c2790f,#8a560a); }
   .navArrowBar button:disabled{ opacity:.35; pointer-events:none; background:linear-gradient(155deg,#94a3b8,#64748b); }
-  .newActionFabItems{
-    display:flex; flex-direction:column-reverse; align-items:flex-start; gap:14px; margin-bottom:4px;
-    max-height:0; overflow:hidden; opacity:0; pointer-events:none; transition:max-height .25s ease, opacity .2s ease;
-  }
-  .newActionFab.open .newActionFabItems{ max-height:280px; opacity:1; pointer-events:auto; }
-  .newActionFabItem{
-    display:flex; align-items:center; gap:9px; padding:11px 18px; background:#fff; color:var(--primary-dark);
-    border:1px solid #e5e7eb; border-radius:26px; font-weight:700; font-size:13px; box-shadow:0 4px 14px rgba(15,23,42,.2);
-    cursor:pointer; white-space:nowrap; transition:transform .12s ease;
-  }
-  .newActionFabItem:active{ transform:scale(.96); }
-  .newActionFabItem span{ font-size:17px; }
-  .newActionFabItem.primary{
-    padding:15px 26px; font-size:14.5px; background:var(--primary); color:#fff; border:none;
-    box-shadow:0 6px 18px rgba(15,118,110,.45);
-  }
-  .newActionFabItem.primary span{ font-size:20px; }
 
   /* ===================== Fonts بٹن — Counter Sale لائن کے دائیں طرف، مستقل جگہ پر (فلوٹنگ نہیں) ===================== */
   .modeToggleRow{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:nowrap; }
@@ -1460,6 +1430,8 @@
       grid-column:1; grid-row:3;
       position:sticky; top:calc(56px + 54px); z-index:588;
     }
+    /* ---------- بلنگ سکرین پر زوم بار مزید کمپیکٹ — تاکہ زیادہ سے زیادہ پراڈکٹس نظر آئیں ---------- */
+    body.billing-active #globalUiZoomBar{ padding:3px 12px; }
 
     #sidebar{
       position:fixed; top:0; right:-260px; bottom:0; width:240px; z-index:800;
@@ -1684,16 +1656,6 @@
     </div>
   </div>
 
-  <!-- ---------- NEW ACTION FAB (نیچے بائیں + بٹن — ٹیپ کرنے پر New Bill / New Customer / New Supplier کھلتے ہیں، ہر صفحے پر موجود) ---------- -->
-  <div id="newActionFab" class="newActionFab">
-    <div class="newActionFabItems" id="newActionFabItems">
-      <button class="newActionFabItem" onclick="quickNewSupplier()"><span>🚚</span> New Supplier</button>
-      <button class="newActionFabItem" onclick="quickNewCustomer()"><span>🧑‍🤝‍🧑</span> New Customer</button>
-      <button class="newActionFabItem primary" onclick="quickNewBill()"><span>🧾</span> New Bill</button>
-    </div>
-    <button class="newActionFabMain" id="newActionFabMain" onclick="toggleNewActionFab()">+</button>
-  </div>
-
   <!-- ---------- ◀ Back / 🏠 Home / ▶ Forward — ہر صفحے پر (Home کے علاوہ)، نیچے وسط میں کمپیکٹ بار ---------- -->
   <div class="navArrowBar" id="navArrowBar">
     <button id="navBackBtn" onclick="goBack()" title="Back">◀</button>
@@ -1708,7 +1670,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO267</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO268</span>
     </div>
   </div>
 
@@ -5532,20 +5494,6 @@ const NAV_SCREENS = {
 };
 
 /* =====================================================================
-   New Action FAB — نیچے بائیں + بٹن، ٹیپ کرنے پر New Bill/Customer/Supplier کے
-   چھوٹے آئیکن اوپر کی طرف کھلتے ہیں (ہر صفحے پر موجود، Quick Access Dock کی طرح)
-   ===================================================================== */
-let newActionFabOpen = false;
-function toggleNewActionFab(){
-  newActionFabOpen = !newActionFabOpen;
-  document.getElementById('newActionFab').classList.toggle('open', newActionFabOpen);
-}
-function closeNewActionFab(){
-  newActionFabOpen = false;
-  document.getElementById('newActionFab')?.classList.remove('open');
-}
-
-/* =====================================================================
    Fonts FAB — نیچے دائیں + بٹن، ٹیپ کرنے پر فونٹس کی لسٹ کھلتی ہے
    ہر فونٹ اپنے ہی سٹائل میں دکھتا ہے، ٹیپ کرتے ہی پوری ایپ کا فونٹ فوری بدل جاتا ہے
    ===================================================================== */
@@ -5601,21 +5549,6 @@ function renderFontsFabPanel(){
       <span class="fontCheckMark">✓</span>
     </div>
   `).join('');
-}
-
-function quickNewBill(){
-  closeNewActionFab();
-  goTo('billing');
-}
-function quickNewCustomer(){
-  closeNewActionFab();
-  currentPartyTab = 'customers';
-  openNewPartyModal();
-}
-function quickNewSupplier(){
-  closeNewActionFab();
-  currentPartyTab = 'suppliers';
-  openNewPartyModal();
 }
 
 let quickDockOpen = false;
