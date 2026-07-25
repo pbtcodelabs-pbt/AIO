@@ -1692,7 +1692,7 @@
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span class="mobileBrand">🧾 AIO POS</span>
     <!-- ---------- بہت چھوٹا، غیر نمایاں بلڈ نمبر — صرف اس لیے تاکہ فون پر واقعی کون سا ورژن لوڈ ہوا ہے یہ فوراً چیک ہو سکے ---------- -->
-    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO247</span>
+    <span style="font-size:9px; opacity:.5; margin-left:2px; align-self:flex-end; margin-bottom:2px;">AIO248</span>
     <span id="connStatusBadge" class="online">Online</span>
   </div>
 
@@ -11628,9 +11628,9 @@ function printAdvOrderPreview(){
   if(!canvas) return;
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   enterPrintMode();
-  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
 // ---------- WhatsApp/دیگر ایپس کو اصل بل کی تصویر بھیجیں — ٹیکسٹ میسج نہیں، Web Share API کے ذریعے اصل پرنٹ ایبل بل ----------
@@ -11689,6 +11689,7 @@ function printAdvanceOrdersList(){
   ).join('');
 
   const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
   area.innerHTML = `
     <div style="width:${mm}mm; font-family:'Courier New',monospace; padding:6mm; box-sizing:border-box;">
       <div style="text-align:center; font-weight:800; font-size:15px; color:#b91c1c;">📝 ADVANCE ORDERS</div>
@@ -11703,8 +11704,7 @@ function printAdvanceOrdersList(){
         These are approximate prices only. Final rates will be confirmed at time of delivery and may go up or down.
       </div>
     </div>`;
-  enterPrintMode();
-  setTimeout(() => window.print(), 50);
+  setTimeout(triggerPrint, 50);
 }
 
 /* =====================================================================
@@ -14798,6 +14798,12 @@ function exitPrintMode(){
   _printHiddenEls.forEach(([el, disp]) => { el.style.display = disp; });
   _printHiddenEls = [];
 }
+// ---------- window.print() سے پہلے کم از کم ایک مکمل paint سائیکل مکمل ہونے دیں —
+// ورنہ Android کا پرنٹ سسٹم وہ پرانی حالت (ابھی ابھی enterPrintMode سے چھپائے گئے موڈل سمیت)
+// کیپچر کر سکتا ہے جو ابھی سکرین پر دوبارہ پینٹ نہیں ہوئی — یہی وجہ تھی کہ موڈل پرنٹ میں نظر آ رہا تھا ----------
+function triggerPrint(){
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => window.print(), 60)));
+}
 
 function printCurrentInvoice(){
   const canvas = document.getElementById('invoiceCanvas');
@@ -14805,9 +14811,9 @@ function printCurrentInvoice(){
   const printCanvas = canvasToGrayscale(canvas);
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   enterPrintMode();
-  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 window.addEventListener('afterprint', () => {
   exitPrintMode();
@@ -15284,9 +15290,9 @@ function printBarcodeLabels(){
   }
 
   const area = document.getElementById('printReceiptArea');
-  area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   enterPrintMode();
-  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+  area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
 // ---------- 🧾 Bill & Print Settings کا اپنا الگ صفحہ — دکان کی معلومات، پرنٹر، رسید کا مواد، لکھائی کا سائز، بارکوڈ ----------
@@ -17627,12 +17633,12 @@ async function printCurrentReport(){
   const useA4Print = AppState.settings.reportPrintStyle === 'a4';
   applyPrintPageSize(useA4Print ? 210 : (AppState.settings.paperWidth || 80));
   const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
   // ---------- A4 پر رپورٹ ایک صاف، راؤنڈ کارنر والے بل کارڈ کی طرح نظر آئے — تھرمل رول پر یہ ضرورت نہیں (سیدھا کنارے تک) ----------
   area.innerHTML = useA4Print
     ? `<div style="border:1px solid #cbd5e1; border-radius:14px; overflow:hidden;"><img src="${printCanvas.toDataURL('image/png')}" style="width:100%; display:block;" onload="this.dispatchEvent(new Event('printready'))"></div>`
     : `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
-  enterPrintMode();
-  area.querySelector('img').addEventListener('printready', () => window.print(), {once:true});
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 
 // ---------- شیئر — فون کا نیٹو شیئر مینو کھلتا ہے (WhatsApp، WhatsApp Business، یا کوئی بھی ایپ منتخب کی جا سکتی ہے) ----------
@@ -17807,6 +17813,7 @@ function testPrint(){
   applyPrintPageSize(mm);
   const now = new Date();
   const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
   area.innerHTML = `
     <div style="width:${mm}mm; font-family:'Courier New',monospace; padding:6mm; box-sizing:border-box;">
       <div style="text-align:center; font-weight:800; font-size:15px;">✅ TEST PRINT</div>
@@ -17817,8 +17824,7 @@ function testPrint(){
       <div style="border-top:1px dashed #000; margin:8px 0;"></div>
       <div style="text-align:center; font-size:11px;">If this printed correctly,<br>your printer is ready to use.</div>
     </div>`;
-  enterPrintMode();
-  setTimeout(() => window.print(), 50);
+  setTimeout(triggerPrint, 50);
 }
 
 // ---------- ابتدائی لوڈ: جب صفحہ کھلے تو ایک بار product list render ہو ----------
