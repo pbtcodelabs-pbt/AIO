@@ -1708,7 +1708,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO262</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO263</span>
     </div>
   </div>
 
@@ -3404,9 +3404,21 @@
       <div class="modalBoxWide" style="width:460px; max-height:90vh; overflow-y:auto;">
         <h3 id="advOrderModalTitle">📝 New Advance Order — Review &amp; Save</h3>
 
-        <input type="text" id="advCustomerName" placeholder="🧑 Customer name" list="advCustomerNameList" style="width:100%; padding:11px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
-        <datalist id="advCustomerNameList"></datalist>
-        <input type="text" id="advCustomerPhone" placeholder="📞 Phone number (optional, for WhatsApp)" inputmode="tel" style="width:100%; padding:11px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
+        <div style="display:flex; gap:6px; margin-bottom:2px;">
+          <div style="position:relative; flex:1 1 auto; min-width:0;">
+            <input type="text" id="advCustomerName" placeholder="🧑 Customer name" autocomplete="off"
+                   oninput="filterAdvCustomerOptions()" onfocus="openAdvCustList()"
+                   style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
+            <!-- ---------- موجودہ کسٹمرز کی سکرول ایبل فہرست — ٹائپ کرتے ہی فلٹر ہو کر یہیں نیچے کھلتی ہے ---------- -->
+            <div id="advCustomerListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:80;"></div>
+          </div>
+          <select id="advCustAreaFilter" onchange="filterAdvCustomerOptions()" title="Filter by City/Area"
+                  style="flex:0 0 100px; padding:8px 4px; border:1px solid #dbe1ea; border-radius:10px; font-size:11px;">
+            <option value="">🗺️ Area</option>
+          </select>
+        </div>
+        <input type="text" id="advCustomerPhone" placeholder="📞 Phone number (optional, for WhatsApp)" inputmode="tel"
+               oninput="lookupAdvCustomerByPhone()" style="width:100%; padding:11px; margin-top:8px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;">
 
         <div style="display:flex; gap:8px; margin-bottom:8px;">
           <button type="button" onclick="closeAdvOrderCartSheet(); goTo('advOrderPicker');" style="flex:1; background:#eef2ff; color:var(--primary-dark); border:1.5px dashed var(--primary); border-radius:10px; padding:10px; font-weight:700; cursor:pointer; font-size:12.5px;">➕ Add More Items</button>
@@ -3437,19 +3449,81 @@
       </div>
     </div>
 
-    <!-- ---------- Advance Order Bill-Style Preview (Print / Share جیسے اصل بل کے لیے) ---------- -->
+    <!-- ---------- Advance Order Bill-Style Preview (Print / Share جیسے اصل بل کے لیے — اب بل/رپورٹ کے یکساں کنٹرول پینل کے ساتھ) ---------- -->
     <div class="modalOverlay" id="advOrderPreviewModal" onclick="if(event.target===this) closeAdvOrderPreview()">
       <div class="invoicePreviewBox">
         <div class="previewHeader">
           <strong>📝 Advance Order — Approximate Pricing</strong>
           <span style="cursor:pointer;" onclick="closeAdvOrderPreview()">✖</span>
         </div>
+
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — بالکل بل/رپورٹ جیسے، یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے ---------- -->
+        <div class="previewStyleControls">
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🔠 Text</span>
+            <span style="font-size:11px; color:var(--muted);">A</span>
+            <input type="range" id="aopscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setAdvOrderZoom('advOrderFontScale', this.value)" style="flex:1;">
+            <span style="font-size:19px; color:var(--muted);">A</span>
+            <span class="pscValue" id="aopscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">↕ Row</span>
+            <input type="range" id="aopscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setAdvOrderZoom('advOrderRowScale', this.value)" style="flex:1;">
+            <span class="pscValue" id="aopscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          </div>
+          <div class="pscRow">
+            <button id="aopscBoldBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">𝐁 Bold</button>
+            <button id="aopscThinBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">Thin</button>
+          </div>
+          <div class="pscRow">
+            <button id="aopscAlignLeftBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('left')">⬅ Left</button>
+            <button id="aopscAlignCenterBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('center')">↔ Center</button>
+            <button id="aopscAlignRightBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('right')">➡ Right</button>
+          </div>
+          <div class="pscRow">
+            <span class="pscLabel">.00 Decimals</span>
+            <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', -1, 0, 4)">−</button>
+            <span class="pscValue" id="aopscDecimalsVal">0</span>
+            <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', 1, 0, 4)">+</button>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🅰️ Font</span>
+            <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
+            <span class="pscLabel">🎨 Bill Theme</span>
+            <div id="aopscColorSwatches" style="display:flex; gap:8px;"></div>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+              <input type="checkbox" id="aopscA4Chk" onchange="toggleAdvOrderPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+            </label>
+          </div>
+          <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
+          <div id="aopscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
+            <span class="pscLabel">📐 Page</span>
+            <div style="display:flex; gap:6px; flex:1;">
+              <button type="button" id="aopscOrientPortraitBtn" onclick="setAdvOrderOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
+              <button type="button" id="aopscOrientLandscapeBtn" onclick="setAdvOrderOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
+            </div>
+          </div>
+        </div>
+
         <div class="invoicePreviewScrollArea">
           <canvas id="advOrderCanvas"></canvas>
         </div>
         <div class="previewActions">
           <button class="btnPrint" onclick="printAdvOrderPreview()">🖨️ Print</button>
-          <button class="btnWhatsapp" onclick="shareAdvOrderUniversal()">📱 WhatsApp / Share</button>
+          <button class="btnWhatsapp" onclick="shareAdvOrderWhatsapp()">📱 WhatsApp</button>
+          <button class="btnHistory" onclick="shareAdvOrderUniversal()" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share More</button>
+        </div>
+        <!-- ---------- تھرمل رول کے لیے — بغیر کسی اضافی ایپ کے سیدھا بلوٹوتھ پرنٹر سے پرنٹ — A4 پر یہ متعلقہ نہیں ---------- -->
+        <div class="previewActions" id="aopBtPrintRow" style="padding-top:0;">
+          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('advOrderCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+        </div>
+        <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
+        <div class="previewActions" id="aopA4ShareRow" style="padding-top:0; display:none;">
+          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareAdvOrderPdf()">📤 Print/Share A4 PDF</button>
         </div>
       </div>
     </div>
@@ -11279,9 +11353,9 @@ function openAdvOrderCartSheet(){
   document.getElementById('advCustomerPhone').value = advOrderMeta.customerPhone;
   document.getElementById('advOrderNote').value = advOrderMeta.note;
 
-  // ---------- موجودہ کسٹمرز کے نام suggestion کے طور پر ----------
-  document.getElementById('advCustomerNameList').innerHTML =
-    customersData.filter(c => !c.name.includes('Walk-in')).map(c => `<option value="${c.name}">`).join('');
+  // ---------- سٹی/ایریا فلٹر ڈراپ ڈاؤن اور کسٹمر فہرست ہر بار تازہ کریں (نئے کسٹمرز شامل ہو چکے ہو سکتے ہیں) ----------
+  populateAdvAreaFilter();
+  closeAdvCustList();
 
   renderAdvOrderCart();
   document.getElementById('advOrderModal').classList.add('show');
@@ -11292,8 +11366,88 @@ function closeAdvOrderCartSheet(){
   advOrderMeta.customerName = document.getElementById('advCustomerName').value.trim();
   advOrderMeta.customerPhone = document.getElementById('advCustomerPhone').value.trim();
   advOrderMeta.note = document.getElementById('advOrderNote').value.trim();
+  closeAdvCustList();
   document.getElementById('advOrderModal').classList.remove('show');
 }
+
+// ---------- ایڈوانس آرڈر کا کسٹمر پکر — نام/فون سرچ + سٹی/ایریا فلٹر، سکرول ایبل فہرست،
+// اور تینوں (نام/فون/ایریا) آپس میں مطابقت رکھتے ہیں ----------
+function openAdvCustList(){
+  filterAdvCustomerOptions();
+  document.getElementById('advCustomerListWrap')?.classList.add('open');
+}
+function closeAdvCustList(){
+  document.getElementById('advCustomerListWrap')?.classList.remove('open');
+}
+// ---------- سٹی/ایریا فلٹر ڈراپ ڈاؤن کو موجودہ کسٹمرز سے تازہ کریں ----------
+function populateAdvAreaFilter(){
+  const areaSel = document.getElementById('advCustAreaFilter');
+  if(!areaSel) return;
+  const prevArea = areaSel.value;
+  const areas = [...new Set(
+    customersData.filter(c => !c.name.includes('Walk-in') && c.area && c.area.trim())
+                 .map(c => c.area.trim())
+  )].sort((a,b) => a.localeCompare(b));
+  areaSel.innerHTML = '<option value="">🗺️ Area</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+  areaSel.value = areas.includes(prevArea) ? prevArea : '';
+}
+// ---------- نام ٹائپ کرتے ہی، اور سٹی/ایریا بدلتے ہی — فہرست فوراً فلٹر ہو کر نیچے کھلتی ہے ----------
+function filterAdvCustomerOptions(){
+  const listWrap = document.getElementById('advCustomerListWrap');
+  if(!listWrap) return;
+  const searchText = (document.getElementById('advCustomerName')?.value || '').trim().toLowerCase();
+  const areaFilter = document.getElementById('advCustAreaFilter')?.value || '';
+
+  let list = customersData.filter(c => !c.name.includes('Walk-in'));
+  if(areaFilter) list = list.filter(c => (c.area || '').trim() === areaFilter);
+  if(searchText){
+    list = list.filter(c =>
+      c.name.toLowerCase().includes(searchText) ||
+      (c.phone || '').toLowerCase().includes(searchText)
+    );
+  }
+  list = list.slice(0, 40); // ---------- سینکڑوں کسٹمرز میں سے صرف پہلے 40 نتائج — فہرست صاف اور تیز رہے ----------
+
+  if(list.length === 0){
+    listWrap.innerHTML = '<div class="custPickEmpty">No matching customers</div>';
+  } else {
+    listWrap.innerHTML = list.map(c => `
+      <div class="custPickRow" onclick="selectAdvCustomerFromList(${c.customer_id})">
+        <span class="custPickName">${c.name}${c.area ? `<span class="custPickArea">— ${c.area}</span>` : ''}</span>
+        ${c.phone ? `<span style="font-size:10.5px; color:var(--muted); flex:0 0 auto;">${c.phone}</span>` : ''}
+      </div>`).join('');
+  }
+}
+// ---------- فہرست میں سے کسی نام پر ٹیپ — نام + فون + سٹی/ایریا تینوں خودکار پُر ہو جائیں ----------
+function selectAdvCustomerFromList(customerId){
+  const c = customersData.find(cc => String(cc.customer_id) === String(customerId));
+  if(!c) return;
+  document.getElementById('advCustomerName').value = c.name;
+  document.getElementById('advCustomerPhone').value = c.phone || '';
+  if(c.area && c.area.trim()){
+    const areaSel = document.getElementById('advCustAreaFilter');
+    if(areaSel) areaSel.value = c.area.trim();
+  }
+  closeAdvCustList();
+}
+// ---------- فون نمبر ٹائپ کرتے ہی — اگر یہ نمبر کسی موجودہ کسٹمر کا ہے تو نام اور سٹی/ایریا خودکار پُر کر دیں ----------
+function lookupAdvCustomerByPhone(){
+  const phone = document.getElementById('advCustomerPhone').value.trim();
+  if(!phone || phone.length < 5) return; // بہت مختصر نمبر پر تلاش نہ کریں
+  const match = customersData.find(c => !c.name.includes('Walk-in') && (c.phone || '').trim() === phone);
+  if(match){
+    document.getElementById('advCustomerName').value = match.name;
+    if(match.area && match.area.trim()){
+      const areaSel = document.getElementById('advCustAreaFilter');
+      if(areaSel) areaSel.value = match.area.trim();
+    }
+  }
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('advCustomerListWrap');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target) && e.target.id !== 'advCustomerName') wrap.classList.remove('open');
+});
 
 // ---------- پورا آرڈر ہی رد کریں (تصدیق لے کر) ----------
 function discardAdvOrderDraft(){
@@ -11506,6 +11660,7 @@ async function openAdvOrderPreview(orderId){
   if(!order) return;
   currentPreviewAdvOrderId = orderId;
   document.getElementById('advOrderPreviewModal').classList.add('show');
+  syncAdvOrderStyleControls();
   await new Promise(r => setTimeout(r, 100)); // ---------- modal کے نظر آنے کے بعد canvas ڈرائنگ (کچھ WebViews کے لیے ضروری) ----------
   await renderAdvOrderToCanvas(order);
 }
@@ -11514,23 +11669,179 @@ function closeAdvOrderPreview(){
   currentPreviewAdvOrderId = null;
 }
 
-async function renderAdvOrderToCanvas(order){
-  const paperWidthMM = AppState.settings.paperWidth || 80;
-  const pxWidth = paperWidthMM === 80 ? 576 : 384;
+// ---------- Advance Order پریویو کو موجودہ سیٹنگز کے مطابق دوبارہ کھینچیں — بالکل بل/رپورٹ کی طرح ----------
+async function rerenderAdvOrderPreview(){
+  if(!currentPreviewAdvOrderId) return;
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order) return;
+  await renderAdvOrderToCanvas(order);
+}
+
+// ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں — بل/رپورٹ کی طرح ----------
+function syncAdvOrderStyleControls(){
+  document.getElementById('aopscFontScaleVal').textContent = (AppState.settings.advOrderFontScale || 100) + '%';
+  const fontSlider = document.getElementById('aopscFontScaleSlider');
+  if(fontSlider) fontSlider.value = AppState.settings.advOrderFontScale || 100;
+  document.getElementById('aopscRowScaleVal').textContent = (AppState.settings.advOrderRowScale || 100) + '%';
+  const rowSlider = document.getElementById('aopscRowScaleSlider');
+  if(rowSlider) rowSlider.value = AppState.settings.advOrderRowScale || 100;
+  const isBold = AppState.settings.advOrderBoldItems !== false;
+  document.getElementById('aopscBoldBtn').classList.toggle('active', isBold);
+  document.getElementById('aopscThinBtn').classList.toggle('active', !isBold);
+  const align = AppState.settings.advOrderAlign || 'left';
+  document.getElementById('aopscAlignLeftBtn').classList.toggle('active', align === 'left');
+  document.getElementById('aopscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('aopscAlignRightBtn').classList.toggle('active', align === 'right');
+  document.getElementById('aopscDecimalsVal').textContent = AppState.settings.advOrderPriceDecimals ?? 0;
+
+  const fontSelect = document.getElementById('aopscFontFamilySelect');
+  if(fontSelect){
+    if(!fontSelect.dataset.filled){
+      fontSelect.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+      fontSelect.dataset.filled = '1';
+    }
+    fontSelect.value = AppState.settings.advOrderFontId || 'segoe';
+  }
+
+  const swatchWrap = document.getElementById('aopscColorSwatches');
+  if(swatchWrap){
+    try{
+      swatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
+      swatchWrap.querySelectorAll('button').forEach(btn => {
+        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
+        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
+      });
+    }catch(e){ console.error('swatch render failed', e); }
+  }
+  document.getElementById('aopscA4Chk').checked = AppState.settings.advOrderPrintStyle === 'a4';
+  const orientRow = document.getElementById('aopscOrientRow');
+  if(orientRow) orientRow.style.display = AppState.settings.advOrderPrintStyle === 'a4' ? 'flex' : 'none';
+  const btRow = document.getElementById('aopBtPrintRow');
+  if(btRow) btRow.style.display = AppState.settings.advOrderPrintStyle === 'a4' ? 'none' : 'flex';
+  const shareRow = document.getElementById('aopA4ShareRow');
+  if(shareRow) shareRow.style.display = AppState.settings.advOrderPrintStyle === 'a4' ? 'flex' : 'none';
+  setAdvOrderOrientation(AppState.settings.advOrderOrientation || 'portrait');
+}
+
+function setAdvOrderZoom(settingKey, val){
+  const min = settingKey === 'advOrderRowScale' ? 70 : 70;
+  const max = settingKey === 'advOrderRowScale' ? 220 : 260;
+  const clamped = Math.max(min, Math.min(max, Number(val) || 100));
+  AppState.settings[settingKey] = clamped;
+  const label = document.getElementById(settingKey === 'advOrderRowScale' ? 'aopscRowScaleVal' : 'aopscFontScaleVal');
+  if(label) label.textContent = clamped + '%';
+  persistAllData();
+  rerenderAdvOrderPreview();
+}
+function adjustAdvOrderStyle(settingKey, delta, min, max){
+  const current = AppState.settings[settingKey] ?? 0;
+  const next = Math.max(min, Math.min(max, current + delta));
+  AppState.settings[settingKey] = next;
+  persistAllData();
+  syncAdvOrderStyleControls();
+  rerenderAdvOrderPreview();
+}
+function toggleAdvOrderBold(){
+  AppState.settings.advOrderBoldItems = !(AppState.settings.advOrderBoldItems !== false);
+  persistAllData();
+  syncAdvOrderStyleControls();
+  rerenderAdvOrderPreview();
+}
+function setAdvOrderAlign(align){
+  AppState.settings.advOrderAlign = align;
+  persistAllData();
+  syncAdvOrderStyleControls();
+  rerenderAdvOrderPreview();
+}
+function setAdvOrderFontFamily(fontId){
+  AppState.settings.advOrderFontId = fontId;
+  persistAllData();
+  rerenderAdvOrderPreview();
+}
+function toggleAdvOrderPaperStyle(checked){
+  AppState.settings.advOrderPrintStyle = checked ? 'a4' : 'thermal';
+  persistAllData();
+  syncAdvOrderStyleControls();
+  rerenderAdvOrderPreview();
+}
+function setAdvOrderOrientation(orient){
+  AppState.settings.advOrderOrientation = orient;
+  persistAllData();
+  const pBtn = document.getElementById('aopscOrientPortraitBtn');
+  const lBtn = document.getElementById('aopscOrientLandscapeBtn');
+  if(pBtn && lBtn){
+    const activeStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid var(--primary); background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);';
+    const inactiveStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;';
+    pBtn.style.cssText = orient === 'portrait' ? activeStyle : inactiveStyle;
+    lBtn.style.cssText = orient === 'landscape' ? activeStyle : inactiveStyle;
+  }
+}
+
+// ---------- A4 PDF بنائیں — بل کی طرح: کینوس کو رنگین کارڈ کے اندر رکھ کر ----------
+function buildAdvOrderPdf(){
   const canvas = document.getElementById('advOrderCanvas');
-  const scale = pxWidth / 576;
+  const { jsPDF } = window.jspdf;
+  const orientation = AppState.settings.advOrderOrientation === 'landscape' ? 'landscape' : 'portrait';
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210, pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 12;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const scale = availH/drawH; drawH = availH; drawW *= scale; }
+  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM + (availH-drawH)/2;
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
+  pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
+  pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  return pdf;
+}
+
+// ---------- A4 PDF کو براہ راست شیئر کریں — Android کی نیٹو شیئر شیٹ کھلتی ہے ----------
+async function shareAdvOrderPdf(){
+  if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+  await rerenderAdvOrderPreview();
+  const pdf = buildAdvOrderPdf();
+  const blob = pdf.output('blob');
+  const file = new File([blob], 'AdvanceOrder.pdf', {type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:'Advance Order'}); }
+    catch(e){ /* یوزر نے منسوخ کر دی */ }
+  } else {
+    window.open(pdf.output('bloburl'), '_blank');
+  }
+}
+
+async function renderAdvOrderToCanvas(order){
+  const useA4 = AppState.settings.advOrderPrintStyle === 'a4';
+  const paperWidthMM = AppState.settings.paperWidth || 80;
+  const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
+  const canvas = document.getElementById('advOrderCanvas');
+  const baseScale = pxWidth / 576;
+
+  // ---------- بل/رپورٹ کی طرح یہاں بھی Zoom/Row/Decimals/Bold/Align/Font/Theme سب لاگو ہوتے ہیں ----------
+  const fscale = (AppState.settings.advOrderFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.advOrderRowScale || 100) / 100;
+  const bold = AppState.settings.advOrderBoldItems !== false;
+  const align = AppState.settings.advOrderAlign || 'left';
+  const decimals = AppState.settings.advOrderPriceDecimals ?? 0;
+  const scale = baseScale * fscale;
+  const rc = getReceiptColor();
 
   const noW = Math.round(28 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
-  const tableLeft = 8, tableRight = pxWidth - 8;
+  const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
   const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
   const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
-  const rowH = 24, headerH = 22;
+  const rowH = Math.round(24 * scale * rowScaleSetting), headerH = Math.round(22 * scale * rowScaleSetting);
   const tableH = headerH + (order.items.length * rowH);
 
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.fontId) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.advOrderFontId) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
-  const fscale = (AppState.settings.printFontScale || 100) / 100;
-  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
+  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
+  const fmt = (n) => (Number(n)||0).toFixed(decimals);
 
   // ---------- اونچائی کا حساب پہلے سے — بینر باکس + ڈسکلیمر پیراگراف (کئی لائنوں کا) کے لیے اضافی جگہ ----------
   const disclaimerLines = [
@@ -11540,17 +11851,19 @@ async function renderAdvOrderToCanvas(order){
     'lower than shown here.',
     '(This is an approximate price, not final — actual rate will be set at delivery)'
   ];
-  let estimatedHeight = 30 + 26 + 22 + 22 + 54 /* banner box */ + tableH + 26 + 40 /* subtotal */ + (disclaimerLines.length * 15) + 30 + 40;
-  if(AppState.settings.businessAddress) estimatedHeight += 16;
-  if(AppState.settings.businessPhone) estimatedHeight += 16;
-  if(order.customerPhone) estimatedHeight += 16;
-  if(order.note) estimatedHeight += 34;
+  const m = useA4 ? 1.6 : 1; // ---------- A4 پر اضافی مارجن/سپیسنگ ----------
+  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH + (disclaimerLines.length * 15 * scale);
+  if(useA4) estimatedHeight += 80;
+  if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
+  if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
+  if(order.customerPhone) estimatedHeight += 16 * scale;
+  if(order.note) estimatedHeight += 34 * scale;
 
   canvas.width = pxWidth;
-  canvas.height = estimatedHeight;
+  canvas.height = Math.round(estimatedHeight);
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, pxWidth, estimatedHeight);
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
 
   try{
     await document.fonts.load(`bold 26px ${canvasFontFamily}`);
@@ -11558,47 +11871,47 @@ async function renderAdvOrderToCanvas(order){
     await document.fonts.ready;
   }catch(e){ /* fallback font خودکار */ }
 
-  let y = 30;
+  let y = 30 * scale;
   ctx.textAlign = 'center';
   ctx.font = F('bold 24px');
   ctx.fillStyle = '#000';
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 24;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 24 * scale;
 
   if(AppState.settings.businessAddress || AppState.settings.businessPhone){
     ctx.font = F('12px');
-    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16; }
-    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16; }
+    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16 * scale; }
+    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16 * scale; }
   }
 
-  // ---------- بڑا واضح سرخ بینر — ADVANCE ORDER / APPROXIMATE PRICING ----------
-  y += 6;
-  const bannerTop = y, bannerH = 48;
-  ctx.fillStyle = '#fee2e2';
+  // ---------- بڑا واضح بینر — ADVANCE ORDER / APPROXIMATE PRICING — اب بل/رپورٹ کے منتخب تھیم رنگ سے ہم آہنگ ----------
+  y += 6 * scale;
+  const bannerTop = y, bannerH = 48 * scale;
+  ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, bannerTop, tableRight - tableLeft, bannerH);
-  ctx.strokeStyle = '#b91c1c';
+  ctx.strokeStyle = rc.border;
   ctx.lineWidth = 2;
   ctx.strokeRect(tableLeft + 1, bannerTop + 1, tableRight - tableLeft - 2, bannerH - 2);
-  ctx.fillStyle = '#b91c1c';
+  ctx.fillStyle = rc.border;
   ctx.font = F('bold 18px');
-  ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + 22);
+  ctx.fillText('📝 ADVANCE ORDER', pxWidth/2, bannerTop + 22 * scale);
   ctx.font = F('bold 13px');
-  ctx.fillText('⚠️ APPROXIMATE PRICING', pxWidth/2, bannerTop + 40);
-  y = bannerTop + bannerH + 16;
+  ctx.fillText('⚠️ APPROXIMATE PRICING', pxWidth/2, bannerTop + 40 * scale);
+  y = bannerTop + bannerH + 16 * scale;
   ctx.fillStyle = '#000';
 
   ctx.font = F('bold 15px');
   const dateObj = new Date(order.createdAt);
   const dd = String(dateObj.getDate()).padStart(2,'0'), mm2 = String(dateObj.getMonth()+1).padStart(2,'0'), yy = String(dateObj.getFullYear()).slice(-2);
-  ctx.fillText(`Advance Order #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22;
+  ctx.fillText(`Advance Order #${order.id} — ${dd}/${mm2}/${yy}`, pxWidth/2, y); y += 22 * scale;
 
   ctx.font = F('16px');
-  ctx.fillText('Customer: ' + order.customerName, pxWidth/2, y); y += 20;
+  ctx.fillText('Customer: ' + order.customerName, pxWidth/2, y); y += 20 * scale;
   if(order.customerPhone){
     ctx.font = F('13px');
-    ctx.fillText(order.customerPhone, pxWidth/2, y); y += 20;
+    ctx.fillText(order.customerPhone, pxWidth/2, y); y += 20 * scale;
   }
 
-  drawSolidLine(ctx, y, pxWidth); y += 16;
+  drawSolidLine(ctx, y, pxWidth); y += 16 * scale;
 
   // ---------- آئٹمز ٹیبل ----------
   const tableTop = y;
@@ -11610,9 +11923,9 @@ async function renderAdvOrderToCanvas(order){
   drawTableHLine(hLineY);
 
   ctx.font = F('bold 13px');
-  const headerBaseline = tableTop + headerH - 7;
+  const headerBaseline = tableTop + headerH - 7 * scale;
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = 'left'; ctx.fillText('Item', colX[1]+4, headerBaseline);
+  ctx.textAlign = align; ctx.fillText('Item', align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), headerBaseline);
   ctx.textAlign = 'right';
   ctx.fillText('Qty', colX[3]-4, headerBaseline);
   ctx.fillText('Approx.', colX[4]-4, headerBaseline);
@@ -11623,40 +11936,41 @@ async function renderAdvOrderToCanvas(order){
   ctx.font = F('bold 14px');
   const maxItemWidth = itemW - 8;
   order.items.forEach((item, idx) => {
-    const rowBaseline = hLineY + rowH - 7;
+    const rowBaseline = hLineY + rowH - 7 * scale;
     let displayName = item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
     if(displayName !== item.name) displayName = displayName.trim() + '…';
 
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
-    ctx.textAlign = 'left'; ctx.fillText(displayName, colX[1]+4, rowBaseline);
+    ctx.textAlign = align;
+    ctx.fillText(displayName, align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), rowBaseline);
     ctx.textAlign = 'right';
     ctx.fillText(String(item.qty), colX[3]-4, rowBaseline);
-    ctx.fillText(item.unitPrice.toFixed(0), colX[4]-4, rowBaseline);
-    ctx.fillText((item.qty*item.unitPrice).toFixed(0), colX[5]-4, rowBaseline);
+    ctx.fillText(fmt(item.unitPrice), colX[4]-4, rowBaseline);
+    ctx.fillText(fmt(item.qty*item.unitPrice), colX[5]-4, rowBaseline);
 
     hLineY += rowH;
     drawTableHLine(hLineY);
   });
 
-  y = tableTop + tableH + 26;
+  y = tableTop + tableH + 26 * scale;
 
   ctx.textAlign = 'right';
   ctx.font = F('bold 20px');
   const grandTotal = advOrderTotal(order);
-  ctx.fillText('Approx. Total: Rs. ' + grandTotal.toFixed(0), pxWidth-10, y);
-  y += 30;
+  ctx.fillText('Approx. Total: Rs. ' + fmt(grandTotal), pxWidth-(10*scale), y);
+  y += 30 * scale;
 
   if(order.note){
     ctx.textAlign = 'left';
     ctx.font = F('12px');
     ctx.fillText('Note: ' + order.note, tableLeft, y);
-    y += 22;
+    y += 22 * scale;
   }
 
   // ---------- ڈسکلیمر باکس — واضح متن کہ یہ حتمی قیمت نہیں ----------
-  const discTop = y, discH = (disclaimerLines.length * 15) + 12;
+  const discTop = y, discH = (disclaimerLines.length * 15 * scale) + 12 * scale;
   ctx.fillStyle = '#fff7ed';
   ctx.fillRect(tableLeft, discTop, tableRight - tableLeft, discH);
   ctx.strokeStyle = '#c2410c';
@@ -11665,24 +11979,60 @@ async function renderAdvOrderToCanvas(order){
   ctx.fillStyle = '#c2410c';
   ctx.textAlign = 'center';
   ctx.font = F('11px');
-  let dy = discTop + 16;
-  disclaimerLines.forEach(line => { ctx.fillText(line, pxWidth/2, dy); dy += 15; });
-  y = discTop + discH + 24;
+  let dy = discTop + 16 * scale;
+  disclaimerLines.forEach(line => { ctx.fillText(line, pxWidth/2, dy); dy += 15 * scale; });
+  y = discTop + discH + 24 * scale;
 
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = F('13px');
-  ctx.fillText('Thank you — see you in our next round!', pxWidth/2, y);
+  ctx.fillText('Thank you — see you in our next round!', pxWidth/2, y); y += 20 * scale;
+
+  // ---------- اونچائی کو اصل ڈرائنگ کے مطابق درست کریں (اندازہ ہمیشہ تھوڑا اوپر نیچے ہو سکتا ہے) ----------
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH;
+    ctx.putImageData(imgData, 0, 0);
+  }
 }
 
-function printAdvOrderPreview(){
+async function printAdvOrderPreview(){
+  await rerenderAdvOrderPreview(); // ---------- حفاظتی وجہ: کینوس بالکل تازہ ہو، خاص طور پر ابھی ابھی سٹائل بدلنے کے فوری بعد پرنٹ دبانے کی صورت میں ----------
   const canvas = document.getElementById('advOrderCanvas');
   if(!canvas) return;
+  const useA4Print = AppState.settings.advOrderPrintStyle === 'a4';
+
+  if(useA4Print){
+    // ---------- A4 پر بل/رپورٹ کی طرح — اصل PDF کھول کر دکھائیں (پورٹریٹ/لینڈسکیپ)، اسی PDF ویور کے
+    // اوپری حصے میں Chrome کے اپنے پرنٹ/شیئر آئیکن پہلے سے موجود ہوتے ہیں ----------
+    if(!window.jspdf){
+      alert('PDF library not loaded — check your internet connection and try again.');
+      return;
+    }
+    const pdf = buildAdvOrderPdf();
+    window.open(pdf.output('bloburl'), '_blank');
+    return;
+  }
+
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
   area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+
+// ---------- سیدھا کسٹمر کے محفوظ شدہ نمبر کی WhatsApp چیٹ کھولیں — بالکل بل کی طرح ----------
+function shareAdvOrderWhatsapp(){
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order) return;
+  if(!order.customerPhone){
+    alert("This customer's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
+    return;
+  }
+  const digits = order.customerPhone.replace(/[^0-9]/g, '');
+  const text = `Advance Order #${order.id} — ${order.customerName} — Approx. Total: Rs. ${advOrderTotal(order).toLocaleString()} (approximate pricing, subject to change at delivery)`;
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 // ---------- WhatsApp/دیگر ایپس کو اصل بل کی تصویر بھیجیں — ٹیکسٹ میسج نہیں، Web Share API کے ذریعے اصل پرنٹ ایبل بل ----------
@@ -11716,9 +12066,6 @@ function printAdvanceOrdersList(){
   const pending = advanceOrdersData.filter(o => o.status !== 'fulfilled');
   if(pending.length === 0){ alert('No pending advance orders to print.'); return; }
 
-  const mm = AppState.settings.paperWidth || 80;
-  applyPrintPageSize(mm);
-
   // ---------- مجموعی خلاصہ: ہر آئٹم کی کل مقدار اور اندازاً مالیت ----------
   const totals = {};
   pending.forEach(o => o.items.forEach(i => {
@@ -11727,36 +12074,51 @@ function printAdvanceOrdersList(){
     totals[i.name].amount += i.qty * i.unitPrice;
   }));
   const grandTotal = pending.reduce((s,o) => s + advOrderTotal(o), 0);
+  const rc = getReceiptColor();
 
   const customerBlocks = pending.map(o => `
-    <div style="border-top:1px dashed #000; margin:6px 0; padding-top:4px;">
-      <div style="font-weight:800; font-size:12.5px;">${o.customerName}${o.customerPhone ? ' — '+o.customerPhone : ''}</div>
-      ${o.items.map(i => `<div style="font-size:11px; display:flex; justify-content:space-between;"><span>• ${i.name} x${i.qty}</span><span>Rs. ${(i.qty*i.unitPrice).toLocaleString()}</span></div>`).join('')}
-      <div style="font-size:11px; font-weight:700; text-align:right;">Order Approx. Total: Rs. ${advOrderTotal(o).toLocaleString()}</div>
-      ${o.note ? `<div style="font-size:10.5px; font-style:italic;">Note: ${o.note}</div>` : ''}
+    <div style="border-top:1px dashed #94a3b8; margin:10px 0; padding-top:8px;">
+      <div style="font-weight:800; font-size:14px;">${o.customerName}${o.customerPhone ? ' — '+o.customerPhone : ''}</div>
+      ${o.items.map(i => `<div style="font-size:12.5px; display:flex; justify-content:space-between;"><span>• ${i.name} x${i.qty}</span><span>Rs. ${(i.qty*i.unitPrice).toLocaleString()}</span></div>`).join('')}
+      <div style="font-size:12.5px; font-weight:700; text-align:right; margin-top:2px;">Order Approx. Total: Rs. ${advOrderTotal(o).toLocaleString()}</div>
+      ${o.note ? `<div style="font-size:11.5px; font-style:italic; color:#64748b;">Note: ${o.note}</div>` : ''}
     </div>`).join('');
 
   const totalsBlock = Object.entries(totals).map(([name, t]) =>
-    `<div style="font-size:11px; display:flex; justify-content:space-between;"><span>• ${name}: ${t.qty}</span><span>Rs. ${t.amount.toLocaleString()}</span></div>`
+    `<div style="font-size:12.5px; display:flex; justify-content:space-between;"><span>• ${name}: ${t.qty}</span><span>Rs. ${t.amount.toLocaleString()}</span></div>`
   ).join('');
 
-  const area = document.getElementById('printReceiptArea');
-  enterPrintMode();
-  area.innerHTML = `
-    <div style="width:${mm}mm; font-family:'Courier New',monospace; padding:6mm; box-sizing:border-box;">
-      <div style="text-align:center; font-weight:800; font-size:15px; color:#b91c1c;">📝 ADVANCE ORDERS</div>
-      <div style="text-align:center; font-weight:700; font-size:11px; color:#b91c1c;">⚠️ APPROXIMATE PRICING — NOT FINAL</div>
-      <div style="text-align:center; font-size:11px; margin-top:2px;">${new Date().toLocaleString()}</div>
-      <div style="text-align:center; font-size:11px;">${pending.length} pending order(s)</div>
-      ${customerBlocks}
-      <div style="border-top:2px solid #000; margin:8px 0 4px; font-weight:800; font-size:12.5px;">TOTAL TO PREPARE</div>
-      ${totalsBlock}
-      <div style="border-top:1px solid #000; margin:6px 0 4px; font-weight:800; font-size:13px; display:flex; justify-content:space-between;"><span>GRAND TOTAL (approx.)</span><span>Rs. ${grandTotal.toLocaleString()}</span></div>
-      <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; font-size:10px; text-align:center; color:#c2410c;">
-        These are approximate prices only. Final rates will be confirmed at time of delivery and may go up or down.
+  // ---------- بل/رپورٹ کی طرح — الگ صاف پیج، اپنا ہی Print/Share بٹن، پرانی same-page print-mode ٹرک استعمال نہیں کی
+  // (وہی ٹرک پہلے کئی جگہ گڑبڑ کی وجہ بن چکی تھی — اسی لیے باقی سب جگہ ترک کر دی گئی تھی) ----------
+  const pageHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Advance Orders</title>
+  <style>
+    @media print{ #aolPrintBtnWrap{ display:none; } }
+    body{ font-family:Arial, Helvetica, sans-serif; margin:0; padding:16px; color:#111; }
+    .aolWrap{ max-width:560px; margin:0 auto; }
+  </style></head>
+  <body>
+    <div id="aolPrintBtnWrap" style="max-width:560px; margin:0 auto 14px; display:flex; gap:8px;">
+      <button onclick="window.print()" style="flex:1; padding:12px; border:none; border-radius:10px; background:${rc.border}; color:#fff; font-weight:700; font-size:14px;">🖨️ Print</button>
+    </div>
+    <div class="aolWrap">
+      <div style="background:${rc.bg}; border:2px solid ${rc.border}; border-radius:10px; padding:14px;">
+        <div style="text-align:center; font-weight:800; font-size:17px; color:${rc.border};">📝 ADVANCE ORDERS</div>
+        <div style="text-align:center; font-weight:700; font-size:12px; color:${rc.border};">⚠️ APPROXIMATE PRICING — NOT FINAL</div>
+        <div style="text-align:center; font-size:12px; margin-top:4px;">${new Date().toLocaleString()}</div>
+        <div style="text-align:center; font-size:12px;">${pending.length} pending order(s)</div>
+        ${customerBlocks}
+        <div style="border-top:2px solid #111; margin:10px 0 6px; font-weight:800; font-size:14px;">TOTAL TO PREPARE</div>
+        ${totalsBlock}
+        <div style="border-top:1px solid #111; margin:8px 0 4px; padding-top:4px; font-weight:800; font-size:15px; display:flex; justify-content:space-between;"><span>GRAND TOTAL (approx.)</span><span>Rs. ${grandTotal.toLocaleString()}</span></div>
+        <div style="border-top:1px dashed #94a3b8; margin-top:10px; padding-top:8px; font-size:11px; text-align:center; color:#c2410c;">
+          These are approximate prices only. Final rates will be confirmed at time of delivery and may go up or down.
+        </div>
       </div>
-    </div>`;
-  setTimeout(triggerPrint, 50);
+    </div>
+  </body></html>`;
+
+  const blob = new Blob([pageHtml], {type: 'text/html'});
+  window.open(URL.createObjectURL(blob), '_blank');
 }
 
 /* =====================================================================
