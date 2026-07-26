@@ -1671,7 +1671,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO270</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO271</span>
     </div>
   </div>
 
@@ -1746,7 +1746,7 @@
         </div>
         <div class="hbcIconsRow">
           <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now">💾</button>
-          <button class="hbcChatBtn admin-only" onclick="document.getElementById('importBackupInputHome').click()" title="Restore Backup">🔄</button>
+          <button class="hbcChatBtn admin-only" onclick="triggerRestoreWithHint('importBackupInputHome')" title="Restore Backup">🔄</button>
           <button class="hbcChatBtn" onclick="openMyAdsModal()" title="My Ads — Promote This App">📣</button>
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
@@ -2057,7 +2057,7 @@
       <div class="dashQuickBar">
         <div class="dashQuickBackup">
           <button class="dqBackupBtn dqExport" onclick="exportBackupData()">⬇️ Export Backup</button>
-          <button class="dqBackupBtn dqImport" onclick="document.getElementById('importBackupInputDash').click()">⬆️ Import Backup</button>
+          <button class="dqBackupBtn dqImport" onclick="triggerRestoreWithHint('importBackupInputDash')">⬆️ Import Backup</button>
           <input type="file" id="importBackupInputDash" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
         <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
@@ -3696,7 +3696,7 @@
               <span class="backupBtnLabel">Export Backup</span>
               <span class="backupBtnSub">Save all data to a file</span>
             </button>
-            <button class="backupActionBtn backupImportBtn" onclick="document.getElementById('importBackupInput').click()">
+            <button class="backupActionBtn backupImportBtn" onclick="triggerRestoreWithHint('importBackupInput')">
               <span class="backupBtnIcon">⬆️</span>
               <span class="backupBtnLabel">Import Backup</span>
               <span class="backupBtnSub">Restore from a file</span>
@@ -4153,6 +4153,21 @@
   </div>
 </div>
 
+<!-- RESTORE HINT — فون کا اپنا فائل پکر ہماری ویب ایپ کے کنٹرول میں نہیں (اس لیے اندر جا کر ہائی لائٹ نہیں کر سکتے)،
+     اس لیے فائل پکر کھلنے سے پہلے صحیح فائل کا نام واضح دکھا دیں + ایک ٹیپ میں کاپی، تاکہ پکر کے سرچ آئیکن میں پیسٹ کر کے فوراً وہی فائل مل جائے -->
+<div class="modalOverlay" id="restoreHintModal" onclick="if(event.target===this) closeRestoreHintModal()">
+  <div class="backupConfirmBox">
+    <div class="backupConfirmIconWrap"><span>💾</span></div>
+    <h3>Look for this file</h3>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">Your phone's own file picker will open next. It will show all your backup files — your <b>most recent</b> one is this:</p>
+    <div id="restoreHintFileChip" class="backupFileChip" style="word-break:break-all;">📄</div>
+    <button class="backupConfirmCloseBtn" style="background:#eef2ff; color:var(--primary-dark); font-size:12.5px;" onclick="copyRestoreHintFilename()">📋 Copy This Filename</button>
+    <p style="font-size:11px; color:var(--muted); margin-top:6px;">Tip: in the file picker, tap the 🔍 search icon and paste this name to jump straight to it — even if older backups are listed too.</p>
+    <button class="backupConfirmCloseBtn" onclick="proceedToRestoreFilePicker()">📁 Open File Picker</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="closeRestoreHintModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- IMPORT BACKUP — تصدیقی پیغام (پرانے نیٹو confirm() کی جگہ، خوبصورت برانڈڈ ڈیزائن) -->
 <div class="modalOverlay" id="importConfirmModal" onclick="if(event.target===this) cancelImportConfirm()">
   <div class="backupConfirmBox">
@@ -4339,6 +4354,46 @@ function exportBackupData(){
   showBackupConfirmModal('export', fileName, {
     products: productsData.length, customers: customersData.length, invoices: invoicesData.length
   });
+}
+
+// ---------- ری سٹور دبانے پر پہلے صحیح فائل کا نام واضح دکھائیں (فون کا اپنا فائل پکر ہمارے کنٹرول میں نہیں،
+// اس لیے اندر جا کر ہائی لائٹ نہیں کر سکتے — مگر نام صاف دکھا کر اور کاپی بٹن دے کر ڈھونڈنا آسان بنا سکتے ہیں) ----------
+let pendingRestoreInputId = null;
+function triggerRestoreWithHint(inputId){
+  pendingRestoreInputId = inputId;
+  const fileName = AppState.settings.lastBackupFileName;
+  const chip = document.getElementById('restoreHintFileChip');
+  if(fileName){
+    chip.textContent = '📄 ' + fileName;
+    chip.style.display = 'block';
+  } else {
+    chip.textContent = '📄 No backup taken yet on this device';
+    chip.style.display = 'block';
+  }
+  document.getElementById('restoreHintModal').classList.add('show');
+}
+function closeRestoreHintModal(){
+  document.getElementById('restoreHintModal').classList.remove('show');
+  pendingRestoreInputId = null;
+}
+function copyRestoreHintFilename(){
+  const fileName = AppState.settings.lastBackupFileName;
+  if(!fileName) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(fileName).then(() => {
+      alert('📋 Copied: ' + fileName);
+    }).catch(() => {
+      alert('Could not copy automatically. Filename: ' + fileName);
+    });
+  } else {
+    alert('Could not copy automatically. Filename: ' + fileName);
+  }
+}
+function proceedToRestoreFilePicker(){
+  const inputId = pendingRestoreInputId;
+  document.getElementById('restoreHintModal').classList.remove('show');
+  pendingRestoreInputId = null;
+  if(inputId) document.getElementById(inputId)?.click();
 }
 
 function importBackupData(event){
