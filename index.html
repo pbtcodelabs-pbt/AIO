@@ -1671,7 +1671,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO274</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO275</span>
     </div>
   </div>
 
@@ -2082,13 +2082,13 @@
           <div class="finRow"><span>📦 Stock Value</span><span id="hlStock">—</span></div>
           <div class="finRow"><span>💵 Cash in Hand</span><span id="hlCash">—</span></div>
           <div class="finRow"><span>🤝 Customer Receivables</span><span id="hlReceivable">—</span></div>
-          <div class="finRow"><span>📔 Diary Receivable</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finRow"><span>📔 Diary Qarz</span><span id="hlDiaryReceivable">—</span></div>
           <div class="finSplitTotal" id="finGreenTotal">Total: Rs. 0</div>
         </div>
         <div class="finSplitCol finRed">
           <div class="finSplitHead">🔴 Money Going Out / Liabilities</div>
           <div class="finRow"><span>📤 Supplier Payables</span><span id="hlPayable">—</span></div>
-          <div class="finRow"><span>📔 Diary Payable</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finRow"><span>📔 Diary Udhaar</span><span id="hlDiaryPayable">—</span></div>
           <div class="finSplitTotal" id="finRedTotal">Total: Rs. 0</div>
         </div>
       </div>
@@ -3035,15 +3035,15 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
-      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. Red = We Owe, Green = We're Owed.</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 Udhaar = We Owe Them, 🟢 Qarz = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 Total Payable</div>
+          <div class="diaryTotalLabel">🔴 Total Udhaar</div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
         <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 Total Receivable</div>
+          <div class="diaryTotalLabel">🟢 Total Qarz</div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
@@ -3131,8 +3131,8 @@
         <datalist id="diaryNameSuggestions"></datalist>
         <input type="number" id="diaryNewAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 Payable</button>
-          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 Receivable</button>
+          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 Udhaar</button>
+          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 Qarz</button>
         </div>
         <input type="text" id="diaryNewNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
@@ -3154,8 +3154,8 @@
         <input type="number" id="diaryAdjustAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input type="text" id="diaryAdjustNote" placeholder="What's this for? (optional, e.g. milk, rent)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions" style="margin-bottom:8px;">
-          <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 Add to Owed</button>
-          <button class="saveBtn" style="background:var(--success);" onclick="diaryAdjustBalance(1)">🟢 Add to Receivable</button>
+          <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 Add to Udhaar</button>
+          <button class="saveBtn" style="background:var(--success);" onclick="diaryAdjustBalance(1)">🟢 Add to Qarz</button>
         </div>
         <div class="modalActions" style="margin-bottom:8px;">
           <button class="saveBtn" style="background:#0284c7;" onclick="diarySettlePartial()">✅ Payment/Collection Made (Reduce Balance)</button>
@@ -3164,7 +3164,7 @@
         <div id="diaryHistoryList" style="max-height:140px; overflow-y:auto; font-size:12px; color:#64748b; border-top:1px solid #eef1f5; margin-top:6px; padding-top:6px;"></div>
 
         <div class="modalActions" style="margin-top:8px;">
-          <button class="saveBtn" style="background:#eef2ff; color:var(--primary-dark);" onclick="shareDiaryPoster()">🖨️ Print / Share Statement</button>
+          <button class="saveBtn" style="background:#eef2ff; color:var(--primary-dark);" onclick="openDiaryStatementPreview()">🖨️ Print / Share Statement</button>
         </div>
 
         <div class="modalActions" style="margin-top:10px;">
@@ -3180,13 +3180,88 @@
         <h3>✏️ Edit This Entry</h3>
         <input type="number" id="diaryHistEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 Payable</button>
-          <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 Receivable</button>
+          <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 Udhaar</button>
+          <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 Qarz</button>
         </div>
         <input type="text" id="diaryHistEditNote" placeholder="What's this for? (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('diaryHistoryEditModal').classList.remove('show')">Cancel</button>
           <button class="saveBtn" onclick="saveDiaryHistoryEdit()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY DIARY — Full Bill-Style Ledger Statement Preview (بالکل بل/رپورٹ/ایڈوانس آرڈر/پرچیز آرڈر جیسا) -->
+    <div class="modalOverlay" id="diaryStatementModal" onclick="if(event.target===this) closeDiaryStatementPreview()">
+      <div class="invoicePreviewBox">
+        <div class="previewHeader">
+          <strong>📔 Ledger Statement</strong>
+          <span style="cursor:pointer;" onclick="closeDiaryStatementPreview()">✖</span>
+        </div>
+
+        <div class="previewStyleControls">
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🔠 Text</span>
+            <span style="font-size:11px; color:var(--muted);">A</span>
+            <input type="range" id="dscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setDiaryStatementZoom('diaryFontScale', this.value)" style="flex:1;">
+            <span style="font-size:19px; color:var(--muted);">A</span>
+            <span class="pscValue" id="dscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">↕ Row</span>
+            <input type="range" id="dscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setDiaryStatementZoom('diaryRowScale', this.value)" style="flex:1;">
+            <span class="pscValue" id="dscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          </div>
+          <div class="pscRow">
+            <button id="dscBoldBtn" class="pscToggleBtn" onclick="toggleDiaryStatementBold()">𝐁 Bold</button>
+            <button id="dscThinBtn" class="pscToggleBtn" onclick="toggleDiaryStatementBold()">Thin</button>
+          </div>
+          <div class="pscRow">
+            <button id="dscAlignLeftBtn" class="pscToggleBtn" onclick="setDiaryStatementAlign('left')">⬅ Left</button>
+            <button id="dscAlignCenterBtn" class="pscToggleBtn" onclick="setDiaryStatementAlign('center')">↔ Center</button>
+            <button id="dscAlignRightBtn" class="pscToggleBtn" onclick="setDiaryStatementAlign('right')">➡ Right</button>
+          </div>
+          <div class="pscRow">
+            <span class="pscLabel">.00 Decimals</span>
+            <button onclick="adjustDiaryStatementStyle('diaryPriceDecimals', -1, 0, 4)">−</button>
+            <span class="pscValue" id="dscDecimalsVal">0</span>
+            <button onclick="adjustDiaryStatementStyle('diaryPriceDecimals', 1, 0, 4)">+</button>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%;">
+            <span class="pscLabel">🅰️ Font</span>
+            <select id="dscFontFamilySelect" onchange="setDiaryStatementFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
+            <span class="pscLabel">🎨 Bill Theme</span>
+            <div id="dscColorSwatches" style="display:flex; gap:8px;"></div>
+          </div>
+          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
+              <input type="checkbox" id="dscA4Chk" onchange="toggleDiaryStatementPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+            </label>
+          </div>
+          <div id="dscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
+            <span class="pscLabel">📐 Page</span>
+            <div style="display:flex; gap:6px; flex:1;">
+              <button type="button" id="dscOrientPortraitBtn" onclick="setDiaryStatementOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
+              <button type="button" id="dscOrientLandscapeBtn" onclick="setDiaryStatementOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="invoicePreviewScrollArea">
+          <canvas id="diaryStatementCanvas"></canvas>
+        </div>
+        <div class="previewActions">
+          <button class="btnPrint" onclick="printDiaryStatementPreview()">🖨️ Print</button>
+          <button class="btnWhatsapp" onclick="shareDiaryStatementWhatsapp()">📱 WhatsApp</button>
+          <button class="btnHistory" onclick="shareDiaryStatementUniversal()" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share More</button>
+        </div>
+        <div class="previewActions" id="dsBtPrintRow" style="padding-top:0;">
+          <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('diaryStatementCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+        </div>
+        <div class="previewActions" id="dsA4ShareRow" style="padding-top:0; display:none;">
+          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareDiaryStatementPdf()">📤 Print/Share A4 PDF</button>
         </div>
       </div>
     </div>
@@ -3198,8 +3273,8 @@
         <input type="text" id="diaryEditName" placeholder="Person's name" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <input type="number" id="diaryEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryEditType-owe" class="active" onclick="setDiaryEditType('owe')" style="flex:1;">🔴 Payable</button>
-          <button type="button" id="diaryEditType-get" onclick="setDiaryEditType('get')" style="flex:1;">🟢 Receivable</button>
+          <button type="button" id="diaryEditType-owe" class="active" onclick="setDiaryEditType('owe')" style="flex:1;">🔴 Udhaar</button>
+          <button type="button" id="diaryEditType-get" onclick="setDiaryEditType('get')" style="flex:1;">🟢 Qarz</button>
         </div>
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('diaryEditModal').classList.remove('show')">Cancel</button>
@@ -9268,7 +9343,7 @@ function renderMyDiaryList(){
   wrap.innerHTML = filtered.map(e => {
     const isOwe = e.balance < 0;
     const cls = isOwe ? 'owe' : 'get';
-    const label = isOwe ? 'Owes' : (e.balance > 0 ? 'Owed' : 'Settled');
+    const label = isOwe ? 'Udhaar' : (e.balance > 0 ? 'Qarz' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
@@ -9410,10 +9485,10 @@ function renderDiaryDetailBalance(entry){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
   } else if(entry.balance < 0){
-    el.textContent = '🔴 Owes: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🔴 Udhaar: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--danger)';
   } else {
-    el.textContent = '🟢 Owed: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 Qarz: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   }
 }
@@ -9509,159 +9584,349 @@ function deleteDiaryEntry(){
   renderMyDiaryList();
 }
 
-// ---------- ڈائری کے کسی بھی بندے کا مکمل Print/WhatsApp ایبل "لیجر سٹیٹمنٹ" پوسٹر —
-// دو کالم: 🟢 Receivable (جو ہم نے دیے/وہ ہمیں دیں گے) اور 🔴 Payable (جو ہم نے لیے/ہم اسے دیں گے) ----------
-async function renderDiaryPosterCanvas(entry, note){
-  const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
-  const W = 640;
-  const marginX = 40;
-  const colGap = 16;
-  const colW = (W - marginX*2 - colGap) / 2;
-  const rowH = 30;
+// =====================================================================
+// 📔 My Diary — مکمل بل جیسا "Ledger Statement" پریویو — بارڈر والا ٹیبل،
+// ہر لائن کے ساتھ اسی وقت کا بیلنس، I Gave (سرخ) / I Got (سبز) دو کالم،
+// وہی مکمل کنٹرول پینل جو بل/رپورٹ/ایڈوانس آرڈر/پرچیز آرڈر میں ہے (Zoom/Row/Bold/Align/Decimals/Font/Theme/A4+Orientation)
+// =====================================================================
+let currentPreviewDiaryEntryId = null;
 
-  // ---------- کالم کی تقسیم اب صرف رقم کے مثبت/منفی ہونے سے نہیں بلکہ اصل قسم (kind) سے ہوتی ہے —
-  // تاکہ کسی Payable قرض کے خلاف کی گئی "ادائیگی" غلطی سے Receivable کالم میں نہ چلی جائے۔
-  // پرانے (اس اپڈیٹ سے پہلے کے) اندراجات میں kind محفوظ نہیں — ان کے لیے پرانا طریقہ (صرف رقم کی علامت) بطور فال بیک ----------
-  const payableLines = (entry.history || []).filter(h => h.kind ? (h.kind === 'owed' || h.kind === 'payment_owed') : h.amount < 0);
-  const receivableLines = (entry.history || []).filter(h => h.kind ? (h.kind === 'receivable' || h.kind === 'payment_receivable') : h.amount > 0);
-  const maxRows = Math.max(receivableLines.length, payableLines.length, 1);
-
-  let H = 210; // ہیڈر + نام + بیلنس چِپ
-  if(note) H += 60; // نوٹ کا خانہ
-  H += 40; // کالم ہیڈر لائن
-  H += maxRows * rowH + 20;
-  H += 50; // ہر کالم کا سب ٹوٹل باکس
-  H += 50; // فوٹر
-
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, W, H);
-
-  // ---------- ہیڈر ----------
-  ctx.fillStyle = theme.primary;
-  ctx.fillRect(0, 0, W, 96);
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center';
-  ctx.font = `800 22px Poppins, sans-serif`;
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', W/2, 42);
-  ctx.font = `600 14px Poppins, sans-serif`;
-  ctx.globalAlpha = 0.9;
-  ctx.fillText('📔 Ledger Statement', W/2, 68);
-  ctx.globalAlpha = 1;
-
-  let y = 130;
-  ctx.fillStyle = '#0f172a';
-  ctx.font = `800 24px Poppins, sans-serif`;
-  ctx.fillText(entry.name, W/2, y);
-
-  y += 38;
-  const isOwe = entry.balance < 0;
-  const chipColor = entry.balance === 0 ? '#64748b' : (isOwe ? '#dc2626' : '#16a34a');
-  const chipLabel = entry.balance === 0 ? 'Settled ✅' : (isOwe ? 'We Owe: ' : 'We Are Owed: ') + fmtDiaryAmount(entry.balance);
-  ctx.fillStyle = hexToRgba(chipColor, 0.1);
-  roundRectPath(ctx, W/2 - 140, y - 24, 280, 40, 10);
-  ctx.fill();
-  ctx.fillStyle = chipColor;
-  ctx.font = `800 18px Poppins, sans-serif`;
-  ctx.fillText(chipLabel, W/2, y + 3);
-  y += 40;
-
-  if(note){
-    ctx.fillStyle = '#f8fafc';
-    roundRectPath(ctx, marginX, y, W - marginX*2, 44, 10);
-    ctx.fill();
-    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
-    roundRectPath(ctx, marginX, y, W - marginX*2, 44, 10);
-    ctx.stroke();
-    ctx.fillStyle = '#334155';
-    ctx.font = `500 12.5px Poppins, sans-serif`;
-    wrapCenteredText(ctx, `📝 ${note}`, W/2, y + 20, W - marginX*2 - 20, 16);
-    y += 60;
-  }
-
-  // ---------- دو کالم ہیڈر ----------
-  const leftX = marginX, rightX = marginX + colW + colGap;
-  ctx.fillStyle = '#f0fdf4';
-  roundRectPath(ctx, leftX, y, colW, 30, 8); ctx.fill();
-  ctx.fillStyle = '#fef2f2';
-  roundRectPath(ctx, rightX, y, colW, 30, 8); ctx.fill();
-  ctx.font = `800 13px Poppins, sans-serif`;
-  ctx.fillStyle = '#166534';
-  ctx.fillText('🟢 Receivable', leftX + colW/2, y + 20);
-  ctx.fillStyle = '#b91c1c';
-  ctx.fillText('🔴 Payable', rightX + colW/2, y + 20);
-  y += 40;
-
-  ctx.font = `500 11.5px Poppins, sans-serif`;
-  const colTop = y;
-  receivableLines.forEach((h, i) => {
-    const ry = colTop + i * rowH;
-    const d = new Date(h.date);
-    const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB');
-    const isPayment = h.kind === 'payment_receivable';
-    ctx.fillStyle = '#334155';
-    ctx.font = `600 11px Poppins, sans-serif`;
-    ctx.fillText(dateStr + (h.note ? ' — ' + h.note : '') + (isPayment ? ' (Received)' : ''), leftX + colW/2, ry + 12);
-    ctx.fillStyle = isPayment ? '#0891b2' : '#16a34a';
-    ctx.font = `800 14px Poppins, sans-serif`;
-    ctx.fillText((isPayment ? '− ' : '') + fmtDiaryAmount(h.amount), leftX + colW/2, ry + 28);
-  });
-  payableLines.forEach((h, i) => {
-    const ry = colTop + i * rowH;
-    const d = new Date(h.date);
-    const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB');
-    const isPayment = h.kind === 'payment_owed';
-    ctx.fillStyle = '#334155';
-    ctx.font = `600 11px Poppins, sans-serif`;
-    ctx.fillText(dateStr + (h.note ? ' — ' + h.note : '') + (isPayment ? ' (Paid)' : ''), rightX + colW/2, ry + 12);
-    ctx.fillStyle = isPayment ? '#0891b2' : '#dc2626';
-    ctx.font = `800 14px Poppins, sans-serif`;
-    ctx.fillText((isPayment ? '− ' : '') + fmtDiaryAmount(h.amount), rightX + colW/2, ry + 28);
-  });
-  if(receivableLines.length === 0){
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = `500 11px Poppins, sans-serif`;
-    ctx.fillText('— none —', leftX + colW/2, colTop + 16);
-  }
-  if(payableLines.length === 0){
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = `500 11px Poppins, sans-serif`;
-    ctx.fillText('— none —', rightX + colW/2, colTop + 16);
-  }
-
-  // ---------- ہر کالم کا صاف، خالص (net) سب ٹوٹل — اصل رقم میں سے اسی طرف کی گئی ادائیگیاں گھٹا کر —
-  // تاکہ "5000 واجب تھے، 2000 ادا ہوئے، اب 3000 باقی" بالکل صاف نظر آئے ----------
-  const subtotalY = colTop + maxRows * rowH + 10;
-  const receivableTotal = receivableLines.reduce((s, h) => s + (h.kind === 'payment_receivable' ? -Math.abs(h.amount) : Math.abs(h.amount)), 0);
-  const payableTotal = payableLines.reduce((s, h) => s + (h.kind === 'payment_owed' ? -Math.abs(h.amount) : Math.abs(h.amount)), 0);
-  ctx.fillStyle = '#f0fdf4';
-  roundRectPath(ctx, leftX, subtotalY, colW, 36, 8); ctx.fill();
-  ctx.fillStyle = '#fef2f2';
-  roundRectPath(ctx, rightX, subtotalY, colW, 36, 8); ctx.fill();
-  ctx.font = `800 15px Poppins, sans-serif`;
-  ctx.fillStyle = '#166534';
-  ctx.fillText('Remaining: ' + fmtDiaryAmount(receivableTotal), leftX + colW/2, subtotalY + 23);
-  ctx.fillStyle = '#b91c1c';
-  ctx.fillText('Remaining: ' + fmtDiaryAmount(payableTotal), rightX + colW/2, subtotalY + 23);
-
-  y = subtotalY + 36 + 24;
-  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(marginX, y - 12); ctx.lineTo(W - marginX, y - 12); ctx.stroke();
-  ctx.fillStyle = '#64748b';
-  ctx.font = `600 11.5px Poppins, sans-serif`;
-  ctx.fillText('❓ If any queries or discrepancy in this record, please contact us.', W/2, y);
-
-  return canvas;
-}
-
-async function shareDiaryPoster(){
+function openDiaryStatementPreview(){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
-  const note = prompt('Add a note to this statement (optional):', '') || '';
-  const canvas = await renderDiaryPosterCanvas(entry, note.trim());
-  showImageSharePreview(canvas, `Ledger_${entry.name.replace(/\s+/g,'_')}.png`, `📔 ${entry.name} — Ledger Statement`, entry.name);
+  currentPreviewDiaryEntryId = entry.id;
+  document.getElementById('diaryStatementModal').classList.add('show');
+  syncDiaryStatementStyleControls();
+  setTimeout(() => rerenderDiaryStatementPreview(), 100);
+}
+function closeDiaryStatementPreview(){
+  document.getElementById('diaryStatementModal').classList.remove('show');
+  currentPreviewDiaryEntryId = null;
+}
+async function rerenderDiaryStatementPreview(){
+  const entry = diaryData.find(e => e.id === currentPreviewDiaryEntryId);
+  if(!entry) return;
+  await renderDiaryStatementCanvas(entry);
+}
+
+async function renderDiaryStatementCanvas(entry){
+  const canvas = document.getElementById('diaryStatementCanvas');
+  if(!canvas) return;
+  const useA4 = AppState.settings.diaryPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : 576;
+  const baseScale = pxWidth / 576;
+
+  const fscale = (AppState.settings.diaryFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.diaryRowScale || 100) / 100;
+  const bold = AppState.settings.diaryBoldItems !== false;
+  const align = AppState.settings.diaryAlign || 'left';
+  const decimals = AppState.settings.diaryPriceDecimals ?? 0;
+  const scale = baseScale * fscale;
+  const rc = getReceiptColor();
+
+  // ---------- کالم چوڑائیاں: تاریخ | نوٹ | I Gave | I Got | بیلنس ----------
+  const dateW = Math.round(70 * scale), giveW = Math.round(72 * scale), getW = Math.round(72 * scale), balW = Math.round(78 * scale);
+  const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
+  const noteW = (tableRight - tableLeft) - dateW - giveW - getW - balW;
+  const colX = [tableLeft, tableLeft+dateW, tableLeft+dateW+noteW, tableLeft+dateW+noteW+giveW, tableLeft+dateW+noteW+giveW+getW, tableRight];
+  const rowH = Math.round(30 * scale * rowScaleSetting), headerH = Math.round(24 * scale * rowScaleSetting);
+
+  // ---------- ہر لائن کے بعد کا بیلنس — ترتیب وار جمع کر کے نکالیں (تاریخ وار آگے بڑھتے ہوئے) ----------
+  const hist = entry.history || [];
+  let running = 0;
+  const rows = hist.map(h => {
+    running += h.amount;
+    const isGive = h.kind === 'receivable' || h.kind === 'payment_owed' || (!h.kind && h.amount > 0);
+    return { ...h, balanceAfter: running, isGive };
+  });
+  const displayRows = rows.slice().reverse(); // نئی انٹری سب سے اوپر
+  const tableH = headerH + Math.max(displayRows.length, 1) * rowH;
+
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.diaryFontId) || FONT_PRESETS[0];
+  const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
+  const fmt = (n) => (Number(n)||0).toFixed(decimals);
+
+  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26) * scale + tableH + 40;
+  if(useA4) estimatedHeight += 60;
+  if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
+  if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.round(estimatedHeight);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  try{
+    await document.fonts.load(`bold 26px ${canvasFontFamily}`);
+    await document.fonts.load(`16px ${canvasFontFamily}`);
+    await document.fonts.ready;
+  }catch(e){}
+
+  let y = 30 * scale;
+  ctx.textAlign = 'center';
+  ctx.font = F('bold 24px');
+  ctx.fillStyle = '#000';
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 24 * scale;
+
+  if(AppState.settings.businessAddress || AppState.settings.businessPhone){
+    ctx.font = F('12px');
+    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += 16 * scale; }
+    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += 16 * scale; }
+  }
+
+  y += 6 * scale;
+  const bannerTop = y, bannerH = 40 * scale;
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, bannerTop, tableRight - tableLeft, bannerH);
+  ctx.strokeStyle = rc.border; ctx.lineWidth = 2;
+  ctx.strokeRect(tableLeft+1, bannerTop+1, tableRight-tableLeft-2, bannerH-2);
+  ctx.fillStyle = rc.border;
+  ctx.font = F('bold 16px');
+  ctx.fillText('📔 Ledger Statement', pxWidth/2, bannerTop + 25*scale);
+  y = bannerTop + bannerH + 20*scale;
+
+  ctx.fillStyle = '#000';
+  ctx.font = F('bold 20px');
+  ctx.fillText(entry.name, pxWidth/2, y); y += 30*scale;
+
+  const isOwe = entry.balance < 0;
+  const chipColor = entry.balance === 0 ? '#64748b' : (isOwe ? '#dc2626' : '#16a34a');
+  const chipLabel = entry.balance === 0 ? 'Settled' : (isOwe ? 'Udhaar (We Owe): ' : "Qarz (We're Owed): ") + 'Rs. ' + fmt(Math.abs(entry.balance));
+  ctx.fillStyle = hexToRgba(chipColor, 0.1);
+  roundRectPath(ctx, pxWidth/2-150*scale, y-18*scale, 300*scale, 34*scale, 8);
+  ctx.fill();
+  ctx.fillStyle = chipColor;
+  ctx.font = F('bold 16px');
+  ctx.fillText(chipLabel, pxWidth/2, y+3*scale);
+  y += 34*scale;
+
+  drawSolidLine(ctx, y, pxWidth); y += 14*scale;
+
+  // ---------- ٹیبل ----------
+  const tableTop = y;
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+  colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x)+0.5, tableTop); ctx.lineTo(Math.floor(x)+0.5, tableTop+tableH); ctx.stroke(); });
+  let hLineY = tableTop;
+  const hLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly)+0.5); ctx.lineTo(tableRight, Math.floor(ly)+0.5); ctx.stroke(); };
+  hLine(hLineY);
+
+  ctx.font = F('bold 11px');
+  const headerBaseline = tableTop + headerH - 7*scale;
+  ctx.textAlign = 'center'; ctx.fillText('Date', (colX[0]+colX[1])/2, headerBaseline);
+  ctx.textAlign = align; ctx.fillText('Note', align==='left'?colX[1]+4:(align==='right'?colX[2]-4:(colX[1]+colX[2])/2), headerBaseline);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#b91c1c'; ctx.fillText('I Gave', (colX[2]+colX[3])/2, headerBaseline);
+  ctx.fillStyle = '#166534'; ctx.fillText('I Got', (colX[3]+colX[4])/2, headerBaseline);
+  ctx.fillStyle = '#000'; ctx.fillText('Balance', (colX[4]+colX[5])/2, headerBaseline);
+  hLineY += headerH;
+  hLine(hLineY);
+
+  if(displayRows.length === 0){
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = F('12px');
+    ctx.textAlign = 'center';
+    ctx.fillText('No entries yet', pxWidth/2, hLineY + rowH/2 + 4*scale);
+    hLineY += rowH;
+    hLine(hLineY);
+  } else {
+    ctx.font = F('11px');
+    displayRows.forEach(h => {
+      const rowBaseline = hLineY + rowH - (rowH/2 - 5*scale);
+      const d = new Date(h.date);
+      const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB');
+
+      ctx.fillStyle = '#000';
+      ctx.textAlign = 'center';
+      ctx.font = F('10px');
+      ctx.fillText(dateStr, (colX[0]+colX[1])/2, rowBaseline);
+
+      ctx.textAlign = align;
+      let noteText = h.note || '—';
+      const maxNoteW = noteW - 8;
+      while(ctx.measureText(noteText).width > maxNoteW && noteText.length > 3){ noteText = noteText.slice(0,-1); }
+      if(noteText !== (h.note || '—') && noteText.length > 1) noteText = noteText.trim() + '…';
+      ctx.fillText(noteText, align==='left'?colX[1]+4:(align==='right'?colX[2]-4:(colX[1]+colX[2])/2), rowBaseline);
+
+      ctx.textAlign = 'center';
+      ctx.font = F('bold 11px');
+      ctx.fillStyle = '#b91c1c';
+      ctx.fillText(h.isGive ? fmt(Math.abs(h.amount)) : '—', (colX[2]+colX[3])/2, rowBaseline);
+      ctx.fillStyle = '#166534';
+      ctx.fillText(!h.isGive ? fmt(Math.abs(h.amount)) : '—', (colX[3]+colX[4])/2, rowBaseline);
+      ctx.fillStyle = '#000';
+      ctx.font = F('10px');
+      ctx.fillText('Rs. ' + fmt(Math.abs(h.balanceAfter)), (colX[4]+colX[5])/2, rowBaseline);
+
+      hLineY += rowH;
+      hLine(hLineY);
+    });
+  }
+
+  y = tableTop + tableH + 24*scale;
+  ctx.fillStyle = '#64748b';
+  ctx.font = F('11px');
+  ctx.textAlign = 'center';
+  ctx.fillText('❓ If any queries or discrepancy in this record, please contact us.', pxWidth/2, y);
+
+  if(Math.abs(y+16*scale - canvas.height) > 4){
+    const finalH = Math.round(y + 16*scale);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH;
+    ctx.putImageData(imgData, 0, 0);
+  }
+}
+
+function syncDiaryStatementStyleControls(){
+  document.getElementById('dscFontScaleVal').textContent = (AppState.settings.diaryFontScale || 100) + '%';
+  const fs = document.getElementById('dscFontScaleSlider'); if(fs) fs.value = AppState.settings.diaryFontScale || 100;
+  document.getElementById('dscRowScaleVal').textContent = (AppState.settings.diaryRowScale || 100) + '%';
+  const rs = document.getElementById('dscRowScaleSlider'); if(rs) rs.value = AppState.settings.diaryRowScale || 100;
+  const isBold = AppState.settings.diaryBoldItems !== false;
+  document.getElementById('dscBoldBtn').classList.toggle('active', isBold);
+  document.getElementById('dscThinBtn').classList.toggle('active', !isBold);
+  const align = AppState.settings.diaryAlign || 'left';
+  document.getElementById('dscAlignLeftBtn').classList.toggle('active', align === 'left');
+  document.getElementById('dscAlignCenterBtn').classList.toggle('active', align === 'center');
+  document.getElementById('dscAlignRightBtn').classList.toggle('active', align === 'right');
+  document.getElementById('dscDecimalsVal').textContent = AppState.settings.diaryPriceDecimals ?? 0;
+
+  const fontSelect = document.getElementById('dscFontFamilySelect');
+  if(fontSelect){
+    if(!fontSelect.dataset.filled){
+      fontSelect.innerHTML = FONT_PRESETS.map(f => `<option value="${f.id}">${f.label}</option>`).join('');
+      fontSelect.dataset.filled = '1';
+    }
+    fontSelect.value = AppState.settings.diaryFontId || 'segoe';
+  }
+  const swatchWrap = document.getElementById('dscColorSwatches');
+  if(swatchWrap){
+    try{
+      swatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
+      swatchWrap.querySelectorAll('button').forEach(btn => {
+        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
+        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
+      });
+    }catch(e){}
+  }
+  document.getElementById('dscA4Chk').checked = AppState.settings.diaryPrintStyle === 'a4';
+  const orientRow = document.getElementById('dscOrientRow');
+  if(orientRow) orientRow.style.display = AppState.settings.diaryPrintStyle === 'a4' ? 'flex' : 'none';
+  const btRow = document.getElementById('dsBtPrintRow');
+  if(btRow) btRow.style.display = AppState.settings.diaryPrintStyle === 'a4' ? 'none' : 'flex';
+  const shareRow = document.getElementById('dsA4ShareRow');
+  if(shareRow) shareRow.style.display = AppState.settings.diaryPrintStyle === 'a4' ? 'flex' : 'none';
+  setDiaryStatementOrientation(AppState.settings.diaryOrientation || 'portrait');
+}
+function setDiaryStatementZoom(settingKey, val){
+  const min = 70, max = settingKey === 'diaryRowScale' ? 220 : 260;
+  const clamped = Math.max(min, Math.min(max, Number(val) || 100));
+  AppState.settings[settingKey] = clamped;
+  const label = document.getElementById(settingKey === 'diaryRowScale' ? 'dscRowScaleVal' : 'dscFontScaleVal');
+  if(label) label.textContent = clamped + '%';
+  persistAllData();
+  rerenderDiaryStatementPreview();
+}
+function adjustDiaryStatementStyle(settingKey, delta, min, max){
+  const current = AppState.settings[settingKey] ?? 0;
+  AppState.settings[settingKey] = Math.max(min, Math.min(max, current + delta));
+  persistAllData();
+  syncDiaryStatementStyleControls();
+  rerenderDiaryStatementPreview();
+}
+function toggleDiaryStatementBold(){
+  AppState.settings.diaryBoldItems = !(AppState.settings.diaryBoldItems !== false);
+  persistAllData(); syncDiaryStatementStyleControls(); rerenderDiaryStatementPreview();
+}
+function setDiaryStatementAlign(align){
+  AppState.settings.diaryAlign = align;
+  persistAllData(); syncDiaryStatementStyleControls(); rerenderDiaryStatementPreview();
+}
+function setDiaryStatementFontFamily(fontId){
+  AppState.settings.diaryFontId = fontId;
+  persistAllData(); rerenderDiaryStatementPreview();
+}
+function toggleDiaryStatementPaperStyle(checked){
+  AppState.settings.diaryPrintStyle = checked ? 'a4' : 'thermal';
+  persistAllData(); syncDiaryStatementStyleControls(); rerenderDiaryStatementPreview();
+}
+function setDiaryStatementOrientation(orient){
+  AppState.settings.diaryOrientation = orient;
+  persistAllData();
+  const pBtn = document.getElementById('dscOrientPortraitBtn');
+  const lBtn = document.getElementById('dscOrientLandscapeBtn');
+  if(pBtn && lBtn){
+    const activeStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid var(--primary); background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);';
+    const inactiveStyle = 'flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;';
+    pBtn.style.cssText = orient === 'portrait' ? activeStyle : inactiveStyle;
+    lBtn.style.cssText = orient === 'landscape' ? activeStyle : inactiveStyle;
+  }
+}
+function buildDiaryStatementPdf(){
+  const canvas = document.getElementById('diaryStatementCanvas');
+  const { jsPDF } = window.jspdf;
+  const orientation = AppState.settings.diaryOrientation === 'landscape' ? 'landscape' : 'portrait';
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210, pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 12;
+  const availW = pageW - marginMM*2, availH = pageH - marginMM*2;
+  let drawW = availW, drawH = drawW * (canvas.height / canvas.width);
+  if(drawH > availH){ const sc = availH/drawH; drawH = availH; drawW *= sc; }
+  const offsetX = marginMM + (availW-drawW)/2, offsetY = marginMM + (availH-drawH)/2;
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  pdf.setFillColor(fr, fg, fb); pdf.rect(0, 0, pageW, pageH, 'F');
+  pdf.setFillColor(255,255,255); pdf.setDrawColor(br,bgc,bb); pdf.setLineWidth(1.1);
+  pdf.roundedRect(offsetX-5, offsetY-5, drawW+10, drawH+10, 7, 7, 'FD');
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', offsetX, offsetY, drawW, drawH);
+  return pdf;
+}
+async function shareDiaryStatementPdf(){
+  if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+  await rerenderDiaryStatementPreview();
+  const pdf = buildDiaryStatementPdf();
+  const blob = pdf.output('blob');
+  const file = new File([blob], 'LedgerStatement.pdf', {type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], title:'Ledger Statement'}); } catch(e){}
+  } else {
+    window.open(pdf.output('bloburl'), '_blank');
+  }
+}
+async function printDiaryStatementPreview(){
+  await rerenderDiaryStatementPreview();
+  const canvas = document.getElementById('diaryStatementCanvas');
+  if(!canvas) return;
+  if(AppState.settings.diaryPrintStyle === 'a4'){
+    if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
+    window.open(buildDiaryStatementPdf().output('bloburl'), '_blank');
+    return;
+  }
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+function shareDiaryStatementWhatsapp(){ shareDiaryStatementUniversal(); }
+function shareDiaryStatementUniversal(){
+  const canvas = document.getElementById('diaryStatementCanvas');
+  const entry = diaryData.find(e => e.id === currentPreviewDiaryEntryId);
+  canvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem creating the image.'); return; }
+    const realFile = new File([blob], 'LedgerStatement.png', {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[realFile]})){
+      try{ await navigator.share({files:[realFile], title:'Ledger Statement', text: entry ? entry.name : ''}); }
+      catch(err){}
+    } else {
+      const win = window.open();
+      if(win) win.document.write(`<img src="${canvas.toDataURL('image/png')}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
 }
 
 // =====================================================================
