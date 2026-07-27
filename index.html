@@ -1671,7 +1671,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO275</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO277</span>
     </div>
   </div>
 
@@ -3130,6 +3130,8 @@
         <input type="text" id="diaryNewName" placeholder="Person's name" list="diaryNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <datalist id="diaryNameSuggestions"></datalist>
         <input type="number" id="diaryNewAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date (change for a back-dated entry)</label>
+        <input type="date" id="diaryNewDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
           <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 Udhaar</button>
           <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 Qarz</button>
@@ -3152,6 +3154,8 @@
         <div id="diaryDetailBalance" style="font-size:22px; font-weight:800; text-align:center; margin:8px 0;">Rs. 0</div>
 
         <input type="number" id="diaryAdjustAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date (change for a back-dated entry)</label>
+        <input type="date" id="diaryAdjustDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input type="text" id="diaryAdjustNote" placeholder="What's this for? (optional, e.g. milk, rent)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions" style="margin-bottom:8px;">
           <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 Add to Udhaar</button>
@@ -3179,6 +3183,8 @@
       <div class="modalBox">
         <h3>✏️ Edit This Entry</h3>
         <input type="number" id="diaryHistEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
+        <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date</label>
+        <input type="date" id="diaryHistEditDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
           <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 Udhaar</button>
           <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 Qarz</button>
@@ -9361,10 +9367,22 @@ function setDiaryNewType(type){
   document.getElementById('diaryNewType-get').classList.toggle('active', type === 'get');
 }
 
+// ---------- تاریخ کے <input type="date"> باکس سے صحیح ISO تاریخ بنائیں — دوپہر کا وقت استعمال کریں
+// تاکہ ٹائم زون کی وجہ سے تاریخ ایک دن پیچھے/آگے نہ ہو جائے ----------
+function getDiaryDateISO(inputId){
+  const val = document.getElementById(inputId).value;
+  if(!val) return new Date().toISOString();
+  return new Date(val + 'T12:00:00').toISOString();
+}
+function todayDateInputValue(){
+  return new Date().toISOString().split('T')[0];
+}
+
 function openDiaryAddModal(){
   document.getElementById('diaryNewName').value = '';
   document.getElementById('diaryNewAmount').value = '';
   document.getElementById('diaryNewNote').value = '';
+  document.getElementById('diaryNewDate').value = todayDateInputValue();
   setDiaryNewType('owe');
   document.getElementById('diaryAddModal').classList.add('show');
 }
@@ -9385,7 +9403,7 @@ function saveDiaryNewEntry(){
     diaryData.push(entry);
   }
   entry.balance += signedAmount;
-  entry.history.push({amount: signedAmount, note, kind: diaryNewTypeSelected === 'owe' ? 'owed' : 'receivable', date: new Date().toISOString()});
+  entry.history.push({amount: signedAmount, note, kind: diaryNewTypeSelected === 'owe' ? 'owed' : 'receivable', date: getDiaryDateISO('diaryNewDate')});
 
   saveToStorage('diary', diaryData);
   saveToStorage('nextDiaryId', nextDiaryId);
@@ -9400,12 +9418,15 @@ function openDiaryDetailModal(id){
   document.getElementById('diaryDetailName').textContent = entry.name;
   document.getElementById('diaryAdjustAmount').value = '';
   document.getElementById('diaryAdjustNote').value = '';
+  document.getElementById('diaryAdjustDate').value = todayDateInputValue();
   renderDiaryDetailBalance(entry);
 
   const histWrap = document.getElementById('diaryHistoryList');
-  const hist = (entry.history || []).slice().reverse().slice(0, 20);
+  // ---------- تاریخ کے حساب سے ترتیب دیں (نہ کہ صرف کس ترتیب میں محفوظ ہوئیں) — بیک ڈیٹ اندراجات صحیح جگہ نظر آئیں ----------
+  const sortedWithIdx = entry.history.map((h, idx) => ({...h, _origIdx: idx})).sort((a,b) => new Date(a.date) - new Date(b.date));
+  const hist = sortedWithIdx.slice().reverse().slice(0, 20);
   histWrap.innerHTML = hist.length ? hist.map(h => {
-    const originalIdx = entry.history.indexOf(h);
+    const originalIdx = h._origIdx;
     const d = new Date(h.date);
     const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB');
     const sign = h.amount >= 0 ? '+' : '-';
@@ -9438,6 +9459,8 @@ function openDiaryHistoryEditModal(historyIdx){
   const h = entry.history[historyIdx];
   document.getElementById('diaryHistEditAmount').value = Math.abs(Math.round(h.amount));
   document.getElementById('diaryHistEditNote').value = h.note || '';
+  const d = new Date(h.date);
+  document.getElementById('diaryHistEditDate').value = isNaN(d) ? todayDateInputValue() : d.toISOString().split('T')[0];
   setDiaryHistEditType(h.amount < 0 ? 'owe' : 'get');
   document.getElementById('diaryHistoryEditModal').classList.add('show');
 }
@@ -9456,6 +9479,7 @@ function saveDiaryHistoryEdit(){
   h.amount = newAmount;
   h.note = noteVal;
   h.kind = diaryHistEditTypeSelected === 'owe' ? 'owed' : 'receivable';
+  h.date = getDiaryDateISO('diaryHistEditDate');
 
   saveToStorage('diary', diaryData);
   document.getElementById('diaryHistoryEditModal').classList.remove('show');
@@ -9543,10 +9567,11 @@ function diaryAdjustBalance(direction){
   if(!amt || amt <= 0){ alert('Please enter a valid amount.'); return; }
   const signedAmount = direction * Math.abs(amt);
   entry.balance += signedAmount;
-  entry.history.push({amount: signedAmount, note: noteVal, kind: direction === -1 ? 'owed' : 'receivable', date: new Date().toISOString()});
+  entry.history.push({amount: signedAmount, note: noteVal, kind: direction === -1 ? 'owed' : 'receivable', date: getDiaryDateISO('diaryAdjustDate')});
   saveToStorage('diary', diaryData);
   document.getElementById('diaryAdjustAmount').value = '';
   document.getElementById('diaryAdjustNote').value = '';
+  document.getElementById('diaryAdjustDate').value = todayDateInputValue();
   renderDiaryDetailBalance(entry);
   openDiaryDetailModal(entry.id);
   renderMyDiaryList();
@@ -9565,10 +9590,11 @@ function diarySettlePartial(){
   const wasOwed = entry.balance < 0;
   const towardsZero = wasOwed ? Math.min(amt, Math.abs(entry.balance)) : -Math.min(amt, entry.balance);
   entry.balance += towardsZero;
-  entry.history.push({amount: towardsZero, note: noteVal || 'Payment/Collection', kind: wasOwed ? 'payment_owed' : 'payment_receivable', date: new Date().toISOString()});
+  entry.history.push({amount: towardsZero, note: noteVal || 'Payment/Collection', kind: wasOwed ? 'payment_owed' : 'payment_receivable', date: getDiaryDateISO('diaryAdjustDate')});
   saveToStorage('diary', diaryData);
   document.getElementById('diaryAdjustAmount').value = '';
   document.getElementById('diaryAdjustNote').value = '';
+  document.getElementById('diaryAdjustDate').value = todayDateInputValue();
   renderDiaryDetailBalance(entry);
   openDiaryDetailModal(entry.id);
   renderMyDiaryList();
@@ -9631,8 +9657,9 @@ async function renderDiaryStatementCanvas(entry){
   const colX = [tableLeft, tableLeft+dateW, tableLeft+dateW+noteW, tableLeft+dateW+noteW+giveW, tableLeft+dateW+noteW+giveW+getW, tableRight];
   const rowH = Math.round(30 * scale * rowScaleSetting), headerH = Math.round(24 * scale * rowScaleSetting);
 
-  // ---------- ہر لائن کے بعد کا بیلنس — ترتیب وار جمع کر کے نکالیں (تاریخ وار آگے بڑھتے ہوئے) ----------
-  const hist = entry.history || [];
+  // ---------- ہر لائن کے بعد کا بیلنس — تاریخ کے حساب سے ترتیب دے کر (نہ کہ صرف محفوظ ہونے کی ترتیب سے)
+  // آگے بڑھتے ہوئے جمع کریں، تاکہ بیک ڈیٹ اندراجات بھی صحیح جگہ اور صحیح بیلنس کے ساتھ نظر آئیں ----------
+  const hist = (entry.history || []).slice().sort((a,b) => new Date(a.date) - new Date(b.date));
   let running = 0;
   const rows = hist.map(h => {
     running += h.amount;
