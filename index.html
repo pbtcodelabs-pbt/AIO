@@ -1671,7 +1671,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO277</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO278</span>
     </div>
   </div>
 
@@ -2579,17 +2579,22 @@
           <div class="pAvatarLg">⚖️</div>
           <div class="pInfo">
             <div class="pName" id="reverseCalcProductName">—</div>
-            <div class="pMeta">Enter the amount, weight will be calculated automatically</div>
+            <div class="pMeta" id="reverseCalcModeHint">Enter the amount, weight will be calculated automatically</div>
           </div>
           <span class="closeBtn" onclick="document.getElementById('reverseCalcModal').classList.remove('show')">✖</span>
         </div>
         <div class="profileBody">
           <select class="rcVariantSelect" id="reverseCalcVariantSelect" onchange="reverseCalcOnVariantChange()"></select>
           <div class="rcRateLine" id="reverseCalcRateLine">—</div>
+          <div class="modeToggle" style="width:100%; margin-bottom:10px;">
+            <button type="button" id="rcModeBtn-amount" class="active" onclick="setReverseCalcMode('amount')" style="flex:1;">💰 By Amount</button>
+            <button type="button" id="rcModeBtn-grams" onclick="setReverseCalcMode('grams')" style="flex:1;">⚖️ By Weight</button>
+          </div>
           <input type="number" inputmode="decimal" class="rcAmountInput" id="reverseCalcAmount" placeholder="Rs. 0" onfocus="this.select()" oninput="updateReverseCalc()">
+          <input type="number" inputmode="decimal" class="rcAmountInput" id="reverseCalcGrams" placeholder="Grams (g)" onfocus="this.select()" oninput="updateReverseCalc()" style="display:none;">
           <div class="rcResultBox">
             <div class="rcResultGrams" id="reverseCalcResultGrams">—</div>
-            <div class="rcResultSub">Approximate weight — weigh on scale and adjust with +/−</div>
+            <div class="rcResultSub" id="reverseCalcResultSub">Approximate weight — weigh on scale and adjust with +/−</div>
           </div>
           <button class="rcAddBtn" id="reverseCalcAddBtn" onclick="addReverseCalcToCart()" disabled>➕ Add to Bill</button>
         </div>
@@ -4019,6 +4024,10 @@
       <button onclick="openTodaySaleReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📅 Today's Sale Report</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Bills, sales, payments, expenses &amp; best-sellers for today</div>
+      </button>
+      <button onclick="openDiarySummaryReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📔 My Diary Summary</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
       </button>
     </div>
   </div>
@@ -6490,7 +6499,7 @@ function addToCart(variantId){
    REVERSE WEIGHT CALCULATOR — تولنے والی اشیاء (چینی، چاول، گھی، دالیں وغیرہ)
    کسٹمر کہتا ہے "100 روپے کی چینی دے دو" — یہاں رقم درج کریں، گرام خودکار نکل آئیں
    ===================================================================== */
-const ReverseCalc = { productId: null, variantId: null };
+const ReverseCalc = { productId: null, variantId: null, mode: 'amount' };
 
 function openReverseCalc(productId){
   const flat = getFlatVariants();
@@ -6516,8 +6525,10 @@ function openReverseCalc(productId){
   sel.value = ReverseCalc.variantId;
 
   document.getElementById('reverseCalcAmount').value = '';
+  document.getElementById('reverseCalcGrams').value = '';
   document.getElementById('reverseCalcResultGrams').textContent = '—';
   document.getElementById('reverseCalcAddBtn').disabled = true;
+  setReverseCalcMode('amount');
   updateReverseCalc();
   document.getElementById('reverseCalcModal').classList.add('show');
 }
@@ -6527,7 +6538,20 @@ function reverseCalcOnVariantChange(){
   updateReverseCalc();
 }
 
-// ---------- منتخب ویریئنٹ کے ریٹ کی بنیاد پر لائیو گرام کیلکولیٹ کریں ----------
+// ---------- موڈ بدلیں: 💰 By Amount (روپے لکھیں، وزن نکلے) یا ⚖️ By Weight (وزن لکھیں، روپے نکلیں) ----------
+function setReverseCalcMode(mode){
+  ReverseCalc.mode = mode;
+  document.getElementById('rcModeBtn-amount').classList.toggle('active', mode === 'amount');
+  document.getElementById('rcModeBtn-grams').classList.toggle('active', mode === 'grams');
+  document.getElementById('reverseCalcAmount').style.display = mode === 'amount' ? 'block' : 'none';
+  document.getElementById('reverseCalcGrams').style.display = mode === 'grams' ? 'block' : 'none';
+  document.getElementById('reverseCalcModeHint').textContent = mode === 'amount'
+    ? 'Enter the amount, weight will be calculated automatically'
+    : 'Enter the exact weight (grams), amount will be calculated automatically';
+  updateReverseCalc();
+}
+
+// ---------- منتخب ویریئنٹ کے ریٹ کی بنیاد پر لائیو گرام/رقم کیلکولیٹ کریں — دونوں طرف سے ----------
 function updateReverseCalc(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
   if(!v) return;
@@ -6538,11 +6562,20 @@ function updateReverseCalc(){
   document.getElementById('reverseCalcRateLine').textContent =
     `Rate: Rs. ${price} / ${v.label}  (Rs. ${pricePerGram.toFixed(2)} per gram)`;
 
-  const amount = parseFloat(document.getElementById('reverseCalcAmount').value) || 0;
-  const resultGrams = amount > 0 ? Math.round(amount / pricePerGram) : 0;
-
-  document.getElementById('reverseCalcResultGrams').textContent = resultGrams > 0 ? `≈ ${resultGrams} g` : '—';
-  document.getElementById('reverseCalcAddBtn').disabled = resultGrams <= 0;
+  if(ReverseCalc.mode === 'amount'){
+    const amount = parseFloat(document.getElementById('reverseCalcAmount').value) || 0;
+    const resultGrams = amount > 0 ? Math.round(amount / pricePerGram) : 0;
+    document.getElementById('reverseCalcResultGrams').textContent = resultGrams > 0 ? `≈ ${resultGrams} g` : '—';
+    document.getElementById('reverseCalcResultSub').textContent = 'Approximate weight — weigh on scale and adjust with +/−';
+    document.getElementById('reverseCalcAddBtn').disabled = resultGrams <= 0;
+  } else {
+    // ---------- کسٹمر نے خود صحیح گرام بتایا ہے (کسی بھی من چاہی مقدار میں — کوئی پہلے سے فیڈ شدہ ویریئنٹ ہونا ضروری نہیں) ----------
+    const gramsInput = parseFloat(document.getElementById('reverseCalcGrams').value) || 0;
+    const resultAmount = gramsInput > 0 ? Math.round(gramsInput * pricePerGram * 100) / 100 : 0;
+    document.getElementById('reverseCalcResultGrams').textContent = resultAmount > 0 ? `Rs. ${resultAmount}` : '—';
+    document.getElementById('reverseCalcResultSub').textContent = 'Amount for this exact weight';
+    document.getElementById('reverseCalcAddBtn').disabled = gramsInput <= 0;
+  }
 }
 
 // ---------- کیلکولیٹ شدہ وزن کو بل میں شامل کریں — الگ (synthetic) variant_id تاکہ اصل پیک والے آئٹم سے نہ ملے ----------
@@ -6552,8 +6585,15 @@ function addReverseCalcToCart(){
   const grams = parseWeightGrams(v.label);
   const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
   const pricePerGram = price / grams;
-  const amount = parseFloat(document.getElementById('reverseCalcAmount').value) || 0;
-  const resultGrams = Math.round(amount / pricePerGram);
+
+  // ---------- موڈ کے مطابق حتمی گرام معلوم کریں — By Amount میں روپے سے، By Weight میں براہ راست کسٹمر کے بتائے گرام سے ----------
+  let resultGrams;
+  if(ReverseCalc.mode === 'amount'){
+    const amount = parseFloat(document.getElementById('reverseCalcAmount').value) || 0;
+    resultGrams = Math.round(amount / pricePerGram);
+  } else {
+    resultGrams = Math.round(parseFloat(document.getElementById('reverseCalcGrams').value) || 0);
+  }
   if(resultGrams <= 0) return;
 
   // ---------- Track Inventory آن ہو تو یہاں بھی دستیاب سٹاک سے زیادہ شامل نہ ہو ----------
@@ -18506,6 +18546,18 @@ function openTodaySaleReport(){
   setTimeout(() => renderReportToCanvas(), 100);
 }
 
+// ---------- 📔 My Diary Summary — سب لوگوں کا مکمل ریکارڈ ایک ہی رپورٹ میں، کیٹگری کی ضرورت نہیں ----------
+function openDiarySummaryReport(){
+  currentReportType = 'diarysummary';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "📔 My Diary Summary";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
 // ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
 function syncReportStyleControls(){
   document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 100) + '%';
@@ -18696,6 +18748,7 @@ async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
+  if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -19549,6 +19602,185 @@ function buildMultiColumnReportPdf(orientation){
 
 // ---------- Today's Sale Report کا اپنا PDF — کیش سمری اوپر پورے صفحے کی چوڑائی میں، نیچے فروخت شدہ آئٹمز
 // وہی ملٹی کالم منطق استعمال کرتے ہوئے تاکہ باقی رپورٹس جیسا ہی یکساں انداز ہو ----------
+async function renderDiarySummaryReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d');
+
+  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+  let totalUdhaar = 0, totalQarz = 0;
+  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
+  const netBalance = totalQarz - totalUdhaar;
+
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const align = AppState.settings.reportAlign || 'left';
+  const decimals = AppState.settings.reportPriceDecimals ?? 0;
+  const fmt = (n) => Number(n||0).toFixed(decimals);
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
+  try{
+    await document.fonts.load(`bold 20px ${fontFam}`);
+    await document.fonts.load(`13px ${fontFam}`);
+    await document.fonts.ready;
+  }catch(e){}
+
+  const rc = getReceiptColor();
+  const base = useA4 ? 2.3 : 1.65;
+  const fsTitle = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(13 * base * fontScale);
+  const fsSmall = Math.round(9 * base * fontScale);
+  const fsSummary = Math.round(10 * base * fontScale);
+  const fsHeader = Math.round(9.5 * base * fontScale);
+  const fsItem = Math.round(10 * base * fontScale);
+
+  const margin = useA4 ? 40 : 8;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const rowH = Math.round(fsItem * 2.3 * rowScaleSetting);
+  const colHeaderH = Math.round(fsHeader * 2.6 * rowScaleSetting);
+  const summaryLineH = Math.round(fsSummary * 1.9 * rowScaleSetting);
+
+  const bg = hexToRgba(rc.bg, 1), border = rc.border;
+
+  // ---------- اونچائی کا اندازہ ----------
+  const summaryRows = 3; // Total Udhaar, Total Qarz, Net Balance
+  const maxCols = 2; // ابتدائی اندازہ، حتمی نیچے تصدیق ہو جائے گی
+  const estRowsPerCol = Math.max(1, Math.ceil(entries.length / maxCols));
+  let estimatedHeight = fsTitle*2 + fsSubtitle*1.5 + fsSmall*3 + (summaryRows*summaryLineH) + 40 + colHeaderH + estRowsPerCol*rowH + 60;
+  canvas.width = pxWidth;
+  canvas.height = Math.round(estimatedHeight);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  let y = fsTitle + 10;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#000';
+  ctx.font = `${bold?'bold':''} ${fsTitle}px ${fontFam}`;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
+  y += fsSubtitle + 6;
+  if(AppState.settings.businessAddress || AppState.settings.businessPhone){
+    ctx.font = `${fsSmall}px ${fontFam}`;
+    if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, y); y += fsSmall+4; }
+    if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += fsSmall+4; }
+  }
+  ctx.font = `bold ${fsSubtitle}px ${fontFam}`;
+  ctx.fillText('My Diary Summary', pxWidth/2, y);
+  y += fsSubtitle + 4;
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  ctx.textAlign = 'left';
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB')}  |  People: ${entries.length}`, tableLeft, y);
+  y += fsSmall + 8;
+
+  // ---------- سمری باکس ----------
+  const sRows = [
+    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
+    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
+  ];
+  const sumTop = y;
+  ctx.font = `${bold?'bold':''} ${fsSummary}px ${fontFam}`;
+  sRows.forEach((row, i) => {
+    const isLast = i === sRows.length - 1;
+    const ry = sumTop + i*summaryLineH;
+    ctx.fillStyle = isLast ? bg : (i%2===1 ? '#f8fafc' : '#fff');
+    ctx.fillRect(tableLeft, ry, totalW, summaryLineH);
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'left';
+    ctx.fillText(row[0], tableLeft+6, ry+summaryLineH*0.68);
+    ctx.textAlign = 'right';
+    ctx.fillText(row[1], tableRight-6, ry+summaryLineH*0.68);
+  });
+  ctx.strokeStyle = border; ctx.lineWidth = 1;
+  ctx.strokeRect(tableLeft, sumTop, totalW, sRows.length*summaryLineH);
+  for(let i=1;i<sRows.length;i++){
+    ctx.beginPath(); ctx.moveTo(tableLeft, sumTop+i*summaryLineH); ctx.lineTo(tableRight, sumTop+i*summaryLineH); ctx.stroke();
+  }
+  y = sumTop + sRows.length*summaryLineH + 16;
+
+  ctx.font = `bold ${fsSubtitle*0.8}px ${fontFam}`;
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#000';
+  ctx.fillText('People', tableLeft, y);
+  y += 6;
+  const headerBottom = y;
+
+  const colGap = 8;
+  const usableH = canvas.height - headerBottom - 16;
+  const rowsPerColumn = Math.max(3, Math.floor((usableH - colHeaderH) / rowH));
+  const maxColsFinal = useA4 && orientation_isLandscape() ? 4 : 2;
+  const neededCols = Math.ceil(entries.length / rowsPerColumn) || 1;
+  const numCols = Math.min(Math.max(neededCols, 1), maxColsFinal);
+  const colW = (totalW - colGap*(numCols-1)) / numCols;
+
+  function orientation_isLandscape(){ return AppState.settings.reportOrientation === 'landscape'; }
+
+  const nameW = (w) => w * 0.6;
+  const drawColHeader = (x, yy, w) => {
+    ctx.fillStyle = bg;
+    ctx.fillRect(x, yy, w, colHeaderH);
+    ctx.font = `bold ${fsHeader}px ${fontFam}`;
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'left';
+    ctx.fillText('Name', x+4, yy+colHeaderH*0.7);
+    ctx.textAlign = 'right';
+    ctx.fillText('Balance', x+w-4, yy+colHeaderH*0.7);
+  };
+
+  let colIdx = 0, rowInCol = 0;
+  const colX = (i) => tableLeft + i*(colW+colGap);
+  for(let i=0;i<numCols;i++) drawColHeader(colX(i), headerBottom, colW);
+
+  ctx.font = `${fsItem}px ${fontFam}`;
+  if(entries.length === 0){
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('No outstanding balances', pxWidth/2, headerBottom+colHeaderH+rowH/2+4);
+  }
+  entries.forEach((e, idx) => {
+    if(rowInCol >= rowsPerColumn){ colIdx++; rowInCol = 0; }
+    const x = colX(colIdx);
+    const ry = headerBottom + colHeaderH + rowInCol*rowH;
+    ctx.fillStyle = rowInCol%2===1 ? '#f8fafc' : '#fff';
+    ctx.fillRect(x, ry, colW, rowH);
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(x, ry, colW, rowH);
+    const isOwe = e.balance < 0;
+    ctx.textAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
+    ctx.fillStyle = '#000';
+    let displayName = e.name;
+    const maxNameW = nameW(colW) - 8;
+    while(ctx.measureText(displayName).width > maxNameW && displayName.length > 3){ displayName = displayName.slice(0,-1); }
+    if(displayName !== e.name) displayName = displayName.trim()+'…';
+    const nameX = align==='left' ? x+4 : (align==='right' ? x+nameW(colW)-4 : x+nameW(colW)/2);
+    ctx.fillText(displayName, nameX, ry+rowH*0.68);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = isOwe ? '#dc2626' : '#16a34a';
+    ctx.font = `bold ${fsItem}px ${fontFam}`;
+    ctx.fillText((isOwe?'-':'+') + ' ' + fmt(Math.abs(e.balance)), x+colW-4, ry+rowH*0.68);
+    ctx.font = `${fsItem}px ${fontFam}`;
+    rowInCol++;
+  });
+
+  y = headerBottom + colHeaderH + rowsPerColumn*rowH + 20;
+  ctx.fillStyle = '#64748b';
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  ctx.textAlign = 'center';
+  ctx.fillText('❓ If any queries or discrepancy in this record, please contact us.', pxWidth/2, y);
+
+  if(Math.abs(y+10 - canvas.height) > 4){
+    const finalH = Math.round(y + 10);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH;
+    ctx.putImageData(imgData, 0, 0);
+  }
+}
+
+// ---------- Today's Sale Report کا اپنا PDF — کیش سمری اوپر پورے صفحے کی چوڑائی میں، نیچے فروخت شدہ آئٹمز
+// وہی ملٹی کالم منطق استعمال کرتے ہوئے تاکہ باقی رپورٹس جیسا ہی یکساں انداز ہو ----------
 function buildTodaySalePdf(orientation){
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
@@ -19703,12 +19935,157 @@ function buildTodaySalePdf(orientation){
   return pdf;
 }
 
+// ---------- My Diary Summary کا اپنا A4 PDF — وہی سمری باکس + ملٹی کالم فہرست، باقی رپورٹس جیسا یکساں انداز ----------
+function buildDiarySummaryPdf(orientation){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210;
+  const pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 10;
+
+  const rc = getReceiptColor();
+  const hexToRgb = (hex) => hex.replace('#','').match(/.{1,2}/g).map(h => parseInt(h, 16));
+  const [br, bgc, bb] = hexToRgb(rc.border);
+  const [fr, fg, fb] = hexToRgb(rc.bg);
+  const [tr, tg, tb] = hexToRgb(rc.text);
+  const zebraR = Math.round(255 - (255-fr)*0.35), zebraG = Math.round(255 - (255-fg)*0.35), zebraB = Math.round(255 - (255-fb)*0.35);
+  const decimals = AppState.settings.reportPriceDecimals ?? 0;
+  const fmt = (n) => Number(n || 0).toFixed(decimals);
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScale = (AppState.settings.reportRowScale || 100) / 100;
+
+  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+  let totalUdhaar = 0, totalQarz = 0;
+  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
+  const netBalance = totalQarz - totalUdhaar;
+
+  let y = marginMM;
+  pdf.setTextColor(tr, tg, tb);
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
+  pdf.text(stripUnrenderableForPdf(AppState.settings.businessName || 'AIO POS'), pageW / 2, y + 6, {align:'center'});
+  y += 9;
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
+  if(AppState.settings.businessAddress){ pdf.text(stripUnrenderableForPdf(AppState.settings.businessAddress), pageW/2, y, {align:'center'}); y += 5; }
+  if(AppState.settings.businessPhone){ pdf.text(AppState.settings.businessPhone, pageW/2, y, {align:'center'}); y += 5; }
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12);
+  pdf.text('My Diary Summary', pageW / 2, y + 3, {align:'center'});
+  y += 9;
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}  |  People: ${entries.length}`, marginMM, y);
+  y += 6;
+
+  const summaryRows = [
+    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
+    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
+  ];
+  const sumRowH = Math.round(6 * rowScale * 10) / 10;
+  const sumFontPt = Math.round(9 * fontScale * 10) / 10;
+  pdf.setFontSize(sumFontPt);
+  const sumTop = y;
+  summaryRows.forEach((row, i) => {
+    const isLast = i === summaryRows.length - 1;
+    const ry = y + i * sumRowH;
+    pdf.setFillColor(isLast ? fr : (i % 2 === 1 ? zebraR : 255), isLast ? fg : (i % 2 === 1 ? zebraG : 255), isLast ? fb : (i % 2 === 1 ? zebraB : 255));
+    pdf.rect(marginMM, ry, pageW - marginMM * 2, sumRowH, 'F');
+    pdf.setFont('helvetica', isLast ? 'bold' : 'normal');
+    pdf.setTextColor(tr, tg, tb);
+    pdf.text(row[0], marginMM + 2, ry + sumRowH*0.7);
+    pdf.text(row[1], pageW - marginMM - 2, ry + sumRowH*0.7, {align:'right'});
+  });
+  pdf.setDrawColor(br, bgc, bb); pdf.setLineWidth(0.45);
+  pdf.roundedRect(marginMM, sumTop, pageW - marginMM*2, summaryRows.length * sumRowH, 2.2, 2.2, 'S');
+  for(let i=1; i<summaryRows.length; i++){
+    pdf.setLineWidth(0.15);
+    pdf.line(marginMM, sumTop + i*sumRowH, pageW - marginMM, sumTop + i*sumRowH);
+  }
+  y += summaryRows.length * sumRowH + 6;
+
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10);
+  pdf.setTextColor(tr, tg, tb);
+  pdf.text('People', marginMM, y);
+  y += 4;
+  const headerBottom = y;
+
+  const fontPt = Math.round(7.5 * fontScale * 10) / 10;
+  const rowH = Math.round(5.2 * rowScale * 10) / 10;
+  const colHeaderH = Math.round(6 * rowScale * 10) / 10;
+  const colGap = 5;
+  const usableH = pageH - headerBottom - marginMM;
+  const rowsPerColumn = Math.max(3, Math.floor((usableH - colHeaderH) / rowH));
+  const maxCols = orientation === 'landscape' ? 4 : 2;
+  const neededCols = Math.ceil(entries.length / rowsPerColumn) || 1;
+  const numCols = Math.min(Math.max(neededCols, 1), maxCols);
+  const colW = (pageW - marginMM * 2 - colGap * (numCols - 1)) / numCols;
+
+  const drawHeader = (x, yy, w) => {
+    const nameW = w * 0.6;
+    pdf.setFillColor(fr, fg, fb);
+    pdf.rect(x, yy, w, colHeaderH, 'F');
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(fontPt);
+    pdf.setTextColor(tr, tg, tb);
+    pdf.text('Name', x + 1.5, yy + colHeaderH - colHeaderH*0.3);
+    pdf.text('Balance', x + w - 1.5, yy + colHeaderH - colHeaderH*0.3, {align:'right'});
+    return nameW;
+  };
+
+  let colIdx = 0, rowInCol = 0, colY = headerBottom;
+  let colX = marginMM;
+  let nameW = drawHeader(colX, colY, colW);
+
+  entries.forEach((e) => {
+    if(rowInCol >= rowsPerColumn){
+      colIdx++; rowInCol = 0;
+      colX = marginMM + colIdx * (colW + colGap);
+      colY = headerBottom;
+      if(colIdx < numCols) nameW = drawHeader(colX, colY, colW);
+    }
+    const ry = colY + colHeaderH + rowInCol * rowH;
+    pdf.setFillColor(rowInCol % 2 === 1 ? zebraR : 255, rowInCol % 2 === 1 ? zebraG : 255, rowInCol % 2 === 1 ? zebraB : 255);
+    pdf.rect(colX, ry, colW, rowH, 'F');
+    pdf.setDrawColor(220, 226, 234); pdf.setLineWidth(0.1);
+    pdf.rect(colX, ry, colW, rowH, 'S');
+
+    const isOwe = e.balance < 0;
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(fontPt);
+    pdf.setTextColor(tr, tg, tb);
+    let displayName = stripUnrenderableForPdf(e.name);
+    while(pdf.getTextWidth(displayName) > nameW - 3 && displayName.length > 3){ displayName = displayName.slice(0, -1); }
+    if(displayName !== stripUnrenderableForPdf(e.name)) displayName = displayName.trim() + '…';
+    pdf.text(displayName, colX + 1.5, ry + rowH*0.68);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(isOwe ? 220 : 22, isOwe ? 38 : 163, isOwe ? 38 : 74);
+    pdf.text((isOwe?'-':'+') + ' ' + fmt(Math.abs(e.balance)), colX + colW - 1.5, ry + rowH*0.68, {align:'right'});
+
+    rowInCol++;
+  });
+
+  if(entries.length === 0){
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(fontPt);
+    pdf.setTextColor(150,150,150);
+    pdf.text('No outstanding balances', pageW/2, headerBottom + colHeaderH + rowH, {align:'center'});
+  }
+
+  const finalColY = headerBottom + colHeaderH + Math.max(rowInCol, 1) * rowH;
+  pdf.setDrawColor(br, bgc, bb); pdf.setLineWidth(0.3);
+  for(let i=0;i<numCols;i++){
+    const cx = marginMM + i*(colW+colGap);
+    pdf.rect(cx, headerBottom, colW, colHeaderH + rowsPerColumn*rowH, 'S');
+  }
+
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7.5);
+  pdf.setTextColor(100,116,139);
+  pdf.text('If any queries or discrepancy in this record, please contact us.', pageW/2, pageH - marginMM/2, {align:'center'});
+
+  return pdf;
+}
+
 // ---------- رپورٹ کا A4 PDF براہ راست شیئر کریں — Android کی نیٹو شیئر شیٹ میں Print/WhatsApp/دیگر ایپس سب مل جاتی ہیں ----------
 async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -19738,7 +20115,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
