@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
+<script>
+// ---------- Casual-inspection deterrent (NOT real security — see delivery note) ----------
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+document.addEventListener('keydown', function(e){
+  var k = (e.key || '').toUpperCase();
+  if (k === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
+      (e.ctrlKey && k === 'U')) {
+    e.preventDefault();
+  }
+});
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>AIO POS — Skeleton</title>
