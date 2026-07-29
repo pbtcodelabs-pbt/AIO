@@ -13,6 +13,7 @@ document.addEventListener('keydown', function(e){
   }
 });
 </script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>AIO POS — Skeleton</title>
@@ -1683,7 +1684,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO278</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO279</span>
     </div>
   </div>
 
@@ -3822,6 +3823,8 @@ document.addEventListener('keydown', function(e){
               <span class="backupBtnSub">Restore from a file</span>
             </button>
           </div>
+          <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; margin-top:10px; padding:13px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:14px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
+          <div class="settingsHint" style="margin-top:6px;">پہلی بار دبانے پر آپ کی Google Drive تک اجازت مانگی جائے گی — ایپ صرف اپنی بنائی بیک اپ فائلیں دیکھ سکے گی، آپ کی باقی Drive تک رسائی نہیں ہو گی۔</div>
           <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
 
@@ -4431,8 +4434,8 @@ function generateBackupFileName(){
   return `BK.AIO${dayCode}${date}${month}${hh}${mm}.json`;
 }
 
-function exportBackupData(){
-  const backup = {
+function buildBackupObject(){
+  return {
     exportedAt: new Date().toISOString(),
     products: productsData,
     customers: customersData,
@@ -4444,19 +4447,20 @@ function exportBackupData(){
     settings: AppState.settings,
     expenses: expenseData,
     nextExpenseId,
-    // ---------- اہم فکس: My Diary، Payments، اور Advance Orders پہلے کبھی بیک اپ میں شامل ہی نہیں تھے —
-    // یعنی ان تینوں کا ڈیٹا صرف اسی ایک براؤزر/اوریجن میں محفوظ تھا اور بیک اپ لینے سے بھی محفوظ نہیں ہو رہا تھا ----------
     diary: diaryData,
     nextDiaryId,
     payments: paymentsData,
     nextPaymentId,
     advanceOrders: advanceOrdersData,
     nextAdvOrderId,
-    // ---------- مکمل آڈٹ کے بعد ملیں: یہ دو بھی پہلے بیک اپ میں شامل نہیں تھیں ----------
-    customCategories: customCategories,      // خود بنائی ہوئی کیٹگریز کی فہرست
-    expiryAlertDays: expiryAlertDays,          // ایکسپائری الرٹ کتنے دن پہلے آئے
-    quickDockItems: quickDockItems,            // ہوم اسکرین کا Quick Access Dock کی ترتیب
+    customCategories: customCategories,
+    expiryAlertDays: expiryAlertDays,
+    quickDockItems: quickDockItems,
   };
+}
+
+function exportBackupData(){
+  const backup = buildBackupObject();
   // ---------- مختصر (compact) فارمیٹ — کوئی اضافی خالی جگہ/لائن بریک نہیں، فائل چھوٹی اور سادہ ----------
   const blob = new Blob([JSON.stringify(backup)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -4478,6 +4482,91 @@ function exportBackupData(){
   showBackupConfirmModal('export', fileName, {
     products: productsData.length, customers: customersData.length, invoices: invoicesData.length
   });
+}
+
+// =====================================================================
+// ☁️ Google Drive Backup — Google Identity Services (GIS) کے ذریعے، صرف
+// drive.file اجازت (ایپ صرف اپنی بنائی فائلیں دیکھ سکے، پوری Drive تک رسائی نہیں)
+// =====================================================================
+const GOOGLE_DRIVE_CLIENT_ID = '751661674362-49d5habgkr9h6t1sb8a9err7e6r1b975.apps.googleusercontent.com';
+const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+let gDriveTokenClient = null;
+let gDriveAccessToken = null;
+
+function getGDriveTokenClient(){
+  if(gDriveTokenClient) return gDriveTokenClient;
+  if(!window.google || !google.accounts || !google.accounts.oauth2){
+    return null; // ---------- گوگل کی سکرپٹ ابھی لوڈ نہیں ہوئی (انٹرنیٹ نہ ہونے کی صورت میں بھی یہی ہو گا) ----------
+  }
+  gDriveTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_DRIVE_CLIENT_ID,
+    scope: GOOGLE_DRIVE_SCOPE,
+    callback: '', // ---------- ہر درخواست پر الگ سے سیٹ ہوتا ہے ----------
+  });
+  return gDriveTokenClient;
+}
+
+async function backupToGoogleDrive(){
+  const btn = document.getElementById('gdriveBackupBtn');
+  const client = getGDriveTokenClient();
+  if(!client){
+    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    return;
+  }
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
+
+  client.callback = async (resp) => {
+    if(resp.error){
+      if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
+      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      return;
+    }
+    gDriveAccessToken = resp.access_token;
+    try{
+      if(btn) btn.textContent = '⏳ Uploading...';
+      const fileName = generateBackupFileName();
+      const backup = buildBackupObject();
+      const fileContent = JSON.stringify(backup);
+
+      const metadata = { name: fileName, mimeType: 'application/json' };
+      const boundary = '-------aiopos' + Date.now();
+      const multipartBody =
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+        `--${boundary}\r\nContent-Type: application/json\r\n\r\n${fileContent}\r\n` +
+        `--${boundary}--`;
+
+      const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + gDriveAccessToken,
+          'Content-Type': `multipart/related; boundary=${boundary}`,
+        },
+        body: multipartBody,
+      });
+
+      if(!uploadRes.ok){
+        const errText = await uploadRes.text();
+        throw new Error('Upload failed: ' + uploadRes.status + ' ' + errText);
+      }
+
+      AppState.settings.lastBackupFileName = fileName;
+      AppState.settings.lastBackupAt = new Date().toISOString();
+      AppState.settings.lastGDriveBackupAt = new Date().toISOString();
+      persistAllData();
+      renderHomeLastBackupLine();
+
+      showBackupConfirmModal('export', fileName + ' (Google Drive)', {
+        products: productsData.length, customers: customersData.length, invoices: invoicesData.length
+      });
+    }catch(err){
+      alert('Google Drive پر اپ لوڈ نہیں ہو سکی: ' + err.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
+    }
+  };
+
+  // ---------- پہلی بار اجازت مانگے گا، اگلی بار خاموشی سے (already authorized) ٹوکن مل جائے گا ----------
+  client.requestAccessToken({ prompt: gDriveAccessToken ? '' : 'consent' });
 }
 
 // ---------- ری سٹور دبانے پر پہلے صحیح فائل کا نام واضح دکھائیں (فون کا اپنا فائل پکر ہمارے کنٹرول میں نہیں،
