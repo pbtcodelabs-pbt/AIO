@@ -1685,7 +1685,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO005</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO006</span>
     </div>
   </div>
 
@@ -4374,6 +4374,140 @@ async function hashPin(pin){
   return 'fb-' + (h1>>>0).toString(16).padStart(8,'0') + (h2>>>0).toString(16).padStart(8,'0');
 }
 
+// =====================================================================
+// 📦 IndexedDB — بڑی تصویریں (پراڈکٹ/کسٹمر/سپلائر) یہاں الگ محفوظ ہوں گی۔
+// localStorage کی 5-10MB حد جلدی بھر جاتی ہے (زیادہ تر تصویروں کی وجہ سے)، جبکہ IndexedDB کو
+// عام طور پر کئی گنا بڑی جگہ ملتی ہے۔ باقی سارا ڈیٹا (پراڈکٹس/بلز/کسٹمرز کی تفصیل) پہلے کی طرح
+// localStorage میں ہی رہتا ہے — صرف بھاری تصویریں یہاں منتقل ہوتی ہیں۔
+// ڈیزائن: ایپ کے چلتے وقت تصویریں ہمیشہ عام JS میموری میں موجود رہتی ہیں (پرنٹنگ/بیک اپ وغیرہ
+// بغیر کسی تبدیلی کے ویسے ہی کام کرتے ہیں) — صرف localStorage میں SAVE کرتے وقت تصویر الگ کر کے
+// IndexedDB میں بھیجی جاتی ہے، اور شروع میں LOAD کے بعد واپس میموری میں جوڑ دی جاتی ہے۔
+// =====================================================================
+const AIO_IMG_DB_NAME = 'aiopos_images_v1';
+const AIO_IMG_STORE = 'images';
+let aioImgDbPromise = null;
+function openImgDb(){
+  if(aioImgDbPromise) return aioImgDbPromise;
+  aioImgDbPromise = new Promise((resolve, reject) => {
+    if(!window.indexedDB){ reject(new Error('IndexedDB not supported')); return; }
+    const req = indexedDB.open(AIO_IMG_DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(AIO_IMG_STORE)) db.createObjectStore(AIO_IMG_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return aioImgDbPromise;
+}
+async function idbSetImage(key, dataUrl){
+  try{
+    const db = await openImgDb();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(AIO_IMG_STORE, 'readwrite');
+      tx.objectStore(AIO_IMG_STORE).put(dataUrl, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  }catch(e){ console.warn('IndexedDB save failed for', key, e); return false; }
+}
+async function idbGetImage(key){
+  try{
+    const db = await openImgDb();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(AIO_IMG_STORE, 'readonly');
+      const req = tx.objectStore(AIO_IMG_STORE).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  }catch(e){ return null; }
+}
+async function idbDeleteImage(key){
+  try{
+    const db = await openImgDb();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(AIO_IMG_STORE, 'readwrite');
+      tx.objectStore(AIO_IMG_STORE).delete(key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  }catch(e){ return false; }
+}
+
+// ---------- SAVE — تصویر الگ کر کے IndexedDB میں بھیجیں، باقی ہلکا ڈیٹا localStorage میں ----------
+function saveProductsLight(){
+  const light = productsData.map(p => ({
+    ...p,
+    variants: p.variants.map(v => {
+      if(v.image){
+        idbSetImage('product_' + v.variant_id, v.image); // fire-and-forget — پرنٹنگ/سیو رکنی نہیں چاہیے
+        const {image, ...rest} = v;
+        return rest;
+      }
+      return v;
+    })
+  }));
+  saveToStorage('products', light);
+}
+function saveCustomersLight(){
+  const light = customersData.map(c => {
+    if(c.photo){
+      idbSetImage('customer_' + c.customer_id, c.photo);
+      const {photo, ...rest} = c;
+      return rest;
+    }
+    return c;
+  });
+  saveToStorage('customers', light);
+}
+function saveSuppliersLight(){
+  const light = suppliersData.map(s => {
+    if(s.photo){
+      idbSetImage('supplier_' + s.supplier_id, s.photo);
+      const {photo, ...rest} = s;
+      return rest;
+    }
+    return s;
+  });
+  saveToStorage('suppliers', light);
+}
+
+// ---------- LOAD — اگر تصویر پہلے سے موجود (پرانا فارمیٹ) تو چھیڑیں نہیں (کوئی ڈیٹا ضائع نہیں ہوتا)۔
+// اگر غائب ہے (نیا، ہلکا فارمیٹ) تو IndexedDB سے واپس لا کر میموری میں جوڑ دیں، پھر متعلقہ اسکرین دوبارہ بنائیں ----------
+async function hydratePhotosFromIndexedDB(){
+  if(!window.indexedDB) return; // پرانے/غیر معمولی براؤزر میں یہ فیچر خاموشی سے چھوڑ دیں، ایپ ویسے ہی چلتی رہے
+  let anyChanged = false;
+  try{
+    for(const p of productsData){
+      for(const v of (p.variants || [])){
+        if(!v.image){
+          const img = await idbGetImage('product_' + v.variant_id);
+          if(img){ v.image = img; anyChanged = true; }
+        }
+      }
+    }
+    for(const c of customersData){
+      if(!c.photo){
+        const img = await idbGetImage('customer_' + c.customer_id);
+        if(img){ c.photo = img; anyChanged = true; }
+      }
+    }
+    for(const s of suppliersData){
+      if(!s.photo){
+        const img = await idbGetImage('supplier_' + s.supplier_id);
+        if(img){ s.photo = img; anyChanged = true; }
+      }
+    }
+  }catch(e){ console.warn('Photo hydration from IndexedDB failed:', e); }
+
+  if(anyChanged){
+    // ---------- تصویریں مل جانے کے بعد جو بھی سکرین اس وقت کھلی ہو، اسے دوبارہ بنائیں تاکہ تصویریں نظر آئیں ----------
+    try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+    try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
+    try{ if(typeof renderPartyList === 'function') renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  }
+}
+
 function loadFromStorage(key, fallback){
   try{
     const raw = localStorage.getItem(STORAGE_PREFIX + key);
@@ -4410,10 +4544,10 @@ function saveToStorage(key, value){
 // ---------- تمام اہم ڈیٹا ایک ساتھ محفوظ — یہ ہر چند سیکنڈ بعد خودکار چلتا ہے، اس لیے
 // کوڈ میں کہیں سے بھی کی گئی کوئی بھی تبدیلی (نیا پراڈکٹ، اسٹاک اپڈیٹ، نیا بل وغیرہ) خودکار محفوظ ہو جاتی ہے ----------
 function persistAllData(){
-  if(typeof productsData !== 'undefined') saveToStorage('products', productsData);
+  if(typeof productsData !== 'undefined') saveProductsLight();
   if(typeof customCategories !== 'undefined') saveToStorage('customCategories', customCategories);
-  if(typeof customersData !== 'undefined') saveToStorage('customers', customersData);
-  if(typeof suppliersData !== 'undefined') saveToStorage('suppliers', suppliersData);
+  if(typeof customersData !== 'undefined') saveCustomersLight();
+  if(typeof suppliersData !== 'undefined') saveSuppliersLight();
   if(typeof invoicesData !== 'undefined') saveToStorage('invoices', invoicesData);
   if(typeof usersData !== 'undefined') saveToStorage('users', usersData);
   if(typeof approvalRequests !== 'undefined') saveToStorage('approvalRequests', approvalRequests);
@@ -9120,6 +9254,7 @@ function addVariantRow(productId){
 
 function deleteVariant(productId, variantId){
   if(!confirm('Are you sure you want to delete this variant?')) return;
+  idbDeleteImage('product_' + variantId); // ---------- تصویر بھی صاف کریں تاکہ IndexedDB میں بے کار ڈیٹا جمع نہ ہو ----------
   const product = productsData.find(p => p.product_id === productId);
   product.variants = product.variants.filter(v => v.variant_id !== variantId);
   openProductCards.add(productId);
@@ -9250,6 +9385,7 @@ function deleteProduct(productId){
   const product = productsData.find(p => p.product_id === productId);
   if(!product) return;
   if(!confirm(`Delete "${product.name}" and all its variants? This cannot be undone.`)) return;
+  (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id)); // ---------- ہر ویریئنٹ کی تصویر بھی صاف کریں ----------
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
   renderProductList(document.getElementById('productSearchInput').value);
@@ -10671,6 +10807,7 @@ function deleteCustomer(customerId){
     msg = `⚠️ "${c.name}" still has Rs. ${c.total_receivable.toLocaleString()} outstanding (they owe you). Deleting will permanently lose this record. Are you sure you want to delete?`;
   }
   if(!confirm(msg)) return;
+  idbDeleteImage('customer_' + customerId);
   customersData = customersData.filter(x => x.customer_id !== customerId);
   persistAllData();
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
@@ -10685,6 +10822,7 @@ function deleteSupplier(supplierId){
     msg = `⚠️ You still owe "${s.name}" Rs. ${s.total_payable.toLocaleString()}. Deleting will permanently lose this record. Are you sure you want to delete?`;
   }
   if(!confirm(msg)) return;
+  idbDeleteImage('supplier_' + supplierId);
   suppliersData = suppliersData.filter(x => x.supplier_id !== supplierId);
   persistAllData();
   renderPartyList(document.getElementById('partySearchInput')?.value || '');
@@ -17041,7 +17179,7 @@ function renderStorageUsage(){
   const budgetBytes = 5 * 1024 * 1024; // ~5MB اندازہ
   const usedMB = (totalBytes / (1024*1024)).toFixed(2);
   const pct = Math.min(100, Math.round((totalBytes / budgetBytes) * 100));
-  textEl.textContent = `${usedMB} MB used (approx. ${pct}% of a typical ${(budgetBytes/(1024*1024)).toFixed(0)}MB device limit). Mostly product photos — delete unused ones or export/clear old Bill History if this gets close to full.`;
+  textEl.textContent = `${usedMB} MB used (approx. ${pct}% of a typical ${(budgetBytes/(1024*1024)).toFixed(0)}MB device limit). Product/customer/supplier photos are now stored separately (not counted here) — this is mostly your products, bills, and customer records. If this ever gets close to full, export/clear old Bill History.`;
   barEl.style.width = pct + '%';
   barEl.style.background = pct >= 90 ? 'var(--danger)' : pct >= 70 ? '#f59e0b' : 'var(--primary)';
 }
@@ -20531,6 +20669,14 @@ function testPrint(){
 
 // ---------- ابتدائی لوڈ: جب صفحہ کھلے تو ایک بار product list render ہو ----------
 document.addEventListener('DOMContentLoaded', () => {
+  // ---------- 📦 اگر پہلے کسی سیشن میں تصویریں IndexedDB میں محفوظ ہو چکی ہیں، انہیں واپس میموری میں جوڑیں —
+  // fire-and-forget، ایپ کے فوری کھلنے میں تاخیر نہیں کرنی (تصویریں چند لمحوں میں خودکار نمودار ہو جائیں گی) ----------
+  hydratePhotosFromIndexedDB();
+  // ---------- ایک بار فوری migration — اگر یہ ڈیوائس پرانے ورژن سے اپ ڈیٹ ہوا ہے تو localStorage میں
+  // ابھی بھی تصویریں inline ہو سکتی ہیں؛ اگلی بار کسی بھی تبدیلی پر خودکار offload تو ہو ہی جاتیں،
+  // لیکن یہاں سے فوری کر دینے سے Settings کا "Storage Used" نمبر پہلی ہی بار درست/کم نظر آئے گا ----------
+  setTimeout(() => { try{ persistAllData(); }catch(e){} }, 3000);
+
   // ---------- 🔙 Android کا Back بٹن/اشارہ — پہلے یہ کھلے ہوئے modal کو نظرانداز کر کے سیدھا پوری PWA بند کر دیتا تھا
   // (خاص طور پر جب Variant Chooser جیسا لمبا modal کھلا ہو اور اوپر کا ✖ نظر نہ آئے) —
   // اب یہ ہر modal کے کھلنے پر ایک history entry ڈالتا ہے، تاکہ Back پہلے modal بند کرے، ایپ سے باہر نہ لے جائے ----------
