@@ -1685,7 +1685,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO004</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO005</span>
     </div>
   </div>
 
@@ -3805,28 +3805,36 @@ document.addEventListener('keydown', function(e){
           </label>
         </div>
 
-        <!-- --- 💾 بیک اپ (Export/Import) — چونکہ فون میں براہ راست HTML کھولنے پر خودکار محفوظ ہونا قابلِ بھروسہ نہیں،
-             یہی سب سے پکا طریقہ ہے کہ آپ کا ڈیٹا (پراڈکٹس، کسٹمرز، بل) محفوظ رہے اور اگلی بار واپس لایا جا سکے --- -->
+        <!-- --- 💾 بیک اپ — اب Google Drive والے دونوں بٹن مرکزی/نمایاں ہیں (زیادہ تر لوگوں کے لیے یہی کافی ہے)،
+             Local Export/Import کو ایک چھوٹے "Advanced" آپشن میں سمیٹ دیا ہے تاکہ سکرین صاف رہے مگر بغیر
+             انٹرنیٹ/Google اکاؤنٹ کے سہارے کی صورت میں وہ سہولت موجود رہے --- -->
         <div class="settingsCard" id="settingsCardBackup">
           <h3>💾 Backup Your Data</h3>
-          <div class="settingsHint">Since opening this file directly in Chrome doesn't reliably auto-save between sessions, use this instead: tap "Export" before closing the app to download a backup file, then tap "Import" next time you open the app to bring everything back.</div>
-          <div class="settingsHint" style="background:#fff7ed; color:#9a3412;">📁 Backups always save to your phone's <b>Downloads</b> folder — Android/Chrome doesn't let a web app choose a different folder automatically. To avoid confusion, always open this app from the <b>same one link</b> (your GitHub Pages URL), and check "Last Backup" below before closing the app.</div>
+          <div class="settingsHint">Your data lives only on this device unless you back it up. Use Google Drive below — it's automatic and always available from any device.</div>
           <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
-          <div class="backupBtnGrid">
-            <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
-              <span class="backupBtnIcon">⬇️</span>
-              <span class="backupBtnLabel">Export Backup</span>
-              <span class="backupBtnSub">Save all data to a file</span>
-            </button>
-            <button class="backupActionBtn backupImportBtn" onclick="triggerRestoreWithHint('importBackupInput')">
-              <span class="backupBtnIcon">⬆️</span>
-              <span class="backupBtnLabel">Import Backup</span>
-              <span class="backupBtnSub">Restore from a file</span>
-            </button>
-          </div>
-          <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; margin-top:10px; padding:13px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:14px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
-          <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:13px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:14px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer;">📥 Restore from Google Drive</button>
+
+          <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
+          <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer;">📥 Restore from Google Drive</button>
           <div class="settingsHint" style="margin-top:6px;">پہلی بار دبانے پر آپ کی Google Drive تک اجازت مانگی جائے گی — ایپ صرف اپنی بنائی بیک اپ فائلیں دیکھ سکے گی، آپ کی باقی Drive تک رسائی نہیں ہو گی۔</div>
+
+          <div onclick="toggleLocalBackupAdvanced()" style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:16px; padding:8px; cursor:pointer; color:var(--muted); font-size:12px; font-weight:700;">
+            <span id="localBackupAdvancedChevron">▸</span> Advanced: Local File Backup (no internet needed)
+          </div>
+          <div id="localBackupAdvancedWrap" style="display:none; margin-top:8px;">
+            <div class="settingsHint" style="background:#fff7ed; color:#9a3412;">📁 For when there's no internet, or as an extra copy. Local backups save to your phone's <b>Downloads</b> folder.</div>
+            <div class="backupBtnGrid">
+              <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
+                <span class="backupBtnIcon">⬇️</span>
+                <span class="backupBtnLabel">Export Backup</span>
+                <span class="backupBtnSub">Save all data to a file</span>
+              </button>
+              <button class="backupActionBtn backupImportBtn" onclick="triggerRestoreWithHint('importBackupInput')">
+                <span class="backupBtnIcon">⬆️</span>
+                <span class="backupBtnLabel">Import Backup</span>
+                <span class="backupBtnSub">Restore from a file</span>
+              </button>
+            </div>
+          </div>
           <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
 
@@ -4436,6 +4444,15 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // فارمیٹ: AIO(Dmonyy DAY HHMMhrs).JSON — مثال: 10 جولائی 2026 جمعہ 06:13 → AIO(10jul26FR0613hrs).JSON
 // ---------- بیک اپ فائل کا نام: BK.AIO + دن(2 حرف) + تاریخ + مہینہ(بغیر زیرو) + وقت(24گھنٹے) + .json ----------
 // مثال: 10 جولائی 2026، جمعہ، شام 6:28 → BK.AIOFR1071828.json
+// ---------- Local Backup کا "Advanced" حصہ چھپا/دکھا — بغیر انٹرنیٹ کے سہارے کے لیے موجود رہے مگر نمایاں نہ ہو ----------
+function toggleLocalBackupAdvanced(){
+  const wrap = document.getElementById('localBackupAdvancedWrap');
+  const chevron = document.getElementById('localBackupAdvancedChevron');
+  const isOpen = wrap.style.display === 'block';
+  wrap.style.display = isOpen ? 'none' : 'block';
+  chevron.textContent = isOpen ? '▸' : '▾';
+}
+
 function generateBackupFileName(){
   const now = new Date();
   const dayNames = ['SU','MO','TU','WE','TH','FR','SA'];
