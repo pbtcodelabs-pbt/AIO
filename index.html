@@ -2,7 +2,6 @@
 <html lang="ur" dir="ltr">
 <head>
 <script>
-// ---------- Casual-inspection deterrent (NOT real security — see delivery note) ----------
 document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 document.addEventListener('keydown', function(e){
   var k = (e.key || '').toUpperCase();
@@ -129,20 +128,22 @@ document.addEventListener('keydown', function(e){
     background:var(--primary); color:#fff; border:none; border-radius:10px; padding:8px 14px;
     font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
   }
-  /* --- 💾 Backup Reminder Toast — دن میں تین اوقات (صبح/دوپہر/رات) میں ایپ کھلنے پر ایک بار نظر آئے --- */
+  /* --- 💾 Backup Reminder Bar — دن میں تین اوقات (صبح/دوپہر/رات) میں ایپ کھلنے پر ایک بار نظر آئے —
+     اب باکسی pill کی بجائے ایک باریک، پورے چوڑائی کا پروفیشنل بار، سکرین کے بالکل نیچے --- */
   #backupReminderToast{
-    position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(80px); z-index:6000;
-    background:#7c2d12; color:#fff; padding:12px 16px; border-radius:16px; font-size:13px; font-weight:700;
-    box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; transition:all .3s ease;
-    display:flex; align-items:center; gap:10px; max-width:90vw;
+    position:fixed; left:0; right:0; bottom:0; transform:translateY(100%); z-index:6000;
+    background:#1e293b; color:#fff; padding:9px 14px; font-size:12.5px; font-weight:600;
+    box-shadow:0 -2px 12px rgba(0,0,0,.25); transition:transform .3s ease;
+    display:flex; align-items:center; gap:10px;
     pointer-events:none;
   }
-  #backupReminderToast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  #backupReminderToast.show{transform:translateY(0); pointer-events:auto;}
+  #backupReminderToast span{flex:1; min-width:0;}
   #backupReminderToast button{
-    border:none; border-radius:10px; padding:8px 14px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;
+    border:none; border-radius:7px; padding:6px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; flex:0 0 auto;
   }
-  #backupReminderToast .brtBackupBtn{background:#fff; color:#7c2d12;}
-  #backupReminderToast .brtDismissBtn{background:rgba(255,255,255,.2); color:#fff; padding:8px 10px;}
+  #backupReminderToast .brtBackupBtn{background:#eab308; color:#1e293b;}
+  #backupReminderToast .brtDismissBtn{background:transparent; color:rgba(255,255,255,.65); padding:6px 8px; font-size:15px;}
   /* پرانا نچلا "آف لائن" بینر ہٹا دیا گیا — اب اوپر ہیڈر میں چھوٹا سا بیج (#connStatusBadge) استعمال ہوتا ہے،
      جو کبھی بھی کسی بٹن کے اوپر نہیں آتا اور ہمیشہ ایک ہی جگہ نظر آتا ہے۔ */
 
@@ -1556,8 +1557,8 @@ document.addEventListener('keydown', function(e){
 
 <!-- ---------- 💾 Backup Reminder Toast — دن میں تین اوقات پر ایپ کھلنے پر ایک بار نظر آئے ---------- -->
 <div id="backupReminderToast">
-  <span>💾 Don't forget to backup your data today</span>
-  <button class="brtBackupBtn" onclick="backupNowFromReminder()">Backup Now</button>
+  <span>💾 Haven't backed up today — take a quick backup now?</span>
+  <button class="brtBackupBtn" onclick="backupNowFromReminder()">✅ Yes, Backup</button>
   <button class="brtDismissBtn" onclick="dismissBackupReminderToast()">✕</button>
 </div>
 
@@ -1684,7 +1685,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO279</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO004</span>
     </div>
   </div>
 
@@ -3824,6 +3825,7 @@ document.addEventListener('keydown', function(e){
             </button>
           </div>
           <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; margin-top:10px; padding:13px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:14px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
+          <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:13px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:14px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer;">📥 Restore from Google Drive</button>
           <div class="settingsHint" style="margin-top:6px;">پہلی بار دبانے پر آپ کی Google Drive تک اجازت مانگی جائے گی — ایپ صرف اپنی بنائی بیک اپ فائلیں دیکھ سکے گی، آپ کی باقی Drive تک رسائی نہیں ہو گی۔</div>
           <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
@@ -4295,6 +4297,17 @@ document.addEventListener('keydown', function(e){
   </div>
 </div>
 
+<!-- ☁️ Google Drive سے بحال کرنے کے لیے فہرست -->
+<div class="modalOverlay" id="gdriveRestoreModal" onclick="if(event.target===this) closeGDriveRestoreModal()">
+  <div class="backupConfirmBox" style="max-height:80vh; overflow-y:auto;">
+    <div class="backupConfirmIconWrap"><span>☁️</span></div>
+    <h3>Select a Backup</h3>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">آپ کی Google Drive میں یہ AIO POS بیک اپ فائلیں ملی ہیں — جس فائل کو بحال کرنا ہے اس پر ٹیپ کریں:</p>
+    <div id="gdriveFileListWrap" style="text-align:left; margin-top:10px;"></div>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="closeGDriveRestoreModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- IMPORT BACKUP — تصدیقی پیغام (پرانے نیٹو confirm() کی جگہ، خوبصورت برانڈڈ ڈیزائن) -->
 <div class="modalOverlay" id="importConfirmModal" onclick="if(event.target===this) cancelImportConfirm()">
   <div class="backupConfirmBox">
@@ -4567,6 +4580,91 @@ async function backupToGoogleDrive(){
 
   // ---------- پہلی بار اجازت مانگے گا، اگلی بار خاموشی سے (already authorized) ٹوکن مل جائے گا ----------
   client.requestAccessToken({ prompt: gDriveAccessToken ? '' : 'consent' });
+}
+
+// ---------- ☁️ Google Drive سے بحال کریں — فہرست دکھائیں، منتخب فائل کو اسی موجودہ
+// import-confirm پاپ اپ کے ذریعے بحال کریں (بالکل جیسے مقامی فائل سے بحال کرتے ہیں) ----------
+async function restoreFromGoogleDrive(){
+  const btn = document.getElementById('gdriveRestoreBtn');
+  const client = getGDriveTokenClient();
+  if(!client){
+    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    return;
+  }
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
+
+  client.callback = async (resp) => {
+    if(resp.error){
+      if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
+      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      return;
+    }
+    gDriveAccessToken = resp.access_token;
+    try{
+      if(btn) btn.textContent = '⏳ Loading files...';
+      const listUrl = 'https://www.googleapis.com/drive/v3/files' +
+        '?q=' + encodeURIComponent("mimeType='application/json' and trashed=false") +
+        '&orderBy=createdTime desc&pageSize=30&fields=' + encodeURIComponent('files(id,name,createdTime)');
+      const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
+      if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
+      const listData = await listRes.json();
+      const files = (listData.files || []).filter(f => f.name.startsWith('BK.AIO'));
+      renderGDriveFileList(files);
+      document.getElementById('gdriveRestoreModal').classList.add('show');
+    }catch(err){
+      alert('Google Drive سے فہرست نہیں مل سکی: ' + err.message);
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
+    }
+  };
+
+  client.requestAccessToken({ prompt: gDriveAccessToken ? '' : 'consent' });
+}
+
+function renderGDriveFileList(files){
+  const wrap = document.getElementById('gdriveFileListWrap');
+  if(files.length === 0){
+    wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px 10px;">اس Google اکاؤنٹ میں کوئی AIO POS بیک اپ فائل نہیں ملی۔</div>';
+    return;
+  }
+  wrap.innerHTML = files.map(f => {
+    const d = new Date(f.createdTime);
+    const dateStr = isNaN(d) ? '' : d.toLocaleString('en-GB', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+    return `<div onclick="selectGDriveBackupFile('${f.id}', '${f.name.replace(/'/g,"\\'")}')"
+      style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid #e2e8f0; border-radius:10px; margin-bottom:8px; cursor:pointer;">
+      <span style="font-size:20px;">📄</span>
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:700; font-size:13px; word-break:break-all;">${f.name}</div>
+        <div style="font-size:11px; color:var(--muted);">${dateStr}</div>
+      </div>
+      <span style="color:var(--primary); font-weight:700;">↻</span>
+    </div>`;
+  }).join('');
+}
+
+async function selectGDriveBackupFile(fileId, fileName){
+  document.getElementById('gdriveRestoreModal').classList.remove('show');
+  try{
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+      headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
+    });
+    if(!res.ok) throw new Error('Download failed: ' + res.status);
+    const backup = await res.json();
+    if(!backup.products || !backup.customers){
+      showBackupConfirmModal('error', fileName, {message:'This does not look like a valid AIO POS backup file.'});
+      return;
+    }
+    // ---------- اسی موجودہ تصدیقی پاپ اپ کا استعمال — بالکل جیسے مقامی فائل سے بحال کرتے وقت ہوتا ہے ----------
+    pendingImportBackup = backup;
+    pendingImportFileName = fileName + ' (Google Drive)';
+    document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
+    document.getElementById('importConfirmModal').classList.add('show');
+  }catch(err){
+    alert('فائل ڈاؤن لوڈ نہیں ہو سکی: ' + err.message);
+  }
+}
+function closeGDriveRestoreModal(){
+  document.getElementById('gdriveRestoreModal').classList.remove('show');
 }
 
 // ---------- ری سٹور دبانے پر پہلے صحیح فائل کا نام واضح دکھائیں (فون کا اپنا فائل پکر ہمارے کنٹرول میں نہیں،
