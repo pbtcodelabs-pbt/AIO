@@ -382,6 +382,16 @@ document.addEventListener('keydown', function(e){
     box-shadow:inset 0 1px 2px rgba(0,0,0,.25), 0 0 0 2px rgba(15,118,110,.25), 0 2px 6px rgba(15,118,110,.4);
     transform:scale(1.03);
   }
+  /* ---------- ڈائری کے "I Gave"/"I Got" ٹوگل — یہاں تھیم کا عام رنگ نہیں، ہمیشہ سرخ/سبز ہی ہونا چاہیے
+     (پہلے دونوں بٹن فعال ہوتے ہی تھیم کے رنگ میں آ جاتے تھے، چاہے وہ سرخ ہو، سبز ہو، یا کوئی تیسرا) ---------- */
+  #diaryNewType-owe.active, #diaryHistEditType-owe.active, #diaryEditType-owe.active{
+    background:linear-gradient(180deg, #ef4444, #b91c1c) !important;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.25), 0 0 0 2px rgba(239,68,68,.25), 0 2px 6px rgba(239,68,68,.4) !important;
+  }
+  #diaryNewType-get.active, #diaryHistEditType-get.active, #diaryEditType-get.active{
+    background:linear-gradient(180deg, #22c55e, #15803d) !important;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.25), 0 0 0 2px rgba(34,197,94,.25), 0 2px 6px rgba(34,197,94,.4) !important;
+  }
 
   /* ---------- Billing Mode Controls: دو بالکل مختلف شکلیں تاکہ کبھی الجھن نہ ہو ----------
      1) Counter Sale: اصلی آن/آف سوئچ (توگل) — بٹن نہیں، الگ ظاہری شکل
@@ -1685,7 +1695,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO011</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO012</span>
     </div>
   </div>
 
