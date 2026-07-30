@@ -1685,7 +1685,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO008</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO009</span>
     </div>
   </div>
 
@@ -3152,8 +3152,8 @@ document.addEventListener('keydown', function(e){
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date (change for a back-dated entry)</label>
         <input type="date" id="diaryNewDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 Udhaar</button>
-          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 Qarz</button>
+          <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 I Gave</button>
+          <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 I Got</button>
         </div>
         <input type="text" id="diaryNewNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
@@ -3205,8 +3205,8 @@ document.addEventListener('keydown', function(e){
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date</label>
         <input type="date" id="diaryHistEditDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 Udhaar</button>
-          <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 Qarz</button>
+          <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 I Gave</button>
+          <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 I Got</button>
         </div>
         <input type="text" id="diaryHistEditNote" placeholder="What's this for? (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
@@ -3223,8 +3223,8 @@ document.addEventListener('keydown', function(e){
         <input type="text" id="diaryEditName" placeholder="Person's name" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <input type="number" id="diaryEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
-          <button type="button" id="diaryEditType-owe" class="active" onclick="setDiaryEditType('owe')" style="flex:1;">🔴 Udhaar</button>
-          <button type="button" id="diaryEditType-get" onclick="setDiaryEditType('get')" style="flex:1;">🟢 Qarz</button>
+          <button type="button" id="diaryEditType-owe" class="active" onclick="setDiaryEditType('owe')" style="flex:1;">🔴 I Gave</button>
+          <button type="button" id="diaryEditType-get" onclick="setDiaryEditType('get')" style="flex:1;">🟢 I Got</button>
         </div>
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('diaryEditModal').classList.remove('show')">Cancel</button>
@@ -9949,20 +9949,22 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   const newBalance = txn ? prevBalance + txn.amount : entry.balance;
   const isGive = txn ? (txn.kind === 'receivable' || txn.kind === 'payment_owed' || (!txn.kind && txn.amount > 0)) : false;
   const txnAmount = txn ? Math.abs(txn.amount) : 0;
-  const txnLabel = isGive ? 'Paid' : 'Received';
+  const txnLabel = isGive ? 'I Gave' : 'I Received';
+  const txnColor = isGive ? '#dc2626' : '#16a34a';
+  const netColor = newBalance >= 0 ? '#16a34a' : '#dc2626'; // ---------- Qarz (وہ ہمیں دیں گے) = سبز، Udhaar (ہم دیں گے) = سرخ — باقی ایپ جیسا یکساں ----------
 
-  const W = 640;
-  const marginX = 30;
+  const W = 480;
+  const marginX = 24;
   const cardX = marginX, cardW = W - marginX*2;
-  let y = 24;
+  let y = 20;
 
   // ---------- اونچائی کا اندازہ ----------
-  const greetingH = 56;
-  const nameBoxH = 62;
-  const rightBoxH = 84, rightBoxGap = 10;
+  const greetingH = 50;
+  const nameBoxH = 54;
+  const rightBoxH = 74, rightBoxGap = 9;
   const rightColH = rightBoxH*3 + rightBoxGap*2;
-  const footerH = 64;
-  let H = y + greetingH + 14 + 26 + nameBoxH + 20 + rightColH + 24 + footerH + 20;
+  const footerH = 56;
+  let H = y + greetingH + 12 + 24 + nameBoxH + 18 + rightColH + 20 + footerH + 18;
 
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
@@ -9970,36 +9972,36 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
   ctx.strokeStyle = theme.primary; ctx.lineWidth = 3;
-  roundRectPath(ctx, 8, 8, W-16, H-16, 16);
+  roundRectPath(ctx, 7, 7, W-14, H-14, 14);
   ctx.stroke();
 
   ctx.textAlign = 'center';
 
   // ---------- اوپر سلام والا بینر ----------
   ctx.fillStyle = '#14532d';
-  roundRectPath(ctx, cardX, y, cardW, greetingH, 28);
+  roundRectPath(ctx, cardX, y, cardW, greetingH, 25);
   ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.font = `700 15px Poppins, sans-serif`;
-  wrapCenteredText(ctx, 'Dear Brother! As-salamu alaykum wa rahmatullahi wa barakatuh', W/2, y + greetingH/2 + 5, cardW - 30, 18);
-  y += greetingH + 14;
+  ctx.font = `700 13px Poppins, sans-serif`;
+  wrapCenteredText(ctx, 'Dear Brother! As-salamu alaykum wa rahmatullahi wa barakatuh', W/2, y + greetingH/2 + 4, cardW - 26, 16);
+  y += greetingH + 12;
 
   // ---------- کسٹمر لیبل + نام کا نیوی باکس ----------
   ctx.fillStyle = '#64748b';
-  ctx.font = `600 12px Poppins, sans-serif`;
-  ctx.fillText('Customer', W/2, y + 12);
-  y += 26;
+  ctx.font = `600 11px Poppins, sans-serif`;
+  ctx.fillText('Customer', W/2, y + 11);
+  y += 24;
   ctx.fillStyle = '#1e3a5f';
   roundRectPath(ctx, cardX, y, cardW, nameBoxH, 10);
   ctx.fill();
   ctx.fillStyle = '#fff';
-  ctx.font = `800 24px Poppins, sans-serif`;
-  ctx.fillText(entry.name, W/2, y + nameBoxH/2 + 8);
-  y += nameBoxH + 20;
+  ctx.font = `800 20px Poppins, sans-serif`;
+  ctx.fillText(entry.name, W/2, y + nameBoxH/2 + 7);
+  y += nameBoxH + 18;
 
   // ---------- بائیں پیغام کا سبز باکس + دائیں تین رنگین بیلنس باکس ----------
-  const leftW = Math.round(cardW * 0.36), rightW = cardW - leftW - 14;
-  const leftX = cardX, rightX = cardX + leftW + 14;
+  const leftW = Math.round(cardW * 0.34), rightW = cardW - leftW - 12;
+  const leftX = cardX, rightX = cardX + leftW + 12;
   const colTop = y;
 
   ctx.fillStyle = '#dcfce7';
@@ -10009,20 +10011,20 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   roundRectPath(ctx, leftX, colTop, leftW, rightColH, 10);
   ctx.stroke();
   ctx.fillStyle = '#14532d';
-  ctx.font = `700 15px Poppins, sans-serif`;
+  ctx.font = `700 13px Poppins, sans-serif`;
   const msgText = note && note.trim() ? note.trim() : (txn && txn.note ? txn.note : '');
   if(msgText){
-    wrapCenteredText(ctx, msgText, leftX + leftW/2, colTop + rightColH/2 - 10, leftW - 24, 22);
+    wrapCenteredText(ctx, msgText, leftX + leftW/2, colTop + rightColH/2 - 8, leftW - 20, 18);
   } else {
     ctx.fillStyle = '#86efac';
-    ctx.font = `500 12px Poppins, sans-serif`;
+    ctx.font = `500 11px Poppins, sans-serif`;
     ctx.fillText('(message space)', leftX + leftW/2, colTop + rightColH/2 + 4);
   }
 
   const rightBoxes = [
-    {label:'Previous Balance', value: prevBalance, color:'#dc2626'},
-    {label: txnLabel, value: txnAmount, color:'#2563eb'},
-    {label:'New Balance', value: newBalance, color:'#334155'},
+    {label:'Old Balance', value: prevBalance, color:'#64748b'},
+    {label: txnLabel, value: txnAmount, color: txnColor},
+    {label:'Net Current Balance', value: newBalance, color: netColor},
   ];
   rightBoxes.forEach((b, i) => {
     const by = colTop + i*(rightBoxH + rightBoxGap);
@@ -10030,12 +10032,12 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
     roundRectPath(ctx, rightX, by, rightW, rightBoxH, 10);
     ctx.fill();
     ctx.fillStyle = '#fff';
-    ctx.font = `600 13px Poppins, sans-serif`;
-    ctx.fillText(b.label, rightX + rightW/2, by + 26);
-    ctx.font = `800 26px Poppins, sans-serif`;
-    ctx.fillText('Rs ' + fmtDiaryAmount(Math.abs(b.value)), rightX + rightW/2, by + 60);
+    ctx.font = `600 11.5px Poppins, sans-serif`;
+    ctx.fillText(b.label, rightX + rightW/2, by + 23);
+    ctx.font = `800 22px Poppins, sans-serif`;
+    ctx.fillText('Rs ' + fmtDiaryAmount(Math.abs(b.value)), rightX + rightW/2, by + 53);
   });
-  y = colTop + rightColH + 24;
+  y = colTop + rightColH + 20;
 
   // ---------- نیچے فوٹر — فون نمبر (بائیں) اور بزنس نام/مالک (دائیں) ----------
   ctx.fillStyle = '#14532d';
@@ -10043,20 +10045,148 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   ctx.fill();
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'left';
-  ctx.font = `700 15px Poppins, sans-serif`;
-  ctx.fillText(AppState.settings.businessPhone || '', cardX + 16, y + footerH/2 + 5);
+  ctx.font = `700 13px Poppins, sans-serif`;
+  ctx.fillText(AppState.settings.businessPhone || '', cardX + 14, y + footerH/2 + 4);
   ctx.textAlign = 'right';
-  ctx.font = `700 15px Poppins, sans-serif`;
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', cardX + cardW - 16, y + footerH/2 - 4);
-  ctx.font = `500 12px Poppins, sans-serif`;
+  ctx.font = `700 13px Poppins, sans-serif`;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', cardX + cardW - 14, y + footerH/2 - 3);
+  ctx.font = `500 10.5px Poppins, sans-serif`;
   ctx.globalAlpha = 0.9;
-  ctx.fillText(AppState.settings.ownerName || '', cardX + cardW - 16, y + footerH/2 + 14);
+  ctx.fillText(AppState.settings.ownerName || '', cardX + cardW - 14, y + footerH/2 + 12);
   ctx.globalAlpha = 1;
 
   return canvas;
 }
 
-// ---------- اکاؤنٹ کا اصل "🖨️ Print / Share Statement" بٹن — تازہ ترین انٹری کی رسید بناتا ہے ----------
+// ---------- مکمل ریکارڈ/پورا لیجر پوسٹر — اسی بصری انداز میں (سلام، نام، فوٹر) مگر ایک انٹری کی بجائے
+// تمام انٹریوں کی فہرست + آخر میں خالص بیلنس، تاکہ "پورا کھاتہ" ایک ہی تصویر میں نظر آئے ----------
+async function renderDiaryFullLedgerPoster(entry, note){
+  const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  const hist = (entry.history || []).slice().sort((a,b) => new Date(a.date) - new Date(b.date));
+  const netColor = entry.balance >= 0 ? '#16a34a' : '#dc2626';
+
+  const W = 480;
+  const marginX = 24;
+  const cardX = marginX, cardW = W - marginX*2;
+  let y = 20;
+
+  const greetingH = 50;
+  const nameBoxH = 54;
+  const rowH = 30;
+  const listH = Math.max(rowH, hist.length * rowH);
+  const netBoxH = 70;
+  const footerH = 56;
+  let H = y + greetingH + 12 + 24 + nameBoxH + 16 + 26 + listH + 16 + netBoxH + 18 + footerH + 18;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = theme.primary; ctx.lineWidth = 3;
+  roundRectPath(ctx, 7, 7, W-14, H-14, 14);
+  ctx.stroke();
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#14532d';
+  roundRectPath(ctx, cardX, y, cardW, greetingH, 25);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = `700 13px Poppins, sans-serif`;
+  wrapCenteredText(ctx, 'Dear Brother! As-salamu alaykum wa rahmatullahi wa barakatuh', W/2, y + greetingH/2 + 4, cardW - 26, 16);
+  y += greetingH + 12;
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = `600 11px Poppins, sans-serif`;
+  ctx.fillText('Customer — Full Record', W/2, y + 11);
+  y += 24;
+  ctx.fillStyle = '#1e3a5f';
+  roundRectPath(ctx, cardX, y, cardW, nameBoxH, 10);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = `800 20px Poppins, sans-serif`;
+  ctx.fillText(entry.name, W/2, y + nameBoxH/2 + 7);
+  y += nameBoxH + 16;
+
+  if(note && note.trim()){
+    ctx.fillStyle = '#334155';
+    ctx.font = `600 11.5px Poppins, sans-serif`;
+    wrapCenteredText(ctx, note.trim(), W/2, y + 8, cardW - 20, 15);
+    y += 22;
+  }
+
+  // ---------- تمام انٹریوں کی فہرست — تاریخ، I Gave (سرخ) یا I Received (سبز)، رقم ----------
+  ctx.textAlign = 'left';
+  ctx.font = `700 11px Poppins, sans-serif`;
+  ctx.fillStyle = '#0f172a';
+  ctx.fillText('Date', cardX + 4, y + 16);
+  ctx.textAlign = 'right';
+  ctx.fillText('Amount', cardX + cardW - 4, y + 16);
+  y += 20;
+  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cardX, y); ctx.lineTo(cardX + cardW, y); ctx.stroke();
+  y += 4;
+
+  if(hist.length === 0){
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = `500 12px Poppins, sans-serif`;
+    ctx.fillText('No entries yet', W/2, y + 16);
+    y += rowH;
+  } else {
+    hist.forEach(h => {
+      const isGive = h.kind === 'receivable' || h.kind === 'payment_owed' || (!h.kind && h.amount > 0);
+      const d = new Date(h.date);
+      const dateStr = isNaN(d) ? '' : d.toLocaleDateString('en-GB');
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#334155';
+      ctx.font = `500 11px Poppins, sans-serif`;
+      let label = dateStr + (h.note ? ' — ' + h.note : '');
+      const maxLabelW = cardW * 0.55;
+      while(ctx.measureText(label).width > maxLabelW && label.length > 3){ label = label.slice(0,-1); }
+      ctx.fillText(label, cardX + 4, y + 16);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = isGive ? '#dc2626' : '#16a34a';
+      ctx.font = `700 12px Poppins, sans-serif`;
+      ctx.fillText((isGive ? '− ' : '+ ') + fmtDiaryAmount(Math.abs(h.amount)), cardX + cardW - 4, y + 16);
+      y += rowH;
+      ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cardX, y - 8); ctx.lineTo(cardX + cardW, y - 8); ctx.stroke();
+    });
+  }
+  y += 12;
+
+  // ---------- خالص بیلنس ----------
+  ctx.fillStyle = netColor;
+  roundRectPath(ctx, cardX, y, cardW, netBoxH, 10);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.font = `600 12px Poppins, sans-serif`;
+  ctx.fillText('Net Current Balance', W/2, y + 24);
+  ctx.font = `800 24px Poppins, sans-serif`;
+  ctx.fillText('Rs ' + fmtDiaryAmount(Math.abs(entry.balance)), W/2, y + 54);
+  y += netBoxH + 18;
+
+  ctx.fillStyle = '#14532d';
+  roundRectPath(ctx, cardX, y, cardW, footerH, 10);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'left';
+  ctx.font = `700 13px Poppins, sans-serif`;
+  ctx.fillText(AppState.settings.businessPhone || '', cardX + 14, y + footerH/2 + 4);
+  ctx.textAlign = 'right';
+  ctx.font = `700 13px Poppins, sans-serif`;
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', cardX + cardW - 14, y + footerH/2 - 3);
+  ctx.font = `500 10.5px Poppins, sans-serif`;
+  ctx.globalAlpha = 0.9;
+  ctx.fillText(AppState.settings.ownerName || '', cardX + cardW - 14, y + footerH/2 + 12);
+  ctx.globalAlpha = 1;
+
+  return canvas;
+}
+
+// ---------- اکاؤنٹ کا اصل "🖨️ Print / Share Statement" بٹن — اب پورا لیجر/مکمل ریکارڈ بناتا ہے (صرف آخری انٹری نہیں) ----------
 async function shareDiaryPoster(){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
@@ -10064,9 +10194,9 @@ async function shareDiaryPoster(){
     alert('Add at least one entry first, then you can print/share a receipt for it.');
     return;
   }
-  const note = prompt('Add a message to this receipt (optional):', '') || '';
-  const canvas = await renderDiaryTransactionPoster(entry, null, note.trim());
-  showImageSharePreview(canvas, `Receipt_${entry.name.replace(/\s+/g,'_')}.png`, `📔 ${entry.name} — Receipt`, entry.name);
+  const note = prompt('Add a message to this statement (optional):', '') || '';
+  const canvas = await renderDiaryFullLedgerPoster(entry, note.trim());
+  showImageSharePreview(canvas, `Statement_${entry.name.replace(/\s+/g,'_')}.png`, `📔 ${entry.name} — Full Record`, entry.name);
 }
 
 // ---------- ہسٹری کی کسی بھی ایک لائن کے ساتھ 📤 دبانے پر، اسی مخصوص انٹری کی رسید بنے ----------
