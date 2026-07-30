@@ -1592,7 +1592,7 @@ document.addEventListener('keydown', function(e){
       <button onclick="login()">Enter</button>
     </div>
 
-    <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px;">📤 Share This App</button>
+    <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
 
     <!-- ---------- سیدھا Login سکرین سے ہی Activation Code لگانے کا آپشن — PIN سے پہلے، تاکہ کنفیوژن نہ ہو ---------- -->
     <div class="loginHint" style="margin-top:10px;">
@@ -1685,7 +1685,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO009</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO011</span>
     </div>
   </div>
 
@@ -3335,7 +3335,7 @@ document.addEventListener('keydown', function(e){
         </div>
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="pscA4ShareRow" style="padding-top:0; display:none;">
-          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareInvoicePdf()">📤 Print/Share A4 PDF</button>
+          <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="shareInvoicePdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
         </div>
       </div>
     </div>
@@ -3554,7 +3554,7 @@ document.addEventListener('keydown', function(e){
         </div>
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="aopA4ShareRow" style="padding-top:0; display:none;">
-          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareAdvOrderPdf()">📤 Print/Share A4 PDF</button>
+          <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="shareAdvOrderPdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
         </div>
       </div>
     </div>
@@ -3629,7 +3629,7 @@ document.addEventListener('keydown', function(e){
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('poCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
         <div class="previewActions" id="poA4ShareRow" style="padding-top:0; display:none;">
-          <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="sharePoPdf()">📤 Print/Share A4 PDF</button>
+          <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="sharePoPdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
         </div>
       </div>
     </div>
@@ -4075,7 +4075,7 @@ document.addEventListener('keydown', function(e){
     </div>
     <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
     <div class="previewActions" id="rpA4ShareRow" style="padding-top:0; display:none;">
-      <button style="background:#f0fdf4; color:#166534; flex:1;" onclick="shareReportPdf()">📤 Print/Share A4 PDF</button>
+      <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="shareReportPdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
     </div>
   </div>
 </div>
@@ -4122,6 +4122,23 @@ document.addEventListener('keydown', function(e){
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeImageSharePreview()">Cancel</button>
           <button class="saveBtn" style="background:#25D366;" onclick="confirmImageShare()">💬 Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- 📔 My Diary Poster — میسج ٹائپ کرتے ہی پوسٹر لائیو اپڈیٹ (بالکل Piara Khata جیسا) ---------- -->
+    <div class="modalOverlay" id="diaryPosterModal" style="z-index:960;" onclick="if(event.target===this) closeDiaryPosterModal()">
+      <div class="modalBox" style="max-width:400px; text-align:center; max-height:88vh; overflow-y:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <h3 style="margin:0;">📔 Ledger Poster</h3>
+          <span onclick="closeDiaryPosterModal()" style="cursor:pointer; font-size:20px; color:var(--muted); padding:4px;">✖</span>
+        </div>
+        <label style="display:block; text-align:left; font-size:12px; font-weight:700; color:var(--muted); margin:8px 0 4px;">Message (Optional)</label>
+        <textarea id="diaryPosterMessageInput" oninput="onDiaryPosterMessageInput()" rows="2" placeholder="Type a message — it will appear on the poster live" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px; resize:vertical;"></textarea>
+        <img id="diaryPosterPreviewImg" style="width:100%; border-radius:12px; margin:10px 0; box-shadow:0 4px 14px rgba(0,0,0,.18);">
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="downloadDiaryPoster()">⬇️ Download</button>
+          <button class="saveBtn" style="background:#25D366;" onclick="shareDiaryPosterFromModal()">💬 Share</button>
         </div>
       </div>
     </div>
@@ -9751,7 +9768,7 @@ function openDiaryDetailModal(id){
       <span style="flex:1;">${dateStr}${h.note ? ' — ' + h.note.replace(/</g,'&lt;') : ''}</span>
       <span>${sign} ${fmtDiaryAmount(h.amount)}</span>
       <span onclick="event.stopPropagation(); openDiaryHistoryEditModal(${originalIdx})" style="flex:0 0 auto; color:var(--primary-dark); cursor:pointer; font-size:13px; padding:2px 4px;">✏️</span>
-      <span onclick="event.stopPropagation(); shareDiaryHistoryLine(${originalIdx})" style="flex:0 0 auto; color:#2563eb; cursor:pointer; font-size:13px; padding:2px 4px;">📤</span>
+      <span onclick="event.stopPropagation(); shareDiaryHistoryLine(${originalIdx})" style="flex:0 0 auto; color:#2563eb; cursor:pointer; font-size:13px; padding:2px 4px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></span>
       <span onclick="event.stopPropagation(); deleteDiaryHistoryLine(${originalIdx})" style="flex:0 0 auto; color:var(--danger); cursor:pointer; font-size:13px; padding:2px 4px;">🗑️</span>
     </div>`;
   }).join('') : '<div>No history yet.</div>';
@@ -10187,6 +10204,12 @@ async function renderDiaryFullLedgerPoster(entry, note){
 }
 
 // ---------- اکاؤنٹ کا اصل "🖨️ Print / Share Statement" بٹن — اب پورا لیجر/مکمل ریکارڈ بناتا ہے (صرف آخری انٹری نہیں) ----------
+// ---------- 📔 ڈائری پوسٹر — میسج لکھتے ہی لائیو پریویو اپڈیٹ ہو (بالکل Piara Khata جیسا) ----------
+let diaryPosterMode = null;   // 'full' یا 'single'
+let diaryPosterHistIdx = null;
+let diaryPosterCanvas = null;
+let diaryPosterDebounce = null;
+
 async function shareDiaryPoster(){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
@@ -10194,18 +10217,69 @@ async function shareDiaryPoster(){
     alert('Add at least one entry first, then you can print/share a receipt for it.');
     return;
   }
-  const note = prompt('Add a message to this statement (optional):', '') || '';
-  const canvas = await renderDiaryFullLedgerPoster(entry, note.trim());
-  showImageSharePreview(canvas, `Statement_${entry.name.replace(/\s+/g,'_')}.png`, `📔 ${entry.name} — Full Record`, entry.name);
+  openDiaryPosterModal('full', null);
 }
 
-// ---------- ہسٹری کی کسی بھی ایک لائن کے ساتھ 📤 دبانے پر، اسی مخصوص انٹری کی رسید بنے ----------
+// ---------- ہسٹری کی کسی بھی ایک لائن کے ساتھ شیئر آئیکن دبانے پر، اسی مخصوص انٹری کی رسید بنے ----------
 async function shareDiaryHistoryLine(historyIdx){
   const entry = diaryData.find(e => e.id === activeDiaryEntryId);
   if(!entry) return;
-  const note = prompt('Add a message to this receipt (optional):', '') || '';
-  const canvas = await renderDiaryTransactionPoster(entry, historyIdx, note.trim());
-  showImageSharePreview(canvas, `Receipt_${entry.name.replace(/\s+/g,'_')}.png`, `📔 ${entry.name} — Receipt`, entry.name);
+  openDiaryPosterModal('single', historyIdx);
+}
+
+async function openDiaryPosterModal(mode, historyIdx){
+  diaryPosterMode = mode;
+  diaryPosterHistIdx = historyIdx;
+  document.getElementById('diaryPosterMessageInput').value = '';
+  document.getElementById('diaryPosterModal').classList.add('show');
+  await regenerateDiaryPoster();
+}
+function closeDiaryPosterModal(){
+  document.getElementById('diaryPosterModal').classList.remove('show');
+  diaryPosterCanvas = null;
+}
+// ---------- ٹائپ کرتے ہی (ہلکی سی تاخیر کے ساتھ) پوسٹر دوبارہ بنے — بالکل جیسے پیارا کھاتہ میں ہوتا ہے ----------
+function onDiaryPosterMessageInput(){
+  clearTimeout(diaryPosterDebounce);
+  diaryPosterDebounce = setTimeout(regenerateDiaryPoster, 250);
+}
+async function regenerateDiaryPoster(){
+  const entry = diaryData.find(e => e.id === activeDiaryEntryId);
+  if(!entry) return;
+  const note = document.getElementById('diaryPosterMessageInput').value;
+  const canvas = diaryPosterMode === 'full'
+    ? await renderDiaryFullLedgerPoster(entry, note.trim())
+    : await renderDiaryTransactionPoster(entry, diaryPosterHistIdx, note.trim());
+  diaryPosterCanvas = canvas;
+  document.getElementById('diaryPosterPreviewImg').src = canvas.toDataURL('image/png');
+}
+function downloadDiaryPoster(){
+  if(!diaryPosterCanvas) return;
+  const entry = diaryData.find(e => e.id === activeDiaryEntryId);
+  const fileName = `${diaryPosterMode === 'full' ? 'Statement' : 'Receipt'}_${(entry?.name || 'Diary').replace(/\s+/g,'_')}.png`;
+  const a = document.createElement('a');
+  a.href = diaryPosterCanvas.toDataURL('image/png');
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+async function shareDiaryPosterFromModal(){
+  if(!diaryPosterCanvas) return;
+  const entry = diaryData.find(e => e.id === activeDiaryEntryId);
+  const fileName = `${diaryPosterMode === 'full' ? 'Statement' : 'Receipt'}_${(entry?.name || 'Diary').replace(/\s+/g,'_')}.png`;
+  diaryPosterCanvas.toBlob(async (blob) => {
+    if(!blob){ alert('There was a problem preparing the image.'); return; }
+    const file = new File([blob], fileName, {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({ files:[file], title: entry ? entry.name : 'Diary', text: entry ? entry.name : '' }); }
+      catch(err){ /* یوزر نے شیئر منسوخ کر دی */ }
+    } else {
+      const win = window.open();
+      if(win) win.document.write(`<img src="${diaryPosterCanvas.toDataURL('image/png')}" style="width:100%;">`);
+      else alert("Sharing isn't supported. Please take a screenshot and send it.");
+    }
+  }, 'image/png');
 }
 
 // =====================================================================
