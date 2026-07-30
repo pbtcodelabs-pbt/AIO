@@ -1695,7 +1695,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO018</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO019</span>
     </div>
   </div>
 
@@ -16142,12 +16142,19 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     const remainingQty = Math.max(0, item.qty - returnedQty);
     const isFullyReturned = returnedQty > 0 && remainingQty === 0;
 
-    let displayName = (isHighlighted ? '👉 ' : '') + item.name;
+    // ---------- Item کے نام کے ساتھ ویریئنٹ (Kg/Packet/Tikki وغیرہ) اب دوبارہ نہ لکھا جائے —
+    // وہ اب اپنے ہی الگ Variant کالم میں ہے۔ نام کے آخر سے صرف وہی حصہ ہٹائیں جو خود ویریئنٹ لیبل سے میل کھاتا ہو
+    // (یعنی صرف وہی جو addToCart کے وقت جوڑا گیا تھا) — باقی نام جوں کا توں رہے ----------
+    let baseName = item.name;
+    if(item.label && baseName.endsWith(item.label)){
+      baseName = baseName.slice(0, baseName.length - item.label.length).trim();
+    }
+    let displayName = (isHighlighted ? '👉 ' : '') + baseName;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){
       displayName = displayName.slice(0, -1);
     }
-    if(displayName !== ((isHighlighted ? '👉 ' : '') + item.name)) displayName = displayName.trim() + '…';
+    if(displayName !== ((isHighlighted ? '👉 ' : '') + baseName)) displayName = displayName.trim() + '…';
 
     ctx.fillStyle = isFullyReturned ? '#9ca3af' : '#000'; // ---------- مکمل واپس شدہ آئٹم مدہم رنگ میں ----------
     ctx.textAlign = 'center';
