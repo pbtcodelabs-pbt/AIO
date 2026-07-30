@@ -1685,7 +1685,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO006</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO007</span>
     </div>
   </div>
 
@@ -19254,12 +19254,46 @@ async function renderReportToCanvas(){
   const titles = {pricelist:'Price List', inventory:'Inventory Report', profit:'Purchase / Sale / Profit Report', lowstock:'Low Stock Items'};
   const titleFit = fitCenteredLines(titles[currentReportType] || 'Report', totalW, fsSubtitle, 'bold');
 
-  // ---------- کل اونچائی کا حساب — تمام قطاریں مقررہ اونچائی کی ہیں تو یہ درست پیشگی حساب ممکن ہے ----------
-  const totalItemRows = groups.reduce((s,g) => s + g.items.length, 0);
-  // ---------- Purchase/Selling اور Profit/Profit% جیسے کالمز میں دو سطریں دکھائی جاتی ہیں — ایسی رپورٹس میں
-  // قطار کی اونچائی خودکار زیادہ رکھی جاتی ہے تاکہ دوسری لائن اگلی قطار میں نہ چڑھے (زوم بڑھانے پر بھی) ----------
+  // ---------- لمبے پراڈکٹ نام کبھی ساتھ والے کالم میں نہ گھسیں — اپنے ہی خانے میں دوسری لائن پر جائیں،
+  // خانہ خود بخود اونچا ہو جائے۔ زیادہ سے زیادہ 2 لائنیں — اگر پھر بھی جگہ کم پڑے تو آخر میں "…" ----------
+  const nameColWidth = cols[0].width - 12;
+  const wrapItemName = (name) => {
+    ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
+    const text = String(name);
+    if(ctx.measureText(text).width <= nameColWidth) return [text];
+    const words = text.split(' ');
+    const lines = []; let cur = '';
+    words.forEach(word => {
+      const test = cur ? cur + ' ' + word : word;
+      if(ctx.measureText(test).width > nameColWidth && cur){ lines.push(cur); cur = word; }
+      else cur = test;
+    });
+    if(cur) lines.push(cur);
+    if(lines.length > 2){
+      let secondLine = lines[1];
+      while(ctx.measureText(secondLine + '…').width > nameColWidth && secondLine.length > 1){ secondLine = secondLine.slice(0, -1); }
+      lines.splice(1, lines.length - 1, secondLine + '…');
+    } else if(lines.length === 1 && ctx.measureText(lines[0]).width > nameColWidth){
+      // ---------- ایک ہی لمبا لفظ ہو (کوئی سپیس نہیں) اور خود اسی خانے سے بڑا ہو تو اسے کاٹ کر فٹ کریں ----------
+      let only = lines[0];
+      while(ctx.measureText(only + '…').width > nameColWidth && only.length > 1){ only = only.slice(0, -1); }
+      lines[0] = only + '…';
+    }
+    return lines;
+  };
+  const itemNameLineH = Math.round(fsItem * 1.25);
+  groups.forEach(g => g.items.forEach(it => {
+    it._nameLines = wrapItemName(it.name);
+  }));
+
   const needsTwoLineRow = cols.some(c => c.key === 'ps' || c.key === 'profit');
-  const itemRowH = needsTwoLineRow ? Math.round(baseRowH * 1.7) : baseRowH;
+  const baseItemRowH = needsTwoLineRow ? Math.round(baseRowH * 1.7) : baseRowH;
+  // ---------- ہر آئٹم کی اپنی قطار کی اونچائی — عام حالت میں یکساں baseItemRowH، مگر نام دو لائنوں میں ٹوٹے
+  // تو اتنی ہی اونچی ہو جائے (کبھی متعین اونچائی سے کم نہیں، صرف ضرورت پڑنے پر زیادہ) ----------
+  groups.forEach(g => g.items.forEach(it => {
+    const nameLinesH = 10 + it._nameLines.length * itemNameLineH;
+    it._rowH = Math.max(baseItemRowH, nameLinesH);
+  }));
   let headerBandH = useA4 ? 78 : 46;   // بزنس نام + فون + رپورٹ ٹائٹل + تاریخ
   if(logoImg) headerBandH += logoH + 8;
   if(AppState.settings.businessAddress) headerBandH += Math.round(fsSmall * 1.6);
@@ -19273,7 +19307,8 @@ async function renderReportToCanvas(){
     bodyTop += summaryLineH + 10;
   }
   bodyTop += 10 + headerRowH;
-  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + (totalItemRows * itemRowH) + 50;
+  const totalItemRowsH = groups.reduce((s,g) => s + g.items.reduce((s2,it) => s2 + it._rowH, 0), 0);
+  let estimatedHeight = bodyTop + (groups.length * (catHeaderH + 5)) + totalItemRowsH + 50;
   estimatedHeight += Math.round(40 * fontScale); // ---------- اضافی حفاظتی مارجن — زوم جتنا بڑا ہو، اتنا ہی تھوڑا اضافی نیچے خالی رکھیں تاکہ کبھی بھی مواد کٹے نہیں ----------
 
   canvas.width = pxWidth;
@@ -19354,7 +19389,7 @@ async function renderReportToCanvas(){
     y += 5;
 
     g.items.forEach((it) => {
-      const rh = itemRowH;
+      const rh = it._rowH;
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
       ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
       cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
@@ -19365,7 +19400,10 @@ async function renderReportToCanvas(){
         const cx = colTextX(c);
         if(c.key === 'name'){
           ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
-          ctx.fillText(String(it.name), cx, y + rh/2 + fsItem*0.32);
+          const lines = it._nameLines;
+          const blockH = (lines.length - 1) * itemNameLineH;
+          const startY = y + rh/2 - blockH/2 + fsItem*0.32;
+          lines.forEach((line, i) => ctx.fillText(line, cx, startY + i*itemNameLineH));
         } else if(c.key === 'retail'){
           ctx.font = `${fsItem}px ${fontFam}`;
           ctx.fillText(Number(it.retail).toFixed(decimals), cx, y + rh/2 + fsItem*0.32);
