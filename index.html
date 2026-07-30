@@ -1695,7 +1695,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO014</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO015</span>
     </div>
   </div>
 
@@ -1921,16 +1921,19 @@ document.addEventListener('keydown', function(e){
           <div class="cartWrap">
             <table class="cartTable">
               <thead>
-                <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th><th>Sale Record</th></tr>
+                <tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th><th>Sale Record</th></tr>
               </thead>
               <tbody id="cartBody">
                 <!-- JS سے cart rows یہاں بنیں گی -->
               </tbody>
             </table>
             <div class="emptyCart" id="emptyCartMsg">Cart is empty — search above to add items</div>
+            <div id="cartItemCountSummary" style="text-align:right; font-size:11.5px; font-weight:700; color:var(--muted); padding:6px 4px 0;"></div>
           </div>
 
           <button type="button" onclick="closeCartSheet()" class="addMoreItemsBtn">➕ Add More Items</button>
+
+          <button type="button" onclick="openBillPreviewBeforeComplete()" style="width:100%; margin-top:8px; padding:11px; border:1.5px dashed var(--primary); border-radius:10px; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:13px; cursor:pointer;">👁️ Preview Bill Before Completing</button>
 
           <!-- ---------- منتخب کسٹمر کا پہلا بقایہ اب نیچے Totals ٹیبل میں ہی مکمل حساب کے ساتھ نظر آتا ہے ---------- -->
 
@@ -7132,10 +7135,12 @@ function renderCart(){
   if(Billing.cart.length === 0){
     body.innerHTML = '';
     emptyMsg.style.display = 'block';
+    document.getElementById('cartItemCountSummary').textContent = '';
   } else {
     emptyMsg.style.display = 'none';
-    body.innerHTML = Billing.cart.map(item => `
+    body.innerHTML = Billing.cart.map((item, idx) => `
       <tr>
+        <td style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
         <td>${item.name}</td>
         <td>
           <div class="qtyBtns">
@@ -7153,6 +7158,13 @@ function renderCart(){
         <td><button class="saleRecordBtn" onclick="showItemSaleRecord(${item.variant_id})" title="See this customer's past sale record for this item">🔁 Record</button></td>
       </tr>
     `).join('');
+
+    // ---------- کل اقسام (varieties) اور کل کیٹگریز کا خلاصہ — تاکہ چیک آؤٹ سے پہلے صاف پتہ چلے کتنی چیزیں بل میں شامل ہیں ----------
+    const distinctCategories = new Set(flat
+      .filter(v => Billing.cart.some(c => c.variant_id === v.variant_id))
+      .map(v => v.category || 'Uncategorized'));
+    document.getElementById('cartItemCountSummary').textContent =
+      `🧾 ${Billing.cart.length} ${Billing.cart.length === 1 ? 'item' : 'items'} in ${distinctCategories.size} ${distinctCategories.size === 1 ? 'category' : 'categories'}`;
   }
 
   const subtotal = Billing.cart.reduce((sum, i) => sum + (i.qty * i.unitPrice), 0);
@@ -7372,6 +7384,43 @@ function generateBillNumbers(){
     monthly_bill_no,
     invoice_no: `Bill#${daily_bill_no}/${monthly_bill_no}`
   };
+}
+
+// ---------- بل مکمل (Complete) کرنے سے پہلے کبھی بھی دیکھ سکیں کہ بل بالکل ویسا ہی بن رہا ہے جیسا چاہیے —
+// کوئی آئٹم ڈپلیکیٹ تو نہیں، کوئی ریٹ غلط تو نہیں۔ یہ اصل بل کا حصہ نہیں بنتا، صرف پریویو ہے ----------
+async function openBillPreviewBeforeComplete(){
+  if(Billing.cart.length === 0){ alert('Cart is empty — add items first.'); return; }
+  const custId = document.getElementById('customerSelect').value;
+  const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
+
+  const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
+  const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
+  const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
+  const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
+  const grandTotal = subtotal - discount + taxAmount;
+  const previousBalance = customer ? customer.total_receivable : 0;
+
+  const draftInvoice = {
+    invoice_id: 'DRAFT',
+    ...generateBillNumbers(), // ---------- صرف پڑھتا ہے، کچھ بھی محفوظ/شمار نہیں بدلتا — پریویو کے لیے بے خطر ----------
+    invoice_no: 'DRAFT PREVIEW — Not Yet Saved',
+    customer_id: customer ? customer.customer_id : null,
+    customer_name: customer ? customer.name : 'Walk-in Customer',
+    customer_phone: customer ? customer.phone : '',
+    sold_by: AppState.currentUser?.name || 'Unknown',
+    sale_mode: Billing.saleMode,
+    payment_method: Billing.counterSale ? 'cash' : 'credit',
+    items: JSON.parse(JSON.stringify(Billing.cart)),
+    discount, tax_percent: taxPercent, tax_amount: taxAmount,
+    grand_total: grandTotal,
+    previous_balance: previousBalance,
+    status: 'draft',
+    created_at: new Date().toISOString()
+  };
+
+  await renderInvoiceToCanvas(draftInvoice);
+  const canvas = document.getElementById('invoiceCanvas');
+  showImageSharePreview(canvas, 'Bill_Preview.png', '👁️ Bill Preview — Not Yet Saved', 'Bill preview');
 }
 
 function finalizeInvoice(){
