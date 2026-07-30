@@ -1695,7 +1695,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO015</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO016</span>
     </div>
   </div>
 
@@ -6790,7 +6790,7 @@ function addToCart(variantId){
   if(existing){
     existing.qty += 1;
   } else {
-    Billing.cart.push({variant_id: variantId, name: product.name, qty: 1, unitPrice: price, unit: product.unit || 'pcs'});
+    Billing.cart.push({variant_id: variantId, name: product.name, label: product.label || '', qty: 1, unitPrice: price, unit: product.unit || 'pcs'});
     // ---------- پہلے یہاں خودکار پاپ اپ آتا تھا — اب یہ بل بنانے میں رکاوٹ نہیں بنے گا؛ کسٹمر کا پرانا ریکارڈ دیکھنا ہو تو کارٹ میں ہر آئٹم کے ساتھ 🔁 Sale Record بٹن سے مانگے پر دیکھا جا سکتا ہے ----------
   }
 
@@ -6915,6 +6915,7 @@ function addReverseCalcToCart(){
   const existing = Billing.cart.find(c => c.loose_product_id === ReverseCalc.productId);
   if(existing){
     existing.name = `${productName} (loose) ${resultGrams}g`;
+    existing.label = 'Loose';
     existing.qty = resultGrams;
     existing.unitPrice = Math.round(pricePerGram * 100) / 100;
     existing.costPerUnit = Math.round(costPerGram * 100) / 100;
@@ -6923,6 +6924,7 @@ function addReverseCalcToCart(){
       variant_id: Date.now(), // منفرد نمبر، کسی اصل variant سے نہیں ٹکرائے گا
       loose_product_id: ReverseCalc.productId, // اسی پراڈکٹ کے دوبارہ وزن کیے جانے پر پہچان کے لیے — ڈپلیکیٹ روکنے کو
       name: `${productName} (loose) ${resultGrams}g`,
+      label: 'Loose',
       qty: resultGrams,
       unitPrice: Math.round(pricePerGram * 100) / 100,
       costPerUnit: Math.round(costPerGram * 100) / 100,
@@ -15916,11 +15918,20 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     img.src = receiptQrURL;
   });
 
-  // ---------- ٹیبل کالمز کی چوڑائی — پیپر سائز کے تناسب سے، تاکہ 58mm اور 80mm دونوں پر صحیح فٹ ہوں ----------
-  const noW = Math.round(28 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  // ---------- ٹیبل کالمز کی چوڑائی — پیپر سائز کے تناسب سے، تاکہ 58mm اور 80mm دونوں پر صحیح فٹ ہوں
+  // کالمز کی ترتیب: #  |  Item  |  Variant  |  Qty  |  Price  |  Total ----------
+  const noW = Math.round(28 * scale), variantW = Math.round(46 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
   const tableLeft = 8, tableRight = pxWidth - 8;
-  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
-  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
+  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
+  const colX = [
+    tableLeft,
+    tableLeft + noW,
+    tableLeft + noW + itemW,
+    tableLeft + noW + itemW + variantW,
+    tableLeft + noW + itemW + variantW + qtyW,
+    tableLeft + noW + itemW + variantW + qtyW + priceW,
+    tableRight
+  ];
   const rowScale = (AppState.settings.printRowScale || 100) / 100; // ---------- پرنٹ پریویو میں لائیو ↕ Row کنٹرول سے ----------
   const rowH = Math.round(24 * rowScale), headerH = Math.round(22 * rowScale);
   const returnedNoteExtra = Math.round(14 * rowScale); // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
@@ -16021,7 +16032,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     : invoice.items;
 
   // ---------- آئٹمز ٹیبل — مکمل باریک ٹھوس گرڈ (باکس والا)، ہر کالم پر عمودی لائن، ہر آئٹم پر افقی لائن ----------
-  // کالمز کی ترتیب: #  |  Item  |  Qty  |  Price  |  Total
+  // کالمز کی ترتیب: #  |  Item  |  Variant  |  Qty  |  Price  |  Total
   const tableTop = y;
   ctx.fillStyle = rc.bg; // ---------- منتخب شدہ ہلکا رنگ — صارف اپنی مرضی سے 6 میں سے چن سکتا ہے ----------
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerH);
@@ -16037,9 +16048,9 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 4 : a + 4);
   const headerItemNameX = colCenterX(colX[1], colX[2]);
-  const headerQtyX = colCenterX(colX[2], colX[3]);
-  const headerPriceX = colCenterX(colX[3], colX[4]);
-  const headerTotalX = colCenterX(colX[4], colX[5]);
+  const headerQtyX = colCenterX(colX[3], colX[4]);
+  const headerPriceX = colCenterX(colX[4], colX[5]);
+  const headerTotalX = colCenterX(colX[5], colX[6]);
   const ctxAlignForItems = headerItemAlign; // ---------- 'left'/'center'/'right' سیدھا ctx.textAlign کے طور پر استعمال ہو سکتا ہے ----------
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
   // ---------- ہر کیپشن کا فونٹ اس کے اپنے کالم کی چوڑائی میں فٹ ہونے تک خود بخود چھوٹا ہوتا ہے — زوم جتنا بھی بڑا ہو، کبھی کالم سے باہر نہیں نکلے گا ----------
@@ -16060,11 +16071,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.textAlign = ctxAlignForItems;
   fitHeaderFont('Item', colX[2]-colX[1]-8);
   ctx.fillText('Item', headerItemNameX, headerBaseline);
-  fitHeaderFont('Qty', colX[3]-colX[2]-8);
+  ctx.textAlign = 'center';
+  fitHeaderFont('Variant', colX[3]-colX[2]-4);
+  ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
+  ctx.textAlign = ctxAlignForItems;
+  fitHeaderFont('Qty', colX[4]-colX[3]-8);
   ctx.fillText('Qty', headerQtyX, headerBaseline);
-  fitHeaderFont('Price', colX[4]-colX[3]-8);
+  fitHeaderFont('Price', colX[5]-colX[4]-8);
   ctx.fillText('Price', headerPriceX, headerBaseline);
-  fitHeaderFont('Total', colX[5]-colX[4]-8);
+  fitHeaderFont('Total', colX[6]-colX[5]-8);
   ctx.fillText('Total', headerTotalX, headerBaseline);
 
   hLineY += headerH;
@@ -16081,6 +16096,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const totalX = headerTotalX;
   ctx.font = F(itemFontWeight + '18px');
   const maxItemWidth = itemW - 8;
+  const maxVariantWidth = variantW - 6;
   const rowFontPx = Math.round(18 * fscale);
   // ---------- Qty/Price/Total کا فونٹ بھی اپنے کالم میں فٹ ہونے تک خود بخود چھوٹا ہو — زوم جتنا بڑا ہو، کبھی کالم سے باہر نہ نکلے ----------
   const fitBodyFont = (text, maxWidth) => {
@@ -16120,10 +16136,16 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillText(String(idx + 1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = itemAlign;
     ctx.fillText(displayName, itemNameX, rowBaseline);
+    // ---------- Variant/Packing کالم — "1kg", "Packet", "Dabbi" وغیرہ — اپنے خانے سے کبھی باہر نہیں نکلے گا،
+    // ضرورت پڑنے پر فونٹ خودکار چھوٹا ہو جاتا ہے ----------
+    ctx.textAlign = 'center';
+    const variantText = item.label || '—';
+    fitBodyFont(variantText, maxVariantWidth);
+    ctx.fillText(variantText, (colX[2]+colX[3])/2, rowBaseline);
     const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
-    fitBodyFont(qtyText, (colX[3]-colX[2])-8); ctx.fillText(qtyText, qtyX, rowBaseline);
-    fitBodyFont(priceText, (colX[4]-colX[3])-8); ctx.fillText(priceText, priceX, rowBaseline);
-    fitBodyFont(totalText, (colX[5]-colX[4])-8); ctx.fillText(totalText, totalX, rowBaseline);
+    fitBodyFont(qtyText, (colX[4]-colX[3])-8); ctx.fillText(qtyText, qtyX, rowBaseline);
+    fitBodyFont(priceText, (colX[5]-colX[4])-8); ctx.fillText(priceText, priceX, rowBaseline);
+    fitBodyFont(totalText, (colX[6]-colX[5])-8); ctx.fillText(totalText, totalX, rowBaseline);
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
     ctx.fillStyle = '#000';
 
@@ -16181,7 +16203,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let summaryBottom = y, accountBottom = y, summaryBlockHForCentering = 0;
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
-    const sumLeft = colX[2]; // ---------- Qty کالم کے شروع سے — یعنی اوپر Qty+Price+Total جتنی ہی چوڑائی ----------
+    const sumLeft = colX[3]; // ---------- Qty کالم کے شروع سے — یعنی اوپر Qty+Price+Total جتنی ہی چوڑائی (Variant کالم شامل ہونے کے بعد اب انڈیکس 3) ----------
     const sumRight = tableRight;
     const sumBoxW = sumRight - sumLeft;
     const sumLabelW = Math.round(sumBoxW * 0.5);
