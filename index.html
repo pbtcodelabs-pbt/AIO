@@ -1695,7 +1695,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO019</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO020</span>
     </div>
   </div>
 
@@ -16378,9 +16378,17 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const rowScale = (AppState.settings.printRowScale || 100) / 100;
 
   const tableLeft = 50, tableRight = 800;
-  const noW = 44, qtyW = 80, priceW = 120, totalW = 140;
-  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
-  const colX = [tableLeft, tableLeft+noW, tableLeft+noW+itemW, tableLeft+noW+itemW+qtyW, tableLeft+noW+itemW+qtyW+priceW, tableRight];
+  const noW = 44, variantW = 90, qtyW = 80, priceW = 120, totalW = 140;
+  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
+  const colX = [
+    tableLeft,
+    tableLeft+noW,
+    tableLeft+noW+itemW,
+    tableLeft+noW+itemW+variantW,
+    tableLeft+noW+itemW+variantW+qtyW,
+    tableLeft+noW+itemW+variantW+qtyW+priceW,
+    tableRight
+  ];
   const headerRowH = Math.round(34 * rowScale), rowH = Math.round(32 * rowScale);
   const returnedNoteExtraA4 = Math.round(18 * rowScale); // ---------- ہر واپس شدہ آئٹم کے نیچے ایک اضافی مدہم نوٹ لائن کی جگہ ----------
   const returnedItemsCountA4 = invoice.items.filter(it => (it.returnQty || 0) > 0).length;
@@ -16468,9 +16476,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const a4Align = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const a4ColCenterX = (a, b) => a4Align === 'center' ? (a + b) / 2 : (a4Align === 'right' ? b - 10 : a + 10);
   const a4ItemNameX = a4ColCenterX(colX[1], colX[2]);
-  const a4QtyX = a4ColCenterX(colX[2], colX[3]);
-  const a4PriceX = a4ColCenterX(colX[3], colX[4]);
-  const a4TotalX = a4ColCenterX(colX[4], colX[5]);
+  const a4QtyX = a4ColCenterX(colX[3], colX[4]);
+  const a4PriceX = a4ColCenterX(colX[4], colX[5]);
+  const a4TotalX = a4ColCenterX(colX[5], colX[6]);
   const tableTop = y;
   ctx.fillStyle = theme.primary;
   ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerRowH);
@@ -16480,6 +16488,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
   ctx.textAlign = a4Align;
   ctx.fillText('Item', a4ItemNameX, headerBaseline);
+  ctx.textAlign = 'center';
+  ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
+  ctx.textAlign = a4Align;
   ctx.fillText('Qty', a4QtyX, headerBaseline);
   ctx.fillText('Price', a4PriceX, headerBaseline);
   ctx.fillText('Total', a4TotalX, headerBaseline);
@@ -16495,6 +16506,15 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   ctx.font = F('13px');
   const maxItemWidth = itemW - 16;
+  const maxVariantWidthA4 = variantW - 12;
+  const fitA4Font = (text, maxWidth, basePx) => {
+    let px = basePx;
+    ctx.font = `${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > 8){
+      px -= 1;
+      ctx.font = `${px}px ${fontFam}`;
+    }
+  };
   invoice.items.forEach((item, idx) => {
     if(idx % 2 === 1){ ctx.fillStyle = hexToRgba(theme.primary, 0.05); ctx.fillRect(tableLeft, hLineY, tableRight-tableLeft, rowH); }
     // ---------- 🔁 Sale Record کی فہرست سے یہاں آیا ہو تو وہی آئٹم پیلے رنگ سے ہائی لائٹ کریں (زیبرا شیڈنگ کے اوپر) ----------
@@ -16511,16 +16531,39 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     const remainingQtyA4 = Math.max(0, item.qty - returnedQtyA4);
     const isFullyReturnedA4 = returnedQtyA4 > 0 && remainingQtyA4 === 0;
 
-    let displayName = (isHighlighted ? '👉 ' : '') + item.name;
+    // ---------- Item کے نام سے ویریئنٹ (Kg/Packet/Tikki وغیرہ) نہ دہرائیں — وہ اب اپنے الگ Variant کالم میں ہے ----------
+    let baseNameA4 = item.name;
+    if(item.label && baseNameA4.endsWith(item.label)){
+      baseNameA4 = baseNameA4.slice(0, baseNameA4.length - item.label.length).trim();
+    }
+    let displayName = (isHighlighted ? '👉 ' : '') + baseNameA4;
     ctx.font = F('13px');
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0, -1); }
-    if(displayName !== ((isHighlighted ? '👉 ' : '') + item.name)) displayName = displayName.trim() + '…';
+    if(displayName !== ((isHighlighted ? '👉 ' : '') + baseNameA4)) displayName = displayName.trim() + '…';
 
     if(isFullyReturnedA4) ctx.fillStyle = '#9ca3af';
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
     ctx.textAlign = a4Align;
+    // ---------- سخت کلپنگ — نام کبھی بھی اپنے کالم کی حد سے باہر نہ چھپے ----------
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(colX[1], hLineY, colX[2]-colX[1], rowH);
+    ctx.clip();
     ctx.fillText(displayName, a4ItemNameX, rowBaseline);
+    ctx.restore();
+    // ---------- Variant کالم — اپنے خانے سے کبھی باہر نہیں نکلے گا ----------
+    ctx.textAlign = 'center';
+    const variantTextA4 = item.label || '—';
+    fitA4Font(variantTextA4, maxVariantWidthA4, Math.round(13*fscale));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(colX[2], hLineY, colX[3]-colX[2], rowH);
+    ctx.clip();
+    ctx.fillText(variantTextA4, (colX[2]+colX[3])/2, rowBaseline);
+    ctx.restore();
+    ctx.font = F('13px');
+    ctx.textAlign = a4Align;
     ctx.fillText(String(remainingQtyA4), a4QtyX, rowBaseline);
     ctx.fillText(item.unitPrice.toFixed(0), a4PriceX, rowBaseline);
     ctx.fillText((remainingQtyA4*item.unitPrice).toFixed(0), a4TotalX, rowBaseline);
