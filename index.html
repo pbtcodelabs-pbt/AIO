@@ -1738,7 +1738,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO025</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO026</span>
     </div>
   </div>
 
@@ -3839,6 +3839,18 @@
           </label>
         </div>
 
+        <!-- --- 🔒 Minimum Sale Price Lock — آن ہو تو کوئی بھی (ملازم سمیت) بل بناتے وقت کسی variant کی مقرر کردہ
+             کم از کم قیمت (Min Price) سے کم پر بیچ نہیں سکے گا۔ یہ سیٹنگ صرف Admin/Owner کو ہی نظر آتی ہے
+             (Settings صفحہ admin-only ہے)، اس لیے ملازم اسے خود بند نہیں کر سکتے --- -->
+        <div class="settingsCard" style="background:#fff1f2; border:1px solid #fecdd3;">
+          <h3>🔒 Minimum Sale Price Lock</h3>
+          <div class="settingsHint">When ON, nobody — including your staff — can sell any item below the "Min Price" you set for it (in Products & Variants or Stock Adjustment). If they try to lower the rate on a bill, it will be blocked with a warning. Leave a variant's Min Price at 0 to leave it unrestricted.</div>
+          <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="enforceMinPriceChk" onchange="toggleEnforceMinPrice(this.checked)" style="width:18px; height:18px; margin:0;">
+            Enforce Minimum Sale Price on all bills
+          </label>
+        </div>
+
         <!-- --- 💾 بیک اپ — اب Google Drive والے دونوں بٹن مرکزی/نمایاں ہیں (زیادہ تر لوگوں کے لیے یہی کافی ہے)،
              Local Export/Import کو ایک چھوٹے "Advanced" آپشن میں سمیٹ دیا ہے تاکہ سکرین صاف رہے مگر بغیر
              انٹرنیٹ/Google اکاؤنٹ کے سہارے کی صورت میں وہ سہولت موجود رہے --- -->
@@ -5061,6 +5073,7 @@ const DEFAULT_SETTINGS = {
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
   taxEnabled: false,
   trackInventory: false, // ---------- ڈیفالٹ آف — سٹاک ختم ہونے پر بھی بل بنتا رہے، مائنس میں جائے (موجودہ رویہ) ----------
+  enforceMinPrice: false, // ---------- 🔒 Minimum Sale Price Lock — ڈیفالٹ آف؛ آن ہونے پر ہر variant کی مقرر کردہ Min Price سے کم پر بل نہیں بنے گا ----------
   taxPercent: 0,
   invoiceStyle: 'thermal', // 'thermal' | 'a4' — تھرمل رسید یا رنگین A4 بزنس انوائس
   // ---------- دکان کی اپنی معلومات — بل کے اوپر نظر آئیں گی (خالی ہوں تو "AIO POS" ڈیفالٹ کے طور پر آئے گا) ----------
@@ -7390,6 +7403,7 @@ function updateCartRate(variantId, newRate){
   if(!item) return;
   const rate = parseFloat(newRate);
   if(isNaN(rate) || rate < 0) return;
+  if(!checkMinSalePrice(variantId, rate)){ renderCart(); return; } // ---------- 🔒 Min Sale Price Lock آن ہو اور ریٹ حد سے کم ہو تو مسترد ----------
   item.unitPrice = rate;
   renderCart();
 }
@@ -7796,7 +7810,10 @@ function updateReviewQty(idx, qty){
 }
 function updateReviewRate(idx, rate){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
-  p.items[idx].unitPrice = Math.max(0, rate);
+  const item = p.items[idx];
+  const safeRate = Math.max(0, rate);
+  if(item.variant_id && !checkMinSalePrice(item.variant_id, safeRate)){ renderPendingReview(); return; }
+  item.unitPrice = safeRate;
   renderPendingReview();
 }
 function removeReviewItem(idx){
@@ -8522,7 +8539,7 @@ function renderProductList(query = ''){
         <table class="variantTable">
           <thead>
             <tr>
-              <th>Photo</th><th>Variant</th><th>Barcode</th><th>Purchase</th><th>Retail</th><th>Wholesale</th><th>Stock</th><th>Low Stock Limit</th><th>Expiry Date</th><th>Location</th><th></th>
+              <th>Photo</th><th>Variant</th><th>Barcode</th><th>Purchase</th><th>Retail</th><th>Wholesale</th><th>🔒 Min Price</th><th>Stock</th><th>Low Stock Limit</th><th>Expiry Date</th><th>Location</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -8557,6 +8574,7 @@ function renderVariantRow(productId, v){
       <td><input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)"></td>
       <td><input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)"></td>
       <td><input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></td>
+      <td><input type="number" value="${v.minPrice ?? 0}" title="Lowest rate this item can be sold at when 🔒 Minimum Sale Price Lock is ON (0 = no limit)" style="border-color:#fda4af;" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'minPrice',this.value)"></td>
       <td id="stockCell-${v.variant_id}">
         <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
         <div class="lowStockTag" id="lowStockTag-${v.variant_id}" style="display:${isLow && !isNegative ? 'block' : 'none'};">⚠️ Low Stock</div>
@@ -9310,7 +9328,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   const variant = product?.variants.find(v => v.variant_id === variantId);
   if(!variant) return;
 
-  const numericFields = ['purchase','retail','wholesale','stock','lowStockAt'];
+  const numericFields = ['purchase','retail','wholesale','stock','lowStockAt','minPrice'];
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
@@ -9361,7 +9379,7 @@ function addVariantRow(productId){
 
   product.variants.push({
     variant_id: nextVariantId++,
-    label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
+    label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, minPrice:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
   });
 
   openProductCards.add(productId);
@@ -10741,6 +10759,19 @@ function findVariantById(variantId){
     if(v) return v;
   }
   return null;
+}
+
+// ---------- 🔒 Minimum Sale Price Lock — سیٹنگ آن ہو تو کوئی بھی (ملازم سمیت) اس ویریئنٹ کے لیے مقرر کردہ کم از کم ریٹ سے کم پر بل نہیں بنا سکے گا۔
+// یہ صرف اُس وقت لاگو ہوتا ہے جب Settings میں یہ لاک آن ہو اور اس مخصوص variant پر Min Price 0 سے زیادہ سیٹ ہو (ورنہ کوئی پابندی نہیں) ----------
+function checkMinSalePrice(variantId, rate){
+  if(!AppState.settings.enforceMinPrice) return true;
+  const v = findVariantById(variantId);
+  const minP = v ? (parseFloat(v.minPrice) || 0) : 0;
+  if(minP > 0 && rate < minP){
+    alert(`🔒 Minimum Sale Price Lock is ON.\nThis item can't be sold below Rs. ${minP}.\n(Owner can change this limit from Products & Variants.)`);
+    return false;
+  }
+  return true;
 }
 
 function updateStockAdjField(variantId, field, rawValue){
@@ -12719,7 +12750,9 @@ function updateAdvItemQty(idx, qty){
 function updateAdvItemPrice(idx, price){
   const item = advOrderCart[idx];
   if(!item) return;
-  item.unitPrice = Math.max(0, price);
+  const safePrice = Math.max(0, price);
+  if(item.variant_id && !checkMinSalePrice(item.variant_id, safePrice)){ renderAdvOrderCart(); updateAdvOrderFloatingCartBar(); return; }
+  item.unitPrice = safePrice;
   renderAdvOrderCart();
   updateAdvOrderFloatingCartBar();
 }
@@ -17645,6 +17678,7 @@ function renderSettingsScreen(){
   document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
 
   document.getElementById('trackInventoryChk').checked = !!AppState.settings.trackInventory;
+  document.getElementById('enforceMinPriceChk').checked = !!AppState.settings.enforceMinPrice;
 
   renderMyPaymentAccounts();
 }
@@ -21141,6 +21175,16 @@ function toggleTrackInventory(checked){
   if(chkA) chkA.checked = checked;
   if(chkB) chkB.checked = checked;
 }
+
+// ---------- 🔒 Minimum Sale Price Lock آن/آف — یہ صرف Settings صفحے سے (Admin-only) کنٹرول ہوتا ہے،
+// ملازم اسے بلنگ سکرین سے کبھی بند نہیں کر سکتے ----------
+function toggleEnforceMinPrice(checked){
+  AppState.settings.enforceMinPrice = checked;
+  persistAllData();
+  const chk = document.getElementById('enforceMinPriceChk');
+  if(chk) chk.checked = checked;
+}
+
 
 // ---------- ٹیسٹ پرنٹ بھیجیں — اصل پرنٹ ڈائیلاگ کھلے گا (کسی بھی منسلک/جوڑے گئے پرنٹر پر ٹیسٹ صفحہ جائے گا) ----------
 function testPrint(){
