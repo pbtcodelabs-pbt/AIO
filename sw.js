@@ -1,58 +1,68 @@
-// ==============================================================
-// AIO POS — Service Worker (آف لائن سپورٹ + خودکار اپڈیٹ)
-// ==============================================================
-// جب بھی index.html میں کوئی بڑی تبدیلی کر کے GitHub پر دوبارہ اپلوڈ کریں،
-// نیچے CACHE_VERSION کا نمبر بڑھا دیں (مثلاً v3 → v4) — ورنہ صارفین کو
-// پرانی cached کاپی ہی نظر آتی رہے گی۔
-const CACHE_VERSION = 'aio-pos-v1';
-const CACHE_NAME = CACHE_VERSION;
-
-// یہ فائلیں پہلی بار کھلتے ہی آف لائن استعمال کے لیے محفوظ کر لی جائیں گی
-const PRECACHE_URLS = [
+// ========================================================================
+// AIO POS — Service Worker
+// ورژن نمبر — ہر نئی فائل کے ساتھ یہ نمبر بدلیں (ہوم پیج کے چھوٹے بیج کے نمبر سے میچ ہونا چاہیے)
+// ========================================================================
+const SW_VERSION   = 'AIO023';
+const CACHE_NAME    = 'aio-pos-cache-' + SW_VERSION;
+const CORE_ASSETS   = [
   './',
   './index.html',
   './manifest.json'
 ];
 
-// ---------- INSTALL: نیا ورژن انسٹال ہوتے ہی بنیادی فائلیں کیش کریں (فوری فعال نہیں ہوتا — صارف کے "Update" بٹن کا انتظار) ----------
+// ---------- انسٹال: نئی کیش بنائیں اور بنیادی فائلیں محفوظ کریں ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).catch(() => {})
   );
+  // یہاں جان بوجھ کر خودکار skipWaiting() نہیں بلایا جا رہا —
+  // صارف کو پہلے "نیا ورژن دستیاب ہے" کا ٹوسٹ نظر آئے، وہ "ابھی اپڈیٹ کریں" دبائے تو ہی نیا ورژن فعال ہو۔
 });
 
-// ---------- ACTIVATE: پرانے ورژن کی کیش صاف کریں ----------
+// ---------- ایکٹیویٹ: پرانی کیشز صاف کریں، فوراً کنٹرول سنبھالیں ----------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ---------- FETCH: پہلے نیٹ ورک آزمائیں (تازہ ترین ورژن ملے)، ناکامی پر کیش سے دکھائیں (آف لائن سپورٹ) ----------
+// ---------- انڈیکس/ایپ کا مین صفحہ ہمیشہ پہلے نیٹ ورک سے لانے کی کوشش (تازہ ترین اپڈیٹ ملے)،
+// ناکامی پر (آف لائن) کیش سے دکھائیں — باقی ریکویسٹس کیش-فرسٹ (تیز + آف لائن سپورٹ) ----------
 self.addEventListener('fetch', (event) => {
-  // صرف GET request ہی ہینڈل کریں — POST/PUT وغیرہ کو چھوڑ دیں
-  if(event.request.method !== 'GET') return;
+  const req = event.request;
+  if(req.method !== 'GET') return;
+
+  const isNavigation = req.mode === 'navigate' ||
+    (req.destination === 'document');
+
+  if(isNavigation){
+    event.respondWith(
+      fetch(req).then((res) => {
+        const resClone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', resClone));
+        return res;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
 
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        // کامیاب نیٹ ورک جواب کو بھی کیش میں تازہ کر دیں تاکہ اگلی بار آف لائن بھی یہی نیا ورژن ملے
-        const clone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return networkResponse;
-      })
-      .catch(() =>
-        // نیٹ ورک ناکام (آف لائن) — کیش سے دیں، اور اگر وہ بھی نہ ملے تو index.html (سنگل پیج ایپ) واپس دیں
-        caches.match(event.request).then((cached) => cached || caches.match('./index.html'))
-      )
+    caches.match(req).then((cached) => {
+      if(cached) return cached;
+      return fetch(req).then((res) => {
+        const resClone = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+        return res;
+      }).catch(() => cached);
+    })
   );
 });
 
-// ---------- صفحے سے "SKIP_WAITING" پیغام ملنے پر نیا ورژن فوراً فعال کریں ----------
+// ---------- صفحے سے "SKIP_WAITING" پیغام ملے تو نیا ورژن فوراً فعال کریں ----------
 self.addEventListener('message', (event) => {
   if(event.data === 'SKIP_WAITING'){
     self.skipWaiting();

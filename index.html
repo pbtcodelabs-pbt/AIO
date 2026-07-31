@@ -1206,6 +1206,31 @@
   .profileHead .pInfo{flex:1; min-width:0;}
   .profileHead .pInfo .pName{font-size:16.5px; font-weight:800;}
   .profileHead .pInfo .pMeta{font-size:12px; opacity:.9; margin-top:2px;}
+  /* ---------- 💰 بقایہ رقم اب نام کے ساتھ ہیڈر میں چھوٹی چمکتی چِپ کے طور پر — باڈی کا بڑا باکس ہٹا کر بلوں کے لیے جگہ خالی کی گئی ---------- */
+  .pNameRow{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .pfHeaderBadge{display:none; align-items:center; gap:6px; flex:0 0 auto;}
+  .pfHeaderBadge.show{display:flex;}
+  .pfHeaderAmount{
+    position:relative; overflow:hidden; cursor:pointer; white-space:nowrap;
+    background:linear-gradient(135deg,#fef9c3,#fde68a);
+    color:#92400e; font-weight:800; font-size:12.5px;
+    padding:5px 11px; border-radius:20px;
+    box-shadow:0 2px 8px rgba(217,119,6,.35), inset 0 0 0 1px rgba(255,255,255,.6);
+    transition:transform .12s;
+  }
+  .pfHeaderAmount:active{transform:scale(.94);}
+  .pfHeaderAmount::after{
+    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.9), transparent);
+    animation:pfShine 2.6s ease-in-out infinite;
+  }
+  @keyframes pfShine{0%{left:-60%;} 55%{left:130%;} 100%{left:130%;}}
+  .pfHeaderRemindBtn{
+    display:flex; align-items:center; gap:3px; white-space:nowrap;
+    background:rgba(255,255,255,.2); color:#fff; border:none;
+    border-radius:16px; font-size:10.5px; font-weight:700; padding:5px 9px; cursor:pointer;
+  }
+  .pfHeaderRemindBtn:active{transform:scale(.94);}
   .profileHead .pInfo .pMeta a{color:#fff; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4);}
   .profileHead .closeBtn{cursor:pointer; font-size:18px; opacity:.85; margin-top:2px;}
 
@@ -1698,7 +1723,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO020</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO023</span>
     </div>
   </div>
 
@@ -2482,7 +2507,10 @@
         <div class="profileHead" id="profileHeadEl">
           <div class="pAvatarLg" id="profileAvatar">👤</div>
           <div class="pInfo">
-            <div class="pName" id="profileName">—</div>
+            <div class="pNameRow">
+              <div class="pName" id="profileName">—</div>
+              <div class="pfHeaderBadge" id="profileReceivableBadge"></div>
+            </div>
             <div class="pMeta" id="profileMeta">—</div>
             <div class="pNicknameTag" id="profileNicknameTag" onclick="editProfileNickname()"></div>
             <div class="profileHeadContacts" id="profileHeadContacts"></div>
@@ -11014,22 +11042,20 @@ function openCustomerProfile(customerId){
   document.getElementById('profileEmailRow').style.display = 'none'; // یہ خانہ فی الحال صرف سپلائر پروفائل کے لیے ہے
   renderProfileNicknameTag(c.keywords);
 
-  // --- مالی خلاصہ: والٹ + واجب الوصول ایک نظر میں (کمپیکٹ — پرانی رابطہ پٹی کی جگہ یہیں آ گئی) ---
-  // ---------- اگر کچھ بقایہ ہے تو بڑا سرخ باکس دکھائیں — دبانے پر سیدھا Payment Collect کھلے، ساتھ چھوٹا 📢 ریمائنڈر بٹن ----------
+  // --- مالی خلاصہ: اب صرف Wallet Balance باڈی میں — بقایہ رقم ہیڈر میں نام کے ساتھ چمکتی چِپ ہے (نیچے) تاکہ بلوں کے لیے زیادہ جگہ ملے ---
   const figuresEl = document.getElementById('profileFigures');
-  figuresEl.className = 'profileFigures';
-  const receivableBoxHtml = c.total_receivable > 0
-    ? `<div class="pfBox receivableBig tappable pulse" onclick="closeProfileModal(); openCollectModal(${c.customer_id});">
-         <button class="pfReminderChip" onclick="event.stopPropagation(); openCustomerReminderModal(${c.customer_id});">📢 Remind</button>
-         <div class="pfLabel">📥 Total Outstanding — Tap to Collect Payment</div>
-         <div class="pfValue">Rs. ${c.total_receivable.toLocaleString()}</div>
-         <div class="pfHint">👆 Tap this amount anytime to record a payment from ${c.name}</div>
-       </div>`
-    : `<div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. 0</div></div>`;
+  figuresEl.className = 'profileFigures single';
   figuresEl.innerHTML = `
     <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div>
-    ${receivableBoxHtml}
   `;
+
+  // ---------- 📥 بقایہ کی رقم + 📢 Remind بٹن — ہیڈر میں نام کے ساتھ خالی جگہ پر، چمکتی ہوئی چِپ کے طور پر ----------
+  const receivableBadgeEl = document.getElementById('profileReceivableBadge');
+  receivableBadgeEl.classList.toggle('show', c.total_receivable > 0);
+  receivableBadgeEl.innerHTML = c.total_receivable > 0
+    ? `<span class="pfHeaderAmount" onclick="closeProfileModal(); openCollectModal(${c.customer_id});">Rs. ${c.total_receivable.toLocaleString()}</span>
+       <button class="pfHeaderRemindBtn" onclick="event.stopPropagation(); openCustomerReminderModal(${c.customer_id});">📢 Remind</button>`
+    : '';
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
   const sideEl = document.getElementById('profileQuickActions');
@@ -11367,6 +11393,10 @@ function openSupplierProfile(supplierId){
   figuresEl.innerHTML = `
     <div class="pfBox"><div class="pfLabel">📤 Payable (we owe)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
   `;
+  // ---------- سپلائر پروفائل میں ہیڈر والی بقایہ چِپ کی ضرورت نہیں — خالی رکھیں ----------
+  const receivableBadgeEl = document.getElementById('profileReceivableBadge');
+  receivableBadgeEl.classList.remove('show');
+  receivableBadgeEl.innerHTML = '';
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
