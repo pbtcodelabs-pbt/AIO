@@ -1738,7 +1738,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO026</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO027</span>
     </div>
   </div>
 
@@ -2201,6 +2201,11 @@
       <label style="display:flex; align-items:center; gap:8px; background:#eef2ff; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; font-weight:700; color:var(--primary-dark); cursor:pointer;">
         <input type="checkbox" id="stockAdjTrackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:18px; height:18px; margin:0;">
         📦 Track Inventory (block sales when stock is out — turn OFF to let sales go negative)
+      </label>
+
+      <label style="display:flex; align-items:center; gap:8px; background:#fff1f2; border:1px solid #fecdd3; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; font-weight:700; color:#9f1239; cursor:pointer;">
+        <input type="checkbox" id="stockAdjEnforceMinPriceChk" onchange="toggleEnforceMinPrice(this.checked)" style="width:18px; height:18px; margin:0;">
+        🔒 Enforce Minimum Sale Price (warn everyone, including you, if a bill rate goes below an item's Min Price)
       </label>
 
       <div class="stockValueBar" id="stockValueBar">
@@ -10694,6 +10699,8 @@ function renderStockAdjustmentScreen(){
   if(!wrap) return;
   const trackChk = document.getElementById('stockAdjTrackInventoryChk');
   if(trackChk) trackChk.checked = !!AppState.settings.trackInventory;
+  const minPriceChk = document.getElementById('stockAdjEnforceMinPriceChk');
+  if(minPriceChk) minPriceChk.checked = !!AppState.settings.enforceMinPrice;
   const query = (document.getElementById('stockAdjSearchInput')?.value || '').trim().toLowerCase();
   const catFilter = document.getElementById('stockAdjCategoryFilter')?.value || 'all';
   const sortMode = document.getElementById('stockAdjSortFilter')?.value || 'negFirst';
@@ -21181,8 +21188,11 @@ function toggleTrackInventory(checked){
 function toggleEnforceMinPrice(checked){
   AppState.settings.enforceMinPrice = checked;
   persistAllData();
-  const chk = document.getElementById('enforceMinPriceChk');
-  if(chk) chk.checked = checked;
+  // ---------- Settings اور Stock Adjustment دونوں جگہ یہی ٹوگل نظر آتا ہے — دونوں ہمیشہ ایک ساتھ اپڈیٹ رہیں ----------
+  const chkA = document.getElementById('enforceMinPriceChk');
+  const chkB = document.getElementById('stockAdjEnforceMinPriceChk');
+  if(chkA) chkA.checked = checked;
+  if(chkB) chkB.checked = checked;
 }
 
 
