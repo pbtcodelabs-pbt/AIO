@@ -933,8 +933,8 @@
   .reviewItemRow .riRemove{background:#fef2f2; color:var(--danger); border:none; border-radius:7px; width:28px; height:28px; cursor:pointer; font-weight:700;}
   .reviewActionBtns{display:flex; gap:8px; margin-top:16px;}
   .reviewActionBtns button{flex:1; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer;}
-  .btnApprove{background:var(--success); color:#fff;}
-  .btnReject{background:var(--danger); color:#fff;}
+  .reviewActionBtns .btnApprove{background:var(--success); color:#fff;}
+  .reviewActionBtns .btnReject{background:var(--danger); color:#fff;}
 
   .rejectionNoticeBox{background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
   .rejectionNoticeBox .rnText{font-size:13px; color:#b91c1c;}
@@ -1024,8 +1024,8 @@
   .approvalCard .aDetails{font-size:12px; color:var(--muted); margin:6px 0 10px;}
   .approvalBtns{display:flex; gap:8px;}
   .approvalBtns button{flex:1; padding:9px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;}
-  .btnApprove{background:#dcfce7; color:var(--success);}
-  .btnReject{background:#fef2f2; color:var(--danger);}
+  .approvalBtns .btnApprove{background:#dcfce7; color:var(--success);}
+  .approvalBtns .btnReject{background:#fef2f2; color:var(--danger);}
   .approvalCard.resolved{opacity:.6; border-left-color:var(--muted);}
   .resolvedTag{font-size:12px; font-weight:700;}
 
@@ -1738,7 +1738,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO027</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO028</span>
     </div>
   </div>
 
@@ -5196,6 +5196,15 @@ if(AppState.settings.packagePlansMigratedV2 !== true){
   AppState.settings.subscriptionPlans = DEFAULT_SETTINGS.subscriptionPlans.map(p => ({...p}));
   AppState.settings.perDayRate = DEFAULT_SETTINGS.perDayRate;
   AppState.settings.packagePlansMigratedV2 = true;
+  saveToStorage('settings', AppState.settings);
+}
+
+// ---------- 🩹 ون-ٹائم مائیگریشن — Invoice Style اور invoicePrintStyle پرانے ورژن میں الگ الگ ہو سکتے تھے
+// (ایک ہی چیز کے لیے دو غیر جڑی سیٹنگز)۔ اب یہ ہمیشہ ایک ساتھ رہیں گی — اگر پرانا ڈیٹا الگ الگ ملا
+// تو invoicePrintStyle (جو اصل پرنٹنگ پر لاگو ہوتا تھا) کو معیار مان کر دونوں کو اس پر برابر کر دیں ----------
+if(AppState.settings.invoiceStyleLinkedV1 !== true){
+  AppState.settings.invoiceStyle = AppState.settings.invoicePrintStyle;
+  AppState.settings.invoiceStyleLinkedV1 = true;
   saveToStorage('settings', AppState.settings);
 }
 
@@ -19541,8 +19550,14 @@ function toggleReportShowStock(checked){
   renderReportToCanvas();
 }
 function toggleInvoicePaperStyle(checked){
-  AppState.settings.invoicePrintStyle = checked ? 'a4' : 'thermal';
+  const style = checked ? 'a4' : 'thermal';
+  AppState.settings.invoicePrintStyle = style;
+  AppState.settings.invoiceStyle = style; // Invoice Style سے جڑی ہوئی — دونوں ساتھ رہیں
   persistAllData();
+  // Bill & Print Settings سکرین پر موجود Invoice Style بٹن بھی ساتھ اپڈیٹ کریں (اگر وہ سکرین کھلی ہو)
+  document.querySelectorAll('#invoiceStyleGrid button').forEach(b => {
+    b.classList.toggle('active', b.dataset.style === style);
+  });
   const orientRow = document.getElementById('pscOrientRow');
   if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
   const btRow = document.getElementById('pscBtPrintRow');
@@ -21156,11 +21171,26 @@ function updatePrintFontScale(pct){
 }
 
 // ---------- انوائس اسٹائل — تھرمل رسید یا رنگین A4 بزنس انوائس ----------
+// نوٹ: یہ سیٹنگ اب invoicePrintStyle کے ساتھ جڑی ہوئی ہے — دونوں ہمیشہ ایک ساتھ اپڈیٹ ہوں گی
+// (A4 ڈیزائن منتخب کریں تو پرنٹ بھی خودبخود A4 ہو جائے، تھرمل ڈیزائن ہو تو پرنٹ بھی تھرمل)
 function setInvoiceStyle(style){
   AppState.settings.invoiceStyle = style;
+  AppState.settings.invoicePrintStyle = style;
+  persistAllData();
   document.querySelectorAll('#invoiceStyleGrid button').forEach(b => {
     b.classList.toggle('active', b.dataset.style === style);
   });
+  // Invoice Preview سکرین پر موجود "Print A4" کنٹرولز بھی ساتھ اپڈیٹ کریں (اگر وہ سکرین کھلی ہو)
+  const pscA4Chk = document.getElementById('pscA4Chk');
+  if(pscA4Chk){
+    pscA4Chk.checked = style === 'a4';
+    const iOrientRow = document.getElementById('pscOrientRow');
+    if(iOrientRow) iOrientRow.style.display = style === 'a4' ? 'flex' : 'none';
+    const iBtRow = document.getElementById('pscBtPrintRow');
+    if(iBtRow) iBtRow.style.display = style === 'a4' ? 'none' : 'flex';
+    const iShareRow = document.getElementById('pscA4ShareRow');
+    if(iShareRow) iShareRow.style.display = style === 'a4' ? 'flex' : 'none';
+  }
 }
 
 // ---------- ٹیکس آن/آف اور فیصد — اختیاری، ڈیفالٹ بند ----------
