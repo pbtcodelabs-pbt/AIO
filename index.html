@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
-<script>
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  var k = (e.key || '').toUpperCase();
-  if (k === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
-      (e.ctrlKey && k === 'U')) {
-    e.preventDefault();
-  }
-});
-</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -11004,7 +10993,7 @@ function openCustomerProfile(customerId){
   const sideEl = document.getElementById('profileQuickActions');
   sideEl.innerHTML = `
     <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">New Bill</span></button>
-    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">Collect</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">Payment</span></button>
     <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
@@ -11044,7 +11033,9 @@ function renderCustomerBillsSection(customerId){
   // ---------- اسٹیٹس فلٹر: Pending = ابھی رقم باقی ہے یا منظوری کا انتظار ہے، Cleared = مکمل ادا شدہ ----------
   if(profileBillFilter.status !== 'all'){
     allBills = allBills.filter(row => {
-      const isPending = row.kind === 'pending' || getInvoiceAmountDue(row.inv) > 0;
+      const isPending = row.kind === 'pending'
+        ? row.p.status === 'pending' // ---------- Rejected submission کبھی بل ہی نہیں بنی، اسے Pending شمار نہ کریں ----------
+        : (row.inv.status !== 'voided' && getInvoiceAmountDue(row.inv) > 0); // ---------- Voided بل کا بقایہ پہلے ہی واپس ہو چکا، اسے Pending شمار نہ کریں ----------
       return profileBillFilter.status === 'pending' ? isPending : !isPending;
     });
   }
@@ -11057,14 +11048,18 @@ function renderCustomerBillsSection(customerId){
     : allBills.map(row => {
         if(row.kind === 'invoice'){
           const inv = row.inv;
-          const isPending = getInvoiceAmountDue(inv) > 0;
+          const isPending = inv.status !== 'voided' && getInvoiceAmountDue(inv) > 0;
           const itemsDesc = inv.items.slice(0,2).map(i => i.name).join(', ') + (inv.items.length > 2 ? ` +${inv.items.length-2} more` : '');
           const statusTag = inv.status === 'voided' ? ' · VOIDED' : inv.status === 'edited' ? ' · EDITED' : '';
+          const deleteBtnHtml = inv.status === 'voided'
+            ? `<button class="btnRequestDelete" style="margin-top:6px;" onclick="event.stopPropagation(); permanentlyDeleteBillFromProfile(${inv.invoice_id}, ${customerId});">🗑️ Permanently Delete</button>`
+            : '';
           return `
             <div class="billRow ${isPending?'pending':''}" onclick="closeProfileModal(); openInvoicePreview(${inv.invoice_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}${statusTag}</div>
                 <div class="brDesc">${itemsDesc}</div>
+                ${deleteBtnHtml}
               </div>
               <div class="brAmount">Rs. ${inv.grand_total.toLocaleString()}</div>
             </div>`;
@@ -15795,6 +15790,15 @@ function permanentlyDeleteBill(invoiceId){
   persistAllData();
   renderBillHistory();
 }
+// ---------- کسٹمر پروفائل کے اندر سے Voided بل مستقل ڈیلیٹ کرنے کے بعد پروفائل کی Bills لسٹ ہی دوبارہ بنائیں (Bill History اسکرین پر جانے کی ضرورت نہیں) ----------
+function permanentlyDeleteBillFromProfile(invoiceId, customerId){
+  const inv = invoicesData.find(i => i.invoice_id === invoiceId);
+  if(!inv) return;
+  if(!confirm(`Permanently delete voided bill ${inv.invoice_no}? This cannot be undone.`)) return;
+  invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
+  persistAllData();
+  renderCustomerBillsSection(customerId);
+}
 
 function adminVoidBill(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
@@ -15823,6 +15827,7 @@ function adminVoidBill(invoiceId){
   if(customer){
     const amountDue = (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
     if(amountDue > 0) customer.total_receivable -= amountDue;
+    inv.amount_due = 0; // ---------- بل Void ہونے کے بعد یہ اب واجب الوصول شمار نہیں ہونا چاہیے، ورنہ کسٹمر پروفائل میں غلطی سے "Pending" دکھاتا رہے گا ----------
 
     if(inv.wallet_applied > 0){
       customer.wallet_balance += inv.wallet_applied; // والٹ سے کاٹی گئی رقم واپس کر دیں
