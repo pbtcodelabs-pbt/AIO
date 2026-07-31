@@ -1269,6 +1269,20 @@
   .pfBox .pfValue.wallet{color:var(--success);}
   .pfBox .pfValue.receivable{color:var(--danger);}
   .pfBox .pfValue.payable{color:var(--warning);}
+  /* ---------- کسٹمر کے بقایہ کو بڑا، دبانے کے قابل بنائیں — دبانے پر سیدھا Payment Collect کھلے ---------- */
+  .pfBox.tappable{cursor:pointer; transition:transform .12s;}
+  .pfBox.tappable:active{transform:scale(0.97);}
+  .pfBox.receivableBig{grid-column:1 / -1; background:linear-gradient(155deg,#fef2f2,#fee2e2); border:1.5px solid #fca5a5; padding:12px 14px; position:relative;}
+  .pfBox.receivableBig .pfLabel{font-size:11.5px; color:#b91c1c; font-weight:700;}
+  .pfBox.receivableBig .pfValue{font-size:26px; color:#b91c1c;}
+  .pfBox.receivableBig .pfHint{font-size:10.5px; color:#9a3412; margin-top:2px;}
+  .pfReminderChip{position:absolute; top:8px; right:8px; background:#fb923c; color:#fff; border:none; border-radius:20px; padding:5px 10px; font-size:11px; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  @keyframes pfPulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.35);} 70%{box-shadow:0 0 0 8px rgba(220,38,38,0);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
+  .pfBox.receivableBig.pulse{animation:pfPulse 1.8s infinite;}
+  .pfQrWrap{text-align:center; margin-top:14px; padding:12px; background:#f8fafc; border-radius:10px; border:1px dashed #cbd5e1;}
+  .pfQrWrap img{width:150px; height:150px; object-fit:contain; border-radius:8px; background:#fff; padding:6px; border:1px solid #e2e8f0;}
+  .pfQrWrap .pfQrAcc{font-size:12.5px; font-weight:700; margin-top:6px;}
+  .pfQrWrap .pfQrHint{font-size:11px; color:var(--muted); margin-top:4px;}
 
   /* --- سیکشن ٹیبز: تاریخ / bills / پرچیز orders --- */
   .profileSectionTitle{font-size:13px; font-weight:700; color:var(--text); margin:16px 0 8px; display:flex; justify-content:space-between; align-items:center;}
@@ -2568,6 +2582,7 @@
         <div class="profileBody">
           <div class="settingsSubLabel">Message (you can edit this)</div>
           <textarea id="customerReminderText" style="width:100%; min-height:220px; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; line-height:1.5;"></textarea>
+          <div id="customerReminderQrWrap"></div>
           <button class="checkoutBtn" style="margin-top:12px; background:var(--success);" onclick="sendCustomerReminderWhatsapp()">💬 Send via WhatsApp</button>
         </div>
       </div>
@@ -10919,6 +10934,20 @@ function getInvoiceAmountDue(inv){
   return (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
 }
 
+// ---------- کسٹمر کا total_receivable کبھی کبھار اصل بلوں سے مطابقت نہیں رکھتا (پرانے ڈیٹا/بگ کی وجہ سے) —
+// اصل بلوں (غیر voided) کے amount_due کا مجموعہ نکال کر خاموشی سے درست کر دیں ----------
+function recalcCustomerReceivable(customerId){
+  const c = customersData.find(x => x.customer_id === customerId);
+  if(!c) return;
+  const computed = invoicesData
+    .filter(inv => inv.customer_id === customerId && inv.status !== 'voided')
+    .reduce((sum, inv) => sum + getInvoiceAmountDue(inv), 0);
+  if(computed !== (c.total_receivable || 0)){
+    c.total_receivable = Math.max(0, computed);
+    persistAllData();
+  }
+}
+
 let profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
 let profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
 
@@ -10965,6 +10994,10 @@ function openCustomerProfile(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
 
+  // ---------- بقایہ کا خودکار خودمختار حساب — کبھی کبھار (پرانے بگز، رد شدہ بل وغیرہ کی وجہ سے) total_receivable اصل بلوں سے مطابقت نہیں رکھتا،
+  // یہاں ہر بار پروفائل کھلنے پر خاموشی سے درست کر دیں تاکہ "Rs. 0" غلطی سے کبھی نظر نہ آئے ----------
+  recalcCustomerReceivable(customerId);
+
   currentProfileId = c.customer_id;
   currentProfileType = 'customers';
   profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' }; // ---------- ہر بار نیا پروفائل کھلنے پر فلٹر ری سیٹ ----------
@@ -10982,11 +11015,20 @@ function openCustomerProfile(customerId){
   renderProfileNicknameTag(c.keywords);
 
   // --- مالی خلاصہ: والٹ + واجب الوصول ایک نظر میں (کمپیکٹ — پرانی رابطہ پٹی کی جگہ یہیں آ گئی) ---
+  // ---------- اگر کچھ بقایہ ہے تو بڑا سرخ باکس دکھائیں — دبانے پر سیدھا Payment Collect کھلے، ساتھ چھوٹا 📢 ریمائنڈر بٹن ----------
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures';
+  const receivableBoxHtml = c.total_receivable > 0
+    ? `<div class="pfBox receivableBig tappable pulse" onclick="closeProfileModal(); openCollectModal(${c.customer_id});">
+         <button class="pfReminderChip" onclick="event.stopPropagation(); openCustomerReminderModal(${c.customer_id});">📢 Remind</button>
+         <div class="pfLabel">📥 Total Outstanding — Tap to Collect Payment</div>
+         <div class="pfValue">Rs. ${c.total_receivable.toLocaleString()}</div>
+         <div class="pfHint">👆 Tap this amount anytime to record a payment from ${c.name}</div>
+       </div>`
+    : `<div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. 0</div></div>`;
   figuresEl.innerHTML = `
     <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div>
-    <div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
+    ${receivableBoxHtml}
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
@@ -11068,11 +11110,14 @@ function renderCustomerBillsSection(customerId){
           const total = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
           const itemsDesc = p.items.slice(0,2).map(i => i.name).join(', ') + (p.items.length > 2 ? ` +${p.items.length-2} more` : '');
           const tag = p.status === 'pending' ? 'Awaiting approval' : 'Rejected';
+          // ---------- منظوری کے منتظر یا رد شدہ بل کو براہ راست پروفائل سے ڈیلیٹ کرنے کا بٹن — پہلے یہ کہیں موجود نہیں تھا،
+          // اسی لیے صارف کے لیے ایسے بل کبھی ختم نہیں ہو رہے تھے ----------
           return `
             <div class="billRow pending" onclick="closeProfileModal(); openPendingReview(${p.pending_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(p.submitted_at).toLocaleDateString('en-GB')} · ${tag} · via ${p.salesman_name}</div>
                 <div class="brDesc">${itemsDesc}</div>
+                <button class="btnRequestDelete" style="margin-top:6px;" onclick="event.stopPropagation(); deletePendingBillFromProfile(${p.pending_id}, ${customerId});">🗑️ Delete This Bill</button>
               </div>
               <div class="brAmount">Rs. ${total.toLocaleString()}</div>
             </div>`;
@@ -11256,10 +11301,24 @@ function openCustomerReminderModal(customerId){
 
 This is a reminder that you have a pending balance of Rs. ${c.total_receivable.toLocaleString()} with us.${billsListText}
 
-Kindly clear this at your earliest convenience.
+Kindly clear this at your earliest convenience.${getPaymentAccountsText()}
 
-Thank you,
-${AppState.currentUser?.name || 'Admin'}${getPaymentAccountsText()}`;
+Please send us a screenshot of the payment once done. Thank you!
+
+${AppState.currentUser?.name || 'Admin'}`;
+
+  // ---------- اکاؤنٹ کا QR کوڈ بھی یہیں دکھائیں — ایڈمن اسکرین شاٹ لے کر واٹس ایپ میسج کے ساتھ الگ سے بھیج سکے
+  // (واٹس ایپ لنک صرف ٹیکسٹ لے جاتا ہے، تصویر نہیں — اس لیے QR یہاں الگ نظر آنا ضروری ہے) ----------
+  const qrWrap = document.getElementById('customerReminderQrWrap');
+  const accWithQr = (AppState.settings.paymentAccounts || []).find(a => a.showOnReceipt && a.qr) ||
+                     (AppState.settings.paymentAccounts || []).find(a => a.qr);
+  qrWrap.innerHTML = accWithQr
+    ? `<div class="pfQrWrap">
+         <img src="${accWithQr.qr}" alt="Payment QR">
+         <div class="pfQrAcc">${accWithQr.type}: ${accWithQr.number}${accWithQr.name ? ' (' + accWithQr.name + ')' : ''}</div>
+         <div class="pfQrHint">📸 Screenshot this QR and send it along with the WhatsApp message below</div>
+       </div>`
+    : '';
 
   document.getElementById('customerReminderModal').classList.add('show');
 }
@@ -15797,6 +15856,22 @@ function permanentlyDeleteBillFromProfile(invoiceId, customerId){
   if(!confirm(`Permanently delete voided bill ${inv.invoice_no}? This cannot be undone.`)) return;
   invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
   persistAllData();
+  renderCustomerBillsSection(customerId);
+}
+
+// ---------- منظوری کے منتظر (Awaiting Approval) یا رد شدہ (Rejected) بل کو کسٹمر پروفائل سے ہمیشہ کے لیے حذف کریں —
+// یہ ابھی invoice نہیں بنا، اس لیے اسٹاک/کیش/بقایہ پر کوئی اثر نہیں پڑا، سیدھا لسٹ سے نکال دیں ----------
+function deletePendingBillFromProfile(pendingId, customerId){
+  const p = pendingBillsData.find(x => x.pending_id === pendingId);
+  if(!p) return;
+  if(p.status === 'approved'){
+    alert('This bill was already approved and turned into an invoice — delete it from Bill History instead.');
+    return;
+  }
+  if(!confirm(`Permanently delete this bill (Rs. ${p.items.reduce((s,i)=>s+i.qty*i.unitPrice,0).toLocaleString()})? This cannot be undone.`)) return;
+  pendingBillsData = pendingBillsData.filter(x => x.pending_id !== pendingId);
+  persistAllData();
+  renderPendingBillsBanner();
   renderCustomerBillsSection(customerId);
 }
 
