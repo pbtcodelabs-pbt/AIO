@@ -2152,13 +2152,13 @@
           <div class="finRow"><span>📦 Stock Value</span><span id="hlStock">—</span></div>
           <div class="finRow"><span>💵 Cash in Hand</span><span id="hlCash">—</span></div>
           <div class="finRow"><span>🤝 Customer Receivables</span><span id="hlReceivable">—</span></div>
-          <div class="finRow"><span>📔 Diary Qarz</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finRow"><span>📔 Diary I Got</span><span id="hlDiaryReceivable">—</span></div>
           <div class="finSplitTotal" id="finGreenTotal">Total: Rs. 0</div>
         </div>
         <div class="finSplitCol finRed">
           <div class="finSplitHead">🔴 Money Going Out / Liabilities</div>
           <div class="finRow"><span>📤 Supplier Payables</span><span id="hlPayable">—</span></div>
-          <div class="finRow"><span>📔 Diary Udhaar</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finRow"><span>📔 Diary I Gave</span><span id="hlDiaryPayable">—</span></div>
           <div class="finSplitTotal" id="finRedTotal">Total: Rs. 0</div>
         </div>
       </div>
@@ -3149,15 +3149,15 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
-      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 Udhaar = We Owe Them, 🟢 Qarz = They Owe Us.</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 I Gave = We Owe Them, 🟢 I Got = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 Total Udhaar</div>
+          <div class="diaryTotalLabel">🔴 Total I Gave</div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
         <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 Total Qarz</div>
+          <div class="diaryTotalLabel">🟢 Total I Got</div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
@@ -9889,7 +9889,7 @@ function renderMyDiaryList(){
   wrap.innerHTML = filtered.map(e => {
     const isOwe = e.balance < 0;
     const cls = isOwe ? 'owe' : 'get';
-    const label = isOwe ? 'Udhaar' : (e.balance > 0 ? 'Qarz' : 'Settled');
+    const label = isOwe ? 'I Gave' : (e.balance > 0 ? 'I Got' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
@@ -10050,10 +10050,10 @@ function renderDiaryDetailBalance(entry){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
   } else if(entry.balance < 0){
-    el.textContent = '🔴 Udhaar: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🔴 I Gave: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--danger)';
   } else {
-    el.textContent = '🟢 Qarz: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 I Got: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   }
 }
@@ -19427,9 +19427,9 @@ function getBalanceReportEntries(){
   return {
     entries, reportLabel: 'My Diary Summary', countLabel: 'People',
     summaryRows: [
-      {label: 'Total Udhaar (We Owe)', amount: totalUdhaar, sign: '-'},
-      {label: 'Total Qarz (Owed To Us)', amount: totalQarz, sign: '+'},
-      {label: netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', amount: Math.abs(netBalance), sign: ''}
+      {label: 'Total I Gave (We Owe)', amount: totalUdhaar, sign: '-'},
+      {label: 'Total I Got (Owed To Us)', amount: totalQarz, sign: '+'},
+      {label: netBalance >= 0 ? "Net: I Got (We're Owed)" : 'Net: I Gave (We Owe)', amount: Math.abs(netBalance), sign: ''}
     ]
   };
 }
