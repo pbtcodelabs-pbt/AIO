@@ -1374,6 +1374,10 @@
   .partyRow .prBalance.receivable{color:var(--danger);}
   .partyRow .prBalance.payable{color:var(--warning);}
   .partyRow .prBalance.zero{color:var(--muted); font-weight:600; font-size:11px;}
+  .partyPageTotalBadge{display:none; font-size:13px; font-weight:800; padding:5px 12px; border-radius:20px; white-space:nowrap;}
+  .partyPageTotalBadge.show{display:inline-block;}
+  .partyPageTotalBadge.receivable{background:#fee2e2; color:#b91c1c;}
+  .partyPageTotalBadge.payable{background:#fef3c7; color:#b45309;}
   .partyRow .prContacts{display:flex; gap:5px; flex:0 0 auto;}
   .partyRow .prIconBtn{
     width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center;
@@ -1723,7 +1727,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO023</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO024</span>
     </div>
   </div>
 
@@ -2271,15 +2275,36 @@
 
     <!-- PARTIES (Admin only) -->
     <div class="screen admin-only" id="screen-parties">
-      <div class="pageTitle" id="partyPageTitle">🧑‍🤝‍🧑 Customers</div>
+      <div class="pageTitle" id="partyPageTitle" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <span id="partyPageTitleText">🧑‍🤝‍🧑 Customers</span>
+        <span id="partyPageTotalBadge" class="partyPageTotalBadge"></span>
+      </div>
 
       <div class="partyToolbar">
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ Add New</button>
       </div>
       <button id="bulkReminderBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openBulkReminderCenter()">📢 Remind All (Outstanding Balances)</button>
+      <button id="supplierReportBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#eff6ff; color:#1d4ed8; border:1.5px dashed #93c5fd; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openSupplierPayableReport()">📊 Supplier Report (Total Payable)</button>
 
       <div class="partyList" id="partyListWrap"></div>
+    </div>
+
+    <!-- SUPPLIER PAYABLE REPORT (تمام سپلائرز جن کو ادائیگی باقی ہے — ایک جگہ، رقم کے حساب سے ترتیب، ٹوٹل کے ساتھ) -->
+    <div class="modalOverlay" id="supplierPayableReportModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:460px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">📊</div>
+          <div class="pInfo">
+            <div class="pName">Supplier Report</div>
+            <div class="pMeta" id="supplierPayableReportMeta">—</div>
+          </div>
+          <span class="closeBtn" onclick="document.getElementById('supplierPayableReportModal').classList.remove('show')">✖</span>
+        </div>
+        <div class="profileBody">
+          <div id="supplierPayableReportList"></div>
+        </div>
+      </div>
     </div>
 
     <!-- BULK REMINDER CENTER (تمام واجب الوصول کسٹمرز ایک جگہ — ایک ایک کر کے تیزی سے ریمائنڈر بھیجیں) -->
@@ -4042,6 +4067,14 @@
       <button onclick="openDiarySummaryReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📔 My Diary Summary</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
+      </button>
+      <button onclick="openCustomerBalanceReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📥 Customer Balance Report</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">How much money each customer owes us, with grand total</div>
+      </button>
+      <button onclick="openSupplierBalanceReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📤 Supplier Balance Report</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">How much money we owe each supplier, with grand total</div>
       </button>
     </div>
   </div>
@@ -10736,14 +10769,56 @@ function openBulkReminderCenter(){
   document.getElementById('bulkReminderModal').classList.add('show');
 }
 
+// ---------- Supplier Report — تمام سپلائرز جن کو ادائیگی باقی ہے، ایک جگہ (رقم کے حساب سے ترتیب) + گرینڈ ٹوٹل ----------
+function openSupplierPayableReport(){
+  const owingSuppliers = suppliersData.filter(s => s.total_payable > 0)
+    .sort((a,b) => b.total_payable - a.total_payable);
+
+  const totalOwed = owingSuppliers.reduce((sum,s) => sum + s.total_payable, 0);
+  document.getElementById('supplierPayableReportMeta').textContent = `${owingSuppliers.length} supplier(s) • Rs. ${totalOwed.toLocaleString()} total payable`;
+
+  const wrap = document.getElementById('supplierPayableReportList');
+  if(owingSuppliers.length === 0){
+    wrap.innerHTML = `<div class="profileEmpty">No pending payments to suppliers right now 🎉</div>`;
+  } else {
+    wrap.innerHTML = owingSuppliers.map(s => `
+      <div class="profileListRow" style="flex-direction:column; align-items:stretch; gap:8px; cursor:default;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><div class="plMain">${s.name}</div><div class="plMeta">${s.phone || 'No phone saved'}</div></div>
+          <div class="plAmount" style="color:var(--warning);">Rs. ${s.total_payable.toLocaleString()}</div>
+        </div>
+        <button class="btnReceiveShipment" style="width:100%;" onclick="document.getElementById('supplierPayableReportModal').classList.remove('show'); openPaySupplierModal(${s.supplier_id});">💵 Pay Now</button>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('supplierPayableReportModal').classList.add('show');
+}
+
 // ---------- Customers/Suppliers اب الگ الگ صفحات ہیں — یہ فنکشن نیویگیشن کے وقت صحیح موڈ سیٹ کرتا ہے (goTo کے ذریعے کال ہوتا ہے) ----------
 function enterPartyPage(tab){
   currentPartyTab = tab;
-  document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
+  document.getElementById('partyPageTitleText').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
   document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers by name or phone...' : '🔍 Search suppliers by name or phone...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
+  document.getElementById('supplierReportBtn').style.display = tab === 'suppliers' ? 'block' : 'none';
   renderPartyList();
+}
+
+// ---------- صفحے کے عنوان کے ساتھ کل رقم کا بیج — کسٹمرز میں کل وصولی، سپلائرز میں کل ادائیگی ----------
+function updatePartyPageTotalBadge(){
+  const badge = document.getElementById('partyPageTotalBadge');
+  if(!badge) return;
+  if(currentPartyTab === 'customers'){
+    const total = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
+    badge.className = 'partyPageTotalBadge receivable' + (total > 0 ? ' show' : '');
+    badge.textContent = `📥 To Collect: Rs. ${total.toLocaleString()}`;
+  } else {
+    const total = suppliersData.reduce((sum, s) => sum + (s.total_payable || 0), 0);
+    badge.className = 'partyPageTotalBadge payable' + (total > 0 ? ' show' : '');
+    badge.textContent = `📤 To Pay: Rs. ${total.toLocaleString()}`;
+  }
 }
 
 // ---------- Render List (Customers یا Suppliers، tab کے مطابق) ----------
@@ -10796,6 +10871,7 @@ function partyMatchesQuery(party, rawQuery){
 
 function renderPartyList(query = ''){
   const wrap = document.getElementById('partyListWrap');
+  updatePartyPageTotalBadge();
 
   if(currentPartyTab === 'customers'){
     const filtered = customersData.filter(c => partyMatchesQuery(c, query));
@@ -11045,6 +11121,7 @@ function openCustomerProfile(customerId){
   // --- مالی خلاصہ: اب صرف Wallet Balance باڈی میں — بقایہ رقم ہیڈر میں نام کے ساتھ چمکتی چِپ ہے (نیچے) تاکہ بلوں کے لیے زیادہ جگہ ملے ---
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures single';
+  figuresEl.style.display = '';
   figuresEl.innerHTML = `
     <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div>
   `;
@@ -11390,13 +11467,15 @@ function openSupplierProfile(supplierId){
 
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures single';
-  figuresEl.innerHTML = `
-    <div class="pfBox"><div class="pfLabel">📤 Payable (we owe)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
-  `;
-  // ---------- سپلائر پروفائل میں ہیڈر والی بقایہ چِپ کی ضرورت نہیں — خالی رکھیں ----------
+  figuresEl.style.display = 'none';
+  figuresEl.innerHTML = '';
+
+  // ---------- 📤 ہم نے سپلائر کو جتنے پیسے دینے ہیں — ہیڈر میں نام کے ساتھ چمکتی چِپ، دبانے پر سیدھا Pay Supplier کھلے ----------
   const receivableBadgeEl = document.getElementById('profileReceivableBadge');
-  receivableBadgeEl.classList.remove('show');
-  receivableBadgeEl.innerHTML = '';
+  receivableBadgeEl.classList.toggle('show', s.total_payable > 0);
+  receivableBadgeEl.innerHTML = s.total_payable > 0
+    ? `<span class="pfHeaderAmount" onclick="openPaySupplierModal(${s.supplier_id});">Rs. ${s.total_payable.toLocaleString()}</span>`
+    : '';
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
@@ -19202,6 +19281,68 @@ function openDiarySummaryReport(){
   setTimeout(() => renderReportToCanvas(), 100);
 }
 
+// ---------- 📥 Customer Balance Report — جتنے پیسے کسٹمرز سے لینے ہیں، ایک رپورٹ میں (کیٹگری کی ضرورت نہیں) ----------
+function openCustomerBalanceReport(){
+  currentReportType = 'customerbalance';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "📥 Customer Balance Report";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
+// ---------- 📤 Supplier Balance Report — جتنے پیسے سپلائرز کو دینے ہیں، ایک رپورٹ میں (کیٹگری کی ضرورت نہیں) ----------
+function openSupplierBalanceReport(){
+  currentReportType = 'supplierbalance';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "📤 Supplier Balance Report";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
+// ---------- تینوں "بیلنس بیسڈ" رپورٹس (Diary/Customer/Supplier) کا ڈیٹا سورس ایک ہی جگہ سے —
+// تاکہ کینوس اور PDF دونوں رینڈررز ایک ہی منطق استعمال کریں اور آپس میں کبھی مطابقت نہ کھوئیں ----------
+function getBalanceReportEntries(){
+  if(currentReportType === 'customerbalance'){
+    const entries = customersData.filter(c => (c.total_receivable || 0) > 0)
+      .map(c => ({name: c.name, balance: c.total_receivable}))
+      .sort((a,b) => b.balance - a.balance);
+    const total = entries.reduce((s,e) => s + e.balance, 0);
+    return {
+      entries, reportLabel: 'Customer Balance Report', countLabel: 'Customers',
+      summaryRows: [{label: 'Total Receivable (To Collect)', amount: total, sign: '+'}]
+    };
+  }
+  if(currentReportType === 'supplierbalance'){
+    const entries = suppliersData.filter(s => (s.total_payable || 0) > 0)
+      .map(s => ({name: s.name, balance: -s.total_payable}))
+      .sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+    const total = entries.reduce((s,e) => s + Math.abs(e.balance), 0);
+    return {
+      entries, reportLabel: 'Supplier Balance Report', countLabel: 'Suppliers',
+      summaryRows: [{label: 'Total Payable (To Pay)', amount: total, sign: '-'}]
+    };
+  }
+  // default: diarysummary
+  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+  let totalUdhaar = 0, totalQarz = 0;
+  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
+  const netBalance = totalQarz - totalUdhaar;
+  return {
+    entries, reportLabel: 'My Diary Summary', countLabel: 'People',
+    summaryRows: [
+      {label: 'Total Udhaar (We Owe)', amount: totalUdhaar, sign: '-'},
+      {label: 'Total Qarz (Owed To Us)', amount: totalQarz, sign: '+'},
+      {label: netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', amount: Math.abs(netBalance), sign: ''}
+    ]
+  };
+}
+
 // ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
 function syncReportStyleControls(){
   document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 100) + '%';
@@ -19392,7 +19533,7 @@ async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
-  if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
+  if(currentReportType === 'diarysummary' || currentReportType === 'customerbalance' || currentReportType === 'supplierbalance'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -20291,11 +20432,7 @@ async function renderDiarySummaryReportToCanvas(){
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
   const ctx = canvas.getContext('2d');
 
-  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
-  let totalUdhaar = 0, totalQarz = 0;
-  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
-  const netBalance = totalQarz - totalUdhaar;
-
+  const { entries, reportLabel, countLabel, summaryRows: rawSummaryRows } = getBalanceReportEntries();
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
@@ -20329,10 +20466,10 @@ async function renderDiarySummaryReportToCanvas(){
   const bg = hexToRgba(rc.bg, 1), border = rc.border;
 
   // ---------- اونچائی کا اندازہ ----------
-  const summaryRows = 3; // Total Udhaar, Total Qarz, Net Balance
+  const summaryRowCount = rawSummaryRows.length;
   const maxCols = 2; // ابتدائی اندازہ، حتمی نیچے تصدیق ہو جائے گی
   const estRowsPerCol = Math.max(1, Math.ceil(entries.length / maxCols));
-  let estimatedHeight = fsTitle*2 + fsSubtitle*1.5 + fsSmall*3 + (summaryRows*summaryLineH) + 40 + colHeaderH + estRowsPerCol*rowH + 60;
+  let estimatedHeight = fsTitle*2 + fsSubtitle*1.5 + fsSmall*3 + (summaryRowCount*summaryLineH) + 40 + colHeaderH + estRowsPerCol*rowH + 60;
   canvas.width = pxWidth;
   canvas.height = Math.round(estimatedHeight);
   ctx.fillStyle = '#fff';
@@ -20350,19 +20487,15 @@ async function renderDiarySummaryReportToCanvas(){
     if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += fsSmall+4; }
   }
   ctx.font = `bold ${fsSubtitle}px ${fontFam}`;
-  ctx.fillText('My Diary Summary', pxWidth/2, y);
+  ctx.fillText(reportLabel, pxWidth/2, y);
   y += fsSubtitle + 4;
   ctx.font = `${fsSmall}px ${fontFam}`;
   ctx.textAlign = 'left';
-  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB')}  |  People: ${entries.length}`, tableLeft, y);
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB')}  |  ${countLabel}: ${entries.length}`, tableLeft, y);
   y += fsSmall + 8;
 
   // ---------- سمری باکس ----------
-  const sRows = [
-    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
-    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
-  ];
+  const sRows = rawSummaryRows.map(r => [r.label, (r.sign ? r.sign + ' ' : '') + fmt(r.amount)]);
   const sumTop = y;
   ctx.font = `${bold?'bold':''} ${fsSummary}px ${fontFam}`;
   sRows.forEach((row, i) => {
@@ -20386,7 +20519,7 @@ async function renderDiarySummaryReportToCanvas(){
   ctx.font = `bold ${fsSubtitle*0.8}px ${fontFam}`;
   ctx.textAlign = 'left';
   ctx.fillStyle = '#000';
-  ctx.fillText('People', tableLeft, y);
+  ctx.fillText(countLabel, tableLeft, y);
   y += 6;
   const headerBottom = y;
 
@@ -20636,10 +20769,7 @@ function buildDiarySummaryPdf(orientation){
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScale = (AppState.settings.reportRowScale || 100) / 100;
 
-  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
-  let totalUdhaar = 0, totalQarz = 0;
-  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
-  const netBalance = totalQarz - totalUdhaar;
+  const { entries, reportLabel, countLabel, summaryRows: rawSummaryRows } = getBalanceReportEntries();
 
   let y = marginMM;
   pdf.setTextColor(tr, tg, tb);
@@ -20650,17 +20780,13 @@ function buildDiarySummaryPdf(orientation){
   if(AppState.settings.businessAddress){ pdf.text(stripUnrenderableForPdf(AppState.settings.businessAddress), pageW/2, y, {align:'center'}); y += 5; }
   if(AppState.settings.businessPhone){ pdf.text(AppState.settings.businessPhone, pageW/2, y, {align:'center'}); y += 5; }
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12);
-  pdf.text('My Diary Summary', pageW / 2, y + 3, {align:'center'});
+  pdf.text(reportLabel, pageW / 2, y + 3, {align:'center'});
   y += 9;
   pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5);
-  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}  |  People: ${entries.length}`, marginMM, y);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}  |  ${countLabel}: ${entries.length}`, marginMM, y);
   y += 6;
 
-  const summaryRows = [
-    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
-    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
-  ];
+  const summaryRows = rawSummaryRows.map(r => [r.label, (r.sign ? r.sign + ' ' : '') + fmt(r.amount)]);
   const sumRowH = Math.round(6 * rowScale * 10) / 10;
   const sumFontPt = Math.round(9 * fontScale * 10) / 10;
   pdf.setFontSize(sumFontPt);
@@ -20685,7 +20811,7 @@ function buildDiarySummaryPdf(orientation){
 
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10);
   pdf.setTextColor(tr, tg, tb);
-  pdf.text('People', marginMM, y);
+  pdf.text(countLabel, marginMM, y);
   y += 4;
   const headerBottom = y;
 
@@ -20767,7 +20893,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : (currentReportType === 'diarysummary' || currentReportType === 'customerbalance' || currentReportType === 'supplierbalance') ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -20797,7 +20923,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : (currentReportType === 'diarysummary' || currentReportType === 'customerbalance' || currentReportType === 'supplierbalance') ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }

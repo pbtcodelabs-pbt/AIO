@@ -2,7 +2,7 @@
 // AIO POS — Service Worker
 // ورژن نمبر — ہر نئی فائل کے ساتھ یہ نمبر بدلیں (ہوم پیج کے چھوٹے بیج کے نمبر سے میچ ہونا چاہیے)
 // ========================================================================
-const SW_VERSION   = 'AIO023';
+const SW_VERSION   = 'AIO024';
 const CACHE_NAME    = 'aio-pos-cache-' + SW_VERSION;
 const CORE_ASSETS   = [
   './',
