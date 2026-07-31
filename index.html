@@ -701,7 +701,8 @@
   .fontOptionRow.active .fontCheckMark{ opacity:1; }
 
   .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden;}
-  .productHead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;}
+  .productHead{display:flex; align-items:center; gap:10px; padding:14px 18px; cursor:pointer;}
+  .productHead > div:not(.pActions):not(.pSerial){flex:1; min-width:0;}
   .productHead:hover{background:#f8fafc;}
   .productHead .pName{font-weight:700; font-size:15px;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
@@ -835,15 +836,25 @@
   .custPickEmpty{padding:12px; text-align:center; color:#94a3b8; font-size:12px;}
   .stockAdjFilterBar{display:flex; gap:8px; margin-bottom:12px;}
   .stockAdjFilterBar select{flex:1; padding:8px 6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; background:#fff; color:var(--text);}
-  .stockAdjHeaderRow{display:flex; gap:8px; padding:0 12px 6px; font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  .stockAdjHeaderRow{display:flex; gap:6px; padding:0 12px 6px; font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  .stockAdjColSerial{flex:0 0 18px; text-align:center;}
   .stockAdjColName{flex:2;}
+  .stockAdjColVariant{flex:1.1; text-align:center;}
   .stockAdjColSmall{flex:1; text-align:center;}
-  .stockAdjRow{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #eef1f5; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .stockAdjRow{display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #eef1f5; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.04);}
   .stockAdjRow.negativeRow{border-color:var(--danger); box-shadow:0 0 0 1.5px var(--danger) inset;}
   .stockAdjRow.negativeRow .stockAdjName, .stockAdjRow.negativeRow .stockAdjInput{color:var(--danger); font-weight:800;}
+  .stockAdjSerial{flex:0 0 18px; text-align:center; font-size:11px; font-weight:700; color:var(--muted);}
   .stockAdjName{flex:2; font-size:12.5px; font-weight:700; color:var(--text); line-height:1.3;}
+  .stockAdjVariant{flex:1.1; text-align:center; font-size:11px; font-weight:700; color:var(--primary-dark); background:#f1f5ff; border-radius:6px; padding:3px 4px; line-height:1.3; word-break:break-word;}
   .stockAdjInput{flex:1; width:0; min-width:0; padding:8px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; text-align:center; font-weight:700; color:var(--primary-dark);}
   .stockAdjEmptyState{text-align:center; color:#94a3b8; padding:40px 10px; font-size:14px;}
+  .stockValueBar{display:flex; gap:6px; flex-wrap:wrap; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:8px 10px; margin-bottom:10px; font-size:11.5px; font-weight:700; color:#166534;}
+  .stockValueBar .svDivider{color:#86efac;}
+  .stockValueBar .svSale{color:#0369a1;}
+  .productsSummaryBar{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:11.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:8px; padding:6px 10px; margin-bottom:8px;}
+  .productsSummaryBar .psDivider{color:#a5b4fc;}
+  .pSerial{flex:0 0 22px; font-size:11px; font-weight:800; color:var(--muted); text-align:center;}
 
   /* --- 📣 My Ads poster — real tappable contact actions below the (static) poster image --- */
   .adsContactRow{display:flex; gap:10px; max-width:420px; margin:14px auto 0;}
@@ -1727,7 +1738,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO024</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO025</span>
     </div>
   </div>
 
@@ -2192,6 +2203,12 @@
         📦 Track Inventory (block sales when stock is out — turn OFF to let sales go negative)
       </label>
 
+      <div class="stockValueBar" id="stockValueBar">
+        <span>💰 Stock Value (Purchase): <span id="stockValuePurchase">Rs. 0</span></span>
+        <span class="svDivider">|</span>
+        <span class="svSale">🏷️ Stock Value (Sale): <span id="stockValueSale">Rs. 0</span></span>
+      </div>
+
       <input type="text" id="stockAdjSearchInput" placeholder="🔍 Search item name" oninput="renderStockAdjustmentScreen()" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px; margin-bottom:10px;">
 
       <div class="stockAdjFilterBar">
@@ -2208,7 +2225,9 @@
       </div>
 
       <div class="stockAdjHeaderRow">
+        <div class="stockAdjColSerial">#</div>
         <div class="stockAdjColName">Item</div>
+        <div class="stockAdjColVariant">Unit</div>
         <div class="stockAdjColSmall">Stock</div>
         <div class="stockAdjColSmall">Price</div>
         <div class="stockAdjColSmall">Low Stock</div>
@@ -2229,6 +2248,7 @@
             <input type="text" id="productSearchInput" placeholder="🔍 Search products..." oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
           </div>
+          <div class="productsSummaryBar" id="productsSummaryBar"></div>
           <div class="csvImportBar">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import from CSV</button>
@@ -8470,14 +8490,23 @@ function renderProductList(query = ''){
 
   renderCategoryRail();
 
+  // ---------- کمپیکٹ سمری: کتنے main پراڈکٹس ہیں اور ان کے کل variants (sellable lines) کتنے ----------
+  const summaryBar = document.getElementById('productsSummaryBar');
+  if(summaryBar){
+    const totalMain = filtered.length;
+    const totalVariants = filtered.reduce((sum, p) => sum + p.variants.length, 0);
+    summaryBar.innerHTML = `<span>📦 Total Products: <b>${totalMain}</b></span><span class="psDivider">•</span><span>🔀 With Variants (Total Items): <b>${totalVariants}</b></span>`;
+  }
+
   if(filtered.length === 0){
     wrap.innerHTML = `<div class="placeholder">No product found</div>`;
     return;
   }
 
-  wrap.innerHTML = filtered.map(p => `
+  wrap.innerHTML = filtered.map((p, idx) => `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id})">
+        <div class="pSerial">${idx + 1}</div>
         <div>
           <div class="pName">${p.name}</div>
           <div class="pMeta">${p.category || 'No category'}</div>
@@ -10665,6 +10694,14 @@ function renderStockAdjustmentScreen(){
     list = list.filter(item => ((item.product.category && item.product.category.trim()) ? item.product.category.trim() : 'Uncategorized') === catFilter);
   }
 
+  // ---------- سٹاک ویلیو: خریداری کے حساب سے اور فروخت کے حساب سے (موجودہ فلٹر شدہ فہرست کے مطابق) ----------
+  const purchaseValue = list.reduce((sum, item) => sum + (item.variant.stock * (item.variant.purchase || 0)), 0);
+  const saleValue = list.reduce((sum, item) => sum + (item.variant.stock * (item.variant.retail || 0)), 0);
+  const svPurchaseEl = document.getElementById('stockValuePurchase');
+  const svSaleEl = document.getElementById('stockValueSale');
+  if(svPurchaseEl) svPurchaseEl.textContent = `Rs. ${Math.round(purchaseValue).toLocaleString()}`;
+  if(svSaleEl) svSaleEl.textContent = `Rs. ${Math.round(saleValue).toLocaleString()}`;
+
   // ---------- منتخب ترتیب کے مطابق فہرست سجائیں ----------
   if(sortMode === 'az') list.sort((a,b) => a.displayName.localeCompare(b.displayName));
   else if(sortMode === 'za') list.sort((a,b) => b.displayName.localeCompare(a.displayName));
@@ -10681,12 +10718,16 @@ function renderStockAdjustmentScreen(){
     return;
   }
 
-  wrap.innerHTML = list.map(item => {
+  wrap.innerHTML = list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
+    // ---------- Unit/Variant کالم علیحدہ — پراڈکٹ کے نام کے ساتھ نہیں ملایا جائے گا ----------
+    const unitLabel = (v.label && v.label !== item.product.name) ? v.label : '—';
     return `
       <div class="stockAdjRow ${isNegative ? 'negativeRow' : ''}">
-        <div class="stockAdjName">${item.displayName.replace(/</g,'&lt;')}</div>
+        <div class="stockAdjSerial">${idx + 1}</div>
+        <div class="stockAdjName">${item.product.name.replace(/</g,'&lt;')}</div>
+        <div class="stockAdjVariant">${unitLabel.replace(/</g,'&lt;')}</div>
         <input type="number" class="stockAdjInput" value="${v.stock}" onchange="updateStockAdjField(${v.variant_id}, 'stock', this.value)" onfocus="this.select()">
         <input type="number" class="stockAdjInput" value="${v.retail}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()">
         <input type="number" class="stockAdjInput" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()">
