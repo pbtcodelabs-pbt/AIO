@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
+<script>
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+document.addEventListener('keydown', function(e){
+  var k = (e.key || '').toUpperCase();
+  if (k === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
+      (e.ctrlKey && k === 'U')) {
+    e.preventDefault();
+  }
+});
+</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -701,8 +712,7 @@
   .fontOptionRow.active .fontCheckMark{ opacity:1; }
 
   .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden;}
-  .productHead{display:flex; align-items:center; gap:10px; padding:14px 18px; cursor:pointer;}
-  .productHead > div:not(.pActions):not(.pSerial){flex:1; min-width:0;}
+  .productHead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;}
   .productHead:hover{background:#f8fafc;}
   .productHead .pName{font-weight:700; font-size:15px;}
   .productHead .pMeta{font-size:12px; color:var(--muted); margin-top:2px;}
@@ -836,25 +846,15 @@
   .custPickEmpty{padding:12px; text-align:center; color:#94a3b8; font-size:12px;}
   .stockAdjFilterBar{display:flex; gap:8px; margin-bottom:12px;}
   .stockAdjFilterBar select{flex:1; padding:8px 6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px; background:#fff; color:var(--text);}
-  .stockAdjHeaderRow{display:flex; gap:6px; padding:0 12px 6px; font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
-  .stockAdjColSerial{flex:0 0 18px; text-align:center;}
+  .stockAdjHeaderRow{display:flex; gap:8px; padding:0 12px 6px; font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
   .stockAdjColName{flex:2;}
-  .stockAdjColVariant{flex:1.1; text-align:center;}
   .stockAdjColSmall{flex:1; text-align:center;}
-  .stockAdjRow{display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #eef1f5; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .stockAdjRow{display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #eef1f5; border-radius:12px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.04);}
   .stockAdjRow.negativeRow{border-color:var(--danger); box-shadow:0 0 0 1.5px var(--danger) inset;}
   .stockAdjRow.negativeRow .stockAdjName, .stockAdjRow.negativeRow .stockAdjInput{color:var(--danger); font-weight:800;}
-  .stockAdjSerial{flex:0 0 18px; text-align:center; font-size:11px; font-weight:700; color:var(--muted);}
   .stockAdjName{flex:2; font-size:12.5px; font-weight:700; color:var(--text); line-height:1.3;}
-  .stockAdjVariant{flex:1.1; text-align:center; font-size:11px; font-weight:700; color:var(--primary-dark); background:#f1f5ff; border-radius:6px; padding:3px 4px; line-height:1.3; word-break:break-word;}
   .stockAdjInput{flex:1; width:0; min-width:0; padding:8px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; text-align:center; font-weight:700; color:var(--primary-dark);}
   .stockAdjEmptyState{text-align:center; color:#94a3b8; padding:40px 10px; font-size:14px;}
-  .stockValueBar{display:flex; gap:6px; flex-wrap:wrap; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:8px 10px; margin-bottom:10px; font-size:11.5px; font-weight:700; color:#166534;}
-  .stockValueBar .svDivider{color:#86efac;}
-  .stockValueBar .svSale{color:#0369a1;}
-  .productsSummaryBar{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:11.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:8px; padding:6px 10px; margin-bottom:8px;}
-  .productsSummaryBar .psDivider{color:#a5b4fc;}
-  .pSerial{flex:0 0 22px; font-size:11px; font-weight:800; color:var(--muted); text-align:center;}
 
   /* --- 📣 My Ads poster — real tappable contact actions below the (static) poster image --- */
   .adsContactRow{display:flex; gap:10px; max-width:420px; margin:14px auto 0;}
@@ -933,8 +933,8 @@
   .reviewItemRow .riRemove{background:#fef2f2; color:var(--danger); border:none; border-radius:7px; width:28px; height:28px; cursor:pointer; font-weight:700;}
   .reviewActionBtns{display:flex; gap:8px; margin-top:16px;}
   .reviewActionBtns button{flex:1; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer;}
-  .reviewActionBtns .btnApprove{background:var(--success); color:#fff;}
-  .reviewActionBtns .btnReject{background:var(--danger); color:#fff;}
+  .btnApprove{background:var(--success); color:#fff;}
+  .btnReject{background:var(--danger); color:#fff;}
 
   .rejectionNoticeBox{background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
   .rejectionNoticeBox .rnText{font-size:13px; color:#b91c1c;}
@@ -1024,8 +1024,8 @@
   .approvalCard .aDetails{font-size:12px; color:var(--muted); margin:6px 0 10px;}
   .approvalBtns{display:flex; gap:8px;}
   .approvalBtns button{flex:1; padding:9px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;}
-  .approvalBtns .btnApprove{background:#dcfce7; color:var(--success);}
-  .approvalBtns .btnReject{background:#fef2f2; color:var(--danger);}
+  .btnApprove{background:#dcfce7; color:var(--success);}
+  .btnReject{background:#fef2f2; color:var(--danger);}
   .approvalCard.resolved{opacity:.6; border-left-color:var(--muted);}
   .resolvedTag{font-size:12px; font-weight:700;}
 
@@ -1217,31 +1217,6 @@
   .profileHead .pInfo{flex:1; min-width:0;}
   .profileHead .pInfo .pName{font-size:16.5px; font-weight:800;}
   .profileHead .pInfo .pMeta{font-size:12px; opacity:.9; margin-top:2px;}
-  /* ---------- 💰 بقایہ رقم اب نام کے ساتھ ہیڈر میں چھوٹی چمکتی چِپ کے طور پر — باڈی کا بڑا باکس ہٹا کر بلوں کے لیے جگہ خالی کی گئی ---------- */
-  .pNameRow{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
-  .pfHeaderBadge{display:none; align-items:center; gap:6px; flex:0 0 auto;}
-  .pfHeaderBadge.show{display:flex;}
-  .pfHeaderAmount{
-    position:relative; overflow:hidden; cursor:pointer; white-space:nowrap;
-    background:linear-gradient(135deg,#fef9c3,#fde68a);
-    color:#92400e; font-weight:800; font-size:12.5px;
-    padding:5px 11px; border-radius:20px;
-    box-shadow:0 2px 8px rgba(217,119,6,.35), inset 0 0 0 1px rgba(255,255,255,.6);
-    transition:transform .12s;
-  }
-  .pfHeaderAmount:active{transform:scale(.94);}
-  .pfHeaderAmount::after{
-    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
-    background:linear-gradient(120deg, transparent, rgba(255,255,255,.9), transparent);
-    animation:pfShine 2.6s ease-in-out infinite;
-  }
-  @keyframes pfShine{0%{left:-60%;} 55%{left:130%;} 100%{left:130%;}}
-  .pfHeaderRemindBtn{
-    display:flex; align-items:center; gap:3px; white-space:nowrap;
-    background:rgba(255,255,255,.2); color:#fff; border:none;
-    border-radius:16px; font-size:10.5px; font-weight:700; padding:5px 9px; cursor:pointer;
-  }
-  .pfHeaderRemindBtn:active{transform:scale(.94);}
   .profileHead .pInfo .pMeta a{color:#fff; text-decoration:underline; text-decoration-color:rgba(255,255,255,.4);}
   .profileHead .closeBtn{cursor:pointer; font-size:18px; opacity:.85; margin-top:2px;}
 
@@ -1305,20 +1280,6 @@
   .pfBox .pfValue.wallet{color:var(--success);}
   .pfBox .pfValue.receivable{color:var(--danger);}
   .pfBox .pfValue.payable{color:var(--warning);}
-  /* ---------- کسٹمر کے بقایہ کو بڑا، دبانے کے قابل بنائیں — دبانے پر سیدھا Payment Collect کھلے ---------- */
-  .pfBox.tappable{cursor:pointer; transition:transform .12s;}
-  .pfBox.tappable:active{transform:scale(0.97);}
-  .pfBox.receivableBig{grid-column:1 / -1; background:linear-gradient(155deg,#fef2f2,#fee2e2); border:1.5px solid #fca5a5; padding:12px 14px; position:relative;}
-  .pfBox.receivableBig .pfLabel{font-size:11.5px; color:#b91c1c; font-weight:700;}
-  .pfBox.receivableBig .pfValue{font-size:26px; color:#b91c1c;}
-  .pfBox.receivableBig .pfHint{font-size:10.5px; color:#9a3412; margin-top:2px;}
-  .pfReminderChip{position:absolute; top:8px; right:8px; background:#fb923c; color:#fff; border:none; border-radius:20px; padding:5px 10px; font-size:11px; font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.15);}
-  @keyframes pfPulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.35);} 70%{box-shadow:0 0 0 8px rgba(220,38,38,0);} 100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
-  .pfBox.receivableBig.pulse{animation:pfPulse 1.8s infinite;}
-  .pfQrWrap{text-align:center; margin-top:14px; padding:12px; background:#f8fafc; border-radius:10px; border:1px dashed #cbd5e1;}
-  .pfQrWrap img{width:150px; height:150px; object-fit:contain; border-radius:8px; background:#fff; padding:6px; border:1px solid #e2e8f0;}
-  .pfQrWrap .pfQrAcc{font-size:12.5px; font-weight:700; margin-top:6px;}
-  .pfQrWrap .pfQrHint{font-size:11px; color:var(--muted); margin-top:4px;}
 
   /* --- سیکشن ٹیبز: تاریخ / bills / پرچیز orders --- */
   .profileSectionTitle{font-size:13px; font-weight:700; color:var(--text); margin:16px 0 8px; display:flex; justify-content:space-between; align-items:center;}
@@ -1385,10 +1346,6 @@
   .partyRow .prBalance.receivable{color:var(--danger);}
   .partyRow .prBalance.payable{color:var(--warning);}
   .partyRow .prBalance.zero{color:var(--muted); font-weight:600; font-size:11px;}
-  .partyPageTotalBadge{display:none; font-size:13px; font-weight:800; padding:5px 12px; border-radius:20px; white-space:nowrap;}
-  .partyPageTotalBadge.show{display:inline-block;}
-  .partyPageTotalBadge.receivable{background:#fee2e2; color:#b91c1c;}
-  .partyPageTotalBadge.payable{background:#fef3c7; color:#b45309;}
   .partyRow .prContacts{display:flex; gap:5px; flex:0 0 auto;}
   .partyRow .prIconBtn{
     width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center;
@@ -1738,7 +1695,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO028</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO029</span>
     </div>
   </div>
 
@@ -2152,13 +2109,13 @@
           <div class="finRow"><span>📦 Stock Value</span><span id="hlStock">—</span></div>
           <div class="finRow"><span>💵 Cash in Hand</span><span id="hlCash">—</span></div>
           <div class="finRow"><span>🤝 Customer Receivables</span><span id="hlReceivable">—</span></div>
-          <div class="finRow"><span>📔 Diary I Got</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finRow"><span>📔 Diary Qarz</span><span id="hlDiaryReceivable">—</span></div>
           <div class="finSplitTotal" id="finGreenTotal">Total: Rs. 0</div>
         </div>
         <div class="finSplitCol finRed">
           <div class="finSplitHead">🔴 Money Going Out / Liabilities</div>
           <div class="finRow"><span>📤 Supplier Payables</span><span id="hlPayable">—</span></div>
-          <div class="finRow"><span>📔 Diary I Gave</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finRow"><span>📔 Diary Udhaar</span><span id="hlDiaryPayable">—</span></div>
           <div class="finSplitTotal" id="finRedTotal">Total: Rs. 0</div>
         </div>
       </div>
@@ -2203,17 +2160,6 @@
         📦 Track Inventory (block sales when stock is out — turn OFF to let sales go negative)
       </label>
 
-      <label style="display:flex; align-items:center; gap:8px; background:#fff1f2; border:1px solid #fecdd3; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; font-weight:700; color:#9f1239; cursor:pointer;">
-        <input type="checkbox" id="stockAdjEnforceMinPriceChk" onchange="toggleEnforceMinPrice(this.checked)" style="width:18px; height:18px; margin:0;">
-        🔒 Enforce Minimum Sale Price (warn everyone, including you, if a bill rate goes below an item's Min Price)
-      </label>
-
-      <div class="stockValueBar" id="stockValueBar">
-        <span>💰 Stock Value (Purchase): <span id="stockValuePurchase">Rs. 0</span></span>
-        <span class="svDivider">|</span>
-        <span class="svSale">🏷️ Stock Value (Sale): <span id="stockValueSale">Rs. 0</span></span>
-      </div>
-
       <input type="text" id="stockAdjSearchInput" placeholder="🔍 Search item name" oninput="renderStockAdjustmentScreen()" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px; margin-bottom:10px;">
 
       <div class="stockAdjFilterBar">
@@ -2230,9 +2176,7 @@
       </div>
 
       <div class="stockAdjHeaderRow">
-        <div class="stockAdjColSerial">#</div>
         <div class="stockAdjColName">Item</div>
-        <div class="stockAdjColVariant">Unit</div>
         <div class="stockAdjColSmall">Stock</div>
         <div class="stockAdjColSmall">Price</div>
         <div class="stockAdjColSmall">Low Stock</div>
@@ -2253,7 +2197,6 @@
             <input type="text" id="productSearchInput" placeholder="🔍 Search products..." oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
           </div>
-          <div class="productsSummaryBar" id="productsSummaryBar"></div>
           <div class="csvImportBar">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import from CSV</button>
@@ -2300,36 +2243,15 @@
 
     <!-- PARTIES (Admin only) -->
     <div class="screen admin-only" id="screen-parties">
-      <div class="pageTitle" id="partyPageTitle" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-        <span id="partyPageTitleText">🧑‍🤝‍🧑 Customers</span>
-        <span id="partyPageTotalBadge" class="partyPageTotalBadge"></span>
-      </div>
+      <div class="pageTitle" id="partyPageTitle">🧑‍🤝‍🧑 Customers</div>
 
       <div class="partyToolbar">
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ Add New</button>
       </div>
       <button id="bulkReminderBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openBulkReminderCenter()">📢 Remind All (Outstanding Balances)</button>
-      <button id="supplierReportBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#eff6ff; color:#1d4ed8; border:1.5px dashed #93c5fd; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openSupplierPayableReport()">📊 Supplier Report (Total Payable)</button>
 
       <div class="partyList" id="partyListWrap"></div>
-    </div>
-
-    <!-- SUPPLIER PAYABLE REPORT (تمام سپلائرز جن کو ادائیگی باقی ہے — ایک جگہ، رقم کے حساب سے ترتیب، ٹوٹل کے ساتھ) -->
-    <div class="modalOverlay" id="supplierPayableReportModal" onclick="if(event.target===this) this.classList.remove('show')">
-      <div class="profileBox" style="width:460px;">
-        <div class="profileHead">
-          <div class="pAvatarLg">📊</div>
-          <div class="pInfo">
-            <div class="pName">Supplier Report</div>
-            <div class="pMeta" id="supplierPayableReportMeta">—</div>
-          </div>
-          <span class="closeBtn" onclick="document.getElementById('supplierPayableReportModal').classList.remove('show')">✖</span>
-        </div>
-        <div class="profileBody">
-          <div id="supplierPayableReportList"></div>
-        </div>
-      </div>
     </div>
 
     <!-- BULK REMINDER CENTER (تمام واجب الوصول کسٹمرز ایک جگہ — ایک ایک کر کے تیزی سے ریمائنڈر بھیجیں) -->
@@ -2360,10 +2282,13 @@
           <div id="npPhotoPreview" style="width:72px; height:72px; border-radius:50%; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:30px; overflow:hidden; border:2px solid #dbe1ea;">👤</div>
           <button type="button" onclick="triggerPartyPhotoUpload()" style="padding:6px 14px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Add Photo</button>
         </div>
-        <div style="position:relative;">
-          <input type="text" id="npPartyName" placeholder="Name" autocomplete="off" oninput="filterPartyNameOptions()" onfocus="filterPartyNameOptions()">
-          <!-- ---------- ملتے جلتے موجودہ ناموں کی فہرست — نام ڈپلیکیٹ ہو سکتا ہے، بس یاد دہانی کے لیے ---------- -->
-          <div id="npPartyNameListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:82;"></div>
+        <div style="position:relative; display:flex; gap:6px; align-items:flex-start;">
+          <div style="flex:1; position:relative;">
+            <input type="text" id="npPartyName" placeholder="Name" autocomplete="off" oninput="filterPartyNameOptions()" onfocus="filterPartyNameOptions()" style="width:100%;">
+            <!-- ---------- ملتے جلتے موجودہ ناموں کی فہرست — نام ڈپلیکیٹ ہو سکتا ہے، بس یاد دہانی کے لیے ---------- -->
+            <div id="npPartyNameListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:82;"></div>
+          </div>
+          <button type="button" onclick="pickContactForNewParty()" title="Pick from phone contacts" style="flex:0 0 auto; width:42px; height:42px; border:1.5px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:8px; font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center;">📇</button>
         </div>
         <div style="position:relative;">
           <input type="text" id="npPartyPhone" placeholder="Mobile number (for WhatsApp)" autocomplete="off" inputmode="tel" oninput="filterPartyPhoneOptions()" onfocus="filterPartyPhoneOptions()">
@@ -2557,10 +2482,7 @@
         <div class="profileHead" id="profileHeadEl">
           <div class="pAvatarLg" id="profileAvatar">👤</div>
           <div class="pInfo">
-            <div class="pNameRow">
-              <div class="pName" id="profileName">—</div>
-              <div class="pfHeaderBadge" id="profileReceivableBadge"></div>
-            </div>
+            <div class="pName" id="profileName">—</div>
             <div class="pMeta" id="profileMeta">—</div>
             <div class="pNicknameTag" id="profileNicknameTag" onclick="editProfileNickname()"></div>
             <div class="profileHeadContacts" id="profileHeadContacts"></div>
@@ -2660,7 +2582,6 @@
         <div class="profileBody">
           <div class="settingsSubLabel">Message (you can edit this)</div>
           <textarea id="customerReminderText" style="width:100%; min-height:220px; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; line-height:1.5;"></textarea>
-          <div id="customerReminderQrWrap"></div>
           <button class="checkoutBtn" style="margin-top:12px; background:var(--success);" onclick="sendCustomerReminderWhatsapp()">💬 Send via WhatsApp</button>
         </div>
       </div>
@@ -3149,15 +3070,15 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
-      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 I Gave = We Owe Them, 🟢 I Got = They Owe Us.</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 Udhaar = We Owe Them, 🟢 Qarz = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 Total I Gave</div>
+          <div class="diaryTotalLabel">🔴 Total Udhaar</div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
         <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 Total I Got</div>
+          <div class="diaryTotalLabel">🟢 Total Qarz</div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
@@ -3844,18 +3765,6 @@
           </label>
         </div>
 
-        <!-- --- 🔒 Minimum Sale Price Lock — آن ہو تو کوئی بھی (ملازم سمیت) بل بناتے وقت کسی variant کی مقرر کردہ
-             کم از کم قیمت (Min Price) سے کم پر بیچ نہیں سکے گا۔ یہ سیٹنگ صرف Admin/Owner کو ہی نظر آتی ہے
-             (Settings صفحہ admin-only ہے)، اس لیے ملازم اسے خود بند نہیں کر سکتے --- -->
-        <div class="settingsCard" style="background:#fff1f2; border:1px solid #fecdd3;">
-          <h3>🔒 Minimum Sale Price Lock</h3>
-          <div class="settingsHint">When ON, nobody — including your staff — can sell any item below the "Min Price" you set for it (in Products & Variants or Stock Adjustment). If they try to lower the rate on a bill, it will be blocked with a warning. Leave a variant's Min Price at 0 to leave it unrestricted.</div>
-          <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
-            <input type="checkbox" id="enforceMinPriceChk" onchange="toggleEnforceMinPrice(this.checked)" style="width:18px; height:18px; margin:0;">
-            Enforce Minimum Sale Price on all bills
-          </label>
-        </div>
-
         <!-- --- 💾 بیک اپ — اب Google Drive والے دونوں بٹن مرکزی/نمایاں ہیں (زیادہ تر لوگوں کے لیے یہی کافی ہے)،
              Local Export/Import کو ایک چھوٹے "Advanced" آپشن میں سمیٹ دیا ہے تاکہ سکرین صاف رہے مگر بغیر
              انٹرنیٹ/Google اکاؤنٹ کے سہارے کی صورت میں وہ سہولت موجود رہے --- -->
@@ -4104,14 +4013,6 @@
       <button onclick="openDiarySummaryReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📔 My Diary Summary</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
-      </button>
-      <button onclick="openCustomerBalanceReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
-        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📥 Customer Balance Report</div>
-        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">How much money each customer owes us, with grand total</div>
-      </button>
-      <button onclick="openSupplierBalanceReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
-        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📤 Supplier Balance Report</div>
-        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">How much money we owe each supplier, with grand total</div>
       </button>
     </div>
   </div>
@@ -5078,7 +4979,6 @@ const DEFAULT_SETTINGS = {
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
   taxEnabled: false,
   trackInventory: false, // ---------- ڈیفالٹ آف — سٹاک ختم ہونے پر بھی بل بنتا رہے، مائنس میں جائے (موجودہ رویہ) ----------
-  enforceMinPrice: false, // ---------- 🔒 Minimum Sale Price Lock — ڈیفالٹ آف؛ آن ہونے پر ہر variant کی مقرر کردہ Min Price سے کم پر بل نہیں بنے گا ----------
   taxPercent: 0,
   invoiceStyle: 'thermal', // 'thermal' | 'a4' — تھرمل رسید یا رنگین A4 بزنس انوائس
   // ---------- دکان کی اپنی معلومات — بل کے اوپر نظر آئیں گی (خالی ہوں تو "AIO POS" ڈیفالٹ کے طور پر آئے گا) ----------
@@ -5196,15 +5096,6 @@ if(AppState.settings.packagePlansMigratedV2 !== true){
   AppState.settings.subscriptionPlans = DEFAULT_SETTINGS.subscriptionPlans.map(p => ({...p}));
   AppState.settings.perDayRate = DEFAULT_SETTINGS.perDayRate;
   AppState.settings.packagePlansMigratedV2 = true;
-  saveToStorage('settings', AppState.settings);
-}
-
-// ---------- 🩹 ون-ٹائم مائیگریشن — Invoice Style اور invoicePrintStyle پرانے ورژن میں الگ الگ ہو سکتے تھے
-// (ایک ہی چیز کے لیے دو غیر جڑی سیٹنگز)۔ اب یہ ہمیشہ ایک ساتھ رہیں گی — اگر پرانا ڈیٹا الگ الگ ملا
-// تو invoicePrintStyle (جو اصل پرنٹنگ پر لاگو ہوتا تھا) کو معیار مان کر دونوں کو اس پر برابر کر دیں ----------
-if(AppState.settings.invoiceStyleLinkedV1 !== true){
-  AppState.settings.invoiceStyle = AppState.settings.invoicePrintStyle;
-  AppState.settings.invoiceStyleLinkedV1 = true;
   saveToStorage('settings', AppState.settings);
 }
 
@@ -7417,7 +7308,6 @@ function updateCartRate(variantId, newRate){
   if(!item) return;
   const rate = parseFloat(newRate);
   if(isNaN(rate) || rate < 0) return;
-  if(!checkMinSalePrice(variantId, rate)){ renderCart(); return; } // ---------- 🔒 Min Sale Price Lock آن ہو اور ریٹ حد سے کم ہو تو مسترد ----------
   item.unitPrice = rate;
   renderCart();
 }
@@ -7824,10 +7714,7 @@ function updateReviewQty(idx, qty){
 }
 function updateReviewRate(idx, rate){
   const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
-  const item = p.items[idx];
-  const safeRate = Math.max(0, rate);
-  if(item.variant_id && !checkMinSalePrice(item.variant_id, safeRate)){ renderPendingReview(); return; }
-  item.unitPrice = safeRate;
+  p.items[idx].unitPrice = Math.max(0, rate);
   renderPendingReview();
 }
 function removeReviewItem(idx){
@@ -8521,23 +8408,14 @@ function renderProductList(query = ''){
 
   renderCategoryRail();
 
-  // ---------- کمپیکٹ سمری: کتنے main پراڈکٹس ہیں اور ان کے کل variants (sellable lines) کتنے ----------
-  const summaryBar = document.getElementById('productsSummaryBar');
-  if(summaryBar){
-    const totalMain = filtered.length;
-    const totalVariants = filtered.reduce((sum, p) => sum + p.variants.length, 0);
-    summaryBar.innerHTML = `<span>📦 Total Products: <b>${totalMain}</b></span><span class="psDivider">•</span><span>🔀 With Variants (Total Items): <b>${totalVariants}</b></span>`;
-  }
-
   if(filtered.length === 0){
     wrap.innerHTML = `<div class="placeholder">No product found</div>`;
     return;
   }
 
-  wrap.innerHTML = filtered.map((p, idx) => `
+  wrap.innerHTML = filtered.map(p => `
     <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
       <div class="productHead" onclick="toggleProductCard(${p.product_id})">
-        <div class="pSerial">${idx + 1}</div>
         <div>
           <div class="pName">${p.name}</div>
           <div class="pMeta">${p.category || 'No category'}</div>
@@ -8553,7 +8431,7 @@ function renderProductList(query = ''){
         <table class="variantTable">
           <thead>
             <tr>
-              <th>Photo</th><th>Variant</th><th>Barcode</th><th>Purchase</th><th>Retail</th><th>Wholesale</th><th>🔒 Min Price</th><th>Stock</th><th>Low Stock Limit</th><th>Expiry Date</th><th>Location</th><th></th>
+              <th>Photo</th><th>Variant</th><th>Barcode</th><th>Purchase</th><th>Retail</th><th>Wholesale</th><th>Stock</th><th>Low Stock Limit</th><th>Expiry Date</th><th>Location</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -8588,7 +8466,6 @@ function renderVariantRow(productId, v){
       <td><input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)"></td>
       <td><input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)"></td>
       <td><input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></td>
-      <td><input type="number" value="${v.minPrice ?? 0}" title="Lowest rate this item can be sold at when 🔒 Minimum Sale Price Lock is ON (0 = no limit)" style="border-color:#fda4af;" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'minPrice',this.value)"></td>
       <td id="stockCell-${v.variant_id}">
         <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
         <div class="lowStockTag" id="lowStockTag-${v.variant_id}" style="display:${isLow && !isNegative ? 'block' : 'none'};">⚠️ Low Stock</div>
@@ -8770,6 +8647,42 @@ async function triggerImageUpload(productId, variantId){
 }
 
 // ---------- کسٹمر/سپلائر کی پروفائل تصویر — وہی مکمل کیمرہ ماڈیول (لائیو کیمرہ + پنچ زوم + گول/مستطیل کراپ) دوبارہ استعمال ----------
+// ---------- فون نمبر کو WhatsApp/wa.me کے لیے درست بین الاقوامی شکل میں بدلیں —
+// مقامی نمبر (0320...) میں شروع کا 0 ہٹا کر ملکی کوڈ 92 لگا دیں۔ اگر پہلے سے 92 یا + لگا ہو تو نہ چھیڑیں۔
+// یہی وہ خلا تھا جس کی وجہ سے "+0..." جیسا غلط نمبر بن کر WhatsApp میں "Invalid phone number" آ رہا تھا ----------
+function formatPhoneForWhatsApp(phone){
+  let digits = String(phone || '').replace(/[^0-9]/g, '');
+  if(!digits) return '';
+  if(digits.startsWith('0')) digits = '92' + digits.slice(1);
+  else if(digits.length === 10 && !digits.startsWith('92')) digits = '92' + digits; // 0 کے بغیر 10 ہندسے دیے گئے ہوں
+  return digits;
+}
+
+// ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
+async function pickContactForNewParty(){
+  if(!('contacts' in navigator && 'ContactsManager' in window)){
+    alert('یہ فون/براؤزر فون بک تک رسائی سپورٹ نہیں کرتا — نام اور نمبر خود لکھ دیں۔');
+    return;
+  }
+  try{
+    const props = ['name', 'tel'];
+    const contacts = await navigator.contacts.select(props, {multiple: false});
+    if(!contacts || contacts.length === 0) return;
+    const c = contacts[0];
+    if(c.name && c.name.length) document.getElementById('npPartyName').value = c.name[0];
+    if(c.tel && c.tel.length){
+      const rawTel = c.tel[0].replace(/[^0-9]/g, '');
+      // ---------- اگر نمبر +92 کے ساتھ آیا ہو تو مقامی 0 والی شکل میں دکھائیں (باقی ایپ اسی فارمیٹ میں محفوظ کرتی ہے) ----------
+      const localTel = rawTel.startsWith('92') ? '0' + rawTel.slice(2) : rawTel;
+      document.getElementById('npPartyPhone').value = localTel;
+    }
+    filterPartyNameOptions();
+    filterPartyPhoneOptions();
+  }catch(err){
+    // یوزر نے پکر کینسل کر دیا — کوئی ایکشن درکار نہیں
+  }
+}
+
 async function triggerPartyPhotoUpload(){
   await startPhotoCapture('party', 'circle', '📷 Profile Photo');
 }
@@ -9342,7 +9255,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   const variant = product?.variants.find(v => v.variant_id === variantId);
   if(!variant) return;
 
-  const numericFields = ['purchase','retail','wholesale','stock','lowStockAt','minPrice'];
+  const numericFields = ['purchase','retail','wholesale','stock','lowStockAt'];
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
@@ -9393,7 +9306,7 @@ function addVariantRow(productId){
 
   product.variants.push({
     variant_id: nextVariantId++,
-    label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, minPrice:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
+    label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
   });
 
   openProductCards.add(productId);
@@ -9889,7 +9802,7 @@ function renderMyDiaryList(){
   wrap.innerHTML = filtered.map(e => {
     const isOwe = e.balance < 0;
     const cls = isOwe ? 'owe' : 'get';
-    const label = isOwe ? 'I Gave' : (e.balance > 0 ? 'I Got' : 'Settled');
+    const label = isOwe ? 'Udhaar' : (e.balance > 0 ? 'Qarz' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
@@ -10050,10 +9963,10 @@ function renderDiaryDetailBalance(entry){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
   } else if(entry.balance < 0){
-    el.textContent = '🔴 I Gave: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🔴 Udhaar: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--danger)';
   } else {
-    el.textContent = '🟢 I Got: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 Qarz: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   }
 }
@@ -10708,8 +10621,6 @@ function renderStockAdjustmentScreen(){
   if(!wrap) return;
   const trackChk = document.getElementById('stockAdjTrackInventoryChk');
   if(trackChk) trackChk.checked = !!AppState.settings.trackInventory;
-  const minPriceChk = document.getElementById('stockAdjEnforceMinPriceChk');
-  if(minPriceChk) minPriceChk.checked = !!AppState.settings.enforceMinPrice;
   const query = (document.getElementById('stockAdjSearchInput')?.value || '').trim().toLowerCase();
   const catFilter = document.getElementById('stockAdjCategoryFilter')?.value || 'all';
   const sortMode = document.getElementById('stockAdjSortFilter')?.value || 'negFirst';
@@ -10728,14 +10639,6 @@ function renderStockAdjustmentScreen(){
     list = list.filter(item => ((item.product.category && item.product.category.trim()) ? item.product.category.trim() : 'Uncategorized') === catFilter);
   }
 
-  // ---------- سٹاک ویلیو: خریداری کے حساب سے اور فروخت کے حساب سے (موجودہ فلٹر شدہ فہرست کے مطابق) ----------
-  const purchaseValue = list.reduce((sum, item) => sum + (item.variant.stock * (item.variant.purchase || 0)), 0);
-  const saleValue = list.reduce((sum, item) => sum + (item.variant.stock * (item.variant.retail || 0)), 0);
-  const svPurchaseEl = document.getElementById('stockValuePurchase');
-  const svSaleEl = document.getElementById('stockValueSale');
-  if(svPurchaseEl) svPurchaseEl.textContent = `Rs. ${Math.round(purchaseValue).toLocaleString()}`;
-  if(svSaleEl) svSaleEl.textContent = `Rs. ${Math.round(saleValue).toLocaleString()}`;
-
   // ---------- منتخب ترتیب کے مطابق فہرست سجائیں ----------
   if(sortMode === 'az') list.sort((a,b) => a.displayName.localeCompare(b.displayName));
   else if(sortMode === 'za') list.sort((a,b) => b.displayName.localeCompare(a.displayName));
@@ -10752,16 +10655,12 @@ function renderStockAdjustmentScreen(){
     return;
   }
 
-  wrap.innerHTML = list.map((item, idx) => {
+  wrap.innerHTML = list.map(item => {
     const v = item.variant;
     const isNegative = v.stock < 0;
-    // ---------- Unit/Variant کالم علیحدہ — پراڈکٹ کے نام کے ساتھ نہیں ملایا جائے گا ----------
-    const unitLabel = (v.label && v.label !== item.product.name) ? v.label : '—';
     return `
       <div class="stockAdjRow ${isNegative ? 'negativeRow' : ''}">
-        <div class="stockAdjSerial">${idx + 1}</div>
-        <div class="stockAdjName">${item.product.name.replace(/</g,'&lt;')}</div>
-        <div class="stockAdjVariant">${unitLabel.replace(/</g,'&lt;')}</div>
+        <div class="stockAdjName">${item.displayName.replace(/</g,'&lt;')}</div>
         <input type="number" class="stockAdjInput" value="${v.stock}" onchange="updateStockAdjField(${v.variant_id}, 'stock', this.value)" onfocus="this.select()">
         <input type="number" class="stockAdjInput" value="${v.retail}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()">
         <input type="number" class="stockAdjInput" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()">
@@ -10775,19 +10674,6 @@ function findVariantById(variantId){
     if(v) return v;
   }
   return null;
-}
-
-// ---------- 🔒 Minimum Sale Price Lock — سیٹنگ آن ہو تو کوئی بھی (ملازم سمیت) اس ویریئنٹ کے لیے مقرر کردہ کم از کم ریٹ سے کم پر بل نہیں بنا سکے گا۔
-// یہ صرف اُس وقت لاگو ہوتا ہے جب Settings میں یہ لاک آن ہو اور اس مخصوص variant پر Min Price 0 سے زیادہ سیٹ ہو (ورنہ کوئی پابندی نہیں) ----------
-function checkMinSalePrice(variantId, rate){
-  if(!AppState.settings.enforceMinPrice) return true;
-  const v = findVariantById(variantId);
-  const minP = v ? (parseFloat(v.minPrice) || 0) : 0;
-  if(minP > 0 && rate < minP){
-    alert(`🔒 Minimum Sale Price Lock is ON.\nThis item can't be sold below Rs. ${minP}.\n(Owner can change this limit from Products & Variants.)`);
-    return false;
-  }
-  return true;
 }
 
 function updateStockAdjField(variantId, field, rawValue){
@@ -10857,56 +10743,14 @@ function openBulkReminderCenter(){
   document.getElementById('bulkReminderModal').classList.add('show');
 }
 
-// ---------- Supplier Report — تمام سپلائرز جن کو ادائیگی باقی ہے، ایک جگہ (رقم کے حساب سے ترتیب) + گرینڈ ٹوٹل ----------
-function openSupplierPayableReport(){
-  const owingSuppliers = suppliersData.filter(s => s.total_payable > 0)
-    .sort((a,b) => b.total_payable - a.total_payable);
-
-  const totalOwed = owingSuppliers.reduce((sum,s) => sum + s.total_payable, 0);
-  document.getElementById('supplierPayableReportMeta').textContent = `${owingSuppliers.length} supplier(s) • Rs. ${totalOwed.toLocaleString()} total payable`;
-
-  const wrap = document.getElementById('supplierPayableReportList');
-  if(owingSuppliers.length === 0){
-    wrap.innerHTML = `<div class="profileEmpty">No pending payments to suppliers right now 🎉</div>`;
-  } else {
-    wrap.innerHTML = owingSuppliers.map(s => `
-      <div class="profileListRow" style="flex-direction:column; align-items:stretch; gap:8px; cursor:default;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div><div class="plMain">${s.name}</div><div class="plMeta">${s.phone || 'No phone saved'}</div></div>
-          <div class="plAmount" style="color:var(--warning);">Rs. ${s.total_payable.toLocaleString()}</div>
-        </div>
-        <button class="btnReceiveShipment" style="width:100%;" onclick="document.getElementById('supplierPayableReportModal').classList.remove('show'); openPaySupplierModal(${s.supplier_id});">💵 Pay Now</button>
-      </div>
-    `).join('');
-  }
-
-  document.getElementById('supplierPayableReportModal').classList.add('show');
-}
-
 // ---------- Customers/Suppliers اب الگ الگ صفحات ہیں — یہ فنکشن نیویگیشن کے وقت صحیح موڈ سیٹ کرتا ہے (goTo کے ذریعے کال ہوتا ہے) ----------
 function enterPartyPage(tab){
   currentPartyTab = tab;
-  document.getElementById('partyPageTitleText').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
+  document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
   document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers by name or phone...' : '🔍 Search suppliers by name or phone...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
-  document.getElementById('supplierReportBtn').style.display = tab === 'suppliers' ? 'block' : 'none';
   renderPartyList();
-}
-
-// ---------- صفحے کے عنوان کے ساتھ کل رقم کا بیج — کسٹمرز میں کل وصولی، سپلائرز میں کل ادائیگی ----------
-function updatePartyPageTotalBadge(){
-  const badge = document.getElementById('partyPageTotalBadge');
-  if(!badge) return;
-  if(currentPartyTab === 'customers'){
-    const total = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
-    badge.className = 'partyPageTotalBadge receivable' + (total > 0 ? ' show' : '');
-    badge.textContent = `📥 To Collect: Rs. ${total.toLocaleString()}`;
-  } else {
-    const total = suppliersData.reduce((sum, s) => sum + (s.total_payable || 0), 0);
-    badge.className = 'partyPageTotalBadge payable' + (total > 0 ? ' show' : '');
-    badge.textContent = `📤 To Pay: Rs. ${total.toLocaleString()}`;
-  }
 }
 
 // ---------- Render List (Customers یا Suppliers، tab کے مطابق) ----------
@@ -10918,7 +10762,7 @@ function buildQuickContactIcons(phone, name, dueAmount, dueType){
       <span class="prIconBtn cDisabled">💬</span>
       <span class="prIconBtn cDisabled">✉️</span>`;
   }
-  const digits = phone.replace(/[^0-9]/g, '');
+  const digits = formatPhoneForWhatsApp(phone);
   let msg = `Hello ${name}, this is a message from AIO POS.`;
   if(dueAmount > 0){
     msg = dueType === 'receivable'
@@ -10959,7 +10803,6 @@ function partyMatchesQuery(party, rawQuery){
 
 function renderPartyList(query = ''){
   const wrap = document.getElementById('partyListWrap');
-  updatePartyPageTotalBadge();
 
   if(currentPartyTab === 'customers'){
     const filtered = customersData.filter(c => partyMatchesQuery(c, query));
@@ -11063,10 +10906,11 @@ function renderAvatarInto(elId, photo, emoji){
 // ---------- کسٹمر پروفائل ----------
 // ---------- فون نمبر سے Call/WhatsApp/SMS بٹن بنائیں (کسٹمر اور سپلائر دونوں پروفائل استعمال کرتے ہیں) ----------
 function buildContactButtons(phone, email){
+  const waDigits = phone ? formatPhoneForWhatsApp(phone) : '';
   const phoneHtml = phone ? `
-    <a class="cCall" href="tel:+${phone.replace(/[^0-9]/g,'')}" title="Call">📞</a>
-    <a class="cWhatsapp" href="https://wa.me/${phone.replace(/[^0-9]/g,'')}" target="_blank" rel="noopener" title="WhatsApp">💬</a>
-    <a class="cSms" href="sms:+${phone.replace(/[^0-9]/g,'')}" title="SMS">✉️</a>
+    <a class="cCall" href="tel:+${waDigits}" title="Call">📞</a>
+    <a class="cWhatsapp" href="https://wa.me/${waDigits}" target="_blank" rel="noopener" title="WhatsApp">💬</a>
+    <a class="cSms" href="sms:+${waDigits}" title="SMS">✉️</a>
   ` : `
     <span class="cCall cDisabled">📞</span>
     <span class="cWhatsapp cDisabled">💬</span>
@@ -11126,20 +10970,6 @@ function getInvoiceAmountDue(inv){
   return (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
 }
 
-// ---------- کسٹمر کا total_receivable کبھی کبھار اصل بلوں سے مطابقت نہیں رکھتا (پرانے ڈیٹا/بگ کی وجہ سے) —
-// اصل بلوں (غیر voided) کے amount_due کا مجموعہ نکال کر خاموشی سے درست کر دیں ----------
-function recalcCustomerReceivable(customerId){
-  const c = customersData.find(x => x.customer_id === customerId);
-  if(!c) return;
-  const computed = invoicesData
-    .filter(inv => inv.customer_id === customerId && inv.status !== 'voided')
-    .reduce((sum, inv) => sum + getInvoiceAmountDue(inv), 0);
-  if(computed !== (c.total_receivable || 0)){
-    c.total_receivable = Math.max(0, computed);
-    persistAllData();
-  }
-}
-
 let profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
 let profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
 
@@ -11186,10 +11016,6 @@ function openCustomerProfile(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
 
-  // ---------- بقایہ کا خودکار خودمختار حساب — کبھی کبھار (پرانے بگز، رد شدہ بل وغیرہ کی وجہ سے) total_receivable اصل بلوں سے مطابقت نہیں رکھتا،
-  // یہاں ہر بار پروفائل کھلنے پر خاموشی سے درست کر دیں تاکہ "Rs. 0" غلطی سے کبھی نظر نہ آئے ----------
-  recalcCustomerReceivable(customerId);
-
   currentProfileId = c.customer_id;
   currentProfileType = 'customers';
   profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' }; // ---------- ہر بار نیا پروفائل کھلنے پر فلٹر ری سیٹ ----------
@@ -11201,32 +11027,24 @@ function openCustomerProfile(customerId){
   renderAvatarInto('profileAvatar', c.photo, '👤');
   document.getElementById('profileName').textContent = c.name;
   document.getElementById('profileMeta').innerHTML = c.phone
-    ? `<a href="tel:+${c.phone.replace(/[^0-9]/g,'')}">📱 ${c.phone}</a>` : 'No phone number saved';
+    ? `<a href="tel:+${formatPhoneForWhatsApp(c.phone)}">📱 ${c.phone}</a>` : 'No phone number saved';
   document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(c.phone);
   document.getElementById('profileEmailRow').style.display = 'none'; // یہ خانہ فی الحال صرف سپلائر پروفائل کے لیے ہے
   renderProfileNicknameTag(c.keywords);
 
-  // --- مالی خلاصہ: اب صرف Wallet Balance باڈی میں — بقایہ رقم ہیڈر میں نام کے ساتھ چمکتی چِپ ہے (نیچے) تاکہ بلوں کے لیے زیادہ جگہ ملے ---
+  // --- مالی خلاصہ: والٹ + واجب الوصول ایک نظر میں (کمپیکٹ — پرانی رابطہ پٹی کی جگہ یہیں آ گئی) ---
   const figuresEl = document.getElementById('profileFigures');
-  figuresEl.className = 'profileFigures single';
-  figuresEl.style.display = '';
+  figuresEl.className = 'profileFigures';
   figuresEl.innerHTML = `
     <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div>
+    <div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
-
-  // ---------- 📥 بقایہ کی رقم + 📢 Remind بٹن — ہیڈر میں نام کے ساتھ خالی جگہ پر، چمکتی ہوئی چِپ کے طور پر ----------
-  const receivableBadgeEl = document.getElementById('profileReceivableBadge');
-  receivableBadgeEl.classList.toggle('show', c.total_receivable > 0);
-  receivableBadgeEl.innerHTML = c.total_receivable > 0
-    ? `<span class="pfHeaderAmount" onclick="closeProfileModal(); openCollectModal(${c.customer_id});">Rs. ${c.total_receivable.toLocaleString()}</span>
-       <button class="pfHeaderRemindBtn" onclick="event.stopPropagation(); openCustomerReminderModal(${c.customer_id});">📢 Remind</button>`
-    : '';
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
   const sideEl = document.getElementById('profileQuickActions');
   sideEl.innerHTML = `
     <button style="background:linear-gradient(155deg,#0f766e,#0b4a45);" onclick="startNewBillForCustomer(${c.customer_id})"><span class="sideIcon">🧾</span><span class="sideLabel">New Bill</span></button>
-    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">Payment</span></button>
+    <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="closeProfileModal(); openCollectModal(${c.customer_id});"><span class="sideIcon">📥</span><span class="sideLabel">Collect</span></button>
     <button style="background:linear-gradient(155deg,#22c55e,#15803d);" onclick="closeProfileModal(); openWalletModal(${c.customer_id});"><span class="sideIcon">➕</span><span class="sideLabel">Wallet</span></button>
     <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${c.customer_id});"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
@@ -11266,9 +11084,7 @@ function renderCustomerBillsSection(customerId){
   // ---------- اسٹیٹس فلٹر: Pending = ابھی رقم باقی ہے یا منظوری کا انتظار ہے، Cleared = مکمل ادا شدہ ----------
   if(profileBillFilter.status !== 'all'){
     allBills = allBills.filter(row => {
-      const isPending = row.kind === 'pending'
-        ? row.p.status === 'pending' // ---------- Rejected submission کبھی بل ہی نہیں بنی، اسے Pending شمار نہ کریں ----------
-        : (row.inv.status !== 'voided' && getInvoiceAmountDue(row.inv) > 0); // ---------- Voided بل کا بقایہ پہلے ہی واپس ہو چکا، اسے Pending شمار نہ کریں ----------
+      const isPending = row.kind === 'pending' || getInvoiceAmountDue(row.inv) > 0;
       return profileBillFilter.status === 'pending' ? isPending : !isPending;
     });
   }
@@ -11281,18 +11097,14 @@ function renderCustomerBillsSection(customerId){
     : allBills.map(row => {
         if(row.kind === 'invoice'){
           const inv = row.inv;
-          const isPending = inv.status !== 'voided' && getInvoiceAmountDue(inv) > 0;
+          const isPending = getInvoiceAmountDue(inv) > 0;
           const itemsDesc = inv.items.slice(0,2).map(i => i.name).join(', ') + (inv.items.length > 2 ? ` +${inv.items.length-2} more` : '');
           const statusTag = inv.status === 'voided' ? ' · VOIDED' : inv.status === 'edited' ? ' · EDITED' : '';
-          const deleteBtnHtml = inv.status === 'voided'
-            ? `<button class="btnRequestDelete" style="margin-top:6px;" onclick="event.stopPropagation(); permanentlyDeleteBillFromProfile(${inv.invoice_id}, ${customerId});">🗑️ Permanently Delete</button>`
-            : '';
           return `
             <div class="billRow ${isPending?'pending':''}" onclick="closeProfileModal(); openInvoicePreview(${inv.invoice_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}${statusTag}</div>
                 <div class="brDesc">${itemsDesc}</div>
-                ${deleteBtnHtml}
               </div>
               <div class="brAmount">Rs. ${inv.grand_total.toLocaleString()}</div>
             </div>`;
@@ -11301,14 +11113,11 @@ function renderCustomerBillsSection(customerId){
           const total = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
           const itemsDesc = p.items.slice(0,2).map(i => i.name).join(', ') + (p.items.length > 2 ? ` +${p.items.length-2} more` : '');
           const tag = p.status === 'pending' ? 'Awaiting approval' : 'Rejected';
-          // ---------- منظوری کے منتظر یا رد شدہ بل کو براہ راست پروفائل سے ڈیلیٹ کرنے کا بٹن — پہلے یہ کہیں موجود نہیں تھا،
-          // اسی لیے صارف کے لیے ایسے بل کبھی ختم نہیں ہو رہے تھے ----------
           return `
             <div class="billRow pending" onclick="closeProfileModal(); openPendingReview(${p.pending_id});">
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(p.submitted_at).toLocaleDateString('en-GB')} · ${tag} · via ${p.salesman_name}</div>
                 <div class="brDesc">${itemsDesc}</div>
-                <button class="btnRequestDelete" style="margin-top:6px;" onclick="event.stopPropagation(); deletePendingBillFromProfile(${p.pending_id}, ${customerId});">🗑️ Delete This Bill</button>
               </div>
               <div class="brAmount">Rs. ${total.toLocaleString()}</div>
             </div>`;
@@ -11492,24 +11301,10 @@ function openCustomerReminderModal(customerId){
 
 This is a reminder that you have a pending balance of Rs. ${c.total_receivable.toLocaleString()} with us.${billsListText}
 
-Kindly clear this at your earliest convenience.${getPaymentAccountsText()}
+Kindly clear this at your earliest convenience.
 
-Please send us a screenshot of the payment once done. Thank you!
-
-${AppState.currentUser?.name || 'Admin'}`;
-
-  // ---------- اکاؤنٹ کا QR کوڈ بھی یہیں دکھائیں — ایڈمن اسکرین شاٹ لے کر واٹس ایپ میسج کے ساتھ الگ سے بھیج سکے
-  // (واٹس ایپ لنک صرف ٹیکسٹ لے جاتا ہے، تصویر نہیں — اس لیے QR یہاں الگ نظر آنا ضروری ہے) ----------
-  const qrWrap = document.getElementById('customerReminderQrWrap');
-  const accWithQr = (AppState.settings.paymentAccounts || []).find(a => a.showOnReceipt && a.qr) ||
-                     (AppState.settings.paymentAccounts || []).find(a => a.qr);
-  qrWrap.innerHTML = accWithQr
-    ? `<div class="pfQrWrap">
-         <img src="${accWithQr.qr}" alt="Payment QR">
-         <div class="pfQrAcc">${accWithQr.type}: ${accWithQr.number}${accWithQr.name ? ' (' + accWithQr.name + ')' : ''}</div>
-         <div class="pfQrHint">📸 Screenshot this QR and send it along with the WhatsApp message below</div>
-       </div>`
-    : '';
+Thank you,
+${AppState.currentUser?.name || 'Admin'}${getPaymentAccountsText()}`;
 
   document.getElementById('customerReminderModal').classList.add('show');
 }
@@ -11521,7 +11316,7 @@ function sendCustomerReminderWhatsapp(){
     alert("This customer's phone number isn't saved.");
     return;
   }
-  window.open(`https://wa.me/${c.phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${formatPhoneForWhatsApp(c.phone)}?text=${encodeURIComponent(text)}`, '_blank');
   document.getElementById('customerReminderModal').classList.remove('show');
 }
 
@@ -11540,7 +11335,7 @@ function openSupplierProfile(supplierId){
   renderAvatarInto('profileAvatar', s.photo, '🏭');
   document.getElementById('profileName').textContent = s.name;
   document.getElementById('profileMeta').innerHTML = s.phone
-    ? `<a href="tel:+${s.phone.replace(/[^0-9]/g,'')}">📱 ${s.phone}</a>` : 'No phone number saved';
+    ? `<a href="tel:+${formatPhoneForWhatsApp(s.phone)}">📱 ${s.phone}</a>` : 'No phone number saved';
   document.getElementById('profileHeadContacts').innerHTML = buildContactButtons(s.phone, s.email);
   renderProfileNicknameTag(s.keywords);
 
@@ -11555,15 +11350,9 @@ function openSupplierProfile(supplierId){
 
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures single';
-  figuresEl.style.display = 'none';
-  figuresEl.innerHTML = '';
-
-  // ---------- 📤 ہم نے سپلائر کو جتنے پیسے دینے ہیں — ہیڈر میں نام کے ساتھ چمکتی چِپ، دبانے پر سیدھا Pay Supplier کھلے ----------
-  const receivableBadgeEl = document.getElementById('profileReceivableBadge');
-  receivableBadgeEl.classList.toggle('show', s.total_payable > 0);
-  receivableBadgeEl.innerHTML = s.total_payable > 0
-    ? `<span class="pfHeaderAmount" onclick="openPaySupplierModal(${s.supplier_id});">Rs. ${s.total_payable.toLocaleString()}</span>`
-    : '';
+  figuresEl.innerHTML = `
+    <div class="pfBox"><div class="pfLabel">📤 Payable (we owe)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
+  `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
@@ -12766,9 +12555,7 @@ function updateAdvItemQty(idx, qty){
 function updateAdvItemPrice(idx, price){
   const item = advOrderCart[idx];
   if(!item) return;
-  const safePrice = Math.max(0, price);
-  if(item.variant_id && !checkMinSalePrice(item.variant_id, safePrice)){ renderAdvOrderCart(); updateAdvOrderFloatingCartBar(); return; }
-  item.unitPrice = safePrice;
+  item.unitPrice = Math.max(0, price);
   renderAdvOrderCart();
   updateAdvOrderFloatingCartBar();
 }
@@ -13320,7 +13107,7 @@ function shareAdvOrderWhatsapp(){
     alert("This customer's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
     return;
   }
-  const digits = order.customerPhone.replace(/[^0-9]/g, '');
+  const digits = formatPhoneForWhatsApp(order.customerPhone);
   const text = `Advance Order #${order.id} — ${order.customerName} — Approx. Total: Rs. ${advOrderTotal(order).toLocaleString()} (approximate pricing, subject to change at delivery)`;
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
 }
@@ -13695,7 +13482,7 @@ function sharePoWhatsapp(){
     alert("This supplier's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
     return;
   }
-  const digits = s.phone.replace(/[^0-9]/g, '');
+  const digits = formatPhoneForWhatsApp(s.phone);
   const text = `${po.status === 'received' ? 'Goods Received' : 'Purchase Order'} — ${s.name} — Total: Rs. ${po.total.toLocaleString()}`;
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
 }
@@ -13829,7 +13616,7 @@ function sendPoReminderWhatsapp(){
     alert("This supplier's phone number isn't saved.");
     return;
   }
-  window.open(`https://wa.me/${s.phone.replace(/[^0-9]/g,'')}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${formatPhoneForWhatsApp(s.phone)}?text=${encodeURIComponent(text)}`, '_blank');
   document.getElementById('poReminderModal').classList.remove('show');
 }
 
@@ -14467,6 +14254,11 @@ function filterPartyPhoneOptions(){
   if(exactMatch){
     warnBox.style.display = 'block';
     warnBox.textContent = `⚠️ This number is already saved for "${exactMatch.name}". Please check before saving.`;
+  } else if(digits.length >= 10 && digits.length !== 11 && digits.startsWith('0')){
+    // ---------- پاکستانی موبائل نمبر عام طور پر 11 ہندسے کا ہوتا ہے (0 کے ساتھ) — اگر ایک ہندسہ کم/زیادہ لگے تو یہیں بتا دیں،
+    // ورنہ یہ WhatsApp کھلتے وقت "Invalid phone number" کی صورت میں بعد میں سامنے آتا ہے ----------
+    warnBox.style.display = 'block';
+    warnBox.textContent = `⚠️ This looks ${digits.length < 11 ? 'short' : 'long'} for a Pakistani mobile number (usually 11 digits, e.g. 03206793793). Please double-check.`;
   } else {
     warnBox.style.display = 'none';
   }
@@ -16048,31 +15840,6 @@ function permanentlyDeleteBill(invoiceId){
   persistAllData();
   renderBillHistory();
 }
-// ---------- کسٹمر پروفائل کے اندر سے Voided بل مستقل ڈیلیٹ کرنے کے بعد پروفائل کی Bills لسٹ ہی دوبارہ بنائیں (Bill History اسکرین پر جانے کی ضرورت نہیں) ----------
-function permanentlyDeleteBillFromProfile(invoiceId, customerId){
-  const inv = invoicesData.find(i => i.invoice_id === invoiceId);
-  if(!inv) return;
-  if(!confirm(`Permanently delete voided bill ${inv.invoice_no}? This cannot be undone.`)) return;
-  invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
-  persistAllData();
-  renderCustomerBillsSection(customerId);
-}
-
-// ---------- منظوری کے منتظر (Awaiting Approval) یا رد شدہ (Rejected) بل کو کسٹمر پروفائل سے ہمیشہ کے لیے حذف کریں —
-// یہ ابھی invoice نہیں بنا، اس لیے اسٹاک/کیش/بقایہ پر کوئی اثر نہیں پڑا، سیدھا لسٹ سے نکال دیں ----------
-function deletePendingBillFromProfile(pendingId, customerId){
-  const p = pendingBillsData.find(x => x.pending_id === pendingId);
-  if(!p) return;
-  if(p.status === 'approved'){
-    alert('This bill was already approved and turned into an invoice — delete it from Bill History instead.');
-    return;
-  }
-  if(!confirm(`Permanently delete this bill (Rs. ${p.items.reduce((s,i)=>s+i.qty*i.unitPrice,0).toLocaleString()})? This cannot be undone.`)) return;
-  pendingBillsData = pendingBillsData.filter(x => x.pending_id !== pendingId);
-  persistAllData();
-  renderPendingBillsBanner();
-  renderCustomerBillsSection(customerId);
-}
 
 function adminVoidBill(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
@@ -16101,7 +15868,6 @@ function adminVoidBill(invoiceId){
   if(customer){
     const amountDue = (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
     if(amountDue > 0) customer.total_receivable -= amountDue;
-    inv.amount_due = 0; // ---------- بل Void ہونے کے بعد یہ اب واجب الوصول شمار نہیں ہونا چاہیے، ورنہ کسٹمر پروفائل میں غلطی سے "Pending" دکھاتا رہے گا ----------
 
     if(inv.wallet_applied > 0){
       customer.wallet_balance += inv.wallet_applied; // والٹ سے کاٹی گئی رقم واپس کر دیں
@@ -17453,7 +17219,7 @@ function shareInvoiceWhatsapp(){
   // ---------- سیدھا اسی محفوظ شدہ نمبر کی WhatsApp چیٹ کھولیں ----------
   // نوٹ: کوئی بھی ویب لنک تصویر خودکار منسلک نہیں کر سکتا (یہ WhatsApp کی اپنی حفاظتی پابندی ہے) —
   // اسی لیے یہاں سے صرف صحیح چیٹ کھلے گی، تصویر خود Print/Share بٹن سے لے کر یہاں بھیجیں۔
-  const digits = inv.customer_phone.replace(/[^0-9]/g, '');
+  const digits = formatPhoneForWhatsApp(inv.customer_phone);
   const text = `${inv.invoice_no} — Grand Total: Rs. ${inv.grand_total.toLocaleString()}`;
   window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
 }
@@ -17694,7 +17460,6 @@ function renderSettingsScreen(){
   document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
 
   document.getElementById('trackInventoryChk').checked = !!AppState.settings.trackInventory;
-  document.getElementById('enforceMinPriceChk').checked = !!AppState.settings.enforceMinPrice;
 
   renderMyPaymentAccounts();
 }
@@ -19372,68 +19137,6 @@ function openDiarySummaryReport(){
   setTimeout(() => renderReportToCanvas(), 100);
 }
 
-// ---------- 📥 Customer Balance Report — جتنے پیسے کسٹمرز سے لینے ہیں، ایک رپورٹ میں (کیٹگری کی ضرورت نہیں) ----------
-function openCustomerBalanceReport(){
-  currentReportType = 'customerbalance';
-  currentReportCategories = [];
-  document.getElementById('reportPreviewTitle').textContent = "📥 Customer Balance Report";
-  const showStockWrap = document.getElementById('rpscShowStockWrap');
-  if(showStockWrap) showStockWrap.style.display = 'none';
-  syncReportStyleControls();
-  document.getElementById('reportPreviewModal').classList.add('show');
-  setTimeout(() => renderReportToCanvas(), 100);
-}
-
-// ---------- 📤 Supplier Balance Report — جتنے پیسے سپلائرز کو دینے ہیں، ایک رپورٹ میں (کیٹگری کی ضرورت نہیں) ----------
-function openSupplierBalanceReport(){
-  currentReportType = 'supplierbalance';
-  currentReportCategories = [];
-  document.getElementById('reportPreviewTitle').textContent = "📤 Supplier Balance Report";
-  const showStockWrap = document.getElementById('rpscShowStockWrap');
-  if(showStockWrap) showStockWrap.style.display = 'none';
-  syncReportStyleControls();
-  document.getElementById('reportPreviewModal').classList.add('show');
-  setTimeout(() => renderReportToCanvas(), 100);
-}
-
-// ---------- تینوں "بیلنس بیسڈ" رپورٹس (Diary/Customer/Supplier) کا ڈیٹا سورس ایک ہی جگہ سے —
-// تاکہ کینوس اور PDF دونوں رینڈررز ایک ہی منطق استعمال کریں اور آپس میں کبھی مطابقت نہ کھوئیں ----------
-function getBalanceReportEntries(){
-  if(currentReportType === 'customerbalance'){
-    const entries = customersData.filter(c => (c.total_receivable || 0) > 0)
-      .map(c => ({name: c.name, balance: c.total_receivable}))
-      .sort((a,b) => b.balance - a.balance);
-    const total = entries.reduce((s,e) => s + e.balance, 0);
-    return {
-      entries, reportLabel: 'Customer Balance Report', countLabel: 'Customers',
-      summaryRows: [{label: 'Total Receivable (To Collect)', amount: total, sign: '+'}]
-    };
-  }
-  if(currentReportType === 'supplierbalance'){
-    const entries = suppliersData.filter(s => (s.total_payable || 0) > 0)
-      .map(s => ({name: s.name, balance: -s.total_payable}))
-      .sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
-    const total = entries.reduce((s,e) => s + Math.abs(e.balance), 0);
-    return {
-      entries, reportLabel: 'Supplier Balance Report', countLabel: 'Suppliers',
-      summaryRows: [{label: 'Total Payable (To Pay)', amount: total, sign: '-'}]
-    };
-  }
-  // default: diarysummary
-  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
-  let totalUdhaar = 0, totalQarz = 0;
-  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
-  const netBalance = totalQarz - totalUdhaar;
-  return {
-    entries, reportLabel: 'My Diary Summary', countLabel: 'People',
-    summaryRows: [
-      {label: 'Total I Gave (We Owe)', amount: totalUdhaar, sign: '-'},
-      {label: 'Total I Got (Owed To Us)', amount: totalQarz, sign: '+'},
-      {label: netBalance >= 0 ? "Net: I Got (We're Owed)" : 'Net: I Gave (We Owe)', amount: Math.abs(netBalance), sign: ''}
-    ]
-  };
-}
-
 // ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
 function syncReportStyleControls(){
   document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 100) + '%';
@@ -19550,14 +19253,8 @@ function toggleReportShowStock(checked){
   renderReportToCanvas();
 }
 function toggleInvoicePaperStyle(checked){
-  const style = checked ? 'a4' : 'thermal';
-  AppState.settings.invoicePrintStyle = style;
-  AppState.settings.invoiceStyle = style; // Invoice Style سے جڑی ہوئی — دونوں ساتھ رہیں
+  AppState.settings.invoicePrintStyle = checked ? 'a4' : 'thermal';
   persistAllData();
-  // Bill & Print Settings سکرین پر موجود Invoice Style بٹن بھی ساتھ اپڈیٹ کریں (اگر وہ سکرین کھلی ہو)
-  document.querySelectorAll('#invoiceStyleGrid button').forEach(b => {
-    b.classList.toggle('active', b.dataset.style === style);
-  });
   const orientRow = document.getElementById('pscOrientRow');
   if(orientRow) orientRow.style.display = checked ? 'flex' : 'none';
   const btRow = document.getElementById('pscBtPrintRow');
@@ -19630,7 +19327,7 @@ async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
-  if(currentReportType === 'diarysummary' || currentReportType === 'customerbalance' || currentReportType === 'supplierbalance'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
+  if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -20529,7 +20226,11 @@ async function renderDiarySummaryReportToCanvas(){
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
   const ctx = canvas.getContext('2d');
 
-  const { entries, reportLabel, countLabel, summaryRows: rawSummaryRows } = getBalanceReportEntries();
+  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+  let totalUdhaar = 0, totalQarz = 0;
+  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
+  const netBalance = totalQarz - totalUdhaar;
+
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
@@ -20563,10 +20264,10 @@ async function renderDiarySummaryReportToCanvas(){
   const bg = hexToRgba(rc.bg, 1), border = rc.border;
 
   // ---------- اونچائی کا اندازہ ----------
-  const summaryRowCount = rawSummaryRows.length;
+  const summaryRows = 3; // Total Udhaar, Total Qarz, Net Balance
   const maxCols = 2; // ابتدائی اندازہ، حتمی نیچے تصدیق ہو جائے گی
   const estRowsPerCol = Math.max(1, Math.ceil(entries.length / maxCols));
-  let estimatedHeight = fsTitle*2 + fsSubtitle*1.5 + fsSmall*3 + (summaryRowCount*summaryLineH) + 40 + colHeaderH + estRowsPerCol*rowH + 60;
+  let estimatedHeight = fsTitle*2 + fsSubtitle*1.5 + fsSmall*3 + (summaryRows*summaryLineH) + 40 + colHeaderH + estRowsPerCol*rowH + 60;
   canvas.width = pxWidth;
   canvas.height = Math.round(estimatedHeight);
   ctx.fillStyle = '#fff';
@@ -20584,15 +20285,19 @@ async function renderDiarySummaryReportToCanvas(){
     if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, y); y += fsSmall+4; }
   }
   ctx.font = `bold ${fsSubtitle}px ${fontFam}`;
-  ctx.fillText(reportLabel, pxWidth/2, y);
+  ctx.fillText('My Diary Summary', pxWidth/2, y);
   y += fsSubtitle + 4;
   ctx.font = `${fsSmall}px ${fontFam}`;
   ctx.textAlign = 'left';
-  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB')}  |  ${countLabel}: ${entries.length}`, tableLeft, y);
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-GB')}  |  People: ${entries.length}`, tableLeft, y);
   y += fsSmall + 8;
 
   // ---------- سمری باکس ----------
-  const sRows = rawSummaryRows.map(r => [r.label, (r.sign ? r.sign + ' ' : '') + fmt(r.amount)]);
+  const sRows = [
+    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
+    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
+  ];
   const sumTop = y;
   ctx.font = `${bold?'bold':''} ${fsSummary}px ${fontFam}`;
   sRows.forEach((row, i) => {
@@ -20616,7 +20321,7 @@ async function renderDiarySummaryReportToCanvas(){
   ctx.font = `bold ${fsSubtitle*0.8}px ${fontFam}`;
   ctx.textAlign = 'left';
   ctx.fillStyle = '#000';
-  ctx.fillText(countLabel, tableLeft, y);
+  ctx.fillText('People', tableLeft, y);
   y += 6;
   const headerBottom = y;
 
@@ -20866,7 +20571,10 @@ function buildDiarySummaryPdf(orientation){
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScale = (AppState.settings.reportRowScale || 100) / 100;
 
-  const { entries, reportLabel, countLabel, summaryRows: rawSummaryRows } = getBalanceReportEntries();
+  const entries = (diaryData || []).filter(e => e.balance !== 0).slice().sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+  let totalUdhaar = 0, totalQarz = 0;
+  entries.forEach(e => { if(e.balance < 0) totalUdhaar += Math.abs(e.balance); else totalQarz += e.balance; });
+  const netBalance = totalQarz - totalUdhaar;
 
   let y = marginMM;
   pdf.setTextColor(tr, tg, tb);
@@ -20877,13 +20585,17 @@ function buildDiarySummaryPdf(orientation){
   if(AppState.settings.businessAddress){ pdf.text(stripUnrenderableForPdf(AppState.settings.businessAddress), pageW/2, y, {align:'center'}); y += 5; }
   if(AppState.settings.businessPhone){ pdf.text(AppState.settings.businessPhone, pageW/2, y, {align:'center'}); y += 5; }
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12);
-  pdf.text(reportLabel, pageW / 2, y + 3, {align:'center'});
+  pdf.text('My Diary Summary', pageW / 2, y + 3, {align:'center'});
   y += 9;
   pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5);
-  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}  |  ${countLabel}: ${entries.length}`, marginMM, y);
+  pdf.text(`Date: ${new Date().toLocaleDateString('en-GB')}  |  People: ${entries.length}`, marginMM, y);
   y += 6;
 
-  const summaryRows = rawSummaryRows.map(r => [r.label, (r.sign ? r.sign + ' ' : '') + fmt(r.amount)]);
+  const summaryRows = [
+    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
+    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
+  ];
   const sumRowH = Math.round(6 * rowScale * 10) / 10;
   const sumFontPt = Math.round(9 * fontScale * 10) / 10;
   pdf.setFontSize(sumFontPt);
@@ -20908,7 +20620,7 @@ function buildDiarySummaryPdf(orientation){
 
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10);
   pdf.setTextColor(tr, tg, tb);
-  pdf.text(countLabel, marginMM, y);
+  pdf.text('People', marginMM, y);
   y += 4;
   const headerBottom = y;
 
@@ -20990,7 +20702,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : (currentReportType === 'diarysummary' || currentReportType === 'customerbalance' || currentReportType === 'supplierbalance') ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -21020,7 +20732,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : (currentReportType === 'diarysummary' || currentReportType === 'customerbalance' || currentReportType === 'supplierbalance') ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
@@ -21171,26 +20883,11 @@ function updatePrintFontScale(pct){
 }
 
 // ---------- انوائس اسٹائل — تھرمل رسید یا رنگین A4 بزنس انوائس ----------
-// نوٹ: یہ سیٹنگ اب invoicePrintStyle کے ساتھ جڑی ہوئی ہے — دونوں ہمیشہ ایک ساتھ اپڈیٹ ہوں گی
-// (A4 ڈیزائن منتخب کریں تو پرنٹ بھی خودبخود A4 ہو جائے، تھرمل ڈیزائن ہو تو پرنٹ بھی تھرمل)
 function setInvoiceStyle(style){
   AppState.settings.invoiceStyle = style;
-  AppState.settings.invoicePrintStyle = style;
-  persistAllData();
   document.querySelectorAll('#invoiceStyleGrid button').forEach(b => {
     b.classList.toggle('active', b.dataset.style === style);
   });
-  // Invoice Preview سکرین پر موجود "Print A4" کنٹرولز بھی ساتھ اپڈیٹ کریں (اگر وہ سکرین کھلی ہو)
-  const pscA4Chk = document.getElementById('pscA4Chk');
-  if(pscA4Chk){
-    pscA4Chk.checked = style === 'a4';
-    const iOrientRow = document.getElementById('pscOrientRow');
-    if(iOrientRow) iOrientRow.style.display = style === 'a4' ? 'flex' : 'none';
-    const iBtRow = document.getElementById('pscBtPrintRow');
-    if(iBtRow) iBtRow.style.display = style === 'a4' ? 'none' : 'flex';
-    const iShareRow = document.getElementById('pscA4ShareRow');
-    if(iShareRow) iShareRow.style.display = style === 'a4' ? 'flex' : 'none';
-  }
 }
 
 // ---------- ٹیکس آن/آف اور فیصد — اختیاری، ڈیفالٹ بند ----------
@@ -21212,19 +20909,6 @@ function toggleTrackInventory(checked){
   if(chkA) chkA.checked = checked;
   if(chkB) chkB.checked = checked;
 }
-
-// ---------- 🔒 Minimum Sale Price Lock آن/آف — یہ صرف Settings صفحے سے (Admin-only) کنٹرول ہوتا ہے،
-// ملازم اسے بلنگ سکرین سے کبھی بند نہیں کر سکتے ----------
-function toggleEnforceMinPrice(checked){
-  AppState.settings.enforceMinPrice = checked;
-  persistAllData();
-  // ---------- Settings اور Stock Adjustment دونوں جگہ یہی ٹوگل نظر آتا ہے — دونوں ہمیشہ ایک ساتھ اپڈیٹ رہیں ----------
-  const chkA = document.getElementById('enforceMinPriceChk');
-  const chkB = document.getElementById('stockAdjEnforceMinPriceChk');
-  if(chkA) chkA.checked = checked;
-  if(chkB) chkB.checked = checked;
-}
-
 
 // ---------- ٹیسٹ پرنٹ بھیجیں — اصل پرنٹ ڈائیلاگ کھلے گا (کسی بھی منسلک/جوڑے گئے پرنٹر پر ٹیسٹ صفحہ جائے گا) ----------
 function testPrint(){
