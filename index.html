@@ -1085,6 +1085,17 @@ document.addEventListener('keydown', function(e){
   .pscToggleBtn{border:none; background:#fff !important; color:var(--muted) !important; font-weight:600 !important; padding:5px 10px !important; border-radius:6px; cursor:pointer;}
   .pscToggleBtn.active{background:var(--primary) !important; color:#fff !important;}
   .invoicePreviewBox canvas{width:100%; display:block;}
+  /* ---------- کمپیکٹ کنٹرول پینل — کینوس/بل کو زیادہ سے زیادہ جگہ دینے کے لیے،
+     اوزار (سٹائل کنٹرولز) کم سے کم جگہ لیں — برش/رنگ کے ڈبے چھوٹے، کینوس بڑا ---------- */
+  .compactPsc{display:flex; flex-direction:column; gap:5px; padding:8px 10px;}
+  .pscCompactRow{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .pscStepperGroup{display:flex; align-items:center; gap:3px; background:#fff; border:1px solid #e2e8f0; border-radius:7px; padding:2px 4px;}
+  .pscStepperGroup button{border:none; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:13px; width:22px; height:22px; border-radius:5px; cursor:pointer; line-height:1; padding:0;}
+  .pscStepperGroup .pscValue{font-size:10.5px; font-weight:700; color:var(--text); min-width:34px; text-align:center;}
+  .pscCompactRow .pscToggleBtn{padding:5px 9px !important; font-size:12px !important;}
+  .pscDropdown{flex:1 1 0; min-width:0; border:1px solid #e2e8f0; background:#fff; color:var(--text); font-weight:700; font-size:11.5px; padding:6px 4px; border-radius:7px;}
+  .pscCheckLabel{display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--text); cursor:pointer; white-space:nowrap;}
+  .pscCheckLabel input{width:15px; height:15px;}
   .previewActions{display:flex; gap:8px; padding:14px 18px;}
   .previewActions button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;}
 
@@ -1695,7 +1706,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO029</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO033</span>
     </div>
   </div>
 
@@ -3602,57 +3613,56 @@ document.addEventListener('keydown', function(e){
           <span style="cursor:pointer;" onclick="closePoPreview()">✖</span>
         </div>
 
-        <div class="previewStyleControls">
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">🔠 Text</span>
-            <span style="font-size:11px; color:var(--muted);">A</span>
-            <input type="range" id="popscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPoZoom('poFontScale', this.value)" style="flex:1;">
-            <span style="font-size:19px; color:var(--muted);">A</span>
-            <span class="pscValue" id="popscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+        <div class="previewStyleControls compactPsc">
+          <div class="pscCompactRow">
+            <div class="pscStepperGroup">
+              <span class="pscLabel">🔠</span>
+              <button onclick="adjustPoZoomStep('poFontScale',-5)">−</button>
+              <span class="pscValue" id="popscFontScaleVal">100%</span>
+              <button onclick="adjustPoZoomStep('poFontScale',5)">+</button>
+            </div>
+            <div class="pscStepperGroup">
+              <span class="pscLabel">↕</span>
+              <button onclick="adjustPoZoomStep('poRowScale',-5)">−</button>
+              <span class="pscValue" id="popscRowScaleVal">100%</span>
+              <button onclick="adjustPoZoomStep('poRowScale',5)">+</button>
+            </div>
+            <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁</button>
+            <div class="pscStepperGroup">
+              <span class="pscLabel">.00</span>
+              <button onclick="adjustPoStyle('poPriceDecimals', -1, 0, 4)">−</button>
+              <span class="pscValue" id="popscDecimalsVal">0</span>
+              <button onclick="adjustPoStyle('poPriceDecimals', 1, 0, 4)">+</button>
+            </div>
           </div>
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">↕ Row</span>
-            <input type="range" id="popscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPoZoom('poRowScale', this.value)" style="flex:1;">
-            <span class="pscValue" id="popscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          <div class="pscCompactRow">
+            <select id="popscAlignSelect" onchange="setPoAlign(this.value)" class="pscDropdown">
+              <option value="left">⬅ Left</option>
+              <option value="center">↔ Center</option>
+              <option value="right">➡ Right</option>
+            </select>
+            <select id="popscVAlignSelect" onchange="setPoVAlign(this.value)" class="pscDropdown" title="Vertical align within row">
+              <option value="top">⬆ Top</option>
+              <option value="middle">↕ Middle</option>
+              <option value="bottom">⬇ Bottom</option>
+            </select>
           </div>
-          <div class="pscRow">
-            <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁 Bold</button>
-            <button id="popscThinBtn" class="pscToggleBtn" onclick="togglePoBold()">Thin</button>
+          <div class="pscCompactRow">
+            <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" class="pscDropdown"></select>
+            <select id="popscThemeSelect" onchange="setReceiptColor(this.value)" class="pscDropdown"></select>
           </div>
-          <div class="pscRow">
-            <button id="popscAlignLeftBtn" class="pscToggleBtn" onclick="setPoAlign('left')">⬅ Left</button>
-            <button id="popscAlignCenterBtn" class="pscToggleBtn" onclick="setPoAlign('center')">↔ Center</button>
-            <button id="popscAlignRightBtn" class="pscToggleBtn" onclick="setPoAlign('right')">➡ Right</button>
-          </div>
-          <div class="pscRow">
-            <span class="pscLabel">.00 Decimals</span>
-            <button onclick="adjustPoStyle('poPriceDecimals', -1, 0, 4)">−</button>
-            <span class="pscValue" id="popscDecimalsVal">0</span>
-            <button onclick="adjustPoStyle('poPriceDecimals', 1, 0, 4)">+</button>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">🅰️ Font</span>
-            <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
-            <span class="pscLabel">🎨 Bill Theme</span>
-            <div id="popscColorSwatches" style="display:flex; gap:8px;"></div>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
-              <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+          <div class="pscCompactRow">
+            <label class="pscCheckLabel">
+              <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)"> 🖨️ Print A4
             </label>
-          </div>
-          <div id="popscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
-            <span class="pscLabel">📐 Page</span>
-            <div style="display:flex; gap:6px; flex:1;">
-              <button type="button" id="popscOrientPortraitBtn" onclick="setPoOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
-              <button type="button" id="popscOrientLandscapeBtn" onclick="setPoOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
+            <div id="popscOrientRow" style="display:none; gap:4px; align-items:center;">
+              <button type="button" id="popscOrientPortraitBtn" onclick="setPoOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+              <button type="button" id="popscOrientLandscapeBtn" onclick="setPoOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
             </div>
           </div>
         </div>
 
-        <div class="invoicePreviewScrollArea">
+        <div class="invoicePreviewScrollArea" style="flex:1 1 auto;">
           <canvas id="poCanvas"></canvas>
         </div>
         <div class="previewActions">
@@ -4707,7 +4717,7 @@ async function backupToGoogleDrive(){
   };
 
   // ---------- پہلی بار اجازت مانگے گا، اگلی بار خاموشی سے (already authorized) ٹوکن مل جائے گا ----------
-  client.requestAccessToken({ prompt: gDriveAccessToken ? '' : 'consent' });
+  client.requestAccessToken({ prompt: '' }); // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔ صرف اسی صورت میں مکمل اجازت سکرین دوبارہ آئے گی جب پرانی اجازت واقعی منسوخ ہو چکی ہو ----------
 }
 
 // ---------- ☁️ Google Drive سے بحال کریں — فہرست دکھائیں، منتخب فائل کو اسی موجودہ
@@ -4746,7 +4756,7 @@ async function restoreFromGoogleDrive(){
     }
   };
 
-  client.requestAccessToken({ prompt: gDriveAccessToken ? '' : 'consent' });
+  client.requestAccessToken({ prompt: '' }); // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔ صرف اسی صورت میں مکمل اجازت سکرین دوبارہ آئے گی جب پرانی اجازت واقعی منسوخ ہو چکی ہو ----------
 }
 
 function renderGDriveFileList(files){
@@ -10259,7 +10269,7 @@ async function renderDiaryFullLedgerPoster(entry, note){
   ctx.textAlign = 'right';
   ctx.fillText('Amount', cardX + cardW - 4, y + 16);
   y += 20;
-  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+  ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(cardX, y); ctx.lineTo(cardX + cardW, y); ctx.stroke();
   y += 4;
 
@@ -10286,7 +10296,7 @@ async function renderDiaryFullLedgerPoster(entry, note){
       ctx.font = `700 12px Poppins, sans-serif`;
       ctx.fillText((isGive ? '− ' : '+ ') + fmtDiaryAmount(Math.abs(h.amount)), cardX + cardW - 4, y + 16);
       y += rowH;
-      ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(cardX, y - 8); ctx.lineTo(cardX + cardW, y - 8); ctx.stroke();
     });
   }
@@ -11949,7 +11959,7 @@ function addToPoCartGrid(variantId){
   if(!v) return;
   const existing = poCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else poCart.push({variant_id: variantId, name: v.name, qty: 1, cost: v.purchase});
+  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
   renderPoBrowseList();
   renderPoCart();
 }
@@ -12038,7 +12048,7 @@ function addToPoCart(variantId){
 
   const existing = poCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else poCart.push({variant_id: variantId, name: v.name, qty: 1, cost: v.purchase});
+  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
 
   document.getElementById('poSearchInput').value = '';
   document.getElementById('poSearchResults').classList.remove('show');
@@ -12084,7 +12094,7 @@ function addSelectedLowStockToPo(){
     if(!v) return;
     const existing = poCart.find(i => i.variant_id === variantId);
     if(existing) existing.qty += qty;
-    else poCart.push({variant_id: variantId, name: v.name, qty, cost: v.purchase});
+    else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty, cost: v.purchase});
     addedCount++;
   });
   if(addedCount === 0){
@@ -13177,24 +13187,50 @@ async function renderPoToCanvas(){
   const baseScale = pxWidth / 576;
 
   const fscale = (AppState.settings.poFontScale || 100) / 100;
-  const rowScaleSetting = (AppState.settings.poRowScale || 100) / 100;
   const bold = AppState.settings.poBoldItems !== false;
   const align = AppState.settings.poAlign || 'left';
+  const vAlign = AppState.settings.poVAlign || 'middle';
   const decimals = AppState.settings.poPriceDecimals ?? 0;
   const scale = baseScale * fscale;
   const rc = getReceiptColor();
 
-  const noW = Math.round(28 * scale), qtyW = Math.round(55 * scale), priceW = Math.round(80 * scale), totalW = Math.round(90 * scale);
-  const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
-  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
-  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
+  const rowScaleSetting = (AppState.settings.poRowScale || 100) / 100;
   const rowH = Math.round(24 * scale * rowScaleSetting), headerH = Math.round(22 * scale * rowScaleSetting);
+  const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
   const tableH = headerH + (po.items.length * rowH);
 
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.poFontId) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
   const fmt = (n) => (Number(n)||0).toFixed(decimals);
+
+  // ---------- خانوں کی چوڑائی خودکار — ہر کالم صرف اتنا چوڑا جتنی اس میں سب سے لمبی لکھائی کی ضرورت ہے،
+  // خامخواہ چوڑے ڈبے نہیں بنیں گے، اور نہ ہی کوئی لکھائی کٹے گی ----------
+  const measureCtx = document.createElement('canvas').getContext('2d');
+  const bodyFontPx = Math.round(14 * scale), headerFontPx = Math.round(13 * scale);
+  measureCtx.font = `bold ${bodyFontPx}px ${canvasFontFamily}`;
+  const padX = Math.round(10 * scale);
+  const noW = Math.max(Math.round(24 * scale), measureCtx.measureText('#').width + padX, measureCtx.measureText(String(po.items.length)).width + padX);
+  let variantW = measureCtx.measureText('Variant').width + padX;
+  let qtyW = measureCtx.measureText('Qty').width + padX;
+  let costW = measureCtx.measureText('Cost').width + padX;
+  let totalW = measureCtx.measureText('Total').width + padX;
+  po.items.forEach(item => {
+    variantW = Math.max(variantW, measureCtx.measureText(item.label || '—').width + padX);
+    qtyW = Math.max(qtyW, measureCtx.measureText(String(item.qty)).width + padX);
+    costW = Math.max(costW, measureCtx.measureText(fmt(item.cost)).width + padX);
+    totalW = Math.max(totalW, measureCtx.measureText(fmt(item.qty*item.cost)).width + padX);
+  });
+  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - costW - totalW;
+  const colX = [
+    tableLeft,
+    tableLeft + noW,
+    tableLeft + noW + itemW,
+    tableLeft + noW + itemW + variantW,
+    tableLeft + noW + itemW + variantW + qtyW,
+    tableLeft + noW + itemW + variantW + qtyW + costW,
+    tableRight
+  ];
 
   let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH;
   if(useA4) estimatedHeight += 60;
@@ -13267,38 +13303,72 @@ async function renderPoToCanvas(){
   drawTableHLine(hLineY);
 
   ctx.font = F('bold 13px');
-  const headerBaseline = tableTop + headerH - 7 * scale;
+  // ---------- عمودی الائنمنٹ (Top/Middle/Bottom) — قطار کی اونچائی بڑھانے پر بھی متن مناسب جگہ بیٹھے ----------
+  const getBaseline = (top, h, fontPx) => {
+    if(vAlign === 'top') return top + fontPx + Math.round(3 * scale);
+    if(vAlign === 'bottom') return top + h - Math.round(6 * scale);
+    return top + h/2 + fontPx * 0.35;
+  };
+  const headerBaseline = getBaseline(tableTop, headerH, headerFontPx);
+  const colCenterX = (a, b) => align === 'center' ? (a + b) / 2 : (align === 'right' ? b - padX/2 : a + padX/2);
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = align; ctx.fillText('Item', align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), headerBaseline);
-  ctx.textAlign = 'right';
-  ctx.fillText('Qty', colX[3]-4, headerBaseline);
-  ctx.fillText('Cost', colX[4]-4, headerBaseline);
-  ctx.fillText('Total', colX[5]-4, headerBaseline);
+  // ---------- Item کا نام ہمیشہ بائیں طرف — باقی تین کالمز (Qty/Cost/Total) الائنمنٹ سیٹنگ کے مطابق حرکت کریں،
+  // مگر آئٹم کا نام کبھی سینٹر/رائٹ نہیں ہونا چاہیے (پڑھنے میں مشکل اور بے ڈھنگا لگتا ہے) ----------
+  ctx.textAlign = 'left'; ctx.fillText('Item', colX[1] + padX/2, headerBaseline);
+  ctx.textAlign = 'center'; ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
+  ctx.textAlign = align;
+  ctx.fillText('Qty', colCenterX(colX[3], colX[4]), headerBaseline);
+  ctx.fillText('Cost', colCenterX(colX[4], colX[5]), headerBaseline);
+  ctx.fillText('Total', colCenterX(colX[5], colX[6]), headerBaseline);
   hLineY += headerH;
   drawTableHLine(hLineY);
 
   ctx.font = F('bold 14px');
-  const maxItemWidth = itemW - 8;
+  const maxItemWidth = itemW - padX;
+  const maxVariantWidth = variantW - padX;
   po.items.forEach((item, idx) => {
-    const rowBaseline = hLineY + rowH - 7 * scale;
-    let displayName = item.name;
+    const rowBaseline = getBaseline(hLineY, rowH, bodyFontPx);
+    // ---------- Item کے نام کے ساتھ ویریئنٹ نہ دہرائیں — وہ اب اپنے الگ Variant کالم میں ہے ----------
+    let baseName = item.name;
+    if(item.label && baseName.endsWith(item.label)){
+      baseName = baseName.slice(0, baseName.length - item.label.length).trim();
+    }
+    let displayName = baseName;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
-    if(displayName !== item.name) displayName = displayName.trim() + '…';
+    if(displayName !== baseName) displayName = displayName.trim() + '…';
 
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
+    ctx.textAlign = 'left';
+    ctx.save();
+    ctx.beginPath(); ctx.rect(colX[1], hLineY, colX[2]-colX[1], rowH); ctx.clip();
+    ctx.fillText(displayName, colX[1] + padX/2, rowBaseline);
+    ctx.restore();
+
+    ctx.textAlign = 'center';
+    let variantText = item.label || '—';
+    while(ctx.measureText(variantText).width > maxVariantWidth && variantText.length > 1){ variantText = variantText.slice(0,-1); }
+    ctx.fillText(variantText, (colX[2]+colX[3])/2, rowBaseline);
+
     ctx.textAlign = align;
-    ctx.fillText(displayName, align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), rowBaseline);
-    ctx.textAlign = 'right';
-    ctx.fillText(String(item.qty), colX[3]-4, rowBaseline);
-    ctx.fillText(fmt(item.cost), colX[4]-4, rowBaseline);
-    ctx.fillText(fmt(item.qty*item.cost), colX[5]-4, rowBaseline);
+    ctx.fillText(String(item.qty), colCenterX(colX[3], colX[4]), rowBaseline);
+    ctx.fillText(fmt(item.cost), colCenterX(colX[4], colX[5]), rowBaseline);
+    ctx.fillText(fmt(item.qty*item.cost), colCenterX(colX[5], colX[6]), rowBaseline);
 
     hLineY += rowH;
     drawTableHLine(hLineY);
   });
 
-  y = tableTop + tableH + 26 * scale;
+  y = tableTop + tableH + 20 * scale;
+
+  // ---------- کتنی ورائٹیاں اور کل کتنے آئٹم آرڈر ہوئے — چاہے قیمت 0 ہو، یہ گنتی ہمیشہ نظر آئے ----------
+  const totalQtyOrdered = po.items.reduce((s2, it) => s2 + (it.qty || 0), 0);
+  ctx.textAlign = 'center';
+  ctx.font = F('12px');
+  ctx.fillStyle = '#64748b';
+  ctx.fillText(`${po.items.length} varieties · ${totalQtyOrdered} total items ordered`, pxWidth/2, y);
+  ctx.fillStyle = '#000';
+  y += 22 * scale;
 
   ctx.textAlign = 'right';
   ctx.font = F('bold 20px');
@@ -13322,19 +13392,16 @@ async function rerenderPoPreview(){ await renderPoToCanvas(); }
 
 function syncPoStyleControls(){
   document.getElementById('popscFontScaleVal').textContent = (AppState.settings.poFontScale || 100) + '%';
-  const fontSlider = document.getElementById('popscFontScaleSlider');
-  if(fontSlider) fontSlider.value = AppState.settings.poFontScale || 100;
   document.getElementById('popscRowScaleVal').textContent = (AppState.settings.poRowScale || 100) + '%';
-  const rowSlider = document.getElementById('popscRowScaleSlider');
-  if(rowSlider) rowSlider.value = AppState.settings.poRowScale || 100;
   const isBold = AppState.settings.poBoldItems !== false;
   document.getElementById('popscBoldBtn').classList.toggle('active', isBold);
-  document.getElementById('popscThinBtn').classList.toggle('active', !isBold);
-  const align = AppState.settings.poAlign || 'left';
-  document.getElementById('popscAlignLeftBtn').classList.toggle('active', align === 'left');
-  document.getElementById('popscAlignCenterBtn').classList.toggle('active', align === 'center');
-  document.getElementById('popscAlignRightBtn').classList.toggle('active', align === 'right');
+  document.getElementById('popscBoldBtn').textContent = isBold ? '𝐁 Bold' : 'Thin';
   document.getElementById('popscDecimalsVal').textContent = AppState.settings.poPriceDecimals ?? 0;
+
+  const alignSelect = document.getElementById('popscAlignSelect');
+  if(alignSelect) alignSelect.value = AppState.settings.poAlign || 'left';
+  const vAlignSelect = document.getElementById('popscVAlignSelect');
+  if(vAlignSelect) vAlignSelect.value = AppState.settings.poVAlign || 'middle';
 
   const fontSelect = document.getElementById('popscFontFamilySelect');
   if(fontSelect){
@@ -13345,16 +13412,16 @@ function syncPoStyleControls(){
     fontSelect.value = AppState.settings.poFontId || 'segoe';
   }
 
-  const swatchWrap = document.getElementById('popscColorSwatches');
-  if(swatchWrap){
-    try{
-      swatchWrap.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<button onclick="setReceiptColor('${c.id}')" title="${c.name}" style="width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; background:${c.bg}; cursor:pointer; padding:0; flex:0 0 auto;" data-swatch-id="${c.id}"></button>`).join('');
-      swatchWrap.querySelectorAll('button').forEach(btn => {
-        const active = btn.dataset.swatchId === (AppState.settings.receiptColorId || 'green');
-        btn.style.boxShadow = active ? '0 0 0 2.5px #1e293b' : '0 0 0 1.5px #cbd5e1';
-      });
-    }catch(e){ console.error('swatch render failed', e); }
+  const themeSelect = document.getElementById('popscThemeSelect');
+  if(themeSelect){
+    if(!themeSelect.dataset.filled){
+      const swatchIcon = {green:'🟢',blue:'🔵',peach:'🟠',lavender:'🟣',pink:'🌸',gray:'⚪',navy:'🔷',skydeep:'🌊',charcoal:'⬛',wine:'🍷',crispbw:'⬜'};
+      themeSelect.innerHTML = RECEIPT_COLOR_PRESETS.map(c => `<option value="${c.id}">${swatchIcon[c.id]||'🎨'} ${c.name}</option>`).join('');
+      themeSelect.dataset.filled = '1';
+    }
+    themeSelect.value = AppState.settings.receiptColorId || 'green';
   }
+
   document.getElementById('popscA4Chk').checked = AppState.settings.poPrintStyle === 'a4';
   const orientRow = document.getElementById('popscOrientRow');
   if(orientRow) orientRow.style.display = AppState.settings.poPrintStyle === 'a4' ? 'flex' : 'none';
@@ -13363,6 +13430,17 @@ function syncPoStyleControls(){
   const shareRow = document.getElementById('poA4ShareRow');
   if(shareRow) shareRow.style.display = AppState.settings.poPrintStyle === 'a4' ? 'flex' : 'none';
   setPoOrientation(AppState.settings.poOrientation || 'portrait');
+}
+
+// ---------- کمپیکٹ +/− بٹنوں سے زوم بدلیں (پہلے سلائیڈر تھا، اب جگہ بچانے کے لیے چھوٹے بٹن) ----------
+function adjustPoZoomStep(settingKey, delta){
+  const current = AppState.settings[settingKey] || 100;
+  setPoZoom(settingKey, current + delta);
+}
+function setPoVAlign(vAlign){
+  AppState.settings.poVAlign = vAlign;
+  persistAllData();
+  rerenderPoPreview();
 }
 
 function setPoZoom(settingKey, val){
@@ -14010,7 +14088,7 @@ async function renderReturnReceiptToCanvas(inv, picks, totalRefund, method){
   ctx.fillText('RATE', W - 160, y);
   ctx.fillText('AMOUNT', W - 20, y);
   y += 12;
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#475569';
   ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W - 20, y); ctx.stroke();
   y += 24;
 
@@ -14029,7 +14107,7 @@ async function renderReturnReceiptToCanvas(inv, picks, totalRefund, method){
   });
 
   y += 4;
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#475569';
   ctx.beginPath(); ctx.moveTo(20, y); ctx.lineTo(W - 20, y); ctx.stroke();
   y += 34;
 
@@ -16059,7 +16137,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   let y = 30;
   ctx.textAlign = 'center';
   ctx.font = F('bold 26px');
-  ctx.fillStyle = rc.text;
+  ctx.fillStyle = '#1a1a1a'; // ---------- سفید پس منظر پر ہمیشہ گہرا رنگ — تھیم چاہے گہرا ہو، یہ متن ابھی تک بینر کے اوپر نہیں گیا ----------
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y); y += 26;
 
   // ---------- دکان کا پتہ/فون ہو تو دکھائیں ----------
@@ -16323,7 +16401,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
         ctx.fillText(label, sumLeft + 6, rowTop + sumRowH/2 + 4);
         ctx.textAlign = 'right';
         ctx.fillText(Math.round(val).toLocaleString(), sumRight - 6, rowTop + sumRowH/2 + 4);
-        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       }
       rowTop += sumRowH;
@@ -16366,7 +16444,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       const qrX = leftCx - qrSize/2;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(qrX-4, ly-4, qrSize+8, qrSize+8);
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
       ctx.strokeRect(qrX-4, ly-4, qrSize+8, qrSize+8);
       ctx.save();
       drawBinarizedQR(ctx, receiptQrImg, qrX, ly, qrSize);
@@ -16707,7 +16785,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
         ctx.fillText(label, sumLeft + 12, rowTop + sumRowH/2 + 6);
         ctx.textAlign = 'right';
         ctx.fillText('Rs. ' + Math.round(val).toLocaleString(), sumRight - 12, rowTop + sumRowH/2 + 6);
-        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       }
       rowTop += sumRowH;
@@ -16821,6 +16899,7 @@ function setReceiptColor(colorId){
   syncReportStyleControls();
   if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
   if(document.getElementById('reportPreviewModal')?.classList.contains('show')) renderReportToCanvas();
+  if(document.getElementById('poPreviewModal')?.classList.contains('show')){ syncPoStyleControls(); rerenderPoPreview(); }
 }
 
 // ---------- پرنٹ کے لیے فونٹ سٹائل — یہ صرف رسید پر لاگو ہوتا ہے، پوری ایپ کا فونٹ نہیں بدلتا ----------
@@ -17273,6 +17352,13 @@ const RECEIPT_COLOR_PRESETS = [
   {id:'lavender', name:'Lavender', bg:'#ede9fe', text:'#5b21b6', border:'#b45309'}, // لیوینڈر پس منظر — سنہری بارڈر
   {id:'pink',     name:'Pink',     bg:'#fce7f3', text:'#9d174d', border:'#0f766e'}, // پنک پس منظر — سبزی مائل نیلا بارڈر
   {id:'gray',     name:'Gray',     bg:'#f1f5f9', text:'#334155', border:'#3730a3'}, // گرے پس منظر — گہرا نیلا بارڈر
+  // ---------- نئے گہرے تھیمز — گہرا پس منظر، سفید لکھائی — WhatsApp پر شیئر کرنے کے لیے خوبصورت اور وزنی نظر آئیں ----------
+  {id:'navy',     name:'Navy',     bg:'#1e3a5f', text:'#ffffff', border:'#93c5fd', dark:true},   // گہرا نیوی — ہلکا نیلا بارڈر
+  {id:'skydeep',  name:'Deep Sky', bg:'#0c4a6e', text:'#ffffff', border:'#7dd3fc', dark:true},   // گہرا آسمانی نیلا
+  {id:'charcoal', name:'Charcoal', bg:'#1e293b', text:'#ffffff', border:'#cbd5e1', dark:true},   // گہرا سرمئی/چارکول
+  {id:'wine',     name:'Wine',     bg:'#4c0519', text:'#ffffff', border:'#fda4af', dark:true},   // گہرا مروں/شراب رنگ
+  // ---------- خالص سیاہ/سفید — کوئی رنگ نہیں، صرف گہرا سیاہ متن اور بارڈر (پکا، دھندلا نہیں) ----------
+  {id:'crispbw',  name:'Crisp B&W', bg:'#ffffff', text:'#0a0a0a', border:'#0a0a0a'},
 ];
 function getReceiptColor(){
   return RECEIPT_COLOR_PRESETS.find(c => c.id === AppState.settings.receiptColorId) || RECEIPT_COLOR_PRESETS[0];
@@ -19549,7 +19635,7 @@ async function renderReportToCanvas(){
     y += logoH + 8;
   }
   ctx.textAlign = 'center';
-  ctx.fillStyle = rc.text;
+  ctx.fillStyle = '#1a1a1a'; // ---------- سفید پس منظر پر ہمیشہ گہرا رنگ ----------
   y += fsTitle;
   y = drawCenteredLines(nameFit, pxWidth/2, y, 1.25);
   if(addrFit){
@@ -19615,7 +19701,7 @@ async function renderReportToCanvas(){
 
     g.items.forEach((it) => {
       const rh = it._rowH;
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
       ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
       cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
 
@@ -19866,7 +19952,7 @@ async function renderTodaySaleReportToCanvas(){
     y += logoH + 8;
   }
   ctx.textAlign = 'center';
-  ctx.fillStyle = rc.text;
+  ctx.fillStyle = '#1a1a1a'; // ---------- سفید پس منظر پر ہمیشہ گہرا رنگ ----------
   ctx.font = `bold ${fsTitle}px ${fontFam}`;
   y += fsTitle;
   ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, y);
@@ -19914,7 +20000,7 @@ async function renderTodaySaleReportToCanvas(){
   let rowY = cashTableTop + cashHeaderRowH;
   for(let i = 0; i < cashInItems.length; i++){
     const rh = cashRowHeights[i];
-    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.strokeRect(tableLeft+0.5, rowY+0.5, totalW, rh);
     ctx.beginPath(); ctx.moveTo(tableLeft+colW+0.5, rowY); ctx.lineTo(tableLeft+colW+0.5, rowY+rh); ctx.stroke();
     const [inLabel, inVal] = cashInItems[i];
@@ -19985,7 +20071,7 @@ async function renderTodaySaleReportToCanvas(){
   // ---------- آئٹمز — سب سے زیادہ بکنے والا سب سے اوپر ----------
   if(soldItems.length === 0){
     const rh = baseRowH;
-    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
     ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
     ctx.fillStyle = '#64748b';
     ctx.font = `${fsItem}px ${fontFam}`;
@@ -19995,7 +20081,7 @@ async function renderTodaySaleReportToCanvas(){
   } else {
     soldItems.forEach((it) => {
       const rh = baseRowH;
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
       ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
       cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
       ctx.fillStyle = '#1a1a1a';
@@ -20085,7 +20171,7 @@ function buildMultiColumnReportPdf(orientation){
 
   // ---------- ہیڈر بلاک — پورے صفحے کی چوڑائی میں، بیچ میں ----------
   let y = marginMM;
-  pdf.setTextColor(tr, tg, tb);
+  pdf.setTextColor(26, 26, 26); // ---------- سفید صفحے پر ہمیشہ گہرا رنگ — تھیم رنگ صرف رنگین بینر/ہیڈر پر ----------
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(16);
   pdf.text(stripUnrenderableForPdf(AppState.settings.businessName || 'AIO POS'), pageW / 2, y + 6, {align:'center'});
@@ -20363,7 +20449,7 @@ async function renderDiarySummaryReportToCanvas(){
     const ry = headerBottom + colHeaderH + rowInCol*rowH;
     ctx.fillStyle = rowInCol%2===1 ? '#f8fafc' : '#fff';
     ctx.fillRect(x, ry, colW, rowH);
-    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 0.5;
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.5;
     ctx.strokeRect(x, ry, colW, rowH);
     const isOwe = e.balance < 0;
     ctx.textAlign = align === 'center' ? 'center' : (align === 'right' ? 'right' : 'left');
@@ -20433,7 +20519,7 @@ function buildTodaySalePdf(orientation){
   const soldItems = Object.keys(itemQtyMap).map(name => ({name, qty: itemQtyMap[name]})).sort((a,b) => b.qty - a.qty);
 
   let y = marginMM;
-  pdf.setTextColor(tr, tg, tb);
+  pdf.setTextColor(26, 26, 26); // ---------- سفید صفحے پر ہمیشہ گہرا رنگ ----------
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
   pdf.text(stripUnrenderableForPdf(AppState.settings.businessName || 'AIO POS'), pageW / 2, y + 6, {align:'center'});
   y += 9;
@@ -20577,7 +20663,7 @@ function buildDiarySummaryPdf(orientation){
   const netBalance = totalQarz - totalUdhaar;
 
   let y = marginMM;
-  pdf.setTextColor(tr, tg, tb);
+  pdf.setTextColor(26, 26, 26); // ---------- سفید صفحے پر ہمیشہ گہرا رنگ ----------
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
   pdf.text(stripUnrenderableForPdf(AppState.settings.businessName || 'AIO POS'), pageW / 2, y + 6, {align:'center'});
   y += 9;
@@ -20660,7 +20746,7 @@ function buildDiarySummaryPdf(orientation){
     const ry = colY + colHeaderH + rowInCol * rowH;
     pdf.setFillColor(rowInCol % 2 === 1 ? zebraR : 255, rowInCol % 2 === 1 ? zebraG : 255, rowInCol % 2 === 1 ? zebraB : 255);
     pdf.rect(colX, ry, colW, rowH, 'F');
-    pdf.setDrawColor(220, 226, 234); pdf.setLineWidth(0.1);
+    pdf.setDrawColor(71, 85, 105); pdf.setLineWidth(0.1);
     pdf.rect(colX, ry, colW, rowH, 'S');
 
     const isOwe = e.balance < 0;
