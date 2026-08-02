@@ -925,7 +925,9 @@ document.addEventListener('keydown', function(e){
 
   .reviewSalesmanBar{background:#eef2ff; color:var(--primary-dark); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:700; margin-bottom:14px;}
   .reviewItemRow{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9;}
+  .reviewItemRow .riNo{width:20px; flex:0 0 auto; font-size:12px; font-weight:700; color:var(--muted); text-align:center;}
   .reviewItemRow .riName{flex:1; font-size:13px; font-weight:600;}
+  .reviewItemRow .riVariant{width:52px; flex:0 0 auto; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 2px; text-align:center;}
   .reviewItemRow input{padding:7px; border:1px solid #dbe1ea; border-radius:7px; font-size:13px;}
   .reviewItemRow .riQty{width:55px;}
   .reviewItemRow .riRate{width:75px;}
@@ -1706,7 +1708,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO033</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO034</span>
     </div>
   </div>
 
@@ -2659,7 +2661,9 @@ document.addEventListener('keydown', function(e){
 
           <!-- ---------- ہر خانے کا عنوان — واضح کریں کہ کون سا باکس کس چیز کے لیے ہے ---------- -->
           <div style="display:flex; align-items:center; gap:8px; padding:0 0 4px; margin-top:4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid #e2e8f0;">
+            <span style="width:20px; text-align:center;">#</span>
             <span style="flex:1;">Item</span>
+            <span style="width:52px; text-align:center;">Variant</span>
             <span style="width:55px; text-align:center;">Qty<br>Received</span>
             <span style="width:75px; text-align:center;">Cost<br>Price</span>
             <span style="width:70px; text-align:right;">Line<br>Total</span>
@@ -3627,7 +3631,9 @@ document.addEventListener('keydown', function(e){
               <span class="pscValue" id="popscRowScaleVal">100%</span>
               <button onclick="adjustPoZoomStep('poRowScale',5)">+</button>
             </div>
-            <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁</button>
+          </div>
+          <div class="pscCompactRow">
+            <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁 Bold</button>
             <div class="pscStepperGroup">
               <span class="pscLabel">.00</span>
               <button onclick="adjustPoStyle('poPriceDecimals', -1, 0, 4)">−</button>
@@ -11283,7 +11289,8 @@ function renderPurchaseOrdersScreen(){
           <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ Print</button>
           ${isPending
             ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 Receive Shipment</button>
-               <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>`
+               <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>
+               <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ Delete</button>`
             : `<button class="btnPrint" onclick="openSupplierReturnModal(${po.supplier_id}, ${po.po_idx})">↩️ Return Items</button>`}
         </div>
       </div>`;
@@ -11406,8 +11413,11 @@ function renderSupplierPoSection(supplierId){
         const statusTxt = isPending ? `⏳ Pending • ${daysPending}d` : `✅ Received`;
         const actionBtn = isPending
           ? `<button class="btnReceiveShipment" onclick="event.stopPropagation(); closeProfileModal(); openReceiveShipmentModal(${s.supplier_id}, ${idx});">🚚 Receive Shipment</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>`
-          : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
+             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>
+             <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ Delete</button>`
+          : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
         return `
         <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -13293,14 +13303,20 @@ async function renderPoToCanvas(){
 
   drawSolidLine(ctx, y, pxWidth); y += 16 * scale;
 
-  // ---------- آئٹمز ٹیبل ----------
+  // ---------- آئٹمز ٹیبل — اب تھیم پورے ٹیبل پر بھی لاگو ہوتا ہے (صرف اوپر کی پٹی پر نہیں) —
+  // ہیڈر لائن کا پس منظر تھیم رنگ سے، اور تمام لکیریں تھیم کے بارڈر رنگ سے، تاکہ پورا بل ایک جیسا مربوط نظر آئے ----------
   const tableTop = y;
-  ctx.strokeStyle = '#000';
+  ctx.strokeStyle = rc.border;
   ctx.lineWidth = 1;
   colX.forEach(x => { ctx.beginPath(); ctx.moveTo(Math.floor(x)+0.5, tableTop); ctx.lineTo(Math.floor(x)+0.5, tableTop + tableH); ctx.stroke(); });
   let hLineY = tableTop;
   const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly)+0.5); ctx.lineTo(tableRight, Math.floor(ly)+0.5); ctx.stroke(); };
   drawTableHLine(hLineY);
+
+  // ---------- ہیڈر لائن کا رنگین پس منظر ----------
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, tableTop, tableRight - tableLeft, headerH);
+  ctx.fillStyle = rc.text;
 
   ctx.font = F('bold 13px');
   // ---------- عمودی الائنمنٹ (Top/Middle/Bottom) — قطار کی اونچائی بڑھانے پر بھی متن مناسب جگہ بیٹھے ----------
@@ -13320,6 +13336,7 @@ async function renderPoToCanvas(){
   ctx.fillText('Qty', colCenterX(colX[3], colX[4]), headerBaseline);
   ctx.fillText('Cost', colCenterX(colX[4], colX[5]), headerBaseline);
   ctx.fillText('Total', colCenterX(colX[5], colX[6]), headerBaseline);
+  ctx.fillStyle = '#1a1a1a'; // ---------- باقی قطاریں سفید پس منظر پر ہیں، ان کے لیے واپس گہرا رنگ ----------
   hLineY += headerH;
   drawTableHLine(hLineY);
 
@@ -13549,7 +13566,8 @@ async function printPoPreview(){
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   const area = document.getElementById('printReceiptArea');
   enterPrintMode();
-  area.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  const printCanvas = canvasToGrayscale(canvas); // ---------- کاغذ پر ہمیشہ سیاہ/سفید — سکرین/شیئر کا رنگین ورژن الگ ----------
+  area.innerHTML = `<img src="${printCanvas.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
   area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
 }
 function sharePoWhatsapp(){
@@ -13664,6 +13682,19 @@ let receiveShipmentBillPhoto = null;
 let activePoReminderSupplierId = null;
 let activePoReminderPoIdx = null;
 
+// ---------- PENDING پرچیز آرڈر مکمل حذف کریں — چونکہ سٹاک/رقم صرف "Receive Shipment" مکمل ہونے پر متاثر ہوتی ہے،
+// ایک PENDING آرڈر ہٹانا بالکل محفوظ ہے، کچھ بھی recalculate نہیں کرنا پڑتا ----------
+function deletePendingPurchaseOrder(supplierId, poIdx){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  if(!s || !s.purchaseHistory || !s.purchaseHistory[poIdx]) return;
+  const po = s.purchaseHistory[poIdx];
+  if(po.status === 'received'){ alert('Received orders cannot be deleted — only pending ones.'); return; }
+  if(!confirm(`Delete this pending Purchase Order (${po.items.length} items, dated ${po.date})? This cannot be undone.`)) return;
+  s.purchaseHistory.splice(poIdx, 1);
+  persistAllData();
+  renderSupplierPoSection(supplierId);
+}
+
 function openPoReminderModal(supplierId, poIdx){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   const po = (s?.purchaseHistory || [])[poIdx];
@@ -13731,9 +13762,17 @@ function renderReceiveShipmentCart(){
     list.innerHTML = receiveShipmentCart.map((item, idx) => {
       const lineTotal = item.qty * item.cost;
       total += lineTotal;
+      // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی ایپ کی طرح یہاں بھی "چینی Kg" کی بجائے
+      // نام اور Variant الگ الگ خانوں میں نظر آئیں ----------
+      let baseName = item.name;
+      if(item.label && baseName.endsWith(item.label)){
+        baseName = baseName.slice(0, baseName.length - item.label.length).trim();
+      }
       return `
         <div class="reviewItemRow">
-          <span class="riName">${item.name}</span>
+          <span class="riNo">${idx+1}</span>
+          <span class="riName">${baseName}</span>
+          <span class="riVariant">${item.label || '—'}</span>
           <input type="number" class="riQty" min="0" value="${item.qty}" onfocus="this.select()" onchange="updateReceiveQty(${idx}, parseInt(this.value)||0)">
           <input type="number" class="riRate" min="0" value="${item.cost}" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">
           <span class="riLine">Rs. ${lineTotal.toLocaleString()}</span>
