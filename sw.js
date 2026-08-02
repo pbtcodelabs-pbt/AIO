@@ -1,6 +1,6 @@
 // ---------- AIO POS & ERP — Service Worker ----------
 // ہر ریلیز پر CACHE_VERSION بڑھائی جاتی ہے تاکہ فون پرانی کاپی کی بجائے نئی فائل لوڈ کرے
-const CACHE_VERSION = 'aio-v034';
+const CACHE_VERSION = 'aio-v035';
 const APP_SHELL = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {

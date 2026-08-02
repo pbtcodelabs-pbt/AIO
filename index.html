@@ -356,7 +356,7 @@ document.addEventListener('keydown', function(e){
   .cartWrap{background:var(--card); border-radius:var(--radius); max-height:46vh; overflow-y:auto; box-shadow:0 2px 10px rgba(41,29,10,.07);}
   table.cartTable{width:100%; border-collapse:collapse; font-size:var(--cart-font-size, 14px); font-weight:var(--cart-font-weight, 400);}
   table.cartTable th{text-align:left; padding:5px 8px; background:#f1f5fb; color:var(--muted); font-size:11px; text-transform:uppercase; position:sticky; top:0;}
-  table.cartTable td{padding:var(--cart-row-pad, 7px) 8px; border-bottom:1px solid #eef1f6;}
+  table.cartTable td{padding:var(--cart-row-pad, 7px) 8px; border-bottom:1px solid #eef1f6; vertical-align:top;}
   .qtyBtns{display:flex; align-items:center; gap:6px;}
   .rateEditInput{width:64px; padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:13px; text-align:center; background:#fffbea;}
 
@@ -924,15 +924,15 @@ document.addEventListener('keydown', function(e){
   .pendingStatusTag.rejected{background:#fef2f2; color:var(--danger);}
 
   .reviewSalesmanBar{background:#eef2ff; color:var(--primary-dark); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:700; margin-bottom:14px;}
-  .reviewItemRow{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9;}
-  .reviewItemRow .riNo{width:20px; flex:0 0 auto; font-size:12px; font-weight:700; color:var(--muted); text-align:center;}
-  .reviewItemRow .riName{flex:1; font-size:13px; font-weight:600;}
-  .reviewItemRow .riVariant{width:52px; flex:0 0 auto; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 2px; text-align:center;}
+  .reviewItemRow{display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9;}
+  .reviewItemRow .riNo{width:20px; flex:0 0 auto; font-size:12px; font-weight:700; color:var(--muted); text-align:center; padding-top:8px;}
+  .reviewItemRow .riName{flex:1; font-size:13px; font-weight:600; padding-top:8px; line-height:1.35;}
+  .reviewItemRow .riVariant{width:52px; flex:0 0 auto; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 2px; text-align:center; margin-top:5px;}
   .reviewItemRow input{padding:7px; border:1px solid #dbe1ea; border-radius:7px; font-size:13px;}
   .reviewItemRow .riQty{width:55px;}
   .reviewItemRow .riRate{width:75px;}
-  .reviewItemRow .riLine{width:70px; text-align:right; font-weight:700; font-size:13px;}
-  .reviewItemRow .riRemove{background:#fef2f2; color:var(--danger); border:none; border-radius:7px; width:28px; height:28px; cursor:pointer; font-weight:700;}
+  .reviewItemRow .riLine{width:70px; text-align:right; font-weight:700; font-size:13px; padding-top:8px;}
+  .reviewItemRow .riRemove{background:#fef2f2; color:var(--danger); border:none; border-radius:7px; width:28px; height:28px; cursor:pointer; font-weight:700; margin-top:2px;}
   .reviewActionBtns{display:flex; gap:8px; margin-top:16px;}
   .reviewActionBtns button{flex:1; padding:12px; border:none; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer;}
   .btnApprove{background:var(--success); color:#fff;}
@@ -1708,7 +1708,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO034</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO035</span>
     </div>
   </div>
 
@@ -2660,6 +2660,18 @@ document.addEventListener('keydown', function(e){
           </div>
 
           <!-- ---------- ہر خانے کا عنوان — واضح کریں کہ کون سا باکس کس چیز کے لیے ہے ---------- -->
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px; margin-top:8px;">
+            <span style="font-size:11.5px; font-weight:700; color:var(--muted);">↕️ Sort items:</span>
+            <select id="receiveCartSortSelect" onchange="setReceiveCartSort(this.value)" style="flex:1; border:1px solid #e2e8f0; background:#fff; color:var(--text); font-weight:700; font-size:11.5px; padding:6px 4px; border-radius:7px;">
+              <option value="added">As Ordered</option>
+              <option value="qtyDesc">Qty: High → Low</option>
+              <option value="qtyAsc">Qty: Low → High</option>
+              <option value="variantQtyDesc">Group by Variant, Qty High → Low</option>
+              <option value="variantQtyAsc">Group by Variant, Qty Low → High</option>
+              <option value="nameAsc">Name: A → Z</option>
+              <option value="nameDesc">Name: Z → A</option>
+            </select>
+          </div>
           <div style="display:flex; align-items:center; gap:8px; padding:0 0 4px; margin-top:4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid #e2e8f0;">
             <span style="width:20px; text-align:center;">#</span>
             <span style="flex:1;">Item</span>
@@ -2710,8 +2722,20 @@ document.addEventListener('keydown', function(e){
         <div class="searchResults" id="poSearchResults"></div>
 
         <div class="poTableScroll">
+          <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+            <span style="font-size:11.5px; font-weight:700; color:var(--muted);">↕️ Sort items:</span>
+            <select id="poCartSortSelect" onchange="setPoCartSort(this.value)" style="flex:1; border:1px solid #e2e8f0; background:#fff; color:var(--text); font-weight:700; font-size:11.5px; padding:6px 4px; border-radius:7px;">
+              <option value="added">As Added</option>
+              <option value="qtyDesc">Qty: High → Low</option>
+              <option value="qtyAsc">Qty: Low → High</option>
+              <option value="variantQtyDesc">Group by Variant, Qty High → Low</option>
+              <option value="variantQtyAsc">Group by Variant, Qty Low → High</option>
+              <option value="nameAsc">Name: A → Z</option>
+              <option value="nameDesc">Name: Z → A</option>
+            </select>
+          </div>
           <table class="cartTable" style="margin-bottom:6px;">
-            <thead><tr><th>Item</th><th>Qty</th><th>Purchase Price</th><th>Total</th><th></th></tr></thead>
+            <thead><tr><th style="width:22px;">#</th><th>Item</th><th style="width:52px;">Variant</th><th>Qty</th><th>Purchase Price</th><th>Total</th><th></th></tr></thead>
             <tbody id="poItemsBody"></tbody>
           </table>
         </div>
@@ -11823,6 +11847,9 @@ function openPoModal(supplierId){
 
   activePoSupplierId = supplierId;
   poCart = [];
+  poCartSortMode = 'added';
+  const poSortSel = document.getElementById('poCartSortSelect');
+  if(poSortSel) poSortSel.value = 'added';
   activePoCategory = 'all';
   activePoSort = 'asc';
   document.getElementById('poModalTitle').textContent = `📦 Purchase Order — ${s.name}`;
@@ -12145,12 +12172,19 @@ function renderPoCart(){
   emptyMsg.style.display = 'none';
 
   let total = 0;
-  body.innerHTML = poCart.map(i => {
+  body.innerHTML = poCart.map((i, idx) => {
     const lineTotal = i.qty * i.cost;
     total += lineTotal;
+    // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی پوری ایپ کی طرح یہاں بھی الگ کالم میں ----------
+    let baseName = i.name;
+    if(i.label && baseName.endsWith(i.label)){
+      baseName = baseName.slice(0, baseName.length - i.label.length).trim();
+    }
     return `
       <tr>
-        <td>${i.name}</td>
+        <td style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
+        <td>${baseName}</td>
+        <td><span style="display:inline-block; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 6px; text-align:center;">${i.label || '—'}</span></td>
         <td><input type="number" min="1" value="${i.qty}" style="width:55px;" onfocus="this.select()" onchange="updatePoQty(${i.variant_id}, parseInt(this.value)||1)"></td>
         <td><input type="number" min="0" value="${i.cost}" style="width:70px;" onfocus="this.select()" onchange="updatePoCost(${i.variant_id}, parseFloat(this.value)||0)"></td>
         <td>Rs. ${lineTotal.toLocaleString()}</td>
@@ -12159,6 +12193,43 @@ function renderPoCart(){
     `;
   }).join('');
   document.getElementById('poGrandTotal').textContent = 'Rs. ' + total.toLocaleString();
+}
+
+// ---------- کارٹ آئٹمز کو ترتیب دیں — مقدار، نام، یا ویریئنٹ کے حساب سے گروپ بنا کر —
+// Purchase Order اور Receive Shipment دونوں یہی ایک فنکشن استعمال کرتے ہیں ----------
+function sortCartItems(cart, mode){
+  const arr = [...cart];
+  switch(mode){
+    case 'qtyDesc': return arr.sort((a,b) => b.qty - a.qty);
+    case 'qtyAsc': return arr.sort((a,b) => a.qty - b.qty);
+    case 'nameAsc': return arr.sort((a,b) => a.name.localeCompare(b.name));
+    case 'nameDesc': return arr.sort((a,b) => b.name.localeCompare(a.name));
+    case 'variantQtyDesc':
+    case 'variantQtyAsc': {
+      const desc = mode === 'variantQtyDesc';
+      // ---------- ہر ویریئنٹ (Kg/Tikki/Pkt وغیرہ) کی مجموعی مقدار معلوم کریں — اسی سے گروپس کی ترتیب طے ہو گی ----------
+      const groupTotals = {};
+      arr.forEach(it => {
+        const key = it.label || '—';
+        groupTotals[key] = (groupTotals[key] || 0) + (it.qty || 0);
+      });
+      return arr.sort((a,b) => {
+        const ka = a.label || '—', kb = b.label || '—';
+        if(ka !== kb){
+          const diff = groupTotals[kb] - groupTotals[ka];
+          return desc ? diff : -diff;
+        }
+        return desc ? (b.qty - a.qty) : (a.qty - b.qty);
+      });
+    }
+    default: return arr; // 'added' — جیسے شامل ہوئے، ویسے ہی رہیں
+  }
+}
+let poCartSortMode = 'added';
+function setPoCartSort(mode){
+  poCartSortMode = mode;
+  poCart = sortCartItems(poCart, mode);
+  renderPoCart();
 }
 
 // ---------- محفوظ کریں: اسٹاک بڑھے، سپلائر کا واجب الادا بڑھے، ہسٹری میں محفوظ ہو ----------
@@ -13743,6 +13814,9 @@ function openReceiveShipmentModal(supplierId, poIdx){
   document.getElementById('receiveShipmentMeta').textContent = `${s.name} — Ordered ${po.date}`;
   document.getElementById('receiveShipmentAddInput').value = '';
   document.getElementById('receiveShipmentSearchResults').classList.remove('show');
+  receiveCartSortMode = 'added';
+  const sortSel = document.getElementById('receiveCartSortSelect');
+  if(sortSel) sortSel.value = 'added';
   renderReceiveShipmentCart();
   updateReceiveShipmentBillPreview();
   document.getElementById('receiveShipmentModal').classList.add('show');
@@ -13751,6 +13825,13 @@ function closeReceiveShipmentModal(){
   document.getElementById('receiveShipmentModal').classList.remove('show');
   activeReceiveSupplierId = null;
   activeReceivePoIdx = null;
+}
+
+let receiveCartSortMode = 'added';
+function setReceiveCartSort(mode){
+  receiveCartSortMode = mode;
+  receiveShipmentCart = sortCartItems(receiveShipmentCart, mode);
+  renderReceiveShipmentCart();
 }
 
 function renderReceiveShipmentCart(){
