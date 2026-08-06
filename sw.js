@@ -1,62 +1,35 @@
-// ========================================================================
-// AIO POS — Service Worker
-// ورژن: AIO040 — یہ نمبر ہر نئی فائل کے ساتھ لازمی بڑھایا جائے
-// ========================================================================
-const CACHE_VERSION = 'AIO040';
-const CACHE_NAME = 'aio-pos-cache-' + CACHE_VERSION;
+// ---------- AIO POS & ERP — Service Worker ----------
+// ہر ریلیز پر CACHE_VERSION بڑھائی جاتی ہے تاکہ فون پرانی کاپی کی بجائے نئی فائل لوڈ کرے
+const CACHE_VERSION = 'aio-v039';
+const APP_SHELL = ['./', './index.html', './manifest.json'];
 
-const APP_SHELL = [
-  './',
-  './index.html'
-];
-
-// ---------- انسٹال: نیا کیش بنائیں اور فوراً ایکٹو ہونے کے لیے تیار رہیں ----------
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_VERSION).then((cache) =>
+      cache.addAll(APP_SHELL).catch(() => {}) // ---------- کوئی فائل نہ ملے تو انسٹال ناکام نہ ہو ----------
+    )
   );
 });
 
-// ---------- ایکٹیویٹ: پرانے ورژن کے کیش صاف کریں ----------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
+      Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
-// ---------- "ابھی اپڈیٹ کریں" بٹن سے پیغام موصول ہونے پر فوراً نیا ورژن فعال کریں ----------
-self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
-
-// ---------- فیچ: صفحہ (HTML) ہمیشہ پہلے نیٹ ورک سے تازہ لانے کی کوشش کریں
-// تاکہ نیا اپڈیٹ فوراً نظر آئے — نیٹ ورک ناکام ہو تو کیش سے دکھائیں (آف لائن سپورٹ) ----------
+// ---------- نیٹ ورک-فرسٹ: انٹرنیٹ ہو تو ہمیشہ تازہ فائل لائیں، آف لائن ہونے پر کیش سے دکھائیں ----------
 self.addEventListener('fetch', (event) => {
-  const req = event.request;
-
-  if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept')?.includes('text/html'))) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const resClone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
-          return res;
-        })
-        .catch(() => caches.match(req).then((res) => res || caches.match('./index.html')))
-    );
-    return;
-  }
-
-  // ---------- باقی درخواستیں: پہلے کیش، ورنہ نیٹ ورک ----------
+  if(event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req))
+    fetch(event.request)
+      .then((res) => {
+        const resClone = res.clone();
+        caches.open(CACHE_VERSION).then((cache) => cache.put(event.request, resClone));
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
