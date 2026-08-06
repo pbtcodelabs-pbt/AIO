@@ -1,24 +1,23 @@
 // ========================================================================
-// 🔄 AIO POS — Service Worker (Offline Support + Auto Update)
+// AIO POS — Service Worker
+// ورژن: AIO040 — یہ نمبر ہر نئی فائل کے ساتھ لازمی بڑھایا جائے
 // ========================================================================
 const CACHE_VERSION = 'AIO040';
-const CACHE_NAME = `aio-pos-cache-${CACHE_VERSION}`;
+const CACHE_NAME = 'aio-pos-cache-' + CACHE_VERSION;
 
-const CORE_ASSETS = [
+const APP_SHELL = [
   './',
-  './index.html',
-  './manifest.json'
+  './index.html'
 ];
 
-// ---------- انسٹال: نئے ورژن کی فائلیں کیش کریں ----------
+// ---------- انسٹال: نیا کیش بنائیں اور فوراً ایکٹو ہونے کے لیے تیار رہیں ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
-  self.skipWaiting();
 });
 
-// ---------- ایکٹیویٹ: پرانے ورژن کے کیشز صاف کریں ----------
+// ---------- ایکٹیویٹ: پرانے ورژن کے کیش صاف کریں ----------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -27,29 +26,37 @@ self.addEventListener('activate', (event) => {
           .filter((key) => key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
-    )
-  );
-  self.clients.claim();
-});
-
-// ---------- فیچ: نیٹ ورک پہلے، ناکامی پر کیش سے دیں (آف لائن سپورٹ) ----------
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return response;
-      })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+    ).then(() => self.clients.claim())
   );
 });
 
-// ---------- نیا ورژن فوراً ایکٹیو کرنے کا پیغام (اپڈیٹ ٹوسٹ سے) ----------
+// ---------- "ابھی اپڈیٹ کریں" بٹن سے پیغام موصول ہونے پر فوراً نیا ورژن فعال کریں ----------
 self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') {
+  if (event.data === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// ---------- فیچ: صفحہ (HTML) ہمیشہ پہلے نیٹ ورک سے تازہ لانے کی کوشش کریں
+// تاکہ نیا اپڈیٹ فوراً نظر آئے — نیٹ ورک ناکام ہو تو کیش سے دکھائیں (آف لائن سپورٹ) ----------
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+
+  if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept')?.includes('text/html'))) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+          return res;
+        })
+        .catch(() => caches.match(req).then((res) => res || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // ---------- باقی درخواستیں: پہلے کیش، ورنہ نیٹ ورک ----------
+  event.respondWith(
+    caches.match(req).then((cached) => cached || fetch(req))
+  );
 });
