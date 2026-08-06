@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
-<script>
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  var k = (e.key || '').toUpperCase();
-  if (k === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
-      (e.ctrlKey && k === 'U')) {
-    e.preventDefault();
-  }
-});
-</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -401,17 +390,18 @@ document.addEventListener('keydown', function(e){
   .counterSwitchWrap{display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; flex:0 0 auto;}
   .switchTrack{
     position:relative; flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px;
-    cursor:pointer; transition:all .12s ease; border:1px solid rgba(255,255,255,.6);
-    background:linear-gradient(145deg, #eef0f3, #c3c9d1);
-    box-shadow:3px 3px 6px rgba(41,29,10,.32), -1px -1px 3px rgba(255,255,255,.75), inset 0 1px 1px rgba(255,255,255,.6);
+    cursor:pointer; transition:all .12s ease; border:1px solid rgba(0,0,0,.08);
+    background:#eef0f3; filter:grayscale(55%); opacity:.5;
+    box-shadow:inset 1px 1px 3px rgba(41,29,10,.18);
   }
   .switchTrack.active{
     background:linear-gradient(145deg, #dc2626, #7f1d1d);
-    border-color:rgba(0,0,0,.15);
-    box-shadow:inset 2px 2px 5px rgba(0,0,0,.55), inset -1px -1px 2px rgba(255,255,255,.12), 0 1px 2px rgba(0,0,0,.25);
+    border-color:rgba(0,0,0,.15); filter:none; opacity:1;
+    box-shadow:3px 3px 6px rgba(41,29,10,.32), -1px -1px 3px rgba(255,255,255,.75), inset 0 1px 1px rgba(255,255,255,.35);
   }
   .switchTrack:active{ transform:scale(.92); }
-  .switchLabel{font-weight:800; font-size:12px; color:var(--text); white-space:nowrap;}
+  .switchLabel{font-weight:800; font-size:12px; color:var(--text); white-space:nowrap; transition:opacity .12s ease;}
+  .switchTrack:not(.active) + .switchLabel{ opacity:.5; }
 
   /* --- Retail/Wholesale: صرف دو بٹنوں کا segmented جوڑا، ایک وقت میں صرف ایک بھرا ہوا --- */
   .billModeToggle{display:flex; flex-wrap:nowrap; align-items:stretch; background:transparent; padding:0; margin-bottom:0; gap:8px; box-shadow:none;}
@@ -7502,10 +7492,27 @@ function onCustomerChange(){
   renderCart();
 }
 
-// ---------- Walk-in سوئچ: عام ٹوگل نہیں — دبانے پر ہمیشہ Walk-in کو ہی ON کرتا ہے (منتخب کسٹمر ہو تو ہٹا دیتا ہے)۔
-// کسٹمر کو دوبارہ منتخب کرنے کے لیے نیچے کی ہمیشہ ایکٹو کسٹمر لسٹ استعمال کریں ----------
+// ---------- Walk-in سوئچ: اب اصلی سلیکٹ/ڈی سلیکٹ ٹوگل — Retail/Wholesale کی طرح دبانے پر گہرا (منتخب) اور ہلکا/دھیما (غیر منتخب) ہوتا ہے۔
+// پہلی دبائیں (Walk-in آن، سرخ) → دوسری دبائیں (Walk-in آف، دھیما — اب نیچے کسٹمر لسٹ سے کسٹمر منتخب کریں)۔
+// اگر پہلے سے کوئی کسٹمر منتخب ہو تو دبانے پر وہ ہٹا کر واپس Walk-in پر آ جاتا ہے ----------
 function toggleCounterSale(){
-  endCustomerSelection();
+  const custId = document.getElementById('customerSelect')?.value;
+  if(Billing.counterSale){
+    // ---------- پہلے سے Walk-in آن ہے — بند کر کے دھیما دکھائیں، تاکہ نیچے کسٹمر لسٹ سے انتخاب کیا جا سکے ----------
+    Billing.counterSale = false;
+    syncCartModeControls();
+    renderAutoPaymentNote();
+    renderCart();
+  } else if(!custId){
+    // ---------- پہلے سے آف تھا اور کوئی کسٹمر بھی منتخب نہیں — واپس Walk-in آن کر دیں ----------
+    Billing.counterSale = true;
+    syncCartModeControls();
+    renderAutoPaymentNote();
+    renderCart();
+  } else {
+    // ---------- کوئی کسٹمر پہلے سے منتخب تھا — اسے ہٹا کر واپس Walk-in پر لے جائیں ----------
+    endCustomerSelection();
+  }
 }
 
 // ---------- بلنگ کے دوران پیمنٹ کا فیصلہ — Counter Sale میں فوری مکمل نقد؛ ورنہ صارف چاہے تو یہیں جزوی رقم درج کر سکتا ہے،
