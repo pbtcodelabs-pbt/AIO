@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
-<script>
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  var k = (e.key || '').toUpperCase();
-  if (k === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
-      (e.ctrlKey && k === 'U')) {
-    e.preventDefault();
-  }
-});
-</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -401,17 +390,18 @@ document.addEventListener('keydown', function(e){
   .counterSwitchWrap{display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; flex:0 0 auto;}
   .switchTrack{
     position:relative; flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px;
-    cursor:pointer; transition:all .12s ease; border:1px solid rgba(255,255,255,.6);
-    background:linear-gradient(145deg, #eef0f3, #c3c9d1);
-    box-shadow:3px 3px 6px rgba(41,29,10,.32), -1px -1px 3px rgba(255,255,255,.75), inset 0 1px 1px rgba(255,255,255,.6);
+    cursor:pointer; transition:all .12s ease; border:1px solid rgba(0,0,0,.08);
+    background:#eef0f3; filter:grayscale(55%); opacity:.5;
+    box-shadow:inset 1px 1px 3px rgba(41,29,10,.18);
   }
   .switchTrack.active{
     background:linear-gradient(145deg, #dc2626, #7f1d1d);
-    border-color:rgba(0,0,0,.15);
-    box-shadow:inset 2px 2px 5px rgba(0,0,0,.55), inset -1px -1px 2px rgba(255,255,255,.12), 0 1px 2px rgba(0,0,0,.25);
+    border-color:rgba(0,0,0,.15); filter:none; opacity:1;
+    box-shadow:3px 3px 6px rgba(41,29,10,.32), -1px -1px 3px rgba(255,255,255,.75), inset 0 1px 1px rgba(255,255,255,.35);
   }
   .switchTrack:active{ transform:scale(.92); }
-  .switchLabel{font-weight:800; font-size:12px; color:var(--text); white-space:nowrap;}
+  .switchLabel{font-weight:800; font-size:12px; color:var(--text); white-space:nowrap; transition:opacity .12s ease;}
+  .switchTrack:not(.active) + .switchLabel{ opacity:.5; }
 
   /* --- Retail/Wholesale: صرف دو بٹنوں کا segmented جوڑا، ایک وقت میں صرف ایک بھرا ہوا --- */
   .billModeToggle{display:flex; flex-wrap:nowrap; align-items:stretch; background:transparent; padding:0; margin-bottom:0; gap:8px; box-shadow:none;}
@@ -1534,7 +1524,24 @@ document.addEventListener('keydown', function(e){
       padding:10px 0 8px; margin-bottom:4px;
     }
     #screen-billing .searchResults{position:relative; z-index:49;}
-  }
+
+    /* ---------- سرچ سجیشن — سرچ بار کے بالکل نیچے، باریک لائنیں: نام | ویریئنٹ | قیمت | سٹاک —
+       کبھی بھی صفحے کی چوڑائی سے باہر نہیں نکلتیں، ہمیشہ سرچ بار جتنی چوڑی رہتی ہیں ---------- */
+    .billingSearchSuggestions{
+      display:none; max-height:260px; overflow-y:auto; background:#fff;
+      border:1px solid #dbe1ea; border-radius:10px; margin:-2px 0 6px; box-shadow:0 4px 12px rgba(15,23,42,.08);
+    }
+    .billingSearchSuggestions.open{display:block;}
+    .bssRow{
+      display:flex; align-items:center; gap:6px; padding:7px 8px; border-bottom:1px solid #f1f5f9; cursor:pointer;
+    }
+    .bssRow:last-child{border-bottom:none;}
+    .bssRow:active{background:#f8fafc;}
+    .bssName{flex:1 1 0; min-width:0; font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .bssVariant{flex:0 0 auto; font-size:10.5px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:5px; padding:3px 5px; white-space:nowrap;}
+    .bssPrice{flex:0 0 auto; width:56px; text-align:right; font-size:11.5px; font-weight:700; color:#166534; white-space:nowrap;}
+    .bssStock{flex:0 0 auto; width:46px; text-align:right; font-size:10.5px; font-weight:600; color:var(--muted); white-space:nowrap;}
+    .bssEmpty{padding:12px; text-align:center; font-size:12px; color:var(--muted);}
 
   /* =====================================================================
      نوری نستعلیق فعال ہونے پر خاص ایڈجسٹمنٹس
@@ -1708,7 +1715,7 @@ document.addEventListener('keydown', function(e){
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO035</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO040</span>
     </div>
   </div>
 
@@ -1835,11 +1842,13 @@ document.addEventListener('keydown', function(e){
         </div>
 
         <div class="searchRow">
+          <button id="billingSuggestToggleBtn" onclick="toggleBillingSearchSuggestions()" title="Toggle search suggestions list" style="flex:0 0 42px; padding:0; font-size:15px;">💡</button>
           <input type="text" id="searchInput" placeholder="🔍 Search by name or barcode (or scan)..." autofocus
                  oninput="searchItems(this.value)">
           <button onclick="openBarcodeScanner()" title="Scan barcode" style="flex:0 0 46px; padding:0;">📷</button>
           <button onclick="openQuickAdd()" title="Add new item" style="flex:0 0 46px; padding:0; font-size:18px;">+</button>
         </div>
+        <div id="billingSearchSuggestions" class="billingSearchSuggestions"></div>
 
         <!-- کمپیکٹ کیٹیگری بٹن — لیفٹ سائیڈ، ٹاپ پہ، جہاں سے پراڈکٹ گرڈ شروع ہوتا ہے۔
              دبانے پر نیچے پاپ اپ میں کیٹیگری فہرست کھلتی ہے، کیٹیگری منتخب کرتے ہی خودکار بند ہو جاتی ہے۔ -->
@@ -5103,6 +5112,7 @@ const DEFAULT_SETTINGS = {
   printBoldItems: true,          // آئٹم کے نام بولڈ ہوں یا باریک (Thin)
   printItemAlign: 'left',        // آئٹم کے نام کی سیدھ: 'left' یا 'center'
   receiptColorId: 'green',       // بل/رپورٹ کی سکرین/شیئر رنگت — 6 مقررہ ہلکے رنگوں میں سے ایک (RECEIPT_COLOR_PRESETS)
+  billingSearchSuggestionsOn: true, // بلنگ سرچ بار کے نیچے باریک سجیشن فہرست — بائیں طرف والے بٹن سے آن/آف ہوتی ہے
   printFontId: 'segoe',           // پرنٹ کے لیے مخصوص فونٹ سٹائل — عام ایپ کے فونٹ سے الگ، صرف رسید پر اثر انداز
   priceDecimals: 0,               // قیمتوں کے بعد کتنے ڈیسیمل پوائنٹ دکھائیں (کریانہ/میڈیکل جیسے کاروبار کے لیے)
   // ---------- 🖨️ Reports (Price List / Inventory / Profit) کی اپنی الگ پرنٹ سٹائل سیٹنگز —
@@ -5230,8 +5240,12 @@ function activateSubscription(code){
   const daysNum = verifyAndExtractDays(uid, code);
   if(!daysNum) return {success:false, message:'Invalid activation code. Please double-check with your developer.'};
 
-  // ---------- اگر پہلے سے فعال سبسکرپشن ہو تو نئے دن اس میں جوڑ دیں (توسیع)، ورنہ آج سے شروع کریں ----------
-  const base = isSubscriptionActive() ? new Date(AppState.settings.subscriptionExpiry) : new Date();
+  // ---------- اگر پہلے سے فعال ادائیگی شدہ سبسکرپشن ہو تو نئے دن اس میں جوڑ دیں (توسیع/renewal)۔
+  // لیکن اگر ابھی صرف مفت ٹرائل چل رہا ہو تو نیا کوڈ اسی پر جمع نہیں ہونا چاہیے (ورنہ ٹرائل کے باقی دن +
+  // نئے دن مل کر غیر ارادی طور پر ڈبل مل جاتے ہیں) — اس صورت میں نیا کوڈ آج سے تازہ شروع ہو گا، ٹرائل ختم ہو کر
+  // اصل سبسکرپشن اس کی جگہ لے لے گی ----------
+  const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
+  const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
   base.setDate(base.getDate() + daysNum);
   AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
   AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10); // ---------- آج کی تاریخ — بینر میں "Subscribed on" کے لیے ----------
@@ -5812,7 +5826,7 @@ function goTo(screenName, _isHistoryNav){
 
   if(screenName === 'dashboard') renderDashboard();
   if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); }
-  if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); }
+  if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn(); }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
       '🧑‍💼 Salesman: ' + AppState.currentUser.name + renderTodaysBillBadge();
@@ -6666,7 +6680,78 @@ function filterBillingCategory(cat){
 function searchItems(query){
   activeBillingSearch = query.trim().toLowerCase();
   renderBillingProductGrid();
+  if(AppState.settings.billingSearchSuggestionsOn) renderBillingSearchSuggestions(activeBillingSearch);
 }
+
+// ---------- سرچ سجیشن کو آن/آف کریں — سرچ بار کے بائیں طرف والا بٹن، فوری اثر ----------
+function toggleBillingSearchSuggestions(){
+  AppState.settings.billingSearchSuggestionsOn = !AppState.settings.billingSearchSuggestionsOn;
+  persistAllData();
+  syncBillingSuggestToggleBtn();
+  if(!AppState.settings.billingSearchSuggestionsOn){
+    const wrap = document.getElementById('billingSearchSuggestions');
+    if(wrap){ wrap.classList.remove('open'); wrap.innerHTML = ''; }
+  } else {
+    renderBillingSearchSuggestions(activeBillingSearch);
+  }
+}
+function syncBillingSuggestToggleBtn(){
+  const btn = document.getElementById('billingSuggestToggleBtn');
+  if(!btn) return;
+  const on = AppState.settings.billingSearchSuggestionsOn;
+  btn.style.background = on ? 'var(--primary)' : '#e2e8f0';
+  btn.style.color = on ? '#fff' : '#64748b';
+  btn.title = on ? 'Search suggestions: ON — tap to turn off' : 'Search suggestions: OFF — tap to turn on';
+}
+
+// ---------- سرچ سجیشن — سرچ بار کے نیچے باریک فہرست: نام | ویریئنٹ | قیمت | سٹاک —
+// ٹیپ کرتے ہی سیدھا کارٹ میں شامل ہو جائے، بڑے کارڈز میں ڈھونڈنے کی ضرورت نہیں ----------
+function renderBillingSearchSuggestions(query){
+  const wrap = document.getElementById('billingSearchSuggestions');
+  if(!wrap) return;
+  if(!AppState.settings.billingSearchSuggestionsOn || !query){ wrap.classList.remove('open'); wrap.innerHTML = ''; return; }
+
+  const matches = getFlatVariants()
+    .filter(v => v.name.toLowerCase().includes(query) || (v.barcode && v.barcode.toLowerCase().includes(query)))
+    .slice(0, 10);
+
+  if(matches.length === 0){
+    wrap.innerHTML = `<div class="bssEmpty">No matching products</div>`;
+    wrap.classList.add('open');
+    return;
+  }
+
+  wrap.innerHTML = matches.map(v => {
+    // ---------- نام سے ویریئنٹ الگ کریں — باقی ایپ کی طرح یہاں بھی الگ خانے میں ----------
+    let baseName = v.name;
+    if(v.label && baseName.endsWith(v.label)){
+      baseName = baseName.slice(0, baseName.length - v.label.length).trim();
+    }
+    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    return `
+      <div class="bssRow" onclick="selectBillingSuggestion(${v.variant_id})">
+        <span class="bssName">${baseName}</span>
+        <span class="bssVariant">${v.label || '—'}</span>
+        <span class="bssPrice">Rs.${price}</span>
+        <span class="bssStock">${v.stock} left</span>
+      </div>`;
+  }).join('');
+  wrap.classList.add('open');
+}
+function selectBillingSuggestion(variantId){
+  addToCart(variantId);
+  const input = document.getElementById('searchInput');
+  if(input) input.value = '';
+  activeBillingSearch = '';
+  renderBillingProductGrid();
+  document.getElementById('billingSearchSuggestions').classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('billingSearchSuggestions');
+  const input = document.getElementById('searchInput');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target) && e.target !== input) wrap.classList.remove('open');
+});
 
 function renderBillingProductGrid(){
   const grid = document.getElementById('billingProductGrid');
@@ -7407,10 +7492,27 @@ function onCustomerChange(){
   renderCart();
 }
 
-// ---------- Walk-in سوئچ: عام ٹوگل نہیں — دبانے پر ہمیشہ Walk-in کو ہی ON کرتا ہے (منتخب کسٹمر ہو تو ہٹا دیتا ہے)۔
-// کسٹمر کو دوبارہ منتخب کرنے کے لیے نیچے کی ہمیشہ ایکٹو کسٹمر لسٹ استعمال کریں ----------
+// ---------- Walk-in سوئچ: اب اصلی سلیکٹ/ڈی سلیکٹ ٹوگل — Retail/Wholesale کی طرح دبانے پر گہرا (منتخب) اور ہلکا/دھیما (غیر منتخب) ہوتا ہے۔
+// پہلی دبائیں (Walk-in آن، سرخ) → دوسری دبائیں (Walk-in آف، دھیما — اب نیچے کسٹمر لسٹ سے کسٹمر منتخب کریں)۔
+// اگر پہلے سے کوئی کسٹمر منتخب ہو تو دبانے پر وہ ہٹا کر واپس Walk-in پر آ جاتا ہے ----------
 function toggleCounterSale(){
-  endCustomerSelection();
+  const custId = document.getElementById('customerSelect')?.value;
+  if(Billing.counterSale){
+    // ---------- پہلے سے Walk-in آن ہے — بند کر کے دھیما دکھائیں، تاکہ نیچے کسٹمر لسٹ سے انتخاب کیا جا سکے ----------
+    Billing.counterSale = false;
+    syncCartModeControls();
+    renderAutoPaymentNote();
+    renderCart();
+  } else if(!custId){
+    // ---------- پہلے سے آف تھا اور کوئی کسٹمر بھی منتخب نہیں — واپس Walk-in آن کر دیں ----------
+    Billing.counterSale = true;
+    syncCartModeControls();
+    renderAutoPaymentNote();
+    renderCart();
+  } else {
+    // ---------- کوئی کسٹمر پہلے سے منتخب تھا — اسے ہٹا کر واپس Walk-in پر لے جائیں ----------
+    endCustomerSelection();
+  }
 }
 
 // ---------- بلنگ کے دوران پیمنٹ کا فیصلہ — Counter Sale میں فوری مکمل نقد؛ ورنہ صارف چاہے تو یہیں جزوی رقم درج کر سکتا ہے،
@@ -19778,7 +19880,7 @@ async function renderReportToCanvas(){
 
   // ---------- انوینٹری رپورٹ کی سمری — Total Items (All Categories) + In Stock + دونوں Stock Values ----------
   if(currentReportType === 'inventory'){
-    const totalItemsCount = totalItemRows;
+    const totalItemsCount = relevant.length;
     const totalStock = relevant.reduce((s,it)=>s+it.stock,0);
     const stockValPurchase = relevant.reduce((s,it)=>s+(it.purchase*it.stock),0);
     const stockValSales = relevant.reduce((s,it)=>s+(it.retail*it.stock),0);
@@ -19789,7 +19891,7 @@ async function renderReportToCanvas(){
     y += summaryLineH; ctx.fillText(`Stock Value Sales: ${stockValSales.toFixed(decimals)}`, tableLeft, y);
   } else if(currentReportType === 'lowstock'){
     ctx.font = `bold ${fsSummary}px ${fontFam}`;
-    y += summaryLineH; ctx.fillText(`Total Low Stock Items: ${totalItemRows}`, tableLeft, y);
+    y += summaryLineH; ctx.fillText(`Total Low Stock Items: ${relevant.length}`, tableLeft, y);
   }
   y += 10;
 
@@ -21138,6 +21240,11 @@ function testPrint(){
 
 // ---------- ابتدائی لوڈ: جب صفحہ کھلے تو ایک بار product list render ہو ----------
 document.addEventListener('DOMContentLoaded', () => {
+  // ---------- سب سے پہلے — ڈیوائس کی شناخت اور (اگر بالکل نئی ڈیوائس ہے تو) مفت ٹرائل ابھی، فوری طور پر شروع کریں۔
+  // پہلے یہ صرف لاگ ان فنکشنز کے اندر چلتا تھا — اگر کہیں لاگ ان کا راستہ جلدی نہ چلے تو ٹرائل تاخیر کا شکار ہو سکتا تھا۔
+  // اب یہ ایپ کھلتے ہی، سب سے پہلے، براہ راست چلتا ہے ----------
+  try{ getOrCreateDeviceUID(); }catch(e){}
+
   // ---------- 📦 اگر پہلے کسی سیشن میں تصویریں IndexedDB میں محفوظ ہو چکی ہیں، انہیں واپس میموری میں جوڑیں —
   // fire-and-forget، ایپ کے فوری کھلنے میں تاخیر نہیں کرنی (تصویریں چند لمحوں میں خودکار نمودار ہو جائیں گی) ----------
   hydratePhotosFromIndexedDB();
