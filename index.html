@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
-<script>
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  var k = (e.key || '').toUpperCase();
-  if (k === 'F12' ||
-      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
-      (e.ctrlKey && k === 'U')) {
-    e.preventDefault();
-  }
-});
-</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -58,6 +47,12 @@ document.addEventListener('keydown', function(e){
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
+  /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
+  .dobPicker{display:flex; gap:6px; align-items:center; margin:8px 0;}
+  .dobPicker select{flex:1; min-width:0; padding:10px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; background:#fff; color:var(--text);}
+  .dobPicker .dpYearWrap{flex:1.5; display:flex; gap:4px; align-items:center; min-width:0;}
+  .dobPicker .dpYearWrap select, .dobPicker .dpYearWrap input.dpYearManual{flex:1; min-width:0; padding:10px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; text-align:center;}
+  .dpYearToggleBtn{border:none; background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:10px 7px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; flex:0 0 auto;}
   .welcomeTrialBanner{background:linear-gradient(145deg,#dcfce7,#bbf7d0); border:1.5px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center;}
   .welcomeTrialBanner .wtbHeadline{font-size:15px; font-weight:800; color:#166534; line-height:1.3;}
   .welcomeTrialBanner .wtbSubline{font-size:12.5px; font-weight:700; color:#166534; margin-top:4px;}
@@ -1686,7 +1681,16 @@ document.addEventListener('keydown', function(e){
 
     <div id="apinStepDob">
       <div class="settingsHint" style="margin-top:0;">Confirm it's really you — enter your date of birth to continue.</div>
-      <input type="date" id="apinDobInput" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; margin:8px 0;">
+      <div class="dobPicker">
+        <select id="apinDobInput_day" onchange="dpOnChange('apinDobInput')"></select>
+        <select id="apinDobInput_month" onchange="dpOnMonthChange('apinDobInput')"></select>
+        <span class="dpYearWrap" id="apinDobInput_yearWrap">
+          <select id="apinDobInput_year" onchange="dpOnChange('apinDobInput')"></select>
+          <input type="text" id="apinDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('apinDobInput')">
+          <button type="button" id="apinDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('apinDobInput')">✍️ Type</button>
+        </span>
+      </div>
+      <input type="hidden" id="apinDobInput" value="">
       <button class="checkoutBtn" onclick="verifyDobForPinActivation()">Continue</button>
       <div id="apinDobError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
     </div>
@@ -1720,7 +1724,16 @@ document.addEventListener('keydown', function(e){
     <div class="settingsHint">Select your date of birth correctly to set a brand new Admin PIN right here.</div>
     <div id="recoveryStep1">
       <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
-      <input type="date" id="recoveryDobInput" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
+      <div class="dobPicker">
+        <select id="recoveryDobInput_day" onchange="dpOnChange('recoveryDobInput')"></select>
+        <select id="recoveryDobInput_month" onchange="dpOnMonthChange('recoveryDobInput')"></select>
+        <span class="dpYearWrap" id="recoveryDobInput_yearWrap">
+          <select id="recoveryDobInput_year" onchange="dpOnChange('recoveryDobInput')"></select>
+          <input type="text" id="recoveryDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('recoveryDobInput')">
+          <button type="button" id="recoveryDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('recoveryDobInput')">✍️ Type</button>
+        </span>
+      </div>
+      <input type="hidden" id="recoveryDobInput" value="">
       <button class="checkoutBtn" style="margin-top:14px;" onclick="verifyPinRecovery()">Verify</button>
       <div id="recoveryError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
     </div>
@@ -3969,7 +3982,16 @@ document.addEventListener('keydown', function(e){
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen using your date of birth. No typing, no risk of a typo — just pick it from the calendar. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
-            <input type="date" id="securityDobInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <div class="dobPicker" style="margin-bottom:8px;">
+              <select id="securityDobInput_day" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
+              <select id="securityDobInput_month" onchange="dpOnMonthChange('securityDobInput'); saveAdminControl();"></select>
+              <span class="dpYearWrap" id="securityDobInput_yearWrap">
+                <select id="securityDobInput_year" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
+                <input type="text" id="securityDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('securityDobInput'); saveAdminControl();">
+                <button type="button" id="securityDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('securityDobInput')">✍️ Type</button>
+              </span>
+            </div>
+            <input type="hidden" id="securityDobInput" value="">
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🔒 PIN Lock</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">When ON (default), the app always asks for your PIN before opening — recommended. When OFF, the app opens straight to Home for anyone who picks up this phone, no PIN asked at all. Only turn this off if you're the sole user of this phone and no staff/Salesman accounts exist.</div>
@@ -18045,7 +18067,7 @@ async function unlockAdminControl(){
   renderDayPresetsInAdmin();
   // ---------- سیکیورٹی: یہ باکس ہمیشہ خالی کھلے، چاہے پچھلی بار کچھ ٹائپ کر کے سیو کیا گیا ہو —
   // ورنہ ٹائپ کیا گیا جواب اسکرین پر نظر آتا رہتا ہے جو مقصد کے خلاف ہے ----------
-  document.getElementById('securityDobInput').value = '';
+  dpReset('securityDobInput');
 }
 
 // ---------- Admin Control میں موجودہ Payment Accounts کی فہرست دکھائیں (ہر ایک کے ساتھ حذف کا بٹن) ----------
@@ -18092,7 +18114,7 @@ async function saveAdminControl(){
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
-  document.getElementById('securityDobInput').value = '';
+  dpReset('securityDobInput');
   persistAllData();
   document.getElementById('adminSaveMsg').textContent = '✅ Saved!';
   setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
@@ -18146,10 +18168,112 @@ function syncPinLockUI(){
 }
 
 /* =====================================================================
+   🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن (پرانے کیلنڈر باکس کی جگہ)۔
+   دور کے سال (مثلاً 1976) تک پہنچنے کے لیے مہینوں پر بار بار کلک کرنے کی ضرورت نہیں —
+   ہر ایک الگ ڈراپ ڈاؤن ہے، اور سال کو چاہیں تو "✍️ Type" دبا کر سیدھا ٹائپ بھی کیا جا سکتا ہے۔
+   ===================================================================== */
+const DP_MONTHS = [['01','Jan'],['02','Feb'],['03','Mar'],['04','Apr'],['05','May'],['06','Jun'],['07','Jul'],['08','Aug'],['09','Sep'],['10','Oct'],['11','Nov'],['12','Dec']];
+
+function dpEls(id){
+  return {
+    day: document.getElementById(id+'_day'),
+    month: document.getElementById(id+'_month'),
+    year: document.getElementById(id+'_year'),
+    yearManual: document.getElementById(id+'_yearManual'),
+    hidden: document.getElementById(id)
+  };
+}
+
+function dpDaysInMonth(month, year){
+  if(!month) return 31;
+  const y = year && /^\d{4}$/.test(year) ? parseInt(year,10) : 2000; // سال معلوم نہ ہو تو فروری کے لیے leap year فرض کر لیں (زیادہ محفوظ)
+  return new Date(y, parseInt(month,10), 0).getDate();
+}
+
+function dpBuildDayOptions(sel, maxDay, keepVal){
+  const cur = keepVal !== undefined ? keepVal : sel.value;
+  let html = '<option value="">Day</option>';
+  for(let i=1;i<=maxDay;i++){
+    const v = String(i).padStart(2,'0');
+    html += `<option value="${v}">${i}</option>`;
+  }
+  sel.innerHTML = html;
+  sel.value = (cur && parseInt(cur,10) <= maxDay) ? cur : '';
+}
+
+function dpInitPicker(id){
+  const el = dpEls(id);
+  if(!el.day) return; // یہ ودجٹ اس صفحے پر موجود نہیں — خاموشی سے چھوڑ دیں
+  el.month.innerHTML = '<option value="">Month</option>' + DP_MONTHS.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('');
+  dpBuildDayOptions(el.day, 31, '');
+  const nowYear = new Date().getFullYear();
+  let yearHtml = '<option value="">Year</option>';
+  for(let y=nowYear; y>=nowYear-100; y--){ yearHtml += `<option value="${y}">${y}</option>`; }
+  el.year.innerHTML = yearHtml;
+}
+
+function dpOnMonthChange(id){
+  const el = dpEls(id);
+  const yearVal = (el.yearManual && el.yearManual.style.display !== 'none') ? el.yearManual.value.trim() : el.year.value;
+  dpBuildDayOptions(el.day, dpDaysInMonth(el.month.value, yearVal));
+  dpUpdateHidden(id);
+}
+
+function dpOnChange(id){
+  // ---------- سال بدلنے پر بھی دن کی فہرست (فروری 28/29) دوبارہ درست کریں ----------
+  const el = dpEls(id);
+  const yearVal = (el.yearManual && el.yearManual.style.display !== 'none') ? el.yearManual.value.trim() : el.year.value;
+  if(el.month.value) dpBuildDayOptions(el.day, dpDaysInMonth(el.month.value, yearVal), el.day.value);
+  dpUpdateHidden(id);
+}
+
+function dpUpdateHidden(id){
+  const el = dpEls(id);
+  const day = el.day.value;
+  const month = el.month.value;
+  const manualActive = el.yearManual && el.yearManual.style.display !== 'none';
+  const yearVal = manualActive ? el.yearManual.value.trim() : el.year.value;
+  el.hidden.value = (day && month && /^\d{4}$/.test(yearVal||'')) ? `${yearVal}-${month}-${day}` : '';
+}
+
+// ---------- "✍️ Type" بٹن — سال کا ڈراپ ڈاؤن ہٹا کر سیدھا ٹائپنگ باکس دکھائیں (اور واپس بھی جا سکیں) ----------
+function dpToggleYearMode(id){
+  const el = dpEls(id);
+  const btn = document.getElementById(id+'_yearToggleBtn');
+  const usingManual = el.yearManual.style.display !== 'none';
+  if(usingManual){
+    el.yearManual.style.display = 'none';
+    el.year.style.display = '';
+    if(btn) btn.textContent = '✍️ Type';
+  } else {
+    el.year.style.display = 'none';
+    el.yearManual.style.display = '';
+    el.yearManual.value = el.year.value || '';
+    if(btn) btn.textContent = '🔽 Wheel';
+    el.yearManual.focus();
+  }
+  dpUpdateHidden(id);
+}
+
+// ---------- ودجٹ کو بالکل خالی حالت پر واپس لے جائیں (ماڈل دوبارہ کھلنے پر) ----------
+function dpReset(id){
+  const el = dpEls(id);
+  if(!el.day) return;
+  el.month.value = '';
+  dpBuildDayOptions(el.day, 31, '');
+  el.year.value = '';
+  if(el.yearManual){ el.yearManual.value=''; el.yearManual.style.display='none'; }
+  el.year.style.display = '';
+  const btn = document.getElementById(id+'_yearToggleBtn');
+  if(btn) btn.textContent = '✍️ Type';
+  el.hidden.value = '';
+}
+
+/* =====================================================================
    🔓 PIN Lock دوبارہ فعال کرنا — DOB تصدیق کے بعد، پرانا PIN رکھیں یا نیا بنائیں
    ===================================================================== */
 function openActivatePinLockModal(){
-  document.getElementById('apinDobInput').value = '';
+  dpReset('apinDobInput');
   document.getElementById('apinDobError').textContent = '';
   document.getElementById('apinNewPin1').value = '';
   document.getElementById('apinNewPin2').value = '';
@@ -18235,7 +18359,7 @@ async function saveNewPinAndActivate(){
    🆘 PIN Recovery — Login صفحے پر "Forgot your PIN" سے کھلتا ہے، اب تاریخ پیدائش سے تصدیق ہوتی ہے
    ===================================================================== */
 function openPinRecoveryModal(){
-  document.getElementById('recoveryDobInput').value = '';
+  dpReset('recoveryDobInput');
   document.getElementById('recoveryNewPinInput').value = '';
   document.getElementById('recoveryError').textContent = '';
   document.getElementById('recoveryStep1').style.display = 'block';
@@ -21479,6 +21603,11 @@ document.addEventListener('DOMContentLoaded', () => {
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   applyUiZoom(AppState.settings.uiZoom || 100);
   applyCartTextSettings();
+
+  // ---------- 🎂 DOB Wheel Picker (Day/Month/Year ڈراپ ڈاؤن) کی فہرستیں یہیں ایک بار بنا لیں ----------
+  dpInitPicker('apinDobInput');
+  dpInitPicker('recoveryDobInput');
+  dpInitPicker('securityDobInput');
 
   // ---------- Login اسکرین کی حالت (Trial بینر + PIN یا Quick Enter) ہمیشہ پہلے تیار کر لیں ----------
   setupLoginScreen();
