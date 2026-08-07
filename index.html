@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
+<script>
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+document.addEventListener('keydown', function(e){
+  var k = (e.key || '').toUpperCase();
+  if (k === 'F12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'J' || k === 'C')) ||
+      (e.ctrlKey && k === 'U')) {
+    e.preventDefault();
+  }
+});
+</script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -390,18 +401,17 @@
   .counterSwitchWrap{display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; flex:0 0 auto;}
   .switchTrack{
     position:relative; flex:0 0 auto; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px;
-    cursor:pointer; transition:all .12s ease; border:1px solid rgba(0,0,0,.08);
-    background:#eef0f3; filter:grayscale(55%); opacity:.5;
-    box-shadow:inset 1px 1px 3px rgba(41,29,10,.18);
+    cursor:pointer; transition:all .12s ease; border:1px solid rgba(255,255,255,.6);
+    background:linear-gradient(145deg, #eef0f3, #c3c9d1);
+    box-shadow:3px 3px 6px rgba(41,29,10,.32), -1px -1px 3px rgba(255,255,255,.75), inset 0 1px 1px rgba(255,255,255,.6);
   }
   .switchTrack.active{
     background:linear-gradient(145deg, #dc2626, #7f1d1d);
-    border-color:rgba(0,0,0,.15); filter:none; opacity:1;
-    box-shadow:3px 3px 6px rgba(41,29,10,.32), -1px -1px 3px rgba(255,255,255,.75), inset 0 1px 1px rgba(255,255,255,.35);
+    border-color:rgba(0,0,0,.15);
+    box-shadow:inset 2px 2px 5px rgba(0,0,0,.55), inset -1px -1px 2px rgba(255,255,255,.12), 0 1px 2px rgba(0,0,0,.25);
   }
   .switchTrack:active{ transform:scale(.92); }
-  .switchLabel{font-weight:800; font-size:12px; color:var(--text); white-space:nowrap; transition:opacity .12s ease;}
-  .switchTrack:not(.active) + .switchLabel{ opacity:.5; }
+  .switchLabel{font-weight:800; font-size:12px; color:var(--text); white-space:nowrap;}
 
   /* --- Retail/Wholesale: صرف دو بٹنوں کا segmented جوڑا، ایک وقت میں صرف ایک بھرا ہوا --- */
   .billModeToggle{display:flex; flex-wrap:nowrap; align-items:stretch; background:transparent; padding:0; margin-bottom:0; gap:8px; box-shadow:none;}
@@ -1651,14 +1661,66 @@
 
 <!-- 🔐 SUBSCRIPTION GATE — سبسکرپشن ختم/غیر فعال ہونے پر یہ صفحہ لاگ ان کے بعد نظر آئے گا -->
 <!-- 🆘 PIN RECOVERY MODAL — بچپن کے نک نیم کا آسان سوال صحیح ہو تو خود نیا PIN بنا سکیں، Admin سے رابطہ کیے بغیر -->
+<!-- ---------- 🔒 PIN Lock بند کرنے سے پہلے واضح انتباہ + دو طرفہ تصدیق ---------- -->
+<div class="modalOverlay" id="pinLockWarningModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:380px;">
+    <h3>⚠️ Turn Off PIN Lock?</h3>
+    <div style="background:#fef2f2; color:#b91c1c; border-radius:10px; padding:12px; font-size:13px; line-height:1.6; margin:10px 0;">
+      If you turn this off, <b>anyone who picks up this phone</b> — a customer, a family member, anyone — will be able to open this app straight to your business data: bills, sales history, customer udhaar/qarz records, everything. No PIN will be asked.
+      <br><br>
+      This is temporary — you can turn it back on any time from Home, using your date of birth. Only turn it off if you are the sole user of this phone.
+    </div>
+    <label style="display:flex; align-items:flex-start; gap:8px; font-size:12.5px; font-weight:700; color:var(--text); margin:12px 0; cursor:pointer;">
+      <input type="checkbox" id="pinLockWarningAck" style="width:17px; height:17px; margin-top:1px;" onchange="document.getElementById('pinLockConfirmBtn').disabled = !this.checked;">
+      I understand this risk and the privacy compromise of my app, and I take full responsibility.
+    </label>
+    <button id="pinLockConfirmBtn" class="checkoutBtn" style="background:var(--danger);" disabled onclick="confirmDisablePinLock()">Yes, Turn Off PIN Lock</button>
+    <button class="cancelBtn" style="width:100%; margin-top:8px;" onclick="document.getElementById('pinLockWarningModal').classList.remove('show')">Cancel — Keep PIN Lock On</button>
+  </div>
+</div>
+
+<!-- ---------- 🔓 PIN Lock دوبارہ فعال کریں — پہلے تاریخ پیدائش سے تصدیق، پھر پرانا PIN رکھیں یا نیا بنائیں ---------- -->
+<div class="modalOverlay" id="activatePinLockModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:380px;">
+    <h3>🔓 Activate PIN Lock</h3>
+
+    <div id="apinStepDob">
+      <div class="settingsHint" style="margin-top:0;">Confirm it's really you — enter your date of birth to continue.</div>
+      <input type="date" id="apinDobInput" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; margin:8px 0;">
+      <button class="checkoutBtn" onclick="verifyDobForPinActivation()">Continue</button>
+      <div id="apinDobError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
+    </div>
+
+    <div id="apinStepChoice" style="display:none;">
+      <div class="settingsHint" style="margin-top:0;">Do you remember your current PIN?</div>
+      <button class="checkoutBtn" style="margin-top:8px;" onclick="keepExistingPinAndActivate()">✅ Yes — Keep Using It</button>
+      <button class="testPrintBtn" style="width:100%; margin-top:8px; background:#eef2ff; color:var(--primary-dark);" onclick="showSetNewPinStep()">🔄 No — Set a New PIN</button>
+    </div>
+
+    <div id="apinStepNewPin" style="display:none;">
+      <div class="settingsHint" style="margin-top:0;">Set a new 4-digit PIN. Enter it twice so we're sure there's no typo.</div>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:8px 0 4px;">New PIN</label>
+      <input type="password" id="apinNewPin1" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Re-enter New PIN</label>
+      <input type="password" id="apinNewPin2" maxlength="8" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px; text-align:center; letter-spacing:4px;">
+      <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--muted); margin:10px 0 4px; cursor:pointer;">
+        <input type="checkbox" id="apinShowPinChk" onchange="toggleApinPinVisibility(this.checked)"> 👁️ Show PIN while typing
+      </label>
+      <button class="checkoutBtn" style="margin-top:8px;" onclick="saveNewPinAndActivate()">Save & Activate PIN Lock</button>
+      <div id="apinNewPinError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
+    </div>
+
+    <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('activatePinLockModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
 <div class="modalOverlay" id="pinRecoveryModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:380px;">
     <h3>🆘 Recover Admin PIN</h3>
-    <div class="settingsHint">Answer your security question correctly to set a brand new Admin PIN right here.</div>
+    <div class="settingsHint">Select your date of birth correctly to set a brand new Admin PIN right here.</div>
     <div id="recoveryStep1">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">What were you called as a child? (Nickname)</label>
-      <div id="recoveryNicknameHint" style="font-size:11.5px; color:var(--primary-dark); font-weight:700; margin-bottom:6px;"></div>
-      <input type="password" id="recoveryNicknameInput" placeholder="e.g. Mithoo" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
+      <input type="date" id="recoveryDobInput" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:14px;">
       <button class="checkoutBtn" style="margin-top:14px;" onclick="verifyPinRecovery()">Verify</button>
       <div id="recoveryError" style="color:var(--danger); font-size:12.5px; margin-top:8px; text-align:center;"></div>
     </div>
@@ -1715,7 +1777,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO039</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO042</span>
     </div>
   </div>
 
@@ -1773,6 +1835,12 @@
     <!-- BILLING (Admin + Salesman دونوں کو نظر آتی ہے) — پورا صفحہ صرف پراڈکٹس کے لیے، باقی سب فلوٹنگ کارٹ بار میں -->
     <!-- ===================== 🏠 HOME SCREEN — اصل مین پیج، لاگ ان کے فوراً بعد یہی کھلتا ہے ===================== -->
     <div class="screen" id="screen-home">
+
+      <!-- ---------- 🔓 PIN Lock بند ہو تو یاد دہانی — دوبارہ آن کرنا ایک ٹیپ کی دوری پر ---------- -->
+      <div id="homePinLockOffBanner" class="admin-only" style="display:none; background:#fef3c7; color:#92400e; border-radius:12px; padding:10px 14px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;">
+        <span style="font-size:12.5px; font-weight:700;">🔓 PIN Lock is OFF — anyone can open this app</span>
+        <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
+      </div>
 
       <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
       <div class="homeBusinessCard">
@@ -3900,8 +3968,15 @@
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen by answering this correctly. No need to contact anyone. A short hint (first...last letter) will be shown automatically to jog your memory. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
-            <input type="password" id="securityNicknameInput" placeholder="What were you called as a child? (e.g. Mithoo)" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen using your date of birth. No typing, no risk of a typo — just pick it from the calendar. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
+            <input type="date" id="securityDobInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="saveAdminControl()">
+
+            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🔒 PIN Lock</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">When ON (default), the app always asks for your PIN before opening — recommended. When OFF, the app opens straight to Home for anyone who picks up this phone, no PIN asked at all. Only turn this off if you're the sole user of this phone and no staff/Salesman accounts exist.</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border-radius:10px; padding:10px 12px;">
+              <span id="pinLockStatusLabel" style="font-size:13px; font-weight:700;">🔒 PIN Lock is ON</span>
+              <button id="pinLockToggleBtn" onclick="onPinLockToggleClick()" style="padding:7px 16px; border:none; border-radius:20px; font-weight:800; font-size:12px; cursor:pointer; background:var(--success); color:#fff;">ON</button>
+            </div>
 
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
@@ -5066,9 +5141,9 @@ const DEFAULT_SETTINGS = {
   // زبردستی لانا چاہیں، اس نمبر کو بڑھا دیتے ہیں۔ ہر پرانا محفوظ شدہ settings اس نئے نمبر سے پیچھے ہوگا،
   // چاہے rate/plans میں پہلے سے کچھ بھی موجود ہو — اس لیے migration ہمیشہ صحیح چلتی ہے ----------
   settingsVersion: 2,
-  // ---------- 🆘 PIN Recovery — اگر Admin PIN بالکل بھول جائیں تو یہ دونوں چیزیں درست بتانے پر نیا PIN خود بنا سکیں گے ----------
-  securityNicknameHash: '',
-  securityNicknameHint: '',
+  // ---------- 🆘 PIN Recovery — اگر Admin PIN بالکل بھول جائیں تو تاریخ پیدائش درست بتانے پر نیا PIN خود بنا سکیں گے ----------
+  securityDobHash: '',
+  pinLockEnabled: true, // ---------- بند کرنے پر سنگل ایڈمن یوزر بغیر PIN کے خودکار داخل ہو جاتا ہے — واضح انتباہ کے بعد ہی بند ہو سکتا ہے ----------
   // ---------- 📋 محفوظ شدہ جوابی پیغامات — سبسکرپشن پلانز وغیرہ بار بار ٹائپ کیے بغیر ایک ٹیپ میں کاپی کر کے بھیجیں ----------
   replyTemplates: [
     {title:'Payment Reminder', text:'Dear Customer, this is a friendly reminder that a payment is due on your account. Please clear it at your earliest convenience. Thank you!'},
@@ -5551,7 +5626,8 @@ async function setupLoginScreen(){
 function quickEnterApp(){
   const admin = usersData.find(u => u.role === 'admin' && u.is_active);
   if(!admin){ alert('No active Admin account found.'); return; }
-  finishLogin(admin);
+  // ---------- یہاں سے داخل ہونے پر بھی سیشن یاد رکھیں — اگلی بار ایپ کھلنے پر دوبارہ لاگ ان اسکرین نہ دکھے ----------
+  finishLogin(admin, true);
 }
 
 async function login(){
@@ -5581,9 +5657,9 @@ async function login(){
 }
 
 // ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (عام PIN اور ماسٹر PIN دونوں یہاں سے گزرتے ہیں) ----------
-function finishLogin(user){
+function finishLogin(user, forceRemember){
   const rememberChk = document.getElementById('rememberPinChk');
-  if(rememberChk && rememberChk.checked){
+  if(forceRemember || (rememberChk && rememberChk.checked)){
     saveToStorage('rememberedSession', { user_id: user.user_id });
   } else {
     saveToStorage('rememberedSession', null);
@@ -5702,6 +5778,24 @@ function activateFromLoginScreen(){
 
 // ---------- اگر اس ڈیوائس پر پن یاد رکھا ہوا ہے تو خودکار لاگ ان کر دیں (لاگ ان اسکرین دکھائے بغیر) ----------
 function tryAutoLogin(){
+  // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
+  // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
+  if(AppState.settings.pinLockEnabled === false){
+    const adminUser = usersData.find(u => u.role === 'admin' && u.is_active);
+    if(adminUser){
+      applyRole(adminUser.role, adminUser.name);
+      document.getElementById('loginScreen').style.display = 'none';
+      if(!isSubscriptionActive()){
+        showSubscriptionGate();
+        return true;
+      }
+      document.getElementById('app').style.display = 'grid';
+      goTo('home');
+      setTimeout(checkBackupReminder, 1800);
+      return true;
+    }
+  }
+
   const remembered = loadFromStorage('rememberedSession', null);
   if(!remembered || !remembered.user_id) return false;
 
@@ -5825,7 +5919,7 @@ function goTo(screenName, _isHistoryNav){
   requestAnimationFrame(() => { window.fixMainAreaHeight && window.fixMainAreaHeight(); resetScrollNow(); });
 
   if(screenName === 'dashboard') renderDashboard();
-  if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); }
+  if(screenName === 'home') { renderHomeBusinessCard(); renderSubscriptionBanner(); renderHomeIconGrid(); syncPinLockUI(); }
   if(screenName === 'billing') { renderRejectionNotice(); renderBillingCategoryRail(); renderBillingProductGrid(); renderAutoPaymentNote(); renderFloatingCartBar(); syncBillingSuggestToggleBtn(); }
   if(AppState.currentRole === 'salesman'){
     document.getElementById('userTag').innerHTML =
@@ -7492,27 +7586,10 @@ function onCustomerChange(){
   renderCart();
 }
 
-// ---------- Walk-in سوئچ: اب اصلی سلیکٹ/ڈی سلیکٹ ٹوگل — Retail/Wholesale کی طرح دبانے پر گہرا (منتخب) اور ہلکا/دھیما (غیر منتخب) ہوتا ہے۔
-// پہلی دبائیں (Walk-in آن، سرخ) → دوسری دبائیں (Walk-in آف، دھیما — اب نیچے کسٹمر لسٹ سے کسٹمر منتخب کریں)۔
-// اگر پہلے سے کوئی کسٹمر منتخب ہو تو دبانے پر وہ ہٹا کر واپس Walk-in پر آ جاتا ہے ----------
+// ---------- Walk-in سوئچ: عام ٹوگل نہیں — دبانے پر ہمیشہ Walk-in کو ہی ON کرتا ہے (منتخب کسٹمر ہو تو ہٹا دیتا ہے)۔
+// کسٹمر کو دوبارہ منتخب کرنے کے لیے نیچے کی ہمیشہ ایکٹو کسٹمر لسٹ استعمال کریں ----------
 function toggleCounterSale(){
-  const custId = document.getElementById('customerSelect')?.value;
-  if(Billing.counterSale){
-    // ---------- پہلے سے Walk-in آن ہے — بند کر کے دھیما دکھائیں، تاکہ نیچے کسٹمر لسٹ سے انتخاب کیا جا سکے ----------
-    Billing.counterSale = false;
-    syncCartModeControls();
-    renderAutoPaymentNote();
-    renderCart();
-  } else if(!custId){
-    // ---------- پہلے سے آف تھا اور کوئی کسٹمر بھی منتخب نہیں — واپس Walk-in آن کر دیں ----------
-    Billing.counterSale = true;
-    syncCartModeControls();
-    renderAutoPaymentNote();
-    renderCart();
-  } else {
-    // ---------- کوئی کسٹمر پہلے سے منتخب تھا — اسے ہٹا کر واپس Walk-in پر لے جائیں ----------
-    endCustomerSelection();
-  }
+  endCustomerSelection();
 }
 
 // ---------- بلنگ کے دوران پیمنٹ کا فیصلہ — Counter Sale میں فوری مکمل نقد؛ ورنہ صارف چاہے تو یہیں جزوی رقم درج کر سکتا ہے،
@@ -17742,6 +17819,7 @@ function renderLastBackupStatus(){
 function renderSettingsScreen(){
   renderStorageUsage();
   renderLastBackupStatus();
+  syncPinLockUI();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
 
@@ -17967,7 +18045,7 @@ async function unlockAdminControl(){
   renderDayPresetsInAdmin();
   // ---------- سیکیورٹی: یہ باکس ہمیشہ خالی کھلے، چاہے پچھلی بار کچھ ٹائپ کر کے سیو کیا گیا ہو —
   // ورنہ ٹائپ کیا گیا جواب اسکرین پر نظر آتا رہتا ہے جو مقصد کے خلاف ہے ----------
-  document.getElementById('securityNicknameInput').value = '';
+  document.getElementById('securityDobInput').value = '';
 }
 
 // ---------- Admin Control میں موجودہ Payment Accounts کی فہرست دکھائیں (ہر ایک کے ساتھ حذف کا بٹن) ----------
@@ -18014,7 +18092,7 @@ async function saveAdminControl(){
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
-  document.getElementById('securityNicknameInput').value = '';
+  document.getElementById('securityDobInput').value = '';
   persistAllData();
   document.getElementById('adminSaveMsg').textContent = '✅ Saved!';
   setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
@@ -18026,48 +18104,159 @@ function normalizeNicknameAnswer(value){
 }
 
 async function saveSecurityRecoveryInfo(){
-  const nickname = document.getElementById('securityNicknameInput').value.trim();
-  if(nickname){
-    AppState.settings.securityNicknameHash = await hashPin(normalizeNicknameAnswer(nickname));
-    // ---------- یاد دلانے کے لیے چھوٹا سا ہنٹ خودکار بنائیں — صرف پہلا اور آخری حرف، پورا نام نہیں (پلین ٹیکسٹ میں محفوظ) ----------
-    const clean = nickname.trim();
-    AppState.settings.securityNicknameHint = clean.length > 1
-      ? `${clean[0].toUpperCase()}...${clean[clean.length - 1].toUpperCase()}`
-      : clean.toUpperCase();
+  const dob = document.getElementById('securityDobInput').value;
+  if(dob){
+    AppState.settings.securityDobHash = await hashPin(dob); // ---------- ہمیشہ YYYY-MM-DD فارمیٹ میں آتا ہے، ٹائپنگ کی غلطی کا امکان نہیں ----------
   }
   persistAllData();
 }
 
+// ---------- 🔒 PIN Lock — بٹن دبانے پر: بند کرنا ہو تو انتباہی modal، آن کرنا ہو تو فوری/بلا رکاوٹ ----------
+function onPinLockToggleClick(){
+  if(AppState.settings.pinLockEnabled === false){
+    // ---------- دوبارہ آن کرنا — کوئی رکاوٹ نہیں، فوری ----------
+    AppState.settings.pinLockEnabled = true;
+    persistAllData();
+    syncPinLockUI();
+  } else {
+    // ---------- بند کرنا — پہلے واضح انتباہ اور تصدیق ----------
+    document.getElementById('pinLockWarningAck').checked = false;
+    document.getElementById('pinLockConfirmBtn').disabled = true;
+    document.getElementById('pinLockWarningModal').classList.add('show');
+  }
+}
+function confirmDisablePinLock(){
+  AppState.settings.pinLockEnabled = false;
+  persistAllData();
+  document.getElementById('pinLockWarningModal').classList.remove('show');
+  syncPinLockUI();
+}
+function syncPinLockUI(){
+  const btn = document.getElementById('pinLockToggleBtn');
+  const label = document.getElementById('pinLockStatusLabel');
+  const on = AppState.settings.pinLockEnabled !== false;
+  if(btn && label){
+    btn.textContent = on ? 'ON' : 'OFF';
+    btn.style.background = on ? 'var(--success)' : '#94a3b8';
+    label.textContent = on ? '🔒 PIN Lock is ON' : '🔓 PIN Lock is OFF';
+  }
+  // ---------- ہوم سکرین پر یاد دہانی — صرف اسی وقت جب واقعی بند ہو ----------
+  const banner = document.getElementById('homePinLockOffBanner');
+  if(banner) banner.style.display = on ? 'none' : 'flex';
+}
+
 /* =====================================================================
-   🆘 PIN Recovery — Login صفحے پر "Forgot your PIN" سے کھلتا ہے
+   🔓 PIN Lock دوبارہ فعال کرنا — DOB تصدیق کے بعد، پرانا PIN رکھیں یا نیا بنائیں
+   ===================================================================== */
+function openActivatePinLockModal(){
+  document.getElementById('apinDobInput').value = '';
+  document.getElementById('apinDobError').textContent = '';
+  document.getElementById('apinNewPin1').value = '';
+  document.getElementById('apinNewPin2').value = '';
+  document.getElementById('apinNewPinError').textContent = '';
+  document.getElementById('apinShowPinChk').checked = false;
+  toggleApinPinVisibility(false);
+  document.getElementById('apinStepChoice').style.display = 'none';
+  document.getElementById('apinStepNewPin').style.display = 'none';
+
+  if(!AppState.settings.securityDobHash){
+    // ---------- DOB کبھی سیٹ ہی نہیں ہوئی — پہلے یہیں سیٹ کر کے آگے بڑھیں ----------
+    document.getElementById('apinDobError').textContent = 'ℹ️ No date of birth on file yet — enter it now to set it up.';
+  }
+  document.getElementById('apinStepDob').style.display = 'block';
+  document.getElementById('activatePinLockModal').classList.add('show');
+}
+
+async function verifyDobForPinActivation(){
+  const dob = document.getElementById('apinDobInput').value;
+  if(!dob){
+    document.getElementById('apinDobError').textContent = '❌ Please select your date of birth.';
+    return;
+  }
+  const dobHash = await hashPin(dob);
+
+  if(!AppState.settings.securityDobHash){
+    // ---------- پہلی بار — یہیں محفوظ کر لیں ----------
+    AppState.settings.securityDobHash = dobHash;
+    persistAllData();
+  } else if(dobHash !== AppState.settings.securityDobHash){
+    document.getElementById('apinDobError').textContent = '❌ This does not match our records. Please try again.';
+    return;
+  }
+
+  document.getElementById('apinDobError').textContent = '';
+  document.getElementById('apinStepDob').style.display = 'none';
+  document.getElementById('apinStepChoice').style.display = 'block';
+}
+
+function keepExistingPinAndActivate(){
+  AppState.settings.pinLockEnabled = true;
+  persistAllData();
+  syncPinLockUI();
+  document.getElementById('activatePinLockModal').classList.remove('show');
+}
+
+function showSetNewPinStep(){
+  document.getElementById('apinStepChoice').style.display = 'none';
+  document.getElementById('apinStepNewPin').style.display = 'block';
+}
+
+function toggleApinPinVisibility(show){
+  const type = show ? 'text' : 'password';
+  document.getElementById('apinNewPin1').type = type;
+  document.getElementById('apinNewPin2').type = type;
+}
+
+async function saveNewPinAndActivate(){
+  const pin1 = document.getElementById('apinNewPin1').value.trim();
+  const pin2 = document.getElementById('apinNewPin2').value.trim();
+  const errEl = document.getElementById('apinNewPinError');
+
+  if(pin1.length < 4){
+    errEl.textContent = '❌ PIN must be at least 4 digits.';
+    return;
+  }
+  if(pin1 !== pin2){
+    errEl.textContent = '❌ The two PINs do not match. Please try again.';
+    return;
+  }
+
+  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
+  if(!admin){ errEl.textContent = '❌ No active Admin account found.'; return; }
+
+  admin.pin = await hashPin(pin1);
+  AppState.settings.pinLockEnabled = true;
+  persistAllData();
+  syncPinLockUI();
+  document.getElementById('activatePinLockModal').classList.remove('show');
+}
+
+/* =====================================================================
+   🆘 PIN Recovery — Login صفحے پر "Forgot your PIN" سے کھلتا ہے، اب تاریخ پیدائش سے تصدیق ہوتی ہے
    ===================================================================== */
 function openPinRecoveryModal(){
-  document.getElementById('recoveryNicknameInput').value = '';
+  document.getElementById('recoveryDobInput').value = '';
   document.getElementById('recoveryNewPinInput').value = '';
   document.getElementById('recoveryError').textContent = '';
   document.getElementById('recoveryStep1').style.display = 'block';
   document.getElementById('recoveryStep2').style.display = 'none';
 
   // ---------- اگر Recovery کبھی سیٹ اپ ہی نہ کی گئی ہو تو صاف بتائیں کہ یہ ممکن نہیں ----------
-  const hintEl = document.getElementById('recoveryNicknameHint');
-  if(!AppState.settings.securityNicknameHash){
+  if(!AppState.settings.securityDobHash){
     document.getElementById('recoveryError').textContent = '❌ Recovery info was never set up on this device. Please contact your developer for help.';
-    hintEl.textContent = '';
-  } else {
-    hintEl.textContent = AppState.settings.securityNicknameHint ? `💡 Hint: ${AppState.settings.securityNicknameHint}` : '';
   }
   document.getElementById('pinRecoveryModal').classList.add('show');
 }
 
 async function verifyPinRecovery(){
-  const nickname = document.getElementById('recoveryNicknameInput').value.trim();
-  if(!nickname){
-    document.getElementById('recoveryError').textContent = '❌ Please enter your childhood nickname.';
+  const dob = document.getElementById('recoveryDobInput').value;
+  if(!dob){
+    document.getElementById('recoveryError').textContent = '❌ Please select your date of birth.';
     return;
   }
-  const nicknameHash = await hashPin(normalizeNicknameAnswer(nickname));
+  const dobHash = await hashPin(dob);
 
-  if(nicknameHash !== AppState.settings.securityNicknameHash){
+  if(dobHash !== AppState.settings.securityDobHash){
     document.getElementById('recoveryError').textContent = '❌ This does not match our records. Please try again.';
     return;
   }
