@@ -1661,7 +1661,7 @@
   <div class="modalBox" style="max-width:380px;">
     <h3>⚠️ Turn Off PIN Lock?</h3>
     <div style="background:#fef2f2; color:#b91c1c; border-radius:10px; padding:12px; font-size:13px; line-height:1.6; margin:10px 0;">
-      If you turn this off, <b>anyone who picks up this phone</b> — a customer, a family member, anyone — will be able to open this app straight to your business data: bills, sales history, customer udhaar/qarz records, everything. No PIN will be asked.
+      If you turn this off, <b>anyone who picks up this phone</b> — a customer, a family member, anyone — will be able to open this app straight to your business data: bills, sales history, customer I Gave/I Got records, everything. No PIN will be asked.
       <br><br>
       This is temporary — you can turn it back on any time from Home, using your date of birth. Only turn it off if you are the sole user of this phone.
     </div>
@@ -1680,7 +1680,6 @@
     <h3>🔓 Activate PIN Lock</h3>
 
     <div id="apinStepDob">
-      <div class="settingsHint" style="margin-top:0;">Confirm it's really you — enter your date of birth to continue.</div>
       <div class="dobPicker">
         <select id="apinDobInput_day" onchange="dpOnChange('apinDobInput')"></select>
         <select id="apinDobInput_month" onchange="dpOnMonthChange('apinDobInput')"></select>
@@ -1696,7 +1695,6 @@
     </div>
 
     <div id="apinStepChoice" style="display:none;">
-      <div class="settingsHint" style="margin-top:0;">Do you remember your current PIN?</div>
       <button class="checkoutBtn" style="margin-top:8px;" onclick="keepExistingPinAndActivate()">✅ Yes — Keep Using It</button>
       <button class="testPrintBtn" style="width:100%; margin-top:8px; background:#eef2ff; color:var(--primary-dark);" onclick="showSetNewPinStep()">🔄 No — Set a New PIN</button>
     </div>
@@ -1721,7 +1719,6 @@
 <div class="modalOverlay" id="pinRecoveryModal" style="z-index:3700;" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:380px;">
     <h3>🆘 Recover Admin PIN</h3>
-    <div class="settingsHint">Select your date of birth correctly to set a brand new Admin PIN right here.</div>
     <div id="recoveryStep1">
       <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
       <div class="dobPicker">
@@ -1790,7 +1787,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO046</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO98SU0829AM</span>
     </div>
   </div>
 
@@ -2212,13 +2209,13 @@
           <div class="finRow"><span>📦 Stock Value</span><span id="hlStock">—</span></div>
           <div class="finRow"><span>💵 Cash in Hand</span><span id="hlCash">—</span></div>
           <div class="finRow"><span>🤝 Customer Receivables</span><span id="hlReceivable">—</span></div>
-          <div class="finRow"><span>📔 Diary Qarz</span><span id="hlDiaryReceivable">—</span></div>
+          <div class="finRow"><span>📔 Diary I Gave</span><span id="hlDiaryReceivable">—</span></div>
           <div class="finSplitTotal" id="finGreenTotal">Total: Rs. 0</div>
         </div>
         <div class="finSplitCol finRed">
           <div class="finSplitHead">🔴 Money Going Out / Liabilities</div>
           <div class="finRow"><span>📤 Supplier Payables</span><span id="hlPayable">—</span></div>
-          <div class="finRow"><span>📔 Diary Udhaar</span><span id="hlDiaryPayable">—</span></div>
+          <div class="finRow"><span>📔 Diary I Got</span><span id="hlDiaryPayable">—</span></div>
           <div class="finSplitTotal" id="finRedTotal">Total: Rs. 0</div>
         </div>
       </div>
@@ -3199,15 +3196,15 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
-      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 Udhaar = We Owe Them, 🟢 Qarz = They Owe Us.</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 I Got = We Owe Them, 🟢 I Gave = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 Total Udhaar</div>
+          <div class="diaryTotalLabel">🔴 Total I Got</div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
         <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 Total Qarz</div>
+          <div class="diaryTotalLabel">🟢 Total I Gave</div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
@@ -3835,7 +3832,6 @@
         <!-- --- 🔍 پوری ایپ کا سائز — آئیکن، فونٹ، بٹن سب ایک ساتھ بڑے/چھوٹے --- -->
         <div class="settingsCard">
           <h3>🔍 App Display Size</h3>
-          <div class="settingsHint">Make the whole app — icons, text, buttons — bigger or smaller. Useful for bigger screens or if you want larger text.</div>
           <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
             <span style="font-size:12px; color:var(--muted);">A</span>
             <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
@@ -3847,7 +3843,6 @@
         <!-- --- تھیم اور ظاہری شکل --- -->
         <div class="settingsCard" id="settingsCardTheme">
           <h3>🎨 Theme & Appearance</h3>
-          <div class="settingsHint">As soon as you pick a colour, the whole app — buttons, header, sidebar, everything — instantly changes to that colour.</div>
 
           <div class="settingsSubLabel">Colour Theme</div>
           <div class="themeSwatchGrid" id="themeSwatchGrid"></div>
@@ -3859,21 +3854,14 @@
         <!-- --- 💵 ابتدائی نقد رقم — Dashboard کا Cash in Hand اسی سے شروع ہو کر حقیقی بلوں سے اپڈیٹ ہوتا ہے --- -->
         <div class="settingsCard">
           <h3>💵 Opening Cash Balance</h3>
-          <div class="settingsHint">Enter how much cash you actually had before you started using this app. The Dashboard's "Cash in Hand" starts from this number, then updates automatically with every real cash sale, collection, and payment — fully based on your actual records, no hidden numbers.</div>
           <input type="number" id="openingCashInput" placeholder="e.g. 10000" onchange="updateOpeningCashBalance(this.value)" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         </div>
 
-        <!-- --- 🧾 Bill/Print کی تمام سیٹنگز اب اپنے الگ صفحے "🧾 Bill & Print Settings" پر منتقل کر دی گئی ہیں --- -->
-        <div class="settingsCard" style="background:#eef2ff; text-align:center;">
-          <h3 style="margin-bottom:8px;">🧾 Bill & Print Settings moved!</h3>
-          <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Business Info, Printer, Receipt Content, and Print Text Size are now all together in one place — under 🛠️ Tools on the Home screen.</div>
-          <button class="testPrintBtn" onclick="goTo('billsettings')">Go to Bill & Print Settings →</button>
-        </div>
+
 
         <!-- --- ٹیکس Settings — پاکستان کے عام کاؤنٹر بلوں پر لازمی نہیں، اس لیے مکمل اختیاری اور ڈیفالٹ بند --- -->
         <div class="settingsCard" id="settingsCardTax">
           <h3>🧾 Tax Settings</h3>
-          <div class="settingsHint">Most retail shops in Pakistan don't add tax on the counter bill — leave this off unless your business specifically needs it. If you turn it on, this percentage is added as a separate line on every new bill going forward (past bills are unaffected).</div>
           <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
             <input type="checkbox" id="taxEnabledChk" onchange="toggleTaxEnabled(this.checked)" style="width:18px; height:18px; margin:0;">
             Enable tax on bills
@@ -3888,7 +3876,6 @@
              آف ہو تو سٹاک زیرو سے آگے مائنس میں جاتا رہے گا اور بل بنتا رہے گا (ڈیفالٹ رویہ) --- -->
         <div class="settingsCard">
           <h3>📦 Track Inventory</h3>
-          <div class="settingsHint">When ON, billing will stop you from selling more than what's in stock (never goes negative). When OFF, sales keep going even after stock hits 0 — it goes negative and turns red so you can fix it later in Stock Adjustment.</div>
           <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
             <input type="checkbox" id="trackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:18px; height:18px; margin:0;">
             Track Inventory (block sales when out of stock)
@@ -3900,18 +3887,15 @@
              انٹرنیٹ/Google اکاؤنٹ کے سہارے کی صورت میں وہ سہولت موجود رہے --- -->
         <div class="settingsCard" id="settingsCardBackup">
           <h3>💾 Backup Your Data</h3>
-          <div class="settingsHint">Your data lives only on this device unless you back it up. Use Google Drive below — it's automatic and always available from any device.</div>
           <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
 
           <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
           <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer;">📥 Restore from Google Drive</button>
-          <div class="settingsHint" style="margin-top:6px;">پہلی بار دبانے پر آپ کی Google Drive تک اجازت مانگی جائے گی — ایپ صرف اپنی بنائی بیک اپ فائلیں دیکھ سکے گی، آپ کی باقی Drive تک رسائی نہیں ہو گی۔</div>
 
           <div onclick="toggleLocalBackupAdvanced()" style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:16px; padding:8px; cursor:pointer; color:var(--muted); font-size:12px; font-weight:700;">
             <span id="localBackupAdvancedChevron">▸</span> Advanced: Local File Backup (no internet needed)
           </div>
           <div id="localBackupAdvancedWrap" style="display:none; margin-top:8px;">
-            <div class="settingsHint" style="background:#fff7ed; color:#9a3412;">📁 For when there's no internet, or as an extra copy. Local backups save to your phone's <b>Downloads</b> folder.</div>
             <div class="backupBtnGrid">
               <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
                 <span class="backupBtnIcon">⬇️</span>
@@ -4012,13 +3996,11 @@
 
           <div style="margin-top:14px; padding-top:14px; border-top:1px solid #fecaca;">
             <div class="settingsSubLabel">🧾 Reset Bills &amp; Transactions</div>
-            <div class="settingsHint" style="margin-top:0;">Clears all bills, purchase orders, customer/supplier balances, and Dashboard totals. Your Products, Categories, and current Stock quantities stay exactly as they are — so you can start fresh billing without re-entering your inventory.</div>
             <button class="testPrintBtn" style="margin-top:8px; background:#fff7ed; color:#c2410c; border:1px solid #fdba74;" onclick="requestSoftResetAuth()">🧾 Reset Bills &amp; Transactions…</button>
           </div>
 
           <div style="margin-top:16px; padding-top:14px; border-top:1px solid #fecaca;">
             <div class="settingsSubLabel" style="color:#b91c1c;">🔥 Master Reset — Erase Everything</div>
-            <div class="settingsHint" style="margin-top:0;">Wipes Products, Categories, Customers, Suppliers, Bills, everything — the app goes back to a completely blank, zero state, as if freshly installed. Your login PIN, subscription/activation, and app settings (theme, printer, business info) are NOT affected.</div>
             <button class="testPrintBtn" style="margin-top:8px; background:#b91c1c; color:#fff;" onclick="requestMasterResetAuth()">🔥 Master Reset — Erase Everything…</button>
           </div>
         </div>
@@ -4065,7 +4047,6 @@
       <!-- --- 🧾 پرنٹ شدہ بل پر کیا کیا معلومات شامل ہوں --- -->
       <div class="settingsCard">
         <h3>🧾 Receipt Content</h3>
-        <div class="settingsHint">Turn on whichever details you want to appear on every printed bill.</div>
 
         <label style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #eef1f6;">
           <input type="checkbox" id="printSortAlphaChk" onchange="updatePrintToggle('printSortAlpha', this.checked)" style="width:18px; height:18px; margin:0;">
@@ -4087,7 +4068,6 @@
       <!-- --- 🔠 پرنٹ کی لکھائی کا سائز --- -->
       <div class="settingsCard" id="settingsCardPrintTextSize">
         <h3>🔠 Print Text Size</h3>
-        <div class="settingsHint">Make the printed receipt's writing bigger or smaller across the board.</div>
         <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
           <span style="font-size:12px; color:var(--muted);">A</span>
           <input type="range" id="printFontScaleSlider" min="85" max="130" step="5" value="100" oninput="updatePrintFontScale(this.value)" style="flex:1;">
@@ -4134,7 +4114,6 @@
   <div class="modalBox" style="max-width:440px; position:relative;">
     <button onclick="closeReportCenterModal()" style="position:absolute; top:10px; left:10px; background:#f1f5f9; border:none; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--text);">✕</button>
     <div class="pageTitle" style="margin-top:2px;">🖨️ Reports</div>
-    <div class="settingsHint" style="margin-top:0; margin-bottom:14px;">Generate a category-wise report, customize how it prints, then print or share it on WhatsApp.</div>
     <div style="display:flex; flex-direction:column; gap:12px;">
       <button onclick="openReportCategoryPicker('pricelist')" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📋 Price List</div>
@@ -10043,7 +10022,7 @@ function renderMyDiaryList(){
   wrap.innerHTML = filtered.map(e => {
     const isOwe = e.balance < 0;
     const cls = isOwe ? 'owe' : 'get';
-    const label = isOwe ? 'Udhaar' : (e.balance > 0 ? 'Qarz' : 'Settled');
+    const label = isOwe ? 'I Got' : (e.balance > 0 ? 'I Gave' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
@@ -10204,10 +10183,10 @@ function renderDiaryDetailBalance(entry){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
   } else if(entry.balance < 0){
-    el.textContent = '🔴 Udhaar: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🔴 I Got: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--danger)';
   } else {
-    el.textContent = '🟢 Qarz: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 I Gave: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   }
 }
@@ -17813,7 +17792,7 @@ function renderStorageUsage(){
   const budgetBytes = 5 * 1024 * 1024; // ~5MB اندازہ
   const usedMB = (totalBytes / (1024*1024)).toFixed(2);
   const pct = Math.min(100, Math.round((totalBytes / budgetBytes) * 100));
-  textEl.textContent = `${usedMB} MB used (approx. ${pct}% of a typical ${(budgetBytes/(1024*1024)).toFixed(0)}MB device limit). Product/customer/supplier photos are now stored separately (not counted here) — this is mostly your products, bills, and customer records. If this ever gets close to full, export/clear old Bill History.`;
+  textEl.textContent = `${usedMB} MB used (${pct}%)`;
   barEl.style.width = pct + '%';
   barEl.style.background = pct >= 90 ? 'var(--danger)' : pct >= 70 ? '#f59e0b' : 'var(--primary)';
 }
@@ -20915,9 +20894,9 @@ async function renderDiarySummaryReportToCanvas(){
 
   // ---------- سمری باکس ----------
   const sRows = [
-    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
-    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
+    ['Total I Got', '- ' + fmt(totalUdhaar)],
+    ['Total I Gave', '+ ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: I Gave" : 'Net: I Got', fmt(Math.abs(netBalance))],
   ];
   const sumTop = y;
   ctx.font = `${bold?'bold':''} ${fsSummary}px ${fontFam}`;
@@ -21213,9 +21192,9 @@ function buildDiarySummaryPdf(orientation){
   y += 6;
 
   const summaryRows = [
-    ['Total Udhaar (We Owe)', '- ' + fmt(totalUdhaar)],
-    ['Total Qarz (Owed To Us)', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: Qarz (We're Owed)" : 'Net: Udhaar (We Owe)', fmt(Math.abs(netBalance))],
+    ['Total I Got', '- ' + fmt(totalUdhaar)],
+    ['Total I Gave', '+ ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: I Gave" : 'Net: I Got', fmt(Math.abs(netBalance))],
   ];
   const sumRowH = Math.round(6 * rowScale * 10) / 10;
   const sumFontPt = Math.round(9 * fontScale * 10) / 10;
