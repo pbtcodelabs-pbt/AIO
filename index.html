@@ -486,6 +486,28 @@
   /* --- بلنگ ہوم پیج: کمپیکٹ کیٹیگری بٹن (لیفٹ ٹاپ پہ، پروڈکٹ گرڈ کے عین اوپر) —
        دبانے پر نیچے فلوٹنگ پاپ اپ میں کیٹیگری فہرست کھلتی ہے، منتخب کرتے ہی بند ہو جاتی ہے۔
        مقصد: پوری چوڑائی کی پٹی نہ ہونے سے ہوم پیج زیادہ تر پراڈکٹس کے لیے خالی رہے۔ --- */
+  /* --- 📂 Billing Screen — کیٹیگری لیفٹ سائیڈ کالم (باریک، اوپر سے نیچے تک) --- */
+  .billingMainArea{display:flex; gap:6px; align-items:stretch;}
+  .categorySideRail{
+    flex:0 0 58px; width:58px; display:flex; flex-direction:column; gap:5px;
+    max-height:calc(100vh - 310px); overflow-y:auto; padding:2px; box-sizing:border-box;
+  }
+  .categorySideRailEditBtn{
+    flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:2px;
+    padding:6px 2px; border:none; border-radius:9px; background:#eef2ff; color:var(--primary-dark);
+    font-weight:800; font-size:10px; cursor:pointer; text-align:center; line-height:1.15;
+  }
+  .categorySideRailItem{
+    flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+    padding:7px 2px; border-radius:9px; background:var(--card); color:var(--text);
+    font-weight:700; font-size:9.5px; line-height:1.12; text-align:center; cursor:pointer;
+    word-break:break-word; overflow-wrap:anywhere; box-shadow:0 1px 4px rgba(41,29,10,.12);
+    min-height:44px; box-sizing:border-box;
+  }
+  .categorySideRailItem.active{background:var(--primary); color:#fff; box-shadow:0 2px 8px rgba(41,29,10,.22);}
+  .categorySideRailItem .csrCount{font-size:8.5px; font-weight:800; opacity:.8;}
+  .billingMainArea .productGrid{flex:1 1 auto; min-width:0; grid-template-columns:repeat(3,1fr) !important;}
+
   .categoryDropdownWrap{position:relative; display:inline-block; margin-bottom:6px;}
   .categoryDropdownBtn{
     display:flex; align-items:center; gap:7px; padding:8px 14px; border:none; border-radius:10px;
@@ -1582,6 +1604,8 @@
   <!-- ---------- A4 رپورٹس کے لیے — اصل PDF بنانے کے لیے، تاکہ Android کے window.print() پائپ لائن کے
   مسائل (کھلا ہوا موڈل پرنٹ میں دہرانا) سے مکمل طور پر بچا جا سکے — PDF ایک بالکل الگ، قابلِ اعتماد راستہ ہے ---------- -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 </head>
 <body>
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
@@ -1787,7 +1811,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO98SU0829AM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO138TH0844PM</span>
     </div>
   </div>
 
@@ -1927,20 +1951,13 @@
           <button onclick="openQuickAdd()" title="Add new item" style="flex:0 0 46px; padding:0; font-size:18px;">+</button>
         </div>
         <div id="billingSearchSuggestions" class="billingSearchSuggestions"></div>
-
-        <!-- کمپیکٹ کیٹیگری بٹن — لیفٹ سائیڈ، ٹاپ پہ، جہاں سے پراڈکٹ گرڈ شروع ہوتا ہے۔
-             دبانے پر نیچے پاپ اپ میں کیٹیگری فہرست کھلتی ہے، کیٹیگری منتخب کرتے ہی خودکار بند ہو جاتی ہے۔ -->
-        <div class="categoryDropdownWrap" id="categoryDropdownWrap">
-          <button type="button" class="categoryDropdownBtn" id="categoryDropdownBtn" onclick="toggleCategoryDropdown(event)">
-            <span id="categoryDropdownLabel">📂 All Categories</span>
-            <span class="categoryDropdownArrow">▾</span>
-          </button>
-          <div class="categoryDropdownPanel" id="categoryDropdownPanel"></div>
-        </div>
       </div>
 
-      <!-- پورا بچا ہوا صفحہ صرف پراڈکٹ کارڈز کے لیے -->
-      <div class="productGrid productGridFull" id="billingProductGrid"></div>
+      <!-- پورا بچا ہوا صفحہ: بائیں طرف باریک کیٹیگری کالم + دائیں طرف پراڈکٹ کارڈز -->
+      <div class="billingMainArea">
+        <div class="categorySideRail" id="categorySideRail"></div>
+        <div class="productGrid productGridFull" id="billingProductGrid"></div>
+      </div>
 
       <!-- فلوٹنگ کارٹ بار: نیچے ہمیشہ نظر آتی ہے، دبانے پر مکمل کارٹ/چیک آؤٹ کھلتا ہے -->
       <div class="floatingCartBar" id="floatingCartBar" onclick="openCartSheet()">
@@ -2299,8 +2316,9 @@
           </div>
           <div class="csvImportBar">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
-            <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import from CSV</button>
-            <input type="file" id="productCsvInput" accept=".csv,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
+            <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
+            <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal('product')">📷 Scan Photo & Import</button>
+            <input type="file" id="productCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
           </div>
 
           <div class="productList" id="productListWrap">
@@ -2348,6 +2366,12 @@
       <div class="partyToolbar">
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ Add New</button>
+      </div>
+      <div class="csvImportBar">
+        <button class="csvTemplateBtn" onclick="downloadPartyCsvTemplate()">📄 Download Excel/CSV Template</button>
+        <button class="csvImportBtn" id="partyImportBtn" onclick="document.getElementById('partyCsvInput').click()">📥 Import <span id="partyImportBtnLabel">Customers</span></button>
+        <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal(currentPartyTab === 'customers' ? 'customer' : 'supplier')">📷 Scan Photo & Import</button>
+        <input type="file" id="partyCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handlePartyCsvFileSelect(event)">
       </div>
       <button id="bulkReminderBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openBulkReminderCenter()">📢 Remind All (Outstanding Balances)</button>
 
@@ -3196,15 +3220,15 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
-      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🔴 I Got = We Owe Them, 🟢 I Gave = They Owe Us.</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🟢 I Got = We Owe Them, 🔴 I Gave = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
-        <div class="diaryTotalCard diaryTotalRed">
-          <div class="diaryTotalLabel">🔴 Total I Got</div>
+        <div class="diaryTotalCard diaryTotalGreen">
+          <div class="diaryTotalLabel">🟢 Total I Got</div>
           <div class="diaryTotalValue" id="diaryTotalPayable">Rs. 0</div>
         </div>
-        <div class="diaryTotalCard diaryTotalGreen">
-          <div class="diaryTotalLabel">🟢 Total I Gave</div>
+        <div class="diaryTotalCard diaryTotalRed">
+          <div class="diaryTotalLabel">🔴 Total I Gave</div>
           <div class="diaryTotalValue" id="diaryTotalReceivable">Rs. 0</div>
         </div>
       </div>
@@ -4389,6 +4413,43 @@
     <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Existing products with the same name will get new/updated variants — nothing will be deleted.</div>
     <button class="backupConfirmCloseBtn" onclick="confirmProductCsvImport()">✅ Confirm Import</button>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="document.getElementById('productImportPreviewModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
+<!-- CUSTOMER/SUPPLIER CSV IMPORT — یہ تصدیقی صفحہ ہے، فائل چننے کے فوراً بعد ----------->
+<div class="modalOverlay" id="partyImportPreviewModal" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="backupConfirmBox">
+    <div class="backupConfirmIconWrap"><span>📋</span></div>
+    <h3>Ready to Import?</h3>
+    <div id="partyImportPreviewText" style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:6px;"></div>
+    <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Same phone number والے موجودہ ریکارڈ اپڈیٹ ہوں گے — کچھ ڈیلیٹ نہیں ہوگا۔</div>
+    <button class="backupConfirmCloseBtn" onclick="confirmPartyCsvImport()">✅ Confirm Import</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="document.getElementById('partyImportPreviewModal').classList.remove('show')">Cancel</button>
+  </div>
+</div>
+
+<!-- 📷 SCAN PHOTO & IMPORT — تصویر/سکرین شاٹ سے متن نکال کر، بندہ خود ترتیب دے کر امپورٹ کرے (Products/Customers/Suppliers تینوں کے لیے مشترکہ) -->
+<div class="modalOverlay" id="scanImportModal" onclick="if(event.target===this) closeScanImportModal()">
+  <div class="modalBox" style="max-width:480px;">
+    <h3>📷 Scan Photo & Import</h3>
+    <div class="settingsHint" style="margin-top:0;">تصویر/سکرین شاٹ منتخب کریں — نیچے باکس میں لکھائی خودکار نکل آئے گی۔ پھر اسے چیک کر کے، کوما (,) لگا کر Name,Phone,Address,Area کی ترتیب بنا دیں (ہر بندہ ایک لائن میں)، پھر امپورٹ دبائیں۔</div>
+
+    <input type="file" id="scanImageInput" accept="image/*" onchange="handleScanImageSelect(event)" style="margin:10px 0;">
+
+    <div id="scanProgressWrap" style="display:none; margin:10px 0;">
+      <div style="background:#eef2ff; color:var(--primary-dark); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700;" id="scanProgressText">🔍 پڑھا جا رہا ہے...</div>
+    </div>
+
+    <div id="scanTextWrap" style="display:none; margin-top:12px;">
+      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">نکلا ہوا متن — یہاں خود چیک/ترتیب دیں</label>
+      <textarea id="scanExtractedText" rows="10" style="width:100%; font-family:monospace; font-size:12px; padding:10px; border:1.5px solid #dbe1ea; border-radius:8px;"></textarea>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button onclick="downloadScanAsCsv()" style="flex:1; background:#f1f5f9; color:var(--text);">⬇️ CSV ڈاؤن لوڈ کریں</button>
+        <button onclick="finalizeScanImport()" style="flex:1;">✅ ابھی امپورٹ کریں</button>
+      </div>
+    </div>
+
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:14px;" onclick="closeScanImportModal()">Close</button>
   </div>
 </div>
 
@@ -6353,6 +6414,51 @@ function parseWeightGrams(label){
    ===================================================================== */
 
 // ---------- سادہ مگر مضبوط CSV پارسر — quoted fields (کوما والے نام) کو صحیح سنبھالتا ہے ----------
+// ---------- کسی بھی فائل (CSV یا Excel) کو یکساں CSV متن میں بدلیں — باقی سارا امپورٹ کوڈ اسی متن پر کام کرتا رہے گا ----------
+function fileToCsvText(file){
+  return new Promise((resolve, reject) => {
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if(ext === 'csv' || ext === 'txt'){
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
+      reader.readAsText(file);
+    } else if(ext === 'xlsx' || ext === 'xls'){
+      if(typeof XLSX === 'undefined'){ reject(new Error('Excel سپورٹ لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔')); return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        try{
+          const wb = XLSX.read(e.target.result, {type:'array'});
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          resolve(XLSX.utils.sheet_to_csv(sheet));
+        } catch(err){ reject(new Error('یہ Excel فائل نہیں پڑھی جا سکی — دوبارہ محفوظ کر کے آزمائیں۔')); }
+      };
+      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
+      reader.readAsArrayBuffer(file);
+    } else {
+      reject(new Error('صرف CSV یا Excel (.xlsx/.xls) فائلیں امپورٹ ہو سکتی ہیں۔ اگر ڈیٹا Word/PDF/تصویر میں ہے تو پہلے اسے Excel میں کاپی کر لیں۔'));
+    }
+  });
+}
+
+// ---------- ہیڈر کے نام کو موازنے کے لیے صاف کریں (چھوٹے حروف، سپیس/انڈر سکور ہٹا کر) ----------
+function normalizeHeaderName(h){
+  return (h || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// ---------- دیے گئے synonyms کی بنیاد پر ہر ٹارگٹ فیلڈ کے لیے فائل میں موجود کالم نمبر ڈھونڈیں ----------
+function buildFuzzyFieldMap(headers, synonymsMap){
+  const normHeaders = headers.map(normalizeHeaderName);
+  const map = {};
+  Object.keys(synonymsMap).forEach(field => {
+    const syns = synonymsMap[field].map(normalizeHeaderName);
+    let idx = normHeaders.findIndex(nh => syns.includes(nh));
+    if(idx === -1) idx = normHeaders.findIndex(nh => nh && syns.some(s => nh.includes(s) || s.includes(nh)));
+    map[field] = idx;
+  });
+  return map;
+}
+
 function parseCSV(text){
   const rows = [];
   let row = [], field = '', inQuotes = false;
@@ -6574,8 +6680,7 @@ let activeBillingSearch = '';
 let customCardOrder = []; // یوزر کی دستی ڈریگ سے طے شدہ ترتیب (اب product_ids کی صورت میں — پراڈکٹ کی سطح پر)
 
 function renderBillingCategoryRail(){
-  const panel = document.getElementById('categoryDropdownPanel');
-  const label = document.getElementById('categoryDropdownLabel');
+  const panel = document.getElementById('categorySideRail');
   if(!panel) return;
 
   const counts = {};
@@ -6587,16 +6692,13 @@ function renderBillingCategoryRail(){
   (customCategories || []).forEach(cat => { if(!(cat in counts)) counts[cat] = 0; });
   const categories = Object.keys(counts).sort();
 
-  const items = [`<div class="categoryDropdownItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span>All</span><span class="cdCount">${productsData.length}</span></div>`];
+  // ---------- سب سے اوپر ✏️ ایڈٹ بٹن — اسی کالم کے اندر، براہ راست Categories مینجمنٹ صفحے پر لے جائے ----------
+  const items = [`<div class="categorySideRailEditBtn" onclick="goTo('categories')">✏️<br>Edit</div>`];
+  items.push(`<div class="categorySideRailItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span>All</span><span class="csrCount">${productsData.length}</span></div>`);
   categories.forEach(cat => {
-    items.push(`<div class="categoryDropdownItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${cat.replace(/'/g,"\\'")}')"><span>${cat}</span><span class="cdCount">${counts[cat]}</span></div>`);
+    items.push(`<div class="categorySideRailItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${cat.replace(/'/g,"\\'")}')"><span>${cat}</span><span class="csrCount">${counts[cat]}</span></div>`);
   });
-  // ---------- سب سے نیچے ➕ Add New — نئی کیٹیگری فوری شامل کرنے کے لیے ----------
-  items.push(`<div class="categoryDropdownItem categoryDropdownAddNew" onclick="addNewCategoryFromDropdown(event)"><span>➕ Add New Category</span></div>`);
   panel.innerHTML = items.join('');
-
-  // ---------- بٹن پر منتخب شدہ کیٹیگری کا نام دکھائیں ----------
-  if(label) label.textContent = activeBillingCategory === 'all' ? '📂 All Categories' : `📂 ${activeBillingCategory}`;
 }
 
 // ---------- ڈراپ ڈاؤن کے اندر سے نئی کیٹیگری شامل کریں (ابھی خالی، بعد میں پراڈکٹس اس میں ڈالے جا سکتے ہیں) ----------
@@ -6766,9 +6868,7 @@ function filterBillingCategory(cat){
   activeBillingCategory = cat;
   renderBillingCategoryRail();
   renderBillingProductGrid();
-  // ---------- کیٹیگری منتخب ہوتے ہی پاپ اپ خودکار بند ہو جائے ----------
-  const wrap = document.getElementById('categoryDropdownWrap');
-  if(wrap) wrap.classList.remove('open');
+  if(AppState.settings.billingSearchSuggestionsOn) renderBillingSearchSuggestions(activeBillingSearch);
 }
 
 // ---------- Item Search: ٹائپ کرتے ہی وہی گرڈ فلٹر ہو جاتا ہے — کوئی الگ ڈراپ ڈاؤن نہیں ----------
@@ -6808,6 +6908,12 @@ function renderBillingSearchSuggestions(query){
 
   const matches = getFlatVariants()
     .filter(v => v.name.toLowerCase().includes(query) || (v.barcode && v.barcode.toLowerCase().includes(query)))
+    .filter(v => {
+      if(activeBillingCategory === 'all') return true;
+      const prod = productsData.find(p => p.variants.some(vv => vv.variant_id === v.variant_id));
+      const cat = prod && prod.category && prod.category.trim() ? prod.category.trim() : 'Uncategorized';
+      return cat === activeBillingCategory;
+    })
     .slice(0, 10);
 
   if(matches.length === 0){
@@ -8534,17 +8640,37 @@ function downloadProductCsvTemplate(){
 }
 
 let pendingProductImportRows = [];
+const PRODUCT_FIELD_SYNONYMS = {
+  'product name': ['product name','name','item name','item','product','title'],
+  'category': ['category','cat','group','type'],
+  'variant label': ['variant label','variant','label','size','unit','pack'],
+  'barcode': ['barcode','sku','code','upc','ean'],
+  'purchase price': ['purchase price','cost price','buying price','cost','purchase'],
+  'retail price': ['retail price','sale price','selling price','price','retail'],
+  'wholesale price': ['wholesale price','wholesale','bulk price'],
+  'stock': ['stock','qty','quantity','stock qty','current stock','instock'],
+  'low stock alert': ['low stock alert','low stock','min stock','reorder level'],
+  'expiry date (yyyy-mm-dd)': ['expiry date (yyyy-mm-dd)','expiry date','expiry','exp date','expire'],
+  'location': ['location','warehouse','shelf','aisle','bin']
+};
+// ---------- CSV متن کو پراڈکٹ rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
+function processProductCsvText(text){
+  const rows = parseCSV(text);
+  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  const fieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
+  const objs = rows.slice(1).map(r => {
+    const o = {};
+    Object.keys(fieldMap).forEach(field => { o[field] = fieldMap[field] >= 0 ? (r[fieldMap[field]] || '').trim() : ''; });
+    return o;
+  });
+  pendingProductImportRows = objs.filter(o => (o['product name'] || '').trim());
+  showProductImportPreview();
+  return true;
+}
 function handleProductCsvFileSelect(event){
   const file = event.target.files[0];
   if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const rows = parseCSV(e.target.result);
-    const objs = csvRowsToObjects(rows);
-    pendingProductImportRows = objs.filter(o => (o['product name'] || '').trim());
-    showProductImportPreview();
-  };
-  reader.readAsText(file);
+  fileToCsvText(file).then(text => processProductCsvText(text)).catch(err => alert('❌ ' + err.message));
   event.target.value = ''; // ---------- اگر وہی فائل دوبارہ منتخب کریں تو بھی change ایونٹ چلے ----------
 }
 
@@ -8615,6 +8741,165 @@ function confirmProductCsvImport(){
   document.getElementById('backupConfirmTitle').textContent = 'Products Imported!';
   document.getElementById('backupConfirmBody').innerHTML = `<p>${addedProducts} new product(s) added</p><p>${addedVariants} new variant(s) added</p><p>${updatedVariants} existing variant(s) updated</p>`;
   document.getElementById('backupConfirmModal').classList.add('show');
+}
+
+// ---------- کسٹمر/سپلائر امپورٹ کا ٹیمپلیٹ — currentPartyTab کے مطابق نام بدل جاتا ہے ----------
+function downloadPartyCsvTemplate(){
+  const isCustomer = currentPartyTab === 'customers';
+  const rows = isCustomer
+    ? ['Name,Phone,Address,Area', 'Aslam Bhai,03001234567,Main Bazaar,Lahore', 'Fatima Traders,03211234567,Shop 12 Anarkali,Lahore']
+    : ['Name,Phone,Address,Area', 'Khalid Suppliers,03331234567,Warehouse Road,Karachi', 'Al-Madina Traders,03451234567,Wholesale Market,Faisalabad'];
+  downloadCsvFile(rows.join('\n'), (isCustomer ? 'AIO_Customer_Import_Template.csv' : 'AIO_Supplier_Import_Template.csv'));
+}
+
+// ---------- کسٹمر/سپلائر امپورٹ فائل میں مختلف ناموں کے کالم بھی خودکار پہچانے جائیں (Name/Client Name، Phone/Mobile وغیرہ) ----------
+const PARTY_FIELD_SYNONYMS = {
+  name: ['name','customer name','supplier name','client name','company name','full name','contact name','contact person','party name'],
+  phone: ['phone','mobile','cell','contact','contact number','telephone','tel','whatsapp','whatsapp number','mobile number','phone number','number'],
+  address: ['address','location','street','street address'],
+  area: ['area','city','region','zone','town']
+};
+
+let pendingPartyImportRows = [];
+// ---------- CSV متن کو کسٹمر/سپلائر rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
+function processPartyCsvText(text){
+  const rows = parseCSV(text);
+  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  const fieldMap = buildFuzzyFieldMap(rows[0], PARTY_FIELD_SYNONYMS);
+  if(fieldMap.name < 0){ alert('نام والا کالم نہیں مل سکا — فائل میں "Name" جیسا کوئی کالم ضرور ہونا چاہیے۔'); return false; }
+  const objs = rows.slice(1).map(r => ({
+    name: (r[fieldMap.name] || '').trim(),
+    phone: fieldMap.phone >= 0 ? (r[fieldMap.phone] || '').trim() : '',
+    address: fieldMap.address >= 0 ? (r[fieldMap.address] || '').trim() : '',
+    area: fieldMap.area >= 0 ? (r[fieldMap.area] || '').trim() : ''
+  })).filter(o => o.name);
+  pendingPartyImportRows = objs;
+  showPartyImportPreview();
+  return true;
+}
+function handlePartyCsvFileSelect(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  fileToCsvText(file).then(text => processPartyCsvText(text)).catch(err => alert('❌ ' + err.message));
+  event.target.value = '';
+}
+
+function showPartyImportPreview(){
+  const isCustomer = currentPartyTab === 'customers';
+  const objs = pendingPartyImportRows;
+  if(objs.length === 0){
+    alert('کوئی نام والی row نہیں ملی۔ فائل میں "Name" کالم بھرا ہونا چاہیے۔');
+    return;
+  }
+  const list = isCustomer ? customersData : suppliersData;
+  let newCount = 0, updateCount = 0;
+  objs.forEach(o => {
+    const existing = o.phone
+      ? list.find(p => p.phone && p.phone === o.phone)
+      : list.find(p => p.name.toLowerCase() === o.name.toLowerCase());
+    if(existing) updateCount++; else newCount++;
+  });
+  document.getElementById('partyImportPreviewText').innerHTML =
+    `Found <b>${objs.length}</b> ${isCustomer ? 'customer' : 'supplier'}(s) in the file.<br>` +
+    `${newCount} new one(s) will be added, ${updateCount} existing one(s) will be updated.`;
+  document.getElementById('partyImportPreviewModal').classList.add('show');
+}
+
+function confirmPartyCsvImport(){
+  const isCustomer = currentPartyTab === 'customers';
+  const list = isCustomer ? customersData : suppliersData;
+  let added = 0, updated = 0;
+
+  pendingPartyImportRows.forEach(o => {
+    let existing = o.phone
+      ? list.find(p => p.phone && p.phone === o.phone)
+      : list.find(p => p.name.toLowerCase() === o.name.toLowerCase());
+    if(existing){
+      existing.name = o.name || existing.name;
+      if(o.phone) existing.phone = o.phone;
+      if(o.address) existing.address = o.address;
+      if(o.area) existing.area = o.area;
+      updated++;
+    } else if(isCustomer){
+      customersData.push({customer_id: nextCustomerId++, name: o.name, phone: o.phone, address: o.address, area: o.area, keywords: '', photo: null, wallet_balance: 0, total_receivable: 0, walletHistory: []});
+      added++;
+    } else {
+      suppliersData.push({supplier_id: nextSupplierId++, name: o.name, phone: o.phone, address: o.address, area: o.area, keywords: '', photo: null, total_payable: 0});
+      added++;
+    }
+  });
+
+  document.getElementById('partyImportPreviewModal').classList.remove('show');
+  pendingPartyImportRows = [];
+  persistAllData();
+  renderPartyList();
+  document.getElementById('backupConfirmIcon').textContent = '✅';
+  document.getElementById('backupConfirmTitle').textContent = (isCustomer ? 'Customers' : 'Suppliers') + ' Imported!';
+  document.getElementById('backupConfirmBody').innerHTML = `<p>${added} new ${isCustomer ? 'customer' : 'supplier'}(s) added</p><p>${updated} existing ${isCustomer ? 'customer' : 'supplier'}(s) updated</p>`;
+  document.getElementById('backupConfirmModal').classList.add('show');
+}
+
+/* =====================================================================
+   📷 SCAN PHOTO & IMPORT — تصویر/سکرین شاٹ سے OCR (Tesseract.js) کے ذریعے متن نکالیں،
+   بندہ خود اسے چیک/ترتیب دے کر Comma لگائے (Name,Phone,Address,Area یا پراڈکٹ کی ترتیب)،
+   پھر یا تو CSV ڈاؤن لوڈ کر لے یا سیدھا امپورٹ کر دے۔ Products/Customers/Suppliers تینوں کے لیے مشترکہ۔
+   ===================================================================== */
+let scanImportContext = 'product'; // 'product' | 'customer' | 'supplier'
+
+function openScanImportModal(context){
+  scanImportContext = context;
+  document.getElementById('scanImageInput').value = '';
+  document.getElementById('scanProgressWrap').style.display = 'none';
+  document.getElementById('scanTextWrap').style.display = 'none';
+  document.getElementById('scanExtractedText').value = '';
+  document.getElementById('scanImportModal').classList.add('show');
+}
+function closeScanImportModal(){
+  document.getElementById('scanImportModal').classList.remove('show');
+}
+
+function handleScanImageSelect(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(typeof Tesseract === 'undefined'){
+    alert('❌ سکین سسٹم لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔');
+    return;
+  }
+  document.getElementById('scanProgressWrap').style.display = 'block';
+  document.getElementById('scanTextWrap').style.display = 'none';
+  document.getElementById('scanProgressText').textContent = '🔍 پڑھا جا رہا ہے... (0%)';
+
+  Tesseract.recognize(file, 'eng', {
+    logger: m => {
+      if(m.status === 'recognizing text'){
+        document.getElementById('scanProgressText').textContent = `🔍 پڑھا جا رہا ہے... (${Math.round(m.progress * 100)}%)`;
+      }
+    }
+  }).then(({ data: { text } }) => {
+    document.getElementById('scanProgressWrap').style.display = 'none';
+    document.getElementById('scanTextWrap').style.display = 'block';
+    // ---------- شروع میں گائیڈ لائن کی مثال — تاکہ بندے کو پتا چلے کس فارمیٹ میں ترتیب دینی ہے ----------
+    const guideLine = scanImportContext === 'product'
+      ? PRODUCT_CSV_HEADERS.join(',')
+      : 'Name,Phone,Address,Area';
+    document.getElementById('scanExtractedText').value = guideLine + '\n' + text.trim();
+  }).catch(() => {
+    document.getElementById('scanProgressWrap').style.display = 'none';
+    alert('❌ تصویر پڑھی نہیں جا سکی — دوسری، صاف اور روشن تصویر آزمائیں۔');
+  });
+}
+
+function downloadScanAsCsv(){
+  const text = document.getElementById('scanExtractedText').value.trim();
+  if(!text){ alert('پہلے کوئی متن نکالیں یا ٹائپ کریں۔'); return; }
+  downloadCsvFile(text, 'Scanned_Import.csv');
+}
+
+function finalizeScanImport(){
+  const text = document.getElementById('scanExtractedText').value.trim();
+  if(!text){ alert('پہلے کوئی متن نکالیں یا ٹائپ کریں۔'); return; }
+  const ok = scanImportContext === 'product' ? processProductCsvText(text) : processPartyCsvText(text);
+  if(ok) closeScanImportModal(); // ---------- کامیابی پر Scan modal بند، پیچھے پہلے سے کھلا Preview modal نظر آئے گا ----------
 }
 
 function renderProductList(query = ''){
@@ -10004,7 +10289,7 @@ function renderMyDiaryList(){
   document.getElementById('diaryTotalReceivable').textContent = fmtDiaryAmount(totalReceivable);
   const net = totalReceivable - totalPayable;
   const netBar = document.getElementById('diaryNetBar');
-  netBar.textContent = 'Net: ' + (net >= 0 ? '🟢 ' : '🔴 ') + fmtDiaryAmount(net);
+  netBar.textContent = 'Net: ' + (net >= 0 ? '🔴 ' : '🟢 ') + fmtDiaryAmount(net);
 
   // ---------- ڈیٹالسٹ (نام تجاویز) بھی ساتھ ہی تازہ کر دیں ---------- 
   const dl = document.getElementById('diaryNameSuggestions');
@@ -10021,7 +10306,7 @@ function renderMyDiaryList(){
 
   wrap.innerHTML = filtered.map(e => {
     const isOwe = e.balance < 0;
-    const cls = isOwe ? 'owe' : 'get';
+    const cls = isOwe ? 'get' : 'owe';
     const label = isOwe ? 'I Got' : (e.balance > 0 ? 'I Gave' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
@@ -10183,11 +10468,11 @@ function renderDiaryDetailBalance(entry){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
   } else if(entry.balance < 0){
-    el.textContent = '🔴 I Got: ' + fmtDiaryAmount(entry.balance);
-    el.style.color = 'var(--danger)';
-  } else {
-    el.textContent = '🟢 I Gave: ' + fmtDiaryAmount(entry.balance);
+    el.textContent = '🟢 I Got: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
+  } else {
+    el.textContent = '🔴 I Gave: ' + fmtDiaryAmount(entry.balance);
+    el.style.color = 'var(--danger)';
   }
 }
 
@@ -10967,6 +11252,8 @@ function openBulkReminderCenter(){
 function enterPartyPage(tab){
   currentPartyTab = tab;
   document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
+  const partyImportBtnLabel = document.getElementById('partyImportBtnLabel');
+  if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'Customers' : 'Suppliers';
   document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers by name or phone...' : '🔍 Search suppliers by name or phone...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
@@ -16486,14 +16773,13 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const drawTableHLine = (ly) => { ctx.beginPath(); ctx.moveTo(tableLeft, Math.floor(ly) + 0.5); ctx.lineTo(tableRight, Math.floor(ly) + 0.5); ctx.stroke(); };
   drawTableHLine(hLineY); // اوپر کی باؤنڈری
 
-  // ---------- ہیڈر لائن — اب مکمل 3-طرفہ الائنمنٹ (Left/Center/Right)، چاروں کالمز پر یکساں لاگو ----------
+  // ---------- ہیڈر لائن — Item ہمیشہ Left رہتا ہے، صرف Qty/Price/Total پر منتخب شدہ الائنمنٹ (Left/Center/Right) لاگو ہوتی ہے ----------
   const headerItemAlign = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
   const colCenterX = (a, b) => headerItemAlign === 'center' ? (a + b) / 2 : (headerItemAlign === 'right' ? b - 6 : a + 6);
-  const headerItemNameX = colCenterX(colX[1], colX[2]);
+  const headerItemNameX = colX[1] + 6; // ---------- Item کا نام ہمیشہ اپنے کالم کے بائیں کنارے سے شروع ہو، سیٹنگ سے بے اثر ----------
   const headerQtyX = colCenterX(colX[3], colX[4]);
   const headerPriceX = colCenterX(colX[4], colX[5]);
   const headerTotalX = colCenterX(colX[5], colX[6]);
-  const ctxAlignForItems = headerItemAlign; // ---------- 'left'/'center'/'right' سیدھا ctx.textAlign کے طور پر استعمال ہو سکتا ہے ----------
   const headerBaseline = tableTop + headerH - Math.round(7 * rowScale);
   // ---------- ہر کیپشن کا فونٹ اس کے اپنے کالم کی چوڑائی میں فٹ ہونے تک خود بخود چھوٹا ہوتا ہے — زوم جتنا بھی بڑا ہو، کبھی کالم سے باہر نہیں نکلے گا ----------
   const fitHeaderFont = (text, maxWidth) => {
@@ -16504,32 +16790,37 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       ctx.font = `bold ${px}px ${canvasFontFamily}`;
     }
   };
+  // ---------- سخت کلپنگ کے ساتھ کیپشن لکھیں — fitHeaderFont کے باوجود ناپ میں معمولی فرق ہو تو بھی کالم سے باہر بالکل نہیں نکلے گا ----------
+  const drawClippedHeaderCaption = (text, x1, x2, textX, align) => {
+    ctx.textAlign = align;
+    fitHeaderFont(text, (x2 - x1) - 8);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x1, tableTop, x2 - x1, headerH);
+    ctx.clip();
+    ctx.fillText(text, textX, headerBaseline);
+    ctx.restore();
+  };
   ctx.fillStyle = rc.text; // ---------- منتخب رنگ کے مطابق گہرا متن ----------
   // ---------- نوٹ: پہلے یہاں ہلکا shadowBlur گلو تھا — صارف کو یہ "دھندلا/مدھم" محسوس ہوا، اسی لیے ہٹا دیا۔
   // اب کیپشن بالکل صاف، ٹھوس اور روشن (بغیر کسی دھندلاہٹ کے) ----------
   ctx.textAlign = 'center';
   fitHeaderFont('#', colX[1]-colX[0]-6);
   ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = ctxAlignForItems;
-  fitHeaderFont('Item', colX[2]-colX[1]-8);
-  ctx.fillText('Item', headerItemNameX, headerBaseline);
+  drawClippedHeaderCaption('Item', colX[1], colX[2], headerItemNameX, 'left');
   ctx.textAlign = 'center';
   fitHeaderFont('Variant', colX[3]-colX[2]-4);
   ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
-  ctx.textAlign = ctxAlignForItems;
-  fitHeaderFont('Qty', colX[4]-colX[3]-8);
-  ctx.fillText('Qty', headerQtyX, headerBaseline);
-  fitHeaderFont('Price', colX[5]-colX[4]-8);
-  ctx.fillText('Price', headerPriceX, headerBaseline);
-  fitHeaderFont('Total', colX[6]-colX[5]-8);
-  ctx.fillText('Total', headerTotalX, headerBaseline);
+  drawClippedHeaderCaption('Qty', colX[3], colX[4], headerQtyX, headerItemAlign);
+  drawClippedHeaderCaption('Price', colX[4], colX[5], headerPriceX, headerItemAlign);
+  drawClippedHeaderCaption('Total', colX[5], colX[6], headerTotalX, headerItemAlign);
 
   hLineY += headerH;
   drawTableHLine(hLineY);
 
   // ---------- ہر آئٹم کی لائن — سیریل نمبر کے ساتھ ----------
   const itemFontWeight = AppState.settings.printBoldItems === false ? '' : 'bold ';
-  const itemAlign = headerItemAlign;
+  const itemAlign = 'left'; // ---------- Item کا نام ہمیشہ Left ہی رہے گا ----------
   const itemNameX = headerItemNameX;
   const decimals = AppState.settings.priceDecimals ?? 0; // ---------- کریانہ/میڈیکل جیسے کاروبار کے لیے قیمتوں کے بعد ڈیسیمل پوائنٹس ----------
   // ---------- Center/Right منتخب ہو تو مقدار/قیمت/ٹوٹل کالمز بھی اپنے اپنے کالم میں اسی طرف آئیں ----------
@@ -16604,9 +16895,21 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.fillText(variantText, (colX[2]+colX[3])/2, rowBaseline);
     ctx.restore();
     const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
-    fitBodyFont(qtyText, (colX[4]-colX[3])-8); ctx.fillText(qtyText, qtyX, rowBaseline);
-    fitBodyFont(priceText, (colX[5]-colX[4])-8); ctx.fillText(priceText, priceX, rowBaseline);
-    fitBodyFont(totalText, (colX[6]-colX[5])-8); ctx.fillText(totalText, totalX, rowBaseline);
+    // ---------- سخت کلپنگ کے ساتھ لکھیں — پہلے یہاں textAlign کبھی واپس سیٹ نہیں ہوتا تھا (Variant کے 'center' پر ہی اٹکا رہتا تھا)،
+    // جس کی وجہ سے Right/Center منتخب کرنے پر نمبر کالم سے باہر نکل جاتے تھے۔ اب ہر کالم کی اپنی حد کے اندر مقفل ہے ----------
+    const drawClippedNum = (text, x1, x2, textX) => {
+      ctx.textAlign = headerItemAlign;
+      fitBodyFont(text, (x2 - x1) - 8);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x1, hLineY, x2 - x1, rowH);
+      ctx.clip();
+      ctx.fillText(text, textX, rowBaseline);
+      ctx.restore();
+    };
+    drawClippedNum(qtyText, colX[3], colX[4], qtyX);
+    drawClippedNum(priceText, colX[4], colX[5], priceX);
+    drawClippedNum(totalText, colX[5], colX[6], totalX);
     ctx.font = `${itemFontWeight}${rowFontPx}px ${canvasFontFamily}`; // ---------- اگلی لائن کے لیے بنیادی فونٹ واپس بحال ----------
     ctx.fillStyle = '#000';
 
@@ -16627,17 +16930,18 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   y = tableTop + tableH + 26;
 
   // ---------- رعایت ہو تو Subtotal اور Discount الگ سے دکھائیں — لیکن صرف اسی وقت جب کسٹمر بیلنس باکس نہیں بننا (ورنہ یہ اسی باکس کے اندر نظر آئیں گے) ----------
-  ctx.textAlign = 'right';
+  // ---------- یہ چھوٹے ٹائٹل (Subtotal/Discount/Tax/Grand Total) ہمیشہ بائیں طرف ہی رہیں گے — Item الائنمنٹ سیٹنگ سے بے اثر ----------
+  ctx.textAlign = 'left';
   if(!invoice.customer_id){
     if(invoice.discount && invoice.discount > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(decimals), pxWidth-10, y); y += 20;
-      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(decimals), pxWidth-10, y); y += 24;
+      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(decimals), 10, y); y += 20;
+      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(decimals), 10, y); y += 24;
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
-      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), pxWidth-10, y); y += 20;
+      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), 10, y); y += 20;
     }
   }
 
@@ -16647,15 +16951,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(!alreadyShowedSubtotal){
       const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(decimals), pxWidth-10, y); y += 20;
+      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(decimals), 10, y); y += 20;
     }
     ctx.fillStyle = '#dc2626';
-    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(decimals), pxWidth-10, y); y += 24;
+    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(decimals), 10, y); y += 24;
     ctx.fillStyle = '#000';
   }
 
   ctx.font = F('bold 20px');
-  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), pxWidth-10, y);
+  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), 10, y);
   y += 34;
 
   // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
@@ -16690,20 +16994,13 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
       if(idx % 2 === 1){ ctx.fillStyle = '#f4f6f9'; ctx.fillRect(sumLeft+0.5, rowTop+0.5, sumBoxW-1, sumRowH); }
       ctx.font = F(isFinal ? 'bold 13px' : 'bold 11px'); // ---------- خانہ اب تنگ ہے، اسی مناسبت سے فونٹ بھی تھوڑا چھوٹا ----------
       ctx.fillStyle = '#000';
-      if(headerItemAlign === 'center'){
-        ctx.textAlign = 'center';
-        ctx.fillText(`${label}: ${Math.round(val).toLocaleString()}`, sumLeft + sumBoxW/2, rowTop + sumRowH/2 + 4);
-      } else if(headerItemAlign === 'right'){
-        ctx.textAlign = 'right';
-        ctx.fillText(`${label}: ${Math.round(val).toLocaleString()}`, sumRight - 6, rowTop + sumRowH/2 + 4);
-      } else {
-        ctx.textAlign = 'left';
-        ctx.fillText(label, sumLeft + 6, rowTop + sumRowH/2 + 4);
-        ctx.textAlign = 'right';
-        ctx.fillText(Math.round(val).toLocaleString(), sumRight - 6, rowTop + sumRowH/2 + 4);
-        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
-      }
+      // ---------- یہ ٹائٹل (Grand Total/Subtotal/Discount وغیرہ) ہمیشہ بائیں طرف — Item الائنمنٹ سیٹنگ سے بے اثر ----------
+      ctx.textAlign = 'left';
+      ctx.fillText(label, sumLeft + 6, rowTop + sumRowH/2 + 4);
+      ctx.textAlign = 'right';
+      ctx.fillText(Math.round(val).toLocaleString(), sumRight - 6, rowTop + sumRowH/2 + 4);
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sumValueX, rowTop); ctx.lineTo(sumValueX, rowTop+sumRowH); ctx.stroke();
       rowTop += sumRowH;
       ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(sumLeft, rowTop); ctx.lineTo(sumRight, rowTop); ctx.stroke();
@@ -17006,19 +17303,19 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
 
   y = tableTop + tableH + 30;
 
-  ctx.textAlign = 'right';
+  ctx.textAlign = 'left';
   ctx.fillStyle = '#1a1a1a';
   const lineStepA4 = Math.round(24*fscale), lineStepA4b = Math.round(26*fscale);
   if(!invoice.customer_id){
     if(invoice.discount && invoice.discount > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableRight - 10, y); y += lineStepA4;
-      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), tableRight - 10, y); y += lineStepA4b;
+      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(0), tableLeft + 10, y); y += lineStepA4;
+      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
-      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), tableRight - 10, y); y += lineStepA4b;
+      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
     }
   }
 
@@ -17028,10 +17325,10 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     if(!alreadyShowedSubtotalA4){
       const originalSubtotalA4 = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + originalSubtotalA4.toFixed(0), tableRight - 10, y); y += lineStepA4;
+      ctx.fillText('Subtotal: Rs. ' + originalSubtotalA4.toFixed(0), tableLeft + 10, y); y += lineStepA4;
     }
     ctx.fillStyle = '#dc2626';
-    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmtA4.toFixed(0), tableRight - 10, y); y += lineStepA4b;
+    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmtA4.toFixed(0), tableLeft + 10, y); y += lineStepA4b;
     ctx.fillStyle = '#1a1a1a';
   }
 
