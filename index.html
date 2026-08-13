@@ -1811,7 +1811,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO138TH0844PM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO138TH0925PM</span>
     </div>
   </div>
 
@@ -3533,7 +3533,6 @@
          ===================================================================== -->
     <div class="screen" id="screen-advanceorders">
       <div class="pageTitle">📝 Advance Orders</div>
-      <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Out at an exhibition/stall? Jot down a rough order for each customer here, then come back later and fulfill each one in the next sale round.</div>
 
       <div class="partyToolbar">
         <button onclick="openAdvanceOrderModal()" style="flex:1; background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px; font-weight:700; cursor:pointer;">➕ New Advance Order</button>
@@ -13560,11 +13559,13 @@ async function renderAdvOrderToCanvas(order){
   ctx.font = F('bold 13px');
   const headerBaseline = tableTop + headerH - 7 * scale;
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
-  ctx.textAlign = align; ctx.fillText('Item', align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), headerBaseline);
-  ctx.textAlign = 'right';
-  ctx.fillText('Qty', colX[3]-4, headerBaseline);
-  ctx.fillText('Approx.', colX[4]-4, headerBaseline);
-  ctx.fillText('Total', colX[5]-4, headerBaseline);
+  // ---------- Item کا نام ہمیشہ Left رہے گا — الائنمنٹ سیٹنگ صرف Qty/Approx/Total پر لاگو ہوگی ----------
+  ctx.textAlign = 'left'; ctx.fillText('Item', colX[1]+4, headerBaseline);
+  const advColCenterX = (a, b) => align === 'center' ? (a + b) / 2 : (align === 'right' ? b - 4 : a + 4);
+  ctx.textAlign = align;
+  ctx.fillText('Qty', advColCenterX(colX[2], colX[3]), headerBaseline);
+  ctx.fillText('Approx.', advColCenterX(colX[3], colX[4]), headerBaseline);
+  ctx.fillText('Total', advColCenterX(colX[4], colX[5]), headerBaseline);
   hLineY += headerH;
   drawTableHLine(hLineY);
 
@@ -13578,12 +13579,27 @@ async function renderAdvOrderToCanvas(order){
     if(displayName !== item.name) displayName = displayName.trim() + '…';
 
     ctx.textAlign = 'center'; ctx.fillText(String(idx+1), (colX[0]+colX[1])/2, rowBaseline);
-    ctx.textAlign = align;
-    ctx.fillText(displayName, align === 'left' ? colX[1]+4 : (align === 'right' ? colX[2]-4 : (colX[1]+colX[2])/2), rowBaseline);
-    ctx.textAlign = 'right';
-    ctx.fillText(String(item.qty), colX[3]-4, rowBaseline);
-    ctx.fillText(fmt(item.unitPrice), colX[4]-4, rowBaseline);
-    ctx.fillText(fmt(item.qty*item.unitPrice), colX[5]-4, rowBaseline);
+    // ---------- Item کا نام یہاں بھی ہمیشہ Left، سخت کلپنگ کے ساتھ کالم سے باہر نہ نکلے ----------
+    ctx.textAlign = 'left';
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(colX[1], hLineY, colX[2] - colX[1], rowH);
+    ctx.clip();
+    ctx.fillText(displayName, colX[1]+4, rowBaseline);
+    ctx.restore();
+    // ---------- Qty/Approx/Total اب منتخب الائنمنٹ (Left/Center/Right) اپناتے ہیں، اور سخت کلپنگ سے کبھی کالم سے باہر نہیں نکلیں گے ----------
+    const drawAdvClippedNum = (text, x1, x2, textX) => {
+      ctx.textAlign = align;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x1, hLineY, x2 - x1, rowH);
+      ctx.clip();
+      ctx.fillText(text, textX, rowBaseline);
+      ctx.restore();
+    };
+    drawAdvClippedNum(String(item.qty), colX[2], colX[3], advColCenterX(colX[2], colX[3]));
+    drawAdvClippedNum(fmt(item.unitPrice), colX[3], colX[4], advColCenterX(colX[3], colX[4]));
+    drawAdvClippedNum(fmt(item.qty*item.unitPrice), colX[4], colX[5], advColCenterX(colX[4], colX[5]));
 
     hLineY += rowH;
     drawTableHLine(hLineY);
@@ -13591,10 +13607,10 @@ async function renderAdvOrderToCanvas(order){
 
   y = tableTop + tableH + 26 * scale;
 
-  ctx.textAlign = 'right';
+  ctx.textAlign = 'left';
   ctx.font = F('bold 20px');
   const grandTotal = advOrderTotal(order);
-  ctx.fillText('Approx. Total: Rs. ' + fmt(grandTotal), pxWidth-(10*scale), y);
+  ctx.fillText('Approx. Total: Rs. ' + fmt(grandTotal), 10*scale, y);
   y += 30 * scale;
 
   if(order.note){
