@@ -1864,7 +1864,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO148FR1117AM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO148FR1153AM</span>
     </div>
   </div>
 
@@ -9046,12 +9046,12 @@ function parseProductLineToRow(line){
 
   const numRe = /(?:rs\.?\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)(?:\s*\/-)?/gi;
   const matches = [...line.matchAll(numRe)];
-  let price = '', name = line;
-  if(matches.length){
-    const last = matches[matches.length - 1];
-    price = last[1].replace(/,/g, '');
-    name = line.slice(0, last.index) + line.slice(last.index + last[0].length);
-  }
+  // ---------- کوئی قیمت والا نمبر نہ ملے تو یہ لائن پراڈکٹ نہیں — دکان کا نام/عنوان/ہیڈر لائن ہو سکتی ہے، اسے چھوڑ دیں
+  //   (پہلے یہاں خالی قیمت کے ساتھ بھی قبول ہو جاتی تھی، جس سے مثلاً "Muhammadi Kirana Store" جیسی عنوان لائن غلطی سے پراڈکٹ بن جاتی تھی) ----------
+  if(!matches.length) return null;
+  const last = matches[matches.length - 1];
+  const price = last[1].replace(/,/g, '');
+  let name = line.slice(0, last.index) + line.slice(last.index + last[0].length);
   name = name.replace(/\brs\.?\b/gi, '').replace(/^[-:.\s]+|[-:.\s]+$/g, '').trim();
   if(!name) return null;
   if(looksLikeGarbageOcrLine(name)) return null; // ---------- خراب/بے معنی OCR لائن — فہرست کو صاف رکھنے کے لیے چھوڑ دیں ----------
@@ -9088,15 +9088,17 @@ function scanEscAttr(v){
 
 // ---------- پراڈکٹ ٹیبل کے کالمز — بالکل وہی ترتیب اور نام جو AIO POS کی اپنی CSV/PRODUCT_CSV_HEADERS میں استعمال ہوتے ہیں،
 //   تاکہ سکین شدہ ڈیٹا اور CSV امپورٹ دونوں ایک ہی فارمیٹ پر رہیں اور کوئی خانہ ادھر ادھر نہ ہو ----------
+// ---------- ترتیب: Product Name کے فوراً بعد Purchase Price → Sale Price → Stock سیدھے سیدھے آنے چاہیے
+//   (پہلے یہ Category/Variant/Barcode کے بعد آتے تھے) — باقی کالمز (Category, Variant, Barcode, Wholesale وغیرہ) ان کے بعد ----------
 const SCAN_PRODUCT_COLUMNS = [
   {field:'name',      label:'Product Name',  type:'text',   placeholder:'Product name', cls:'scanCellName'},
+  {field:'purchase',  label:'Purchase Price',type:'number', placeholder:'0', num:true},
+  {field:'retail',    label:'Sale Price',    type:'number', placeholder:'0', num:true},
+  {field:'stock',     label:'Stock',         type:'number', placeholder:'0', num:true},
   {field:'category',  label:'Category',      type:'text',   placeholder:'Category'},
   {field:'variant',   label:'Variant',       type:'text',   placeholder:'Default'},
   {field:'barcode',   label:'Barcode',       type:'text',   placeholder:'Barcode'},
-  {field:'purchase',  label:'Purchase',      type:'number', placeholder:'0', num:true},
-  {field:'retail',    label:'Retail',        type:'number', placeholder:'0', num:true},
   {field:'wholesale', label:'Wholesale',     type:'number', placeholder:'0', num:true},
-  {field:'stock',     label:'Stock',         type:'number', placeholder:'0', num:true},
   {field:'lowstock',  label:'Low Stock',     type:'number', placeholder:'5', num:true},
   {field:'expiry',    label:'Expiry',        type:'date',   placeholder:''},
   {field:'location',  label:'Location',      type:'text',   placeholder:'Location'},
