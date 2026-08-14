@@ -503,7 +503,7 @@
   }
   .categorySideRailEditBtn:active{ transform:scale(.95); }
   .categorySideRailItem{
-    flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    flex:0 0 auto; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
     padding:10px 3px; border-radius:11px; background:linear-gradient(145deg,#ffffff,#eef3f2); color:var(--text);
     font-weight:700; font-size:10px; line-height:1.18; text-align:center; cursor:pointer;
     word-break:break-word; overflow-wrap:anywhere;
@@ -518,6 +518,14 @@
     box-shadow:0 0 0 1.5px rgba(15,118,110,.4), 0 0 16px 4px rgba(15,118,110,.55), 2px 2px 5px rgba(41,29,10,.25);
   }
   .categorySideRailItem .csrCount{font-size:8.5px; font-weight:800; opacity:.8;}
+  .csrPencil{
+    position:absolute; top:-5px; right:-5px; width:17px; height:17px; border-radius:50%;
+    background:linear-gradient(145deg,#fff,#f1f5f9); color:var(--primary-dark); font-size:9.5px;
+    display:flex; align-items:center; justify-content:center; box-shadow:1px 1px 4px rgba(41,29,10,.35), 0 0 0 1px rgba(15,118,110,.25);
+    z-index:2; cursor:pointer;
+  }
+  .categorySideRailItem.active .csrPencil{ background:linear-gradient(145deg,#fff,#e7fbf8); }
+  .csrPencil:active{ transform:scale(.88); }
   .billingMainArea .productGrid{
     flex:1 1 auto; min-width:0;
     grid-template-columns:repeat(auto-fit, minmax(120px,1fr)) !important;
@@ -1827,7 +1835,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO148FR0849AM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO148FR0938AM</span>
     </div>
   </div>
 
@@ -2333,7 +2341,7 @@
           <div class="csvImportBar">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
-            <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal('product')">📷 Scan Photo & Import</button>
+            <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal('product')">📷 Scan Photos & Import</button>
             <input type="file" id="productCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
           </div>
 
@@ -2386,7 +2394,7 @@
       <div class="csvImportBar">
         <button class="csvTemplateBtn" onclick="downloadPartyCsvTemplate()">📄 Download Excel/CSV Template</button>
         <button class="csvImportBtn" id="partyImportBtn" onclick="document.getElementById('partyCsvInput').click()">📥 Import <span id="partyImportBtnLabel">Customers</span></button>
-        <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal(currentPartyTab === 'customers' ? 'customer' : 'supplier')">📷 Scan Photo & Import</button>
+        <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal(currentPartyTab === 'customers' ? 'customer' : 'supplier')">📷 Scan Photos & Import</button>
         <input type="file" id="partyCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handlePartyCsvFileSelect(event)">
       </div>
       <button id="bulkReminderBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openBulkReminderCenter()">📢 Remind All (Outstanding Balances)</button>
@@ -4431,28 +4439,61 @@
   </div>
 </div>
 
-<!-- 📷 SCAN PHOTO & IMPORT — تصویر/سکرین شاٹ سے متن نکال کر، بندہ خود ترتیب دے کر امپورٹ کرے (Products/Customers/Suppliers تینوں کے لیے مشترکہ) -->
+<!-- 📷 SCAN PHOTOS & IMPORT — گیلری سے کئی تصاویر منتخب کریں یا لائیو کیمرہ سے تصویر بنائیں — سسٹم خودکار CSV بنا کر ہر لائن کو Name/Price (یا Name/Phone/Address/Area) میں توڑ کر ایڈٹ کے قابل فہرست دکھائے — Products/Customers/Suppliers تینوں کے لیے مشترکہ -->
 <div class="modalOverlay" id="scanImportModal" onclick="if(event.target===this) closeScanImportModal()">
-  <div class="modalBox" style="max-width:480px;">
-    <h3>📷 Scan Photo & Import</h3>
-    <div class="settingsHint" style="margin-top:0;">تصویر/سکرین شاٹ منتخب کریں — نیچے باکس میں لکھائی خودکار نکل آئے گی۔ پھر اسے چیک کر کے، کوما (,) لگا کر Name,Phone,Address,Area کی ترتیب بنا دیں (ہر بندہ ایک لائن میں)، پھر امپورٹ دبائیں۔</div>
+  <div class="modalBox" style="max-width:520px;">
+    <h3>📷 Scan Photos & Import</h3>
+    <div class="settingsHint" style="margin-top:0;" id="scanImportHint">گیلری سے ایک ساتھ کئی تصویریں منتخب کریں، یا کیمرے سے براہ راست تصویر بنائیں — سسٹم خودکار ہر لائن سے نام اور قیمت (یا نام/فون/پتہ) نکال کر CSV فہرست بنا دے گا۔ نیچے فہرست میں چیک/درست کر کے امپورٹ کریں۔</div>
 
-    <input type="file" id="scanImageInput" accept="image/*" onchange="handleScanImageSelect(event)" style="margin:10px 0;">
+    <div style="display:flex; gap:8px; margin:10px 0;">
+      <button type="button" onclick="document.getElementById('scanImageInput').click()" style="flex:1; padding:12px 8px; border:none; border-radius:10px; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:13px; cursor:pointer;">🖼️ Gallery</button>
+      <button type="button" onclick="openCameraCapture()" style="flex:1; padding:12px 8px; border:none; border-radius:10px; background:#f3e8ff; color:#7c3aed; font-weight:800; font-size:13px; cursor:pointer;">📸 Camera</button>
+    </div>
+    <input type="file" id="scanImageInput" accept="image/*" multiple onchange="handleScanImageSelect(event)" style="display:none;">
 
     <div id="scanProgressWrap" style="display:none; margin:10px 0;">
-      <div style="background:#eef2ff; color:var(--primary-dark); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700;" id="scanProgressText">🔍 پڑھا جا رہا ہے...</div>
+      <div style="background:#eef2ff; color:var(--primary-dark); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700;" id="scanProgressText">🔍 Scanning...</div>
     </div>
 
-    <div id="scanTextWrap" style="display:none; margin-top:12px;">
-      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">نکلا ہوا متن — یہاں خود چیک/ترتیب دیں</label>
-      <textarea id="scanExtractedText" rows="10" style="width:100%; font-family:monospace; font-size:12px; padding:10px; border:1.5px solid #dbe1ea; border-radius:8px;"></textarea>
-      <div style="display:flex; gap:8px; margin-top:10px;">
-        <button onclick="downloadScanAsCsv()" style="flex:1; background:#f1f5f9; color:var(--text);">⬇️ CSV ڈاؤن لوڈ کریں</button>
-        <button onclick="finalizeScanImport()" style="flex:1;">✅ ابھی امپورٹ کریں</button>
+    <div id="scanReviewWrap" style="display:none; margin-top:12px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div style="font-size:12.5px; font-weight:800; color:var(--primary-dark);" id="scanReviewCount">0 item(s) found</div>
+        <button type="button" onclick="addBlankScanRow()" style="padding:6px 11px; font-size:11.5px; border-radius:8px; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:800; cursor:pointer;">+ Add row</button>
+      </div>
+      <div id="scanReviewList" style="max-height:44vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:2px;"></div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button onclick="downloadScanAsCsv()" style="flex:1; background:#f1f5f9; color:var(--text);">⬇️ CSV</button>
+        <button onclick="finalizeScanImport()" style="flex:1.5;">✅ Import These Items</button>
       </div>
     </div>
 
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:14px;" onclick="closeScanImportModal()">Close</button>
+  </div>
+</div>
+
+<!-- 📸 CAMERA CAPTURE — لائیو کیمرہ پریویو، برائٹنس سلائیڈر کے ساتھ صاف تصویر بنائیں، ایک سے زیادہ تصویریں بھی بنا سکتے ہیں پھر ایک ساتھ سکین ہوں -->
+<div class="modalOverlay" id="cameraCaptureModal">
+  <div class="modalBox" style="max-width:480px;">
+    <h3>📸 Take Photo</h3>
+    <div style="position:relative; border-radius:12px; overflow:hidden; background:#000;">
+      <video id="cameraPreviewVideo" autoplay playsinline muted style="width:100%; display:block;"></video>
+    </div>
+    <canvas id="cameraCaptureCanvas" style="display:none;"></canvas>
+
+    <div style="margin-top:12px;">
+      <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); font-weight:700;">
+        ☀️ Brightness
+        <input type="range" id="cameraBrightness" min="60" max="200" value="115" oninput="updateCameraBrightness(this.value)" style="flex:1;">
+      </label>
+    </div>
+
+    <div style="font-size:12px; color:var(--primary-dark); font-weight:800; margin-top:8px;" id="cameraCapturedCount">0 photo(s) captured</div>
+
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button type="button" onclick="captureCameraPhoto()" style="flex:1.4; padding:13px; border:none; border-radius:10px; background:linear-gradient(145deg,#7c3aed,#5b21b6); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">📸 Capture</button>
+      <button type="button" onclick="closeCameraCapture(false)" style="flex:1; padding:13px; border:none; border-radius:10px; background:var(--primary); color:#fff; font-weight:800; font-size:13px; cursor:pointer;">✅ Done</button>
+    </div>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:10px;" onclick="closeCameraCapture(true)">Cancel</button>
   </div>
 </div>
 
@@ -6699,9 +6740,25 @@ function renderBillingCategoryRail(){
   const items = [`<div class="categorySideRailEditBtn" onclick="goTo('categories')">✏️<br>Edit</div>`];
   items.push(`<div class="categorySideRailItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span>All</span><span class="csrCount">${productsData.length}</span></div>`);
   categories.forEach(cat => {
-    items.push(`<div class="categorySideRailItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${cat.replace(/'/g,"\\'")}')"><span>${cat}</span><span class="csrCount">${counts[cat]}</span></div>`);
+    items.push(`<div class="categorySideRailItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${cat.replace(/'/g,"\\'")}')"><span class="csrPencil" onclick="renameCategoryInline(event,'${cat.replace(/'/g,"\\'")}')" title="Rename category">✏️</span><span>${cat}</span><span class="csrCount">${counts[cat]}</span></div>`);
   });
   panel.innerHTML = items.join('');
+}
+
+// ---------- بلنگ اسکرین کے کیٹگری کالم سے براہ راست کیٹگری کا نام تبدیل کریں —
+//            Categories صفحے پر جائے بغیر، اسی جگہ prompt کھل کر نام بدل دے اور فوراً یہیں تازہ ہو جائے ----------
+function renameCategoryInline(e, oldName){
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  const newName = prompt(`Rename "${oldName}" to:`, oldName);
+  if(!newName || !newName.trim() || newName.trim() === oldName) return;
+  const trimmed = newName.trim();
+  productsData.forEach(p => { if((p.category || '').trim() === oldName) p.category = trimmed; });
+  const idx = (customCategories || []).indexOf(oldName);
+  if(idx !== -1) customCategories[idx] = trimmed;
+  if(activeBillingCategory === oldName) activeBillingCategory = trimmed;
+  persistAllData();
+  renderBillingCategoryRail();
+  renderBillingProductGrid();
 }
 
 // ---------- ڈراپ ڈاؤن کے اندر سے نئی کیٹیگری شامل کریں (ابھی خالی، بعد میں پراڈکٹس اس میں ڈالے جا سکتے ہیں) ----------
@@ -8843,18 +8900,22 @@ function confirmPartyCsvImport(){
 }
 
 /* =====================================================================
-   📷 SCAN PHOTO & IMPORT — تصویر/سکرین شاٹ سے OCR (Tesseract.js) کے ذریعے متن نکالیں،
-   بندہ خود اسے چیک/ترتیب دے کر Comma لگائے (Name,Phone,Address,Area یا پراڈکٹ کی ترتیب)،
-   پھر یا تو CSV ڈاؤن لوڈ کر لے یا سیدھا امپورٹ کر دے۔ Products/Customers/Suppliers تینوں کے لیے مشترکہ۔
+   📷 SCAN PHOTOS & IMPORT — گیلری سے کئی تصاویر یا لائیو کیمرہ (برائٹنس ایڈجسٹ کے ساتھ) سے
+   تصویر بنا کر OCR (Tesseract.js) سے متن نکالا جاتا ہے، ہر لائن خودکار Name/Price
+   (یا Name/Phone/Address/Area) میں توڑ کر ایڈٹ کے قابل فہرست دکھائی جاتی ہے — بندہ یہیں
+   غلطی درست کر کے، نئی لائن شامل/حذف کر کے پھر امپورٹ کر دے۔ Products/Customers/Suppliers
+   تینوں کے لیے مشترکہ۔
    ===================================================================== */
 let scanImportContext = 'product'; // 'product' | 'customer' | 'supplier'
+let scanReviewRows = []; // OCR سے نکلی/دستی شامل کی گئی، ایڈٹ کے قابل rows
 
 function openScanImportModal(context){
   scanImportContext = context;
+  scanReviewRows = [];
   document.getElementById('scanImageInput').value = '';
   document.getElementById('scanProgressWrap').style.display = 'none';
-  document.getElementById('scanTextWrap').style.display = 'none';
-  document.getElementById('scanExtractedText').value = '';
+  document.getElementById('scanReviewWrap').style.display = 'none';
+  document.getElementById('scanReviewList').innerHTML = '';
   document.getElementById('scanImportModal').classList.add('show');
 }
 function closeScanImportModal(){
@@ -8862,50 +8923,266 @@ function closeScanImportModal(){
 }
 
 function handleScanImageSelect(event){
-  const file = event.target.files[0];
-  if(!file) return;
+  const files = Array.from(event.target.files || []);
+  event.target.value = ''; // ---------- دوبارہ وہی فائل(ز) منتخب کریں تو بھی change ایونٹ چلے ----------
+  if(!files.length) return;
+  processScanFiles(files);
+}
+
+// ---------- گیلری اور کیمرہ دونوں سے آئی ہوئی فائلیں یہیں سے پراسیس ہوں گی — ایک ساتھ کئی تصاویر بھی چل سکتی ہیں ----------
+async function processScanFiles(files){
+  if(!files.length) return;
   if(typeof Tesseract === 'undefined'){
     alert('❌ سکین سسٹم لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔');
     return;
   }
   document.getElementById('scanProgressWrap').style.display = 'block';
-  document.getElementById('scanTextWrap').style.display = 'none';
-  document.getElementById('scanProgressText').textContent = '🔍 پڑھا جا رہا ہے... (0%)';
+  document.getElementById('scanReviewWrap').style.display = 'none';
+  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}...`;
 
-  Tesseract.recognize(file, 'eng', {
-    logger: m => {
-      if(m.status === 'recognizing text'){
-        document.getElementById('scanProgressText').textContent = `🔍 پڑھا جا رہا ہے... (${Math.round(m.progress * 100)}%)`;
-      }
+  let combinedLines = [];
+  for(let i = 0; i < files.length; i++){
+    const file = files[i];
+    document.getElementById('scanProgressText').textContent = `🔍 Scanning photo ${i + 1} of ${files.length}...`;
+    try{
+      const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+        logger: m => {
+          if(m.status === 'recognizing text'){
+            document.getElementById('scanProgressText').textContent = `🔍 Scanning photo ${i + 1} of ${files.length}... (${Math.round(m.progress * 100)}%)`;
+          }
+        }
+      });
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      combinedLines = combinedLines.concat(lines);
+    } catch(err){
+      console.error('Scan failed for one photo:', err);
     }
-  }).then(({ data: { text } }) => {
-    document.getElementById('scanProgressWrap').style.display = 'none';
-    document.getElementById('scanTextWrap').style.display = 'block';
-    // ---------- شروع میں گائیڈ لائن کی مثال — تاکہ بندے کو پتا چلے کس فارمیٹ میں ترتیب دینی ہے ----------
-    const guideLine = scanImportContext === 'product'
-      ? PRODUCT_CSV_HEADERS.join(',')
-      : 'Name,Phone,Address,Area';
-    document.getElementById('scanExtractedText').value = guideLine + '\n' + text.trim();
-  }).catch(() => {
-    document.getElementById('scanProgressWrap').style.display = 'none';
-    alert('❌ تصویر پڑھی نہیں جا سکی — دوسری، صاف اور روشن تصویر آزمائیں۔');
-  });
+  }
+
+  document.getElementById('scanProgressWrap').style.display = 'none';
+
+  const newRows = combinedLines
+    .map(line => scanImportContext === 'product' ? parseProductLineToRow(line) : parsePartyLineToRow(line))
+    .filter(Boolean);
+  scanReviewRows = scanReviewRows.concat(newRows); // ---------- پہلے سے موجود rows میں مزید شامل کریں (گیلری + کیمرہ ملا کر بھی چل سکتے ہیں) ----------
+
+  if(scanReviewRows.length === 0){
+    alert('❌ کوئی آئٹم نہیں ملا — صاف اور روشن تصویر آزمائیں، یا نیچے "+ Add row" سے خود لکھیں۔');
+  }
+  renderScanReviewList();
+  document.getElementById('scanReviewWrap').style.display = 'block';
 }
 
+// ---------- ایک لائن سے پراڈکٹ نام + قیمت نکالنے کی کوشش — لائن کے آخری نمبر کو قیمت مانا جاتا ہے، باقی نام ----------
+function parseProductLineToRow(line){
+  line = line.replace(/[|`~_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if(line.length < 2) return null;
+  if(!/[a-zA-Z\u0600-\u06FF]/.test(line)) return null; // کم از کم ایک حرف ضرور ہو (خالی نمبر لائنیں چھوڑ دیں)
+  if(/^(item|product|name|price|qty|quantity|s\.?no\.?|sr\.?no\.?|total)$/i.test(line)) return null;
+
+  const numRe = /(?:rs\.?\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)(?:\s*\/-)?/gi;
+  const matches = [...line.matchAll(numRe)];
+  let price = '', name = line;
+  if(matches.length){
+    const last = matches[matches.length - 1];
+    price = last[1].replace(/,/g, '');
+    name = line.slice(0, last.index) + line.slice(last.index + last[0].length);
+  }
+  name = name.replace(/\brs\.?\b/gi, '').replace(/^[-:.\s]+|[-:.\s]+$/g, '').trim();
+  if(!name) return null;
+  return {name, category:'', variant:'Default', barcode:'', purchase:'', retail:price, wholesale:'', stock:'0', lowstock:'', expiry:'', location:''};
+}
+
+// ---------- ایک لائن سے نام/فون/پتہ/علاقہ نکالنے کی کوشش (کسٹمر/سپلائر سکین کے لیے) ----------
+function parsePartyLineToRow(line){
+  line = line.replace(/[|`~_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if(line.length < 3) return null;
+  if(!/[a-zA-Z\u0600-\u06FF]/.test(line)) return null;
+
+  const phoneRe = /(\+?\d[\d\s-]{8,14}\d)/;
+  const m = line.match(phoneRe);
+  let phone = '', rest = line;
+  if(m){
+    phone = m[1].replace(/[\s-]/g, '');
+    rest = (line.slice(0, m.index) + line.slice(m.index + m[0].length)).trim();
+  }
+  rest = rest.replace(/^[,.\-\s]+|[,.\-\s]+$/g, '');
+  const parts = rest.split(',').map(s => s.trim()).filter(Boolean);
+  let name = rest, address = '', area = '';
+  if(parts.length >= 3){ name = parts[0]; address = parts.slice(1, -1).join(', '); area = parts[parts.length - 1]; }
+  else if(parts.length === 2){ name = parts[0]; address = parts[1]; }
+  else if(parts.length === 1){ name = parts[0]; }
+  if(!name) return null;
+  return {name, phone, address, area};
+}
+
+// ---------- HTML attribute میں محفوظ طریقے سے دکھانے کے لیے escape ----------
+function scanEscAttr(v){
+  return (v == null ? '' : String(v)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderScanReviewList(){
+  const wrap = document.getElementById('scanReviewList');
+  document.getElementById('scanReviewCount').textContent = `${scanReviewRows.length} item(s) found — check & fix if needed`;
+  if(scanImportContext === 'product'){
+    wrap.innerHTML = scanReviewRows.map((row, i) => `
+      <div class="scanReviewRow" style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:8px;">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="text" value="${scanEscAttr(row.name)}" placeholder="Product name" oninput="updateScanRow(${i},'name',this.value)" style="flex:1; min-width:0; padding:8px 9px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:13px; font-weight:700;">
+          <button type="button" onclick="removeScanRow(${i})" title="Remove" style="flex:0 0 32px; height:34px; border:none; border-radius:8px; background:#fee2e2; color:var(--danger); font-size:14px; cursor:pointer;">🗑️</button>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <input type="text" value="${scanEscAttr(row.category)}" placeholder="Category" oninput="updateScanRow(${i},'category',this.value)" style="flex:1.2; min-width:0; padding:7px 8px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+          <input type="number" value="${scanEscAttr(row.retail)}" placeholder="Price" oninput="updateScanRow(${i},'retail',this.value)" style="flex:0 0 76px; padding:7px 8px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+          <input type="number" value="${scanEscAttr(row.stock)}" placeholder="Stock" oninput="updateScanRow(${i},'stock',this.value)" style="flex:0 0 58px; padding:7px 8px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+        </div>
+      </div>
+    `).join('');
+  } else {
+    wrap.innerHTML = scanReviewRows.map((row, i) => `
+      <div class="scanReviewRow" style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:8px;">
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input type="text" value="${scanEscAttr(row.name)}" placeholder="Name" oninput="updateScanRow(${i},'name',this.value)" style="flex:1; min-width:0; padding:8px 9px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:13px; font-weight:700;">
+          <button type="button" onclick="removeScanRow(${i})" title="Remove" style="flex:0 0 32px; height:34px; border:none; border-radius:8px; background:#fee2e2; color:var(--danger); font-size:14px; cursor:pointer;">🗑️</button>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <input type="text" value="${scanEscAttr(row.phone)}" placeholder="Phone" oninput="updateScanRow(${i},'phone',this.value)" style="flex:1; min-width:0; padding:7px 8px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+          <input type="text" value="${scanEscAttr(row.address)}" placeholder="Address" oninput="updateScanRow(${i},'address',this.value)" style="flex:1.4; min-width:0; padding:7px 8px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+          <input type="text" value="${scanEscAttr(row.area)}" placeholder="Area" oninput="updateScanRow(${i},'area',this.value)" style="flex:0 0 70px; padding:7px 8px; border:1.5px solid #dbe1ea; border-radius:8px; font-size:12px;">
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateScanRow(i, field, value){
+  if(scanReviewRows[i]) scanReviewRows[i][field] = value;
+}
+function removeScanRow(i){
+  scanReviewRows.splice(i, 1);
+  renderScanReviewList();
+}
+function addBlankScanRow(){
+  scanReviewRows.push(
+    scanImportContext === 'product'
+      ? {name:'', category:'', variant:'Default', barcode:'', purchase:'', retail:'', wholesale:'', stock:'0', lowstock:'', expiry:'', location:''}
+      : {name:'', phone:'', address:'', area:''}
+  );
+  renderScanReviewList();
+  const wrap = document.getElementById('scanReviewList');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function scanCsvEscape(v){
+  v = (v == null ? '' : String(v));
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
 function downloadScanAsCsv(){
-  const text = document.getElementById('scanExtractedText').value.trim();
-  if(!text){ alert('پہلے کوئی متن نکالیں یا ٹائپ کریں۔'); return; }
-  downloadCsvFile(text, 'Scanned_Import.csv');
+  if(scanReviewRows.length === 0){ alert('پہلے کوئی آئٹم شامل کریں۔'); return; }
+  let headerRow, dataRows;
+  if(scanImportContext === 'product'){
+    headerRow = PRODUCT_CSV_HEADERS;
+    dataRows = scanReviewRows.map(r => [r.name, r.category, r.variant || 'Default', r.barcode, r.purchase, r.retail, r.wholesale, r.stock, r.lowstock, r.expiry, r.location]);
+  } else {
+    headerRow = ['Name','Phone','Address','Area'];
+    dataRows = scanReviewRows.map(r => [r.name, r.phone, r.address, r.area]);
+  }
+  const csvText = [headerRow, ...dataRows].map(row => row.map(scanCsvEscape).join(',')).join('\n');
+  downloadCsvFile(csvText, 'Scanned_Import.csv');
 }
 
 function finalizeScanImport(){
-  const text = document.getElementById('scanExtractedText').value.trim();
-  if(!text){ alert('پہلے کوئی متن نکالیں یا ٹائپ کریں۔'); return; }
-  const ok = scanImportContext === 'product' ? processProductCsvText(text) : processPartyCsvText(text);
-  if(ok) closeScanImportModal(); // ---------- کامیابی پر Scan modal بند، پیچھے پہلے سے کھلا Preview modal نظر آئے گا ----------
+  if(scanReviewRows.length === 0){ alert('کوئی آئٹم نہیں — پہلے تصویر منتخب کریں یا "+ Add row" سے شامل کریں۔'); return; }
+  if(scanImportContext === 'product'){
+    const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
+      'product name': (r.name || '').trim(),
+      'category': (r.category || '').trim(),
+      'variant label': (r.variant || 'Default').trim() || 'Default',
+      'barcode': (r.barcode || '').trim(),
+      'purchase price': String(r.purchase || '').trim(),
+      'retail price': String(r.retail || '').trim(),
+      'wholesale price': String(r.wholesale || '').trim(),
+      'stock': String(r.stock || '0').trim(),
+      'low stock alert': String(r.lowstock || '').trim(),
+      'expiry date (yyyy-mm-dd)': (r.expiry || '').trim(),
+      'location': (r.location || '').trim(),
+    }));
+    if(objs.length === 0){ alert('کوئی پراڈکٹ نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    pendingProductImportRows = objs;
+    showProductImportPreview();
+  } else {
+    const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
+      name: (r.name || '').trim(), phone: (r.phone || '').trim(), address: (r.address || '').trim(), area: (r.area || '').trim()
+    }));
+    if(objs.length === 0){ alert('کوئی نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    pendingPartyImportRows = objs;
+    showPartyImportPreview();
+  }
+  closeScanImportModal(); // ---------- کامیابی پر Scan modal بند، پیچھے پہلے سے کھلا "Ready to Import?" preview modal نظر آئے گا ----------
+}
+
+/* =====================================================================
+   📸 CAMERA CAPTURE — لائیو کیمرہ پریویو + برائٹنس سلائیڈر (صاف تصویر کے لیے)،
+   ایک سے زیادہ تصویریں بنا کر "Done" دبانے پر سب ایک ساتھ سکین کے لیے بھیج دی جاتی ہیں۔
+   ===================================================================== */
+let cameraStream = null;
+let cameraCapturedFiles = [];
+
+function openCameraCapture(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    alert('❌ اس ڈیوائس/براؤزر پر کیمرہ دستیاب نہیں — براہ کرم "Gallery" سے تصویر منتخب کریں۔');
+    return;
+  }
+  cameraCapturedFiles = [];
+  document.getElementById('cameraCapturedCount').textContent = '0 photo(s) captured';
+  document.getElementById('cameraBrightness').value = 115;
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    .then(stream => {
+      cameraStream = stream;
+      const video = document.getElementById('cameraPreviewVideo');
+      video.srcObject = stream;
+      updateCameraBrightness(115);
+      document.getElementById('cameraCaptureModal').classList.add('show');
+    })
+    .catch(() => {
+      alert('❌ کیمرہ کھل نہیں سکا — کیمرہ کی اجازت (permission) دیں، یا "Gallery" سے تصویر منتخب کریں۔');
+    });
+}
+
+function updateCameraBrightness(val){
+  document.getElementById('cameraPreviewVideo').style.filter = `brightness(${val}%)`;
+}
+
+function captureCameraPhoto(){
+  const video = document.getElementById('cameraPreviewVideo');
+  if(!video.videoWidth){ return; }
+  const canvas = document.getElementById('cameraCaptureCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  const brightness = document.getElementById('cameraBrightness').value;
+  ctx.filter = `brightness(${brightness}%)`; // ---------- برائٹنس سلائیڈر کی ویلیو تصویر میں بھی سیدھی بیک ہو جائے، صرف پریویو پر نہیں ----------
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.toBlob(blob => {
+    if(!blob) return;
+    const file = new File([blob], `camera_${Date.now()}.jpg`, {type:'image/jpeg'});
+    cameraCapturedFiles.push(file);
+    document.getElementById('cameraCapturedCount').textContent = `${cameraCapturedFiles.length} photo(s) captured`;
+  }, 'image/jpeg', 0.92);
+}
+
+function closeCameraCapture(discard){
+  if(cameraStream){ cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('cameraCaptureModal').classList.remove('show');
+  const files = cameraCapturedFiles;
+  cameraCapturedFiles = [];
+  if(!discard && files.length){
+    processScanFiles(files);
+  }
 }
 
 function renderProductList(query = ''){
+
   const wrap = document.getElementById('productListWrap');
   query = query.trim().toLowerCase();
 
