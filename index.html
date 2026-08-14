@@ -487,26 +487,42 @@
        دبانے پر نیچے فلوٹنگ پاپ اپ میں کیٹیگری فہرست کھلتی ہے، منتخب کرتے ہی بند ہو جاتی ہے۔
        مقصد: پوری چوڑائی کی پٹی نہ ہونے سے ہوم پیج زیادہ تر پراڈکٹس کے لیے خالی رہے۔ --- */
   /* --- 📂 Billing Screen — کیٹیگری لیفٹ سائیڈ کالم (باریک، اوپر سے نیچے تک) --- */
-  .billingMainArea{display:flex; gap:6px; align-items:stretch;}
+  .billingMainArea{display:flex; gap:10px; align-items:stretch;}
   .categorySideRail{
-    flex:0 0 58px; width:58px; display:flex; flex-direction:column; gap:5px;
-    max-height:calc(100vh - 310px); overflow-y:auto; padding:2px; box-sizing:border-box;
+    flex:0 0 68px; width:68px; display:flex; flex-direction:column; gap:9px;
+    max-height:calc(100vh - 310px); overflow-y:auto; overflow-x:hidden; box-sizing:border-box;
+    padding:10px 7px; border-radius:16px;
+    background:linear-gradient(180deg,#eef6f5,#dceae7 55%,#d3e6e2);
+    box-shadow:inset 0 1px 3px rgba(15,118,110,.10), inset 0 -1px 2px rgba(255,255,255,.6), 0 2px 6px rgba(41,29,10,.08);
   }
   .categorySideRailEditBtn{
     flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:2px;
-    padding:6px 2px; border:none; border-radius:9px; background:#eef2ff; color:var(--primary-dark);
-    font-weight:800; font-size:10px; cursor:pointer; text-align:center; line-height:1.15;
+    padding:9px 3px; border:none; border-radius:11px; background:linear-gradient(145deg,#eef2ff,#dde4fb); color:var(--primary-dark);
+    font-weight:800; font-size:10px; cursor:pointer; text-align:center; line-height:1.2;
+    box-shadow:2px 2px 5px rgba(41,29,10,.14), -1px -1px 3px rgba(255,255,255,.85);
   }
+  .categorySideRailEditBtn:active{ transform:scale(.95); }
   .categorySideRailItem{
-    flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
-    padding:7px 2px; border-radius:9px; background:var(--card); color:var(--text);
-    font-weight:700; font-size:9.5px; line-height:1.12; text-align:center; cursor:pointer;
-    word-break:break-word; overflow-wrap:anywhere; box-shadow:0 1px 4px rgba(41,29,10,.12);
-    min-height:44px; box-sizing:border-box;
+    flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    padding:10px 3px; border-radius:11px; background:linear-gradient(145deg,#ffffff,#eef3f2); color:var(--text);
+    font-weight:700; font-size:10px; line-height:1.18; text-align:center; cursor:pointer;
+    word-break:break-word; overflow-wrap:anywhere;
+    border:1px solid rgba(15,118,110,.14);
+    box-shadow:3px 3px 6px rgba(41,29,10,.15), -2px -2px 5px rgba(255,255,255,.95), 0 0 6px rgba(15,118,110,.10);
+    min-height:52px; box-sizing:border-box;
+    transition:box-shadow .15s ease, transform .1s ease, background .15s ease;
   }
-  .categorySideRailItem.active{background:var(--primary); color:#fff; box-shadow:0 2px 8px rgba(41,29,10,.22);}
+  .categorySideRailItem:active{ transform:scale(.95); }
+  .categorySideRailItem.active{
+    background:linear-gradient(145deg, var(--primary), var(--primary-dark)); color:#fff; font-weight:800;
+    box-shadow:0 0 0 1.5px rgba(15,118,110,.4), 0 0 16px 4px rgba(15,118,110,.55), 2px 2px 5px rgba(41,29,10,.25);
+  }
   .categorySideRailItem .csrCount{font-size:8.5px; font-weight:800; opacity:.8;}
-  .billingMainArea .productGrid{flex:1 1 auto; min-width:0; grid-template-columns:repeat(3,1fr) !important;}
+  .billingMainArea .productGrid{
+    flex:1 1 auto; min-width:0;
+    grid-template-columns:repeat(auto-fit, minmax(120px,1fr)) !important;
+    gap:14px !important;
+  }
 
   .categoryDropdownWrap{position:relative; display:inline-block; margin-bottom:6px;}
   .categoryDropdownBtn{
@@ -539,10 +555,10 @@
   .categoryDropdownAddNew:hover{background:#eef2ff;}
 
   /* --- پراڈکٹ گرڈ: کارڈز ایک دوسرے کے قریب قریب، کم سے کم فاصلہ، زیادہ سے زیادہ ایک نظر میں نظر آئیں --- */
-  .productGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); align-items:start; align-content:start; gap:6px; max-height:480px; overflow-y:auto; padding:4px;}
+  .productGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); align-items:start; align-content:start; gap:12px; max-height:480px; overflow-y:auto; padding:4px;}
   .productGridCard{
     background:var(--card); border-radius:12px; overflow:hidden; position:relative; cursor:default;
-    height:136px; display:flex; flex-direction:column;
+    height:152px; display:flex; flex-direction:column;
     box-shadow:3px 3px 7px rgba(41,29,10,.16), -2px -2px 6px rgba(255,255,255,.8);
     border:1px solid rgba(255,255,255,.6);
   }
@@ -1115,8 +1131,8 @@
   .pscDropdown{flex:1 1 0; min-width:0; border:1px solid #e2e8f0; background:#fff; color:var(--text); font-weight:700; font-size:11.5px; padding:6px 4px; border-radius:7px;}
   .pscCheckLabel{display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--text); cursor:pointer; white-space:nowrap;}
   .pscCheckLabel input{width:15px; height:15px;}
-  .previewActions{display:flex; gap:8px; padding:14px 18px;}
-  .previewActions button{flex:1; padding:10px; border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;}
+  .previewActions{display:flex; gap:6px; padding:8px 14px;}
+  .previewActions button{flex:1; padding:8px; border:none; border-radius:8px; font-weight:600; font-size:12.5px; cursor:pointer;}
 
   /* ===================== SETTINGS SCREEN ===================== */
   .settingsWrap{display:flex; flex-direction:column; gap:16px; max-width:640px;}
@@ -1811,7 +1827,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO138TH0925PM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO148FR0849AM</span>
     </div>
   </div>
 
@@ -3439,55 +3455,51 @@
           </div>
         </div>
 
-        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے ---------- -->
-        <div class="previewStyleControls">
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">🔠 Text</span>
-            <span style="font-size:11px; color:var(--muted);">A</span>
-            <input type="range" id="pscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPreviewZoom('printFontScale', this.value)" style="flex:1;">
-            <span style="font-size:19px; color:var(--muted);">A</span>
-            <span class="pscValue" id="pscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے (کمپیکٹ — بل زیادہ نظر آئے) ---------- -->
+        <div class="previewStyleControls compactPsc">
+          <div class="pscCompactRow">
+            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+              <span class="pscLabel">🔠</span>
+              <input type="range" id="pscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPreviewZoom('printFontScale', this.value)" style="flex:1;">
+              <span class="pscValue" id="pscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
+            </div>
           </div>
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">↕ Row</span>
-            <input type="range" id="pscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPreviewZoom('printRowScale', this.value)" style="flex:1;">
-            <span class="pscValue" id="pscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          <div class="pscCompactRow">
+            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+              <span class="pscLabel">↕</span>
+              <input type="range" id="pscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPreviewZoom('printRowScale', this.value)" style="flex:1;">
+              <span class="pscValue" id="pscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
+            </div>
           </div>
-          <div class="pscRow">
-            <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁 Bold</button>
+          <div class="pscCompactRow">
+            <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁</button>
             <button id="pscThinBtn" class="pscToggleBtn" onclick="togglePreviewBold()">Thin</button>
+            <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅</button>
+            <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔</button>
+            <button id="pscAlignRightBtn" class="pscToggleBtn" onclick="setPreviewAlign('right')">➡</button>
           </div>
-          <div class="pscRow">
-            <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅ Left</button>
-            <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔ Center</button>
-            <button id="pscAlignRightBtn" class="pscToggleBtn" onclick="setPreviewAlign('right')">➡ Right</button>
+          <div class="pscCompactRow">
+            <div class="pscStepperGroup">
+              <span class="pscLabel">.00</span>
+              <button onclick="adjustPreviewStyle('priceDecimals', -1, 0, 4)">−</button>
+              <span class="pscValue" id="pscDecimalsVal">0</span>
+              <button onclick="adjustPreviewStyle('priceDecimals', 1, 0, 4)">+</button>
+            </div>
+            <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" class="pscDropdown"></select>
           </div>
-          <div class="pscRow">
-            <span class="pscLabel">.00 Decimals</span>
-            <button onclick="adjustPreviewStyle('priceDecimals', -1, 0, 4)">−</button>
-            <span class="pscValue" id="pscDecimalsVal">0</span>
-            <button onclick="adjustPreviewStyle('priceDecimals', 1, 0, 4)">+</button>
+          <div class="pscCompactRow">
+            <span class="pscLabel">🎨</span>
+            <div id="pscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
           </div>
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">🅰️ Font</span>
-            <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
-            <span class="pscLabel">🎨 Bill Theme</span>
-            <div id="pscColorSwatches" style="display:flex; gap:8px;"></div>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
-              <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+          <div class="pscCompactRow">
+            <label class="pscCheckLabel">
+              <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)"> 🖨️ Print A4
             </label>
           </div>
           <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
-          <div id="pscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
-            <span class="pscLabel">📐 Page</span>
-            <div style="display:flex; gap:6px; flex:1;">
-              <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
-              <button type="button" id="pscOrientLandscapeBtn" onclick="setInvoiceOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
-            </div>
+          <div id="pscOrientRow" class="pscCompactRow" style="display:none;">
+            <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+            <button type="button" id="pscOrientLandscapeBtn" onclick="setInvoiceOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
           </div>
         </div>
 
@@ -3672,55 +3684,51 @@
           <span style="cursor:pointer;" onclick="closeAdvOrderPreview()">✖</span>
         </div>
 
-        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — بالکل بل/رپورٹ جیسے، یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے ---------- -->
-        <div class="previewStyleControls">
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">🔠 Text</span>
-            <span style="font-size:11px; color:var(--muted);">A</span>
-            <input type="range" id="aopscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setAdvOrderZoom('advOrderFontScale', this.value)" style="flex:1;">
-            <span style="font-size:19px; color:var(--muted);">A</span>
-            <span class="pscValue" id="aopscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — بالکل بل/رپورٹ جیسے، یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے (کمپیکٹ) ---------- -->
+        <div class="previewStyleControls compactPsc">
+          <div class="pscCompactRow">
+            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+              <span class="pscLabel">🔠</span>
+              <input type="range" id="aopscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setAdvOrderZoom('advOrderFontScale', this.value)" style="flex:1;">
+              <span class="pscValue" id="aopscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
+            </div>
           </div>
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">↕ Row</span>
-            <input type="range" id="aopscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setAdvOrderZoom('advOrderRowScale', this.value)" style="flex:1;">
-            <span class="pscValue" id="aopscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+          <div class="pscCompactRow">
+            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+              <span class="pscLabel">↕</span>
+              <input type="range" id="aopscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setAdvOrderZoom('advOrderRowScale', this.value)" style="flex:1;">
+              <span class="pscValue" id="aopscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
+            </div>
           </div>
-          <div class="pscRow">
-            <button id="aopscBoldBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">𝐁 Bold</button>
+          <div class="pscCompactRow">
+            <button id="aopscBoldBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">𝐁</button>
             <button id="aopscThinBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">Thin</button>
+            <button id="aopscAlignLeftBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('left')">⬅</button>
+            <button id="aopscAlignCenterBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('center')">↔</button>
+            <button id="aopscAlignRightBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('right')">➡</button>
           </div>
-          <div class="pscRow">
-            <button id="aopscAlignLeftBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('left')">⬅ Left</button>
-            <button id="aopscAlignCenterBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('center')">↔ Center</button>
-            <button id="aopscAlignRightBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('right')">➡ Right</button>
+          <div class="pscCompactRow">
+            <div class="pscStepperGroup">
+              <span class="pscLabel">.00</span>
+              <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', -1, 0, 4)">−</button>
+              <span class="pscValue" id="aopscDecimalsVal">0</span>
+              <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', 1, 0, 4)">+</button>
+            </div>
+            <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" class="pscDropdown"></select>
           </div>
-          <div class="pscRow">
-            <span class="pscLabel">.00 Decimals</span>
-            <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', -1, 0, 4)">−</button>
-            <span class="pscValue" id="aopscDecimalsVal">0</span>
-            <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', 1, 0, 4)">+</button>
+          <div class="pscCompactRow">
+            <span class="pscLabel">🎨</span>
+            <div id="aopscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
           </div>
-          <div class="pscRow" style="flex:1 1 100%;">
-            <span class="pscLabel">🅰️ Font</span>
-            <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%; gap:8px;">
-            <span class="pscLabel">🎨 Bill Theme</span>
-            <div id="aopscColorSwatches" style="display:flex; gap:8px;"></div>
-          </div>
-          <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
-              <input type="checkbox" id="aopscA4Chk" onchange="toggleAdvOrderPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+          <div class="pscCompactRow">
+            <label class="pscCheckLabel">
+              <input type="checkbox" id="aopscA4Chk" onchange="toggleAdvOrderPaperStyle(this.checked)"> 🖨️ Print A4
             </label>
           </div>
           <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
-          <div id="aopscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
-            <span class="pscLabel">📐 Page</span>
-            <div style="display:flex; gap:6px; flex:1;">
-              <button type="button" id="aopscOrientPortraitBtn" onclick="setAdvOrderOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
-              <button type="button" id="aopscOrientLandscapeBtn" onclick="setAdvOrderOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
-            </div>
+          <div id="aopscOrientRow" class="pscCompactRow" style="display:none;">
+            <button type="button" id="aopscOrientPortraitBtn" onclick="setAdvOrderOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+            <button type="button" id="aopscOrientLandscapeBtn" onclick="setAdvOrderOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
           </div>
         </div>
 
@@ -4190,57 +4198,53 @@
       <span style="cursor:pointer;" onclick="closeReportPreview()">✖</span>
     </div>
 
-    <div class="previewStyleControls">
-      <div class="pscRow" style="flex:1 1 100%;">
-        <span class="pscLabel">🔠 Zoom</span>
-        <span style="font-size:11px; color:var(--muted);">A</span>
-        <input type="range" id="rpscFontScaleSlider" min="100" max="400" step="10" value="100" oninput="setReportZoom(this.value)" style="flex:1;">
-        <span style="font-size:19px; color:var(--muted);">A</span>
-        <span class="pscValue" id="rpscFontScaleVal" style="min-width:44px; text-align:right;">100%</span>
+    <div class="previewStyleControls compactPsc">
+      <div class="pscCompactRow">
+        <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+          <span class="pscLabel">🔠</span>
+          <input type="range" id="rpscFontScaleSlider" min="100" max="400" step="10" value="100" oninput="setReportZoom(this.value)" style="flex:1;">
+          <span class="pscValue" id="rpscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
+        </div>
       </div>
-      <div class="pscRow" style="flex:1 1 100%;">
-        <span class="pscLabel">↕ Row</span>
-        <input type="range" id="rpscRowScaleSlider" min="70" max="260" step="5" value="100" oninput="setReportRowZoom(this.value)" style="flex:1;">
-        <span class="pscValue" id="rpscRowScaleVal" style="min-width:44px; text-align:right;">100%</span>
+      <div class="pscCompactRow">
+        <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+          <span class="pscLabel">↕</span>
+          <input type="range" id="rpscRowScaleSlider" min="70" max="260" step="5" value="100" oninput="setReportRowZoom(this.value)" style="flex:1;">
+          <span class="pscValue" id="rpscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
+        </div>
       </div>
-      <div class="pscRow">
-        <span class="pscLabel">.00 Decimals</span>
-        <button onclick="adjustReportStyle('reportPriceDecimals', -1, 0, 4)">−</button>
-        <span class="pscValue" id="rpscDecimalsVal">0</span>
-        <button onclick="adjustReportStyle('reportPriceDecimals', 1, 0, 4)">+</button>
-      </div>
-      <div class="pscRow">
-        <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁 Bold</button>
+      <div class="pscCompactRow">
+        <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁</button>
         <button id="rpscThinBtn" class="pscToggleBtn" onclick="toggleReportBold()">Thin</button>
+        <button id="rpscAlignLeftBtn" class="pscToggleBtn" onclick="setReportAlign('left')">⬅</button>
+        <button id="rpscAlignCenterBtn" class="pscToggleBtn" onclick="setReportAlign('center')">↔</button>
+        <button id="rpscAlignRightBtn" class="pscToggleBtn" onclick="setReportAlign('right')">➡</button>
       </div>
-      <div class="pscRow">
-        <button id="rpscAlignLeftBtn" class="pscToggleBtn" onclick="setReportAlign('left')">⬅ Left</button>
-        <button id="rpscAlignCenterBtn" class="pscToggleBtn" onclick="setReportAlign('center')">↔ Center</button>
-        <button id="rpscAlignRightBtn" class="pscToggleBtn" onclick="setReportAlign('right')">➡ Right</button>
+      <div class="pscCompactRow">
+        <div class="pscStepperGroup">
+          <span class="pscLabel">.00</span>
+          <button onclick="adjustReportStyle('reportPriceDecimals', -1, 0, 4)">−</button>
+          <span class="pscValue" id="rpscDecimalsVal">0</span>
+          <button onclick="adjustReportStyle('reportPriceDecimals', 1, 0, 4)">+</button>
+        </div>
+        <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" class="pscDropdown"></select>
       </div>
-      <div class="pscRow" style="flex:1 1 100%;">
-        <span class="pscLabel">🅰️ Font</span>
-        <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" style="flex:1; border:none; background:#eef2ff; color:var(--primary-dark); font-weight:700; font-size:12px; padding:6px 8px; border-radius:6px;"></select>
+      <div class="pscCompactRow">
+        <span class="pscLabel">🎨</span>
+        <div id="rpscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
       </div>
-      <div class="pscRow" style="flex:1 1 100%; gap:8px;">
-        <span class="pscLabel">🎨 Bill Theme</span>
-        <div id="rpscColorSwatches" style="display:flex; gap:8px;"></div>
-      </div>
-      <div class="pscRow" style="flex:1 1 100%; display:flex; gap:14px; flex-wrap:wrap;">
-        <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
-          <input type="checkbox" id="rpscA4Chk" onchange="toggleReportPaperStyle(this.checked)" style="width:16px; height:16px;"> 🖨️ Print A4
+      <div class="pscCompactRow">
+        <label class="pscCheckLabel">
+          <input type="checkbox" id="rpscA4Chk" onchange="toggleReportPaperStyle(this.checked)"> 🖨️ Print A4
         </label>
-        <label id="rpscShowStockWrap" style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--text); cursor:pointer;">
-          <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)" style="width:16px; height:16px;"> Show In Stock Qty
+        <label id="rpscShowStockWrap" class="pscCheckLabel">
+          <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)"> Show In Stock Qty
         </label>
       </div>
       <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
-      <div id="rpscOrientRow" class="pscRow" style="flex:1 1 100%; display:none; gap:8px; align-items:center;">
-        <span class="pscLabel">📐 Page</span>
-        <div style="display:flex; gap:6px; flex:1;">
-          <button type="button" id="rpscOrientPortraitBtn" onclick="setReportOrientation('portrait')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#eef2ff; font-size:12px; font-weight:700; color:var(--primary-dark);">📄 Portrait</button>
-          <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" style="flex:1; padding:6px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; font-size:12px; font-weight:700; color:#64748b;">📃 Landscape</button>
-        </div>
+      <div id="rpscOrientRow" class="pscCompactRow" style="display:none;">
+        <button type="button" id="rpscOrientPortraitBtn" onclick="setReportOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+        <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
       </div>
     </div>
 
@@ -10589,9 +10593,9 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
   const newBalance = txn ? prevBalance + txn.amount : entry.balance;
   const isGive = txn ? (txn.kind === 'owed' || txn.kind === 'payment_owed' || (!txn.kind && txn.amount < 0)) : false;
   const txnAmount = txn ? Math.abs(txn.amount) : 0;
-  const txnLabel = isGive ? 'I Gave' : 'I Received';
+  const txnLabel = isGive ? 'I Gave' : 'I Got';
   const txnColor = isGive ? '#dc2626' : '#16a34a';
-  const netColor = newBalance >= 0 ? '#16a34a' : '#dc2626'; // ---------- Qarz (وہ ہمیں دیں گے) = سبز، Udhaar (ہم دیں گے) = سرخ — باقی ایپ جیسا یکساں ----------
+  const netColor = newBalance >= 0 ? '#dc2626' : '#16a34a'; // ---------- I Gave (وہ ہمیں دیں گے) = سرخ، I Got (ہم دیں گے) = سبز — باقی ایپ جیسا یکساں ----------
 
   const W = 480;
   const marginX = 24;
@@ -10703,7 +10707,7 @@ async function renderDiaryTransactionPoster(entry, historyIdx, note){
 async function renderDiaryFullLedgerPoster(entry, note){
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
   const hist = (entry.history || []).slice().sort((a,b) => new Date(a.date) - new Date(b.date));
-  const netColor = entry.balance >= 0 ? '#16a34a' : '#dc2626';
+  const netColor = entry.balance >= 0 ? '#dc2626' : '#16a34a'; // ---------- I Gave (وہ ہمیں دیں گے) = سرخ، I Got (ہم دیں گے) = سبز
 
   const W = 480;
   const marginX = 24;
@@ -10755,7 +10759,7 @@ async function renderDiaryFullLedgerPoster(entry, note){
     y += 22;
   }
 
-  // ---------- تمام انٹریوں کی فہرست — تاریخ، I Gave (سرخ) یا I Received (سبز)، رقم ----------
+  // ---------- تمام انٹریوں کی فہرست — تاریخ، I Gave (سرخ) یا I Got (سبز)، رقم ----------
   ctx.textAlign = 'left';
   ctx.font = `700 11px Poppins, sans-serif`;
   ctx.fillStyle = '#0f172a';
@@ -12909,7 +12913,7 @@ function addToAdvOrderCartGrid(variantId){
   const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
   const existing = advOrderCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else advOrderCart.push({variant_id: variantId, name: v.name, qty: 1, unitPrice: price});
+  else advOrderCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, unitPrice: price});
   renderAdvOrderProductGrid();
   updateAdvOrderFloatingCartBar();
 }
@@ -13465,10 +13469,11 @@ async function renderAdvOrderToCanvas(order){
   const scale = baseScale * fscale;
   const rc = getReceiptColor();
 
-  const noW = Math.round(28 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  const noW = Math.round(28 * scale), variantW = Math.round(56 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
   const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
-  const itemW = (tableRight - tableLeft) - noW - qtyW - priceW - totalW;
-  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + qtyW, tableLeft + noW + itemW + qtyW + priceW, tableRight];
+  const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
+  // ---------- کالمز: #, Item, Variant, Qty, Approx., Total — بالکل نارمل بل کی طرح ----------
+  const colX = [tableLeft, tableLeft + noW, tableLeft + noW + itemW, tableLeft + noW + itemW + variantW, tableLeft + noW + itemW + variantW + qtyW, tableLeft + noW + itemW + variantW + qtyW + priceW, tableRight];
   const rowH = Math.round(24 * scale * rowScaleSetting), headerH = Math.round(22 * scale * rowScaleSetting);
   const tableH = headerH + (order.items.length * rowH);
 
@@ -13476,17 +13481,8 @@ async function renderAdvOrderToCanvas(order){
   const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * scale) + 'px') + ` ${bold ? 'bold' : ''} ${canvasFontFamily}`.replace(/bold\s+bold/, 'bold');
   const fmt = (n) => (Number(n)||0).toFixed(decimals);
-
-  // ---------- اونچائی کا حساب پہلے سے — بینر باکس + ڈسکلیمر پیراگراف (کئی لائنوں کا) کے لیے اضافی جگہ ----------
-  const disclaimerLines = [
-    'These are APPROXIMATE prices only, not final.',
-    'Actual rates will be confirmed at the time of',
-    'delivery/next sale round, and may be higher or',
-    'lower than shown here.',
-    '(This is an approximate price, not final — actual rate will be set at delivery)'
-  ];
   const m = useA4 ? 1.6 : 1; // ---------- A4 پر اضافی مارجن/سپیسنگ ----------
-  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH + (disclaimerLines.length * 15 * scale);
+  let estimatedHeight = (30 + 26 + 22 + 22 + 54 + 26 + 40 + 30 + 40) * scale + tableH;
   if(useA4) estimatedHeight += 80;
   if(AppState.settings.businessAddress) estimatedHeight += 16 * scale;
   if(AppState.settings.businessPhone) estimatedHeight += 16 * scale;
@@ -13498,6 +13494,24 @@ async function renderAdvOrderToCanvas(order){
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  // ---------- 🖨️ ڈائیگنل واٹر مارک — "APPROXIMATE PRICING" پورے بل پر ہلکا سا، بار بار، بغیر پڑھنے میں رکاوٹ کے —
+  // یہ سب سے پہلے (سب سے نیچے کی تہہ میں) بنایا جا رہا ہے تاکہ باقی سارا متن اس کے اوپر صاف نظر آئے ----------
+  ctx.save();
+  ctx.globalAlpha = 0.09;
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `bold ${Math.round(24 * scale)}px ${canvasFontFamily}`;
+  const wmSpacing = Math.round(120 * scale);
+  for(let wy = wmSpacing / 2; wy < canvas.height + wmSpacing; wy += wmSpacing){
+    ctx.save();
+    ctx.translate(pxWidth / 2, wy);
+    ctx.rotate(-Math.PI / 7); // ---------- ہلکا سا ترچھا (diagonal) زاویہ ----------
+    ctx.fillText('APPROXIMATE PRICING', 0, 0);
+    ctx.restore();
+  }
+  ctx.restore();
 
   try{
     await document.fonts.load(`bold 26px ${canvasFontFamily}`);
@@ -13561,11 +13575,12 @@ async function renderAdvOrderToCanvas(order){
   ctx.textAlign = 'center'; ctx.fillText('#', (colX[0]+colX[1])/2, headerBaseline);
   // ---------- Item کا نام ہمیشہ Left رہے گا — الائنمنٹ سیٹنگ صرف Qty/Approx/Total پر لاگو ہوگی ----------
   ctx.textAlign = 'left'; ctx.fillText('Item', colX[1]+4, headerBaseline);
+  ctx.textAlign = 'center'; ctx.fillText('Variant', (colX[2]+colX[3])/2, headerBaseline);
   const advColCenterX = (a, b) => align === 'center' ? (a + b) / 2 : (align === 'right' ? b - 4 : a + 4);
   ctx.textAlign = align;
-  ctx.fillText('Qty', advColCenterX(colX[2], colX[3]), headerBaseline);
-  ctx.fillText('Approx.', advColCenterX(colX[3], colX[4]), headerBaseline);
-  ctx.fillText('Total', advColCenterX(colX[4], colX[5]), headerBaseline);
+  ctx.fillText('Qty', advColCenterX(colX[3], colX[4]), headerBaseline);
+  ctx.fillText('Approx.', advColCenterX(colX[4], colX[5]), headerBaseline);
+  ctx.fillText('Total', advColCenterX(colX[5], colX[6]), headerBaseline);
   hLineY += headerH;
   drawTableHLine(hLineY);
 
@@ -13573,7 +13588,10 @@ async function renderAdvOrderToCanvas(order){
   const maxItemWidth = itemW - 8;
   order.items.forEach((item, idx) => {
     const rowBaseline = hLineY + rowH - 7 * scale;
-    let displayName = item.name;
+    // ---------- item.name میں پراڈکٹ کا نام + ویریئنٹ لیبل دونوں مل کر محفوظ ہوتے ہیں — یہاں دونوں الگ کر رہے ہیں ----------
+    const variantText = item.label && item.name.endsWith(item.label) ? item.label : '—';
+    let displayName = (item.label && item.name.endsWith(item.label)) ? item.name.slice(0, item.name.length - item.label.length).trim() : item.name;
+    if(!displayName) displayName = item.name;
     ctx.textAlign = 'left';
     while(ctx.measureText(displayName).width > maxItemWidth && displayName.length > 3){ displayName = displayName.slice(0,-1); }
     if(displayName !== item.name) displayName = displayName.trim() + '…';
@@ -13587,6 +13605,16 @@ async function renderAdvOrderToCanvas(order){
     ctx.clip();
     ctx.fillText(displayName, colX[1]+4, rowBaseline);
     ctx.restore();
+    // ---------- Variant کا اپنا الگ کالم — نارمل بل کی طرح ----------
+    ctx.textAlign = 'center';
+    let variantDisplay = variantText;
+    while(ctx.measureText(variantDisplay).width > (colX[3]-colX[2])-6 && variantDisplay.length > 1){ variantDisplay = variantDisplay.slice(0,-1); }
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(colX[2], hLineY, colX[3] - colX[2], rowH);
+    ctx.clip();
+    ctx.fillText(variantDisplay, (colX[2]+colX[3])/2, rowBaseline);
+    ctx.restore();
     // ---------- Qty/Approx/Total اب منتخب الائنمنٹ (Left/Center/Right) اپناتے ہیں، اور سخت کلپنگ سے کبھی کالم سے باہر نہیں نکلیں گے ----------
     const drawAdvClippedNum = (text, x1, x2, textX) => {
       ctx.textAlign = align;
@@ -13597,9 +13625,9 @@ async function renderAdvOrderToCanvas(order){
       ctx.fillText(text, textX, rowBaseline);
       ctx.restore();
     };
-    drawAdvClippedNum(String(item.qty), colX[2], colX[3], advColCenterX(colX[2], colX[3]));
-    drawAdvClippedNum(fmt(item.unitPrice), colX[3], colX[4], advColCenterX(colX[3], colX[4]));
-    drawAdvClippedNum(fmt(item.qty*item.unitPrice), colX[4], colX[5], advColCenterX(colX[4], colX[5]));
+    drawAdvClippedNum(String(item.qty), colX[3], colX[4], advColCenterX(colX[3], colX[4]));
+    drawAdvClippedNum(fmt(item.unitPrice), colX[4], colX[5], advColCenterX(colX[4], colX[5]));
+    drawAdvClippedNum(fmt(item.qty*item.unitPrice), colX[5], colX[6], advColCenterX(colX[5], colX[6]));
 
     hLineY += rowH;
     drawTableHLine(hLineY);
@@ -13619,20 +13647,6 @@ async function renderAdvOrderToCanvas(order){
     ctx.fillText('Note: ' + order.note, tableLeft, y);
     y += 22 * scale;
   }
-
-  // ---------- ڈسکلیمر باکس — واضح متن کہ یہ حتمی قیمت نہیں ----------
-  const discTop = y, discH = (disclaimerLines.length * 15 * scale) + 12 * scale;
-  ctx.fillStyle = '#fff7ed';
-  ctx.fillRect(tableLeft, discTop, tableRight - tableLeft, discH);
-  ctx.strokeStyle = '#c2410c';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(tableLeft+0.5, discTop+0.5, tableRight-tableLeft-1, discH-1);
-  ctx.fillStyle = '#c2410c';
-  ctx.textAlign = 'center';
-  ctx.font = F('11px');
-  let dy = discTop + 16 * scale;
-  disclaimerLines.forEach(line => { ctx.fillText(line, pxWidth/2, dy); dy += 15 * scale; });
-  y = discTop + discH + 24 * scale;
 
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
@@ -17513,6 +17527,7 @@ function setReceiptColor(colorId){
   if(document.getElementById('invoicePreviewModal')?.classList.contains('show')) rerenderInvoicePreview();
   if(document.getElementById('reportPreviewModal')?.classList.contains('show')) renderReportToCanvas();
   if(document.getElementById('poPreviewModal')?.classList.contains('show')){ syncPoStyleControls(); rerenderPoPreview(); }
+  if(document.getElementById('advOrderPreviewModal')?.classList.contains('show')){ syncAdvOrderStyleControls(); rerenderAdvOrderPreview(); }
 }
 
 // ---------- پرنٹ کے لیے فونٹ سٹائل — یہ صرف رسید پر لاگو ہوتا ہے، پوری ایپ کا فونٹ نہیں بدلتا ----------
@@ -20543,28 +20558,41 @@ async function renderReportToCanvas(){
           const startY = y + rh/2 - blockH/2 + fsItem*0.32;
           lines.forEach((line, i) => ctx.fillText(line, cx, startY + i*itemNameLineH));
         } else if(c.key === 'retail'){
-          ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.fillText(Number(it.retail).toFixed(decimals), cx, y + rh/2 + fsItem*0.32);
+          const retailTxt = Number(it.retail).toFixed(decimals);
+          ctx.font = `${fitReportCellFont(retailTxt, c.width-8, fsItem)}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(retailTxt, cx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
         } else if(c.key === 'stock'){
-          ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.fillText(Number(it.stock).toFixed(decimals), cx, y + rh/2 + fsItem*0.32);
+          const stockTxt = Number(it.stock).toFixed(decimals);
+          ctx.font = `${fitReportCellFont(stockTxt, c.width-8, fsItem)}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(stockTxt, cx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
         } else if(c.key === 'lowStockAt'){
-          ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.fillText(String(it.lowStockAt), cx, y + rh/2 + fsItem*0.32);
+          const lowTxt = String(it.lowStockAt);
+          ctx.font = `${fitReportCellFont(lowTxt, c.width-8, fsItem)}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(lowTxt, cx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
         } else if(c.key === 'ps'){
           const purchaseTxt = Number(it.purchase).toFixed(decimals), retailTxt2 = Number(it.retail).toFixed(decimals);
           const psFit = Math.min(fitReportCellFont(purchaseTxt, c.width-8, fsItemSm), fitReportCellFont(retailTxt2, c.width-8, fsItemSm));
           ctx.font = `${psFit}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
           ctx.fillText(purchaseTxt, cx, y + rh/2 - fsItemSm*0.35);
           ctx.fillText(retailTxt2, cx, y + rh/2 + fsItemSm*1.05);
+          ctx.restore();
         } else if(c.key === 'profit'){
           const profit = it.retail - it.purchase;
           const profitPct = it.purchase > 0 ? (profit / it.purchase * 100) : 0;
           const profitTxt = profit.toFixed(decimals), profitPctTxt = profitPct.toFixed(2)+'%';
           const profFit = Math.min(fitReportCellFont(profitTxt, c.width-8, fsItemSm), fitReportCellFont(profitPctTxt, c.width-8, fsItemSm));
           ctx.font = `${profFit}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
           ctx.fillText(profitTxt, cx, y + rh/2 - fsItemSm*0.35);
           ctx.fillText(profitPctTxt, cx, y + rh/2 + fsItemSm*1.05);
+          ctx.restore();
         }
       });
       y += rh;
@@ -20915,11 +20943,17 @@ async function renderTodaySaleReportToCanvas(){
       ctx.textAlign = colTextAlign;
       cols.forEach(c => {
         if(c.key === 'name'){
-          ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
-          ctx.fillText(String(it.name), colTextX(c), y + rh/2 + fsItem*0.32);
+          const nameTxt = String(it.name);
+          ctx.font = `${bold ? 'bold ' : ''}${fitReportCellFont(nameTxt, c.width-8, fsItem)}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(nameTxt, colTextX(c), y + rh/2 + fsItem*0.32);
+          ctx.restore();
         } else if(c.key === 'qty'){
-          ctx.font = `${fsItem}px ${fontFam}`;
-          ctx.fillText(String(it.qty), colTextX(c), y + rh/2 + fsItem*0.32);
+          const qtyTxt = String(it.qty);
+          ctx.font = `${fitReportCellFont(qtyTxt, c.width-8, fsItem)}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(qtyTxt, colTextX(c), y + rh/2 + fsItem*0.32);
+          ctx.restore();
         }
       });
       y += rh;
