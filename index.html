@@ -1864,7 +1864,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO148FR0647PM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO178MO0744AM</span>
     </div>
   </div>
 
@@ -8970,6 +8970,32 @@ function handleScanImageSelect(event){
   processScanFiles(files);
 }
 
+// ---------- OCR کے الفاظ کی اصل جگہ (pixel position) کی بنیاد پر قطاریں دوبارہ جوڑیں —
+//   ٹیبل والی تصویروں میں خالی سطر (\n) پر بھروسہ کرنا غیر بھروسہ مند ہوتا ہے (کئی قطاریں گم ہو جاتی ہیں)،
+//   اس لیے ہر لفظ کی y-پوزیشن دیکھ کر ایک ہی قطار کے الفاظ کو جمع کریں، پھر بائیں سے دائیں ترتیب دیں ----------
+function reconstructRowsFromWords(words){
+  const valid = (words || []).filter(w => w && w.text && w.text.trim());
+  if(!valid.length) return [];
+  valid.forEach(w => { w._yc = (w.bbox.y0 + w.bbox.y1) / 2; w._h = Math.max(1, w.bbox.y1 - w.bbox.y0); });
+  valid.sort((a, b) => a._yc - b._yc);
+  const rows = [];
+  let current = [valid[0]], currentY = valid[0]._yc;
+  for(let i = 1; i < valid.length; i++){
+    const w = valid[i];
+    const tol = Math.max(w._h, current[current.length - 1]._h) * 0.6;
+    if(Math.abs(w._yc - currentY) <= tol){
+      current.push(w);
+      currentY = current.reduce((s, x) => s + x._yc, 0) / current.length; // ---------- قطار کی اوسط y-پوزیشن اپڈیٹ کرتے رہیں ----------
+    } else {
+      rows.push(current);
+      current = [w];
+      currentY = w._yc;
+    }
+  }
+  if(current.length) rows.push(current);
+  return rows.map(r => r.sort((a, b) => a.bbox.x0 - b.bbox.x0).map(w => w.text).join(' '));
+}
+
 // ---------- گیلری اور کیمرہ دونوں سے آئی ہوئی فائلیں یہیں سے پراسیس ہوں گی — ایک ساتھ کئی تصاویر بھی چل سکتی ہیں ----------
 async function processScanFiles(files){
   if(!files.length) return;
@@ -8993,20 +9019,26 @@ async function processScanFiles(files){
       }
     };
     let text = '';
+    let words = null;
     try{
       // ---------- اردو + انگریزی دونوں زبانیں ایک ساتھ — تاکہ نام اردو میں اور قیمت انگریزی ہندسوں میں ہو تو بھی صحیح پڑھا جائے ----------
       const result = await Tesseract.recognize(file, 'eng+urd', { logger: ocrLogger });
       text = result.data.text;
+      words = result.data.words;
     } catch(err){
       console.error('Urdu+English scan failed, retrying with English only:', err);
       try{
         const result = await Tesseract.recognize(file, 'eng', { logger: ocrLogger });
         text = result.data.text;
+        words = result.data.words;
       } catch(err2){
         console.error('Scan failed for one photo:', err2);
       }
     }
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    // ---------- ٹیبل کی قطاریں الفاظ کی اصل جگہ سے دوبارہ بنائیں — خالی سطر پر بھروسہ کرنے سے زیادہ بھروسہ مند ----------
+    const lines = (words && words.length)
+      ? reconstructRowsFromWords(words)
+      : text.split('\n').map(l => l.trim()).filter(Boolean);
     combinedLines = combinedLines.concat(lines);
   }
 
@@ -9024,28 +9056,10 @@ async function processScanFiles(files){
   document.getElementById('scanReviewWrap').style.display = 'block';
 }
 
-// ---------- OCR سے آئی ہوئی بے معنی/ٹوٹی پھوٹی لائنیں (جیسے "e @" یا "EE A" یا "default()" جیسے کوڈ نما ٹکڑے) پہچان کر چھوڑ دیں —
-//   اردو رسم الخط میں کم از کم 2 حروف کافی ہیں، لاطینی حروف میں کوئی ایک لفظ کم از کم 3 حروف کا ہونا چاہیے،
-//   اور مجموعی لائن میں غیر-حرفی نشانات (بریکٹس/کوڈ سِمبلز) کا تناسب زیادہ نہیں ہونا چاہیے ----------
+// ---------- OCR سے آئی بالکل خالی/بے حرف لائن ہی رد کریں — نام کسی بھی زبان (اردو/انگریزی/مکسڈ) میں ہو، اس پر کوئی پابندی نہیں
+//   (پہلے یہاں سخت حروف کی گنتی کی شرط تھی جو بہت سی صحیح اردو لائنیں بھی غلطی سے رد کر دیتی تھی) ----------
 function looksLikeGarbageOcrLine(name){
-  // ---------- کوڈ نما ٹکڑے — bracket/brace/semicolon/equals وغیرہ رکھنے والی لائن کبھی پراڈکٹ نام نہیں ہوتی ----------
-  if(/[(){}\[\]<>=;]/.test(name)) return true;
-  const cleaned = name.replace(/[^A-Za-z\u0600-\u06FF]/g, ' ').replace(/\s+/g, ' ').trim();
-  if(!cleaned) return true;
-  const hasUrdu = /[\u0600-\u06FF]/.test(cleaned);
-  const letterCount = cleaned.replace(/\s+/g, '').length;
-  if(hasUrdu){
-    // ---------- خالص اردو لفظ ہو تو کم از کم 2 حروف، لیکن اگر لاطینی حروف بھی ساتھ ملے ہوں (مکسڈ گڑبڑ) تو کم از کم 3 مانگیں ----------
-    const hasLatinToo = /[A-Za-z]/.test(cleaned);
-    return letterCount < (hasLatinToo ? 3 : 2);
-  }
-  const words = cleaned.split(' ').filter(Boolean);
-  const hasDecentWord = words.some(w => w.length >= 3);
-  if(!hasDecentWord && letterCount < 5) return true;
-  // ---------- اصل لائن میں حروف کا تناسب بہت کم ہو (زیادہ تر ہندسے/نشانات) تو مشکوک سمجھیں ----------
-  const rawLen = name.replace(/\s+/g, '').length;
-  if(rawLen > 0 && letterCount / rawLen < 0.4) return true;
-  return false;
+  return !/[A-Za-z\u0600-\u06FF]/.test(name);
 }
 
 // ---------- تاریخ/عنوان/ہیڈر جیسی لائنیں — یہ کبھی پراڈکٹ نہیں ہوتیں، انہیں شروع ہی میں رد کر دیں ----------
@@ -9056,26 +9070,36 @@ function looksLikeDateOrHeaderLine(line){
   return false;
 }
 
-// ---------- ایک لائن سے پراڈکٹ نام + قیمت نکالنے کی کوشش — لائن کے آخری نمبر کو قیمت مانا جاتا ہے، باقی نام ----------
+// ---------- ایک لائن (یا ٹیبل کی ایک قطار) سے نام + قیمتیں نکالنے کی کوشش —
+//   نام ہمیشہ پہلے نمبر سے پہلے کا حصہ ہے (کسی بھی زبان میں، بغیر کسی پابندی کے)،
+//   اگر دو نمبر ملیں تو پہلا = Purchase Price، دوسرا = Sale Price (جیسے قیمتِ خرید/فروخت کی ترتیب اکثر فہرستوں میں ہوتی ہے)،
+//   صرف ایک نمبر ملے تو اسے Sale Price مانا جائے گا۔ آگے (Profit/Stock وغیرہ) کے نمبر نظرانداز — غیر بھروسہ مند ہوتے ہیں ----------
 function parseProductLineToRow(line){
   line = line.replace(/[|`~_]+/g, ' ').replace(/\s+/g, ' ').trim();
   if(line.length < 2) return null;
   if(!/[a-zA-Z\u0600-\u06FF]/.test(line)) return null; // کم از کم ایک حرف ضرور ہو (خالی نمبر لائنیں چھوڑ دیں)
-  if(/^(item|product|name|price|qty|quantity|s\.?no\.?|sr\.?no\.?|total)$/i.test(line)) return null;
+  if(/^(item|product|name|price|qty|quantity|s\.?no\.?|sr\.?no\.?|total|purchase|selling|sale|profit|stock|category|variant)$/i.test(line)) return null;
   if(looksLikeDateOrHeaderLine(line)) return null; // ---------- تاریخ/انوائس/ہیڈر لائن — پراڈکٹ نہیں ----------
 
-  const numRe = /(?:rs\.?\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)(?:\s*\/-)?/gi;
-  const matches = [...line.matchAll(numRe)];
-  // ---------- کوئی قیمت والا نمبر نہ ملے تو یہ لائن پراڈکٹ نہیں — دکان کا نام/عنوان/ہیڈر لائن ہو سکتی ہے، اسے چھوڑ دیں
-  //   (پہلے یہاں خالی قیمت کے ساتھ بھی قبول ہو جاتی تھی، جس سے مثلاً "Muhammadi Kirana Store" جیسی عنوان لائن غلطی سے پراڈکٹ بن جاتی تھی) ----------
-  if(!matches.length) return null;
-  const last = matches[matches.length - 1];
-  const price = last[1].replace(/,/g, '');
-  let name = line.slice(0, last.index) + line.slice(last.index + last[0].length);
-  name = name.replace(/\brs\.?\b/gi, '').replace(/^[-:.\s]+|[-:.\s]+$/g, '').trim();
-  if(!name) return null;
-  if(looksLikeGarbageOcrLine(name)) return null; // ---------- خراب/بے معنی OCR لائن — فہرست کو صاف رکھنے کے لیے چھوڑ دیں ----------
-  return {name, category:'', variant:'Default', barcode:'', purchase:'', retail:price, wholesale:'', stock:'0', lowstock:'', expiry:'', location:''};
+  const numRe = /(?:rs\.?\s*)?(-?\d{1,3}(?:,\d{3})*(?:\.\d{1,3})?)\s*%?/gi;
+  const matches = [...line.matchAll(numRe)].filter(m => m[1] !== undefined && m[1] !== '' && m[1] !== '-');
+  if(!matches.length) return null; // ---------- کوئی نمبر نہ ملے تو یہ پراڈکٹ نہیں — دکان کا نام/عنوان/ہیڈر لائن ہو سکتی ہے ----------
+
+  // ---------- نام = لائن کا وہ حصہ جو پہلے نمبر سے پہلے آتا ہے — اصل زبان/رسم الخط جوں کا توں رہے گا ----------
+  const first = matches[0];
+  let name = line.slice(0, first.index);
+  name = name.replace(/\brs\.?\b/gi, '').replace(/^[-:.,\s]+|[-:.,\s]+$/g, '').trim();
+  if(!name || looksLikeGarbageOcrLine(name)) return null; // ---------- خراب/بے حرف OCR لائن — فہرست کو صاف رکھنے کے لیے چھوڑ دیں ----------
+
+  const nums = matches.map(m => m[1].replace(/,/g, ''));
+  let purchase = '', retail = '';
+  if(nums.length === 1){
+    retail = nums[0]; // ---------- صرف ایک قیمت ملی — یہی فروخت کی قیمت مانی جائے گی ----------
+  } else {
+    purchase = nums[0]; // ---------- دو یا زیادہ نمبر — پہلا Purchase، دوسرا Sale (باقی نمبر — Profit/Stock وغیرہ — نظرانداز) ----------
+    retail = nums[1];
+  }
+  return {name, category:'', variant:'Default', barcode:'', purchase, retail, wholesale:'', stock:'', lowstock:'', expiry:'', location:''};
 }
 
 
