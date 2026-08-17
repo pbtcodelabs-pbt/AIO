@@ -1864,7 +1864,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO178MO0744AM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO178MO0802AM</span>
     </div>
   </div>
 
@@ -2370,7 +2370,6 @@
           <div class="csvImportBar">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
-            <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal('product')">📷 Scan Photos & Import</button>
             <input type="file" id="productCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handleProductCsvFileSelect(event)">
           </div>
 
@@ -2423,7 +2422,6 @@
       <div class="csvImportBar">
         <button class="csvTemplateBtn" onclick="downloadPartyCsvTemplate()">📄 Download Excel/CSV Template</button>
         <button class="csvImportBtn" id="partyImportBtn" onclick="document.getElementById('partyCsvInput').click()">📥 Import <span id="partyImportBtnLabel">Customers</span></button>
-        <button class="csvImportBtn" style="background:#7c3aed;" onclick="openScanImportModal(currentPartyTab === 'customers' ? 'customer' : 'supplier')">📷 Scan Photos & Import</button>
         <input type="file" id="partyCsvInput" accept=".csv,.xlsx,.xls,text/csv" style="display:none;" onchange="handlePartyCsvFileSelect(event)">
       </div>
       <button id="bulkReminderBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openBulkReminderCenter()">📢 Remind All (Outstanding Balances)</button>
