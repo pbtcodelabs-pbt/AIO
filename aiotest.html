@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ur" dir="ltr">
+<html lang="en" dir="ltr">
 <head>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
@@ -4921,7 +4921,7 @@ async function backupToGoogleDrive(){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    alert('Google service could not load — check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -4929,7 +4929,7 @@ async function backupToGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
-      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
@@ -4970,7 +4970,7 @@ async function backupToGoogleDrive(){
         products: productsData.length, customers: customersData.length, invoices: invoicesData.length
       });
     }catch(err){
-      alert('Google Drive پر اپ لوڈ نہیں ہو سکی: ' + err.message);
+      alert('Could not upload to Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
     }
@@ -4986,7 +4986,7 @@ async function restoreFromGoogleDrive(){
   const btn = document.getElementById('gdriveRestoreBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    alert('Google service could not load — check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -4994,7 +4994,7 @@ async function restoreFromGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
-      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
@@ -5010,7 +5010,7 @@ async function restoreFromGoogleDrive(){
       renderGDriveFileList(files);
       document.getElementById('gdriveRestoreModal').classList.add('show');
     }catch(err){
-      alert('Google Drive سے فہرست نہیں مل سکی: ' + err.message);
+      alert('Could not get list from Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
     }
@@ -5058,7 +5058,7 @@ async function selectGDriveBackupFile(fileId, fileName){
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
     document.getElementById('importConfirmModal').classList.add('show');
   }catch(err){
-    alert('فائل ڈاؤن لوڈ نہیں ہو سکی: ' + err.message);
+    alert('File could not be downloaded: ' + err.message);
   }
 }
 function closeGDriveRestoreModal(){
@@ -5699,7 +5699,7 @@ function buildDevChatMessage(){
     return buildAdInquiryMessage();
   }
   // ---------- مسئلہ رپورٹ کرنے کا پیغام — اردو میں، خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
-  return `محترم ڈیویلپر،\nمیں آپ کی بیٹا ورژن AIO POS استعمال کر رہا ہوں۔ میں نے اس کے اندر یہ مسئلہ محسوس کیا ہے اور میرا مشورہ یہ ہے:\n\n\n\nمیرا Device ID:\n${uid}`;
+  return `Dear Developer,\nI am using the beta version of AIO POS. I noticed this issue in it and my suggestion is:\n\n\n\nMy Device ID:\n${uid}`;
 }
 
 // ---------- My Ads پوسٹر/اشتہار دیکھ کر رابطہ کرنے والے نئے دلچسپی رکھنے والے کے لیے مختصر، دوستانہ پیغام —
@@ -6505,22 +6505,22 @@ function fileToCsvText(file){
     if(ext === 'csv' || ext === 'txt'){
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
-      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
+      reader.onerror = () => reject(new Error('Failed to read — the file may be corrupted.'));
       reader.readAsText(file);
     } else if(ext === 'xlsx' || ext === 'xls'){
-      if(typeof XLSX === 'undefined'){ reject(new Error('Excel سپورٹ لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔')); return; }
+      if(typeof XLSX === 'undefined'){ reject(new Error('Excel support could not load — turn on internet and try again.')); return; }
       const reader = new FileReader();
       reader.onload = e => {
         try{
           const wb = XLSX.read(e.target.result, {type:'array'});
           const sheet = wb.Sheets[wb.SheetNames[0]];
           resolve(XLSX.utils.sheet_to_csv(sheet));
-        } catch(err){ reject(new Error('یہ Excel فائل نہیں پڑھی جا سکی — دوبارہ محفوظ کر کے آزمائیں۔')); }
+        } catch(err){ reject(new Error('This Excel file could not be read — try saving it again.')); }
       };
-      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
+      reader.onerror = () => reject(new Error('Failed to read — the file may be corrupted.'));
       reader.readAsArrayBuffer(file);
     } else {
-      reject(new Error('صرف CSV یا Excel (.xlsx/.xls) فائلیں امپورٹ ہو سکتی ہیں۔ اگر ڈیٹا Word/PDF/تصویر میں ہے تو پہلے اسے Excel میں کاپی کر لیں۔'));
+      reject(new Error('Only CSV or Excel (.xlsx/.xls) files can be imported. If your data is in Word/PDF/an image, copy it into Excel first.'));
     }
   });
 }
@@ -8756,7 +8756,7 @@ const PRODUCT_FIELD_SYNONYMS = {
 // ---------- CSV متن کو پراڈکٹ rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processProductCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  if(rows.length < 2){ alert('No data found — the first row must be a header with at least one data row below it.'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
   const objs = rows.slice(1).map(r => {
     const o = {};
@@ -8864,9 +8864,9 @@ let pendingPartyImportRows = [];
 // ---------- CSV متن کو کسٹمر/سپلائر rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processPartyCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  if(rows.length < 2){ alert('No data found — the first row must be a header with at least one data row below it.'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PARTY_FIELD_SYNONYMS);
-  if(fieldMap.name < 0){ alert('نام والا کالم نہیں مل سکا — فائل میں "Name" جیسا کوئی کالم ضرور ہونا چاہیے۔'); return false; }
+  if(fieldMap.name < 0){ alert('Name column not found — the file must have a column like "Name".'); return false; }
   const objs = rows.slice(1).map(r => ({
     name: (r[fieldMap.name] || '').trim(),
     phone: fieldMap.phone >= 0 ? (r[fieldMap.phone] || '').trim() : '',
@@ -8888,7 +8888,7 @@ function showPartyImportPreview(){
   const isCustomer = currentPartyTab === 'customers';
   const objs = pendingPartyImportRows;
   if(objs.length === 0){
-    alert('کوئی نام والی row نہیں ملی۔ فائل میں "Name" کالم بھرا ہونا چاہیے۔');
+    alert('No row with a name was found. The "Name" column must be filled in.');
     return;
   }
   const list = isCustomer ? customersData : suppliersData;
@@ -9002,12 +9002,12 @@ function reconstructRowsFromWords(words){
 async function processScanFiles(files){
   if(!files.length) return;
   if(typeof Tesseract === 'undefined'){
-    alert('❌ سکین سسٹم لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔');
+    alert('❌ Scan system could not load — turn on internet and try again.');
     return;
   }
   document.getElementById('scanProgressWrap').style.display = 'block';
   document.getElementById('scanReviewWrap').style.display = 'none';
-  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — پہلی بار تھوڑا وقت لگ سکتا ہے)`;
+  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — this may take a moment the first time)`;
 
   let combinedLines = [];
   for(let i = 0; i < files.length; i++){
@@ -9052,7 +9052,7 @@ async function processScanFiles(files){
   scanReviewRows = scanReviewRows.concat(newRows); // ---------- پہلے سے موجود rows میں مزید شامل کریں (گیلری + کیمرہ ملا کر بھی چل سکتے ہیں) ----------
 
   if(scanReviewRows.length === 0){
-    alert('❌ کوئی آئٹم نہیں ملا — صاف اور روشن تصویر آزمائیں، یا نیچے "+ Add row" سے خود لکھیں۔');
+    alert('❌ No items found — try a clear, well-lit photo, or add rows manually below with "+ Add row".');
   }
   renderScanReviewList();
   document.getElementById('scanReviewWrap').style.display = 'block';
@@ -9238,7 +9238,7 @@ function scanCsvEscape(v){
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 function downloadScanAsCsv(){
-  if(scanReviewRows.length === 0){ alert('پہلے کوئی آئٹم شامل کریں۔'); return; }
+  if(scanReviewRows.length === 0){ alert('Add an item first.'); return; }
   let headerRow, dataRows;
   if(scanImportContext === 'product'){
     headerRow = PRODUCT_CSV_HEADERS;
@@ -9252,7 +9252,7 @@ function downloadScanAsCsv(){
 }
 
 function finalizeScanImport(){
-  if(scanReviewRows.length === 0){ alert('کوئی آئٹم نہیں — پہلے تصویر منتخب کریں یا "+ Add row" سے شامل کریں۔'); return; }
+  if(scanReviewRows.length === 0){ alert('No items — first select a photo or add one with "+ Add row".'); return; }
   if(scanImportContext === 'product'){
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       'product name': (r.name || '').trim(),
@@ -9267,14 +9267,14 @@ function finalizeScanImport(){
       'expiry date (yyyy-mm-dd)': (r.expiry || '').trim(),
       'location': (r.location || '').trim(),
     }));
-    if(objs.length === 0){ alert('کوئی پراڈکٹ نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    if(objs.length === 0){ alert('No product name entered — enter a name first.'); return; }
     pendingProductImportRows = objs;
     showProductImportPreview();
   } else {
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       name: (r.name || '').trim(), phone: (r.phone || '').trim(), address: (r.address || '').trim(), area: (r.area || '').trim()
     }));
-    if(objs.length === 0){ alert('کوئی نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    if(objs.length === 0){ alert('No name entered — enter a name first.'); return; }
     pendingPartyImportRows = objs;
     showPartyImportPreview();
   }
@@ -9290,7 +9290,7 @@ let cameraCapturedFiles = [];
 
 function openCameraCapture(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    alert('❌ اس ڈیوائس/براؤزر پر کیمرہ دستیاب نہیں — براہ کرم "Gallery" سے تصویر منتخب کریں۔');
+    alert('❌ Camera is not available on this device/browser — please select a photo from "Gallery" instead.');
     return;
   }
   cameraCapturedFiles = [];
@@ -9305,7 +9305,7 @@ function openCameraCapture(){
       document.getElementById('cameraCaptureModal').classList.add('show');
     })
     .catch(() => {
-      alert('❌ کیمرہ کھل نہیں سکا — کیمرہ کی اجازت (permission) دیں، یا "Gallery" سے تصویر منتخب کریں۔');
+      alert('❌ Camera could not open — grant camera permission, or select a photo from "Gallery".');
     });
 }
 
@@ -9606,7 +9606,7 @@ function formatPhoneForWhatsApp(phone){
 // ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
 async function pickContactForNewParty(){
   if(!('contacts' in navigator && 'ContactsManager' in window)){
-    alert('یہ فون/براؤزر فون بک تک رسائی سپورٹ نہیں کرتا — نام اور نمبر خود لکھ دیں۔');
+    alert('This phone/browser does not support access to contacts — enter the name and number manually.');
     return;
   }
   try{
@@ -18204,7 +18204,7 @@ async function printCurrentInvoice(){
     // خود Chrome کے 🖨️ پرنٹ اور ⋮/📤 شیئر آئیکن موجود ہوتے ہیں۔ فوری، بغیر دیکھے شیئر کرنے کے لیے
     // نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں، جو سیدھا نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      alert('PDF library could not load — check your internet connection and try again.');
       return;
     }
     const { jsPDF } = window.jspdf;
@@ -18464,8 +18464,8 @@ const FONT_PRESETS = [
   // ---------- 💪 اصل موٹے/بولڈ ڈسپلے فونٹس — یہ اپنی ڈیزائن سے ہی بولڈ ہیں (صرف ایک ہی، بھاری وزن میں بنتے ہیں)،
   // اس لیے باقی سب سے صاف الگ اور نمایاں نظر آتے ہیں، دور سے بھی فرق پتا چلے ----------
   {id:'archivoblack', label:'💪 Archivo Black', family:"'Archivo Black', sans-serif"},
-  {id:'anton',         label:'💪 Anton (سب سے موٹا)', family:"'Anton', sans-serif"},
-  {id:'bebasneue',     label:'💪 Bebas Neue (لمبے بڑے حروف)', family:"'Bebas Neue', sans-serif"},
+  {id:'anton',         label:'💪 Anton (boldest)', family:"'Anton', sans-serif"},
+  {id:'bebasneue',     label:'💪 Bebas Neue (tall capitals)', family:"'Bebas Neue', sans-serif"},
   {id:'fjallaone',     label:'💪 Fjalla One', family:"'Fjalla One', sans-serif"},
   {id:'nastaleeq',  label:'✒️ Noori Nastaleeq', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
 ];
@@ -19194,7 +19194,7 @@ async function loadPlayBillingDetails(){
 // ---------- خریداری کا اصل عمل — کامیابی پر Play کو acknowledge کر کے، اسی طرح دن جوڑیں جیسے Local کوڈ سے جوڑتے ہیں ----------
 async function purchaseViaPlayBilling(sku, days){
   if(!isPlayBillingAvailable()){
-    alert('❌ یہ خریداری صرف Play Store سے نصب شدہ ایپ میں کام کرتی ہے۔');
+    alert('❌ This purchase only works in the app installed from the Play Store.');
     return;
   }
   try{
@@ -22209,7 +22209,7 @@ async function printCurrentReport(){
     // فوری، بغیر دیکھے شیئر کرنے کے لیے نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں،
     // جو سیدھا Android کی نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      alert('PDF library could not load — check your internet connection and try again.');
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
