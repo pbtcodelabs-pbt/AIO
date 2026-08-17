@@ -586,10 +586,10 @@
   .productGridCard{
     background:var(--card); border-radius:12px; overflow:hidden; position:relative; cursor:default;
     height:152px; display:flex; flex-direction:column;
-    box-shadow:3px 3px 7px rgba(41,29,10,.16), -2px -2px 6px rgba(255,255,255,.8);
-    border:1px solid rgba(255,255,255,.6);
+    box-shadow:0 1px 5px rgba(41,29,10,.12);
+    border:1px solid rgba(15,118,110,.08);
   }
-  .productGridCard.outOfStock{box-shadow:0 0 0 2px var(--danger) inset, 3px 3px 7px rgba(41,29,10,.16);}
+  .productGridCard.outOfStock{box-shadow:0 0 0 2px var(--danger) inset, 0 1px 5px rgba(41,29,10,.12);}
   .productGridCard.negativeStock{box-shadow:0 0 0 2.5px var(--danger) inset, 3px 3px 7px rgba(41,29,10,.16);}
   .productGridCard.negativeStock .pgName, .productGridCard.negativeStock .pgPrice{color:var(--danger);}
   .productGridCard.lowStockCard{box-shadow:0 0 0 2px var(--warning) inset, 3px 3px 7px rgba(41,29,10,.16);}
@@ -1229,8 +1229,10 @@
   .paymentAccBank{font-size:11px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 7px; margin-left:6px;}
   .paymentAccNumber{font-size:12.5px; color:var(--muted); margin-top:2px; white-space:normal; word-break:break-all;}
   .paymentAccActionsRow{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
-  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 9px; border-radius:8px; cursor:pointer;}
-  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:7px 10px; cursor:pointer; font-size:13px;}
+  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 8px; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:52px;}
+  .paymentAccBtnLabel{font-size:9px; font-weight:700; color:var(--muted); letter-spacing:.2px;}
+  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:13px;}
+  .paymentAccDelBtn .paymentAccBtnLabel{color:var(--danger);}
 
   /* --- Theme colour swatches --- */
   .themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
@@ -1876,7 +1878,7 @@
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 AIO POS</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "AIO POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے ---------- -->
-    <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST11</span>
+    <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST13</span>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
@@ -2273,7 +2275,10 @@
           <button class="dqBackupBtn dqImport" onclick="triggerRestoreWithHint('importBackupInputDash')">⬆️ Import Backup</button>
           <input type="file" id="importBackupInputDash" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
-        <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
+        <div style="margin-top:8px;">
+          <div style="font-size:10px; color:var(--muted); font-weight:700; margin-bottom:4px;">🎨 Quick Theme Color</div>
+          <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
+        </div>
       </div>
 
       <!-- ---------- ⭐ سب سے پہلے، سب سے نمایاں: صاف صاف Profit/Loss سمری (کل اثاثے − کل واجبات) ---------- -->
@@ -3927,7 +3932,8 @@
           <div class="themeSwatchGrid" id="themeSwatchGrid"></div>
 
           <div class="settingsSubLabel">Font Style</div>
-          <div class="fontOptionGrid" id="fontOptionGrid"></div>
+          <div class="fontOptionGrid" id="fontOptionGrid" style="max-height:180px; overflow-y:auto; padding-bottom:4px;"></div>
+          <button type="button" onclick="const g=document.getElementById('fontOptionGrid'); const exp=g.style.maxHeight==='none'; g.style.maxHeight=exp?'180px':'none'; this.textContent=exp?'🔽 Show All Fonts':'🔼 Show Less';" style="width:100%; margin-top:8px; padding:7px; background:#f1f5f9; color:var(--primary-dark); border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">🔽 Show All Fonts</button>
         </div>
 
         <!-- --- 💵 ابتدائی نقد رقم — Dashboard کا Cash in Hand اسی سے شروع ہو کر حقیقی بلوں سے اپڈیٹ ہوتا ہے --- -->
@@ -4237,7 +4243,7 @@
       <span style="cursor:pointer;" onclick="closeReportPreview()">✖</span>
     </div>
 
-    <div class="previewStyleControls compactPsc">
+    <div class="previewStyleControls compactPsc" id="reportStyleControlsWrap" style="display:none;">
       <div class="pscCompactRow">
         <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
           <span class="pscLabel">🔠</span>
@@ -4286,6 +4292,9 @@
         <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
       </div>
     </div>
+
+    <!-- ---------- ⚙️ Advanced formatting بٹن — عام صارف کو صرف پرنٹ/شیئر چاہیے، سٹائل کنٹرول چھپے رہیں جب تک نہ مانگیں ---------- -->
+    <button type="button" onclick="const w=document.getElementById('reportStyleControlsWrap'); const open=w.style.display==='none'; w.style.display=open?'flex':'none'; this.textContent=open?'⚙️ Hide Formatting Options':'⚙️ Advanced Formatting Options';" style="width:100%; margin:8px 0; padding:9px; background:#eef2ff; color:var(--primary-dark); border:none; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer;">⚙️ Advanced Formatting Options</button>
 
     <div id="reportCanvasScrollWrap" class="invoicePreviewScrollArea">
       <canvas id="reportCanvas"></canvas>
@@ -19604,11 +19613,11 @@ function renderMyPaymentAccounts(){
         </div>
       </div>
       <div class="paymentAccActionsRow">
-        <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
-        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}">${acc.qr ? '🔳✅' : '🔳'}</button>
-        <button onclick="shareAccountCard(${idx})" title="Share as a landscape card">🎴</button>
-        <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster">🖼️</button>
-        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
+        <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer"><span style="font-size:15px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</span><span class="paymentAccBtnLabel">Receipt</span></button>
+        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}"><span style="font-size:15px;">${acc.qr ? '🔳✅' : '🔳'}</span><span class="paymentAccBtnLabel">QR Code</span></button>
+        <button onclick="shareAccountCard(${idx})" title="Share as a landscape card"><span style="font-size:15px;">🎴</span><span class="paymentAccBtnLabel">Card</span></button>
+        <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster"><span style="font-size:15px;">🖼️</span><span class="paymentAccBtnLabel">Poster</span></button>
+        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})"><span style="font-size:15px;">🗑️</span><span class="paymentAccBtnLabel">Delete</span></button>
       </div>
     </div>
   `).join('');
