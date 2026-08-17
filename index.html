@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ur" dir="ltr">
 <head>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>AIO POS</title>
+<title>AIO POS — Skeleton</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
   <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwZjc2NmUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGI0YTQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMjQ4IiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNjQiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiNmZmZmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPkFJTzwvdGV4dD4KICA8dGV4dCB4PSIyNTYiIHk9IjM2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBIZWx2ZXRpY2EsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNzIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM1ZWVhZDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGxldHRlci1zcGFjaW5nPSIxNCI+UE9TPC90ZXh0Pgo8L3N2Zz4K">
   <link rel="manifest" href="./manifest.json">
@@ -47,19 +47,6 @@
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
-  /* --- 🧪 Test Build لیبل — "AIO POS" کی جگہ، اسی بڑے سائز میں، خوبصورت رنگین چمک (صرف aiotestXX.html فائلوں میں نظر آتا ہے)
-       پہلے صرف ایک زرد رنگ کی روشنی/مدھم ہوتی تھی جو آنکھوں کو تھکا رہی تھی — اب اس کی جگہ نرم، مسلسل بہتا ہوا رنگین Shimmer ہے --- */
-  .testBuildGlow{
-    font-weight:900 !important;
-    background:linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6, #fb923c, #facc15, #4ade80, #38bdf8);
-    background-size:300% auto;
-    -webkit-background-clip:text; background-clip:text; color:transparent !important;
-    animation:testShimmer 5s linear infinite;
-  }
-  @keyframes testShimmer{
-    0%{ background-position:0% 50%; }
-    100%{ background-position:300% 50%; }
-  }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   .dobPicker{display:flex; gap:6px; align-items:center; margin:8px 0;}
   .dobPicker select{flex:1; min-width:0; padding:10px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; background:#fff; color:var(--text);}
@@ -69,7 +56,7 @@
   .welcomeTrialBanner{background:linear-gradient(145deg,#dcfce7,#bbf7d0); border:1.5px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center;}
   .welcomeTrialBanner .wtbHeadline{font-size:15px; font-weight:800; color:#166534; line-height:1.3;}
   .welcomeTrialBanner .wtbSubline{font-size:12.5px; font-weight:700; color:#166534; margin-top:4px;}
-  .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7;}
+  .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7; text-align:right; direction:rtl;}
 
   /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان ---
      نوٹ: نام والی لائن اور آئیکنز کو دو الگ الگ قطاروں میں رکھا گیا ہے تاکہ
@@ -117,11 +104,11 @@
 
   /* --- 🔔 Role Toast — لاگ ان کے بعد چند سیکنڈ کے لیے نظر آئے --- */
   .roleToast{
-    position:fixed; top:64px; right:8px; z-index:5000;
-    background:rgba(15,23,42,.88); color:#fef08a; padding:4px 10px; border-radius:12px; font-size:10.5px; font-weight:800;
-    box-shadow:0 2px 8px rgba(0,0,0,.25); opacity:0; transform:translateY(-8px); transition:all .3s ease; white-space:nowrap;
+    position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-40px); z-index:5000;
+    background:#0f172a; color:#fff; padding:11px 20px; border-radius:30px; font-size:13px; font-weight:700;
+    box-shadow:0 6px 20px rgba(0,0,0,.3); opacity:0; transition:all .3s ease; white-space:nowrap;
   }
-  .roleToast.show{opacity:1; transform:translateY(0);}
+  .roleToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
   /* --- 🔄 Update Toast — نیا اپڈیٹ آنے پر نیچے نظر آئے، صارف ٹیپ کر کے فوراً اپڈیٹ کر سکے --- */
   #updateToast{
@@ -1229,8 +1216,10 @@
   .paymentAccBank{font-size:11px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 7px; margin-left:6px;}
   .paymentAccNumber{font-size:12.5px; color:var(--muted); margin-top:2px; white-space:normal; word-break:break-all;}
   .paymentAccActionsRow{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
-  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 9px; border-radius:8px; cursor:pointer;}
-  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:7px 10px; cursor:pointer; font-size:13px;}
+  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 8px; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:52px;}
+  .paymentAccBtnLabel{font-size:9px; font-weight:700; color:var(--muted); letter-spacing:.2px;}
+  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:13px;}
+  .paymentAccDelBtn .paymentAccBtnLabel{color:var(--danger);}
 
   /* --- Theme colour swatches --- */
   .themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
@@ -1696,7 +1685,7 @@
     <div class="welcomeTrialBanner">
       <div class="wtbHeadline">🎉 Best Billing App — Try it FREE for 30 Days!</div>
       <div class="wtbSubline">Your 30-Day Free Trial starts now.</div>
-      <div class="wtbUrduNote">This app is currently in Beta (testing) version. Please don't forget to take daily backups, and keep running your old method alongside it too. If you notice any issue — big or small — please report it to the developer right away, so this app can become the best it can be for you.</div>
+      <div class="wtbUrduNote">یہ ایپ ابھی Beta (آزمائشی) ورژن میں ہے۔ روزانہ Backup لینا نہ بھولیں، اور اپنا پرانا طریقہ بھی ساتھ ساتھ چلاتے رہیں۔ اگر کوئی مسئلہ محسوس ہو — چھوٹا ہو یا بڑا — فوری طور پر ڈویلپر تک پہنچائیں، تاکہ یہ ایپ آپ کے لیے بہترین بن سکے۔</div>
     </div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
@@ -1873,14 +1862,10 @@
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
-    <span id="mobileBrandText" class="mobileBrand" style="display:inline;">🧾 AIO POS</span>
-    <!-- ---------- 🧪 ٹیسٹ لیبل — یہ صرف aiotest.html (ڈویلپر کی اپنی ٹیسٹنگ فائل) میں نظر آتا ہے۔
-         پروڈکشن index.html میں یہ ہمیشہ چھپا رہے گا تاکہ کسٹمرز کو نارمل "AIO POS" لیبل اور 802 ورژن ہی نظر آئے ---------- -->
-    <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none;">TEST: AIOTEST09</span>
+    <span class="mobileBrand">🧾 AIO POS</span>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
-      <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO178MO0802AM</span>
+      <!-- ---------- بلڈ نمبر ہیڈر سے ہٹا دیا گیا — کسٹمر کو صاف/پروفیشنل نظارہ ملے۔ Settings کے اندر "App Version" میں دستیاب ہے ---------- -->
     </div>
   </div>
 
@@ -2273,7 +2258,10 @@
           <button class="dqBackupBtn dqImport" onclick="triggerRestoreWithHint('importBackupInputDash')">⬆️ Import Backup</button>
           <input type="file" id="importBackupInputDash" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
-        <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
+        <div style="margin-top:8px;">
+          <div style="font-size:10px; color:var(--muted); font-weight:700; margin-bottom:4px;">🎨 Quick Theme Color</div>
+          <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
+        </div>
       </div>
 
       <!-- ---------- ⭐ سب سے پہلے، سب سے نمایاں: صاف صاف Profit/Loss سمری (کل اثاثے − کل واجبات) ---------- -->
@@ -2731,6 +2719,7 @@
           <span class="closeBtn" onclick="document.getElementById('supplierPosterAccountPickerModal').classList.remove('show')">✖</span>
         </div>
         <div class="profileBody">
+          <div class="settingsHint" style="margin-top:0;">Tick which account(s) to include on the shareable profile poster.</div>
           <div id="posterAccountChecklist" style="margin:10px 0;"></div>
           <button class="checkoutBtn" onclick="confirmSupplierProfilePoster()">🪪 Generate Poster</button>
         </div>
@@ -3049,7 +3038,7 @@
       <div class="billCompactBar">
         <input type="text" id="pmtSearchInput" class="bcbItem bcbName" placeholder="🔍 Party name" oninput="renderPaymentsScreen()" style="flex:2;">
         <input type="date" id="pmtDateFilter" class="bcbItem bcbDate" onchange="renderPaymentsScreen()">
-        <button class="billAdvClearBtn bcbItem" onclick="clearPaymentsFilters()">✖</button>
+        <button class="billAdvClearBtn bcbItem" onclick="clearPaymentsFilters()" style="display:none;">✖</button>
       </div>
 
       <div class="billSummaryBar" id="pmtSummaryBar"></div>
@@ -3286,6 +3275,7 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
+      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🟢 I Got = We Owe Them, 🔴 I Gave = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalGreen">
@@ -3575,6 +3565,7 @@
     <div class="modalOverlay" id="editBillCustomerModal" onclick="if(event.target===this) closeEditBillCustomerModal()">
       <div class="modalBox">
         <h3>✏️ Edit Customer</h3>
+        <div class="settingsHint" style="margin-top:0;">Only the customer name/link can be changed after a bill is completed — items, prices, and stock stay locked to keep your records accurate.</div>
         <input type="text" id="ebcName" placeholder="Customer name" oninput="filterEbcCustomerOptions()" onfocus="filterEbcCustomerOptions()" autocomplete="off" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 4px; font-size:14px;">
         <!-- ---------- موجودہ کسٹمرز کی سکرول ایبل فہرست — منتخب کرنے پر اسی کسٹمر سے لنک ہو جائے گا ---------- -->
         <div id="ebcListWrap" class="custPickList" style="position:relative; margin-bottom:8px;"></div>
@@ -3899,6 +3890,11 @@
 
       <div class="settingsWrap">
 
+        <!-- ---------- ℹ️ App Version — صرف Settings کے اندر، ٹیسٹنگ کے لیے۔ ہیڈر سے ہٹا دیا تاکہ کسٹمر کو صاف/پروفیشنل نظارہ ملے ---------- -->
+        <div class="settingsCard" style="text-align:center; padding:8px 14px;">
+          <span style="font-size:10px; color:var(--muted); font-weight:700; letter-spacing:.3px;">App Version: <span id="settingsAppVersion">AIOPS178MO1040PM</span></span>
+        </div>
+
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
         <div class="settingsCard" id="storageUsageCard">
           <h3>💾 Storage Used</h3>
@@ -3927,7 +3923,8 @@
           <div class="themeSwatchGrid" id="themeSwatchGrid"></div>
 
           <div class="settingsSubLabel">Font Style</div>
-          <div class="fontOptionGrid" id="fontOptionGrid"></div>
+          <div class="fontOptionGrid" id="fontOptionGrid" style="max-height:180px; overflow-y:auto; padding-bottom:4px;"></div>
+          <button type="button" onclick="const g=document.getElementById('fontOptionGrid'); const exp=g.style.maxHeight==='none'; g.style.maxHeight=exp?'180px':'none'; this.textContent=exp?'🔽 Show All Fonts':'🔼 Show Less';" style="width:100%; margin-top:8px; padding:7px; background:#f1f5f9; color:var(--primary-dark); border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">🔽 Show All Fonts</button>
         </div>
 
         <!-- --- 💵 ابتدائی نقد رقم — Dashboard کا Cash in Hand اسی سے شروع ہو کر حقیقی بلوں سے اپڈیٹ ہوتا ہے --- -->
@@ -3994,6 +3991,7 @@
         <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
         <div class="settingsCard" id="settingsCardPaymentAccounts">
           <h3>💳 My Payment Accounts</h3>
+          <div class="settingsHint">These will be automatically included in every payment reminder you send to customers, so they can pay you directly without calling to ask for your account number.</div>
           <div id="myPaymentAccountsWrap"></div>
           <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
           <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
@@ -4021,6 +4019,7 @@
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Write your own message here (e.g. "Our app is very good, please use it") — it will be sent along with the link above when the 📤 Share button is pressed.</div>
             <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
             <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Add as many as you like (EasyPaisa, JazzCash, Bank, etc). Customers will see these in Package Plans and can switch between them — useful if they don't have your default wallet.</div>
             <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
             <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
               <option value="">— Select Bank/Wallet —</option>
@@ -4030,9 +4029,11 @@
             <button class="testPrintBtn" style="margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addDevPaymentAccount()">➕ Add This Account</button>
 
             <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Rate Per Day (Rs.)</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this once — every customer's calculated price updates automatically. Change it anytime and everything recalculates immediately.</div>
             <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
 
             <div class="settingsSubLabel">Package Plans (with fixed price per plan)</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">These appear as tappable plans for customers (e.g. 1 day, 1 month, 1 year). Set an exact price for each — useful when longer plans are discounted and don't follow the plain per-day rate. Leave price empty to auto-calculate from the per-day rate above.</div>
             <div id="dayPresetsWrap"></div>
             <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Plan</button>
 
@@ -4090,6 +4091,7 @@
       <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
       <div class="settingsCard">
         <h3>🏪 Business Info</h3>
+        <div class="settingsHint">This appears on printed bills. Leave blank to just show "AIO POS".</div>
         <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
@@ -4099,18 +4101,21 @@
       <!-- --- پرنٹر Settings --- -->
       <div class="settingsCard" id="settingsCardPrinter">
         <h3>🖨️ Printer Settings</h3>
+        <div class="settingsHint">Printing works through your phone's own Print system. When you tap Print, Android shows every printer it knows about — Bluetooth thermal printers (via an app like RawBT), Sunmi's built-in printer, WiFi/USB printers, or "Save as PDF". If your printer doesn't appear, install its print-service app from Play Store once — after that it'll show up automatically here and in every other app.</div>
 
         <div class="settingsSubLabel">Paper Width (for receipt layout)</div>
         <div class="settingsBtnGrid two" id="paperWidthGrid">
           <button data-width="58" onclick="setPaperWidth(58)">58mm (2")</button>
           <button data-width="80" onclick="setPaperWidth(80)">80mm (3")</button>
         </div>
+        <div class="settingsHint">Printing a full page instead? Just choose "A4" / "Fit to page" in the print dialog itself — the same bill works for both.</div>
 
         <div class="settingsSubLabel">Invoice Style</div>
         <div class="settingsBtnGrid two" id="invoiceStyleGrid">
           <button data-style="thermal" onclick="setInvoiceStyle('thermal')">🧾 Thermal Receipt</button>
           <button data-style="a4" onclick="setInvoiceStyle('a4')">📄 A4 Business Invoice</button>
         </div>
+        <div class="settingsHint">A4 style uses your current theme color and font, with a signature line — best for formal invoices or sharing a polished bill on WhatsApp.</div>
 
         <button class="testPrintBtn" onclick="testPrint()">🧾 Send Test Print</button>
       </div>
@@ -4150,6 +4155,7 @@
       <!-- --- 🏷️ بارکوڈ لیبل پرنٹنگ — کسی بھی پراڈکٹ ویریئنٹ کے موجودہ بارکوڈ نمبر سے پرنٹ کے قابل لیبل بنائیں --- -->
       <div class="settingsCard">
         <h3>🏷️ Barcode Labels</h3>
+        <div class="settingsHint">Print a barcode sticker for any product — using the barcode number already saved on that product's variant. Useful for labeling shelves or items so a barcode scanner (or phone camera scanner app) can look them up quickly at checkout.</div>
         <select id="barcodeLabelProductSelect" style="width:100%; padding:9px; margin-top:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateBarcodeLabelPreview()">
           <option value="">— Select a product variant —</option>
         </select>
@@ -4237,7 +4243,7 @@
       <span style="cursor:pointer;" onclick="closeReportPreview()">✖</span>
     </div>
 
-    <div class="previewStyleControls compactPsc">
+    <div class="previewStyleControls compactPsc" id="reportStyleControlsWrap" style="display:none;">
       <div class="pscCompactRow">
         <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
           <span class="pscLabel">🔠</span>
@@ -4286,6 +4292,9 @@
         <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
       </div>
     </div>
+
+    <!-- ---------- ⚙️ Advanced formatting بٹن — عام صارف کو صرف پرنٹ/شیئر چاہیے، سٹائل کنٹرول چھپے رہیں جب تک نہ مانگیں ---------- -->
+    <button type="button" onclick="const w=document.getElementById('reportStyleControlsWrap'); const open=w.style.display==='none'; w.style.display=open?'flex':'none'; this.textContent=open?'⚙️ Hide Formatting Options':'⚙️ Advanced Formatting Options';" style="width:100%; margin:8px 0; padding:9px; background:#eef2ff; color:var(--primary-dark); border:none; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer;">⚙️ Advanced Formatting Options</button>
 
     <div id="reportCanvasScrollWrap" class="invoicePreviewScrollArea">
       <canvas id="reportCanvas"></canvas>
@@ -4403,6 +4412,7 @@
 <div class="modalOverlay" id="packagePlansModal" style="z-index:3600;" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:400px; max-height:82vh; overflow-y:auto;">
     <h3>🗂️ Package Plans</h3>
+    <div class="settingsHint">Enter the number of days you'd like — the price will be calculated automatically. Then tap "Chat with Developer" below to send your request.</div>
 
     <!-- ---------- 🧮 کیلکولیٹر — کوئی بھی دن لکھیں، قیمت خودکار بنے ---------- -->
     <div id="planCalcWrap" style="background:#eef2ff; border-radius:12px; padding:14px; margin-top:10px; text-align:center;">
@@ -4419,7 +4429,7 @@
     </div>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
-    <button class="checkoutBtn" style="margin-top:14px; background:#7c3aed;" onclick="sharePackagePlansPoster()">🖼️ Share as Poster</button>
+    <button class="checkoutBtn" style="margin-top:14px; background:var(--primary);" onclick="sharePackagePlansPoster()">🖼️ Share as Poster</button>
     <button class="checkoutBtn" style="margin-top:10px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
@@ -4429,6 +4439,7 @@
 <div class="modalOverlay" id="replyTemplatesModal" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:400px; max-height:80vh; overflow-y:auto;">
     <h3>📋 Reply Templates</h3>
+    <div class="settingsHint">Save your subscription plans or any standard reply once — then just tap Copy and paste it when replying to a customer's WhatsApp/SMS/Gmail message.</div>
     <div id="replyTemplatesWrap" style="margin-top:10px;"></div>
     <button class="testPrintBtn" style="margin-top:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addReplyTemplate()">➕ Add Template</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('replyTemplatesModal').classList.remove('show')">Close</button>
@@ -4462,7 +4473,7 @@
     <div class="backupConfirmIconWrap"><span>📋</span></div>
     <h3>Ready to Import?</h3>
     <div id="partyImportPreviewText" style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:6px;"></div>
-    <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Existing records with the same phone number will be updated — nothing will be deleted.</div>
+    <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Same phone number والے موجودہ ریکارڈ اپڈیٹ ہوں گے — کچھ ڈیلیٹ نہیں ہوگا۔</div>
     <button class="backupConfirmCloseBtn" onclick="confirmPartyCsvImport()">✅ Confirm Import</button>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="document.getElementById('partyImportPreviewModal').classList.remove('show')">Cancel</button>
   </div>
@@ -4472,7 +4483,7 @@
 <div class="modalOverlay" id="scanImportModal" onclick="if(event.target===this) closeScanImportModal()">
   <div class="modalBox" id="scanImportModalBox" style="max-width:520px;">
     <h3>📷 Scan Photos & Import</h3>
-    <div class="settingsHint" style="margin-top:0;" id="scanImportHint">Select several photos at once from Gallery, or take a photo directly with the Camera — the system will automatically pull the name and price (or name/phone/address) from each line and build a list. Check/fix the list below, then import.</div>
+    <div class="settingsHint" style="margin-top:0;" id="scanImportHint">گیلری سے ایک ساتھ کئی تصویریں منتخب کریں، یا کیمرے سے براہ راست تصویر بنائیں — سسٹم خودکار ہر لائن سے نام اور قیمت (یا نام/فون/پتہ) نکال کر فہرست بنا دے گا۔ نیچے فہرست میں چیک/درست کر کے امپورٹ کریں۔</div>
 
     <div style="display:flex; gap:8px; margin:10px 0;">
       <button type="button" onclick="document.getElementById('scanImageInput').click()" style="flex:1; padding:12px 8px; border:none; border-radius:10px; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:13px; cursor:pointer;">🖼️ Gallery</button>
@@ -4555,7 +4566,7 @@
   <div class="backupConfirmBox" style="max-height:80vh; overflow-y:auto;">
     <div class="backupConfirmIconWrap"><span>☁️</span></div>
     <h3>Select a Backup</h3>
-    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">These AIO POS backup files were found in your Google Drive — tap the one you want to restore:</p>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">آپ کی Google Drive میں یہ AIO POS بیک اپ فائلیں ملی ہیں — جس فائل کو بحال کرنا ہے اس پر ٹیپ کریں:</p>
     <div id="gdriveFileListWrap" style="text-align:left; margin-top:10px;"></div>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="closeGDriveRestoreModal()">Cancel</button>
   </div>
@@ -4919,7 +4930,7 @@ async function backupToGoogleDrive(){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google service could not load — check your internet connection and try again.');
+    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -4927,7 +4938,7 @@ async function backupToGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
-      alert('Google Drive permission was not granted: ' + resp.error);
+      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
@@ -4968,7 +4979,7 @@ async function backupToGoogleDrive(){
         products: productsData.length, customers: customersData.length, invoices: invoicesData.length
       });
     }catch(err){
-      alert('Could not upload to Google Drive: ' + err.message);
+      alert('Google Drive پر اپ لوڈ نہیں ہو سکی: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
     }
@@ -4984,7 +4995,7 @@ async function restoreFromGoogleDrive(){
   const btn = document.getElementById('gdriveRestoreBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google service could not load — check your internet connection and try again.');
+    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -4992,7 +5003,7 @@ async function restoreFromGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
-      alert('Google Drive permission was not granted: ' + resp.error);
+      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
@@ -5008,7 +5019,7 @@ async function restoreFromGoogleDrive(){
       renderGDriveFileList(files);
       document.getElementById('gdriveRestoreModal').classList.add('show');
     }catch(err){
-      alert('Could not get list from Google Drive: ' + err.message);
+      alert('Google Drive سے فہرست نہیں مل سکی: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
     }
@@ -5020,7 +5031,7 @@ async function restoreFromGoogleDrive(){
 function renderGDriveFileList(files){
   const wrap = document.getElementById('gdriveFileListWrap');
   if(files.length === 0){
-    wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px 10px;">No AIO POS backup file was found in this Google account.</div>';
+    wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px 10px;">اس Google اکاؤنٹ میں کوئی AIO POS بیک اپ فائل نہیں ملی۔</div>';
     return;
   }
   wrap.innerHTML = files.map(f => {
@@ -5056,7 +5067,7 @@ async function selectGDriveBackupFile(fileId, fileName){
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
     document.getElementById('importConfirmModal').classList.add('show');
   }catch(err){
-    alert('File could not be downloaded: ' + err.message);
+    alert('فائل ڈاؤن لوڈ نہیں ہو سکی: ' + err.message);
   }
 }
 function closeGDriveRestoreModal(){
@@ -5697,7 +5708,7 @@ function buildDevChatMessage(){
     return buildAdInquiryMessage();
   }
   // ---------- مسئلہ رپورٹ کرنے کا پیغام — اردو میں، خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
-  return `Dear Developer,\nI am using the beta version of AIO POS. I noticed this issue in it and my suggestion is:\n\n\n\nMy Device ID:\n${uid}`;
+  return `محترم ڈیویلپر،\nمیں آپ کی بیٹا ورژن AIO POS استعمال کر رہا ہوں۔ میں نے اس کے اندر یہ مسئلہ محسوس کیا ہے اور میرا مشورہ یہ ہے:\n\n\n\nمیرا Device ID:\n${uid}`;
 }
 
 // ---------- My Ads پوسٹر/اشتہار دیکھ کر رابطہ کرنے والے نئے دلچسپی رکھنے والے کے لیے مختصر، دوستانہ پیغام —
@@ -5859,7 +5870,7 @@ function showRoleToast(role, name){
   const roleLabel = role === 'admin' ? '🔑 Admin' : '🧑‍💼 Salesman';
   const toast = document.createElement('div');
   toast.className = 'roleToast';
-  toast.textContent = roleLabel; // ---------- پہلے یہاں پورا "Logged in as Admin — Admin User" جملہ تھا جو ہیڈر کو ڈھانپ لیتا تھا — اب صرف مختصر رول ----------
+  toast.textContent = `Logged in as ${roleLabel} — ${name}`;
   document.body.appendChild(toast);
   setTimeout(() => toast.classList.add('show'), 50);
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
@@ -6503,22 +6514,22 @@ function fileToCsvText(file){
     if(ext === 'csv' || ext === 'txt'){
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
-      reader.onerror = () => reject(new Error('Failed to read — the file may be corrupted.'));
+      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
       reader.readAsText(file);
     } else if(ext === 'xlsx' || ext === 'xls'){
-      if(typeof XLSX === 'undefined'){ reject(new Error('Excel support could not load — turn on internet and try again.')); return; }
+      if(typeof XLSX === 'undefined'){ reject(new Error('Excel سپورٹ لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔')); return; }
       const reader = new FileReader();
       reader.onload = e => {
         try{
           const wb = XLSX.read(e.target.result, {type:'array'});
           const sheet = wb.Sheets[wb.SheetNames[0]];
           resolve(XLSX.utils.sheet_to_csv(sheet));
-        } catch(err){ reject(new Error('This Excel file could not be read — try saving it again.')); }
+        } catch(err){ reject(new Error('یہ Excel فائل نہیں پڑھی جا سکی — دوبارہ محفوظ کر کے آزمائیں۔')); }
       };
-      reader.onerror = () => reject(new Error('Failed to read — the file may be corrupted.'));
+      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
       reader.readAsArrayBuffer(file);
     } else {
-      reject(new Error('Only CSV or Excel (.xlsx/.xls) files can be imported. If your data is in Word/PDF/an image, copy it into Excel first.'));
+      reject(new Error('صرف CSV یا Excel (.xlsx/.xls) فائلیں امپورٹ ہو سکتی ہیں۔ اگر ڈیٹا Word/PDF/تصویر میں ہے تو پہلے اسے Excel میں کاپی کر لیں۔'));
     }
   });
 }
@@ -8754,7 +8765,7 @@ const PRODUCT_FIELD_SYNONYMS = {
 // ---------- CSV متن کو پراڈکٹ rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processProductCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('No data found — the first row must be a header with at least one data row below it.'); return false; }
+  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
   const objs = rows.slice(1).map(r => {
     const o = {};
@@ -8862,9 +8873,9 @@ let pendingPartyImportRows = [];
 // ---------- CSV متن کو کسٹمر/سپلائر rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processPartyCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('No data found — the first row must be a header with at least one data row below it.'); return false; }
+  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PARTY_FIELD_SYNONYMS);
-  if(fieldMap.name < 0){ alert('Name column not found — the file must have a column like "Name".'); return false; }
+  if(fieldMap.name < 0){ alert('نام والا کالم نہیں مل سکا — فائل میں "Name" جیسا کوئی کالم ضرور ہونا چاہیے۔'); return false; }
   const objs = rows.slice(1).map(r => ({
     name: (r[fieldMap.name] || '').trim(),
     phone: fieldMap.phone >= 0 ? (r[fieldMap.phone] || '').trim() : '',
@@ -8886,7 +8897,7 @@ function showPartyImportPreview(){
   const isCustomer = currentPartyTab === 'customers';
   const objs = pendingPartyImportRows;
   if(objs.length === 0){
-    alert('No row with a name was found. The "Name" column must be filled in.');
+    alert('کوئی نام والی row نہیں ملی۔ فائل میں "Name" کالم بھرا ہونا چاہیے۔');
     return;
   }
   const list = isCustomer ? customersData : suppliersData;
@@ -9000,12 +9011,12 @@ function reconstructRowsFromWords(words){
 async function processScanFiles(files){
   if(!files.length) return;
   if(typeof Tesseract === 'undefined'){
-    alert('❌ Scan system could not load — turn on internet and try again.');
+    alert('❌ سکین سسٹم لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔');
     return;
   }
   document.getElementById('scanProgressWrap').style.display = 'block';
   document.getElementById('scanReviewWrap').style.display = 'none';
-  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — this may take a moment the first time)`;
+  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — پہلی بار تھوڑا وقت لگ سکتا ہے)`;
 
   let combinedLines = [];
   for(let i = 0; i < files.length; i++){
@@ -9050,7 +9061,7 @@ async function processScanFiles(files){
   scanReviewRows = scanReviewRows.concat(newRows); // ---------- پہلے سے موجود rows میں مزید شامل کریں (گیلری + کیمرہ ملا کر بھی چل سکتے ہیں) ----------
 
   if(scanReviewRows.length === 0){
-    alert('❌ No items found — try a clear, well-lit photo, or add rows manually below with "+ Add row".');
+    alert('❌ کوئی آئٹم نہیں ملا — صاف اور روشن تصویر آزمائیں، یا نیچے "+ Add row" سے خود لکھیں۔');
   }
   renderScanReviewList();
   document.getElementById('scanReviewWrap').style.display = 'block';
@@ -9236,7 +9247,7 @@ function scanCsvEscape(v){
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 function downloadScanAsCsv(){
-  if(scanReviewRows.length === 0){ alert('Add an item first.'); return; }
+  if(scanReviewRows.length === 0){ alert('پہلے کوئی آئٹم شامل کریں۔'); return; }
   let headerRow, dataRows;
   if(scanImportContext === 'product'){
     headerRow = PRODUCT_CSV_HEADERS;
@@ -9250,7 +9261,7 @@ function downloadScanAsCsv(){
 }
 
 function finalizeScanImport(){
-  if(scanReviewRows.length === 0){ alert('No items — first select a photo or add one with "+ Add row".'); return; }
+  if(scanReviewRows.length === 0){ alert('کوئی آئٹم نہیں — پہلے تصویر منتخب کریں یا "+ Add row" سے شامل کریں۔'); return; }
   if(scanImportContext === 'product'){
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       'product name': (r.name || '').trim(),
@@ -9265,14 +9276,14 @@ function finalizeScanImport(){
       'expiry date (yyyy-mm-dd)': (r.expiry || '').trim(),
       'location': (r.location || '').trim(),
     }));
-    if(objs.length === 0){ alert('No product name entered — enter a name first.'); return; }
+    if(objs.length === 0){ alert('کوئی پراڈکٹ نام درج نہیں — پہلے نام لکھیں۔'); return; }
     pendingProductImportRows = objs;
     showProductImportPreview();
   } else {
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       name: (r.name || '').trim(), phone: (r.phone || '').trim(), address: (r.address || '').trim(), area: (r.area || '').trim()
     }));
-    if(objs.length === 0){ alert('No name entered — enter a name first.'); return; }
+    if(objs.length === 0){ alert('کوئی نام درج نہیں — پہلے نام لکھیں۔'); return; }
     pendingPartyImportRows = objs;
     showPartyImportPreview();
   }
@@ -9288,7 +9299,7 @@ let cameraCapturedFiles = [];
 
 function openCameraCapture(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    alert('❌ Camera is not available on this device/browser — please select a photo from "Gallery" instead.');
+    alert('❌ اس ڈیوائس/براؤزر پر کیمرہ دستیاب نہیں — براہ کرم "Gallery" سے تصویر منتخب کریں۔');
     return;
   }
   cameraCapturedFiles = [];
@@ -9303,7 +9314,7 @@ function openCameraCapture(){
       document.getElementById('cameraCaptureModal').classList.add('show');
     })
     .catch(() => {
-      alert('❌ Camera could not open — grant camera permission, or select a photo from "Gallery".');
+      alert('❌ کیمرہ کھل نہیں سکا — کیمرہ کی اجازت (permission) دیں، یا "Gallery" سے تصویر منتخب کریں۔');
     });
 }
 
@@ -9604,7 +9615,7 @@ function formatPhoneForWhatsApp(phone){
 // ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
 async function pickContactForNewParty(){
   if(!('contacts' in navigator && 'ContactsManager' in window)){
-    alert('This phone/browser does not support access to contacts — enter the name and number manually.');
+    alert('یہ فون/براؤزر فون بک تک رسائی سپورٹ نہیں کرتا — نام اور نمبر خود لکھ دیں۔');
     return;
   }
   try{
@@ -11692,7 +11703,7 @@ function enterPartyPage(tab){
   document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
   const partyImportBtnLabel = document.getElementById('partyImportBtnLabel');
   if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'Customers' : 'Suppliers';
-  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers by name or phone...' : '🔍 Search suppliers by name or phone...';
+  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers...' : '🔍 Search suppliers...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
   renderPartyList();
@@ -15810,6 +15821,10 @@ function renderPaymentsScreen(){
   const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
   const dateVal = dateEl ? dateEl.value : '';
 
+  // ---------- ✖ Clear بٹن صرف اس وقت نظر آئے جب کوئی فلٹر واقعی لگا ہو (ورنہ خالی جگہ گھیرتا ہے) ----------
+  const clearBtn = document.querySelector('#screen-payments .billAdvClearBtn');
+  if(clearBtn) clearBtn.style.display = (search || dateVal || paymentsFilter !== 'all') ? 'flex' : 'none';
+
   let list = paymentsData.filter(p => {
     if(paymentsFilter !== 'all' && p.direction !== paymentsFilter) return false;
     if(search && !p.party_name.toLowerCase().includes(search)) return false;
@@ -18202,7 +18217,7 @@ async function printCurrentInvoice(){
     // خود Chrome کے 🖨️ پرنٹ اور ⋮/📤 شیئر آئیکن موجود ہوتے ہیں۔ فوری، بغیر دیکھے شیئر کرنے کے لیے
     // نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں، جو سیدھا نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF library could not load — check your internet connection and try again.');
+      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
       return;
     }
     const { jsPDF } = window.jspdf;
@@ -18462,8 +18477,8 @@ const FONT_PRESETS = [
   // ---------- 💪 اصل موٹے/بولڈ ڈسپلے فونٹس — یہ اپنی ڈیزائن سے ہی بولڈ ہیں (صرف ایک ہی، بھاری وزن میں بنتے ہیں)،
   // اس لیے باقی سب سے صاف الگ اور نمایاں نظر آتے ہیں، دور سے بھی فرق پتا چلے ----------
   {id:'archivoblack', label:'💪 Archivo Black', family:"'Archivo Black', sans-serif"},
-  {id:'anton',         label:'💪 Anton (boldest)', family:"'Anton', sans-serif"},
-  {id:'bebasneue',     label:'💪 Bebas Neue (tall capitals)', family:"'Bebas Neue', sans-serif"},
+  {id:'anton',         label:'💪 Anton (سب سے موٹا)', family:"'Anton', sans-serif"},
+  {id:'bebasneue',     label:'💪 Bebas Neue (لمبے بڑے حروف)', family:"'Bebas Neue', sans-serif"},
   {id:'fjallaone',     label:'💪 Fjalla One', family:"'Fjalla One', sans-serif"},
   {id:'nastaleeq',  label:'✒️ Noori Nastaleeq', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
 ];
@@ -19153,79 +19168,6 @@ async function finishPinRecovery(){
 let selectedPlanDays = null;
 let selectedPlanPrice = null;
 
-/* =====================================================================
-   💳 GOOGLE PLAY BILLING — صرف اُس وقت فعال ہوتا ہے جب یہ ایپ Play Store سے
-   نصب شدہ TWA کے طور پر چل رہی ہو (براؤزر/عام PWA میں یہ خودکار بند رہتا ہے،
-   وہاں پرانا Local/EasyPaisa نظام ہی چلتا رہے گا — دونوں ورژن ایک ہی فائل میں محفوظ)۔
-
-   ⚠️ ضروری: نیچے PLAY_BILLING_PRODUCTS میں دیے گئے sku بالکل انہی ناموں سے
-   Play Console → Monetize → Subscriptions میں بنانے ہوں گے، ورنہ خریداری ناکام ہوگی۔
-   ===================================================================== */
-const PLAY_BILLING_PRODUCTS = [
-  { sku: 'aio_pos_trial7',    days: 7,     label: '7 Days Free'  },
-  { sku: 'aio_pos_monthly',   days: 30,    label: '1 Month'      },
-  { sku: 'aio_pos_6month',    days: 180,   label: '6 Months'     },
-  { sku: 'aio_pos_yearly',    days: 365,   label: '1 Year'       },
-  { sku: 'aio_pos_lifetime',  days: 36500, label: 'Lifetime (100 Years)' },
-];
-
-function isPlayBillingAvailable(){
-  return typeof window.getDigitalGoodsService === 'function';
-}
-
-// ---------- Play Console سے قیمتیں لا کر کیش کر لیں — تاکہ Package Plans میں دکھائی جا سکیں ----------
-let playBillingDetailsCache = null;
-async function loadPlayBillingDetails(){
-  if(!isPlayBillingAvailable()) return null;
-  if(playBillingDetailsCache) return playBillingDetailsCache;
-  try{
-    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-    const details = await service.getDetails(PLAY_BILLING_PRODUCTS.map(p => p.sku));
-    playBillingDetailsCache = details;
-    return details;
-  } catch(err){
-    console.error('Play Billing details load failed:', err);
-    return null;
-  }
-}
-
-// ---------- خریداری کا اصل عمل — کامیابی پر Play کو acknowledge کر کے، اسی طرح دن جوڑیں جیسے Local کوڈ سے جوڑتے ہیں ----------
-async function purchaseViaPlayBilling(sku, days){
-  if(!isPlayBillingAvailable()){
-    alert('❌ This purchase only works in the app installed from the Play Store.');
-    return;
-  }
-  try{
-    const paymentMethod = { supportedMethods: 'https://play.google.com/billing', data: { sku } };
-    const request = new PaymentRequest([paymentMethod]);
-    const response = await request.show();
-    const { purchaseToken } = response.details;
-    await response.complete('success');
-
-    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-    await service.acknowledge(purchaseToken, 'repeat'); // ---------- 'repeat' = subscription، ورنہ Google 3 دن بعد خودکار رقم واپس کر دیتا ہے ----------
-
-    // ---------- کامیاب خریداری — بالکل اسی طرح دن جوڑیں جیسے Local activation code سے جوڑے جاتے ہیں ----------
-    const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
-    const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
-    base.setDate(base.getDate() + days);
-    AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
-    AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
-    AppState.settings.isOnFreeTrial = false;
-    AppState.settings.subscriptionViaPlayBilling = true;
-    persistAllData();
-    document.getElementById('packagePlansModal')?.classList.remove('show');
-    refreshAllScreens();
-    alert('✅ Subscription activated successfully via Google Play!');
-  } catch(err){
-    console.error('Play Billing purchase failed:', err);
-    if(err && err.name !== 'AbortError'){ // ---------- صارف نے خود منسوخ کیا ہو تو خاموشی سے واپس، ورنہ پیغام دکھائیں ----------
-      alert('❌ Purchase could not be completed. Please try again.');
-    }
-  }
-}
-
-
 function openPackagePlansModal(){
   document.getElementById('planCalcDaysInput').value = '';
   document.getElementById('planCalcPriceOutput').textContent = '—';
@@ -19234,8 +19176,6 @@ function openPackagePlansModal(){
   devPaymentSelectedIdx = 0;
   renderPackagePlansView();
   document.getElementById('packagePlansModal').classList.add('show');
-  // ---------- Play Store سے نصب شدہ ہو تو تھوڑی دیر بعد قیمتیں لوڈ ہو کر دوبارہ رینڈر ہوں گی ----------
-  if(isPlayBillingAvailable()) loadPlayBillingDetails().then(() => renderPackagePlansView());
 }
 
 // ---------- کوئی بھی دن لکھیں — قیمت خودکار بنے (دن × روزانہ کی شرح)، Chat پیغام کے لیے بھی محفوظ ہو جائے ----------
@@ -19318,28 +19258,6 @@ function selectPresetPlanAndChat(days, fixedPrice){
 
 function renderPackagePlansView(){
   const wrap = document.getElementById('packagePlansWrap');
-
-  // ---------- 💳 Play Store سے نصب شدہ ہو تو یہاں سے Google Play کے ذریعے خریداری دکھائیں —
-  // نیچے والا Local/EasyPaisa نظام بالکل ویسے کا ویسے محفوظ ہے، صرف براؤزر/عام PWA ورژن کے لیے ----------
-  if(isPlayBillingAvailable()){
-    document.getElementById('planCalcWrap').style.display = 'none';
-    document.getElementById('devPaymentAccountWrap').style.display = 'none';
-    if(!playBillingDetailsCache){
-      wrap.innerHTML = `<div style="text-align:center; padding:20px 10px; color:var(--muted);">🔍 Loading plans from Google Play…</div>`;
-      return;
-    }
-    wrap.innerHTML = PLAY_BILLING_PRODUCTS.map(p => {
-      const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
-      const priceLabel = info ? `${info.price.currency} ${info.price.value}` : '—';
-      return `
-      <div onclick="purchaseViaPlayBilling('${p.sku}', ${p.days})" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:11px 14px; margin-bottom:8px; cursor:pointer;">
-        <div style="font-weight:800; font-size:14px;">${p.label}</div>
-        <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${priceLabel}</div>
-      </div>`;
-    }).join('');
-    return;
-  }
-
   const plans = AppState.settings.subscriptionPlans || [];
   const rate = AppState.settings.perDayRate || 0;
 
@@ -19604,11 +19522,11 @@ function renderMyPaymentAccounts(){
         </div>
       </div>
       <div class="paymentAccActionsRow">
-        <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer">${acc.showOnReceipt ? '🧾✅' : '🧾'}</button>
-        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}">${acc.qr ? '🔳✅' : '🔳'}</button>
-        <button onclick="shareAccountCard(${idx})" title="Share as a landscape card">🎴</button>
-        <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster">🖼️</button>
-        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})">🗑️</button>
+        <button onclick="toggleAccountShowOnReceipt(${idx})" title="Show on printed bill footer"><span style="font-size:15px;">${acc.showOnReceipt ? '🧾✅' : '🧾'}</span><span class="paymentAccBtnLabel">Receipt</span></button>
+        <button onclick="triggerAccountQrUpload(${idx})" title="${acc.qr ? 'Change QR code' : 'Add QR code (best quality — for Scan to Pay)'}"><span style="font-size:15px;">${acc.qr ? '🔳✅' : '🔳'}</span><span class="paymentAccBtnLabel">QR Code</span></button>
+        <button onclick="shareAccountCard(${idx})" title="Share as a landscape card"><span style="font-size:15px;">🎴</span><span class="paymentAccBtnLabel">Card</span></button>
+        <button onclick="shareAccountPoster(${idx})" title="Share as a portrait mini-poster"><span style="font-size:15px;">🖼️</span><span class="paymentAccBtnLabel">Poster</span></button>
+        <button class="paymentAccDelBtn" onclick="deletePaymentAccount(${idx})"><span style="font-size:15px;">🗑️</span><span class="paymentAccBtnLabel">Delete</span></button>
       </div>
     </div>
   `).join('');
@@ -22207,7 +22125,7 @@ async function printCurrentReport(){
     // فوری، بغیر دیکھے شیئر کرنے کے لیے نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں،
     // جو سیدھا Android کی نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF library could not load — check your internet connection and try again.');
+      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
