@@ -581,6 +581,16 @@
   .categoryDropdownAddNew{border-top:1px dashed #dbe1ea; margin-top:4px; padding-top:11px; color:var(--primary-dark); font-weight:800;}
   .categoryDropdownAddNew:hover{background:#eef2ff;}
 
+  /* ---------- کیٹیگری ڈراپ ڈاؤن کے اندر ہر ریکارڈ کا اپنا ایڈٹ (پینسل) بٹن — الگ سے ابھرا ہوا نہیں،
+       بلکہ نام کے ساتھ ہی قطار میں، فہرست کھلنے پر ہی نظر آتا ہے ---------- */
+  .categoryDropdownItem .cdiName{flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .categoryDropdownItem .cdiPencil{
+    flex:0 0 auto; width:24px; height:24px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+    font-size:12px; background:rgba(15,118,110,.08); color:var(--primary-dark);
+  }
+  .categoryDropdownItem.active .cdiPencil{ background:rgba(255,255,255,.25); color:#fff; }
+  .categoryDropdownItem .cdiPencil:active{ transform:scale(.88); }
+
   /* --- پراڈکٹ گرڈ: کارڈز ایک دوسرے کے قریب قریب، کم سے کم فاصلہ، زیادہ سے زیادہ ایک نظر میں نظر آئیں --- */
   .productGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); align-items:start; align-content:start; gap:12px; max-height:480px; overflow-y:auto; padding:4px;}
   .productGridCard{
@@ -1878,7 +1888,7 @@
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 AIO POS</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "AIO POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے ---------- -->
-    <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST13</span>
+    <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST14</span>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
@@ -2024,9 +2034,17 @@
         <div id="billingSearchSuggestions" class="billingSearchSuggestions"></div>
       </div>
 
-      <!-- پورا بچا ہوا صفحہ: بائیں طرف باریک کیٹیگری کالم + دائیں طرف پراڈکٹ کارڈز -->
+      <!-- کیٹیگری اب لیفٹ کالم کی بجائے ایک کمپیکٹ ڈراپ ڈاؤن بٹن — دبانے پر فہرست نیچے کھلتی ہے -->
+      <div class="categoryDropdownWrap" id="billingCategoryDropdownWrap">
+        <button type="button" class="categoryDropdownBtn" id="billingCategoryDropdownBtn" onclick="toggleBillingCategoryDropdown(event)">
+          <span id="billingCategoryDropdownLabel">📂 All Categories</span>
+          <span class="categoryDropdownArrow">▾</span>
+        </button>
+        <div class="categoryDropdownPanel" id="billingCategoryDropdownPanel"></div>
+      </div>
+
+      <!-- پورا بچا ہوا صفحہ: پراڈکٹ کارڈز اب پوری چوڑائی میں -->
       <div class="billingMainArea">
-        <div class="categorySideRail" id="categorySideRail"></div>
         <div class="productGrid productGridFull" id="billingProductGrid"></div>
       </div>
 
@@ -6771,7 +6789,8 @@ let activeBillingSearch = '';
 let customCardOrder = []; // یوزر کی دستی ڈریگ سے طے شدہ ترتیب (اب product_ids کی صورت میں — پراڈکٹ کی سطح پر)
 
 function renderBillingCategoryRail(){
-  const panel = document.getElementById('categorySideRail');
+  const panel = document.getElementById('billingCategoryDropdownPanel');
+  const label = document.getElementById('billingCategoryDropdownLabel');
   if(!panel) return;
 
   const counts = {};
@@ -6783,14 +6802,27 @@ function renderBillingCategoryRail(){
   (customCategories || []).forEach(cat => { if(!(cat in counts)) counts[cat] = 0; });
   const categories = Object.keys(counts).sort();
 
-  // ---------- سب سے اوپر ✏️ ایڈٹ بٹن — اسی کالم کے اندر، براہ راست Categories مینجمنٹ صفحے پر لے جائے ----------
-  const items = [`<div class="categorySideRailEditBtn" onclick="goTo('categories')">✏️ Edit</div>`];
-  items.push(`<div class="categorySideRailItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span>All</span><span class="csrCount">${productsData.length}</span></div>`);
+  const items = [`<div class="categoryDropdownItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span class="cdiName">All</span><span class="cdCount">${productsData.length}</span></div>`];
   categories.forEach(cat => {
-    items.push(`<div class="categorySideRailItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${cat.replace(/'/g,"\\'")}')"><span class="csrPencil" onclick="renameCategoryInline(event,'${cat.replace(/'/g,"\\'")}')" title="Rename category">✏️</span><span>${cat}</span><span class="csrCount">${counts[cat]}</span></div>`);
+    const safe = cat.replace(/'/g,"\\'");
+    items.push(`<div class="categoryDropdownItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${safe}')"><span class="cdiName">${cat}</span><span class="cdiPencil" onclick="renameCategoryInline(event,'${safe}')" title="Rename category">✏️</span><span class="cdCount">${counts[cat]}</span></div>`);
   });
+  items.push(`<div class="categoryDropdownItem categoryDropdownAddNew" onclick="goTo('categories')">📂 Manage Categories</div>`);
   panel.innerHTML = items.join('');
+  if(label) label.textContent = activeBillingCategory === 'all' ? '📂 All Categories' : `📂 ${activeBillingCategory}`;
 }
+
+function toggleBillingCategoryDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('billingCategoryDropdownWrap');
+  if(!wrap) return;
+  wrap.classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('billingCategoryDropdownWrap');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+});
 
 // ---------- بلنگ اسکرین کے کیٹگری کالم سے براہ راست کیٹگری کا نام تبدیل کریں —
 //            Categories صفحے پر جائے بغیر، اسی جگہ prompt کھل کر نام بدل دے اور فوراً یہیں تازہ ہو جائے ----------
@@ -6976,6 +7008,8 @@ function filterBillingCategory(cat){
   renderBillingCategoryRail();
   renderBillingProductGrid();
   if(AppState.settings.billingSearchSuggestionsOn) renderBillingSearchSuggestions(activeBillingSearch);
+  const wrap = document.getElementById('billingCategoryDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
 }
 
 // ---------- Item Search: ٹائپ کرتے ہی وہی گرڈ فلٹر ہو جاتا ہے — کوئی الگ ڈراپ ڈاؤن نہیں ----------
