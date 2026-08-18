@@ -1113,6 +1113,13 @@
   .btnToggleActive{background:#f1f5f9; color:var(--text);}
   .btnResetPin{background:#eef2ff; color:var(--primary-dark);}
 
+  /* ---------- 📂 Categories سکرین کے ایکشن بٹن (Rename/Uncategorize/Delete) —
+       الگ سے سٹینڈرڈائزڈ کلاس، بارڈر لیس، رنگ سے فوری پہچانے جائیں ---------- */
+  .categoryActionBtn{border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;}
+  .categoryActionBtn.rename{background:#eef2ff; color:var(--primary-dark);}
+  .categoryActionBtn.uncategorize{background:#fff7ed; color:#c2410c;}
+  .categoryActionBtn.delete{background:#fef2f2; color:var(--danger);}
+
   /* --- Approval Requests --- */
   .approvalCard{background:var(--card); border-radius:var(--radius); padding:16px 18px; box-shadow:0 2px 10px rgba(41,29,10,.07); margin-bottom:10px; border-left:4px solid var(--warning);}
   .approvalCard .aTitle{font-weight:700; font-size:14px;}
@@ -1891,8 +1898,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST16</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue0813am18aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST18</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue0835am18aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -2292,18 +2299,7 @@
         <span class="pbArrow">›</span>
       </div>
 
-      <!-- ---------- فوری رسائی: بیک اپ (Export/Import) اور تھیم کلر — مین پیج پر تاکہ کام کے دوران کہیں جانا نہ پڑے ---------- -->
-      <div class="dashQuickBar">
-        <div class="dashQuickBackup">
-          <button class="dqBackupBtn dqExport" onclick="exportBackupData()">⬇️ Export Backup</button>
-          <button class="dqBackupBtn dqImport" onclick="triggerRestoreWithHint('importBackupInputDash')">⬆️ Import Backup</button>
-          <input type="file" id="importBackupInputDash" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
-        </div>
-        <div style="margin-top:8px;">
-          <div style="font-size:10px; color:var(--muted); font-weight:700; margin-bottom:4px;">🎨 Quick Theme Color</div>
-          <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
-        </div>
-      </div>
+      <!-- ---------- بیک اپ اور تھیم اب صرف Settings میں ہیں — یہاں دہرائی ہٹا دی گئی تاکہ ڈیش بورڈ صاف/ہلکا رہے ---------- -->
 
       <!-- ---------- ⭐ سب سے پہلے، سب سے نمایاں: صاف صاف Profit/Loss سمری (کل اثاثے − کل واجبات) ---------- -->
       <div class="netPositionHero" id="netPositionHero">
@@ -2452,6 +2448,20 @@
         <div class="modalBtns">
           <button class="cancelBtn" onclick="document.getElementById('manageCategoryProductsModal').classList.remove('show')">Cancel</button>
           <button class="saveBtn" onclick="saveManageCategoryProducts()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🗓️ Variant Batches — ایک ہی آئٹم کی مختلف کھیپوں (مختلف ایکسپائری ڈیٹس والے ڈبے) کو الگ الگ ٹریک کریں -->
+    <div class="modalOverlay" id="variantBatchesModal" onclick="if(event.target===this) closeVariantBatchesModal()">
+      <div class="modalBox" style="max-width:400px; max-height:82vh; overflow-y:auto;">
+        <h3 id="batchesModalTitle">🗓️ Batches</h3>
+        <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Same item, different boxes with different expiry dates? Add each box as its own batch here — quantity + its own expiry date. Reports and alerts will then show each batch separately.</div>
+        <div id="variantBatchesListWrap" style="display:flex; flex-direction:column;"></div>
+        <button class="testPrintBtn" style="margin-top:4px; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);" onclick="addVariantBatch()">➕ Add Batch</button>
+        <div id="variantBatchesTotalLabel" style="font-weight:700; font-size:13px; color:var(--primary-dark); margin-bottom:10px;">Total stock from batches: 0</div>
+        <div class="modalBtns">
+          <button class="saveBtn" style="width:100%;" onclick="closeVariantBatchesModal()">✅ Done</button>
         </div>
       </div>
     </div>
@@ -4898,6 +4908,7 @@ function buildBackupObject(){
     users: usersData,
     approvalRequests: approvalRequests,
     nextProductId, nextVariantId, nextCustomerId, nextSupplierId, nextUserId, nextRequestId,
+    nextBatchId,
     settings: AppState.settings,
     expenses: expenseData,
     nextExpenseId,
@@ -5200,6 +5211,7 @@ function proceedWithImport(){
       nextSupplierId = backup.nextSupplierId || nextSupplierId;
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
+      nextBatchId = backup.nextBatchId || nextBatchId;
       if(backup.settings) Object.assign(AppState.settings, backup.settings);
       if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
@@ -8012,7 +8024,7 @@ function finalizeInvoice(){
   Billing.cart.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ v.stock -= item.qty; v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
+      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
     });
   });
 
@@ -8276,7 +8288,7 @@ function approvePendingBill(){
   p.items.forEach(item => {
     productsData.forEach(prod => {
       const v = prod.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ v.stock -= item.qty; v.salesCount = (v.salesCount || 0) + item.qty; }
+      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; }
     });
   });
 
@@ -8725,10 +8737,10 @@ function renderCategoriesScreen(){
           <div style="font-size:12px; color:var(--muted);">${counts[cat]} product${counts[cat] === 1 ? '' : 's'}</div>
         </div>
         <div style="display:flex; gap:8px;">
-          ${cat !== 'Uncategorized' ? `<button class="btnResetPin" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
+          ${cat !== 'Uncategorized' ? `<button class="categoryActionBtn rename" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
           ${counts[cat] > 0 && cat !== 'Uncategorized'
-            ? `<button class="btnResetPin" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
-            : counts[cat] === 0 ? `<button class="btnResetPin" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
+            ? `<button class="categoryActionBtn uncategorize" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
+            : counts[cat] === 0 ? `<button class="categoryActionBtn delete" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
         </div>
       </div>
       ${cat !== 'Uncategorized' ? `<button class="testPrintBtn" style="margin-top:10px; background:#eef2ff; color:var(--primary-dark);" onclick="openManageCategoryProductsModal('${cat.replace(/'/g,"\\'")}')">📦 Add/Move Products into "${cat}"</button>` : ''}
@@ -9487,6 +9499,7 @@ function renderVariantRow(productId, v){
       </td>
       <td><input value="${v.location}" placeholder="Aisle/Shelf/Warehouse" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)"></td>
       <td class="variantRowActions">
+        <button title="Manage expiry batches (multiple boxes, different expiry dates)" onclick="openVariantBatchesModal(${productId},${v.variant_id})" style="border:none; background:#eef2ff; color:var(--primary-dark); width:28px; height:28px; border-radius:8px; font-size:13px; cursor:pointer;">🗓️${v.batches && v.batches.length > 1 ? `<span style="display:block; font-size:8px; font-weight:800; margin-top:-2px;">${v.batches.length}</span>` : ''}</button>
         <button title="Delete" onclick="deleteVariant(${productId},${v.variant_id})">🗑️</button>
       </td>
     </tr>
@@ -9504,6 +9517,136 @@ function getExpiryTier(expiryDate){
   if(daysLeft <= 15) return 'exp-orange';
   if(daysLeft <= 30) return 'exp-yellow';
   return null;
+}
+
+/* =====================================================================
+   🗓️ Batch-wise Expiry — ایک ہی variant (مثلاً "Disprin — 1 Strip") کی مختلف کھیپوں (batches)
+   کی الگ الگ ایکسپائری ڈیٹس ٹریک کرنے کے لیے۔ مثال: میڈیکل سٹور پر ایک ہی دوائی کے 10 ڈبے آئیں،
+   3 جون میں ایکسپائر ہوں، 4 اگست میں، 3 دسمبر میں — سب الگ الگ فلٹر/الرٹ ہو سکیں۔
+   v.batches = [{batchId, qty, expiryDate}] — v.stock ہمیشہ سب batches کے qty کا مجموعہ رہتا ہے،
+   v.expiryDate ہمیشہ سب سے قریب والی batch کی تاریخ (پرانے صفحات/الرٹس کے لیے) — دونوں خودکار sync رہتے ہیں۔
+   اگر کسی variant پر کبھی Batches استعمال ہی نہ کی جائیں تو وہ بالکل پہلے کی طرح سادہ single-expiry موڈ میں کام کرتا رہتا ہے۔
+   ===================================================================== */
+let nextBatchId = loadFromStorage('nextBatchId', 1);
+
+// ---------- موجودہ سادہ stock+expiryDate سے ایک ابتدائی batch بنائیں (پہلی بار Batches کھولنے پر) ----------
+function ensureVariantBatches(v){
+  if(v.batches && v.batches.length) return v.batches;
+  v.batches = v.stock > 0 ? [{batchId: nextBatchId++, qty: v.stock, expiryDate: v.expiryDate || ''}] : [];
+  saveToStorage('nextBatchId', nextBatchId);
+  return v.batches;
+}
+
+// ---------- Batches کی فہرست سے v.stock اور v.expiryDate (سب سے قریب والی تاریخ) دوبارہ حساب کریں ----------
+function syncVariantFromBatches(v){
+  v.stock = v.batches.reduce((sum,b) => sum + (Number(b.qty) || 0), 0);
+  const dated = v.batches.filter(b => b.expiryDate).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+  v.expiryDate = dated.length ? dated[0].expiryDate : '';
+}
+
+// ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
+function deductVariantStock(v, qty){
+  if(!v || qty <= 0) return;
+  v.stock = Math.max(0, (v.stock || 0) - qty);
+  if(v.batches && v.batches.length){
+    let remaining = qty;
+    const sorted = [...v.batches].sort((a,b) => {
+      if(!a.expiryDate) return 1;
+      if(!b.expiryDate) return -1;
+      return new Date(a.expiryDate) - new Date(b.expiryDate);
+    });
+    for(const b of sorted){
+      if(remaining <= 0) break;
+      const take = Math.min(b.qty, remaining);
+      b.qty -= take;
+      remaining -= take;
+    }
+    v.batches = v.batches.filter(b => b.qty > 0);
+  }
+}
+
+let activeBatchesProductId = null;
+let activeBatchesVariantId = null;
+
+// ---------- Batches مینج کرنے کا پاپ اپ کھولیں ----------
+function openVariantBatchesModal(productId, variantId){
+  const p = productsData.find(pp => pp.product_id === productId);
+  const v = p && p.variants.find(vv => vv.variant_id === variantId);
+  if(!v) return;
+  ensureVariantBatches(v);
+  activeBatchesProductId = productId;
+  activeBatchesVariantId = variantId;
+  document.getElementById('batchesModalTitle').textContent = `🗓️ ${p.name} — ${v.label}`;
+  renderVariantBatchesModal();
+  document.getElementById('variantBatchesModal').classList.add('show');
+}
+function closeVariantBatchesModal(){
+  document.getElementById('variantBatchesModal').classList.remove('show');
+  renderProductList(document.getElementById('productSearchInput').value); // سٹاک/ایکسپائری کالم فوراً تازہ دکھائیں
+}
+
+function renderVariantBatchesModal(){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  const wrap = document.getElementById('variantBatchesListWrap');
+  if(!v){ wrap.innerHTML = ''; return; }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(v.batches.length === 0){
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px; padding:8px 2px;">No batches yet — add the first one below.</div>`;
+  } else {
+    wrap.innerHTML = v.batches.slice().sort((a,b) => {
+      if(!a.expiryDate) return 1; if(!b.expiryDate) return -1;
+      return new Date(a.expiryDate) - new Date(b.expiryDate);
+    }).map(b => {
+      const tier = getExpiryTier(b.expiryDate);
+      const daysLeft = b.expiryDate ? Math.ceil((new Date(b.expiryDate) - today) / (1000*60*60*24)) : null;
+      return `
+      <div class="productCard" style="padding:10px 12px; margin-bottom:8px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="number" value="${b.qty}" min="0" style="width:70px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateVariantBatch(${b.batchId},'qty',this.value)">
+          <input type="date" class="expiryInput ${tier || ''}" value="${b.expiryDate || ''}" style="flex:1;" onchange="updateVariantBatch(${b.batchId},'expiryDate',this.value)">
+          <button title="Delete batch" onclick="deleteVariantBatch(${b.batchId})" style="border:none; background:#fef2f2; color:var(--danger); width:32px; height:32px; border-radius:8px; font-size:14px; cursor:pointer; flex:0 0 auto;">🗑️</button>
+        </div>
+        ${daysLeft !== null ? `<div style="font-size:11px; margin-top:5px; color:${tier==='exp-red'?'var(--danger)':tier==='exp-orange'?'#c2410c':tier==='exp-yellow'?'#92400e':'var(--muted)'};">${daysLeft < 0 ? '❌ Expired' : `⏳ ${daysLeft} days left`}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  const totalQty = v.batches.reduce((s,b) => s + (Number(b.qty)||0), 0);
+  document.getElementById('variantBatchesTotalLabel').textContent = `Total stock from batches: ${totalQty}`;
+}
+
+function addVariantBatch(){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  if(!v) return;
+  v.batches.push({batchId: nextBatchId++, qty: 0, expiryDate: ''});
+  saveToStorage('nextBatchId', nextBatchId);
+  renderVariantBatchesModal();
+}
+
+function updateVariantBatch(batchId, field, value){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  if(!v) return;
+  const b = v.batches.find(bb => bb.batchId === batchId);
+  if(!b) return;
+  b[field] = field === 'qty' ? Math.max(0, parseInt(value) || 0) : value;
+  syncVariantFromBatches(v);
+  persistAllData();
+  renderVariantBatchesModal();
+}
+
+function deleteVariantBatch(batchId){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  if(!v) return;
+  if(!confirm('Delete this batch? Its quantity will be removed from stock too.')) return;
+  v.batches = v.batches.filter(bb => bb.batchId !== batchId);
+  syncVariantFromBatches(v);
+  persistAllData();
+  renderVariantBatchesModal();
 }
 
 // ---------- Item Photo Upload (کیمرہ یا گیلری سے — خودکار طور پر چھوٹا thumbnail بنایا جاتا ہے تاکہ زیادہ جگہ نہ لے) ----------
@@ -10280,11 +10423,22 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     }
     if(negTag) negTag.style.display = isNegative ? 'block' : 'none';
     if(stockInput) stockInput.classList.toggle('negativeStockInput', isNegative);
+    // ---------- اگر صرف ایک ہی batch ہے تو اسے بھی سیدھا مطابق رکھیں — دو یا زیادہ batches ہوں تو تفصیل صرف 🗓️ Batches سے بدلیں ----------
+    if(field === 'stock' && (!variant.batches || variant.batches.length <= 1)){
+      variant.batches = [{batchId: (variant.batches && variant.batches[0]?.batchId) || nextBatchId++, qty: variant.stock, expiryDate: variant.expiryDate || ''}];
+      saveToStorage('nextBatchId', nextBatchId);
+    }
     return;
   }
   if(field === 'expiryDate' && inputEl){
     const tier = getExpiryTier(variant.expiryDate);
     inputEl.className = 'expiryInput ' + (tier || '');
+    if(!variant.batches || variant.batches.length <= 1){
+      variant.batches = [{batchId: (variant.batches && variant.batches[0]?.batchId) || nextBatchId++, qty: variant.stock, expiryDate: variant.expiryDate || ''}];
+      saveToStorage('nextBatchId', nextBatchId);
+    } else {
+      alert('This item has multiple batches with different expiry dates. Tap 🗓️ next to Delete to edit each batch\'s own expiry date.');
+    }
     return;
   }
   if(field === 'barcode'){
@@ -10474,17 +10628,27 @@ const financeDummy = {
   cashInHand: AppState.settings.openingCashBalance || 0,
 };
 
-// ---------- Expiry Data اب براہ راست productsData کے ہر variant کے expiryDate فیلڈ سے آتی ہے ----------
-// (پہلے یہ ایک الگ dummy batches array سے آتی تھی — اب Products اسکرین میں جو تاریخ بھی درج کریں وہ یہاں فوری نظر آئے گی)
+// ---------- Expiry Data — اب Batches موجود ہوں تو ہر batch الگ الگ (اپنی qty/تاریخ کے ساتھ) دکھائی جاتی ہے،
+//            تاکہ ایک ہی آئٹم کے مختلف ایکسپائری والے ڈبے/کھیپ الگ الگ فلٹر/الرٹ ہو سکیں۔
+//            Batches نہ ہوں تو پہلے کی طرح سادہ v.expiryDate سے کام چلتا ہے ----------
 function getAllExpiringItems(){
   const today = new Date();
   today.setHours(0,0,0,0);
   const items = [];
   productsData.forEach(p => p.variants.forEach(v => {
+    if(v.batches && v.batches.length){
+      v.batches.forEach(b => {
+        if(!b.expiryDate || b.qty <= 0) return;
+        const exp = new Date(b.expiryDate);
+        const daysLeft = Math.ceil((exp - today) / (1000*60*60*24));
+        items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: b.expiryDate, qty: b.qty});
+      });
+      return;
+    }
     if(!v.expiryDate) return;
     const exp = new Date(v.expiryDate);
     const daysLeft = Math.ceil((exp - today) / (1000*60*60*24));
-    items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: v.expiryDate});
+    items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: v.expiryDate, qty: v.stock});
   }));
   return items;
 }
@@ -10695,7 +10859,7 @@ function renderExpiryAlerts(){
   grid.innerHTML = withDays.sort((a,b) => a.daysLeft - b.daysLeft).map(b => `
     <div class="alertRow ${b.tier}" style="cursor:pointer;" onclick="jumpToProduct(${b.product_id})">
       <div class="aName">${b.tier==='exp-red' ? '🔴' : b.tier==='exp-orange' ? '🟠' : '🟡'} ${b.product_name}</div>
-      <div class="aMeta">${b.daysLeft < 0 ? 'Expired' : 'Remaining'}: ${b.daysLeft} days ${b.barcode ? '| ' + b.barcode : ''}</div>
+      <div class="aMeta">${b.daysLeft < 0 ? 'Expired' : 'Remaining'}: ${b.daysLeft} days • Qty: ${b.qty ?? '—'} ${b.barcode ? '| ' + b.barcode : ''}</div>
     </div>
   `).join('');
 }
@@ -15303,7 +15467,7 @@ function confirmSupplierReturn(itemIndex){
   // ---------- اسٹاک سے Item منہا کریں (سامان سپلائر کو واپس جا رہا ہے) ----------
   productsData.forEach(p => {
     const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-    if(v) v.stock = Math.max(0, v.stock - qty); // TODO: DB میں product_variants.current_stock -= qty
+    if(v) deductVariantStock(v, qty); // TODO: DB میں product_variants.current_stock -= qty
   });
 
   // ---------- سپلائر کا Payable کم کریں (ایڈمن کی طے شدہ Price کے مطابق) ----------
