@@ -581,6 +581,10 @@
   .categoryDropdownAddNew{border-top:1px dashed #dbe1ea; margin-top:4px; padding-top:11px; color:var(--primary-dark); font-weight:800;}
   .categoryDropdownAddNew:hover{background:#eef2ff;}
 
+  /* ---------- 🎨 Theme/Font ڈراپ ڈاؤن پینل کے اندر — Theme رنگوں کا کمپیکٹ grid، Font کی سکرول ہونے والی فہرست ---------- */
+  #themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
+  #fontOptionGrid{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:8px;}
+
   /* ---------- کیٹیگری ڈراپ ڈاؤن کے اندر ہر ریکارڈ کا اپنا ایڈٹ (پینسل) بٹن — الگ سے ابھرا ہوا نہیں،
        بلکہ نام کے ساتھ ہی قطار میں، فہرست کھلنے پر ہی نظر آتا ہے ---------- */
   .categoryDropdownItem .cdiName{flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -1543,6 +1547,14 @@
       background:linear-gradient(145deg,#3b82f6,#1e40af);
       box-shadow: 0 2px 4px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5), inset 0 -1px 2px rgba(0,0,0,.3);
       border:1px solid rgba(255,255,255,.25);
+      cursor:pointer;
+    }
+    /* ---------- کمپیکٹ حالت: صرف 🔍 آئیکن نظر آئے، خانہ چھپا رہے — دبانے پر ہی کھلے ---------- */
+    #globalSearchBar:not(.expanded) input{
+      flex:0 0 0; width:0; min-width:0; padding:0; border:none; opacity:0; pointer-events:none;
+    }
+    #globalSearchBar.expanded input{
+      flex:1;
     }
     #globalSearchBar .gsbIcon svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
     #globalSearchBar input{
@@ -1898,8 +1910,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST18</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue0835am18aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST19</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue1047am18aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -1911,7 +1923,7 @@
   <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
        پراڈکٹ سرچ باکسز سے بالکل الگ (رنگ/جگہ دونوں مختلف) تاکہ کبھی مکس نہ ہو ---------- -->
   <div id="globalSearchBar">
-    <span class="gsbIcon" aria-hidden="true">
+    <span class="gsbIcon" aria-hidden="true" onclick="toggleGlobalSearchBar()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -3958,16 +3970,27 @@
           <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span class="uiZoomValueLabel">100%</span></div>
         </div>
 
-        <!-- --- تھیم اور ظاہری شکل --- -->
+        <!-- --- تھیم اور ظاہری شکل — کمپیکٹ ڈراپ ڈاؤن، صرف منتخب شدہ چیز نظر آتی ہے، دبانے پر باقی آپشنز کھلتے ہیں --- -->
         <div class="settingsCard" id="settingsCardTheme">
           <h3>🎨 Theme & Appearance</h3>
 
           <div class="settingsSubLabel">Colour Theme</div>
-          <div class="themeSwatchGrid" id="themeSwatchGrid"></div>
+          <div class="categoryDropdownWrap" id="themeDropdownWrap">
+            <button type="button" class="categoryDropdownBtn" id="themeDropdownBtn" onclick="toggleThemeDropdown(event)">
+              <span id="themeDropdownLabel" style="display:flex; align-items:center; gap:8px;"><span id="themeDropdownDot" style="width:16px; height:16px; border-radius:50%; display:inline-block; flex:0 0 auto;"></span><span id="themeDropdownName">—</span></span>
+              <span class="categoryDropdownArrow">▾</span>
+            </button>
+            <div class="categoryDropdownPanel" id="themeSwatchGrid" style="padding:12px;"></div>
+          </div>
 
-          <div class="settingsSubLabel">Font Style</div>
-          <div class="fontOptionGrid" id="fontOptionGrid" style="max-height:180px; overflow-y:auto; padding-bottom:4px;"></div>
-          <button type="button" onclick="const g=document.getElementById('fontOptionGrid'); const exp=g.style.maxHeight==='none'; g.style.maxHeight=exp?'180px':'none'; this.textContent=exp?'🔽 Show All Fonts':'🔼 Show Less';" style="width:100%; margin-top:8px; padding:7px; background:#f1f5f9; color:var(--primary-dark); border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">🔽 Show All Fonts</button>
+          <div class="settingsSubLabel" style="margin-top:14px;">Font Style</div>
+          <div class="categoryDropdownWrap" id="fontDropdownWrap">
+            <button type="button" class="categoryDropdownBtn" id="fontDropdownBtn" onclick="toggleFontDropdown(event)">
+              <span id="fontDropdownLabel">—</span>
+              <span class="categoryDropdownArrow">▾</span>
+            </button>
+            <div class="categoryDropdownPanel" id="fontOptionGrid"></div>
+          </div>
         </div>
 
         <!-- --- 💵 ابتدائی نقد رقم — Dashboard کا Cash in Hand اسی سے شروع ہو کر حقیقی بلوں سے اپڈیٹ ہوتا ہے --- -->
@@ -5298,7 +5321,8 @@ window.addEventListener('beforeunload', persistAllData);
 // ---------- STATE (اب localStorage سے جُڑا ہوا ہے) ----------
 const DEFAULT_SETTINGS = {
   themeId: 'teal',
-  font: "'Segoe UI', system-ui, sans-serif",
+  font: "'Arial Black', Arial, sans-serif",
+  fontId: 'arialblack',
   paperWidth: 80,         // 58 | 80 (mm) — Print خود Android کے Print Service سسٹم سے چلتا ہے، الگ کنکشن سیٹنگ کی ضرورت نہیں
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
@@ -6247,6 +6271,25 @@ const APP_SEARCH_INDEX = [
   {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply'},
   {label:'Package Plans', path:'Home → Tools', action:'openPackagePlansModal', keywords:'package plans subscription price days activation code'},
 ];
+
+// ---------- 🔍 App Search بار — کمپیکٹ (صرف آئیکن)، دبانے پر کھلتی ہے، باہر ٹیپ کرنے یا نتیجہ چننے پر خودکار بند ----------
+function toggleGlobalSearchBar(){
+  const bar = document.getElementById('globalSearchBar');
+  if(!bar) return;
+  const opening = !bar.classList.contains('expanded');
+  bar.classList.toggle('expanded', opening);
+  if(opening) setTimeout(() => document.getElementById('appSearchInput')?.focus(), 50);
+  else document.getElementById('appSearchInput').value = '';
+}
+document.addEventListener('click', (e) => {
+  const bar = document.getElementById('globalSearchBar');
+  if(!bar || !bar.classList.contains('expanded')) return;
+  if(!bar.contains(e.target)){
+    bar.classList.remove('expanded');
+    document.getElementById('appSearchInput').value = '';
+    document.getElementById('appSearchResults').classList.remove('show');
+  }
+});
 
 function renderAppSearchResults(query){
   const wrap = document.getElementById('appSearchResults');
@@ -18667,34 +18710,11 @@ const THEME_PRESETS = [
   {id:'slate',  name:'Slate/Dark',      primary:'#475569', primaryDark:'#1e293b'},
 ];
 
-// ---------- Font Presets ----------
+// ---------- Font Presets — صرف 3 بہترین پرنٹنگ-فرینڈلی فونٹس (کم سیاہی، کم چوڑائی، صاف پرنٹ): Arial Black, Arial Narrow, Calibri ----------
 const FONT_PRESETS = [
-  {id:'segoe',      label:'Default', family:"'Segoe UI', system-ui, sans-serif"},
-  {id:'calibri',    label:'Calibri',  family:"Calibri, 'Segoe UI', sans-serif"},
-  {id:'tahoma',     label:'Classic',  family:"Tahoma, Geneva, sans-serif"},
-  {id:'verdana',    label:'Wide',  family:"Verdana, Geneva, sans-serif"},
-  {id:'trebuchet',  label:'Modern',   family:"'Trebuchet MS', sans-serif"},
-  {id:'arial',      label:'Arial', family:"Arial, Helvetica, sans-serif"},
   {id:'arialblack', label:'Arial Black', family:"'Arial Black', Arial, sans-serif"},
   {id:'arialnarrow',label:'Arial Narrow', family:"'Arial Narrow', Arial, sans-serif"},
-  {id:'timesnr',    label:'Times New Roman', family:"'Times New Roman', Times, serif"},
-  {id:'georgia',    label:'Georgia', family:"Georgia, serif"},
-  {id:'couriernew', label:'Courier New', family:"'Courier New', Courier, monospace"},
-  // ---------- 7 پیارے گوگل فونٹس — CDN سے، ہلکے (صرف 400/600/700 ویٹ) ----------
-  {id:'poppins',    label:'Poppins',   family:"'Poppins', sans-serif"},
-  {id:'inter',      label:'Inter',     family:"'Inter', sans-serif"},
-  {id:'nunito',     label:'Nunito',    family:"'Nunito', sans-serif"},
-  {id:'quicksand',  label:'Quicksand', family:"'Quicksand', sans-serif"},
-  {id:'manrope',    label:'Manrope',   family:"'Manrope', sans-serif"},
-  {id:'comfortaa',  label:'Comfortaa', family:"'Comfortaa', sans-serif"},
-  {id:'rubik',      label:'Rubik',     family:"'Rubik', sans-serif"},
-  // ---------- 💪 اصل موٹے/بولڈ ڈسپلے فونٹس — یہ اپنی ڈیزائن سے ہی بولڈ ہیں (صرف ایک ہی، بھاری وزن میں بنتے ہیں)،
-  // اس لیے باقی سب سے صاف الگ اور نمایاں نظر آتے ہیں، دور سے بھی فرق پتا چلے ----------
-  {id:'archivoblack', label:'💪 Archivo Black', family:"'Archivo Black', sans-serif"},
-  {id:'anton',         label:'💪 Anton (سب سے موٹا)', family:"'Anton', sans-serif"},
-  {id:'bebasneue',     label:'💪 Bebas Neue (لمبے بڑے حروف)', family:"'Bebas Neue', sans-serif"},
-  {id:'fjallaone',     label:'💪 Fjalla One', family:"'Fjalla One', sans-serif"},
-  {id:'nastaleeq',  label:'✒️ Noori Nastaleeq', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
+  {id:'calibri',    label:'Calibri',  family:"Calibri, 'Segoe UI', sans-serif"},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
@@ -18744,7 +18764,30 @@ function applyTheme(themeId){
   document.querySelectorAll('#themeSwatchGridMini .themeSwatch').forEach(el => {
     el.classList.toggle('active', el.dataset.theme === t.id);
   });
+  syncThemeDropdownLabel();
 }
+
+// ---------- Theme ڈراپ ڈاؤن — کھولنا/بند کرنا/سامنے والا لیبل مطابق رکھنا (بلنگ کیٹگری ڈراپ ڈاؤن جیسا پیٹرن) ----------
+function toggleThemeDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('themeDropdownWrap');
+  if(wrap) wrap.classList.toggle('open');
+}
+function closeThemeDropdown(){
+  const wrap = document.getElementById('themeDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
+}
+function syncThemeDropdownLabel(){
+  const t = THEME_PRESETS.find(x => x.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  const dot = document.getElementById('themeDropdownDot');
+  const name = document.getElementById('themeDropdownName');
+  if(dot) dot.style.background = t.primary;
+  if(name) name.textContent = t.name;
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('themeDropdownWrap');
+  if(wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
 
 // ---------- فونٹ پوری ایپ پر لاگو کریں (صرف اسکرین UI پر — پرنٹ کینوس ہمیشہ محفوظ/تیز فونٹ استعمال کرتا ہے) ----------
 function applyFont(fontId){
@@ -18756,7 +18799,7 @@ function applyFont(fontId){
   // نستعلیق فعال ہونے پر لائن ہائٹ/اسپیسنگ خودکار بڑھ جاتی ہے تاکہ حروف آپس میں نہ چڑھیں
   document.body.classList.toggle('nastaleeq-active', !!f.isNastaleeq);
 
-  document.querySelectorAll('#fontOptionGrid .fontOption').forEach(el => {
+  document.querySelectorAll('#fontOptionGrid .fontOptionRow').forEach(el => {
     el.classList.toggle('active', el.dataset.font === f.id);
   });
 
@@ -18764,7 +18807,28 @@ function applyFont(fontId){
   document.querySelectorAll('#fontsFabPanelList .fontOptionRow').forEach(el => {
     el.classList.toggle('active', el.dataset.font === f.id);
   });
+  syncFontDropdownLabel();
 }
+
+// ---------- Font ڈراپ ڈاؤن — کھولنا/بند کرنا/سامنے والا لیبل مطابق رکھنا (منتخب شدہ فونٹ اپنی ہی شکل میں سامنے نظر آئے) ----------
+function toggleFontDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('fontDropdownWrap');
+  if(wrap) wrap.classList.toggle('open');
+}
+function closeFontDropdown(){
+  const wrap = document.getElementById('fontDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
+}
+function syncFontDropdownLabel(){
+  const f = FONT_PRESETS.find(x => x.family === AppState.settings.font) || FONT_PRESETS[0];
+  const label = document.getElementById('fontDropdownLabel');
+  if(label){ label.textContent = f.label; label.style.fontFamily = f.family; }
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('fontDropdownWrap');
+  if(wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
 
 // ---------- Settings اسکرین کھلتے وقت سب کچھ رینڈر + پرنٹر خودکار تلاش ----------
 // ---------- Settings میں 💾 Storage Used کارڈ اپڈیٹ کریں — تاکہ صارف کو ہمیشہ حقیقی اندازہ رہے کتنی جگہ استعمال ہو چکی ----------
@@ -18816,20 +18880,25 @@ function renderSettingsScreen(){
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
 
-  // تھیم سواچز بنائیں
+  // تھیم سواچز بنائیں (ڈراپ ڈاؤن پینل کے اندر)
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
     <div class="themeSwatch ${t.id === AppState.settings.themeId ? 'active' : ''}"
          data-theme="${t.id}" title="${t.name}"
          style="background:${t.primary};"
-         onclick="applyTheme('${t.id}')"></div>
+         onclick="applyTheme('${t.id}'); closeThemeDropdown();"></div>
   `).join('');
+  syncThemeDropdownLabel();
 
-  // فونٹ آپشنز بنائیں
+  // فونٹ آپشنز بنائیں (ڈراپ ڈاؤن پینل کے اندر — ہر ایک اپنے ہی فونٹ میں پیش نظارہ)
   document.getElementById('fontOptionGrid').innerHTML = FONT_PRESETS.map(f => `
-    <div class="fontOption ${AppState.settings.font === f.family ? 'active' : ''}"
-         data-font="${f.id}" style="font-family:${f.family};"
-         onclick="applyFont('${f.id}')">${f.label}</div>
+    <div class="fontOptionRow ${AppState.settings.font === f.family ? 'active' : ''}"
+         data-font="${f.id}"
+         onclick="applyFont('${f.id}'); closeFontDropdown();">
+      <span class="fontPreviewText" style="font-family:${f.family};">${f.label}</span>
+      <span class="fontCheckMark">✓</span>
+    </div>
   `).join('');
+  syncFontDropdownLabel();
 
   document.getElementById('openingCashInput').value = AppState.settings.openingCashBalance || '';
 
@@ -22686,7 +22755,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   applyTheme(AppState.settings.themeId);
-  applyFont('segoe');
+  applyFont(AppState.settings.fontId || 'arialblack');
   renderFontsFabPanel();
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   applyUiZoom(AppState.settings.uiZoom || 100);
