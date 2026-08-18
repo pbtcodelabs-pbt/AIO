@@ -1887,8 +1887,13 @@
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 AIO POS</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "AIO POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
-         آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے ---------- -->
-    <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST14</span>
+         آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
+         نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
+         (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
+    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST16</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue0813am18aug26</span>
+    </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
@@ -1938,6 +1943,7 @@
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
     <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
     <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
+    <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
 
     <div class="userTag" id="userTag">—</div>
@@ -1959,7 +1965,7 @@
 
       <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
       <div class="homeBusinessCard">
-        <button class="hbcEditBtn admin-only" onclick="goTo('billsettings')" title="Edit Business Card / Logo">✏️</button>
+        <button class="hbcEditBtn admin-only" onclick="goTo('myaccount')" title="Edit Business Card / Logo">✏️</button>
         <div class="hbcTopRow">
           <div class="hbcLogoWrap" onclick="triggerBusinessLogoUpload()" title="Change Logo">
             <img id="hbcLogoImg" style="display:none;">
@@ -4015,14 +4021,6 @@
           <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
 
-        <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
-        <div class="settingsCard" id="settingsCardPaymentAccounts">
-          <h3>💳 My Payment Accounts</h3>
-          <div id="myPaymentAccountsWrap"></div>
-          <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
-          <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
-        </div>
-
         <!-- --- 🔐 Admin Control — PIN سے محفوظ، ڈویلپر کی رابطہ معلومات یہاں سے بدلی جائیں --- -->
         <div class="settingsCard">
           <h3>🔐 Admin Control</h3>
@@ -4111,15 +4109,6 @@
     <div class="screen admin-only" id="screen-billsettings">
       <div class="pageTitle">🧾 Bill & Print Settings</div>
 
-      <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
-      <div class="settingsCard">
-        <h3>🏪 Business Info</h3>
-        <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-      </div>
-
       <!-- --- پرنٹر Settings --- -->
       <div class="settingsCard" id="settingsCardPrinter">
         <h3>🖨️ Printer Settings</h3>
@@ -4183,6 +4172,35 @@
         </div>
         <canvas id="barcodeLabelPreviewCanvas" style="display:none; width:100%; max-width:320px; margin:0 auto 10px; border:1px solid #eef1f6; border-radius:8px;"></canvas>
         <button class="testPrintBtn" onclick="printBarcodeLabels()">🖨️ Print Barcode Label(s)</button>
+      </div>
+    </div>
+
+    <!-- 🏦 MY ACCOUNT (Admin only) — بکھری ہوئی "My..." چیزیں ایک جگہ: بزنس نام/مالک/پتہ/فون، پیمنٹ اکاؤنٹس، My Diary شارٹ کٹ -->
+    <div class="screen admin-only" id="screen-myaccount">
+      <div class="pageTitle">🏦 My Account</div>
+
+      <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
+      <div class="settingsCard">
+        <h3>🏪 My Business Info</h3>
+        <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      </div>
+
+      <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
+      <div class="settingsCard" id="settingsCardPaymentAccounts">
+        <h3>💳 My Payment Accounts</h3>
+        <div id="myPaymentAccountsWrap"></div>
+        <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
+      </div>
+
+      <!-- --- 📔 My Diary شارٹ کٹ — پوری ڈائری فیچر اپنی اصل جگہ (اپنی سکرین) پر ہی رہتی ہے، یہاں صرف فوری رسائی --- -->
+      <div class="settingsCard">
+        <h3>📔 My Diary</h3>
+        <div class="settingsHint">Personal "I Got / I Gave" ledger — separate from customer/supplier accounts.</div>
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
     </div>
 
@@ -5553,6 +5571,7 @@ const HOME_TILE_GROUPS_ADMIN = [
     {icon:'🖨️', label:'Reports', action:'openReportCenterModal'},
   ]},
   { section: '⚙️ Management', tiles: [
+    {icon:'🏦', label:'My Account', screen:'myaccount'},
     {icon:'🔑', label:'Users', screen:'users'},
     {icon:'⚙️', label:'Settings', screen:'settings'},
   ]},
@@ -6110,6 +6129,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
+  if(screenName === 'myaccount') renderMyAccountScreen();
   if(screenName === 'payments') renderPaymentsScreen();
   if(screenName === 'trends') renderTrendsScreen();
 
@@ -6202,13 +6222,15 @@ const APP_SEARCH_INDEX = [
   {label:'My Ads — Promote App', path:'My Ads', action:'openMyAdsModal', keywords:'my ads poster promote advertisement share whatsapp flex'},
   {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast'},
   {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission'},
-  {label:'Settings — Business Info', path:'Settings', screen:'settings', keywords:'business info name logo owner address phone shop details'},
+  {label:'My Account', path:'My Account', screen:'myaccount', keywords:'my account business payment diary owner mobile number shop'},
+  {label:'My Account — Business Info', path:'My Account', screen:'myaccount', keywords:'my account business info name logo owner address phone shop details'},
+  {label:'My Account — Payment Accounts', path:'My Account', screen:'myaccount', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive'},
+  {label:'My Account — My Diary', path:'My Account', screen:'myaccount', keywords:'my diary shortcut personal ledger khata'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
   {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', anchor:'settingsCardBackup', keywords:'backup export import restore data save json downloads last backup'},
   {label:'Settings — Theme Color', path:'Settings', screen:'settings', anchor:'settingsCardTheme', keywords:'theme color colour appearance look design purple teal blue'},
   {label:'Settings — Admin PIN / Password', path:'Settings', screen:'settings', keywords:'admin pin password change security cnic dob recovery login'},
   {label:'Settings — Print / Paper Size', path:'Bill & Print Settings', screen:'billsettings', anchor:'settingsCardPrinter', keywords:'print paper size thermal 58mm 80mm receipt font invoice style a4'},
-  {label:'Settings — Payment Accounts', path:'Settings', screen:'settings', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive'},
   {label:'Settings — Storage Usage', path:'Settings', screen:'settings', anchor:'storageUsageCard', keywords:'storage usage space full device limit photos'},
   {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply'},
   {label:'Package Plans', path:'Home → Tools', action:'openPackagePlansModal', keywords:'package plans subscription price days activation code'},
@@ -18653,8 +18675,6 @@ function renderSettingsScreen(){
   document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
 
   document.getElementById('trackInventoryChk').checked = !!AppState.settings.trackInventory;
-
-  renderMyPaymentAccounts();
 }
 
 /* =====================================================================
@@ -18796,13 +18816,16 @@ function renderBillSettingsScreen(){
     b.classList.toggle('active', b.dataset.style === AppState.settings.invoiceStyle);
   });
 
-  // دکان کی معلومات فیلڈز اپڈیٹ کریں
+  renderBarcodeLabelProductOptions();
+}
+
+// ---------- 🏦 My Account — بزنس انفو + پیمنٹ اکاؤنٹس، ایک ہی جگہ (پہلے Settings اور Bill & Print Settings میں بکھرے ہوئے تھے) ----------
+function renderMyAccountScreen(){
   document.getElementById('bizNameInput').value = AppState.settings.businessName || '';
   document.getElementById('bizOwnerInput').value = AppState.settings.ownerName || '';
   document.getElementById('bizAddressInput').value = AppState.settings.businessAddress || '';
   document.getElementById('bizPhoneInput').value = AppState.settings.businessPhone || '';
-
-  renderBarcodeLabelProductOptions();
+  renderMyPaymentAccounts();
 }
 
 // ---------- میرے پیمنٹ اکاؤنٹس (لامحدود اکاؤنٹس) — Reminders میں خودکار شامل ہوں گے ----------
