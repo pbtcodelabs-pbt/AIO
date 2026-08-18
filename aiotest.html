@@ -1250,10 +1250,14 @@
   .paymentAccBank{font-size:11px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 7px; margin-left:6px;}
   .paymentAccNumber{font-size:12.5px; color:var(--muted); margin-top:2px; white-space:normal; word-break:break-all;}
   .paymentAccActionsRow{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
-  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 8px; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:52px;}
-  .paymentAccBtnLabel{font-size:9px; font-weight:700; color:var(--muted); letter-spacing:.2px;}
-  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:13px;}
-  .paymentAccDelBtn .paymentAccBtnLabel{color:var(--danger);}
+  .paymentAccActionsRow button{border:none; font-size:16px; padding:7px 8px; border-radius:9px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; min-width:56px;}
+  .paymentAccBtnLabel{font-size:10px; font-weight:800; letter-spacing:.2px;}
+  /* ---------- ہر بٹن کا اپنا رنگ — تاکہ صرف آئیکن دیکھ کر بھی فوری پہچان ہو ---------- */
+  .paymentAccActionsRow button:nth-child(1){background:#eef2ff; color:var(--primary-dark);} /* Receipt */
+  .paymentAccActionsRow button:nth-child(2){background:#f3e8ff; color:#6d28d9;} /* QR Code */
+  .paymentAccActionsRow button:nth-child(3){background:#ecfeff; color:#0e7490;} /* Card */
+  .paymentAccActionsRow button:nth-child(4){background:#fff7ed; color:#c2410c;} /* Poster */
+  .paymentAccDelBtn{background:#fef2f2 !important; color:var(--danger) !important;}
 
   /* --- Theme colour swatches --- */
   .themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
@@ -1910,8 +1914,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST19</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue1047am18aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST21</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue1100am18aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -19474,16 +19478,19 @@ function isPlayBillingAvailable(){
 
 // ---------- Play Console سے قیمتیں لا کر کیش کر لیں — تاکہ Package Plans میں دکھائی جا سکیں ----------
 let playBillingDetailsCache = null;
+let playBillingLoadFailed = false; // ---------- ناکامی کی صورت میں Loading… ہمیشہ کے لیے اٹکنے کی بجائے خودکار Local/EasyPaisa پر واپس آ جائے ----------
 async function loadPlayBillingDetails(){
   if(!isPlayBillingAvailable()) return null;
   if(playBillingDetailsCache) return playBillingDetailsCache;
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
     const details = await service.getDetails(PLAY_BILLING_PRODUCTS.map(p => p.sku));
+    if(!details || details.length === 0){ playBillingLoadFailed = true; return null; }
     playBillingDetailsCache = details;
     return details;
   } catch(err){
     console.error('Play Billing details load failed:', err);
+    playBillingLoadFailed = true;
     return null;
   }
 }
@@ -19531,10 +19538,16 @@ function openPackagePlansModal(){
   selectedPlanDays = null;
   selectedPlanPrice = null;
   devPaymentSelectedIdx = 0;
+  playBillingLoadFailed = false; // ---------- ہر بار پاپ اپ کھلنے پر دوبارہ کوشش کا موقع دیں ----------
   renderPackagePlansView();
   document.getElementById('packagePlansModal').classList.add('show');
-  // ---------- Play Store سے نصب شدہ ہو تو تھوڑی دیر بعد قیمتیں لوڈ ہو کر دوبارہ رینڈر ہوں گی ----------
-  if(isPlayBillingAvailable()) loadPlayBillingDetails().then(() => renderPackagePlansView());
+  // ---------- Play Store سے نصب شدہ ہو تو تھوڑی دیر بعد قیمتیں لوڈ ہو کر دوبارہ رینڈر ہوں گی — 6 سیکنڈ میں جواب نہ آئے تو خودکار Local/EasyPaisa پر واپس ----------
+  if(isPlayBillingAvailable()){
+    loadPlayBillingDetails().then(() => renderPackagePlansView());
+    setTimeout(() => {
+      if(!playBillingDetailsCache){ playBillingLoadFailed = true; renderPackagePlansView(); }
+    }, 6000);
+  }
 }
 
 // ---------- کوئی بھی دن لکھیں — قیمت خودکار بنے (دن × روزانہ کی شرح)، Chat پیغام کے لیے بھی محفوظ ہو جائے ----------
@@ -19618,11 +19631,20 @@ function selectPresetPlanAndChat(days, fixedPrice){
 function renderPackagePlansView(){
   const wrap = document.getElementById('packagePlansWrap');
 
-  // ---------- 💳 Play Store سے نصب شدہ ہو تو یہاں سے Google Play کے ذریعے خریداری دکھائیں —
-  // نیچے والا Local/EasyPaisa نظام بالکل ویسے کا ویسے محفوظ ہے، صرف براؤزر/عام PWA ورژن کے لیے ----------
+  // ---------- 💳 Play Store سے نصب شدہ ہو تو یہاں سے صرف اور صرف Google Play کے ذریعے خریداری دکھائیں —
+  // Google Play پالیسی کے مطابق TWA/Play Store انسٹال میں کوئی متبادل (EasyPaisa/Local) پیمنٹ کبھی نہیں دکھانی —
+  // اس لیے ناکامی کی صورت میں بھی نیچے دیے گئے Local سیکشن پر گرنا منع ہے؛ صرف "دوبارہ کوشش کریں" دکھائیں ----------
   if(isPlayBillingAvailable()){
     document.getElementById('planCalcWrap').style.display = 'none';
     document.getElementById('devPaymentAccountWrap').style.display = 'none';
+    if(playBillingLoadFailed){
+      wrap.innerHTML = `
+        <div style="text-align:center; padding:20px 10px;">
+          <div style="color:var(--danger); font-weight:700; margin-bottom:12px;">⚠️ Could not load plans from Google Play. Please check your internet connection.</div>
+          <button class="testPrintBtn" onclick="playBillingLoadFailed=false; playBillingDetailsCache=null; renderPackagePlansView(); loadPlayBillingDetails().then(()=>renderPackagePlansView());">🔄 Try Again</button>
+        </div>`;
+      return;
+    }
     if(!playBillingDetailsCache){
       wrap.innerHTML = `<div style="text-align:center; padding:20px 10px; color:var(--muted);">🔍 Loading plans from Google Play…</div>`;
       return;
@@ -19639,6 +19661,8 @@ function renderPackagePlansView(){
     return;
   }
 
+  // ---------- یہاں سے نیچے صرف اُس صورت میں چلتا ہے جب ایپ Play Store TWA کے طور پر انسٹال ہی نہ ہو
+  // (عام براؤزر/GitHub/Netlify یا الگ Local سائیڈ لوڈ APK) — Play Store والے ورژن میں یہ حصہ کبھی نظر نہیں آئے گا ----------
   const plans = AppState.settings.subscriptionPlans || [];
   const rate = AppState.settings.perDayRate || 0;
 
