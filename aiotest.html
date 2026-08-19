@@ -1915,8 +1915,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST27</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0220pm19aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST29</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0250pm19aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -2002,16 +2002,15 @@
           </div>
         </div>
         <div class="hbcIconsRow">
-          <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now">💾</button>
-          <button class="hbcChatBtn admin-only" onclick="triggerRestoreWithHint('importBackupInputHome')" title="Restore Backup">🔄</button>
+          <button class="hbcChatBtn admin-only" onclick="backupToGoogleDrive()" title="Backup to Google Drive">☁️</button>
+          <button class="hbcChatBtn admin-only" onclick="restoreFromGoogleDrive()" title="Restore from Google Drive">📥</button>
           <button class="hbcChatBtn" onclick="openMyAdsModal()" title="My Ads — Promote This App">📣</button>
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
-        <!-- ---------- 💾/🔄 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
+        <!-- ---------- ☁️/📥 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
         <div class="hbcLastBackupLine admin-only" id="hbcLastBackupLine"></div>
       </div>
-      <input type="file" id="importBackupInputHome" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
 
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
@@ -4029,34 +4028,14 @@
           </label>
         </div>
 
-        <!-- --- 💾 بیک اپ — اب Google Drive والے دونوں بٹن مرکزی/نمایاں ہیں (زیادہ تر لوگوں کے لیے یہی کافی ہے)،
-             Local Export/Import کو ایک چھوٹے "Advanced" آپشن میں سمیٹ دیا ہے تاکہ سکرین صاف رہے مگر بغیر
-             انٹرنیٹ/Google اکاؤنٹ کے سہارے کی صورت میں وہ سہولت موجود رہے --- -->
+        <!-- --- 💾 بیک اپ — Play Store ورژن میں صرف Google Drive (بین الاقوامی معیار)، لوکل فائل ایکسپورٹ/امپورٹ مکمل ہٹا دیا گیا
+             تاکہ ہر صارف کا بیک اپ خودکار اُس کے اپنے Google اکاؤنٹ پر محفوظ رہے --- -->
         <div class="settingsCard" id="settingsCardBackup">
           <h3>💾 Backup Your Data</h3>
           <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
 
           <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
           <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer;">📥 Restore from Google Drive</button>
-
-          <div onclick="toggleLocalBackupAdvanced()" style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:16px; padding:8px; cursor:pointer; color:var(--muted); font-size:12px; font-weight:700;">
-            <span id="localBackupAdvancedChevron">▸</span> Advanced: Local File Backup (no internet needed)
-          </div>
-          <div id="localBackupAdvancedWrap" style="display:none; margin-top:8px;">
-            <div class="backupBtnGrid">
-              <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
-                <span class="backupBtnIcon">⬇️</span>
-                <span class="backupBtnLabel">Export Backup</span>
-                <span class="backupBtnSub">Save all data to a file</span>
-              </button>
-              <button class="backupActionBtn backupImportBtn" onclick="triggerRestoreWithHint('importBackupInput')">
-                <span class="backupBtnIcon">⬆️</span>
-                <span class="backupBtnLabel">Import Backup</span>
-                <span class="backupBtnSub">Restore from a file</span>
-              </button>
-            </div>
-          </div>
-          <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
         </div>
 
         <!-- --- 🔐 Admin Control — PIN سے محفوظ، ڈویلپر کی رابطہ معلومات یہاں سے بدلی جائیں --- -->
@@ -4644,6 +4623,19 @@
   </div>
 </div>
 
+<!-- 🆕 پہلی بار ایپ کھلنے پر — Google Drive اکاؤنٹ جوڑنے کی دعوت، صرف ایک ہی دفعہ نظر آئے گی -->
+<div class="modalOverlay" id="gdriveFirstRunModal" onclick="if(event.target===this) dismissGDriveFirstRunPrompt()">
+  <div class="backupConfirmBox">
+    <div class="backupConfirmIconWrap"><span>☁️</span></div>
+    <h3>Connect Google Drive Backup?</h3>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">
+      To keep your bills, products, and customer data safe, connect your Google account now. All backups will automatically go into one folder in your Drive called <b>"AIO Backup"</b> — nothing will be scattered around.
+    </p>
+    <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#1a73e8,#0d47a1); margin-top:14px;" onclick="connectGDriveFromFirstRunPrompt()">☁️ Connect Now</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissGDriveFirstRunPrompt()">Maybe Later</button>
+  </div>
+</div>
+
 <!-- IMPORT BACKUP — تصدیقی پیغام (پرانے نیٹو confirm() کی جگہ، خوبصورت برانڈڈ ڈیزائن) -->
 <div class="modalOverlay" id="importConfirmModal" onclick="if(event.target===this) cancelImportConfirm()">
   <div class="backupConfirmBox">
@@ -4985,6 +4977,38 @@ const GOOGLE_DRIVE_CLIENT_ID = '751661674362-49d5habgkr9h6t1sb8a9err7e6r1b975.ap
 const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 let gDriveTokenClient = null;
 let gDriveAccessToken = null;
+const GDRIVE_BACKUP_FOLDER_NAME = 'AIO Backup';
+
+// ---------- Google Drive میں "AIO Backup" فولڈر تلاش کریں، نہ ملے تو نئی بنا دیں — تاکہ ہر بار وہی ایک فولڈر
+// دوبارہ استعمال ہو، فائلیں پوری Drive میں بکھری نہ رہیں۔ فولڈر کی ID ایک بار مل جائے تو محفوظ کر لیتے ہیں ----------
+async function ensureGDriveBackupFolder(){
+  if(AppState.settings.gdriveFolderId) return AppState.settings.gdriveFolderId;
+
+  const searchUrl = 'https://www.googleapis.com/drive/v3/files' +
+    '?q=' + encodeURIComponent(`name='${GDRIVE_BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`) +
+    '&fields=' + encodeURIComponent('files(id,name)');
+  const searchRes = await fetch(searchUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
+  if(searchRes.ok){
+    const searchData = await searchRes.json();
+    if(searchData.files && searchData.files.length > 0){
+      AppState.settings.gdriveFolderId = searchData.files[0].id;
+      persistAllData();
+      return AppState.settings.gdriveFolderId;
+    }
+  }
+
+  // ---------- نہیں ملا تو نئی فولڈر بنائیں ----------
+  const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + gDriveAccessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: GDRIVE_BACKUP_FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }),
+  });
+  if(!createRes.ok) throw new Error('Could not create Drive folder: ' + createRes.status);
+  const createData = await createRes.json();
+  AppState.settings.gdriveFolderId = createData.id;
+  persistAllData();
+  return AppState.settings.gdriveFolderId;
+}
 
 function getGDriveTokenClient(){
   if(gDriveTokenClient) return gDriveTokenClient;
@@ -5017,11 +5041,12 @@ async function backupToGoogleDrive(){
     gDriveAccessToken = resp.access_token;
     try{
       if(btn) btn.textContent = '⏳ Uploading...';
+      const folderId = await ensureGDriveBackupFolder(); // ---------- ہمیشہ "AIO Backup" فولڈر کے اندر ہی جائے ----------
       const fileName = generateBackupFileName();
       const backup = buildBackupObject();
       const fileContent = JSON.stringify(backup);
 
-      const metadata = { name: fileName, mimeType: 'application/json' };
+      const metadata = { name: fileName, mimeType: 'application/json', parents: [folderId] };
       const boundary = '-------aiopos' + Date.now();
       const multipartBody =
         `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
@@ -5082,8 +5107,9 @@ async function restoreFromGoogleDrive(){
     gDriveAccessToken = resp.access_token;
     try{
       if(btn) btn.textContent = '⏳ Loading files...';
+      const folderId = await ensureGDriveBackupFolder(); // ---------- صرف "AIO Backup" فولڈر کے اندر کی فائلیں دکھائیں ----------
       const listUrl = 'https://www.googleapis.com/drive/v3/files' +
-        '?q=' + encodeURIComponent("mimeType='application/json' and trashed=false") +
+        '?q=' + encodeURIComponent(`'${folderId}' in parents and mimeType='application/json' and trashed=false`) +
         '&orderBy=createdTime desc&pageSize=30&fields=' + encodeURIComponent('files(id,name,createdTime)');
       const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
       if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
@@ -5911,7 +5937,24 @@ function finishLogin(user, forceRemember){
   document.getElementById('app').style.display = 'grid';
   goTo('home'); // ہر role پہلے Home اسکرین پر جائے گا
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
-  if(user.role === 'admin') setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+  if(user.role === 'admin'){
+    if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
+    else setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+  }
+}
+
+// ---------- 🆕 پہلی بار ایپ کھلنے پر: صرف ایک ہی دفعہ نظر آنے والی دعوت — "ابھی Google Drive جوڑیں" یا "بعد میں" ----------
+function showGDriveFirstRunPrompt(){
+  AppState.settings.gdrivePromptShown = true;
+  persistAllData();
+  document.getElementById('gdriveFirstRunModal')?.classList.add('show');
+}
+function dismissGDriveFirstRunPrompt(){
+  document.getElementById('gdriveFirstRunModal')?.classList.remove('show');
+}
+function connectGDriveFromFirstRunPrompt(){
+  dismissGDriveFirstRunPrompt();
+  backupToGoogleDrive();
 }
 
 // ---------- 💾 دن میں تین اوقات میں (صبح/دوپہر/رات) ایپ کھلنے پر ایک بار بیک اپ یاد دہانی دکھائیں —
@@ -5938,7 +5981,7 @@ function dismissBackupReminderToast(){
   document.getElementById('backupReminderToast')?.classList.remove('show');
 }
 function backupNowFromReminder(){
-  exportBackupData();
+  backupToGoogleDrive();
   dismissBackupReminderToast();
 }
 
