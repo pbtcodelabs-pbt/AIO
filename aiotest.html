@@ -1914,8 +1914,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST25</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue1144am18aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST26</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue1150am18aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -10781,11 +10781,12 @@ function renderHealthBand(){
   const totalReceivable = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
   const totalPayable = suppliersData.reduce((sum, s) => sum + (s.total_payable || 0), 0);
 
-  // ---------- My Diary کے بیلنس بھی اسی سمری میں شامل — منفی بیلنس = ہم نے دینے ہیں (سرخ)، مثبت = ہم نے لینے ہیں (سبز) ----------
+  // ---------- My Diary کے بیلنس بھی اسی سمری میں شامل — balance مثبت = 🟢 I Got (ہم نے دینے ہیں، Liability)،
+  // balance منفی = 🔴 I Gave (ہمیں ملنے ہیں، Asset) — یہی وہ قاعدہ ہے جو My Diary سکرین خود استعمال کرتی ہے ----------
   let diaryPayable = 0, diaryReceivable = 0;
   (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
-    if(e.balance < 0) diaryPayable += Math.abs(e.balance);
-    else if(e.balance > 0) diaryReceivable += e.balance;
+    if(e.balance > 0) diaryPayable += e.balance;       // I Got → Liability
+    else if(e.balance < 0) diaryReceivable += Math.abs(e.balance); // I Gave → Asset
   });
 
   document.getElementById('hlStock').textContent = 'Rs. ' + stockValue.toLocaleString();
@@ -11022,16 +11023,16 @@ function renderMyDiaryList(){
   const wrap = document.getElementById('diaryListWrap');
   if(!wrap) return;
 
-  let totalPayable = 0, totalReceivable = 0;
+  let totalGot = 0, totalGave = 0;
   diaryData.forEach(e => {
-    if(e.balance < 0) totalPayable += Math.abs(e.balance);
-    else if(e.balance > 0) totalReceivable += e.balance;
+    if(e.balance > 0) totalGot += e.balance;
+    else if(e.balance < 0) totalGave += Math.abs(e.balance);
   });
-  document.getElementById('diaryTotalPayable').textContent = fmtDiaryAmount(totalPayable);
-  document.getElementById('diaryTotalReceivable').textContent = fmtDiaryAmount(totalReceivable);
-  const net = totalReceivable - totalPayable;
+  document.getElementById('diaryTotalPayable').textContent = fmtDiaryAmount(totalGot);   // 🟢 Total I Got کارڈ
+  document.getElementById('diaryTotalReceivable').textContent = fmtDiaryAmount(totalGave); // 🔴 Total I Gave کارڈ
+  const net = totalGot - totalGave;
   const netBar = document.getElementById('diaryNetBar');
-  netBar.textContent = 'Net: ' + (net >= 0 ? '🔴 ' : '🟢 ') + fmtDiaryAmount(net);
+  netBar.textContent = 'Net: ' + (net >= 0 ? '🟢 ' : '🔴 ') + fmtDiaryAmount(net);
 
   // ---------- ڈیٹالسٹ (نام تجاویز) بھی ساتھ ہی تازہ کر دیں ---------- 
   const dl = document.getElementById('diaryNameSuggestions');
@@ -11047,16 +11048,18 @@ function renderMyDiaryList(){
   }
 
   wrap.innerHTML = filtered.map(e => {
-    const isOwe = e.balance < 0;
-    const cls = isOwe ? 'get' : 'owe';
-    const label = isOwe ? 'I Got' : (e.balance > 0 ? 'I Gave' : 'Settled');
+    // ---------- balance مثبت = 🟢 I Got، balance منفی = 🔴 I Gave — یہی وہ اصل قاعدہ ہے جو Add/Adjust بٹن استعمال کرتے ہیں
+    // (پہلے یہاں یہ الٹا لکھا ہوا تھا، اسی وجہ سے سبز بٹن سے کی گئی انٹری سرخ میں نظر آ رہی تھی) ----------
+    const isGot = e.balance > 0;
+    const cls = isGot ? 'get' : (e.balance < 0 ? 'owe' : '');
+    const label = isGot ? 'I Got' : (e.balance < 0 ? 'I Gave' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
           <div class="diaryRowName">${(e.name||'').replace(/</g,'&lt;')}</div>
           <div class="diaryRowSub">${label}</div>
         </div>
-        <div class="diaryRowAmount ${cls}">${e.balance === 0 ? 'Rs. 0' : (isOwe ? '- ' : '+ ') + fmtDiaryAmount(e.balance)}</div>
+        <div class="diaryRowAmount ${cls}">${e.balance === 0 ? 'Rs. 0' : (isGot ? '+ ' : '- ') + fmtDiaryAmount(e.balance)}</div>
       </div>`;
   }).join('');
 }
@@ -11209,7 +11212,7 @@ function renderDiaryDetailBalance(entry){
   if(entry.balance === 0){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
-  } else if(entry.balance < 0){
+  } else if(entry.balance > 0){
     el.textContent = '🟢 I Got: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   } else {
@@ -21514,11 +21517,11 @@ async function renderTodaySaleReportToCanvas(){
   // ---------- اوپننگ کیش (Settings سے) ----------
   const openingCash = AppState.settings.openingCashBalance || 0;
 
-  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب) ----------
+  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب — balance مثبت = I Got/Liability، منفی = I Gave/Asset) ----------
   let diaryPayable = 0, diaryReceivable = 0;
   (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
-    if(e.balance < 0) diaryPayable += Math.abs(e.balance);
-    else if(e.balance > 0) diaryReceivable += e.balance;
+    if(e.balance > 0) diaryPayable += e.balance;
+    else if(e.balance < 0) diaryReceivable += Math.abs(e.balance);
   });
 
   // ---------- آئٹم وائز فروخت — سب سے زیادہ بکنے والا سب سے اوپر ----------
@@ -22127,9 +22130,9 @@ async function renderDiarySummaryReportToCanvas(){
 
   // ---------- سمری باکس ----------
   const sRows = [
-    ['Total I Got', '- ' + fmt(totalUdhaar)],
-    ['Total I Gave', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: I Gave" : 'Net: I Got', fmt(Math.abs(netBalance))],
+    ['Total I Gave', '+ ' + fmt(totalUdhaar)],
+    ['Total I Got', '- ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: I Got" : 'Net: I Gave', fmt(Math.abs(netBalance))],
   ];
   const sumTop = y;
   ctx.font = `${bold?'bold':''} ${fsSummary}px ${fontFam}`;
@@ -22425,9 +22428,9 @@ function buildDiarySummaryPdf(orientation){
   y += 6;
 
   const summaryRows = [
-    ['Total I Got', '- ' + fmt(totalUdhaar)],
-    ['Total I Gave', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: I Gave" : 'Net: I Got', fmt(Math.abs(netBalance))],
+    ['Total I Gave', '+ ' + fmt(totalUdhaar)],
+    ['Total I Got', '- ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: I Got" : 'Net: I Gave', fmt(Math.abs(netBalance))],
   ];
   const sumRowH = Math.round(6 * rowScale * 10) / 10;
   const sumFontPt = Math.round(9 * fontScale * 10) / 10;
