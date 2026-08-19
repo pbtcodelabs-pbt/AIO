@@ -16,7 +16,7 @@
 <!-- ---------- Google Fonts (7 پیارے انگلش فونٹس — صرف ہلکے وزن، ایپ کو بھاری نہیں کرتے) ---------- -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Roboto+Condensed:wght@400;700&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&family=Roboto:wght@300;400;700&family=Lato:wght@300;400;700&family=Roboto+Condensed:wght@400;700&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ===================== THEME VARIABLES (بعد میں Theme Selector یہاں تبدیل کرے گا) ===================== */
   :root{
@@ -33,9 +33,10 @@
     --radius:14px;
     --shadow:0 2px 10px rgba(41,29,10,.07);
     --font:'Segoe UI', system-ui, sans-serif;
+    --font-weight:400;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:var(--font); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
+  body{font-family:var(--font); font-weight:var(--font-weight); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
 
   /* ===================== LOGIN SCREEN ===================== */
   #loginScreen{
@@ -1914,8 +1915,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST26</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Tue1150am18aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST27</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0220pm19aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -5325,8 +5326,9 @@ window.addEventListener('beforeunload', persistAllData);
 // ---------- STATE (اب localStorage سے جُڑا ہوا ہے) ----------
 const DEFAULT_SETTINGS = {
   themeId: 'teal',
-  font: "'Archivo Black', 'Arial Black', sans-serif",
-  fontId: 'arialblack',
+  font: "'Open Sans', Tahoma, sans-serif",
+  fontId: 'tahoma',
+  fontWeight: 400,
   paperWidth: 80,         // 58 | 80 (mm) — Print خود Android کے Print Service سسٹم سے چلتا ہے، الگ کنکشن سیٹنگ کی ضرورت نہیں
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
@@ -18746,13 +18748,17 @@ const THEME_PRESETS = [
 ];
 
 // ---------- Font Presets — صرف 3 بہترین پرنٹنگ-فرینڈلی فونٹس (کم سیاہی، کم چوڑائی، صاف پرنٹ)۔
-// ⚠️ اہم: "Arial Black/Arial Narrow/Calibri" اصل ناموں سے موبائل (Android) میں موجود ہی نہیں ہوتے —
+// ⚠️ اہم: "Tahoma/Arial Narrow/Calibri" اصل ناموں سے موبائل (Android) میں موجود ہی نہیں ہوتے —
+// Tahoma خاص طور پر صرف مائیکروسافٹ ونڈوز کا اپنا فونٹ ہے، Google Fonts پر سرے سے موجود نہیں —
 // اس لیے نیچے حقیقی ویب فونٹس (Google Fonts سے لوڈ) استعمال کیے گئے ہیں جو بالکل انہی جیسے نظر آتے ہیں،
-// تاکہ فونٹ بدلنے پر واقعی نظر آنے والا فرق پڑے (پہلے موبائل پر تینوں ایک جیسے ہی نظر آ رہے تھے) ----------
+// (Open Sans کو ڈیزائنرز عالمی سطح پر Tahoma کا سب سے قریبی متبادل مانتے ہیں) ----------
 const FONT_PRESETS = [
-  {id:'arialblack', label:'Arial Black', family:"'Archivo Black', 'Arial Black', sans-serif"},
-  {id:'arialnarrow',label:'Arial Narrow', family:"'Roboto Condensed', 'Arial Narrow', sans-serif"},
-  {id:'calibri',    label:'Calibri',  family:"'Carlito', Calibri, sans-serif"},
+  {id:'tahoma',       label:'Tahoma',          family:"'Open Sans', Tahoma, sans-serif",       weight:400},
+  {id:'robotolight',  label:'Roboto Light',    family:"'Roboto', sans-serif",                  weight:300},
+  {id:'opensanslight',label:'Open Sans Light', family:"'Open Sans', Tahoma, sans-serif",        weight:300},
+  {id:'latolight',    label:'Lato Light',      family:"'Lato', sans-serif",                    weight:300},
+  {id:'arialnarrow',  label:'Arial Narrow',    family:"'Roboto Condensed', 'Arial Narrow', sans-serif", weight:400},
+  {id:'calibri',      label:'Calibri',         family:"'Carlito', Calibri, sans-serif",         weight:400},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
@@ -18831,6 +18837,7 @@ document.addEventListener('click', (e) => {
 function applyFont(fontId){
   const f = FONT_PRESETS.find(x => x.id === fontId) || FONT_PRESETS[0];
   document.documentElement.style.setProperty('--font', f.family);
+  document.documentElement.style.setProperty('--font-weight', f.weight || 400);
   AppState.settings.font = f.family;
   AppState.settings.fontId = f.id;
 
@@ -22813,7 +22820,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   applyTheme(AppState.settings.themeId);
-  applyFont(AppState.settings.fontId || 'arialblack');
+  applyFont(AppState.settings.fontId || 'tahoma');
   renderFontsFabPanel();
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   applyUiZoom(AppState.settings.uiZoom || 100);
