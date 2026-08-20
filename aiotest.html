@@ -1916,8 +1916,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST34</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0435pm19aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST35</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0558pm19aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -4975,7 +4975,24 @@ const GDRIVE_BACKUP_FOLDER_NAME = 'AIO Backup';
 // ---------- Google Drive میں "AIO Backup" فولڈر تلاش کریں، نہ ملے تو نئی بنا دیں — تاکہ ہر بار وہی ایک فولڈر
 // دوبارہ استعمال ہو، فائلیں پوری Drive میں بکھری نہ رہیں۔ فولڈر کی ID ایک بار مل جائے تو محفوظ کر لیتے ہیں ----------
 async function ensureGDriveBackupFolder(){
-  if(AppState.settings.gdriveFolderId) return AppState.settings.gdriveFolderId;
+  // ---------- پہلے سے محفوظ فولڈر ID موجود ہو تو پہلے تصدیق کریں کہ وہ اسی (ابھی سائن اِن) اکاؤنٹ کی Drive میں واقعی موجود ہے —
+  // ورنہ اگر فون میں کوئی دوسرا Google اکاؤنٹ منتخب کیا جائے تو پرانا فولڈر ID "File not found" کی خرابی دیتا ہے ----------
+  if(AppState.settings.gdriveFolderId){
+    try{
+      const checkRes = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${AppState.settings.gdriveFolderId}?fields=id,trashed`,
+        { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } }
+      );
+      if(checkRes.ok){
+        const checkData = await checkRes.json();
+        if(!checkData.trashed) return AppState.settings.gdriveFolderId;
+      }
+      // ---------- 404 یا trashed ہو تو نیچے جا کر اسی (موجودہ) اکاؤنٹ کے لیے از سرِ نو ڈھونڈیں/بنائیں ----------
+      AppState.settings.gdriveFolderId = null;
+    }catch(e){
+      AppState.settings.gdriveFolderId = null;
+    }
+  }
 
   const searchUrl = 'https://www.googleapis.com/drive/v3/files' +
     '?q=' + encodeURIComponent(`name='${GDRIVE_BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`) +
