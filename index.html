@@ -17,7 +17,7 @@
 <!-- ---------- Google Fonts (7 پیارے انگلش فونٹس — صرف ہلکے وزن، ایپ کو بھاری نہیں کرتے) ---------- -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600;700&family=Nunito:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Manrope:wght@400;600;700&family=Comfortaa:wght@400;600;700&family=Rubik:wght@400;600;700&family=Archivo+Black&family=Anton&family=Bebas+Neue&family=Fjalla+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&family=Roboto:wght@300;400;700&family=Lato:wght@300;400;700&family=Roboto+Condensed:wght@400;700&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ===================== THEME VARIABLES (بعد میں Theme Selector یہاں تبدیل کرے گا) ===================== */
   :root{
@@ -34,9 +34,10 @@
     --radius:14px;
     --shadow:0 2px 10px rgba(41,29,10,.07);
     --font:'Segoe UI', system-ui, sans-serif;
+    --font-weight:400;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:var(--font); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
+  body{font-family:var(--font); font-weight:var(--font-weight); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
 
   /* ===================== LOGIN SCREEN ===================== */
   #loginScreen{
@@ -48,6 +49,19 @@
   .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
   .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
+  /* --- 🧪 Test Build لیبل — "AIO POS" کی جگہ، اسی بڑے سائز میں، خوبصورت رنگین چمک (صرف aiotestXX.html فائلوں میں نظر آتا ہے)
+       پہلے صرف ایک زرد رنگ کی روشنی/مدھم ہوتی تھی جو آنکھوں کو تھکا رہی تھی — اب اس کی جگہ نرم، مسلسل بہتا ہوا رنگین Shimmer ہے --- */
+  .testBuildGlow{
+    font-weight:900 !important;
+    background:linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6, #fb923c, #facc15, #4ade80, #38bdf8);
+    background-size:300% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent !important;
+    animation:testShimmer 5s linear infinite;
+  }
+  @keyframes testShimmer{
+    0%{ background-position:0% 50%; }
+    100%{ background-position:300% 50%; }
+  }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   .dobPicker{display:flex; gap:6px; align-items:center; margin:8px 0;}
   .dobPicker select{flex:1; min-width:0; padding:10px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; background:#fff; color:var(--text);}
@@ -57,7 +71,7 @@
   .welcomeTrialBanner{background:linear-gradient(145deg,#dcfce7,#bbf7d0); border:1.5px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center;}
   .welcomeTrialBanner .wtbHeadline{font-size:15px; font-weight:800; color:#166534; line-height:1.3;}
   .welcomeTrialBanner .wtbSubline{font-size:12.5px; font-weight:700; color:#166534; margin-top:4px;}
-  .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7; text-align:right; direction:rtl;}
+  .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7;}
 
   /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان ---
      نوٹ: نام والی لائن اور آئیکنز کو دو الگ الگ قطاروں میں رکھا گیا ہے تاکہ
@@ -105,11 +119,11 @@
 
   /* --- 🔔 Role Toast — لاگ ان کے بعد چند سیکنڈ کے لیے نظر آئے --- */
   .roleToast{
-    position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-40px); z-index:5000;
-    background:#0f172a; color:#fff; padding:11px 20px; border-radius:30px; font-size:13px; font-weight:700;
-    box-shadow:0 6px 20px rgba(0,0,0,.3); opacity:0; transition:all .3s ease; white-space:nowrap;
+    position:fixed; top:64px; right:8px; z-index:5000;
+    background:rgba(15,23,42,.88); color:#fef08a; padding:4px 10px; border-radius:12px; font-size:10.5px; font-weight:800;
+    box-shadow:0 2px 8px rgba(0,0,0,.25); opacity:0; transform:translateY(-8px); transition:all .3s ease; white-space:nowrap;
   }
-  .roleToast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .roleToast.show{opacity:1; transform:translateY(0);}
 
   /* --- 🔄 Update Toast — نیا اپڈیٹ آنے پر نیچے نظر آئے، صارف ٹیپ کر کے فوراً اپڈیٹ کر سکے --- */
   #updateToast{
@@ -264,6 +278,50 @@
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- 🎁 Trial Reminder — روزانہ ایک بار، چمکتا ہوا، حرکت کرتا ہوا Toast (بغیر بٹن، خود بخود غائب) ---------- */
+  @keyframes trialToastSlide{
+    0%{ transform:translateY(-40px); opacity:0; }
+    12%{ transform:translateY(0); opacity:1; }
+    88%{ transform:translateY(0); opacity:1; }
+    100%{ transform:translateY(-40px); opacity:0; }
+  }
+  @keyframes trialToastGlow{
+    0%,100%{ box-shadow:0 4px 18px rgba(245,158,11,.35), 0 0 0 rgba(245,158,11,0); }
+    50%{ box-shadow:0 4px 26px rgba(245,158,11,.6), 0 0 14px rgba(245,158,11,.5); }
+  }
+  #trialReminderToast{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%);
+    z-index:9999; max-width:92vw; width:360px;
+    background:linear-gradient(135deg,#fffbeb,#fef3c7);
+    border:1.5px solid #fbbf24; border-radius:14px;
+    padding:12px 16px; display:flex; align-items:center; gap:10px;
+    animation: trialToastSlide 4.5s ease forwards, trialToastGlow 1.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  #trialReminderToast .trtIcon{font-size:22px; flex:0 0 auto; animation:trialPulseIcon 1.2s ease-in-out infinite;}
+  @keyframes trialPulseIcon{0%,100%{transform:scale(1);} 50%{transform:scale(1.18);}}
+  #trialReminderToast .trtText{font-size:13px; font-weight:800; color:#92400e; line-height:1.35;}
+
+  /* ---------- ⚠️ آخری 1-2 دن — زیادہ نمایاں، چمکتی ہوئی پاپ اپ، Subscribe Now / Remind Me Later بٹن کے ساتھ ---------- */
+  @keyframes trialUrgentGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.45); }
+    50%{ box-shadow:0 0 0 12px rgba(220,38,38,0); }
+  }
+  #trialUrgentModal .backupConfirmBox{
+    border:2px solid #dc2626;
+    animation: trialUrgentGlow 1.8s ease-in-out infinite;
+  }
+  #trialUrgentModal .backupConfirmIconWrap{
+    animation: trialPulseIcon 1s ease-in-out infinite;
+  }
+
+  /* ---------- 🟢 ہمیشہ نظر آنے والا "Remaining" ڈبہ — آخری 3 دن میں خود بھی ہلکا سا چمکے ---------- */
+  @keyframes subBoxDaysGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.35); }
+    50%{ box-shadow:0 0 10px 2px rgba(220,38,38,.35); }
+  }
+  .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
 
   .pageTitle{font-size:20px; font-weight:800; margin-bottom:18px; padding-bottom:10px; color:var(--primary-dark); position:relative; border-bottom:2.5px solid var(--primary);}
   /* --- Billing (ہوم) کا عنوان خاص طور پر باریک — تاکہ نیچے پراڈکٹس کے لیے زیادہ جگہ بچے --- */
@@ -467,12 +525,12 @@
 
   /* ===================== PRODUCTS & VARIANTS SCREEN ===================== */
   .productToolbar{display:flex; gap:10px; margin-bottom:14px;}
-  .csvImportBar{display:flex; gap:8px; margin-bottom:16px;}
+  .csvImportBar{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:18px;}
   .csvTemplateBtn, .csvImportBtn{
-    flex:1; padding:9px 8px; border-radius:9px; font-size:11.5px; font-weight:700; cursor:pointer; border:none;
+    flex:1 1 auto; min-width:130px; padding:10px 10px; border-radius:10px; font-size:11.5px; font-weight:700; cursor:pointer; border:none;
   }
   .csvTemplateBtn{background:#f1f5f9; color:var(--text); border:1.5px dashed #cbd5e1;}
-  .csvImportBtn{background:var(--primary); color:#fff;}
+  .csvImportBtn{background:var(--primary); color:#fff; box-shadow:0 2px 6px rgba(41,29,10,.12);}
   .productToolbar input{flex:1; padding:11px 14px; border:1px solid #dbe1ea; border-radius:10px; font-size:14px;}
   .productToolbar button{padding:0 18px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;}
 
@@ -503,19 +561,19 @@
     box-shadow:inset 0 1px 3px rgba(15,118,110,.10), inset 0 -1px 2px rgba(255,255,255,.6), 0 2px 6px rgba(41,29,10,.08);
   }
   .categorySideRailEditBtn{
-    flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:2px;
-    padding:9px 3px; border:none; border-radius:11px; background:linear-gradient(145deg,#eef2ff,#dde4fb); color:var(--primary-dark);
-    font-weight:800; font-size:10px; cursor:pointer; text-align:center; line-height:1.2;
-    box-shadow:2px 2px 5px rgba(41,29,10,.14), -1px -1px 3px rgba(255,255,255,.85);
+    flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:4px;
+    padding:8px 3px; margin-bottom:2px; border:none; border-radius:10px; background:var(--primary); color:#fff;
+    font-weight:800; font-size:10.5px; cursor:pointer; text-align:center; line-height:1;
+    box-shadow:0 2px 6px rgba(41,29,10,.18);
   }
   .categorySideRailEditBtn:active{ transform:scale(.95); }
   .categorySideRailItem{
     flex:0 0 auto; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    padding:10px 3px; border-radius:11px; background:linear-gradient(145deg,#ffffff,#eef3f2); color:var(--text);
+    padding:10px 3px; border-radius:11px; background:#fff; color:var(--text);
     font-weight:700; font-size:10px; line-height:1.18; text-align:center; cursor:pointer;
     word-break:break-word; overflow-wrap:anywhere;
-    border:1px solid rgba(15,118,110,.14);
-    box-shadow:3px 3px 6px rgba(41,29,10,.15), -2px -2px 5px rgba(255,255,255,.95), 0 0 6px rgba(15,118,110,.10);
+    border:1px solid rgba(15,118,110,.12);
+    box-shadow:0 1px 4px rgba(41,29,10,.10);
     min-height:52px; box-sizing:border-box;
     transition:box-shadow .15s ease, transform .1s ease, background .15s ease;
   }
@@ -569,15 +627,29 @@
   .categoryDropdownAddNew{border-top:1px dashed #dbe1ea; margin-top:4px; padding-top:11px; color:var(--primary-dark); font-weight:800;}
   .categoryDropdownAddNew:hover{background:#eef2ff;}
 
+  /* ---------- 🎨 Theme/Font ڈراپ ڈاؤن پینل کے اندر — Theme رنگوں کا کمپیکٹ grid، Font کی سکرول ہونے والی فہرست ---------- */
+  #themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
+  #fontOptionGrid{max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:8px;}
+
+  /* ---------- کیٹیگری ڈراپ ڈاؤن کے اندر ہر ریکارڈ کا اپنا ایڈٹ (پینسل) بٹن — الگ سے ابھرا ہوا نہیں،
+       بلکہ نام کے ساتھ ہی قطار میں، فہرست کھلنے پر ہی نظر آتا ہے ---------- */
+  .categoryDropdownItem .cdiName{flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .categoryDropdownItem .cdiPencil{
+    flex:0 0 auto; width:24px; height:24px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+    font-size:12px; background:rgba(15,118,110,.08); color:var(--primary-dark);
+  }
+  .categoryDropdownItem.active .cdiPencil{ background:rgba(255,255,255,.25); color:#fff; }
+  .categoryDropdownItem .cdiPencil:active{ transform:scale(.88); }
+
   /* --- پراڈکٹ گرڈ: کارڈز ایک دوسرے کے قریب قریب، کم سے کم فاصلہ، زیادہ سے زیادہ ایک نظر میں نظر آئیں --- */
   .productGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); align-items:start; align-content:start; gap:12px; max-height:480px; overflow-y:auto; padding:4px;}
   .productGridCard{
     background:var(--card); border-radius:12px; overflow:hidden; position:relative; cursor:default;
     height:152px; display:flex; flex-direction:column;
-    box-shadow:3px 3px 7px rgba(41,29,10,.16), -2px -2px 6px rgba(255,255,255,.8);
-    border:1px solid rgba(255,255,255,.6);
+    box-shadow:0 1px 5px rgba(41,29,10,.12);
+    border:1px solid rgba(15,118,110,.08);
   }
-  .productGridCard.outOfStock{box-shadow:0 0 0 2px var(--danger) inset, 3px 3px 7px rgba(41,29,10,.16);}
+  .productGridCard.outOfStock{box-shadow:0 0 0 2px var(--danger) inset, 0 1px 5px rgba(41,29,10,.12);}
   .productGridCard.negativeStock{box-shadow:0 0 0 2.5px var(--danger) inset, 3px 3px 7px rgba(41,29,10,.16);}
   .productGridCard.negativeStock .pgName, .productGridCard.negativeStock .pgPrice{color:var(--danger);}
   .productGridCard.lowStockCard{box-shadow:0 0 0 2px var(--warning) inset, 3px 3px 7px rgba(41,29,10,.16);}
@@ -758,6 +830,17 @@
   }
   .fontOptionRow .fontCheckMark{ font-size:12px; opacity:0; flex:0 0 auto; color:var(--primary-dark); }
   .fontOptionRow.active .fontCheckMark{ opacity:1; }
+  /* ===================== 🅰️🎨 ہوم پیج Font/Theme کوئیک پینل — fontsPanel جیسا ہی انداز ===================== */
+  .homeQuickPanel{
+    position:fixed; top:0; left:0; z-index:900;
+    background:#fff; border-radius:14px; box-shadow:0 10px 28px rgba(15,23,42,.28); width:230px;
+    max-height:min(70vh, 420px); overflow-y:auto; overflow-x:hidden; opacity:0; pointer-events:none;
+    transform:scaleY(0.85); transform-origin:top left;
+    transition:opacity .18s ease, transform .18s ease; visibility:hidden; padding:10px 0;
+  }
+  .homeQuickPanel.open{ opacity:1; pointer-events:auto; transform:scaleY(1); visibility:visible; }
+  .homeQuickPanelLabel{ font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; padding:6px 12px 6px; }
+  .homeIntensityRow{ display:flex; align-items:center; gap:8px; padding:2px 12px 10px; }
 
   .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden;}
   .productHead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;}
@@ -1091,6 +1174,13 @@
   .btnToggleActive{background:#f1f5f9; color:var(--text);}
   .btnResetPin{background:#eef2ff; color:var(--primary-dark);}
 
+  /* ---------- 📂 Categories سکرین کے ایکشن بٹن (Rename/Uncategorize/Delete) —
+       الگ سے سٹینڈرڈائزڈ کلاس، بارڈر لیس، رنگ سے فوری پہچانے جائیں ---------- */
+  .categoryActionBtn{border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;}
+  .categoryActionBtn.rename{background:#eef2ff; color:var(--primary-dark);}
+  .categoryActionBtn.uncategorize{background:#fff7ed; color:#c2410c;}
+  .categoryActionBtn.delete{background:#fef2f2; color:var(--danger);}
+
   /* --- Approval Requests --- */
   .approvalCard{background:var(--card); border-radius:var(--radius); padding:16px 18px; box-shadow:0 2px 10px rgba(41,29,10,.07); margin-bottom:10px; border-left:4px solid var(--warning);}
   .approvalCard .aTitle{font-weight:700; font-size:14px;}
@@ -1217,10 +1307,14 @@
   .paymentAccBank{font-size:11px; font-weight:600; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:1px 7px; margin-left:6px;}
   .paymentAccNumber{font-size:12.5px; color:var(--muted); margin-top:2px; white-space:normal; word-break:break-all;}
   .paymentAccActionsRow{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
-  .paymentAccActionsRow button{border:1px solid #e6ebf2; background:#fff; font-size:17px; padding:6px 8px; border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:52px;}
-  .paymentAccBtnLabel{font-size:9px; font-weight:700; color:var(--muted); letter-spacing:.2px;}
-  .paymentAccDelBtn{flex:0 0 auto; background:#fef2f2; border:1px solid #fecaca !important; color:var(--danger); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:13px;}
-  .paymentAccDelBtn .paymentAccBtnLabel{color:var(--danger);}
+  .paymentAccActionsRow button{border:none; font-size:16px; padding:7px 8px; border-radius:9px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; min-width:56px;}
+  .paymentAccBtnLabel{font-size:10px; font-weight:800; letter-spacing:.2px;}
+  /* ---------- ہر بٹن کا اپنا رنگ — تاکہ صرف آئیکن دیکھ کر بھی فوری پہچان ہو ---------- */
+  .paymentAccActionsRow button:nth-child(1){background:#eef2ff; color:var(--primary-dark);} /* Receipt */
+  .paymentAccActionsRow button:nth-child(2){background:#f3e8ff; color:#6d28d9;} /* QR Code */
+  .paymentAccActionsRow button:nth-child(3){background:#ecfeff; color:#0e7490;} /* Card */
+  .paymentAccActionsRow button:nth-child(4){background:#fff7ed; color:#c2410c;} /* Poster */
+  .paymentAccDelBtn{background:#fef2f2 !important; color:var(--danger) !important;}
 
   /* --- Theme colour swatches --- */
   .themeSwatchGrid{display:flex; flex-wrap:wrap; gap:12px;}
@@ -1514,6 +1608,14 @@
       background:linear-gradient(145deg,#3b82f6,#1e40af);
       box-shadow: 0 2px 4px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.5), inset 0 -1px 2px rgba(0,0,0,.3);
       border:1px solid rgba(255,255,255,.25);
+      cursor:pointer;
+    }
+    /* ---------- کمپیکٹ حالت: صرف 🔍 آئیکن نظر آئے، خانہ چھپا رہے — دبانے پر ہی کھلے ---------- */
+    #globalSearchBar:not(.expanded) input{
+      flex:0 0 0; width:0; min-width:0; padding:0; border:none; opacity:0; pointer-events:none;
+    }
+    #globalSearchBar.expanded input{
+      flex:1;
     }
     #globalSearchBar .gsbIcon svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));}
     #globalSearchBar input{
@@ -1686,7 +1788,7 @@
     <div class="welcomeTrialBanner">
       <div class="wtbHeadline">🎉 Best Billing App — Try it FREE for 30 Days!</div>
       <div class="wtbSubline">Your 30-Day Free Trial starts now.</div>
-      <div class="wtbUrduNote">یہ ایپ ابھی Beta (آزمائشی) ورژن میں ہے۔ روزانہ Backup لینا نہ بھولیں، اور اپنا پرانا طریقہ بھی ساتھ ساتھ چلاتے رہیں۔ اگر کوئی مسئلہ محسوس ہو — چھوٹا ہو یا بڑا — فوری طور پر ڈویلپر تک پہنچائیں، تاکہ یہ ایپ آپ کے لیے بہترین بن سکے۔</div>
+      <div class="wtbUrduNote">This app is currently in Beta (testing) version. Please don't forget to take daily backups, and keep running your old method alongside it too. If you notice any issue — big or small — please report it to the developer right away, so this app can become the best it can be for you.</div>
     </div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
@@ -1708,17 +1810,6 @@
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
-
-    <!-- ---------- سیدھا Login سکرین سے ہی Activation Code لگانے کا آپشن — PIN سے پہلے، تاکہ کنفیوژن نہ ہو ---------- -->
-    <div class="loginHint" style="margin-top:10px;">
-      <a href="javascript:void(0)" onclick="toggleLoginActivationBox()" style="color:var(--primary); font-weight:700; text-decoration:none;">🔑 Have an activation code? Tap here.</a>
-    </div>
-    <div id="loginActivationBox" style="display:none; margin-top:10px; text-align:left;">
-      <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:4px;">Activation code (from your developer)</label>
-      <input type="text" id="loginActivationCodeInput" placeholder="6-digit code">
-      <button onclick="activateFromLoginScreen()" style="margin-top:8px;">✅ Activate</button>
-      <div id="loginActivationMsg" style="margin-top:8px; font-size:13px; font-weight:700;"></div>
-    </div>
 
     <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
   </div>
@@ -1828,17 +1919,8 @@
   <div class="loginBox" style="max-width:340px;">
     <h2>🔒 Subscription Required</h2>
     <p id="subGateStatus" style="font-size:13px; color:var(--muted); margin-bottom:14px;"></p>
-    <div style="background:#f1f5f9; border-radius:10px; padding:10px 12px; margin-bottom:16px;">
-      <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Your Device ID (share this with your developer)</div>
-      <div id="subGateUid" style="font-weight:800; font-size:14px; color:var(--primary-dark); word-break:break-all;"></div>
-    </div>
-    <label style="display:block; font-size:12px; color:var(--muted); text-align:left; margin-bottom:4px;">Activation code (from your developer)</label>
-    <input type="text" id="subGateCodeInput" placeholder="6-digit code">
-    <button onclick="submitActivationCode()" style="margin-top:14px;">✅ Activate</button>
-    <div id="subGateMsg" style="margin-top:10px; font-size:13px; font-weight:700;"></div>
-    <div class="loginHint">No code yet? Tap the 💬 chat bubble below to ask your developer.</div>
+    <button onclick="openPackagePlansModal()" style="margin-top:6px;">🎟️ View Subscription Plans</button>
   </div>
-  <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
 </div>
 
 <!-- ===================== APP SHELL ===================== -->
@@ -1863,17 +1945,26 @@
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
-    <span class="mobileBrand">🧾 AIO POS</span>
+    <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 AIO POS</span>
+    <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "AIO POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
+         آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
+         نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
+         (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
+    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">PLAYSTORE FINAL</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0710pm19aug26</span>
+    </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
-      <!-- ---------- بلڈ نمبر ہیڈر سے ہٹا دیا گیا — کسٹمر کو صاف/پروفیشنل نظارہ ملے۔ Settings کے اندر "App Version" میں دستیاب ہے ---------- -->
+      <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO178MO0802AM</span>
     </div>
   </div>
 
   <!-- ---------- 🔎 App Search — یونیورسل سرچ، ہمیشہ نظر آنے والی، ہر سکرین پر ایک ہی جگہ —
        پراڈکٹ سرچ باکسز سے بالکل الگ (رنگ/جگہ دونوں مختلف) تاکہ کبھی مکس نہ ہو ---------- -->
   <div id="globalSearchBar">
-    <span class="gsbIcon" aria-hidden="true">
+    <span class="gsbIcon" aria-hidden="true" onclick="toggleGlobalSearchBar()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -1912,6 +2003,7 @@
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
     <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
     <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
+    <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
 
     <div class="userTag" id="userTag">—</div>
@@ -1933,7 +2025,7 @@
 
       <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
       <div class="homeBusinessCard">
-        <button class="hbcEditBtn admin-only" onclick="goTo('billsettings')" title="Edit Business Card / Logo">✏️</button>
+        <button class="hbcEditBtn admin-only" onclick="goTo('myaccount')" title="Edit Business Card / Logo">✏️</button>
         <div class="hbcTopRow">
           <div class="hbcLogoWrap" onclick="triggerBusinessLogoUpload()" title="Change Logo">
             <img id="hbcLogoImg" style="display:none;">
@@ -1946,16 +2038,19 @@
           </div>
         </div>
         <div class="hbcIconsRow">
-          <button class="hbcChatBtn admin-only" onclick="exportBackupData()" title="Backup Now">💾</button>
-          <button class="hbcChatBtn admin-only" onclick="triggerRestoreWithHint('importBackupInputHome')" title="Restore Backup">🔄</button>
-          <button class="hbcChatBtn" onclick="openMyAdsModal()" title="My Ads — Promote This App">📣</button>
+          <button class="hbcChatBtn" id="hbcFontBtn" onclick="toggleHomeFontPanel(event)" title="Font Style">Aa</button>
+          <button class="hbcChatBtn" id="hbcThemeBtn" onclick="toggleHomeThemePanel(event)" title="Colour Theme">🎨</button>
+          <button class="hbcChatBtn admin-only" onclick="backupToGoogleDrive()" title="Backup to Google Drive">☁️</button>
+          <button class="hbcChatBtn admin-only" onclick="restoreFromGoogleDrive()" title="Restore from Google Drive"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/><path d="M12 12v9"/><path d="M8 17l4 4 4-4"/></svg></button>
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
-        <!-- ---------- 💾/🔄 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
+        <!-- ---------- 🅰️🎨 ہوم پیج پر فوری Font/Theme پاپ اپ پینل — Settings تک جانے کی ضرورت نہیں ---------- -->
+        <div class="homeQuickPanel" id="homeFontPanel"></div>
+        <div class="homeQuickPanel" id="homeThemePanel"></div>
+        <!-- ---------- ☁️/📥 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
         <div class="hbcLastBackupLine admin-only" id="hbcLastBackupLine"></div>
       </div>
-      <input type="file" id="importBackupInputHome" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
 
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
@@ -1963,6 +2058,12 @@
         <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
         <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
+      </div>
+
+      <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
+      <div id="trialReminderToast" style="display:none;">
+        <span class="trtIcon">🎁</span>
+        <span class="trtText" id="trialReminderToastText"></span>
       </div>
 
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
@@ -2008,9 +2109,17 @@
         <div id="billingSearchSuggestions" class="billingSearchSuggestions"></div>
       </div>
 
-      <!-- پورا بچا ہوا صفحہ: بائیں طرف باریک کیٹیگری کالم + دائیں طرف پراڈکٹ کارڈز -->
+      <!-- کیٹیگری اب لیفٹ کالم کی بجائے ایک کمپیکٹ ڈراپ ڈاؤن بٹن — دبانے پر فہرست نیچے کھلتی ہے -->
+      <div class="categoryDropdownWrap" id="billingCategoryDropdownWrap">
+        <button type="button" class="categoryDropdownBtn" id="billingCategoryDropdownBtn" onclick="toggleBillingCategoryDropdown(event)">
+          <span id="billingCategoryDropdownLabel">📂 All Categories</span>
+          <span class="categoryDropdownArrow">▾</span>
+        </button>
+        <div class="categoryDropdownPanel" id="billingCategoryDropdownPanel"></div>
+      </div>
+
+      <!-- پورا بچا ہوا صفحہ: پراڈکٹ کارڈز اب پوری چوڑائی میں -->
       <div class="billingMainArea">
-        <div class="categorySideRail" id="categorySideRail"></div>
         <div class="productGrid productGridFull" id="billingProductGrid"></div>
       </div>
 
@@ -2252,18 +2361,7 @@
         <span class="pbArrow">›</span>
       </div>
 
-      <!-- ---------- فوری رسائی: بیک اپ (Export/Import) اور تھیم کلر — مین پیج پر تاکہ کام کے دوران کہیں جانا نہ پڑے ---------- -->
-      <div class="dashQuickBar">
-        <div class="dashQuickBackup">
-          <button class="dqBackupBtn dqExport" onclick="exportBackupData()">⬇️ Export Backup</button>
-          <button class="dqBackupBtn dqImport" onclick="triggerRestoreWithHint('importBackupInputDash')">⬆️ Import Backup</button>
-          <input type="file" id="importBackupInputDash" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
-        </div>
-        <div style="margin-top:8px;">
-          <div style="font-size:10px; color:var(--muted); font-weight:700; margin-bottom:4px;">🎨 Quick Theme Color</div>
-          <div class="themeSwatchGrid mini" id="themeSwatchGridMini"></div>
-        </div>
-      </div>
+      <!-- ---------- بیک اپ اور تھیم اب صرف Settings میں ہیں — یہاں دہرائی ہٹا دی گئی تاکہ ڈیش بورڈ صاف/ہلکا رہے ---------- -->
 
       <!-- ---------- ⭐ سب سے پہلے، سب سے نمایاں: صاف صاف Profit/Loss سمری (کل اثاثے − کل واجبات) ---------- -->
       <div class="netPositionHero" id="netPositionHero">
@@ -2412,6 +2510,20 @@
         <div class="modalBtns">
           <button class="cancelBtn" onclick="document.getElementById('manageCategoryProductsModal').classList.remove('show')">Cancel</button>
           <button class="saveBtn" onclick="saveManageCategoryProducts()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🗓️ Variant Batches — ایک ہی آئٹم کی مختلف کھیپوں (مختلف ایکسپائری ڈیٹس والے ڈبے) کو الگ الگ ٹریک کریں -->
+    <div class="modalOverlay" id="variantBatchesModal" onclick="if(event.target===this) closeVariantBatchesModal()">
+      <div class="modalBox" style="max-width:400px; max-height:82vh; overflow-y:auto;">
+        <h3 id="batchesModalTitle">🗓️ Batches</h3>
+        <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Same item, different boxes with different expiry dates? Add each box as its own batch here — quantity + its own expiry date. Reports and alerts will then show each batch separately.</div>
+        <div id="variantBatchesListWrap" style="display:flex; flex-direction:column;"></div>
+        <button class="testPrintBtn" style="margin-top:4px; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);" onclick="addVariantBatch()">➕ Add Batch</button>
+        <div id="variantBatchesTotalLabel" style="font-weight:700; font-size:13px; color:var(--primary-dark); margin-bottom:10px;">Total stock from batches: 0</div>
+        <div class="modalBtns">
+          <button class="saveBtn" style="width:100%;" onclick="closeVariantBatchesModal()">✅ Done</button>
         </div>
       </div>
     </div>
@@ -2720,7 +2832,6 @@
           <span class="closeBtn" onclick="document.getElementById('supplierPosterAccountPickerModal').classList.remove('show')">✖</span>
         </div>
         <div class="profileBody">
-          <div class="settingsHint" style="margin-top:0;">Tick which account(s) to include on the shareable profile poster.</div>
           <div id="posterAccountChecklist" style="margin:10px 0;"></div>
           <button class="checkoutBtn" onclick="confirmSupplierProfilePoster()">🪪 Generate Poster</button>
         </div>
@@ -3039,7 +3150,7 @@
       <div class="billCompactBar">
         <input type="text" id="pmtSearchInput" class="bcbItem bcbName" placeholder="🔍 Party name" oninput="renderPaymentsScreen()" style="flex:2;">
         <input type="date" id="pmtDateFilter" class="bcbItem bcbDate" onchange="renderPaymentsScreen()">
-        <button class="billAdvClearBtn bcbItem" onclick="clearPaymentsFilters()" style="display:none;">✖</button>
+        <button class="billAdvClearBtn bcbItem" onclick="clearPaymentsFilters()">✖</button>
       </div>
 
       <div class="billSummaryBar" id="pmtSummaryBar"></div>
@@ -3276,7 +3387,6 @@
          ===================================================================== -->
     <div class="screen admin-only" id="screen-mydiary">
       <div class="pageTitle">📔 My Diary</div>
-      <div class="settingsHint" style="margin-top:0;">This is completely separate from the billing system — just a simple personal record of people's names and balances. 🟢 I Got = We Owe Them, 🔴 I Gave = They Owe Us.</div>
 
       <div class="diaryTotalsBar">
         <div class="diaryTotalCard diaryTotalGreen">
@@ -3566,7 +3676,6 @@
     <div class="modalOverlay" id="editBillCustomerModal" onclick="if(event.target===this) closeEditBillCustomerModal()">
       <div class="modalBox">
         <h3>✏️ Edit Customer</h3>
-        <div class="settingsHint" style="margin-top:0;">Only the customer name/link can be changed after a bill is completed — items, prices, and stock stay locked to keep your records accurate.</div>
         <input type="text" id="ebcName" placeholder="Customer name" oninput="filterEbcCustomerOptions()" onfocus="filterEbcCustomerOptions()" autocomplete="off" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 4px; font-size:14px;">
         <!-- ---------- موجودہ کسٹمرز کی سکرول ایبل فہرست — منتخب کرنے پر اسی کسٹمر سے لنک ہو جائے گا ---------- -->
         <div id="ebcListWrap" class="custPickList" style="position:relative; margin-bottom:8px;"></div>
@@ -3891,11 +4000,6 @@
 
       <div class="settingsWrap">
 
-        <!-- ---------- ℹ️ App Version — صرف Settings کے اندر، ٹیسٹنگ کے لیے۔ ہیڈر سے ہٹا دیا تاکہ کسٹمر کو صاف/پروفیشنل نظارہ ملے ---------- -->
-        <div class="settingsCard" style="text-align:center; padding:8px 14px;">
-          <span style="font-size:10px; color:var(--muted); font-weight:700; letter-spacing:.3px;">App Version: <span id="settingsAppVersion">AIOPS178MO1040PM</span></span>
-        </div>
-
         <!-- --- 💾 اسٹوریج کا استعمال — تاکہ صارف کو ہمیشہ پتا رہے کتنی جگہ بچی ہے، اچانک خاموشی سے ڈیٹا ضائع نہ ہو --- -->
         <div class="settingsCard" id="storageUsageCard">
           <h3>💾 Storage Used</h3>
@@ -3916,16 +4020,32 @@
           <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span class="uiZoomValueLabel">100%</span></div>
         </div>
 
-        <!-- --- تھیم اور ظاہری شکل --- -->
+        <!-- --- تھیم اور ظاہری شکل — کمپیکٹ ڈراپ ڈاؤن، صرف منتخب شدہ چیز نظر آتی ہے، دبانے پر باقی آپشنز کھلتے ہیں --- -->
         <div class="settingsCard" id="settingsCardTheme">
           <h3>🎨 Theme & Appearance</h3>
+          <div class="settingsHint">Quick Font & Theme buttons are now on the Home page, under the business name.</div>
 
-          <div class="settingsSubLabel">Colour Theme</div>
-          <div class="themeSwatchGrid" id="themeSwatchGrid"></div>
+          <!-- ---------- یہ دونوں پوشیدہ رکھے گئے ہیں — پرانا کوڈ اور کہیں انہیں id سے ڈھونڈتا ہے، اس لیے حذف نہیں کیے ---------- -->
+          <div class="categoryDropdownWrap" id="themeDropdownWrap" style="display:none;">
+            <button type="button" class="categoryDropdownBtn" id="themeDropdownBtn" onclick="toggleThemeDropdown(event)">
+              <span id="themeDropdownLabel" style="display:flex; align-items:center; gap:8px;"><span id="themeDropdownDot" style="width:16px; height:16px; border-radius:50%; display:inline-block; flex:0 0 auto;"></span><span id="themeDropdownName">—</span></span>
+              <span class="categoryDropdownArrow">▾</span>
+            </button>
+            <div class="categoryDropdownPanel" id="themeSwatchGrid" style="padding:12px;"></div>
+          </div>
+          <div class="categoryDropdownWrap" id="fontDropdownWrap" style="display:none;">
+            <button type="button" class="categoryDropdownBtn" id="fontDropdownBtn" onclick="toggleFontDropdown(event)">
+              <span id="fontDropdownLabel">—</span>
+              <span class="categoryDropdownArrow">▾</span>
+            </button>
+            <div class="categoryDropdownPanel" id="fontOptionGrid"></div>
+          </div>
+        </div>
 
-          <div class="settingsSubLabel">Font Style</div>
-          <div class="fontOptionGrid" id="fontOptionGrid" style="max-height:180px; overflow-y:auto; padding-bottom:4px;"></div>
-          <button type="button" onclick="const g=document.getElementById('fontOptionGrid'); const exp=g.style.maxHeight==='none'; g.style.maxHeight=exp?'180px':'none'; this.textContent=exp?'🔽 Show All Fonts':'🔼 Show Less';" style="width:100%; margin-top:8px; padding:7px; background:#f1f5f9; color:var(--primary-dark); border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">🔽 Show All Fonts</button>
+        <!-- --- 📣 My Ads — پہلے ہوم پیج پر تھا، اب یہاں Settings میں --- -->
+        <div class="settingsCard" id="settingsCardMyAds">
+          <h3>📣 My Ads</h3>
+          <button onclick="openMyAdsModal()" style="width:100%; padding:10px; margin-top:6px; border:none; border-radius:10px; background:var(--primary); color:#fff; font-size:13px; font-weight:800; cursor:pointer;">📣 Promote This App</button>
         </div>
 
         <!-- --- 💵 ابتدائی نقد رقم — Dashboard کا Cash in Hand اسی سے شروع ہو کر حقیقی بلوں سے اپڈیٹ ہوتا ہے --- -->
@@ -3959,43 +4079,14 @@
           </label>
         </div>
 
-        <!-- --- 💾 بیک اپ — اب Google Drive والے دونوں بٹن مرکزی/نمایاں ہیں (زیادہ تر لوگوں کے لیے یہی کافی ہے)،
-             Local Export/Import کو ایک چھوٹے "Advanced" آپشن میں سمیٹ دیا ہے تاکہ سکرین صاف رہے مگر بغیر
-             انٹرنیٹ/Google اکاؤنٹ کے سہارے کی صورت میں وہ سہولت موجود رہے --- -->
+        <!-- --- 💾 بیک اپ — Play Store ورژن میں صرف Google Drive (بین الاقوامی معیار)، لوکل فائل ایکسپورٹ/امپورٹ مکمل ہٹا دیا گیا
+             تاکہ ہر صارف کا بیک اپ خودکار اُس کے اپنے Google اکاؤنٹ پر محفوظ رہے --- -->
         <div class="settingsCard" id="settingsCardBackup">
           <h3>💾 Backup Your Data</h3>
           <div id="lastBackupStatus" style="background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:9px 12px; font-size:12px; font-weight:600; margin-bottom:10px;"></div>
 
           <button id="gdriveBackupBtn" onclick="backupToGoogleDrive()" style="width:100%; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #1a73e8, #0d47a1); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(26,115,232,.35); cursor:pointer;">☁️ Backup to Google Drive</button>
-          <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer;">📥 Restore from Google Drive</button>
-
-          <div onclick="toggleLocalBackupAdvanced()" style="display:flex; align-items:center; justify-content:center; gap:5px; margin-top:16px; padding:8px; cursor:pointer; color:var(--muted); font-size:12px; font-weight:700;">
-            <span id="localBackupAdvancedChevron">▸</span> Advanced: Local File Backup (no internet needed)
-          </div>
-          <div id="localBackupAdvancedWrap" style="display:none; margin-top:8px;">
-            <div class="backupBtnGrid">
-              <button class="backupActionBtn backupExportBtn" onclick="exportBackupData()">
-                <span class="backupBtnIcon">⬇️</span>
-                <span class="backupBtnLabel">Export Backup</span>
-                <span class="backupBtnSub">Save all data to a file</span>
-              </button>
-              <button class="backupActionBtn backupImportBtn" onclick="triggerRestoreWithHint('importBackupInput')">
-                <span class="backupBtnIcon">⬆️</span>
-                <span class="backupBtnLabel">Import Backup</span>
-                <span class="backupBtnSub">Restore from a file</span>
-              </button>
-            </div>
-          </div>
-          <input type="file" id="importBackupInput" accept="application/json,.json" style="display:none;" onchange="importBackupData(event)">
-        </div>
-
-        <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
-        <div class="settingsCard" id="settingsCardPaymentAccounts">
-          <h3>💳 My Payment Accounts</h3>
-          <div class="settingsHint">These will be automatically included in every payment reminder you send to customers, so they can pay you directly without calling to ask for your account number.</div>
-          <div id="myPaymentAccountsWrap"></div>
-          <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
-          <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
+          <button id="gdriveRestoreBtn" onclick="restoreFromGoogleDrive()" style="width:100%; margin-top:8px; padding:15px; border:none; border-radius:12px; background:linear-gradient(155deg, #34a853, #1e7e34); color:#fff; font-weight:800; font-size:15px; box-shadow:0 4px 14px rgba(52,168,83,.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 4 16.3"/><path d="M12 12v9"/><path d="M8 17l4 4 4-4"/></svg> Restore from Google Drive</button>
         </div>
 
         <!-- --- 🔐 Admin Control — PIN سے محفوظ، ڈویلپر کی رابطہ معلومات یہاں سے بدلی جائیں --- -->
@@ -4019,25 +4110,6 @@
             <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Write your own message here (e.g. "Our app is very good, please use it") — it will be sent along with the link above when the 📤 Share button is pressed.</div>
             <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
-            <div class="settingsSubLabel">Accounts to Receive Your Payments</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Add as many as you like (EasyPaisa, JazzCash, Bank, etc). Customers will see these in Package Plans and can switch between them — useful if they don't have your default wallet.</div>
-            <div id="devPaymentAccountsListWrap" style="margin-bottom:10px;"></div>
-            <select id="devPaymentTypeInput" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-              <option value="">— Select Bank/Wallet —</option>
-            </select>
-            <input type="text" id="devPaymentNumberInput" placeholder="Account Number" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-            <input type="text" id="devPaymentNameInput" placeholder="Account Holder Name" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-            <button class="testPrintBtn" style="margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addDevPaymentAccount()">➕ Add This Account</button>
-
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">Rate Per Day (Rs.)</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this once — every customer's calculated price updates automatically. Change it anytime and everything recalculates immediately.</div>
-            <input type="number" id="perDayRateInput" placeholder="e.g. 30 (Rs per day)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-
-            <div class="settingsSubLabel">Package Plans (with fixed price per plan)</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">These appear as tappable plans for customers (e.g. 1 day, 1 month, 1 year). Set an exact price for each — useful when longer plans are discounted and don't follow the plain per-day rate. Leave price empty to auto-calculate from the per-day rate above.</div>
-            <div id="dayPresetsWrap"></div>
-            <button class="testPrintBtn" style="margin-top:6px; margin-bottom:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addSubscriptionPlan()">➕ Add Plan</button>
-
             <div class="settingsSubLabel">One Admin PIN for Everything</div>
             <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
 
@@ -4089,34 +4161,21 @@
     <div class="screen admin-only" id="screen-billsettings">
       <div class="pageTitle">🧾 Bill & Print Settings</div>
 
-      <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
-      <div class="settingsCard">
-        <h3>🏪 Business Info</h3>
-        <div class="settingsHint">This appears on printed bills. Leave blank to just show "AIO POS".</div>
-        <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-      </div>
-
       <!-- --- پرنٹر Settings --- -->
       <div class="settingsCard" id="settingsCardPrinter">
         <h3>🖨️ Printer Settings</h3>
-        <div class="settingsHint">Printing works through your phone's own Print system. When you tap Print, Android shows every printer it knows about — Bluetooth thermal printers (via an app like RawBT), Sunmi's built-in printer, WiFi/USB printers, or "Save as PDF". If your printer doesn't appear, install its print-service app from Play Store once — after that it'll show up automatically here and in every other app.</div>
 
         <div class="settingsSubLabel">Paper Width (for receipt layout)</div>
         <div class="settingsBtnGrid two" id="paperWidthGrid">
           <button data-width="58" onclick="setPaperWidth(58)">58mm (2")</button>
           <button data-width="80" onclick="setPaperWidth(80)">80mm (3")</button>
         </div>
-        <div class="settingsHint">Printing a full page instead? Just choose "A4" / "Fit to page" in the print dialog itself — the same bill works for both.</div>
 
         <div class="settingsSubLabel">Invoice Style</div>
         <div class="settingsBtnGrid two" id="invoiceStyleGrid">
           <button data-style="thermal" onclick="setInvoiceStyle('thermal')">🧾 Thermal Receipt</button>
           <button data-style="a4" onclick="setInvoiceStyle('a4')">📄 A4 Business Invoice</button>
         </div>
-        <div class="settingsHint">A4 style uses your current theme color and font, with a signature line — best for formal invoices or sharing a polished bill on WhatsApp.</div>
 
         <button class="testPrintBtn" onclick="testPrint()">🧾 Send Test Print</button>
       </div>
@@ -4156,7 +4215,6 @@
       <!-- --- 🏷️ بارکوڈ لیبل پرنٹنگ — کسی بھی پراڈکٹ ویریئنٹ کے موجودہ بارکوڈ نمبر سے پرنٹ کے قابل لیبل بنائیں --- -->
       <div class="settingsCard">
         <h3>🏷️ Barcode Labels</h3>
-        <div class="settingsHint">Print a barcode sticker for any product — using the barcode number already saved on that product's variant. Useful for labeling shelves or items so a barcode scanner (or phone camera scanner app) can look them up quickly at checkout.</div>
         <select id="barcodeLabelProductSelect" style="width:100%; padding:9px; margin-top:8px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateBarcodeLabelPreview()">
           <option value="">— Select a product variant —</option>
         </select>
@@ -4166,6 +4224,35 @@
         </div>
         <canvas id="barcodeLabelPreviewCanvas" style="display:none; width:100%; max-width:320px; margin:0 auto 10px; border:1px solid #eef1f6; border-radius:8px;"></canvas>
         <button class="testPrintBtn" onclick="printBarcodeLabels()">🖨️ Print Barcode Label(s)</button>
+      </div>
+    </div>
+
+    <!-- 🏦 MY ACCOUNT (Admin only) — بکھری ہوئی "My..." چیزیں ایک جگہ: بزنس نام/مالک/پتہ/فون، پیمنٹ اکاؤنٹس، My Diary شارٹ کٹ -->
+    <div class="screen admin-only" id="screen-myaccount">
+      <div class="pageTitle">🏦 My Account</div>
+
+      <!-- --- 🏪 دکان کی معلومات — بل کے اوپر نظر آئیں (خاص طور پر A4 انوائس پر) --- -->
+      <div class="settingsCard">
+        <h3>🏪 My Business Info</h3>
+        <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+      </div>
+
+      <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
+      <div class="settingsCard" id="settingsCardPaymentAccounts">
+        <h3>💳 My Payment Accounts</h3>
+        <div id="myPaymentAccountsWrap"></div>
+        <input type="file" id="accountQrFileInput" accept="image/*" style="display:none;" onchange="handleAccountQrFileSelected(event)">
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="openAddPaymentAccountModal()">➕ Add Account</button>
+      </div>
+
+      <!-- --- 📔 My Diary شارٹ کٹ — پوری ڈائری فیچر اپنی اصل جگہ (اپنی سکرین) پر ہی رہتی ہے، یہاں صرف فوری رسائی --- -->
+      <div class="settingsCard">
+        <h3>📔 My Diary</h3>
+        <div class="settingsHint">Personal "I Got / I Gave" ledger — separate from customer/supplier accounts.</div>
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
     </div>
 
@@ -4413,25 +4500,12 @@
 <div class="modalOverlay" id="packagePlansModal" style="z-index:3600;" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:400px; max-height:82vh; overflow-y:auto;">
     <h3>🗂️ Package Plans</h3>
-    <div class="settingsHint">Enter the number of days you'd like — the price will be calculated automatically. Then tap "Chat with Developer" below to send your request.</div>
-
-    <!-- ---------- 🧮 کیلکولیٹر — کوئی بھی دن لکھیں، قیمت خودکار بنے ---------- -->
-    <div id="planCalcWrap" style="background:#eef2ff; border-radius:12px; padding:14px; margin-top:10px; text-align:center;">
-      <label style="font-size:12px; font-weight:700; color:var(--primary-dark); display:block; margin-bottom:6px;">Number of Days</label>
-      <input type="number" id="planCalcDaysInput" placeholder="e.g. 30" oninput="updatePlanCalculator()" style="width:100%; padding:10px; border:1.5px solid #c7d2fe; border-radius:10px; font-size:18px; text-align:center; font-weight:800; box-sizing:border-box;">
-      <div style="font-size:12px; color:var(--muted); margin-top:10px;">Total Price</div>
-      <div id="planCalcPriceOutput" style="font-size:26px; font-weight:800; color:var(--primary-dark);">—</div>
-    </div>
-
-    <div id="devPaymentAccountWrap" style="display:none; background:#fff7ed; border-radius:10px; padding:11px 14px; margin-top:10px; font-size:12.5px;">
-      <div style="font-weight:700; color:#9a3412; margin-bottom:2px;">💳 Send Payment To <span style="font-weight:400; font-size:11px;">(tap number to copy)</span></div>
-      <div id="devPaymentAccountText" onclick="copyDevPaymentNumber()" style="color:#7c2d12; font-weight:600; cursor:pointer; text-decoration:underline dotted;"></div>
-      <button id="devPaymentSwitchBtn" onclick="switchDevPaymentAccount()" style="display:none; margin-top:8px; border:1px solid #fdba74; background:#fff; color:#9a3412; border-radius:8px; padding:6px 10px; font-size:11.5px; font-weight:700;">🔄 Try a Different Wallet/Bank</button>
-    </div>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
-    <button class="checkoutBtn" style="margin-top:14px; background:var(--primary);" onclick="sharePackagePlansPoster()">🖼️ Share as Poster</button>
-    <button class="checkoutBtn" style="margin-top:10px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
+    <p style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:12px; text-align:center;">
+      💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
+    </p>
+    <button class="checkoutBtn" style="margin-top:8px; background:#c2410c;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
 </div>
@@ -4440,7 +4514,6 @@
 <div class="modalOverlay" id="replyTemplatesModal" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:400px; max-height:80vh; overflow-y:auto;">
     <h3>📋 Reply Templates</h3>
-    <div class="settingsHint">Save your subscription plans or any standard reply once — then just tap Copy and paste it when replying to a customer's WhatsApp/SMS/Gmail message.</div>
     <div id="replyTemplatesWrap" style="margin-top:10px;"></div>
     <button class="testPrintBtn" style="margin-top:8px; background:#eef2ff; color:var(--primary-dark);" onclick="addReplyTemplate()">➕ Add Template</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('replyTemplatesModal').classList.remove('show')">Close</button>
@@ -4474,7 +4547,7 @@
     <div class="backupConfirmIconWrap"><span>📋</span></div>
     <h3>Ready to Import?</h3>
     <div id="partyImportPreviewText" style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:6px;"></div>
-    <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Same phone number والے موجودہ ریکارڈ اپڈیٹ ہوں گے — کچھ ڈیلیٹ نہیں ہوگا۔</div>
+    <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Existing records with the same phone number will be updated — nothing will be deleted.</div>
     <button class="backupConfirmCloseBtn" onclick="confirmPartyCsvImport()">✅ Confirm Import</button>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="document.getElementById('partyImportPreviewModal').classList.remove('show')">Cancel</button>
   </div>
@@ -4484,7 +4557,7 @@
 <div class="modalOverlay" id="scanImportModal" onclick="if(event.target===this) closeScanImportModal()">
   <div class="modalBox" id="scanImportModalBox" style="max-width:520px;">
     <h3>📷 Scan Photos & Import</h3>
-    <div class="settingsHint" style="margin-top:0;" id="scanImportHint">گیلری سے ایک ساتھ کئی تصویریں منتخب کریں، یا کیمرے سے براہ راست تصویر بنائیں — سسٹم خودکار ہر لائن سے نام اور قیمت (یا نام/فون/پتہ) نکال کر فہرست بنا دے گا۔ نیچے فہرست میں چیک/درست کر کے امپورٹ کریں۔</div>
+    <div class="settingsHint" style="margin-top:0;" id="scanImportHint">Select several photos at once from Gallery, or take a photo directly with the Camera — the system will automatically pull the name and price (or name/phone/address) from each line and build a list. Check/fix the list below, then import.</div>
 
     <div style="display:flex; gap:8px; margin:10px 0;">
       <button type="button" onclick="document.getElementById('scanImageInput').click()" style="flex:1; padding:12px 8px; border:none; border-radius:10px; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:13px; cursor:pointer;">🖼️ Gallery</button>
@@ -4567,9 +4640,41 @@
   <div class="backupConfirmBox" style="max-height:80vh; overflow-y:auto;">
     <div class="backupConfirmIconWrap"><span>☁️</span></div>
     <h3>Select a Backup</h3>
-    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">آپ کی Google Drive میں یہ AIO POS بیک اپ فائلیں ملی ہیں — جس فائل کو بحال کرنا ہے اس پر ٹیپ کریں:</p>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">These AIO POS backup files were found in your Google Drive — tap the one you want to restore:</p>
     <div id="gdriveFileListWrap" style="text-align:left; margin-top:10px;"></div>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="closeGDriveRestoreModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- 🆕 پہلی بار ایپ کھلنے پر — Google Drive اکاؤنٹ جوڑنے کی دعوت، صرف ایک ہی دفعہ نظر آئے گی -->
+<div class="modalOverlay" id="gdriveFirstRunModal" onclick="if(event.target===this) dismissGDriveFirstRunPrompt()">
+  <div class="backupConfirmBox">
+    <div class="backupConfirmIconWrap"><span>☁️</span></div>
+    <h3>Connect Google Drive Backup?</h3>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;">
+      To keep your bills, products, and customer data safe, connect your Google account now. All backups will automatically go into one folder in your Drive called <b>"AIO Backup"</b> — nothing will be scattered around.
+    </p>
+    <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#1a73e8,#0d47a1); margin-top:14px;" onclick="connectGDriveFromFirstRunPrompt()">☁️ Connect Now</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissGDriveFirstRunPrompt()">Maybe Later</button>
+  </div>
+</div>
+
+<!-- ⚠️ Trial Urgent — صرف آخری 1-2 دن میں، روزانہ ایک بار، چمکتی سرخ بارڈر، Subscribe Now / Remind Me Later -->
+<div class="modalOverlay" id="trialUrgentModal" onclick="if(event.target===this) dismissTrialUrgentModal()">
+  <div class="backupConfirmBox">
+    <div class="backupConfirmIconWrap" style="background:#fee2e2; color:var(--danger);"><span>⚠️</span></div>
+    <h3 id="trialUrgentTitle">Trial ending soon</h3>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;" id="trialUrgentBody">
+      Subscribe to keep using the same reports and features and to continue your business without interruption.
+    </p>
+    <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#dc2626,#991b1b); margin-top:14px;" onclick="dismissTrialUrgentModal(); goTo('billing'); openPackagePlansModal();">🎟️ Subscribe Now</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissTrialUrgentModal()">Remind Me Later</button>
+    <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #dbe1ea; text-align:left;">
+      <p style="font-size:11.5px; color:var(--muted); line-height:1.6; margin-bottom:8px;">
+        💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
+      </p>
+      <button class="backupConfirmCloseBtn" style="background:#fff7ed; color:#c2410c; font-size:12.5px; padding:10px;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
+    </div>
   </div>
 </div>
 
@@ -4835,14 +4940,6 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // فارمیٹ: AIO(Dmonyy DAY HHMMhrs).JSON — مثال: 10 جولائی 2026 جمعہ 06:13 → AIO(10jul26FR0613hrs).JSON
 // ---------- بیک اپ فائل کا نام: BK.AIO + دن(2 حرف) + تاریخ + مہینہ(بغیر زیرو) + وقت(24گھنٹے) + .json ----------
 // مثال: 10 جولائی 2026، جمعہ، شام 6:28 → BK.AIOFR1071828.json
-// ---------- Local Backup کا "Advanced" حصہ چھپا/دکھا — بغیر انٹرنیٹ کے سہارے کے لیے موجود رہے مگر نمایاں نہ ہو ----------
-function toggleLocalBackupAdvanced(){
-  const wrap = document.getElementById('localBackupAdvancedWrap');
-  const chevron = document.getElementById('localBackupAdvancedChevron');
-  const isOpen = wrap.style.display === 'block';
-  wrap.style.display = isOpen ? 'none' : 'block';
-  chevron.textContent = isOpen ? '▸' : '▾';
-}
 
 function generateBackupFileName(){
   const now = new Date();
@@ -4865,6 +4962,7 @@ function buildBackupObject(){
     users: usersData,
     approvalRequests: approvalRequests,
     nextProductId, nextVariantId, nextCustomerId, nextSupplierId, nextUserId, nextRequestId,
+    nextBatchId,
     settings: AppState.settings,
     expenses: expenseData,
     nextExpenseId,
@@ -4913,6 +5011,55 @@ const GOOGLE_DRIVE_CLIENT_ID = '751661674362-49d5habgkr9h6t1sb8a9err7e6r1b975.ap
 const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 let gDriveTokenClient = null;
 let gDriveAccessToken = null;
+const GDRIVE_BACKUP_FOLDER_NAME = 'AIO Backup';
+
+// ---------- Google Drive میں "AIO Backup" فولڈر تلاش کریں، نہ ملے تو نئی بنا دیں — تاکہ ہر بار وہی ایک فولڈر
+// دوبارہ استعمال ہو، فائلیں پوری Drive میں بکھری نہ رہیں۔ فولڈر کی ID ایک بار مل جائے تو محفوظ کر لیتے ہیں ----------
+async function ensureGDriveBackupFolder(){
+  // ---------- پہلے سے محفوظ فولڈر ID موجود ہو تو پہلے تصدیق کریں کہ وہ اسی (ابھی سائن اِن) اکاؤنٹ کی Drive میں واقعی موجود ہے —
+  // ورنہ اگر فون میں کوئی دوسرا Google اکاؤنٹ منتخب کیا جائے تو پرانا فولڈر ID "File not found" کی خرابی دیتا ہے ----------
+  if(AppState.settings.gdriveFolderId){
+    try{
+      const checkRes = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${AppState.settings.gdriveFolderId}?fields=id,trashed`,
+        { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } }
+      );
+      if(checkRes.ok){
+        const checkData = await checkRes.json();
+        if(!checkData.trashed) return AppState.settings.gdriveFolderId;
+      }
+      // ---------- 404 یا trashed ہو تو نیچے جا کر اسی (موجودہ) اکاؤنٹ کے لیے از سرِ نو ڈھونڈیں/بنائیں ----------
+      AppState.settings.gdriveFolderId = null;
+    }catch(e){
+      AppState.settings.gdriveFolderId = null;
+    }
+  }
+
+  const searchUrl = 'https://www.googleapis.com/drive/v3/files' +
+    '?q=' + encodeURIComponent(`name='${GDRIVE_BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`) +
+    '&fields=' + encodeURIComponent('files(id,name)');
+  const searchRes = await fetch(searchUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
+  if(searchRes.ok){
+    const searchData = await searchRes.json();
+    if(searchData.files && searchData.files.length > 0){
+      AppState.settings.gdriveFolderId = searchData.files[0].id;
+      persistAllData();
+      return AppState.settings.gdriveFolderId;
+    }
+  }
+
+  // ---------- نہیں ملا تو نئی فولڈر بنائیں ----------
+  const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + gDriveAccessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: GDRIVE_BACKUP_FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' }),
+  });
+  if(!createRes.ok) throw new Error('Could not create Drive folder: ' + createRes.status);
+  const createData = await createRes.json();
+  AppState.settings.gdriveFolderId = createData.id;
+  persistAllData();
+  return AppState.settings.gdriveFolderId;
+}
 
 function getGDriveTokenClient(){
   if(gDriveTokenClient) return gDriveTokenClient;
@@ -4931,7 +5078,7 @@ async function backupToGoogleDrive(){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    alert('Could not load Google services — please check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -4939,17 +5086,18 @@ async function backupToGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
-      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
     try{
       if(btn) btn.textContent = '⏳ Uploading...';
+      const folderId = await ensureGDriveBackupFolder(); // ---------- ہمیشہ "AIO Backup" فولڈر کے اندر ہی جائے ----------
       const fileName = generateBackupFileName();
       const backup = buildBackupObject();
       const fileContent = JSON.stringify(backup);
 
-      const metadata = { name: fileName, mimeType: 'application/json' };
+      const metadata = { name: fileName, mimeType: 'application/json', parents: [folderId] };
       const boundary = '-------aiopos' + Date.now();
       const multipartBody =
         `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
@@ -4976,42 +5124,80 @@ async function backupToGoogleDrive(){
       persistAllData();
       renderHomeLastBackupLine();
 
+      // ---------- کس Google اکاؤنٹ میں محفوظ ہوا — یہ بتانا صارف کے لیے سب سے زیادہ اطمینان بخش ہوتا ہے ----------
+      let accountEmail = '';
+      try{
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
+        });
+        if(userInfoRes.ok){
+          const userInfo = await userInfoRes.json();
+          accountEmail = userInfo.email || '';
+          // ---------- یہی اکاؤنٹ آئندہ خودکار یاد رہے — دوبارہ اکاؤنٹ چننے کی فہرست بار بار نہ دکھانی پڑے ----------
+          if(accountEmail && AppState.settings.gdriveAccountEmail !== accountEmail){
+            AppState.settings.gdriveAccountEmail = accountEmail;
+            persistAllData();
+          }
+        }
+      }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
+
       showBackupConfirmModal('export', fileName + ' (Google Drive)', {
-        products: productsData.length, customers: customersData.length, invoices: invoicesData.length
+        products: productsData.length, customers: customersData.length, invoices: invoicesData.length,
+        accountEmail
       });
     }catch(err){
-      alert('Google Drive پر اپ لوڈ نہیں ہو سکی: ' + err.message);
+      alert('Could not upload to Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
     }
   };
 
   // ---------- پہلی بار اجازت مانگے گا، اگلی بار خاموشی سے (already authorized) ٹوکن مل جائے گا ----------
-  client.requestAccessToken({ prompt: '' }); // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔ صرف اسی صورت میں مکمل اجازت سکرین دوبارہ آئے گی جب پرانی اجازت واقعی منسوخ ہو چکی ہو ----------
+  // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔
+  // 'hint' میں پہلے سے محفوظ اکاؤنٹ کا ای میل بھیج کر Google کو بتا دیتے ہیں کس اکاؤنٹ کے ساتھ رہنا ہے —
+  // اسی سے وہ بار بار سب اکاؤنٹس کی فہرست دکھانے کی بجائے سیدھا اسی اکاؤنٹ کے ساتھ آگے بڑھتا ہے ----------
+  const requestOptions = { prompt: '' };
+  if(AppState.settings.gdriveAccountEmail) requestOptions.hint = AppState.settings.gdriveAccountEmail;
+  client.requestAccessToken(requestOptions);
 }
 
 // ---------- ☁️ Google Drive سے بحال کریں — فہرست دکھائیں، منتخب فائل کو اسی موجودہ
 // import-confirm پاپ اپ کے ذریعے بحال کریں (بالکل جیسے مقامی فائل سے بحال کرتے ہیں) ----------
 async function restoreFromGoogleDrive(){
   const btn = document.getElementById('gdriveRestoreBtn');
+  const RESTORE_BTN_DEFAULT = btn ? btn.innerHTML : ''; // ---------- اصل SVG+متن محفوظ کر لیں، بعد میں دوبارہ لگانے کے لیے ----------
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    alert('Could not load Google services — please check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
 
   client.callback = async (resp) => {
     if(resp.error){
-      if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
-      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      if(btn){ btn.disabled = false; btn.innerHTML = RESTORE_BTN_DEFAULT; }
+      alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
     try{
       if(btn) btn.textContent = '⏳ Loading files...';
+      // ---------- یہاں سے بھی اکاؤنٹ یاد رکھ لیں — اگر صارف پہلے کبھی Backup سے پہلے سیدھا Restore کرے تو بھی آئندہ اکاؤنٹ فہرست دوبارہ نہ کھلے ----------
+      try{
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
+        });
+        if(userInfoRes.ok){
+          const userInfo = await userInfoRes.json();
+          if(userInfo.email && AppState.settings.gdriveAccountEmail !== userInfo.email){
+            AppState.settings.gdriveAccountEmail = userInfo.email;
+            persistAllData();
+          }
+        }
+      }catch(e){ /* اختیاری معلومات، ناکام ہو تو بھی Restore جاری رہے */ }
+      const folderId = await ensureGDriveBackupFolder(); // ---------- صرف "AIO Backup" فولڈر کے اندر کی فائلیں دکھائیں ----------
       const listUrl = 'https://www.googleapis.com/drive/v3/files' +
-        '?q=' + encodeURIComponent("mimeType='application/json' and trashed=false") +
+        '?q=' + encodeURIComponent(`'${folderId}' in parents and mimeType='application/json' and trashed=false`) +
         '&orderBy=createdTime desc&pageSize=30&fields=' + encodeURIComponent('files(id,name,createdTime)');
       const listRes = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + gDriveAccessToken } });
       if(!listRes.ok) throw new Error('List failed: ' + listRes.status);
@@ -5020,19 +5206,24 @@ async function restoreFromGoogleDrive(){
       renderGDriveFileList(files);
       document.getElementById('gdriveRestoreModal').classList.add('show');
     }catch(err){
-      alert('Google Drive سے فہرست نہیں مل سکی: ' + err.message);
+      alert('Could not load the file list from Google Drive: ' + err.message);
     }finally{
-      if(btn){ btn.disabled = false; btn.textContent = '📥 Restore from Google Drive'; }
+      if(btn){ btn.disabled = false; btn.innerHTML = RESTORE_BTN_DEFAULT; }
     }
   };
 
-  client.requestAccessToken({ prompt: '' }); // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔ صرف اسی صورت میں مکمل اجازت سکرین دوبارہ آئے گی جب پرانی اجازت واقعی منسوخ ہو چکی ہو ----------
+  // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔
+  // 'hint' میں پہلے سے محفوظ اکاؤنٹ کا ای میل بھیج کر Google کو بتا دیتے ہیں کس اکاؤنٹ کے ساتھ رہنا ہے —
+  // اسی سے وہ بار بار سب اکاؤنٹس کی فہرست دکھانے کی بجائے سیدھا اسی اکاؤنٹ کے ساتھ آگے بڑھتا ہے ----------
+  const requestOptions = { prompt: '' };
+  if(AppState.settings.gdriveAccountEmail) requestOptions.hint = AppState.settings.gdriveAccountEmail;
+  client.requestAccessToken(requestOptions);
 }
 
 function renderGDriveFileList(files){
   const wrap = document.getElementById('gdriveFileListWrap');
   if(files.length === 0){
-    wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px 10px;">اس Google اکاؤنٹ میں کوئی AIO POS بیک اپ فائل نہیں ملی۔</div>';
+    wrap.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px 10px;">No AIO POS backup file was found in this Google account.</div>';
     return;
   }
   wrap.innerHTML = files.map(f => {
@@ -5068,7 +5259,7 @@ async function selectGDriveBackupFile(fileId, fileName){
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
     document.getElementById('importConfirmModal').classList.add('show');
   }catch(err){
-    alert('فائل ڈاؤن لوڈ نہیں ہو سکی: ' + err.message);
+    alert('Could not download the file: ' + err.message);
   }
 }
 function closeGDriveRestoreModal(){
@@ -5167,6 +5358,7 @@ function proceedWithImport(){
       nextSupplierId = backup.nextSupplierId || nextSupplierId;
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
+      nextBatchId = backup.nextBatchId || nextBatchId;
       if(backup.settings) Object.assign(AppState.settings, backup.settings);
       if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
@@ -5205,7 +5397,15 @@ function showBackupConfirmModal(type, fileName, info){
   if(type === 'export'){
     icon.textContent = '✅';
     title.textContent = 'Backup Saved!';
-    body.innerHTML = `
+    const isDrive = /\(Google Drive\)$/.test(fileName);
+    const cleanFileName = fileName.replace(/ \(Google Drive\)$/, '');
+    body.innerHTML = isDrive ? `
+      <div class="backupFileChip">📄 ${cleanFileName}</div>
+      ${info.accountEmail ? `<p style="font-weight:700; color:var(--primary-dark);">✅ Backup Successful!</p><p>Google Drive account: <b>${info.accountEmail}</b></p>` : `<p style="font-weight:700; color:var(--primary-dark);">✅ Backup Successful!</p>`}
+      <p>Saved in Google Drive → folder <b>"AIO Backup"</b> → file <b>${cleanFileName}</b></p>
+      <p>${info.products} products • ${info.customers} customers • ${info.invoices} invoices</p>
+      <p class="backupHintText">Next time, tap "Restore from Google Drive" — this file (and every future one) will always be right there.</p>
+    ` : `
       <div class="backupFileChip">📄 ${fileName}</div>
       <p>Saved to your <b>Downloads</b> folder.</p>
       <p>${info.products} products • ${info.customers} customers • ${info.invoices} invoices</p>
@@ -5253,7 +5453,9 @@ window.addEventListener('beforeunload', persistAllData);
 // ---------- STATE (اب localStorage سے جُڑا ہوا ہے) ----------
 const DEFAULT_SETTINGS = {
   themeId: 'teal',
-  font: "'Segoe UI', system-ui, sans-serif",
+  font: "'Open Sans', Tahoma, sans-serif",
+  fontId: 'tahoma',
+  fontWeight: 400,
   paperWidth: 80,         // 58 | 80 (mm) — Print خود Android کے Print Service سسٹم سے چلتا ہے، الگ کنکشن سیٹنگ کی ضرورت نہیں
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
@@ -5292,7 +5494,7 @@ const DEFAULT_SETTINGS = {
   devPaymentType: '',
   devPaymentNumber: '',
   devPaymentName: '',
-  devPaymentAccounts: [], // {type, number, name} — اگر خالی ہو تو اوپر والے پرانے تین فیلڈز سے خودکار مائیگریٹ ہو جاتے ہیں
+  // ---------- (Play Store ورژن میں سبسکرپشن کے لیے کوئی لوکل پیمنٹ اکاؤنٹ محفوظ نہیں کیا جاتا) ----------
   // ---------- 🩹 مائیگریشن ورژن — جب بھی ہم پرانے فون/براؤزر پر خودکار کوئی نیا ڈیفالٹ ڈیٹا (جیسے Package Plans)
   // زبردستی لانا چاہیں، اس نمبر کو بڑھا دیتے ہیں۔ ہر پرانا محفوظ شدہ settings اس نئے نمبر سے پیچھے ہوگا،
   // چاہے rate/plans میں پہلے سے کچھ بھی موجود ہو — اس لیے migration ہمیشہ صحیح چلتی ہے ----------
@@ -5313,15 +5515,11 @@ const DEFAULT_SETTINGS = {
   // 1-دن کا پلان جان بوجھ کر یہاں شامل نہیں کیا — 7 دن فری ٹرائل پہلے سے موجود ہے، اس لیے صرف
   // 1 ماہ سے اوپر کے پلانز دکھانا زیادہ مناسب ہے۔ (per-day rate نیچے پھر بھی موجود ہے تاکہ کسٹمر
   // کیلکولیٹر میں کوئی بھی کسٹم دن لکھے تو قیمت خودکار نکل آئے۔)
-  subscriptionPlans: [
-    {days: 30,  price: 900},
-    {days: 90,  price: 2700},
-    {days: 180, price: 5200},
-    {days: 365, price: 9000},
-  ],
-  // ---------- 💰 روزانہ کی شرح — صرف اس وقت استعمال ہوتی ہے جب کسی پلان کی اپنی fixed price نہ ہو
-  // (کیلکولیٹر میں کوئی بھی کسٹم دن لکھے جائیں تو اسی ریٹ سے قیمت نکلے گی) ----------
-  perDayRate: 30,
+  // ---------- 🗂️ سبسکرپشن پیکج پلانز — اس Play Store ورژن میں یہ صرف Google Play Billing کی سکرین پر ہی
+  // منحصر ہیں (PLAY_BILLING_PRODUCTS)، اس لیے یہاں کوئی لوکل پلان ڈیٹا محفوظ نہیں کیا جاتا ----------
+  subscriptionPlans: [],
+  // ---------- 💰 روزانہ کی شرح — لوکل بلنگ نظام کے ساتھ ختم، اب استعمال نہیں ہوتی ----------
+  perDayRate: 0,
   // ---------- 💵 ابتدائی نقد رقم — وہ کیش جو آپ کے پاس ایپ استعمال شروع کرنے سے پہلے موجود تھا۔
   // Dashboard کا "Cash in Hand" اسی رقم سے شروع ہو کر، اس کے بعد کی ہر نقد فروخت/وصولی/ادائیگی سے خودکار اپڈیٹ ہوتا ہے —
   // یعنی مکمل طور پر آپ کے اصل ریکارڈ پر مبنی، کوئی خفیہ فرضی نمبر نہیں ----------
@@ -5393,44 +5591,6 @@ function getDeveloperContact(){
   };
 }
 
-/* =====================================================================
-   🔐 Subscription/License نظام — مکمل آفلائن، کسی سرور کی ضرورت نہیں
-   ہر انسٹالیشن کی اپنی منفرد UID ہوتی ہے۔ ڈویلپر اپنے نجی "License Generator"
-   ٹول میں UID + دنوں کی تعداد ڈال کر ایک کوڈ بناتا ہے — یہی کوڈ کسٹمر کو دیا جاتا ہے۔
-   ایپ اسی فارمولے سے خود تصدیق کر لیتی ہے (کوئی انٹرنیٹ درکار نہیں)۔
-   ===================================================================== */
-const LICENSE_SECRET = 'PBT-AIO-2026-SECRET-KEY'; // یہی سیکرٹ ڈویلپر کے نجی Generator ٹول میں بھی ہونا چاہیے
-
-function simpleHash(str){
-  let hash = 0;
-  for(let i = 0; i < str.length; i++){
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-// ---------- UID + دنوں کی تعداد سے 6 ہندسوں کا فعال سازی کوڈ بنائیں ----------
-// نیا کوڈ فارمیٹ: پہلے 3 ہندسے = دنوں کی تعداد (000-999)، آخری 3 ہندسے = چیک سم —
-// اسی لیے کسٹمر کو صرف ایک ہی کوڈ درج کرنا ہوتا ہے، دنوں کی تعداد الگ سے پوچھنے کی ضرورت نہیں —
-// کوڈ خود بتا دیتا ہے کتنے دن دیے گئے، اور چیک سم تصدیق کرتا ہے کہ کوڈ اسی ڈیوائس کے لیے صحیح ہے ----------
-function generateLicenseCode(uid, days){
-  const daysNum = Math.max(1, Math.min(999, parseInt(days) || 0));
-  const daysPart = String(daysNum).padStart(3, '0');
-  const raw = `${uid}-${daysPart}-${LICENSE_SECRET}`;
-  const checksum = String(simpleHash(raw) % 1000).padStart(3, '0');
-  return daysPart + checksum;
-}
-// ---------- کوڈ سے دنوں کی تعداد نکالیں اور تصدیق کریں کہ یہ اسی ڈیوائس کے لیے صحیح بنایا گیا تھا ----------
-function verifyAndExtractDays(uid, code){
-  const trimmed = (code || '').trim();
-  if(!/^\d{6}$/.test(trimmed)) return null;
-  const daysPart = trimmed.slice(0, 3);
-  const daysNum = parseInt(daysPart);
-  const expected = generateLicenseCode(uid, daysNum);
-  return (expected === trimmed) ? daysNum : null;
-}
-
 // ---------- ہر انسٹالیشن کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
 // نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 30 دن کا مفت (Beta) ٹرائل بھی شروع ہو جاتا ہے — تاکہ
 // کسی نئے صارف کو فائل کھولتے ہی PIN/Activation کے چکر میں نہ الجھنا پڑے، وہ فوراً ایپ آزما سکے۔
@@ -5465,26 +5625,6 @@ function daysLeftInSubscription(){
   return Math.round((expDate - today) / (1000*60*60*24));
 }
 
-// ---------- کسٹمر کا درج کردہ کوڈ خود تصدیق کریں — دنوں کی تعداد کوڈ کے اندر سے نکل آتی ہے ----------
-function activateSubscription(code){
-  const uid = getOrCreateDeviceUID();
-  const daysNum = verifyAndExtractDays(uid, code);
-  if(!daysNum) return {success:false, message:'Invalid activation code. Please double-check with your developer.'};
-
-  // ---------- اگر پہلے سے فعال ادائیگی شدہ سبسکرپشن ہو تو نئے دن اس میں جوڑ دیں (توسیع/renewal)۔
-  // لیکن اگر ابھی صرف مفت ٹرائل چل رہا ہو تو نیا کوڈ اسی پر جمع نہیں ہونا چاہیے (ورنہ ٹرائل کے باقی دن +
-  // نئے دن مل کر غیر ارادی طور پر ڈبل مل جاتے ہیں) — اس صورت میں نیا کوڈ آج سے تازہ شروع ہو گا، ٹرائل ختم ہو کر
-  // اصل سبسکرپشن اس کی جگہ لے لے گی ----------
-  const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
-  const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
-  base.setDate(base.getDate() + daysNum);
-  AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
-  AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10); // ---------- آج کی تاریخ — بینر میں "Subscribed on" کے لیے ----------
-  AppState.settings.isOnFreeTrial = false; // ---------- اصل ادائیگی شدہ کوڈ لگ گیا — اب یہ مفت ٹرائل نہیں رہا ----------
-  persistAllData();
-  return {success:true, expiry: AppState.settings.subscriptionExpiry, daysGranted: daysNum};
-}
-
 // ---------- ہوم پیج (اور ہر صفحے) کے اوپر باریک پٹی — کب سبسکرائب کیا، کب ختم ہوگی، کتنے دن باقی — روزانہ خودکار تازہ ----------
 function renderSubscriptionBanner(){
   const row = document.getElementById('subBoxRow');
@@ -5501,13 +5641,44 @@ function renderSubscriptionBanner(){
   document.getElementById('subBoxEndVal').textContent = formatDateDMY(AppState.settings.subscriptionExpiry);
   document.getElementById('subBoxDaysVal').textContent = `${daysLeft} day${daysLeft === 1 ? '' : 's'}`;
 
-  // ---------- میعاد ختم ہونے کے قریب "Remaining" ڈبے کا رنگ خودکار خطرے کی طرف بدلے ----------
+  // ---------- میعاد ختم ہونے کے قریب "Remaining" ڈبے کا رنگ خودکار خطرے کی طرف بدلے، اور آخری 3 دن میں ہلکا سا چمکے بھی ----------
   const daysBox = document.getElementById('subBoxDays');
-  if(daysLeft <= 3){ daysBox.style.background = '#fee2e2'; daysBox.style.color = 'var(--danger)'; }
+  daysBox.classList.remove('subBoxUrgentGlow');
+  if(daysLeft <= 3){ daysBox.style.background = '#fee2e2'; daysBox.style.color = 'var(--danger)'; daysBox.classList.add('subBoxUrgentGlow'); }
   else if(daysLeft <= 7){ daysBox.style.background = '#fff7ed'; daysBox.style.color = '#c2410c'; }
   else { daysBox.style.background = '#dcfce7'; daysBox.style.color = 'var(--success)'; }
 
   row.style.display = 'flex';
+
+  // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
+  if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
+}
+
+// ---------- 🎁 روزانہ ایک بار Trial یاد دہانی — 2 دن یا کم بچے ہوں تو زیادہ نمایاں (بٹن والا) پاپ اپ،
+// ورنہ صرف ہلکا سا خود بخود غائب ہونے والا Toast (بغیر کسی بٹن کے، تنگ نہیں کرتا) ----------
+function maybeShowTrialReminder(daysLeft){
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(AppState.settings.trialReminderShownOn === todayStr) return; // آج ایک بار دکھا چکے
+  AppState.settings.trialReminderShownOn = todayStr;
+  persistAllData();
+
+  if(daysLeft <= 2){
+    document.getElementById('trialUrgentTitle').textContent =
+      daysLeft <= 0 ? 'Your free trial has ended' : `Only ${daysLeft} day${daysLeft===1?'':'s'} left in your trial`;
+    document.getElementById('trialUrgentBody').textContent =
+      'Subscribe now to keep using the same reports and features, and to continue your business without any interruption.';
+    document.getElementById('trialUrgentModal').classList.add('show');
+  } else {
+    const toast = document.getElementById('trialReminderToast');
+    document.getElementById('trialReminderToastText').textContent =
+      `You are in your Free Trial period. ${daysLeft} day${daysLeft===1?'':'s'} remaining — subscribe anytime to keep using the same reports & features and continue your business smoothly.`;
+    toast.style.display = 'flex';
+    toast.style.animation = 'none'; toast.offsetHeight; toast.style.animation = ''; // ---------- ری سٹارٹ اینیمیشن ----------
+    setTimeout(() => { toast.style.display = 'none'; }, 4600);
+  }
+}
+function dismissTrialUrgentModal(){
+  document.getElementById('trialUrgentModal').classList.remove('show');
 }
 
 // ---------- 🏪 ہوم پیج کا بزنس کارڈ — لوگو، دکان کا نام، مالک کا نام، فون نمبر ----------
@@ -5538,6 +5709,7 @@ const HOME_TILE_GROUPS_ADMIN = [
     {icon:'🖨️', label:'Reports', action:'openReportCenterModal'},
   ]},
   { section: '⚙️ Management', tiles: [
+    {icon:'🏦', label:'My Account', screen:'myaccount'},
     {icon:'🔑', label:'Users', screen:'users'},
     {icon:'⚙️', label:'Settings', screen:'settings'},
   ]},
@@ -5673,9 +5845,8 @@ function handleBusinessLogoUpload(event){
 let devChatContext = 'support';
 function openDevChat(context){
   devChatContext = context;
-  const uid = getOrCreateDeviceUID();
   document.getElementById('devChatTitle').textContent = context === 'subscription' ? '💬 Ask About Subscription' : '💬 Chat with Developer';
-  document.getElementById('devChatUidLine').textContent = `Your Device ID: ${uid}`;
+  document.getElementById('devChatUidLine').textContent = '';
   document.getElementById('devChatPanel').classList.toggle('show');
 }
 
@@ -5700,23 +5871,36 @@ async function shareAppLink(){
 
 
 function buildDevChatMessage(){
-  const uid = getOrCreateDeviceUID();
   if(devChatContext === 'subscription'){
     // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ عام دلچسپی کا پیغام بھیجیں ----------
     if(selectedPlanDays && selectedPlanPrice){
-      return `Sir, I want to subscribe your AIO POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.\n\nMy Device ID:\n${uid}`;
+      return `Sir, I want to subscribe your AIO POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.`;
     }
     return buildAdInquiryMessage();
   }
-  // ---------- مسئلہ رپورٹ کرنے کا پیغام — اردو میں، خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
-  return `محترم ڈیویلپر،\nمیں آپ کی بیٹا ورژن AIO POS استعمال کر رہا ہوں۔ میں نے اس کے اندر یہ مسئلہ محسوس کیا ہے اور میرا مشورہ یہ ہے:\n\n\n\nمیرا Device ID:\n${uid}`;
+  // ---------- مسئلہ رپورٹ کرنے کا پیغام — خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
+  return `Dear Developer,\nI am using your beta version of AIO POS. I noticed the following issue and my suggestion is:\n\n\n`;
+}
+
+// ---------- 🆘 "Trouble Subscribing?" — Trial ختم ہونے کے قریب، یا Package Plans میں، ان لوگوں کے لیے
+// جن کا ڈیبٹ/کریڈٹ کارڈ Google Play پر کام نہیں کر رہا۔ WhatsApp پر ایک تیار (fill-in-the-blank) پیغام کھلتا ہے
+// تاکہ نام/ملک/مسئلہ خود بھر کر بھیج سکیں، اور آپ کو مکمل تفصیل کے ساتھ پیغام ملے —
+// ⚠️ یہاں Device ID جان بوجھ کر شامل نہیں کیا: اس Play Store ورژن میں کوئی مقامی کوڈ ریڈیم نہیں ہوتا،
+// اس لیے Device ID بھیجنے کا کوئی عملی فائدہ نہیں — بلاوجہ Data Safety اعلان کی ضرورت پڑ سکتی تھی ----------
+function sendTroubleSubscribingMessage(){
+  const msg = `Hi, I'm trying to subscribe to AIO POS but I'm having trouble completing the payment through Google Play (e.g., no debit/credit card, or a Google Play Gift Card is not easily available where I live).\n\n` +
+    `My Name: \n` +
+    `My Country/City: \n` +
+    `What's the problem: \n\n` +
+    `Please guide me on how I can subscribe.`;
+  const contact = getDeveloperContact();
+  window.open(`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // ---------- My Ads پوسٹر/اشتہار دیکھ کر رابطہ کرنے والے نئے دلچسپی رکھنے والے کے لیے مختصر، دوستانہ پیغام —
 // "package plan" کا پرانا فرض شدہ حوالہ ہٹا دیا، چونکہ اب کوئی پیڈ پیکج پلان دکھایا نہیں جاتا ----------
 function buildAdInquiryMessage(){
-  const uid = getOrCreateDeviceUID();
-  return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.\n\nMy Device ID:\n${uid}`;
+  return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.`;
 }
 
 function sendDevChat(channel){
@@ -5835,7 +6019,24 @@ function finishLogin(user, forceRemember){
   document.getElementById('app').style.display = 'grid';
   goTo('home'); // ہر role پہلے Home اسکرین پر جائے گا
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
-  if(user.role === 'admin') setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+  if(user.role === 'admin'){
+    if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
+    else setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+  }
+}
+
+// ---------- 🆕 پہلی بار ایپ کھلنے پر: صرف ایک ہی دفعہ نظر آنے والی دعوت — "ابھی Google Drive جوڑیں" یا "بعد میں" ----------
+function showGDriveFirstRunPrompt(){
+  AppState.settings.gdrivePromptShown = true;
+  persistAllData();
+  document.getElementById('gdriveFirstRunModal')?.classList.add('show');
+}
+function dismissGDriveFirstRunPrompt(){
+  document.getElementById('gdriveFirstRunModal')?.classList.remove('show');
+}
+function connectGDriveFromFirstRunPrompt(){
+  dismissGDriveFirstRunPrompt();
+  backupToGoogleDrive();
 }
 
 // ---------- 💾 دن میں تین اوقات میں (صبح/دوپہر/رات) ایپ کھلنے پر ایک بار بیک اپ یاد دہانی دکھائیں —
@@ -5862,7 +6063,7 @@ function dismissBackupReminderToast(){
   document.getElementById('backupReminderToast')?.classList.remove('show');
 }
 function backupNowFromReminder(){
-  exportBackupData();
+  backupToGoogleDrive();
   dismissBackupReminderToast();
 }
 
@@ -5871,65 +6072,23 @@ function showRoleToast(role, name){
   const roleLabel = role === 'admin' ? '🔑 Admin' : '🧑‍💼 Salesman';
   const toast = document.createElement('div');
   toast.className = 'roleToast';
-  toast.textContent = `Logged in as ${roleLabel} — ${name}`;
+  toast.textContent = roleLabel; // ---------- پہلے یہاں پورا "Logged in as Admin — Admin User" جملہ تھا جو ہیڈر کو ڈھانپ لیتا تھا — اب صرف مختصر رول ----------
   document.body.appendChild(toast);
   setTimeout(() => toast.classList.add('show'), 50);
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
 }
 
-// ---------- سبسکرپشن ختم/غیر فعال ہونے پر یہ صفحہ دکھایا جائے — فعال سازی کوڈ درج کرنے کے لیے ----------
+// ---------- سبسکرپشن ختم/غیر فعال ہونے پر یہ صفحہ دکھایا جائے — سیدھا Google Play Billing پلانز کی طرف لے جائے ----------
 function showSubscriptionGate(){
-  const uid = getOrCreateDeviceUID();
-  document.getElementById('subGateUid').textContent = uid;
   const exp = AppState.settings.subscriptionExpiry;
   document.getElementById('subGateStatus').textContent = exp
     ? (AppState.settings.isOnFreeTrial
-        ? `Your 30-day free trial ended on ${formatDateDMY(exp)}. Please contact the developer to continue.`
+        ? `Your free trial ended on ${formatDateDMY(exp)}. Please subscribe to continue.`
         : `Your subscription expired on ${formatDateDMY(exp)}.`)
     : `This app is not yet activated.`;
   document.getElementById('subscriptionGateScreen').style.display = 'flex';
   // ---------- ٹرائل ختم ہوتے ہی سیدھا Package Plans بھی خودکار سامنے آ جائیں — صارف کو الگ سے بٹن ڈھونڈنا نہ پڑے ----------
   openPackagePlansModal();
-}
-
-function submitActivationCode(){
-  const code = document.getElementById('subGateCodeInput').value;
-  const result = activateSubscription(code);
-  const msgEl = document.getElementById('subGateMsg');
-  if(result.success){
-    msgEl.style.color = 'var(--success)';
-    msgEl.textContent = `✅ Activated! ${result.daysGranted} day(s) added — valid until ${result.expiry}. Opening app...`;
-    setTimeout(() => {
-      document.getElementById('subscriptionGateScreen').style.display = 'none';
-      document.getElementById('app').style.display = 'grid';
-      goTo('home');
-      showRoleToast(AppState.currentRole, AppState.currentUser?.name || '');
-    }, 1200);
-  } else {
-    msgEl.style.color = 'var(--danger)';
-    msgEl.textContent = '❌ ' + result.message;
-  }
-}
-
-// ---------- Login سکرین پر ہی سیدھا کوڈ لگانے کا خانہ کھولیں/بند کریں ----------
-function toggleLoginActivationBox(){
-  const box = document.getElementById('loginActivationBox');
-  if(box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
-}
-
-// ---------- PIN درج کیے بغیر ہی، سیدھا Login سکرین سے کوڈ لگا کر ٹرائل/سبسکرپشن فعال کریں ----------
-function activateFromLoginScreen(){
-  const code = document.getElementById('loginActivationCodeInput').value;
-  const result = activateSubscription(code);
-  const msgEl = document.getElementById('loginActivationMsg');
-  if(result.success){
-    msgEl.style.color = 'var(--success)';
-    msgEl.textContent = `✅ Activated! ${result.daysGranted} day(s) added — valid until ${result.expiry}.`;
-    setTimeout(() => { setupLoginScreen(); }, 1000); // ---------- لاگ ان سکرین کی حیثیت (Trial/Subscribed) فوراً تازہ ہو جائے ----------
-  } else {
-    msgEl.style.color = 'var(--danger)';
-    msgEl.textContent = '❌ ' + result.message;
-  }
 }
 
 // ---------- اگر اس ڈیوائس پر پن یاد رکھا ہوا ہے تو خودکار لاگ ان کر دیں (لاگ ان اسکرین دکھائے بغیر) ----------
@@ -6095,6 +6254,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'advOrderPicker') renderAdvOrderPickerScreen();
   if(screenName === 'settings') renderSettingsScreen();
   if(screenName === 'billsettings') renderBillSettingsScreen();
+  if(screenName === 'myaccount') renderMyAccountScreen();
   if(screenName === 'payments') renderPaymentsScreen();
   if(screenName === 'trends') renderTrendsScreen();
 
@@ -6168,36 +6328,66 @@ function closeSidebar(){
 // تاکہ "Admin پاسورڈ کہاں ہے" یا "تھیم کلر کہاں ہیں" لکھتے ہی صحیح جگہ مل جائے
 // =====================================================================
 const APP_SEARCH_INDEX = [
-  {label:'Home', path:'Home Screen', screen:'home', keywords:'home main dashboard start'},
-  {label:'Billing / New Sale', path:'Billing', screen:'billing', keywords:'billing sale invoice cart new bill sell'},
-  {label:'Bill History', path:'Bill History', screen:'billhistory', keywords:'bill history invoices past sales voided returns return item'},
-  {label:'My Diary', path:'My Diary', screen:'mydiary', keywords:'diary payable receivable owe owed personal record khata'},
-  {label:'Expenditure', path:'Expenditure', screen:'expenditure', keywords:'expenditure expense expenses spending daily cost'},
-  {label:'Dashboard & Reports', path:'Dashboard', screen:'dashboard', keywords:'dashboard reports sales summary profit loss financial health stock value cash'},
-  {label:'Trend Analysis', path:'Dashboard → Trend Analysis', screen:'dashboard', keywords:'trend analysis top selling items customers areas'},
-  {label:'Products & Variants', path:'Products', screen:'products', keywords:'products variants items stock price barcode'},
-  {label:'Categories', path:'Categories', screen:'categories', keywords:'categories category product grouping'},
-  {label:'Stock Adjustment', path:'Stock Adjustment', screen:'stockadjustment', keywords:'stock adjustment adjust manual negative low stock reset'},
+  {label:'Home', path:'Home Screen', screen:'home', keywords:'home main dashboard start launcher'},
+  {label:'Billing / New Sale', path:'Billing', screen:'billing', keywords:'billing sale invoice cart new bill sell checkout retail wholesale walk-in'},
+  {label:'Bill History', path:'Bill History', screen:'billhistory', keywords:'bill history invoices past sales voided returns return item pending clear delete'},
+  {label:'My Diary', path:'My Diary', screen:'mydiary', keywords:'diary payable receivable owe owed personal record khata i got i gave udhaar'},
+  {label:'Expenditure', path:'Expenditure', screen:'expenditure', keywords:'expenditure expense expenses spending daily cost new expense'},
+  {label:'Dashboard & Reports', path:'Dashboard', screen:'dashboard', keywords:'dashboard reports sales summary profit loss financial health stock value cash net position admin'},
+  {label:'Trend Analysis', path:'Dashboard → Trend Analysis', screen:'dashboard', keywords:'trend analysis top selling items customers areas revenue qty sold'},
+  {label:'Products & Variants', path:'Products', screen:'products', keywords:'products variants items stock price barcode add new product edit'},
+  {label:'Categories', path:'Categories', screen:'categories', keywords:'categories category product grouping rename uncategorize delete add move'},
+  {label:'Stock Adjustment', path:'Stock Adjustment', screen:'stockadjustment', keywords:'stock adjustment adjust manual negative low stock reset quantity'},
   {label:'Track Inventory (On/Off)', path:'Stock Adjustment / Settings', screen:'stockadjustment', keywords:'track inventory toggle negative stock block sale out of stock'},
-  {label:'Customers', path:'Customers', screen:'customers', keywords:'customers wallet receivable phone contact reminder'},
-  {label:'Suppliers', path:'Suppliers', screen:'suppliers', keywords:'suppliers vendor payable bank account pay supplier'},
-  {label:'Purchase Orders', path:'Purchase Orders', screen:'purchaseorders', keywords:'purchase order po restock get from low stock'},
-  {label:'Payments', path:'Payments', screen:'payments', keywords:'payments record customer supplier receipt paid'},
-  {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking'},
+  {label:'Expiry Batches (Multiple Boxes)', path:'Products', screen:'products', keywords:'expiry batch batches multiple boxes different dates lot fefo medicine medical'},
+  {label:'Customers', path:'Customers', screen:'customers', keywords:'customers wallet receivable phone contact reminder walk-in add new import csv'},
+  {label:'Suppliers', path:'Suppliers', screen:'suppliers', keywords:'suppliers vendor payable bank account pay supplier add new import csv'},
+  {label:'Purchase Orders', path:'Purchase Orders', screen:'purchaseorders', keywords:'purchase order po restock get from low stock receive'},
+  {label:'Payments', path:'Payments', screen:'payments', keywords:'payments record customer supplier receipt paid received total'},
+  {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking pending fulfilled print list'},
   {label:'My Ads — Promote App', path:'My Ads', action:'openMyAdsModal', keywords:'my ads poster promote advertisement share whatsapp flex'},
-  {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast'},
-  {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission'},
-  {label:'Settings — Business Info', path:'Settings', screen:'settings', keywords:'business info name logo owner address phone shop details'},
+  {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast todays sale'},
+  {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission active inactive pin'},
+  {label:'Approval Requests', path:'Users → Approval Requests', screen:'users', keywords:'approval requests pending bills salesman approve reject'},
+  {label:'My Account', path:'My Account', screen:'myaccount', keywords:'my account business payment diary owner mobile number shop hub'},
+  {label:'My Account — Business Info', path:'My Account', screen:'myaccount', keywords:'my account business info name logo owner address phone shop details'},
+  {label:'My Account — Payment Accounts', path:'My Account', screen:'myaccount', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive card poster receipt'},
+  {label:'My Account — My Diary', path:'My Account', screen:'myaccount', keywords:'my diary shortcut personal ledger khata'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
-  {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', anchor:'settingsCardBackup', keywords:'backup export import restore data save json downloads last backup'},
-  {label:'Settings — Theme Color', path:'Settings', screen:'settings', anchor:'settingsCardTheme', keywords:'theme color colour appearance look design purple teal blue'},
-  {label:'Settings — Admin PIN / Password', path:'Settings', screen:'settings', keywords:'admin pin password change security cnic dob recovery login'},
-  {label:'Settings — Print / Paper Size', path:'Bill & Print Settings', screen:'billsettings', anchor:'settingsCardPrinter', keywords:'print paper size thermal 58mm 80mm receipt font invoice style a4'},
-  {label:'Settings — Payment Accounts', path:'Settings', screen:'settings', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive'},
-  {label:'Settings — Storage Usage', path:'Settings', screen:'settings', anchor:'storageUsageCard', keywords:'storage usage space full device limit photos'},
-  {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply'},
-  {label:'Package Plans', path:'Home → Tools', action:'openPackagePlansModal', keywords:'package plans subscription price days activation code'},
+  {label:'Settings — Opening Cash Balance', path:'Settings', screen:'settings', keywords:'opening cash balance starting amount till'},
+  {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', anchor:'settingsCardBackup', keywords:'backup export import restore data save json downloads last backup google drive local file'},
+  {label:'Settings — Theme Color', path:'Settings', screen:'settings', anchor:'settingsCardTheme', keywords:'theme color colour appearance look design purple teal blue maroon green pink slate brass'},
+  {label:'Settings — Font Style', path:'Settings', screen:'settings', anchor:'settingsCardTheme', keywords:'font style typography arial black narrow calibri archivo roboto condensed carlito text style'},
+  {label:'Settings — Admin PIN / Password', path:'Settings', screen:'settings', keywords:'admin pin password change security cnic dob recovery login unlock developer contact'},
+  {label:'Settings — App Display Size / Zoom', path:'Settings', screen:'settings', keywords:'app display size zoom text bigger smaller ui scale'},
+  {label:'Settings — Danger Zone / Reset', path:'Settings', screen:'settings', keywords:'reset bills transactions master reset erase everything danger zone delete all'},
+  {label:'Settings — Print / Paper Size', path:'Bill & Print Settings', screen:'billsettings', anchor:'settingsCardPrinter', keywords:'print paper size thermal 58mm 80mm receipt invoice style a4 test print'},
+  {label:'Settings — Receipt Content', path:'Bill & Print Settings', screen:'billsettings', keywords:'receipt content sort items alphabetically salesman name sold by footer powered by'},
+  {label:'Settings — Print Text Size', path:'Bill & Print Settings', screen:'billsettings', keywords:'print text size bill font size receipt'},
+  {label:'Settings — Barcode Labels', path:'Bill & Print Settings', screen:'billsettings', keywords:'barcode labels print sticker code39 copies variant'},
+  {label:'Settings — Storage Usage', path:'Settings', screen:'settings', anchor:'storageUsageCard', keywords:'storage usage space full device limit photos mb used'},
+  {label:'Reply Templates', path:'Home → Tools', action:'openReplyTemplatesModal', keywords:'reply templates canned message whatsapp sms quick reply payment reminder thank you'},
+  {label:'Package Plans', path:'Home → Tools', action:'openPackagePlansModal', keywords:'package plans subscription price days activation code trial google play billing'},
 ];
+
+// ---------- 🔍 App Search بار — کمپیکٹ (صرف آئیکن)، دبانے پر کھلتی ہے، باہر ٹیپ کرنے یا نتیجہ چننے پر خودکار بند ----------
+function toggleGlobalSearchBar(){
+  const bar = document.getElementById('globalSearchBar');
+  if(!bar) return;
+  const opening = !bar.classList.contains('expanded');
+  bar.classList.toggle('expanded', opening);
+  if(opening) setTimeout(() => document.getElementById('appSearchInput')?.focus(), 50);
+  else document.getElementById('appSearchInput').value = '';
+}
+document.addEventListener('click', (e) => {
+  const bar = document.getElementById('globalSearchBar');
+  if(!bar || !bar.classList.contains('expanded')) return;
+  if(!bar.contains(e.target)){
+    bar.classList.remove('expanded');
+    document.getElementById('appSearchInput').value = '';
+    document.getElementById('appSearchResults').classList.remove('show');
+  }
+});
 
 function renderAppSearchResults(query){
   const wrap = document.getElementById('appSearchResults');
@@ -6208,10 +6398,29 @@ function renderAppSearchResults(query){
   // ضروری ہے (سب الفاظ ملیں تب ہی میچ) — اس طرح لفظوں کی ترتیب مختلف ہونے پر بھی صحیح چیز مل جاتی ہے،
   // اور جو چیز واقعی موجود نہیں اس کے غلط نتائج بھی سامنے نہیں آتے ----------
   const qWords = q.split(/\s+/).filter(Boolean);
-  const matches = APP_SEARCH_INDEX.filter(item => {
-    const haystack = (item.label + ' ' + item.path + ' ' + item.keywords).toLowerCase();
-    return qWords.every((w) => haystack.includes(w));
-  }).slice(0, 8);
+  const scored = APP_SEARCH_INDEX
+    .map(item => {
+      const label = item.label.toLowerCase();
+      const path = item.path.toLowerCase();
+      const kw = item.keywords.toLowerCase();
+      const haystack = label + ' ' + path + ' ' + kw;
+      const allWordsMatch = qWords.every((w) => haystack.includes(w));
+      if(!allWordsMatch) return null;
+      // ---------- بہترین/سب سے متعلقہ نتیجہ سب سے اوپر: لیبل کے شروع میں لفظ ملے تو سب سے زیادہ نمبر،
+      // پھر کسی بھی کی ورڈ کا مکمل لفظ ملے، پھر عام سب سٹرنگ میچ ----------
+      let score = 0;
+      qWords.forEach(w => {
+        if(label.startsWith(w)) score += 100;
+        else if(label.includes(' ' + w) || label === w) score += 60;
+        else if(label.includes(w)) score += 30;
+        if(kw.split(/\s+/).includes(w)) score += 40;
+        else if(kw.includes(w)) score += 10;
+      });
+      return {item, score};
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
+  const matches = scored.map(s => s.item).slice(0, 8);
 
   if(matches.length === 0){
     wrap.innerHTML = '<div class="appSearchEmpty">No matches — try a different word</div>';
@@ -6774,7 +6983,8 @@ let activeBillingSearch = '';
 let customCardOrder = []; // یوزر کی دستی ڈریگ سے طے شدہ ترتیب (اب product_ids کی صورت میں — پراڈکٹ کی سطح پر)
 
 function renderBillingCategoryRail(){
-  const panel = document.getElementById('categorySideRail');
+  const panel = document.getElementById('billingCategoryDropdownPanel');
+  const label = document.getElementById('billingCategoryDropdownLabel');
   if(!panel) return;
 
   const counts = {};
@@ -6786,14 +6996,27 @@ function renderBillingCategoryRail(){
   (customCategories || []).forEach(cat => { if(!(cat in counts)) counts[cat] = 0; });
   const categories = Object.keys(counts).sort();
 
-  // ---------- سب سے اوپر ✏️ ایڈٹ بٹن — اسی کالم کے اندر، براہ راست Categories مینجمنٹ صفحے پر لے جائے ----------
-  const items = [`<div class="categorySideRailEditBtn" onclick="goTo('categories')">✏️<br>Edit</div>`];
-  items.push(`<div class="categorySideRailItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span>All</span><span class="csrCount">${productsData.length}</span></div>`);
+  const items = [`<div class="categoryDropdownItem ${activeBillingCategory === 'all' ? 'active' : ''}" onclick="filterBillingCategory('all')"><span class="cdiName">All</span><span class="cdCount">${productsData.length}</span></div>`];
   categories.forEach(cat => {
-    items.push(`<div class="categorySideRailItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${cat.replace(/'/g,"\\'")}')"><span class="csrPencil" onclick="renameCategoryInline(event,'${cat.replace(/'/g,"\\'")}')" title="Rename category">✏️</span><span>${cat}</span><span class="csrCount">${counts[cat]}</span></div>`);
+    const safe = cat.replace(/'/g,"\\'");
+    items.push(`<div class="categoryDropdownItem ${activeBillingCategory === cat ? 'active' : ''}" onclick="filterBillingCategory('${safe}')"><span class="cdiName">${cat}</span><span class="cdiPencil" onclick="renameCategoryInline(event,'${safe}')" title="Rename category">✏️</span><span class="cdCount">${counts[cat]}</span></div>`);
   });
+  items.push(`<div class="categoryDropdownItem categoryDropdownAddNew" onclick="goTo('categories')">📂 Manage Categories</div>`);
   panel.innerHTML = items.join('');
+  if(label) label.textContent = activeBillingCategory === 'all' ? '📂 All Categories' : `📂 ${activeBillingCategory}`;
 }
+
+function toggleBillingCategoryDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('billingCategoryDropdownWrap');
+  if(!wrap) return;
+  wrap.classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('billingCategoryDropdownWrap');
+  if(!wrap || !wrap.classList.contains('open')) return;
+  if(!wrap.contains(e.target)) wrap.classList.remove('open');
+});
 
 // ---------- بلنگ اسکرین کے کیٹگری کالم سے براہ راست کیٹگری کا نام تبدیل کریں —
 //            Categories صفحے پر جائے بغیر، اسی جگہ prompt کھل کر نام بدل دے اور فوراً یہیں تازہ ہو جائے ----------
@@ -6828,21 +7051,6 @@ function addNewCategoryFromDropdown(e){
   renderBillingCategoryRail();
   filterBillingCategory(name);
 }
-
-// ---------- کیٹیگری پاپ اپ کھولیں/بند کریں (دبانے پر ٹوگل ہو) ----------
-function toggleCategoryDropdown(e){
-  if(e) e.stopPropagation();
-  const wrap = document.getElementById('categoryDropdownWrap');
-  if(!wrap) return;
-  wrap.classList.toggle('open');
-}
-
-// ---------- پاپ اپ کے باہر کہیں بھی ٹیپ کریں تو خودکار بند ہو جائے ----------
-document.addEventListener('click', (e) => {
-  const wrap = document.getElementById('categoryDropdownWrap');
-  if(!wrap || !wrap.classList.contains('open')) return;
-  if(!wrap.contains(e.target)) wrap.classList.remove('open');
-});
 
 /* =====================================================================
    کارڈز کو دبا کر ڈریگ کر کے اوپر/نیچے لے جانا (دستی ترتیب)
@@ -6979,6 +7187,8 @@ function filterBillingCategory(cat){
   renderBillingCategoryRail();
   renderBillingProductGrid();
   if(AppState.settings.billingSearchSuggestionsOn) renderBillingSearchSuggestions(activeBillingSearch);
+  const wrap = document.getElementById('billingCategoryDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
 }
 
 // ---------- Item Search: ٹائپ کرتے ہی وہی گرڈ فلٹر ہو جاتا ہے — کوئی الگ ڈراپ ڈاؤن نہیں ----------
@@ -7959,7 +8169,7 @@ function finalizeInvoice(){
   Billing.cart.forEach(item => {
     productsData.forEach(p => {
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ v.stock -= item.qty; v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
+      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
     });
   });
 
@@ -8223,7 +8433,7 @@ function approvePendingBill(){
   p.items.forEach(item => {
     productsData.forEach(prod => {
       const v = prod.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ v.stock -= item.qty; v.salesCount = (v.salesCount || 0) + item.qty; }
+      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; }
     });
   });
 
@@ -8672,10 +8882,10 @@ function renderCategoriesScreen(){
           <div style="font-size:12px; color:var(--muted);">${counts[cat]} product${counts[cat] === 1 ? '' : 's'}</div>
         </div>
         <div style="display:flex; gap:8px;">
-          ${cat !== 'Uncategorized' ? `<button class="btnResetPin" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
+          ${cat !== 'Uncategorized' ? `<button class="categoryActionBtn rename" onclick="renameCategoryPrompt('${cat.replace(/'/g,"\\'")}')">✏️ Rename</button>` : ''}
           ${counts[cat] > 0 && cat !== 'Uncategorized'
-            ? `<button class="btnResetPin" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
-            : counts[cat] === 0 ? `<button class="btnResetPin" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
+            ? `<button class="categoryActionBtn uncategorize" onclick="clearCategoryProducts('${cat.replace(/'/g,"\\'")}')">↩️ Uncategorize</button>`
+            : counts[cat] === 0 ? `<button class="categoryActionBtn delete" onclick="deleteEmptyCategory('${cat.replace(/'/g,"\\'")}')">🗑️ Delete</button>` : ''}
         </div>
       </div>
       ${cat !== 'Uncategorized' ? `<button class="testPrintBtn" style="margin-top:10px; background:#eef2ff; color:var(--primary-dark);" onclick="openManageCategoryProductsModal('${cat.replace(/'/g,"\\'")}')">📦 Add/Move Products into "${cat}"</button>` : ''}
@@ -8766,7 +8976,7 @@ const PRODUCT_FIELD_SYNONYMS = {
 // ---------- CSV متن کو پراڈکٹ rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processProductCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  if(rows.length < 2){ alert('No data found — the first row must be a header, with at least one data row below it.'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
   const objs = rows.slice(1).map(r => {
     const o = {};
@@ -8874,9 +9084,9 @@ let pendingPartyImportRows = [];
 // ---------- CSV متن کو کسٹمر/سپلائر rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processPartyCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  if(rows.length < 2){ alert('No data found — the first row must be a header, with at least one data row below it.'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PARTY_FIELD_SYNONYMS);
-  if(fieldMap.name < 0){ alert('نام والا کالم نہیں مل سکا — فائل میں "Name" جیسا کوئی کالم ضرور ہونا چاہیے۔'); return false; }
+  if(fieldMap.name < 0){ alert('Could not find a Name column — the file must have a column like "Name".'); return false; }
   const objs = rows.slice(1).map(r => ({
     name: (r[fieldMap.name] || '').trim(),
     phone: fieldMap.phone >= 0 ? (r[fieldMap.phone] || '').trim() : '',
@@ -8898,7 +9108,7 @@ function showPartyImportPreview(){
   const isCustomer = currentPartyTab === 'customers';
   const objs = pendingPartyImportRows;
   if(objs.length === 0){
-    alert('کوئی نام والی row نہیں ملی۔ فائل میں "Name" کالم بھرا ہونا چاہیے۔');
+    alert('No rows with a name were found. The "Name" column must be filled in.');
     return;
   }
   const list = isCustomer ? customersData : suppliersData;
@@ -9012,12 +9222,12 @@ function reconstructRowsFromWords(words){
 async function processScanFiles(files){
   if(!files.length) return;
   if(typeof Tesseract === 'undefined'){
-    alert('❌ سکین سسٹم لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔');
+    alert('❌ Could not load the scanning system — please turn on the internet and try again.');
     return;
   }
   document.getElementById('scanProgressWrap').style.display = 'block';
   document.getElementById('scanReviewWrap').style.display = 'none';
-  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — پہلی بار تھوڑا وقت لگ سکتا ہے)`;
+  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — this may take a moment the first time)`;
 
   let combinedLines = [];
   for(let i = 0; i < files.length; i++){
@@ -9062,7 +9272,7 @@ async function processScanFiles(files){
   scanReviewRows = scanReviewRows.concat(newRows); // ---------- پہلے سے موجود rows میں مزید شامل کریں (گیلری + کیمرہ ملا کر بھی چل سکتے ہیں) ----------
 
   if(scanReviewRows.length === 0){
-    alert('❌ کوئی آئٹم نہیں ملا — صاف اور روشن تصویر آزمائیں، یا نیچے "+ Add row" سے خود لکھیں۔');
+    alert('❌ No items found — try a clearer, well-lit photo, or type them in manually using "+ Add row" below.');
   }
   renderScanReviewList();
   document.getElementById('scanReviewWrap').style.display = 'block';
@@ -9248,7 +9458,7 @@ function scanCsvEscape(v){
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 function downloadScanAsCsv(){
-  if(scanReviewRows.length === 0){ alert('پہلے کوئی آئٹم شامل کریں۔'); return; }
+  if(scanReviewRows.length === 0){ alert('Please add at least one item first.'); return; }
   let headerRow, dataRows;
   if(scanImportContext === 'product'){
     headerRow = PRODUCT_CSV_HEADERS;
@@ -9262,7 +9472,7 @@ function downloadScanAsCsv(){
 }
 
 function finalizeScanImport(){
-  if(scanReviewRows.length === 0){ alert('کوئی آئٹم نہیں — پہلے تصویر منتخب کریں یا "+ Add row" سے شامل کریں۔'); return; }
+  if(scanReviewRows.length === 0){ alert('No items — first select a photo, or add one using "+ Add row".'); return; }
   if(scanImportContext === 'product'){
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       'product name': (r.name || '').trim(),
@@ -9277,14 +9487,14 @@ function finalizeScanImport(){
       'expiry date (yyyy-mm-dd)': (r.expiry || '').trim(),
       'location': (r.location || '').trim(),
     }));
-    if(objs.length === 0){ alert('کوئی پراڈکٹ نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    if(objs.length === 0){ alert('No product name entered — please type a name first.'); return; }
     pendingProductImportRows = objs;
     showProductImportPreview();
   } else {
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       name: (r.name || '').trim(), phone: (r.phone || '').trim(), address: (r.address || '').trim(), area: (r.area || '').trim()
     }));
-    if(objs.length === 0){ alert('کوئی نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    if(objs.length === 0){ alert('No name entered — please type a name first.'); return; }
     pendingPartyImportRows = objs;
     showPartyImportPreview();
   }
@@ -9300,7 +9510,7 @@ let cameraCapturedFiles = [];
 
 function openCameraCapture(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    alert('❌ اس ڈیوائس/براؤزر پر کیمرہ دستیاب نہیں — براہ کرم "Gallery" سے تصویر منتخب کریں۔');
+    alert('❌ Camera not available on this device/browser — please select a photo from "Gallery" instead.');
     return;
   }
   cameraCapturedFiles = [];
@@ -9315,7 +9525,7 @@ function openCameraCapture(){
       document.getElementById('cameraCaptureModal').classList.add('show');
     })
     .catch(() => {
-      alert('❌ کیمرہ کھل نہیں سکا — کیمرہ کی اجازت (permission) دیں، یا "Gallery" سے تصویر منتخب کریں۔');
+      alert('❌ Could not open the camera — please allow camera permission, or select a photo from "Gallery" instead.');
     });
 }
 
@@ -9434,6 +9644,7 @@ function renderVariantRow(productId, v){
       </td>
       <td><input value="${v.location}" placeholder="Aisle/Shelf/Warehouse" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)"></td>
       <td class="variantRowActions">
+        <button title="Manage expiry batches (multiple boxes, different expiry dates)" onclick="openVariantBatchesModal(${productId},${v.variant_id})" style="border:none; background:#eef2ff; color:var(--primary-dark); width:28px; height:28px; border-radius:8px; font-size:13px; cursor:pointer;">🗓️${v.batches && v.batches.length > 1 ? `<span style="display:block; font-size:8px; font-weight:800; margin-top:-2px;">${v.batches.length}</span>` : ''}</button>
         <button title="Delete" onclick="deleteVariant(${productId},${v.variant_id})">🗑️</button>
       </td>
     </tr>
@@ -9451,6 +9662,136 @@ function getExpiryTier(expiryDate){
   if(daysLeft <= 15) return 'exp-orange';
   if(daysLeft <= 30) return 'exp-yellow';
   return null;
+}
+
+/* =====================================================================
+   🗓️ Batch-wise Expiry — ایک ہی variant (مثلاً "Disprin — 1 Strip") کی مختلف کھیپوں (batches)
+   کی الگ الگ ایکسپائری ڈیٹس ٹریک کرنے کے لیے۔ مثال: میڈیکل سٹور پر ایک ہی دوائی کے 10 ڈبے آئیں،
+   3 جون میں ایکسپائر ہوں، 4 اگست میں، 3 دسمبر میں — سب الگ الگ فلٹر/الرٹ ہو سکیں۔
+   v.batches = [{batchId, qty, expiryDate}] — v.stock ہمیشہ سب batches کے qty کا مجموعہ رہتا ہے،
+   v.expiryDate ہمیشہ سب سے قریب والی batch کی تاریخ (پرانے صفحات/الرٹس کے لیے) — دونوں خودکار sync رہتے ہیں۔
+   اگر کسی variant پر کبھی Batches استعمال ہی نہ کی جائیں تو وہ بالکل پہلے کی طرح سادہ single-expiry موڈ میں کام کرتا رہتا ہے۔
+   ===================================================================== */
+let nextBatchId = loadFromStorage('nextBatchId', 1);
+
+// ---------- موجودہ سادہ stock+expiryDate سے ایک ابتدائی batch بنائیں (پہلی بار Batches کھولنے پر) ----------
+function ensureVariantBatches(v){
+  if(v.batches && v.batches.length) return v.batches;
+  v.batches = v.stock > 0 ? [{batchId: nextBatchId++, qty: v.stock, expiryDate: v.expiryDate || ''}] : [];
+  saveToStorage('nextBatchId', nextBatchId);
+  return v.batches;
+}
+
+// ---------- Batches کی فہرست سے v.stock اور v.expiryDate (سب سے قریب والی تاریخ) دوبارہ حساب کریں ----------
+function syncVariantFromBatches(v){
+  v.stock = v.batches.reduce((sum,b) => sum + (Number(b.qty) || 0), 0);
+  const dated = v.batches.filter(b => b.expiryDate).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+  v.expiryDate = dated.length ? dated[0].expiryDate : '';
+}
+
+// ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
+function deductVariantStock(v, qty){
+  if(!v || qty <= 0) return;
+  v.stock = Math.max(0, (v.stock || 0) - qty);
+  if(v.batches && v.batches.length){
+    let remaining = qty;
+    const sorted = [...v.batches].sort((a,b) => {
+      if(!a.expiryDate) return 1;
+      if(!b.expiryDate) return -1;
+      return new Date(a.expiryDate) - new Date(b.expiryDate);
+    });
+    for(const b of sorted){
+      if(remaining <= 0) break;
+      const take = Math.min(b.qty, remaining);
+      b.qty -= take;
+      remaining -= take;
+    }
+    v.batches = v.batches.filter(b => b.qty > 0);
+  }
+}
+
+let activeBatchesProductId = null;
+let activeBatchesVariantId = null;
+
+// ---------- Batches مینج کرنے کا پاپ اپ کھولیں ----------
+function openVariantBatchesModal(productId, variantId){
+  const p = productsData.find(pp => pp.product_id === productId);
+  const v = p && p.variants.find(vv => vv.variant_id === variantId);
+  if(!v) return;
+  ensureVariantBatches(v);
+  activeBatchesProductId = productId;
+  activeBatchesVariantId = variantId;
+  document.getElementById('batchesModalTitle').textContent = `🗓️ ${p.name} — ${v.label}`;
+  renderVariantBatchesModal();
+  document.getElementById('variantBatchesModal').classList.add('show');
+}
+function closeVariantBatchesModal(){
+  document.getElementById('variantBatchesModal').classList.remove('show');
+  renderProductList(document.getElementById('productSearchInput').value); // سٹاک/ایکسپائری کالم فوراً تازہ دکھائیں
+}
+
+function renderVariantBatchesModal(){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  const wrap = document.getElementById('variantBatchesListWrap');
+  if(!v){ wrap.innerHTML = ''; return; }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(v.batches.length === 0){
+    wrap.innerHTML = `<div style="color:var(--muted); font-size:13px; padding:8px 2px;">No batches yet — add the first one below.</div>`;
+  } else {
+    wrap.innerHTML = v.batches.slice().sort((a,b) => {
+      if(!a.expiryDate) return 1; if(!b.expiryDate) return -1;
+      return new Date(a.expiryDate) - new Date(b.expiryDate);
+    }).map(b => {
+      const tier = getExpiryTier(b.expiryDate);
+      const daysLeft = b.expiryDate ? Math.ceil((new Date(b.expiryDate) - today) / (1000*60*60*24)) : null;
+      return `
+      <div class="productCard" style="padding:10px 12px; margin-bottom:8px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="number" value="${b.qty}" min="0" style="width:70px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateVariantBatch(${b.batchId},'qty',this.value)">
+          <input type="date" class="expiryInput ${tier || ''}" value="${b.expiryDate || ''}" style="flex:1;" onchange="updateVariantBatch(${b.batchId},'expiryDate',this.value)">
+          <button title="Delete batch" onclick="deleteVariantBatch(${b.batchId})" style="border:none; background:#fef2f2; color:var(--danger); width:32px; height:32px; border-radius:8px; font-size:14px; cursor:pointer; flex:0 0 auto;">🗑️</button>
+        </div>
+        ${daysLeft !== null ? `<div style="font-size:11px; margin-top:5px; color:${tier==='exp-red'?'var(--danger)':tier==='exp-orange'?'#c2410c':tier==='exp-yellow'?'#92400e':'var(--muted)'};">${daysLeft < 0 ? '❌ Expired' : `⏳ ${daysLeft} days left`}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  const totalQty = v.batches.reduce((s,b) => s + (Number(b.qty)||0), 0);
+  document.getElementById('variantBatchesTotalLabel').textContent = `Total stock from batches: ${totalQty}`;
+}
+
+function addVariantBatch(){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  if(!v) return;
+  v.batches.push({batchId: nextBatchId++, qty: 0, expiryDate: ''});
+  saveToStorage('nextBatchId', nextBatchId);
+  renderVariantBatchesModal();
+}
+
+function updateVariantBatch(batchId, field, value){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  if(!v) return;
+  const b = v.batches.find(bb => bb.batchId === batchId);
+  if(!b) return;
+  b[field] = field === 'qty' ? Math.max(0, parseInt(value) || 0) : value;
+  syncVariantFromBatches(v);
+  persistAllData();
+  renderVariantBatchesModal();
+}
+
+function deleteVariantBatch(batchId){
+  const p = productsData.find(pp => pp.product_id === activeBatchesProductId);
+  const v = p && p.variants.find(vv => vv.variant_id === activeBatchesVariantId);
+  if(!v) return;
+  if(!confirm('Delete this batch? Its quantity will be removed from stock too.')) return;
+  v.batches = v.batches.filter(bb => bb.batchId !== batchId);
+  syncVariantFromBatches(v);
+  persistAllData();
+  renderVariantBatchesModal();
 }
 
 // ---------- Item Photo Upload (کیمرہ یا گیلری سے — خودکار طور پر چھوٹا thumbnail بنایا جاتا ہے تاکہ زیادہ جگہ نہ لے) ----------
@@ -9616,7 +9957,7 @@ function formatPhoneForWhatsApp(phone){
 // ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
 async function pickContactForNewParty(){
   if(!('contacts' in navigator && 'ContactsManager' in window)){
-    alert('یہ فون/براؤزر فون بک تک رسائی سپورٹ نہیں کرتا — نام اور نمبر خود لکھ دیں۔');
+    alert('This phone/browser does not support access to contacts — please type the name and number manually.');
     return;
   }
   try{
@@ -10227,11 +10568,22 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     }
     if(negTag) negTag.style.display = isNegative ? 'block' : 'none';
     if(stockInput) stockInput.classList.toggle('negativeStockInput', isNegative);
+    // ---------- اگر صرف ایک ہی batch ہے تو اسے بھی سیدھا مطابق رکھیں — دو یا زیادہ batches ہوں تو تفصیل صرف 🗓️ Batches سے بدلیں ----------
+    if(field === 'stock' && (!variant.batches || variant.batches.length <= 1)){
+      variant.batches = [{batchId: (variant.batches && variant.batches[0]?.batchId) || nextBatchId++, qty: variant.stock, expiryDate: variant.expiryDate || ''}];
+      saveToStorage('nextBatchId', nextBatchId);
+    }
     return;
   }
   if(field === 'expiryDate' && inputEl){
     const tier = getExpiryTier(variant.expiryDate);
     inputEl.className = 'expiryInput ' + (tier || '');
+    if(!variant.batches || variant.batches.length <= 1){
+      variant.batches = [{batchId: (variant.batches && variant.batches[0]?.batchId) || nextBatchId++, qty: variant.stock, expiryDate: variant.expiryDate || ''}];
+      saveToStorage('nextBatchId', nextBatchId);
+    } else {
+      alert('This item has multiple batches with different expiry dates. Tap 🗓️ next to Delete to edit each batch\'s own expiry date.');
+    }
     return;
   }
   if(field === 'barcode'){
@@ -10421,17 +10773,27 @@ const financeDummy = {
   cashInHand: AppState.settings.openingCashBalance || 0,
 };
 
-// ---------- Expiry Data اب براہ راست productsData کے ہر variant کے expiryDate فیلڈ سے آتی ہے ----------
-// (پہلے یہ ایک الگ dummy batches array سے آتی تھی — اب Products اسکرین میں جو تاریخ بھی درج کریں وہ یہاں فوری نظر آئے گی)
+// ---------- Expiry Data — اب Batches موجود ہوں تو ہر batch الگ الگ (اپنی qty/تاریخ کے ساتھ) دکھائی جاتی ہے،
+//            تاکہ ایک ہی آئٹم کے مختلف ایکسپائری والے ڈبے/کھیپ الگ الگ فلٹر/الرٹ ہو سکیں۔
+//            Batches نہ ہوں تو پہلے کی طرح سادہ v.expiryDate سے کام چلتا ہے ----------
 function getAllExpiringItems(){
   const today = new Date();
   today.setHours(0,0,0,0);
   const items = [];
   productsData.forEach(p => p.variants.forEach(v => {
+    if(v.batches && v.batches.length){
+      v.batches.forEach(b => {
+        if(!b.expiryDate || b.qty <= 0) return;
+        const exp = new Date(b.expiryDate);
+        const daysLeft = Math.ceil((exp - today) / (1000*60*60*24));
+        items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: b.expiryDate, qty: b.qty});
+      });
+      return;
+    }
     if(!v.expiryDate) return;
     const exp = new Date(v.expiryDate);
     const daysLeft = Math.ceil((exp - today) / (1000*60*60*24));
-    items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: v.expiryDate});
+    items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: v.expiryDate, qty: v.stock});
   }));
   return items;
 }
@@ -10440,23 +10802,10 @@ function getAllExpiringItems(){
 function renderDashboard(){
   renderDashDate();
   renderPendingBillsBanner();
-  renderDashQuickThemeBar();
   renderKpiCards();
   renderHealthBand();
   renderLowStockAlerts();
   renderExpiryAlerts();
-}
-
-// ---------- ڈیش بورڈ کی چھوٹی تھیم سواچ لائن — سیدھا مین پیج سے کلر بدلا جا سکے ----------
-function renderDashQuickThemeBar(){
-  const grid = document.getElementById('themeSwatchGridMini');
-  if(!grid) return;
-  grid.innerHTML = THEME_PRESETS.map(t => `
-    <div class="themeSwatch ${t.id === AppState.settings.themeId ? 'active' : ''}"
-         data-theme="${t.id}" title="${t.name}"
-         style="background:${t.primary};"
-         onclick="applyTheme('${t.id}')"></div>
-  `).join('');
 }
 
 // --- بینر: جتنے bills ابھی 'pending' حالت میں ہیں، نمایاں طور پر دکھائیں ---
@@ -10489,11 +10838,12 @@ function renderHealthBand(){
   const totalReceivable = customersData.reduce((sum, c) => sum + (c.total_receivable || 0), 0);
   const totalPayable = suppliersData.reduce((sum, s) => sum + (s.total_payable || 0), 0);
 
-  // ---------- My Diary کے بیلنس بھی اسی سمری میں شامل — منفی بیلنس = ہم نے دینے ہیں (سرخ)، مثبت = ہم نے لینے ہیں (سبز) ----------
+  // ---------- My Diary کے بیلنس بھی اسی سمری میں شامل — balance مثبت = 🟢 I Got (ہم نے دینے ہیں، Liability)،
+  // balance منفی = 🔴 I Gave (ہمیں ملنے ہیں، Asset) — یہی وہ قاعدہ ہے جو My Diary سکرین خود استعمال کرتی ہے ----------
   let diaryPayable = 0, diaryReceivable = 0;
   (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
-    if(e.balance < 0) diaryPayable += Math.abs(e.balance);
-    else if(e.balance > 0) diaryReceivable += e.balance;
+    if(e.balance > 0) diaryPayable += e.balance;       // I Got → Liability
+    else if(e.balance < 0) diaryReceivable += Math.abs(e.balance); // I Gave → Asset
   });
 
   document.getElementById('hlStock').textContent = 'Rs. ' + stockValue.toLocaleString();
@@ -10642,7 +10992,7 @@ function renderExpiryAlerts(){
   grid.innerHTML = withDays.sort((a,b) => a.daysLeft - b.daysLeft).map(b => `
     <div class="alertRow ${b.tier}" style="cursor:pointer;" onclick="jumpToProduct(${b.product_id})">
       <div class="aName">${b.tier==='exp-red' ? '🔴' : b.tier==='exp-orange' ? '🟠' : '🟡'} ${b.product_name}</div>
-      <div class="aMeta">${b.daysLeft < 0 ? 'Expired' : 'Remaining'}: ${b.daysLeft} days ${b.barcode ? '| ' + b.barcode : ''}</div>
+      <div class="aMeta">${b.daysLeft < 0 ? 'Expired' : 'Remaining'}: ${b.daysLeft} days • Qty: ${b.qty ?? '—'} ${b.barcode ? '| ' + b.barcode : ''}</div>
     </div>
   `).join('');
 }
@@ -10730,16 +11080,16 @@ function renderMyDiaryList(){
   const wrap = document.getElementById('diaryListWrap');
   if(!wrap) return;
 
-  let totalPayable = 0, totalReceivable = 0;
+  let totalGot = 0, totalGave = 0;
   diaryData.forEach(e => {
-    if(e.balance < 0) totalPayable += Math.abs(e.balance);
-    else if(e.balance > 0) totalReceivable += e.balance;
+    if(e.balance > 0) totalGot += e.balance;
+    else if(e.balance < 0) totalGave += Math.abs(e.balance);
   });
-  document.getElementById('diaryTotalPayable').textContent = fmtDiaryAmount(totalPayable);
-  document.getElementById('diaryTotalReceivable').textContent = fmtDiaryAmount(totalReceivable);
-  const net = totalReceivable - totalPayable;
+  document.getElementById('diaryTotalPayable').textContent = fmtDiaryAmount(totalGot);   // 🟢 Total I Got کارڈ
+  document.getElementById('diaryTotalReceivable').textContent = fmtDiaryAmount(totalGave); // 🔴 Total I Gave کارڈ
+  const net = totalGot - totalGave;
   const netBar = document.getElementById('diaryNetBar');
-  netBar.textContent = 'Net: ' + (net >= 0 ? '🔴 ' : '🟢 ') + fmtDiaryAmount(net);
+  netBar.textContent = 'Net: ' + (net >= 0 ? '🟢 ' : '🔴 ') + fmtDiaryAmount(net);
 
   // ---------- ڈیٹالسٹ (نام تجاویز) بھی ساتھ ہی تازہ کر دیں ---------- 
   const dl = document.getElementById('diaryNameSuggestions');
@@ -10755,16 +11105,18 @@ function renderMyDiaryList(){
   }
 
   wrap.innerHTML = filtered.map(e => {
-    const isOwe = e.balance < 0;
-    const cls = isOwe ? 'get' : 'owe';
-    const label = isOwe ? 'I Got' : (e.balance > 0 ? 'I Gave' : 'Settled');
+    // ---------- balance مثبت = 🟢 I Got، balance منفی = 🔴 I Gave — یہی وہ اصل قاعدہ ہے جو Add/Adjust بٹن استعمال کرتے ہیں
+    // (پہلے یہاں یہ الٹا لکھا ہوا تھا، اسی وجہ سے سبز بٹن سے کی گئی انٹری سرخ میں نظر آ رہی تھی) ----------
+    const isGot = e.balance > 0;
+    const cls = isGot ? 'get' : (e.balance < 0 ? 'owe' : '');
+    const label = isGot ? 'I Got' : (e.balance < 0 ? 'I Gave' : 'Settled');
     return `
       <div class="diaryRow" onclick="openDiaryDetailModal(${e.id})">
         <div>
           <div class="diaryRowName">${(e.name||'').replace(/</g,'&lt;')}</div>
           <div class="diaryRowSub">${label}</div>
         </div>
-        <div class="diaryRowAmount ${cls}">${e.balance === 0 ? 'Rs. 0' : (isOwe ? '- ' : '+ ') + fmtDiaryAmount(e.balance)}</div>
+        <div class="diaryRowAmount ${cls}">${e.balance === 0 ? 'Rs. 0' : (isGot ? '+ ' : '- ') + fmtDiaryAmount(e.balance)}</div>
       </div>`;
   }).join('');
 }
@@ -10917,7 +11269,7 @@ function renderDiaryDetailBalance(entry){
   if(entry.balance === 0){
     el.textContent = 'Rs. 0 — Settled ✅';
     el.style.color = '#64748b';
-  } else if(entry.balance < 0){
+  } else if(entry.balance > 0){
     el.textContent = '🟢 I Got: ' + fmtDiaryAmount(entry.balance);
     el.style.color = 'var(--success)';
   } else {
@@ -11704,7 +12056,7 @@ function enterPartyPage(tab){
   document.getElementById('partyPageTitle').textContent = tab === 'customers' ? '🧑‍🤝‍🧑 Customers' : '🚚 Suppliers';
   const partyImportBtnLabel = document.getElementById('partyImportBtnLabel');
   if(partyImportBtnLabel) partyImportBtnLabel.textContent = tab === 'customers' ? 'Customers' : 'Suppliers';
-  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers...' : '🔍 Search suppliers...';
+  document.getElementById('partySearchInput').placeholder = tab === 'customers' ? '🔍 Search customers by name or phone...' : '🔍 Search suppliers by name or phone...';
   document.getElementById('partySearchInput').value = '';
   document.getElementById('bulkReminderBtn').style.display = tab === 'customers' ? 'block' : 'none';
   renderPartyList();
@@ -15250,7 +15602,7 @@ function confirmSupplierReturn(itemIndex){
   // ---------- اسٹاک سے Item منہا کریں (سامان سپلائر کو واپس جا رہا ہے) ----------
   productsData.forEach(p => {
     const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-    if(v) v.stock = Math.max(0, v.stock - qty); // TODO: DB میں product_variants.current_stock -= qty
+    if(v) deductVariantStock(v, qty); // TODO: DB میں product_variants.current_stock -= qty
   });
 
   // ---------- سپلائر کا Payable کم کریں (ایڈمن کی طے شدہ Price کے مطابق) ----------
@@ -15821,10 +16173,6 @@ function renderPaymentsScreen(){
   const dateEl = document.getElementById('pmtDateFilter');
   const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
   const dateVal = dateEl ? dateEl.value : '';
-
-  // ---------- ✖ Clear بٹن صرف اس وقت نظر آئے جب کوئی فلٹر واقعی لگا ہو (ورنہ خالی جگہ گھیرتا ہے) ----------
-  const clearBtn = document.querySelector('#screen-payments .billAdvClearBtn');
-  if(clearBtn) clearBtn.style.display = (search || dateVal || paymentsFilter !== 'all') ? 'flex' : 'none';
 
   let list = paymentsData.filter(p => {
     if(paymentsFilter !== 'all' && p.direction !== paymentsFilter) return false;
@@ -18218,7 +18566,7 @@ async function printCurrentInvoice(){
     // خود Chrome کے 🖨️ پرنٹ اور ⋮/📤 شیئر آئیکن موجود ہوتے ہیں۔ فوری، بغیر دیکھے شیئر کرنے کے لیے
     // نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں، جو سیدھا نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      alert('Could not load the PDF library — please check your internet connection and try again.');
       return;
     }
     const { jsPDF } = window.jspdf;
@@ -18454,34 +18802,18 @@ const THEME_PRESETS = [
   {id:'slate',  name:'Slate/Dark',      primary:'#475569', primaryDark:'#1e293b'},
 ];
 
-// ---------- Font Presets ----------
+// ---------- Font Presets — صرف 3 بہترین پرنٹنگ-فرینڈلی فونٹس (کم سیاہی، کم چوڑائی، صاف پرنٹ)۔
+// ⚠️ اہم: "Tahoma/Arial Narrow/Calibri" اصل ناموں سے موبائل (Android) میں موجود ہی نہیں ہوتے —
+// Tahoma خاص طور پر صرف مائیکروسافٹ ونڈوز کا اپنا فونٹ ہے، Google Fonts پر سرے سے موجود نہیں —
+// اس لیے نیچے حقیقی ویب فونٹس (Google Fonts سے لوڈ) استعمال کیے گئے ہیں جو بالکل انہی جیسے نظر آتے ہیں،
+// (Open Sans کو ڈیزائنرز عالمی سطح پر Tahoma کا سب سے قریبی متبادل مانتے ہیں) ----------
 const FONT_PRESETS = [
-  {id:'segoe',      label:'Default', family:"'Segoe UI', system-ui, sans-serif"},
-  {id:'calibri',    label:'Calibri',  family:"Calibri, 'Segoe UI', sans-serif"},
-  {id:'tahoma',     label:'Classic',  family:"Tahoma, Geneva, sans-serif"},
-  {id:'verdana',    label:'Wide',  family:"Verdana, Geneva, sans-serif"},
-  {id:'trebuchet',  label:'Modern',   family:"'Trebuchet MS', sans-serif"},
-  {id:'arial',      label:'Arial', family:"Arial, Helvetica, sans-serif"},
-  {id:'arialblack', label:'Arial Black', family:"'Arial Black', Arial, sans-serif"},
-  {id:'arialnarrow',label:'Arial Narrow', family:"'Arial Narrow', Arial, sans-serif"},
-  {id:'timesnr',    label:'Times New Roman', family:"'Times New Roman', Times, serif"},
-  {id:'georgia',    label:'Georgia', family:"Georgia, serif"},
-  {id:'couriernew', label:'Courier New', family:"'Courier New', Courier, monospace"},
-  // ---------- 7 پیارے گوگل فونٹس — CDN سے، ہلکے (صرف 400/600/700 ویٹ) ----------
-  {id:'poppins',    label:'Poppins',   family:"'Poppins', sans-serif"},
-  {id:'inter',      label:'Inter',     family:"'Inter', sans-serif"},
-  {id:'nunito',     label:'Nunito',    family:"'Nunito', sans-serif"},
-  {id:'quicksand',  label:'Quicksand', family:"'Quicksand', sans-serif"},
-  {id:'manrope',    label:'Manrope',   family:"'Manrope', sans-serif"},
-  {id:'comfortaa',  label:'Comfortaa', family:"'Comfortaa', sans-serif"},
-  {id:'rubik',      label:'Rubik',     family:"'Rubik', sans-serif"},
-  // ---------- 💪 اصل موٹے/بولڈ ڈسپلے فونٹس — یہ اپنی ڈیزائن سے ہی بولڈ ہیں (صرف ایک ہی، بھاری وزن میں بنتے ہیں)،
-  // اس لیے باقی سب سے صاف الگ اور نمایاں نظر آتے ہیں، دور سے بھی فرق پتا چلے ----------
-  {id:'archivoblack', label:'💪 Archivo Black', family:"'Archivo Black', sans-serif"},
-  {id:'anton',         label:'💪 Anton (سب سے موٹا)', family:"'Anton', sans-serif"},
-  {id:'bebasneue',     label:'💪 Bebas Neue (لمبے بڑے حروف)', family:"'Bebas Neue', sans-serif"},
-  {id:'fjallaone',     label:'💪 Fjalla One', family:"'Fjalla One', sans-serif"},
-  {id:'nastaleeq',  label:'✒️ Noori Nastaleeq', family:"'JameelNooriNastaleeq', 'Segoe UI', serif", isNastaleeq:true},
+  {id:'tahoma',       label:'Tahoma',          family:"'Open Sans', Tahoma, sans-serif",       weight:400},
+  {id:'robotolight',  label:'Roboto Light',    family:"'Roboto', sans-serif",                  weight:300},
+  {id:'opensanslight',label:'Open Sans Light', family:"'Open Sans', Tahoma, sans-serif",        weight:300},
+  {id:'latolight',    label:'Lato Light',      family:"'Lato', sans-serif",                    weight:300},
+  {id:'arialnarrow',  label:'Arial Narrow',    family:"'Roboto Condensed', 'Arial Narrow', sans-serif", weight:400},
+  {id:'calibri',      label:'Calibri',         family:"'Carlito', Calibri, sans-serif",         weight:400},
 ];
 
 // ---------- پوری ایپ کا سائز (Zoom) — بڑی اسکرین/فونٹ چاہنے والوں کے لیے۔ html root پر zoom لگانے سے
@@ -18519,39 +18851,226 @@ function toggleCartTextBold(){
 }
 
 // ---------- تھیم پوری ایپ پر لاگو کریں (:root پر CSS variables تبدیل ہوتے ہی ہر جگہ خودکار اپڈیٹ) ----------
+// ---------- تھیم کا رنگ منتخب شدہ Shade (ہلکا/گہرا) سلائیڈر کے مطابق ہمیشہ یہیں سے لگے ----------
+function shiftColorLightness(hex, delta){
+  let c = hex.replace('#','');
+  if(c.length === 3) c = c.split('').map(ch => ch + ch).join('');
+  const r = parseInt(c.substring(0,2),16), g = parseInt(c.substring(2,4),16), b = parseInt(c.substring(4,6),16);
+  const r1 = r/255, g1 = g/255, b1 = b/255;
+  const max = Math.max(r1,g1,b1), min = Math.min(r1,g1,b1);
+  let h = 0, s = 0; const l0 = (max+min)/2;
+  if(max !== min){
+    const d = max - min;
+    s = l0 > 0.5 ? d/(2-max-min) : d/(max+min);
+    if(max === r1) h = (g1-b1)/d + (g1 < b1 ? 6 : 0);
+    else if(max === g1) h = (b1-r1)/d + 2;
+    else h = (r1-g1)/d + 4;
+    h /= 6;
+  }
+  const l = Math.max(0.06, Math.min(0.94, l0 + delta/100));
+  function hue2rgb(p,q,t){
+    if(t < 0) t += 1; if(t > 1) t -= 1;
+    if(t < 1/6) return p + (q-p)*6*t;
+    if(t < 1/2) return q;
+    if(t < 2/3) return p + (q-p)*(2/3-t)*6;
+    return p;
+  }
+  let r2, g2, b2;
+  if(s === 0){ r2 = g2 = b2 = l; }
+  else{
+    const q = l < 0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l - q;
+    r2 = hue2rgb(p,q,h+1/3); g2 = hue2rgb(p,q,h); b2 = hue2rgb(p,q,h-1/3);
+  }
+  const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
+  return '#' + toHex(r2) + toHex(g2) + toHex(b2);
+}
+function applyThemeColorsWithIntensity(){
+  const t = THEME_PRESETS.find(x => x.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  const delta = AppState.settings.themeIntensity || 0;
+  const primary = delta ? shiftColorLightness(t.primary, delta) : t.primary;
+  const primaryDark = delta ? shiftColorLightness(t.primaryDark, delta) : t.primaryDark;
+  document.documentElement.style.setProperty('--primary', primary);
+  document.documentElement.style.setProperty('--primary-dark', primaryDark);
+}
+// ---------- Shade سلائیڈر — ہوم پیج تھیم پینل سے کال ہوتا ہے، فوری لاگو اور محفوظ ----------
+function adjustThemeIntensity(val){
+  AppState.settings.themeIntensity = Math.max(-40, Math.min(40, Number(val) || 0));
+  applyThemeColorsWithIntensity();
+  persistAllData();
+}
 function applyTheme(themeId){
   const t = THEME_PRESETS.find(x => x.id === themeId) || THEME_PRESETS[0];
-  document.documentElement.style.setProperty('--primary', t.primary);
-  document.documentElement.style.setProperty('--primary-dark', t.primaryDark);
   AppState.settings.themeId = t.id;
+  applyThemeColorsWithIntensity();
 
-  document.querySelectorAll('#themeSwatchGrid .themeSwatch').forEach(el => {
+  document.querySelectorAll('.themeSwatch').forEach(el => {
     el.classList.toggle('active', el.dataset.theme === t.id);
   });
-  document.querySelectorAll('#themeSwatchGridMini .themeSwatch').forEach(el => {
-    el.classList.toggle('active', el.dataset.theme === t.id);
-  });
+  syncThemeDropdownLabel();
 }
+
+// ---------- Theme ڈراپ ڈاؤن — کھولنا/بند کرنا/سامنے والا لیبل مطابق رکھنا (بلنگ کیٹگری ڈراپ ڈاؤن جیسا پیٹرن) ----------
+function toggleThemeDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('themeDropdownWrap');
+  if(wrap) wrap.classList.toggle('open');
+}
+function closeThemeDropdown(){
+  const wrap = document.getElementById('themeDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
+}
+function syncThemeDropdownLabel(){
+  const t = THEME_PRESETS.find(x => x.id === AppState.settings.themeId) || THEME_PRESETS[0];
+  const dot = document.getElementById('themeDropdownDot');
+  const name = document.getElementById('themeDropdownName');
+  if(dot) dot.style.background = t.primary;
+  if(name) name.textContent = t.name;
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('themeDropdownWrap');
+  if(wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
 
 // ---------- فونٹ پوری ایپ پر لاگو کریں (صرف اسکرین UI پر — پرنٹ کینوس ہمیشہ محفوظ/تیز فونٹ استعمال کرتا ہے) ----------
 function applyFont(fontId){
   const f = FONT_PRESETS.find(x => x.id === fontId) || FONT_PRESETS[0];
   document.documentElement.style.setProperty('--font', f.family);
+  document.documentElement.style.setProperty('--font-weight', f.weight || 400);
   AppState.settings.font = f.family;
   AppState.settings.fontId = f.id;
 
   // نستعلیق فعال ہونے پر لائن ہائٹ/اسپیسنگ خودکار بڑھ جاتی ہے تاکہ حروف آپس میں نہ چڑھیں
   document.body.classList.toggle('nastaleeq-active', !!f.isNastaleeq);
 
-  document.querySelectorAll('#fontOptionGrid .fontOption').forEach(el => {
+  // ---------- تمام جگہ سنک رہے: Settings، بلنگ کا فلوٹنگ Fonts بٹن، اور ہوم پیج کا نیا کوئیک پینل ----------
+  document.querySelectorAll('.fontOptionRow').forEach(el => {
     el.classList.toggle('active', el.dataset.font === f.id);
   });
-
-  // ---------- فلوٹنگ Fonts بٹن کا پینل بھی سنک رہے ----------
-  document.querySelectorAll('#fontsFabPanelList .fontOptionRow').forEach(el => {
-    el.classList.toggle('active', el.dataset.font === f.id);
-  });
+  syncFontDropdownLabel();
 }
+
+// ---------- Font ڈراپ ڈاؤن — کھولنا/بند کرنا/سامنے والا لیبل مطابق رکھنا (منتخب شدہ فونٹ اپنی ہی شکل میں سامنے نظر آئے) ----------
+function toggleFontDropdown(e){
+  if(e) e.stopPropagation();
+  const wrap = document.getElementById('fontDropdownWrap');
+  if(wrap) wrap.classList.toggle('open');
+}
+function closeFontDropdown(){
+  const wrap = document.getElementById('fontDropdownWrap');
+  if(wrap) wrap.classList.remove('open');
+}
+function syncFontDropdownLabel(){
+  const f = FONT_PRESETS.find(x => x.family === AppState.settings.font) || FONT_PRESETS[0];
+  const label = document.getElementById('fontDropdownLabel');
+  if(label){ label.textContent = f.label; label.style.fontFamily = f.family; }
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('fontDropdownWrap');
+  if(wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+/* =====================================================================
+   🅰️🎨 ہوم پیج Font/Theme کوئیک پینل — بزنس نیم کے نیچے دو گول بٹن،
+   دبانے پر فوراً وہیں پاپ اپ کھلتا ہے، Settings تک جانے کی ضرورت نہیں
+   ===================================================================== */
+let homeFontPanelOpen = false;
+let homeThemePanelOpen = false;
+
+function positionHomeQuickPanel(btnId, panelId){
+  const btn = document.getElementById(btnId);
+  const panel = document.getElementById(panelId);
+  if(!btn || !panel) return;
+  const r = btn.getBoundingClientRect();
+  const margin = 8;
+  const panelWidth = panel.offsetWidth || 230;
+  let top = r.bottom + 6;
+  let left = r.left;
+  if(left < margin) left = margin;
+  if(left + panelWidth > window.innerWidth - margin) left = window.innerWidth - margin - panelWidth;
+  const maxH = Math.min(window.innerHeight * 0.7, 420);
+  if(top + maxH > window.innerHeight - margin){
+    top = Math.max(margin, r.top - maxH - 6);
+  }
+  panel.style.top = top + 'px';
+  panel.style.left = left + 'px';
+}
+
+function renderHomeFontPanel(){
+  const panel = document.getElementById('homeFontPanel');
+  if(!panel) return;
+  panel.innerHTML = '<div class="homeQuickPanelLabel">Font Style</div>' + FONT_PRESETS.map(f => `
+    <div class="fontOptionRow ${AppState.settings.fontId === f.id ? 'active' : ''}"
+         data-font="${f.id}" onclick="applyFont('${f.id}');">
+      <span class="fontPreviewText" style="font-family:${f.family};">${f.label}</span>
+      <span class="fontCheckMark">✓</span>
+    </div>
+  `).join('');
+}
+
+function renderHomeThemePanel(){
+  const panel = document.getElementById('homeThemePanel');
+  if(!panel) return;
+  const intensity = AppState.settings.themeIntensity || 0;
+  panel.innerHTML = `
+    <div class="homeQuickPanelLabel">Colour Theme</div>
+    <div class="themeSwatchGrid" style="padding:2px 12px 10px;">
+      ${THEME_PRESETS.map(t => `
+        <div class="themeSwatch ${t.id === AppState.settings.themeId ? 'active' : ''}"
+             data-theme="${t.id}" title="${t.name}"
+             style="background:${t.primary};"
+             onclick="applyTheme('${t.id}'); renderHomeThemePanel();"></div>
+      `).join('')}
+    </div>
+    <div class="homeQuickPanelLabel">Shade — Light ↔ Dark</div>
+    <div class="homeIntensityRow">
+      <span style="font-size:15px;">🔅</span>
+      <input type="range" min="-40" max="40" step="2" value="${intensity}" oninput="adjustThemeIntensity(this.value)" style="flex:1;">
+      <span style="font-size:15px;">🔆</span>
+    </div>
+  `;
+}
+
+function toggleHomeFontPanel(e){
+  if(e) e.stopPropagation();
+  closeHomeThemePanel();
+  homeFontPanelOpen = !homeFontPanelOpen;
+  const panel = document.getElementById('homeFontPanel');
+  if(panel) panel.classList.toggle('open', homeFontPanelOpen);
+  if(homeFontPanelOpen){ renderHomeFontPanel(); positionHomeQuickPanel('hbcFontBtn', 'homeFontPanel'); }
+}
+function closeHomeFontPanel(){
+  homeFontPanelOpen = false;
+  document.getElementById('homeFontPanel')?.classList.remove('open');
+}
+function toggleHomeThemePanel(e){
+  if(e) e.stopPropagation();
+  closeHomeFontPanel();
+  homeThemePanelOpen = !homeThemePanelOpen;
+  const panel = document.getElementById('homeThemePanel');
+  if(panel) panel.classList.toggle('open', homeThemePanelOpen);
+  if(homeThemePanelOpen){ renderHomeThemePanel(); positionHomeQuickPanel('hbcThemeBtn', 'homeThemePanel'); }
+}
+function closeHomeThemePanel(){
+  homeThemePanelOpen = false;
+  document.getElementById('homeThemePanel')?.classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const fp = document.getElementById('homeFontPanel');
+  const fb = document.getElementById('hbcFontBtn');
+  if(homeFontPanelOpen && fp && !fp.contains(e.target) && fb && !fb.contains(e.target)) closeHomeFontPanel();
+  const tp = document.getElementById('homeThemePanel');
+  const tb = document.getElementById('hbcThemeBtn');
+  if(homeThemePanelOpen && tp && !tp.contains(e.target) && tb && !tb.contains(e.target)) closeHomeThemePanel();
+});
+window.addEventListener('resize', () => {
+  if(homeFontPanelOpen) positionHomeQuickPanel('hbcFontBtn', 'homeFontPanel');
+  if(homeThemePanelOpen) positionHomeQuickPanel('hbcThemeBtn', 'homeThemePanel');
+});
+window.addEventListener('scroll', () => {
+  if(homeFontPanelOpen) positionHomeQuickPanel('hbcFontBtn', 'homeFontPanel');
+  if(homeThemePanelOpen) positionHomeQuickPanel('hbcThemeBtn', 'homeThemePanel');
+}, true);
 
 // ---------- Settings اسکرین کھلتے وقت سب کچھ رینڈر + پرنٹر خودکار تلاش ----------
 // ---------- Settings میں 💾 Storage Used کارڈ اپڈیٹ کریں — تاکہ صارف کو ہمیشہ حقیقی اندازہ رہے کتنی جگہ استعمال ہو چکی ----------
@@ -18603,20 +19122,25 @@ function renderSettingsScreen(){
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
 
-  // تھیم سواچز بنائیں
+  // تھیم سواچز بنائیں (ڈراپ ڈاؤن پینل کے اندر)
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
     <div class="themeSwatch ${t.id === AppState.settings.themeId ? 'active' : ''}"
          data-theme="${t.id}" title="${t.name}"
          style="background:${t.primary};"
-         onclick="applyTheme('${t.id}')"></div>
+         onclick="applyTheme('${t.id}'); closeThemeDropdown();"></div>
   `).join('');
+  syncThemeDropdownLabel();
 
-  // فونٹ آپشنز بنائیں
+  // فونٹ آپشنز بنائیں (ڈراپ ڈاؤن پینل کے اندر — ہر ایک اپنے ہی فونٹ میں پیش نظارہ)
   document.getElementById('fontOptionGrid').innerHTML = FONT_PRESETS.map(f => `
-    <div class="fontOption ${AppState.settings.font === f.family ? 'active' : ''}"
-         data-font="${f.id}" style="font-family:${f.family};"
-         onclick="applyFont('${f.id}')">${f.label}</div>
+    <div class="fontOptionRow ${AppState.settings.font === f.family ? 'active' : ''}"
+         data-font="${f.id}"
+         onclick="applyFont('${f.id}'); closeFontDropdown();">
+      <span class="fontPreviewText" style="font-family:${f.family};">${f.label}</span>
+      <span class="fontCheckMark">✓</span>
+    </div>
   `).join('');
+  syncFontDropdownLabel();
 
   document.getElementById('openingCashInput').value = AppState.settings.openingCashBalance || '';
 
@@ -18626,8 +19150,6 @@ function renderSettingsScreen(){
   document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
 
   document.getElementById('trackInventoryChk').checked = !!AppState.settings.trackInventory;
-
-  renderMyPaymentAccounts();
 }
 
 /* =====================================================================
@@ -18769,13 +19291,16 @@ function renderBillSettingsScreen(){
     b.classList.toggle('active', b.dataset.style === AppState.settings.invoiceStyle);
   });
 
-  // دکان کی معلومات فیلڈز اپڈیٹ کریں
+  renderBarcodeLabelProductOptions();
+}
+
+// ---------- 🏦 My Account — بزنس انفو + پیمنٹ اکاؤنٹس، ایک ہی جگہ (پہلے Settings اور Bill & Print Settings میں بکھرے ہوئے تھے) ----------
+function renderMyAccountScreen(){
   document.getElementById('bizNameInput').value = AppState.settings.businessName || '';
   document.getElementById('bizOwnerInput').value = AppState.settings.ownerName || '';
   document.getElementById('bizAddressInput').value = AppState.settings.businessAddress || '';
   document.getElementById('bizPhoneInput').value = AppState.settings.businessPhone || '';
-
-  renderBarcodeLabelProductOptions();
+  renderMyPaymentAccounts();
 }
 
 // ---------- میرے پیمنٹ اکاؤنٹس (لامحدود اکاؤنٹس) — Reminders میں خودکار شامل ہوں گے ----------
@@ -18798,70 +19323,9 @@ async function unlockAdminControl(){
   document.getElementById('devEmailInput').value = AppState.settings.devEmail || '';
   document.getElementById('appShareLinkInput').value = AppState.settings.appShareLink || '';
   document.getElementById('appShareMessageInput').value = AppState.settings.appShareMessage || '';
-  // ---------- Payment اکاؤنٹ dropdown خالی ہو تو بھریں (وہی BANK_LOGIN_URLS جو سپلائر اکاؤنٹس میں استعمال ہوتی ہے) ----------
-  const payTypeSel = document.getElementById('devPaymentTypeInput');
-  if(payTypeSel.options.length <= 1){
-    Object.keys(BANK_LOGIN_URLS).forEach(bank => {
-      const opt = document.createElement('option');
-      opt.value = bank; opt.textContent = bank;
-      payTypeSel.appendChild(opt);
-    });
-  }
-  // ---------- پرانا واحد اکاؤنٹ ہو اور نئی فہرست ابھی خالی ہو تو خودکار فہرست میں منتقل کر دیں (ایک بار) ----------
-  AppState.settings.devPaymentAccounts = AppState.settings.devPaymentAccounts || [];
-  if(AppState.settings.devPaymentAccounts.length === 0 && AppState.settings.devPaymentType && AppState.settings.devPaymentNumber){
-    AppState.settings.devPaymentAccounts.push({
-      type: AppState.settings.devPaymentType,
-      number: AppState.settings.devPaymentNumber,
-      name: AppState.settings.devPaymentName || ''
-    });
-    persistAllData();
-  }
-  payTypeSel.value = '';
-  document.getElementById('devPaymentNumberInput').value = '';
-  document.getElementById('devPaymentNameInput').value = '';
-  renderDevPaymentAccountsList();
-  document.getElementById('perDayRateInput').value = AppState.settings.perDayRate || '';
-  renderDayPresetsInAdmin();
   // ---------- سیکیورٹی: یہ باکس ہمیشہ خالی کھلے، چاہے پچھلی بار کچھ ٹائپ کر کے سیو کیا گیا ہو —
   // ورنہ ٹائپ کیا گیا جواب اسکرین پر نظر آتا رہتا ہے جو مقصد کے خلاف ہے ----------
   dpReset('securityDobInput');
-}
-
-// ---------- Admin Control میں موجودہ Payment Accounts کی فہرست دکھائیں (ہر ایک کے ساتھ حذف کا بٹن) ----------
-function renderDevPaymentAccountsList(){
-  const wrap = document.getElementById('devPaymentAccountsListWrap');
-  if(!wrap) return;
-  const accounts = AppState.settings.devPaymentAccounts || [];
-  if(accounts.length === 0){
-    wrap.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:4px 2px;">No accounts added yet.</div>`;
-    return;
-  }
-  wrap.innerHTML = accounts.map((acc, idx) => `
-    <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border:1px solid #eef2f7; border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12.5px;">
-      <div><b>${acc.type}</b>: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}</div>
-      <button onclick="deleteDevPaymentAccount(${idx})" style="border:none; background:none; font-size:16px; padding:2px 6px;">🗑️</button>
-    </div>
-  `).join('');
-}
-function addDevPaymentAccount(){
-  const type = document.getElementById('devPaymentTypeInput').value;
-  const number = document.getElementById('devPaymentNumberInput').value.trim();
-  const name = document.getElementById('devPaymentNameInput').value.trim();
-  if(!type || !number){ alert('Please select a bank/wallet and enter the account number.'); return; }
-  AppState.settings.devPaymentAccounts = AppState.settings.devPaymentAccounts || [];
-  AppState.settings.devPaymentAccounts.push({type, number, name});
-  document.getElementById('devPaymentTypeInput').value = '';
-  document.getElementById('devPaymentNumberInput').value = '';
-  document.getElementById('devPaymentNameInput').value = '';
-  persistAllData();
-  renderDevPaymentAccountsList();
-}
-function deleteDevPaymentAccount(idx){
-  if(!confirm('Delete this account?')) return;
-  AppState.settings.devPaymentAccounts.splice(idx, 1);
-  persistAllData();
-  renderDevPaymentAccountsList();
 }
 
 async function saveAdminControl(){
@@ -18870,7 +19334,6 @@ async function saveAdminControl(){
   AppState.settings.devEmail = document.getElementById('devEmailInput').value.trim();
   AppState.settings.appShareLink = document.getElementById('appShareLinkInput').value.trim();
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
-  AppState.settings.perDayRate = parseFloat(document.getElementById('perDayRateInput').value) || 0;
   await saveSecurityRecoveryInfo();
   dpReset('securityDobInput');
   persistAllData();
@@ -19169,61 +19632,93 @@ async function finishPinRecovery(){
 let selectedPlanDays = null;
 let selectedPlanPrice = null;
 
-function openPackagePlansModal(){
-  document.getElementById('planCalcDaysInput').value = '';
-  document.getElementById('planCalcPriceOutput').textContent = '—';
-  selectedPlanDays = null;
-  selectedPlanPrice = null;
-  devPaymentSelectedIdx = 0;
-  renderPackagePlansView();
-  document.getElementById('packagePlansModal').classList.add('show');
+/* =====================================================================
+   💳 GOOGLE PLAY BILLING — صرف اُس وقت فعال ہوتا ہے جب یہ ایپ Play Store سے
+   نصب شدہ TWA کے طور پر چل رہی ہو (براؤزر/عام PWA میں یہ خودکار بند رہتا ہے،
+   وہاں پرانا Local/EasyPaisa نظام ہی چلتا رہے گا — دونوں ورژن ایک ہی فائل میں محفوظ)۔
+
+   ⚠️ ضروری: نیچے PLAY_BILLING_PRODUCTS میں دیے گئے sku بالکل انہی ناموں سے
+   Play Console → Monetize → Subscriptions میں بنانے ہوں گے، ورنہ خریداری ناکام ہوگی۔
+   ===================================================================== */
+const PLAY_BILLING_PRODUCTS = [
+  { sku: 'aio_pos_trial7',    days: 7,     label: '7 Days Free'  },
+  { sku: 'aio_pos_monthly',   days: 30,    label: '1 Month'      },
+  { sku: 'aio_pos_6month',    days: 180,   label: '6 Months'     },
+  { sku: 'aio_pos_yearly',    days: 365,   label: '1 Year'       },
+  { sku: 'aio_pos_lifetime',  days: 36500, label: 'Lifetime (100 Years)' },
+];
+
+function isPlayBillingAvailable(){
+  return typeof window.getDigitalGoodsService === 'function';
 }
 
-// ---------- کوئی بھی دن لکھیں — قیمت خودکار بنے (دن × روزانہ کی شرح)، Chat پیغام کے لیے بھی محفوظ ہو جائے ----------
-let devPaymentSelectedIdx = 0; // ---------- Package Plans میں فی الحال کون سا Dev Payment Account دکھایا جا رہا ہے ----------
-// ---------- کسٹمر "🔄 Try a Different Wallet/Bank" دبائے تو اگلے محفوظ شدہ اکاؤنٹ پر منتقل ہو جائیں (آخری کے بعد پہلے پر واپس) ----------
-function switchDevPaymentAccount(){
-  const accounts = AppState.settings.devPaymentAccounts || [];
-  if(accounts.length <= 1) return;
-  devPaymentSelectedIdx = (devPaymentSelectedIdx + 1) % accounts.length;
-  renderPackagePlansView();
-}
-// ---------- اکاؤنٹ نمبر پر ٹیپ کرتے ہی کلپ بورڈ میں کاپی ہو جائے — تاکہ کسٹمر کو ٹائپ نہ کرنا پڑے ----------
-function copyDevPaymentNumber(){
-  const accounts = AppState.settings.devPaymentAccounts || [];
-  const acc = accounts[devPaymentSelectedIdx];
-  if(!acc) return;
-  const el = document.getElementById('devPaymentAccountText');
-  const originalText = el.textContent;
-  const showCopied = () => { el.textContent = '✅ Copied: ' + acc.number; setTimeout(() => { el.textContent = originalText; }, 1800); };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(acc.number).then(showCopied).catch(() => {});
-  } else {
-    try{
-      const ta = document.createElement('textarea');
-      ta.value = acc.number; ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showCopied();
-    }catch(e){ /* کاپی ناکام — خاموشی سے نظرانداز */ }
+// ---------- Play Console سے قیمتیں لا کر کیش کر لیں — تاکہ Package Plans میں دکھائی جا سکیں ----------
+let playBillingDetailsCache = null;
+let playBillingLoadFailed = false; // ---------- ناکامی کی صورت میں Loading… ہمیشہ کے لیے اٹکنے کی بجائے خودکار Local/EasyPaisa پر واپس آ جائے ----------
+async function loadPlayBillingDetails(){
+  if(!isPlayBillingAvailable()) return null;
+  if(playBillingDetailsCache) return playBillingDetailsCache;
+  try{
+    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+    const details = await service.getDetails(PLAY_BILLING_PRODUCTS.map(p => p.sku));
+    if(!details || details.length === 0){ playBillingLoadFailed = true; return null; }
+    playBillingDetailsCache = details;
+    return details;
+  } catch(err){
+    console.error('Play Billing details load failed:', err);
+    playBillingLoadFailed = true;
+    return null;
   }
 }
 
-function updatePlanCalculator(){
-  const days = parseInt(document.getElementById('planCalcDaysInput').value) || 0;
-  const rate = AppState.settings.perDayRate || 0;
-  const output = document.getElementById('planCalcPriceOutput');
-  if(days <= 0 || rate <= 0){
-    output.textContent = '—';
-    selectedPlanDays = null;
-    selectedPlanPrice = null;
+// ---------- خریداری کا اصل عمل — کامیابی پر Play کو acknowledge کر کے، اسی طرح دن جوڑیں جیسے Local کوڈ سے جوڑتے ہیں ----------
+async function purchaseViaPlayBilling(sku, days){
+  if(!isPlayBillingAvailable()){
+    alert('❌ This purchase only works inside the app when installed from the Play Store.');
     return;
   }
-  const price = days * rate;
-  output.textContent = `Rs. ${price.toLocaleString()}`;
-  selectedPlanDays = days;
-  selectedPlanPrice = price;
+  try{
+    const paymentMethod = { supportedMethods: 'https://play.google.com/billing', data: { sku } };
+    const request = new PaymentRequest([paymentMethod]);
+    const response = await request.show();
+    const { purchaseToken } = response.details;
+    await response.complete('success');
+
+    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+    await service.acknowledge(purchaseToken, 'repeat'); // ---------- 'repeat' = subscription، ورنہ Google 3 دن بعد خودکار رقم واپس کر دیتا ہے ----------
+
+    // ---------- کامیاب خریداری — بالکل اسی طرح دن جوڑیں جیسے Local activation code سے جوڑے جاتے ہیں ----------
+    const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
+    const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
+    base.setDate(base.getDate() + days);
+    AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
+    AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+    AppState.settings.isOnFreeTrial = false;
+    AppState.settings.subscriptionViaPlayBilling = true;
+    persistAllData();
+    document.getElementById('packagePlansModal')?.classList.remove('show');
+    refreshAllScreens();
+    alert('✅ Subscription activated successfully via Google Play!');
+  } catch(err){
+    console.error('Play Billing purchase failed:', err);
+    if(err && err.name !== 'AbortError'){ // ---------- صارف نے خود منسوخ کیا ہو تو خاموشی سے واپس، ورنہ پیغام دکھائیں ----------
+      alert('❌ Purchase could not be completed. Please try again.');
+    }
+  }
+}
+
+
+function openPackagePlansModal(){
+  selectedPlanDays = null;
+  selectedPlanPrice = null;
+  playBillingLoadFailed = false; // ---------- ہر بار پاپ اپ کھلنے پر دوبارہ کوشش کا موقع دیں ----------
+  renderPackagePlansView();
+  document.getElementById('packagePlansModal').classList.add('show');
+  // ---------- یہ ورژن ہمیشہ صرف Google Play Billing کے ذریعے چلتی ہے — قیمتیں لوڈ ہوتے ہی خودکار دوبارہ رینڈر ----------
+  loadPlayBillingDetails().then(() => renderPackagePlansView());
+  setTimeout(() => {
+    if(!playBillingDetailsCache){ playBillingLoadFailed = true; renderPackagePlansView(); }
+  }, 6000);
 }
 
 // ---------- دنوں کو خوش کن لیبل میں بدلیں — "30 days" کی بجائے "1 Month" وغیرہ ----------
@@ -19236,193 +19731,33 @@ function formatPlanDaysLabel(days){
   return `${days} day${days === 1 ? '' : 's'}`;
 }
 
-// ---------- کسی محفوظ شدہ پلان پر ٹیپ کریں تو کیلکولیٹر فوراً اسی دن/قیمت سے بھر جائے
-// (fixedPrice ہو تو وہی استعمال ہوگی، ورنہ per-day rate سے حساب ہوگی) ----------
-function selectPresetPlan(days, fixedPrice){
-  document.getElementById('planCalcDaysInput').value = days;
-  if(fixedPrice != null){
-    selectedPlanDays = days;
-    selectedPlanPrice = fixedPrice;
-    document.getElementById('planCalcPriceOutput').textContent = `Rs. ${fixedPrice.toLocaleString()}`;
-  } else {
-    updatePlanCalculator();
-  }
-}
-
-// ---------- پلان پر ٹیپ کرتے ہی سیدھا Chat with Developer کھل جائے (WhatsApp/SMS/Email چننے کے لیے) —
-// کسٹمر کو الگ سے نیچے کا بٹن دبانے کی ضرورت نہیں رہتی، ایک ٹیپ میں پیغام تیار ----------
-function selectPresetPlanAndChat(days, fixedPrice){
-  selectPresetPlan(days, fixedPrice);
-  document.getElementById('packagePlansModal').classList.remove('show');
-  openDevChat('subscription');
-}
-
 function renderPackagePlansView(){
   const wrap = document.getElementById('packagePlansWrap');
-  const plans = AppState.settings.subscriptionPlans || [];
-  const rate = AppState.settings.perDayRate || 0;
 
-  if(rate > 0){
-    document.getElementById('planCalcWrap').style.display = 'block';
-  } else {
-    document.getElementById('planCalcWrap').style.display = 'none';
-  }
-
-  // ---------- ڈویلپر کے پیمنٹ اکاؤنٹس — قیمت کے فوراً نیچے، تاکہ کسٹمر کو الگ سے پوچھنا نہ پڑے؛
-  // ایک سے زیادہ ہوں تو "🔄 Try a Different Wallet/Bank" سے دوسرے اکاؤنٹ پر منتقل ہو سکتے ہیں ----------
-  const s = AppState.settings;
-  const devAccounts = s.devPaymentAccounts || [];
-  if(devAccounts.length > 0){
-    if(devPaymentSelectedIdx >= devAccounts.length) devPaymentSelectedIdx = 0;
-    const acc = devAccounts[devPaymentSelectedIdx];
-    document.getElementById('devPaymentAccountText').textContent = `${acc.type}: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}`;
-    document.getElementById('devPaymentAccountWrap').style.display = 'block';
-    document.getElementById('devPaymentSwitchBtn').style.display = devAccounts.length > 1 ? 'inline-block' : 'none';
-  } else {
-    document.getElementById('devPaymentAccountWrap').style.display = 'none';
-  }
-
-  if(plans.length === 0){
-    wrap.innerHTML = rate > 0 ? '' : `<div style="color:var(--muted); font-size:12px; padding:10px 2px;">No plans published yet. Please chat with the developer directly.</div>`;
+  // ---------- 💳 اس Play Store ورژن میں ہمیشہ صرف اور صرف Google Play کے ذریعے خریداری —
+  // Google Play پالیسی کے مطابق کوئی متبادل (EasyPaisa/Local) پیمنٹ کبھی نہیں دکھانی، اسی لیے
+  // یہاں کوئی "لوکل" حصہ سرے سے موجود ہی نہیں — ناکامی کی صورت میں بھی صرف "دوبارہ کوشش کریں" دکھائیں ----------
+  if(playBillingLoadFailed){
+    wrap.innerHTML = `
+      <div style="text-align:center; padding:20px 10px;">
+        <div style="color:var(--danger); font-weight:700; margin-bottom:12px;">⚠️ Could not load plans from Google Play. Please check your internet connection.</div>
+        <button class="testPrintBtn" onclick="playBillingLoadFailed=false; playBillingDetailsCache=null; renderPackagePlansView(); loadPlayBillingDetails().then(()=>renderPackagePlansView());">🔄 Try Again</button>
+      </div>`;
     return;
   }
-  wrap.innerHTML = plans.map(p => {
-    const price = p.price != null ? p.price : (rate > 0 ? p.days * rate : null);
-    const priceLabel = price != null ? 'Rs. ' + price.toLocaleString() : '—';
+  if(!playBillingDetailsCache){
+    wrap.innerHTML = `<div style="text-align:center; padding:20px 10px; color:var(--muted);">🔍 Loading plans from Google Play…</div>`;
+    return;
+  }
+  wrap.innerHTML = PLAY_BILLING_PRODUCTS.map(p => {
+    const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
+    const priceLabel = info ? `${info.price.currency} ${info.price.value}` : '—';
     return `
-    <div onclick="selectPresetPlanAndChat(${p.days}, ${p.price != null ? p.price : 'null'})" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:11px 14px; margin-bottom:8px; cursor:pointer;">
-      <div style="font-weight:800; font-size:14px;">${formatPlanDaysLabel(p.days)}</div>
+    <div onclick="purchaseViaPlayBilling('${p.sku}', ${p.days})" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:11px 14px; margin-bottom:8px; cursor:pointer;">
+      <div style="font-weight:800; font-size:14px;">${p.label}</div>
       <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${priceLabel}</div>
     </div>`;
   }).join('');
-}
-
-// ---------- 📦 Subscription Plans کا خوبصورت، فوری شیئر ایبل پوسٹر — کسٹمر پوچھے تو ایک ٹیپ میں WhatsApp پر بھیج دیں ----------
-async function sharePackagePlansPoster(){
-  const plans = AppState.settings.subscriptionPlans || [];
-  const rate = AppState.settings.perDayRate || 0;
-  const devAccounts = AppState.settings.devPaymentAccounts || [];
-  const acc = devAccounts[devPaymentSelectedIdx] || devAccounts[0] || null;
-
-  const W = 640;
-  const rowH = 62;
-  const headerH = 190;
-  const accountH = acc ? 90 : 0;
-  const footerH = 90;
-  const H = headerH + Math.max(plans.length, 1) * rowH + accountH + footerH;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // ---------- پس منظر ----------
-  const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, W, H);
-
-  let y = 0;
-  ctx.fillStyle = theme.primary;
-  ctx.fillRect(0, 0, W, headerH);
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#fff';
-  ctx.font = "800 26px Poppins, sans-serif";
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', W/2, 55);
-  ctx.font = "900 30px Poppins, sans-serif";
-  ctx.fillText('📦 Subscription Plans', W/2, 105);
-  ctx.font = "600 14px Poppins, sans-serif";
-  ctx.fillText('Choose the plan that suits you best', W/2, 135);
-  if(rate > 0){
-    ctx.font = "600 13px Poppins, sans-serif";
-    ctx.fillText(`(or any custom duration — Rs. ${rate}/day)`, W/2, 160);
-  }
-
-  y = headerH + 20;
-  ctx.textAlign = 'left';
-  if(plans.length === 0){
-    ctx.fillStyle = '#64748b';
-    ctx.font = "600 15px Poppins, sans-serif";
-    ctx.textAlign = 'center';
-    ctx.fillText('Contact us for pricing details', W/2, y + 20);
-    y += rowH;
-  } else {
-    plans.forEach((p, idx) => {
-      const price = p.price != null ? p.price : (rate > 0 ? p.days * rate : null);
-      const priceLabel = price != null ? 'Rs. ' + price.toLocaleString() : '—';
-      const rowY = y + idx * rowH;
-      ctx.fillStyle = idx % 2 === 0 ? '#f8fafc' : '#ffffff';
-      ctx.fillRect(30, rowY, W - 60, rowH - 10);
-      ctx.fillStyle = '#0f172a';
-      ctx.font = "800 19px Poppins, sans-serif";
-      ctx.textAlign = 'left';
-      ctx.fillText(formatPlanDaysLabel(p.days), 52, rowY + 34);
-      ctx.fillStyle = theme.primary;
-      ctx.font = "800 20px Poppins, sans-serif";
-      ctx.textAlign = 'right';
-      ctx.fillText(priceLabel, W - 52, rowY + 34);
-    });
-    y += plans.length * rowH;
-  }
-
-  y += 10;
-  if(acc){
-    ctx.fillStyle = '#fff7ed';
-    ctx.fillRect(30, y, W - 60, accountH - 15);
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#9a3412';
-    ctx.font = "700 14px Poppins, sans-serif";
-    ctx.fillText('💳 Send Payment To:', 50, y + 30);
-    ctx.fillStyle = '#7c2d12';
-    ctx.font = "700 16px Poppins, sans-serif";
-    ctx.fillText(`${acc.type}: ${acc.number}${acc.name ? ' (' + acc.name + ')' : ''}`, 50, y + 56);
-    y += accountH;
-  }
-
-  ctx.fillStyle = theme.primaryDark || '#0b4a45';
-  ctx.fillRect(0, H - footerH, W, footerH);
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center';
-  ctx.font = "700 15px Poppins, sans-serif";
-  const contactNum = '+' + (AppState.settings.devWhatsapp || '923206793793').replace(/\D/g, '');
-  ctx.fillText(`💬 Questions? WhatsApp us: ${contactNum}`, W/2, H - footerH/2 + 6);
-
-  showImageSharePreview(canvas, 'Subscription_Plans.png', 'Subscription Plans', 'Here are our subscription plans:');
-}
-
-function renderDayPresetsInAdmin(){
-  const wrap = document.getElementById('dayPresetsWrap');
-  const plans = AppState.settings.subscriptionPlans || [];
-  wrap.innerHTML = plans.map((p, idx) => `
-    <div style="display:flex; gap:6px; margin-bottom:6px;">
-      <input type="number" value="${p.days}" placeholder="Days" onchange="updateSubscriptionPlan(${idx}, 'days', this.value)" style="flex:1; padding:7px; border:1px solid #dbe1ea; border-radius:6px; font-size:12.5px;">
-      <input type="number" value="${p.price != null ? p.price : ''}" placeholder="Price (Rs.)" onchange="updateSubscriptionPlan(${idx}, 'price', this.value)" style="flex:1; padding:7px; border:1px solid #dbe1ea; border-radius:6px; font-size:12.5px;">
-      <button onclick="deleteSubscriptionPlan(${idx})" style="padding:7px 10px; background:#fef2f2; color:var(--danger); border:none; border-radius:6px; font-size:12px; cursor:pointer;">🗑️</button>
-    </div>
-  `).join('');
-}
-
-function updatePerDayRate(value){
-  AppState.settings.perDayRate = parseFloat(value) || 0;
-  persistAllData();
-}
-
-function addSubscriptionPlan(){
-  if(!AppState.settings.subscriptionPlans) AppState.settings.subscriptionPlans = [];
-  AppState.settings.subscriptionPlans.push({days: 30, price: null});
-  persistAllData();
-  renderDayPresetsInAdmin();
-}
-function updateSubscriptionPlan(idx, field, value){
-  if(field === 'price'){
-    AppState.settings.subscriptionPlans[idx].price = value === '' ? null : (parseFloat(value) || 0);
-  } else {
-    AppState.settings.subscriptionPlans[idx][field] = parseInt(value) || 0;
-  }
-  persistAllData();
-}
-function deleteSubscriptionPlan(idx){
-  AppState.settings.subscriptionPlans.splice(idx, 1);
-  persistAllData();
-  renderDayPresetsInAdmin();
 }
 
 // ---------- Home ٹائل سے یہاں پہنچتے ہیں — پہلے فہرست تازہ بنائیں، پھر modal دکھائیں ----------
@@ -21079,11 +21414,11 @@ async function renderTodaySaleReportToCanvas(){
   // ---------- اوپننگ کیش (Settings سے) ----------
   const openingCash = AppState.settings.openingCashBalance || 0;
 
-  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب) ----------
+  // ---------- ڈائری کا موجودہ بیلنس (Dashboard جیسا ہی حساب — balance مثبت = I Got/Liability، منفی = I Gave/Asset) ----------
   let diaryPayable = 0, diaryReceivable = 0;
   (typeof diaryData !== 'undefined' ? diaryData : []).forEach(e => {
-    if(e.balance < 0) diaryPayable += Math.abs(e.balance);
-    else if(e.balance > 0) diaryReceivable += e.balance;
+    if(e.balance > 0) diaryPayable += e.balance;
+    else if(e.balance < 0) diaryReceivable += Math.abs(e.balance);
   });
 
   // ---------- آئٹم وائز فروخت — سب سے زیادہ بکنے والا سب سے اوپر ----------
@@ -21692,9 +22027,9 @@ async function renderDiarySummaryReportToCanvas(){
 
   // ---------- سمری باکس ----------
   const sRows = [
-    ['Total I Got', '- ' + fmt(totalUdhaar)],
-    ['Total I Gave', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: I Gave" : 'Net: I Got', fmt(Math.abs(netBalance))],
+    ['Total I Gave', '+ ' + fmt(totalUdhaar)],
+    ['Total I Got', '- ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: I Got" : 'Net: I Gave', fmt(Math.abs(netBalance))],
   ];
   const sumTop = y;
   ctx.font = `${bold?'bold':''} ${fsSummary}px ${fontFam}`;
@@ -21990,9 +22325,9 @@ function buildDiarySummaryPdf(orientation){
   y += 6;
 
   const summaryRows = [
-    ['Total I Got', '- ' + fmt(totalUdhaar)],
-    ['Total I Gave', '+ ' + fmt(totalQarz)],
-    [netBalance >= 0 ? "Net: I Gave" : 'Net: I Got', fmt(Math.abs(netBalance))],
+    ['Total I Gave', '+ ' + fmt(totalUdhaar)],
+    ['Total I Got', '- ' + fmt(totalQarz)],
+    [netBalance >= 0 ? "Net: I Got" : 'Net: I Gave', fmt(Math.abs(netBalance))],
   ];
   const sumRowH = Math.round(6 * rowScale * 10) / 10;
   const sumFontPt = Math.round(9 * fontScale * 10) / 10;
@@ -22126,7 +22461,7 @@ async function printCurrentReport(){
     // فوری، بغیر دیکھے شیئر کرنے کے لیے نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں،
     // جو سیدھا Android کی نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      alert('Could not load the PDF library — please check your internet connection and try again.');
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
@@ -22375,7 +22710,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   applyTheme(AppState.settings.themeId);
-  applyFont('segoe');
+  applyFont(AppState.settings.fontId || 'tahoma');
   renderFontsFabPanel();
   applyPrintPageSize(AppState.settings.paperWidth || 80);
   applyUiZoom(AppState.settings.uiZoom || 100);
