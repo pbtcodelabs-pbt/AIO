@@ -279,6 +279,50 @@
   .screen.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 
+  /* ---------- 🎁 Trial Reminder — روزانہ ایک بار، چمکتا ہوا، حرکت کرتا ہوا Toast (بغیر بٹن، خود بخود غائب) ---------- */
+  @keyframes trialToastSlide{
+    0%{ transform:translateY(-40px); opacity:0; }
+    12%{ transform:translateY(0); opacity:1; }
+    88%{ transform:translateY(0); opacity:1; }
+    100%{ transform:translateY(-40px); opacity:0; }
+  }
+  @keyframes trialToastGlow{
+    0%,100%{ box-shadow:0 4px 18px rgba(245,158,11,.35), 0 0 0 rgba(245,158,11,0); }
+    50%{ box-shadow:0 4px 26px rgba(245,158,11,.6), 0 0 14px rgba(245,158,11,.5); }
+  }
+  #trialReminderToast{
+    position:fixed; top:14px; left:50%; transform:translateX(-50%);
+    z-index:9999; max-width:92vw; width:360px;
+    background:linear-gradient(135deg,#fffbeb,#fef3c7);
+    border:1.5px solid #fbbf24; border-radius:14px;
+    padding:12px 16px; display:flex; align-items:center; gap:10px;
+    animation: trialToastSlide 4.5s ease forwards, trialToastGlow 1.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  #trialReminderToast .trtIcon{font-size:22px; flex:0 0 auto; animation:trialPulseIcon 1.2s ease-in-out infinite;}
+  @keyframes trialPulseIcon{0%,100%{transform:scale(1);} 50%{transform:scale(1.18);}}
+  #trialReminderToast .trtText{font-size:13px; font-weight:800; color:#92400e; line-height:1.35;}
+
+  /* ---------- ⚠️ آخری 1-2 دن — زیادہ نمایاں، چمکتی ہوئی پاپ اپ، Subscribe Now / Remind Me Later بٹن کے ساتھ ---------- */
+  @keyframes trialUrgentGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.45); }
+    50%{ box-shadow:0 0 0 12px rgba(220,38,38,0); }
+  }
+  #trialUrgentModal .backupConfirmBox{
+    border:2px solid #dc2626;
+    animation: trialUrgentGlow 1.8s ease-in-out infinite;
+  }
+  #trialUrgentModal .backupConfirmIconWrap{
+    animation: trialPulseIcon 1s ease-in-out infinite;
+  }
+
+  /* ---------- 🟢 ہمیشہ نظر آنے والا "Remaining" ڈبہ — آخری 3 دن میں خود بھی ہلکا سا چمکے ---------- */
+  @keyframes subBoxDaysGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.35); }
+    50%{ box-shadow:0 0 10px 2px rgba(220,38,38,.35); }
+  }
+  .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
+
   .pageTitle{font-size:20px; font-weight:800; margin-bottom:18px; padding-bottom:10px; color:var(--primary-dark); position:relative; border-bottom:2.5px solid var(--primary);}
   /* --- Billing (ہوم) کا عنوان خاص طور پر باریک — تاکہ نیچے پراڈکٹس کے لیے زیادہ جگہ بچے --- */
   .billingPageTitle{font-size:14px; margin-bottom:8px; padding-bottom:5px; border-bottom-width:1.5px;}
@@ -1916,8 +1960,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST35</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0558pm19aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST39</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0640pm19aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -2019,6 +2063,12 @@
         <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
         <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
+      </div>
+
+      <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
+      <div id="trialReminderToast" style="display:none;">
+        <span class="trtIcon">🎁</span>
+        <span class="trtText" id="trialReminderToastText"></span>
       </div>
 
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
@@ -4637,6 +4687,19 @@
   </div>
 </div>
 
+<!-- ⚠️ Trial Urgent — صرف آخری 1-2 دن میں، روزانہ ایک بار، چمکتی سرخ بارڈر، Subscribe Now / Remind Me Later -->
+<div class="modalOverlay" id="trialUrgentModal" onclick="if(event.target===this) dismissTrialUrgentModal()">
+  <div class="backupConfirmBox">
+    <div class="backupConfirmIconWrap" style="background:#fee2e2; color:var(--danger);"><span>⚠️</span></div>
+    <h3 id="trialUrgentTitle">Trial ending soon</h3>
+    <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;" id="trialUrgentBody">
+      Subscribe to keep using the same reports and features and to continue your business without interruption.
+    </p>
+    <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#dc2626,#991b1b); margin-top:14px;" onclick="dismissTrialUrgentModal(); goTo('billing'); openPackagePlansModal();">🎟️ Subscribe Now</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissTrialUrgentModal()">Remind Me Later</button>
+  </div>
+</div>
+
 <!-- IMPORT BACKUP — تصدیقی پیغام (پرانے نیٹو confirm() کی جگہ، خوبصورت برانڈڈ ڈیزائن) -->
 <div class="modalOverlay" id="importConfirmModal" onclick="if(event.target===this) cancelImportConfirm()">
   <div class="backupConfirmBox">
@@ -5037,7 +5100,7 @@ async function backupToGoogleDrive(){
   const btn = document.getElementById('gdriveBackupBtn');
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    alert('Could not load Google services — please check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -5045,7 +5108,7 @@ async function backupToGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
-      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
@@ -5083,18 +5146,41 @@ async function backupToGoogleDrive(){
       persistAllData();
       renderHomeLastBackupLine();
 
+      // ---------- کس Google اکاؤنٹ میں محفوظ ہوا — یہ بتانا صارف کے لیے سب سے زیادہ اطمینان بخش ہوتا ہے ----------
+      let accountEmail = '';
+      try{
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
+        });
+        if(userInfoRes.ok){
+          const userInfo = await userInfoRes.json();
+          accountEmail = userInfo.email || '';
+          // ---------- یہی اکاؤنٹ آئندہ خودکار یاد رہے — دوبارہ اکاؤنٹ چننے کی فہرست بار بار نہ دکھانی پڑے ----------
+          if(accountEmail && AppState.settings.gdriveAccountEmail !== accountEmail){
+            AppState.settings.gdriveAccountEmail = accountEmail;
+            persistAllData();
+          }
+        }
+      }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
+
       showBackupConfirmModal('export', fileName + ' (Google Drive)', {
-        products: productsData.length, customers: customersData.length, invoices: invoicesData.length
+        products: productsData.length, customers: customersData.length, invoices: invoicesData.length,
+        accountEmail
       });
     }catch(err){
-      alert('Google Drive پر اپ لوڈ نہیں ہو سکی: ' + err.message);
+      alert('Could not upload to Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '☁️ Backup to Google Drive'; }
     }
   };
 
   // ---------- پہلی بار اجازت مانگے گا، اگلی بار خاموشی سے (already authorized) ٹوکن مل جائے گا ----------
-  client.requestAccessToken({ prompt: '' }); // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔ صرف اسی صورت میں مکمل اجازت سکرین دوبارہ آئے گی جب پرانی اجازت واقعی منسوخ ہو چکی ہو ----------
+  // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔
+  // 'hint' میں پہلے سے محفوظ اکاؤنٹ کا ای میل بھیج کر Google کو بتا دیتے ہیں کس اکاؤنٹ کے ساتھ رہنا ہے —
+  // اسی سے وہ بار بار سب اکاؤنٹس کی فہرست دکھانے کی بجائے سیدھا اسی اکاؤنٹ کے ساتھ آگے بڑھتا ہے ----------
+  const requestOptions = { prompt: '' };
+  if(AppState.settings.gdriveAccountEmail) requestOptions.hint = AppState.settings.gdriveAccountEmail;
+  client.requestAccessToken(requestOptions);
 }
 
 // ---------- ☁️ Google Drive سے بحال کریں — فہرست دکھائیں، منتخب فائل کو اسی موجودہ
@@ -5104,7 +5190,7 @@ async function restoreFromGoogleDrive(){
   const RESTORE_BTN_DEFAULT = btn ? btn.innerHTML : ''; // ---------- اصل SVG+متن محفوظ کر لیں، بعد میں دوبارہ لگانے کے لیے ----------
   const client = getGDriveTokenClient();
   if(!client){
-    alert('Google سروس لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+    alert('Could not load Google services — please check your internet connection and try again.');
     return;
   }
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Connecting to Google...'; }
@@ -5112,12 +5198,25 @@ async function restoreFromGoogleDrive(){
   client.callback = async (resp) => {
     if(resp.error){
       if(btn){ btn.disabled = false; btn.innerHTML = RESTORE_BTN_DEFAULT; }
-      alert('Google Drive اجازت نہیں مل سکی: ' + resp.error);
+      alert('Google Drive permission was not granted: ' + resp.error);
       return;
     }
     gDriveAccessToken = resp.access_token;
     try{
       if(btn) btn.textContent = '⏳ Loading files...';
+      // ---------- یہاں سے بھی اکاؤنٹ یاد رکھ لیں — اگر صارف پہلے کبھی Backup سے پہلے سیدھا Restore کرے تو بھی آئندہ اکاؤنٹ فہرست دوبارہ نہ کھلے ----------
+      try{
+        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
+        });
+        if(userInfoRes.ok){
+          const userInfo = await userInfoRes.json();
+          if(userInfo.email && AppState.settings.gdriveAccountEmail !== userInfo.email){
+            AppState.settings.gdriveAccountEmail = userInfo.email;
+            persistAllData();
+          }
+        }
+      }catch(e){ /* اختیاری معلومات، ناکام ہو تو بھی Restore جاری رہے */ }
       const folderId = await ensureGDriveBackupFolder(); // ---------- صرف "AIO Backup" فولڈر کے اندر کی فائلیں دکھائیں ----------
       const listUrl = 'https://www.googleapis.com/drive/v3/files' +
         '?q=' + encodeURIComponent(`'${folderId}' in parents and mimeType='application/json' and trashed=false`) +
@@ -5129,13 +5228,18 @@ async function restoreFromGoogleDrive(){
       renderGDriveFileList(files);
       document.getElementById('gdriveRestoreModal').classList.add('show');
     }catch(err){
-      alert('Google Drive سے فہرست نہیں مل سکی: ' + err.message);
+      alert('Could not load the file list from Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.innerHTML = RESTORE_BTN_DEFAULT; }
     }
   };
 
-  client.requestAccessToken({ prompt: '' }); // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔ صرف اسی صورت میں مکمل اجازت سکرین دوبارہ آئے گی جب پرانی اجازت واقعی منسوخ ہو چکی ہو ----------
+  // ---------- ہمیشہ پہلے خاموشی سے (silent) کوشش کریں — اگر پہلے سے اجازت دی جا چکی ہے تو Google خود بخود، بغیر کسی سکرین کے، نیا ٹوکن دے دیتا ہے۔
+  // 'hint' میں پہلے سے محفوظ اکاؤنٹ کا ای میل بھیج کر Google کو بتا دیتے ہیں کس اکاؤنٹ کے ساتھ رہنا ہے —
+  // اسی سے وہ بار بار سب اکاؤنٹس کی فہرست دکھانے کی بجائے سیدھا اسی اکاؤنٹ کے ساتھ آگے بڑھتا ہے ----------
+  const requestOptions = { prompt: '' };
+  if(AppState.settings.gdriveAccountEmail) requestOptions.hint = AppState.settings.gdriveAccountEmail;
+  client.requestAccessToken(requestOptions);
 }
 
 function renderGDriveFileList(files){
@@ -5177,7 +5281,7 @@ async function selectGDriveBackupFile(fileId, fileName){
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
     document.getElementById('importConfirmModal').classList.add('show');
   }catch(err){
-    alert('فائل ڈاؤن لوڈ نہیں ہو سکی: ' + err.message);
+    alert('Could not download the file: ' + err.message);
   }
 }
 function closeGDriveRestoreModal(){
@@ -5316,9 +5420,11 @@ function showBackupConfirmModal(type, fileName, info){
     icon.textContent = '✅';
     title.textContent = 'Backup Saved!';
     const isDrive = /\(Google Drive\)$/.test(fileName);
+    const cleanFileName = fileName.replace(/ \(Google Drive\)$/, '');
     body.innerHTML = isDrive ? `
-      <div class="backupFileChip">📄 ${fileName}</div>
-      <p>Saved to the <b>"AIO Backup"</b> folder in your Google Drive.</p>
+      <div class="backupFileChip">📄 ${cleanFileName}</div>
+      ${info.accountEmail ? `<p style="font-weight:700; color:var(--primary-dark);">✅ Backup Successful!</p><p>Google Drive account: <b>${info.accountEmail}</b></p>` : `<p style="font-weight:700; color:var(--primary-dark);">✅ Backup Successful!</p>`}
+      <p>Saved in Google Drive → folder <b>"AIO Backup"</b> → file <b>${cleanFileName}</b></p>
       <p>${info.products} products • ${info.customers} customers • ${info.invoices} invoices</p>
       <p class="backupHintText">Next time, tap "Restore from Google Drive" — this file (and every future one) will always be right there.</p>
     ` : `
@@ -5619,13 +5725,44 @@ function renderSubscriptionBanner(){
   document.getElementById('subBoxEndVal').textContent = formatDateDMY(AppState.settings.subscriptionExpiry);
   document.getElementById('subBoxDaysVal').textContent = `${daysLeft} day${daysLeft === 1 ? '' : 's'}`;
 
-  // ---------- میعاد ختم ہونے کے قریب "Remaining" ڈبے کا رنگ خودکار خطرے کی طرف بدلے ----------
+  // ---------- میعاد ختم ہونے کے قریب "Remaining" ڈبے کا رنگ خودکار خطرے کی طرف بدلے، اور آخری 3 دن میں ہلکا سا چمکے بھی ----------
   const daysBox = document.getElementById('subBoxDays');
-  if(daysLeft <= 3){ daysBox.style.background = '#fee2e2'; daysBox.style.color = 'var(--danger)'; }
+  daysBox.classList.remove('subBoxUrgentGlow');
+  if(daysLeft <= 3){ daysBox.style.background = '#fee2e2'; daysBox.style.color = 'var(--danger)'; daysBox.classList.add('subBoxUrgentGlow'); }
   else if(daysLeft <= 7){ daysBox.style.background = '#fff7ed'; daysBox.style.color = '#c2410c'; }
   else { daysBox.style.background = '#dcfce7'; daysBox.style.color = 'var(--success)'; }
 
   row.style.display = 'flex';
+
+  // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
+  if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
+}
+
+// ---------- 🎁 روزانہ ایک بار Trial یاد دہانی — 2 دن یا کم بچے ہوں تو زیادہ نمایاں (بٹن والا) پاپ اپ،
+// ورنہ صرف ہلکا سا خود بخود غائب ہونے والا Toast (بغیر کسی بٹن کے، تنگ نہیں کرتا) ----------
+function maybeShowTrialReminder(daysLeft){
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(AppState.settings.trialReminderShownOn === todayStr) return; // آج ایک بار دکھا چکے
+  AppState.settings.trialReminderShownOn = todayStr;
+  persistAllData();
+
+  if(daysLeft <= 2){
+    document.getElementById('trialUrgentTitle').textContent =
+      daysLeft <= 0 ? 'Your free trial has ended' : `Only ${daysLeft} day${daysLeft===1?'':'s'} left in your trial`;
+    document.getElementById('trialUrgentBody').textContent =
+      'Subscribe now to keep using the same reports and features, and to continue your business without any interruption.';
+    document.getElementById('trialUrgentModal').classList.add('show');
+  } else {
+    const toast = document.getElementById('trialReminderToast');
+    document.getElementById('trialReminderToastText').textContent =
+      `You are in your Free Trial period. ${daysLeft} day${daysLeft===1?'':'s'} remaining — subscribe anytime to keep using the same reports & features and continue your business smoothly.`;
+    toast.style.display = 'flex';
+    toast.style.animation = 'none'; toast.offsetHeight; toast.style.animation = ''; // ---------- ری سٹارٹ اینیمیشن ----------
+    setTimeout(() => { toast.style.display = 'none'; }, 4600);
+  }
+}
+function dismissTrialUrgentModal(){
+  document.getElementById('trialUrgentModal').classList.remove('show');
 }
 
 // ---------- 🏪 ہوم پیج کا بزنس کارڈ — لوگو، دکان کا نام، مالک کا نام، فون نمبر ----------
@@ -8953,7 +9090,7 @@ const PRODUCT_FIELD_SYNONYMS = {
 // ---------- CSV متن کو پراڈکٹ rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processProductCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  if(rows.length < 2){ alert('No data found — the first row must be a header, with at least one data row below it.'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
   const objs = rows.slice(1).map(r => {
     const o = {};
@@ -9061,9 +9198,9 @@ let pendingPartyImportRows = [];
 // ---------- CSV متن کو کسٹمر/سپلائر rows میں بدلیں — فائل اپلوڈ اور Scan Photo دونوں یہی فنکشن استعمال کریں گے ----------
 function processPartyCsvText(text){
   const rows = parseCSV(text);
-  if(rows.length < 2){ alert('کوئی ڈیٹا نہیں ملا — پہلی row میں ہیڈر اور کم از کم ایک ڈیٹا کی row ہونی چاہیے۔'); return false; }
+  if(rows.length < 2){ alert('No data found — the first row must be a header, with at least one data row below it.'); return false; }
   const fieldMap = buildFuzzyFieldMap(rows[0], PARTY_FIELD_SYNONYMS);
-  if(fieldMap.name < 0){ alert('نام والا کالم نہیں مل سکا — فائل میں "Name" جیسا کوئی کالم ضرور ہونا چاہیے۔'); return false; }
+  if(fieldMap.name < 0){ alert('Could not find a Name column — the file must have a column like "Name".'); return false; }
   const objs = rows.slice(1).map(r => ({
     name: (r[fieldMap.name] || '').trim(),
     phone: fieldMap.phone >= 0 ? (r[fieldMap.phone] || '').trim() : '',
@@ -9085,7 +9222,7 @@ function showPartyImportPreview(){
   const isCustomer = currentPartyTab === 'customers';
   const objs = pendingPartyImportRows;
   if(objs.length === 0){
-    alert('کوئی نام والی row نہیں ملی۔ فائل میں "Name" کالم بھرا ہونا چاہیے۔');
+    alert('No rows with a name were found. The "Name" column must be filled in.');
     return;
   }
   const list = isCustomer ? customersData : suppliersData;
@@ -9199,12 +9336,12 @@ function reconstructRowsFromWords(words){
 async function processScanFiles(files){
   if(!files.length) return;
   if(typeof Tesseract === 'undefined'){
-    alert('❌ سکین سسٹم لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔');
+    alert('❌ Could not load the scanning system — please turn on the internet and try again.');
     return;
   }
   document.getElementById('scanProgressWrap').style.display = 'block';
   document.getElementById('scanReviewWrap').style.display = 'none';
-  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — پہلی بار تھوڑا وقت لگ سکتا ہے)`;
+  document.getElementById('scanProgressText').textContent = `🔍 Scanning photo 1 of ${files.length}... (loading Urdu+English language data — this may take a moment the first time)`;
 
   let combinedLines = [];
   for(let i = 0; i < files.length; i++){
@@ -9249,7 +9386,7 @@ async function processScanFiles(files){
   scanReviewRows = scanReviewRows.concat(newRows); // ---------- پہلے سے موجود rows میں مزید شامل کریں (گیلری + کیمرہ ملا کر بھی چل سکتے ہیں) ----------
 
   if(scanReviewRows.length === 0){
-    alert('❌ کوئی آئٹم نہیں ملا — صاف اور روشن تصویر آزمائیں، یا نیچے "+ Add row" سے خود لکھیں۔');
+    alert('❌ No items found — try a clearer, well-lit photo, or type them in manually using "+ Add row" below.');
   }
   renderScanReviewList();
   document.getElementById('scanReviewWrap').style.display = 'block';
@@ -9435,7 +9572,7 @@ function scanCsvEscape(v){
   return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
 }
 function downloadScanAsCsv(){
-  if(scanReviewRows.length === 0){ alert('پہلے کوئی آئٹم شامل کریں۔'); return; }
+  if(scanReviewRows.length === 0){ alert('Please add at least one item first.'); return; }
   let headerRow, dataRows;
   if(scanImportContext === 'product'){
     headerRow = PRODUCT_CSV_HEADERS;
@@ -9449,7 +9586,7 @@ function downloadScanAsCsv(){
 }
 
 function finalizeScanImport(){
-  if(scanReviewRows.length === 0){ alert('کوئی آئٹم نہیں — پہلے تصویر منتخب کریں یا "+ Add row" سے شامل کریں۔'); return; }
+  if(scanReviewRows.length === 0){ alert('No items — first select a photo, or add one using "+ Add row".'); return; }
   if(scanImportContext === 'product'){
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       'product name': (r.name || '').trim(),
@@ -9464,14 +9601,14 @@ function finalizeScanImport(){
       'expiry date (yyyy-mm-dd)': (r.expiry || '').trim(),
       'location': (r.location || '').trim(),
     }));
-    if(objs.length === 0){ alert('کوئی پراڈکٹ نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    if(objs.length === 0){ alert('No product name entered — please type a name first.'); return; }
     pendingProductImportRows = objs;
     showProductImportPreview();
   } else {
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
       name: (r.name || '').trim(), phone: (r.phone || '').trim(), address: (r.address || '').trim(), area: (r.area || '').trim()
     }));
-    if(objs.length === 0){ alert('کوئی نام درج نہیں — پہلے نام لکھیں۔'); return; }
+    if(objs.length === 0){ alert('No name entered — please type a name first.'); return; }
     pendingPartyImportRows = objs;
     showPartyImportPreview();
   }
@@ -9487,7 +9624,7 @@ let cameraCapturedFiles = [];
 
 function openCameraCapture(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    alert('❌ اس ڈیوائس/براؤزر پر کیمرہ دستیاب نہیں — براہ کرم "Gallery" سے تصویر منتخب کریں۔');
+    alert('❌ Camera not available on this device/browser — please select a photo from "Gallery" instead.');
     return;
   }
   cameraCapturedFiles = [];
@@ -9502,7 +9639,7 @@ function openCameraCapture(){
       document.getElementById('cameraCaptureModal').classList.add('show');
     })
     .catch(() => {
-      alert('❌ کیمرہ کھل نہیں سکا — کیمرہ کی اجازت (permission) دیں، یا "Gallery" سے تصویر منتخب کریں۔');
+      alert('❌ Could not open the camera — please allow camera permission, or select a photo from "Gallery" instead.');
     });
 }
 
@@ -9934,7 +10071,7 @@ function formatPhoneForWhatsApp(phone){
 // ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
 async function pickContactForNewParty(){
   if(!('contacts' in navigator && 'ContactsManager' in window)){
-    alert('یہ فون/براؤزر فون بک تک رسائی سپورٹ نہیں کرتا — نام اور نمبر خود لکھ دیں۔');
+    alert('This phone/browser does not support access to contacts — please type the name and number manually.');
     return;
   }
   try{
@@ -18543,7 +18680,7 @@ async function printCurrentInvoice(){
     // خود Chrome کے 🖨️ پرنٹ اور ⋮/📤 شیئر آئیکن موجود ہوتے ہیں۔ فوری، بغیر دیکھے شیئر کرنے کے لیے
     // نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں، جو سیدھا نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      alert('Could not load the PDF library — please check your internet connection and try again.');
       return;
     }
     const { jsPDF } = window.jspdf;
@@ -19568,7 +19705,7 @@ async function loadPlayBillingDetails(){
 // ---------- خریداری کا اصل عمل — کامیابی پر Play کو acknowledge کر کے، اسی طرح دن جوڑیں جیسے Local کوڈ سے جوڑتے ہیں ----------
 async function purchaseViaPlayBilling(sku, days){
   if(!isPlayBillingAvailable()){
-    alert('❌ یہ خریداری صرف Play Store سے نصب شدہ ایپ میں کام کرتی ہے۔');
+    alert('❌ This purchase only works inside the app when installed from the Play Store.');
     return;
   }
   try{
@@ -22600,7 +22737,7 @@ async function printCurrentReport(){
     // فوری، بغیر دیکھے شیئر کرنے کے لیے نیچے دیا گیا الگ سبز "📤 Print/Share A4 PDF" بٹن استعمال کریں،
     // جو سیدھا Android کی نیٹو شیئر شیٹ کھولتا ہے ----------
     if(!window.jspdf){
-      alert('PDF لائبریری لوڈ نہیں ہو سکی — انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔');
+      alert('Could not load the PDF library — please check your internet connection and try again.');
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
