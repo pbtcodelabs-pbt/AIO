@@ -1960,8 +1960,8 @@
          نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST39</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0640pm19aug26</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">TEST: AIOTEST41</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">Wed0710pm19aug26</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -4533,6 +4533,10 @@
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
     <button class="checkoutBtn" style="margin-top:14px; background:#7c3aed;" onclick="sharePackagePlansPoster()">🖼️ Share as Poster</button>
+    <p style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:12px; text-align:center;">
+      💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
+    </p>
+    <button class="checkoutBtn" style="margin-top:8px; background:#c2410c;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
     <button class="checkoutBtn" style="margin-top:10px; background:var(--success);" onclick="document.getElementById('packagePlansModal').classList.remove('show'); openDevChat('subscription');">💬 Chat with Developer</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
@@ -4697,6 +4701,12 @@
     </p>
     <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#dc2626,#991b1b); margin-top:14px;" onclick="dismissTrialUrgentModal(); goTo('billing'); openPackagePlansModal();">🎟️ Subscribe Now</button>
     <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissTrialUrgentModal()">Remind Me Later</button>
+    <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #dbe1ea; text-align:left;">
+      <p style="font-size:11.5px; color:var(--muted); line-height:1.6; margin-bottom:8px;">
+        💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
+      </p>
+      <button class="backupConfirmCloseBtn" style="background:#fff7ed; color:#c2410c; font-size:12.5px; padding:10px;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
+    </div>
   </div>
 </div>
 
@@ -5929,9 +5939,8 @@ function handleBusinessLogoUpload(event){
 let devChatContext = 'support';
 function openDevChat(context){
   devChatContext = context;
-  const uid = getOrCreateDeviceUID();
   document.getElementById('devChatTitle').textContent = context === 'subscription' ? '💬 Ask About Subscription' : '💬 Chat with Developer';
-  document.getElementById('devChatUidLine').textContent = `Your Device ID: ${uid}`;
+  document.getElementById('devChatUidLine').textContent = '';
   document.getElementById('devChatPanel').classList.toggle('show');
 }
 
@@ -5956,23 +5965,36 @@ async function shareAppLink(){
 
 
 function buildDevChatMessage(){
-  const uid = getOrCreateDeviceUID();
   if(devChatContext === 'subscription'){
     // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ عام دلچسپی کا پیغام بھیجیں ----------
     if(selectedPlanDays && selectedPlanPrice){
-      return `Sir, I want to subscribe your AIO POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.\n\nMy Device ID:\n${uid}`;
+      return `Sir, I want to subscribe your AIO POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.`;
     }
     return buildAdInquiryMessage();
   }
-  // ---------- مسئلہ رپورٹ کرنے کا پیغام — اردو میں، خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
-  return `محترم ڈیویلپر،\nمیں آپ کی بیٹا ورژن AIO POS استعمال کر رہا ہوں۔ میں نے اس کے اندر یہ مسئلہ محسوس کیا ہے اور میرا مشورہ یہ ہے:\n\n\n\nمیرا Device ID:\n${uid}`;
+  // ---------- مسئلہ رپورٹ کرنے کا پیغام — خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
+  return `Dear Developer,\nI am using your beta version of AIO POS. I noticed the following issue and my suggestion is:\n\n\n`;
+}
+
+// ---------- 🆘 "Trouble Subscribing?" — Trial ختم ہونے کے قریب، یا Package Plans میں، ان لوگوں کے لیے
+// جن کا ڈیبٹ/کریڈٹ کارڈ Google Play پر کام نہیں کر رہا۔ WhatsApp پر ایک تیار (fill-in-the-blank) پیغام کھلتا ہے
+// تاکہ نام/ملک/مسئلہ خود بھر کر بھیج سکیں، اور آپ کو مکمل تفصیل کے ساتھ پیغام ملے —
+// ⚠️ یہاں Device ID جان بوجھ کر شامل نہیں کیا: اس Play Store ورژن میں کوئی مقامی کوڈ ریڈیم نہیں ہوتا،
+// اس لیے Device ID بھیجنے کا کوئی عملی فائدہ نہیں — بلاوجہ Data Safety اعلان کی ضرورت پڑ سکتی تھی ----------
+function sendTroubleSubscribingMessage(){
+  const msg = `Hi, I'm trying to subscribe to AIO POS but I'm having trouble completing the payment through Google Play (e.g., no debit/credit card, or a Google Play Gift Card is not easily available where I live).\n\n` +
+    `My Name: \n` +
+    `My Country/City: \n` +
+    `What's the problem: \n\n` +
+    `Please guide me on how I can subscribe.`;
+  const contact = getDeveloperContact();
+  window.open(`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // ---------- My Ads پوسٹر/اشتہار دیکھ کر رابطہ کرنے والے نئے دلچسپی رکھنے والے کے لیے مختصر، دوستانہ پیغام —
 // "package plan" کا پرانا فرض شدہ حوالہ ہٹا دیا، چونکہ اب کوئی پیڈ پیکج پلان دکھایا نہیں جاتا ----------
 function buildAdInquiryMessage(){
-  const uid = getOrCreateDeviceUID();
-  return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.\n\nMy Device ID:\n${uid}`;
+  return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.`;
 }
 
 function sendDevChat(channel){
