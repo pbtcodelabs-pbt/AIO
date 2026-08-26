@@ -4,7 +4,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>AIO POS — Skeleton</title>
+<title>AIO POS</title>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -1957,7 +1957,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS208TH0623PM</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS268WE01</span>
     </div>
   </div>
 
@@ -2688,14 +2688,6 @@
               <button onclick="pickFromGallery()" style="flex:1; background:#374151;">🖼️ Gallery</button>
               <button id="captureBtnMain" onclick="handleCaptureButtonClick()" style="flex:2;">📸 Capture</button>
             </div>
-          </div>
-          <!-- ---------- Remove.bg بیک گراؤنڈ ریموول (پراڈکٹ فوٹو کے لیے) — ایک بٹن API سے خودکار، دوسرا سیدھا ویب سائٹ ---------- -->
-          <div id="removeBgRow" style="display:none; flex-direction:column; gap:6px; margin-top:2px;">
-            <div style="display:flex; gap:8px;">
-              <button id="removeBgApiBtn" onclick="removeBackgroundViaApi()" style="flex:1; background:#7c3aed;">🪄 Remove Background (Auto)</button>
-              <button onclick="openRemoveBgWebsite()" style="flex:1; background:#0ea5e9;">🌐 Open remove.bg</button>
-            </div>
-            <div id="removeBgUsageText" style="color:#cbd5e1; font-size:11px; text-align:center;"></div>
           </div>
           <div id="photoPreviewButtons" style="display:none; gap:8px;">
             <button onclick="retakePhoto()" style="flex:1; background:#374151;">🔄 Retake</button>
@@ -4254,6 +4246,13 @@
         <div class="settingsHint">Personal "I Got / I Gave" ledger — separate from customer/supplier accounts.</div>
         <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
+
+      <!-- --- 🔒 Privacy Policy — Play Store کے لیے لازمی: ایپ کے اندر سے بھی قابلِ رسائی ہونا چاہیے، صرف Play Console لسٹنگ میں کافی نہیں --- -->
+      <div class="settingsCard">
+        <h3>🔒 Privacy Policy</h3>
+        <div class="settingsHint">See how AIO POS handles your data.</div>
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="window.open('./privacy.html','_blank')">🔒 View Privacy Policy</button>
+      </div>
     </div>
 
   </div>
@@ -4701,13 +4700,6 @@
 // اب یہ سب localStorage میں مستقل محفوظ ہوتا ہے — بند/دوبارہ کھولنے پر بھی موجود رہے گا۔
 const STORAGE_PREFIX = 'aioPos_';
 
-// ================= Remove.bg API (پراڈکٹ فوٹو کا بیک گراؤنڈ خودکار ریموو کرنے کے لیے) =================
-// نوٹ: فری پلان میں تقریباً 50 تصویریں ماہانہ مفت ہوتی ہیں۔ 50 مکمل ہونے پر API کی جانب سے
-// خطا (403 / کریڈٹ ختم) آئے گی — تب یہ بٹن یوزر کو بتا دے گا اور "🌐 remove.bg کھولیں" بٹن سے
-// ویب سائٹ پر جا کر دستی طور پر بیک گراؤنڈ ریموو کیا جا سکتا ہے۔
-const REMOVE_BG_API_KEY = 'oxacEC9rhoSSGdqSzPtFjQen';
-const REMOVE_BG_API_URL = 'https://api.remove.bg/v1.0/removebg';
-const REMOVE_BG_MONTHLY_LIMIT = 50; // صرف مقامی گنتی/اندازے کے لیے — اصل حد remove.bg اپنے سرور پر لگاتا ہے
 // ================= PIN Hashing (SHA-256) — عارضی حفاظت جب تک Firebase Auth نہیں آتا =================
 // نوٹ: یہ localStorage میں پلین ٹیکسٹ PIN رکھنے سے بہتر ہے، لیکن حتمی حل نہیں —
 // اصل پروڈکشن میں یہ تصدیق سرور سائیڈ (Firebase Auth) پر ہونی چاہیے، کبھی صرف براؤزر میں نہیں۔
@@ -10038,7 +10030,6 @@ async function startPhotoCapture(mode, defaultShape, title){
   document.getElementById('itemPhotoStaticImg').src = '';
   document.getElementById('photoPreviewStep').style.display = 'none';
   document.getElementById('photoPreviewButtons').style.display = 'none';
-  document.getElementById('removeBgRow').style.display = 'none';
   document.getElementById('photoCaptureControls').style.display = 'flex';
   document.getElementById('brightnessSlider').value = 125;
   document.getElementById('shapeToggleRow').style.display = 'flex';
@@ -10225,10 +10216,6 @@ function showPhotoPreview(){
   document.getElementById('photoPreviewStep').style.display = 'flex';
   document.getElementById('photoPreviewButtons').style.display = 'flex';
   document.getElementById('photoPreviewImg').src = capturedPhotoDataUrl;
-  // ---------- Remove.bg بٹن صرف پراڈکٹ فوٹو کے لیے دکھائیں (کسٹمر/سپلائر پروفائل فوٹو کے لیے نہیں) ----------
-  const showRemoveBg = (photoCaptureMode !== 'party');
-  document.getElementById('removeBgRow').style.display = showRemoveBg ? 'flex' : 'none';
-  if(showRemoveBg) updateRemoveBgUsageText();
 }
 
 function retakePhoto(){
@@ -10293,126 +10280,6 @@ function confirmPhoto(){
     document.getElementById(`pcard-${itemPhotoTargetProductId}`)?.classList.add('open');
   }
   closeItemPhotoCapture();
-}
-
-// ================= Remove.bg — بیک گراؤنڈ ریموول (پراڈکٹ فوٹو) =================
-
-// ---------- اس مہینے کی گنتی کے لیے کلید (ہر نئے مہینے میں خودکار ری سیٹ ہو جاتی ہے) ----------
-function removeBgUsageKey(){
-  const now = new Date();
-  return `removeBgUsage_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-}
-function getRemoveBgUsageCount(){
-  return loadFromStorage(removeBgUsageKey(), 0);
-}
-function incrementRemoveBgUsageCount(){
-  const n = getRemoveBgUsageCount() + 1;
-  saveToStorage(removeBgUsageKey(), n);
-  return n;
-}
-function updateRemoveBgUsageText(){
-  const used = getRemoveBgUsageCount();
-  const remaining = Math.max(0, REMOVE_BG_MONTHLY_LIMIT - used);
-  const el = document.getElementById('removeBgUsageText');
-  if(el) el.textContent = `Approximately ${remaining}/${REMOVE_BG_MONTHLY_LIMIT} free background removals left this month`;
-}
-
-// ---------- data URL کو Blob میں تبدیل کریں (API کو فائل بھیجنے کے لیے) ----------
-function dataUrlToBlob(dataUrl){
-  const parts = dataUrl.split(',');
-  const mimeMatch = parts[0].match(/:(.*?);/);
-  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
-  const binary = atob(parts[1]);
-  const bytes = new Uint8Array(binary.length);
-  for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], {type: mime});
-}
-
-// ---------- remove.bg ویب سائٹ سیدھی نئے ٹیب میں کھولیں (فری کریڈٹ ختم ہونے پر یا دستی استعمال کے لیے) ----------
-// مسئلہ: ابھی ابھی کھینچی گئی تصویر صرف ایپ کی میموری میں ہوتی ہے، فون کی گیلری میں محفوظ نہیں ہوتی —
-// اس لیے remove.bg کے اپ لوڈ باکس میں وہ نظر ہی نہیں آتی۔ حل: پہلے یہ تصویر خودکار طور پر
-// فون کی Downloads/Gallery میں محفوظ کریں، پھر remove.bg کھولیں۔ نتیجہ واپس لانے کے لیے
-// (چونکہ کوئی ویب سائٹ خودکار طور پر ہماری ایپ کو فائل واپس نہیں بھیج سکتی) — remove.bg سے
-// ڈاؤن لوڈ کرنے کے بعد "Retake" ➜ "🖼️ Gallery" سے وہی نئی (بیک گراؤنڈ ریموو شدہ) تصویر منتخب کریں،
-// وہ اسی کراپ/پریویو اسکرین میں آ کر لگ جائے گی۔
-function openRemoveBgWebsite(){
-  if(!capturedPhotoDataUrl){
-    window.open('https://www.remove.bg/upload', '_blank');
-    return;
-  }
-
-  const filename = `product_photo_${Date.now()}.jpg`;
-  const link = document.createElement('a');
-  link.href = capturedPhotoDataUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  alert(
-    `✅ This photo has been saved to your phone's Downloads/Gallery as "${filename}".\n\n` +
-    `Now do these 3 steps:\n` +
-    `1) Go to remove.bg and upload this same photo from your Downloads folder\n` +
-    `2) After the background is removed, download the result from there\n` +
-    `3) Come back to this screen and tap "🔄 Retake" then "🖼️ Gallery", and select that same newly downloaded (background-removed) photo — it will drop straight into place here.`
-  );
-
-  setTimeout(() => {
-    window.open('https://www.remove.bg/upload', '_blank');
-  }, 300);
-}
-
-// ---------- API کے ذریعے خودکار بیک گراؤنڈ ریموول — نتیجہ سیدھا پریویو میں لگ جاتا ہے، پھر "Use This Photo" سے محفوظ کریں ----------
-async function removeBackgroundViaApi(){
-  if(!capturedPhotoDataUrl){ alert('Please capture or select a photo first.'); return; }
-
-  const btn = document.getElementById('removeBgApiBtn');
-  const originalLabel = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Removing background…';
-
-  try{
-    const formData = new FormData();
-    formData.append('image_file', dataUrlToBlob(capturedPhotoDataUrl), 'photo.png');
-    formData.append('size', 'auto');
-
-    const response = await fetch(REMOVE_BG_API_URL, {
-      method: 'POST',
-      headers: { 'X-Api-Key': REMOVE_BG_API_KEY },
-      body: formData
-    });
-
-    if(!response.ok){
-      let reason = `Error ${response.status}`;
-      try{
-        const errJson = await response.json();
-        if(errJson?.errors?.[0]?.title) reason = errJson.errors[0].title;
-      }catch(e){}
-      if(response.status === 402 || response.status === 403){
-        alert('Looks like this month\'s 50 free photos are used up (or there\'s an API key issue).\nUse the "🌐 Open remove.bg" button to remove the background manually on their website.\n\nDetails: ' + reason);
-      } else {
-        alert('There was a problem removing the background:\n' + reason);
-      }
-      return;
-    }
-
-    const resultBlob = await response.blob();
-    const reader = new FileReader();
-    reader.onload = () => {
-      capturedPhotoDataUrl = reader.result; // ---------- بیک گراؤنڈ ریموو شدہ تصویر اب اصل تصویر کی جگہ لے لے گی ----------
-      document.getElementById('photoPreviewImg').src = capturedPhotoDataUrl;
-      incrementRemoveBgUsageCount();
-      updateRemoveBgUsageText();
-    };
-    reader.readAsDataURL(resultBlob);
-
-  }catch(e){
-    console.warn('Remove.bg API error:', e);
-    alert('There was an internet or API problem. Try the manual method with the "🌐 Open remove.bg" button.');
-  }finally{
-    btn.disabled = false;
-    btn.textContent = originalLabel;
-  }
 }
 
 // ---------- منتخب کی گئی تصویر (گیلری یا فون کیمرہ) کو اسی مکمل ایڈٹ اسکرین میں لوڈ کریں — کراپ فریم، پنچ زوم/ڈریگ، شکل، برائٹنس، Enhance اور لائیو "پراڈکٹ کارڈ" پریویو سب یہاں بھی کام کریں گے ----------
