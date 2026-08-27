@@ -3,7 +3,7 @@
 // ہر نئی فائل نمبر کے ساتھ CACHE_NAME بھی بدل دیں (نیچے v43 کو v44 وغیرہ کر دیں)
 // تاکہ صارف کے فون پر پرانا ورژن کیش سے نہ چپکا رہے۔
 // ======================================================================
-const CACHE_NAME = 'AIOPS278TH19';
+const CACHE_NAME = 'AIOPS278TH20';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,12 +13,17 @@ const CORE_ASSETS = [
   './icon-512-maskable.png'
 ];
 
-// ---------- انسٹال: بنیادی فائلیں پہلے سے کیش کر لیں ----------
+// ---------- انسٹال: بنیادی فائلیں پہلے سے کیش کر لیں — ہر فائل الگ الگ، ایک دوسرے سے آزاد۔
+// پہلے cache.addAll() تھا (سب یا کچھ نہیں) — ایک فائل ناکام ہونے پر پوری کیشنگ خاموشی سے ناکام ہو جاتی تھی،
+// نتیجتاً آف لائن پر ایپ بالکل خالی رہ جاتی تھی۔ اب ہر فائل انفرادی طور پر کیش ہوتی ہے ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(CORE_ASSETS))
-      .catch(() => {}) // ---------- کوئی فائل (مثلاً manifest.json) نہ ملے تو انسٹال ناکام نہ ہو ----------
+      .then((cache) => Promise.all(
+        CORE_ASSETS.map((url) =>
+          cache.add(url).catch((err) => console.warn('Precache failed for', url, err))
+        )
+      ))
       .then(() => self.skipWaiting())
   );
 });
