@@ -1952,7 +1952,7 @@
          (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">PLAYSTORE FINAL</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">26/8/26we0730pm</span>
+      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">27/8/26th0625am</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
@@ -4247,6 +4247,19 @@
         <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
 
+      <!-- --- 🎁 Admin Gift Access — کسی بھی بندے کو مفت دنوں کا کوڈ بنا کر دیں (Play Billing سے بالکل الگ، صرف Admin کے استعمال کے لیے، عام صارف کو نظر نہیں آتا) --- -->
+      <div class="settingsCard">
+        <h3>🎁 Admin Gift Access</h3>
+        <div class="settingsHint">Generate a private free-access code for anyone — for support, testing, or goodwill. Never advertised to regular users.</div>
+        <input type="number" id="giftDaysInput" placeholder="Number of days (e.g. 30)" min="1" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <button class="testPrintBtn" style="margin-top:8px;" onclick="generateGiftCode()">🎁 Generate Code</button>
+        <div id="generatedGiftCodeBox" style="display:none; margin-top:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px;">
+          <div id="generatedGiftCodeText" style="font-family:monospace; font-size:13px; font-weight:700; word-break:break-all; color:#166534;"></div>
+          <div style="font-size:11px; color:var(--muted); margin-top:6px;">Valid for 30 days. Share this code with the person — they can enter it under Package Plans → "Have a gift code?".</div>
+          <button class="testPrintBtn" style="margin-top:8px; background:#0ea5e9;" onclick="copyGiftCode()">📋 Copy Code</button>
+        </div>
+      </div>
+
       <!-- --- 🔒 Privacy Policy — Play Store کے لیے لازمی: ایپ کے اندر سے بھی قابلِ رسائی ہونا چاہیے، صرف Play Console لسٹنگ میں کافی نہیں --- -->
       <div class="settingsCard">
         <h3>🔒 Privacy Policy</h3>
@@ -4501,6 +4514,16 @@
     <h3>🗂️ Package Plans</h3>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
+
+    <!-- ---------- 🎁 Gift/Admin Code Redemption — کوئی بھی صارف یہاں سے ڈویلپر کا دیا ہوا مفت دنوں کا کوڈ لگا سکتا ہے ---------- -->
+    <div style="margin-top:14px; border-top:1px solid #eef2f7; padding-top:10px;">
+      <div onclick="toggleGiftCodeBox()" style="font-size:12px; color:var(--primary-dark); font-weight:700; cursor:pointer; text-align:center;">🎁 Have a gift code?</div>
+      <div id="giftCodeBox" style="display:none; margin-top:8px; gap:8px; flex-direction:column;">
+        <input type="text" id="giftCodeInput" placeholder="e.g. AIOGIFT-30-20260930-A1B2C3D4E5" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px; text-transform:uppercase;">
+        <button class="testPrintBtn" onclick="redeemGiftCode()">🎁 Redeem Code</button>
+      </div>
+    </div>
+
     <p style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:12px; text-align:center;">
       💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
     </p>
@@ -19500,9 +19523,9 @@ let selectedPlanDays = null;
 let selectedPlanPrice = null;
 
 /* =====================================================================
-   💳 GOOGLE PLAY BILLING — صرف اُس وقت فعال ہوتا ہے جب یہ ایپ Play Store سے
-   نصب شدہ TWA کے طور پر چل رہی ہو (براؤزر/عام PWA میں یہ خودکار بند رہتا ہے،
-   وہاں پرانا Local/EasyPaisa نظام ہی چلتا رہے گا — دونوں ورژن ایک ہی فائل میں محفوظ)۔
+   💳 GOOGLE PLAY BILLING — یہ Play Store ورژن ہمیشہ صرف اور صرف Google Play
+   کے ذریعے خریداری استعمال کرتا ہے۔ کوئی متبادل (EasyPaisa/Local) پیمنٹ
+   کہیں نہیں دکھائی جاتی — Google Play پالیسی کے مطابق۔
 
    ⚠️ ضروری: نیچے PLAY_BILLING_PRODUCTS میں دیے گئے sku بالکل انہی ناموں سے
    Play Console → Monetize → Subscriptions میں بنانے ہوں گے، ورنہ خریداری ناکام ہوگی۔
@@ -19574,6 +19597,133 @@ async function purchaseViaPlayBilling(sku, days){
   }
 }
 
+/* =====================================================================
+   🎁 ADMIN GIFT ACCESS — Google Play Billing سے بالکل الگ، نجی نظام۔
+   یہ Play کا کوئی متبادل پیمنٹ نہیں (کوئی پیسہ شامل نہیں) — صرف ڈویلپر کی
+   طرف سے کسی کو ذاتی طور پر مفت رسائی دینے کا ٹول، بالکل ویسے جیسے بہت سی
+   ایپس کے پاس اندرونی support/QA override ہوتا ہے۔ کبھی بھی صارف کو
+   "یہاں سستا خریدیں" جیسے انداز میں نہ دکھائیں — صرف نجی طور پر شیئر کریں۔
+   ===================================================================== */
+const GIFT_CODE_SALT = 'AIO_POS_GIFT_9f3kQ7';
+
+// ---------- عام مقصد کی SHA-256 ہیکسا ڈیسیمل ہیش — کوڈ کی تصدیق کے لیے ----------
+async function sha256Hex(str){
+  try{
+    if(crypto && crypto.subtle && crypto.subtle.digest){
+      const data = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){ console.warn('sha256Hex ناکام:', e); }
+  // ---------- Fallback (crypto.subtle دستیاب نہ ہو تو) ----------
+  let h1 = 0x9e3779b9, h2 = 0x85ebca6b;
+  for(let i = 0; i < str.length; i++){
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return (h1>>>0).toString(16).padStart(8,'0') + (h2>>>0).toString(16).padStart(8,'0');
+}
+
+// ---------- YYYYMMDD فارمیٹ میں تاریخ (کوڈ کے اندر ایمبیڈ کرنے کے لیے، مختصر رکھنے کے لیے) ----------
+function toYYYYMMDD(d){
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+function fromYYYYMMDD(s){
+  const y = +s.slice(0,4), m = +s.slice(4,6), d = +s.slice(6,8);
+  return new Date(y, m-1, d);
+}
+
+// ---------- Admin کوڈ بنائیں — 30 دن کے اندر کہیں بھی ایک بار قابلِ استعمال ----------
+async function generateGiftCode(){
+  const daysInput = document.getElementById('giftDaysInput');
+  const days = parseInt(daysInput.value, 10);
+  if(!days || days < 1){ alert('براہ کرم دنوں کی درست تعداد لکھیں۔'); return; }
+
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + 30); // ---------- کوڈ خود 30 دن میں expire ہو جائے گا اگر استعمال نہ ہو ----------
+  const expiryStr = toYYYYMMDD(expiry);
+
+  const fullHash = await sha256Hex(`${days}|${expiryStr}|${GIFT_CODE_SALT}`);
+  const checksum = fullHash.slice(0, 10).toUpperCase();
+  const code = `AIOGIFT-${days}-${expiryStr}-${checksum}`;
+
+  document.getElementById('generatedGiftCodeText').textContent = code;
+  document.getElementById('generatedGiftCodeBox').style.display = 'block';
+  daysInput.value = '';
+}
+
+function copyGiftCode(){
+  const text = document.getElementById('generatedGiftCodeText').textContent;
+  navigator.clipboard?.writeText(text).then(() => {
+    alert('✅ Code copied! Share it with the person via WhatsApp or any app.');
+  }).catch(() => {
+    alert('Copy failed — please select and copy the code manually.');
+  });
+}
+
+function toggleGiftCodeBox(){
+  const box = document.getElementById('giftCodeBox');
+  box.style.display = (box.style.display === 'none' || !box.style.display) ? 'flex' : 'none';
+}
+
+// ---------- صارف کا کوڈ لگانا — تصدیق کے بعد بالکل اسی طرح دن جوڑے جاتے ہیں جیسے Play Billing خریداری پر ----------
+async function redeemGiftCode(){
+  const input = document.getElementById('giftCodeInput');
+  const raw = (input.value || '').trim().toUpperCase();
+  const parts = raw.split('-');
+
+  if(parts.length !== 4 || parts[0] !== 'AIOGIFT'){
+    alert('❌ Invalid code format.');
+    return;
+  }
+  const [, daysStr, expiryStr, checksum] = parts;
+  const days = parseInt(daysStr, 10);
+  if(!days || !/^\d{8}$/.test(expiryStr)){
+    alert('❌ Invalid code format.');
+    return;
+  }
+
+  const expectedHash = await sha256Hex(`${days}|${expiryStr}|${GIFT_CODE_SALT}`);
+  const expectedChecksum = expectedHash.slice(0, 10).toUpperCase();
+  if(checksum !== expectedChecksum){
+    alert('❌ This code is not valid.');
+    return;
+  }
+
+  const expiryDate = fromYYYYMMDD(expiryStr);
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(today > expiryDate){
+    alert('❌ This code has expired.');
+    return;
+  }
+
+  // ---------- اسی ڈیوائس پر دوبارہ استعمال نہ ہو سکے (مکمل حفاظت نہیں، مگر عام غلطی/دوبارہ کوشش روکنے کے لیے کافی) ----------
+  const usedCodes = AppState.settings.usedGiftCodes || [];
+  if(usedCodes.includes(raw)){
+    alert('❌ This code has already been used on this device.');
+    return;
+  }
+
+  // ---------- بالکل وہی منطق جو Play Billing خریداری پر استعمال ہوتی ہے ----------
+  const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
+  const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
+  base.setDate(base.getDate() + days);
+  AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
+  AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+  AppState.settings.isOnFreeTrial = false;
+  AppState.settings.subscriptionViaAdminGift = true;
+  usedCodes.push(raw);
+  AppState.settings.usedGiftCodes = usedCodes;
+  persistAllData();
+
+  document.getElementById('packagePlansModal')?.classList.remove('show');
+  refreshAllScreens();
+  alert(`✅ Success! ${days} days added to your subscription.`);
+}
+
 
 function openPackagePlansModal(){
   selectedPlanDays = null;
@@ -19624,7 +19774,12 @@ function renderPackagePlansView(){
       <div style="font-weight:800; font-size:14px;">${p.label}</div>
       <div style="font-weight:700; font-size:13px; color:var(--primary-dark);">${priceLabel}</div>
     </div>`;
-  }).join('');
+  }).join('') +
+  // ---------- Google Play پالیسی کی لازمی شرط: خریداری سے پہلے، بغیر کسی اضافی کلک کے،
+  // قیمت/billing cycle/auto-renewal کی صاف وضاحت نظر آنی چاہیے ----------
+  `<div style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;">
+    ℹ️ Subscriptions (7 Days, 1 Month, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>. The <b>Lifetime</b> plan is a one-time purchase and does not renew.
+  </div>`;
 }
 
 // ---------- Home ٹائل سے یہاں پہنچتے ہیں — پہلے فہرست تازہ بنائیں، پھر modal دکھائیں ----------
