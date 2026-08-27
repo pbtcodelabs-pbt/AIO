@@ -89,6 +89,27 @@
   .welcomeTrialBanner .wtbSubline{font-size:12.5px; font-weight:700; color:#166534; margin-top:4px;}
   .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7;}
 
+  /* --- 🎁 ٹرائل کے دوران ایک ہی بڑا گول بٹن — پہلے دو الگ ڈبے (سٹیٹس + Enter بٹن) تھے،
+     اب دونوں مل کر ایک خوبصورت، دھیرے دھیرے دھڑکتا ہوا دائرہ بن گیا ---------- */
+  .trialCircleBtn{
+    width:172px; height:172px; border-radius:50%; border:none; cursor:pointer;
+    background:radial-gradient(circle at 35% 30%, #34d399, var(--primary) 70%);
+    color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; margin:6px auto 4px; box-shadow:0 10px 30px rgba(16,185,129,.45), 0 0 0 6px rgba(52,211,153,.15);
+    animation:trialCirclePulse 2.4s ease-in-out infinite;
+  }
+  .trialCircleBtn:active{ transform:scale(.96); }
+  @keyframes trialCirclePulse{
+    0%, 100%{ box-shadow:0 10px 30px rgba(16,185,129,.45), 0 0 0 6px rgba(52,211,153,.15); }
+    50%{ box-shadow:0 10px 34px rgba(16,185,129,.55), 0 0 0 12px rgba(52,211,153,.05); }
+  }
+  .trialCircleBtn .tcbIcon{ font-size:28px; line-height:1; }
+  .trialCircleBtn .tcbLine1{ font-size:16px; font-weight:900; margin-top:2px; }
+  .trialCircleBtn .tcbLine2{ font-size:12.5px; font-weight:700; opacity:.95; }
+  .trialCircleBtn .tcbLine3{ font-size:10.5px; font-weight:600; opacity:.85; margin-top:2px; }
+  .trialEndedBadge{background:linear-gradient(145deg,#fef2f2,#fee2e2); border:1.5px solid #fca5a5; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center; color:#991b1b; font-weight:800; font-size:14px;}
+  .subscribedBadge{background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark); text-align:center;}
+
   /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان ---
      نوٹ: نام والی لائن اور آئیکنز کو دو الگ الگ قطاروں میں رکھا گیا ہے تاکہ
      زیادہ آئیکنز ہونے پر بھی بزنس نیم کبھی نہ دبے/چھپے ---------- */
@@ -1812,12 +1833,17 @@
       <div class="wtbUrduNote">This app is currently in Beta (testing) version. Please don't forget to take daily backups, and keep running your old method alongside it too. If you notice any issue — big or small — please report it to the developer right away, so this app can become the best it can be for you.</div>
     </div>
 
-    <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن/ٹرائل کی حیثیت — لاگ ان سے پہلے ہی صاف پتا چل جائے ---------- -->
-    <div id="loginSubStatus" style="background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark);"></div>
+    <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — صرف "ٹرائل ختم" یا "Subscribed" پر نظر آئے، ٹرائل ایکٹو میں نیچے گول بٹن ہی سب کچھ بتا دیتا ہے ---------- -->
+    <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
 
-    <!-- ---------- ڈیفالٹ PIN (1234) پر موجود نئے/ٹرائل صارف کے لیے — کوئی PIN ٹائپ نہیں کرنی، سیدھا اندر ---------- -->
+    <!-- ---------- ڈیفالٹ PIN (1234) پر موجود نئے/ٹرائل صارف کے لیے — ایک ہی بڑا گول بٹن، سٹیٹس اور Enter دونوں ایک ساتھ ---------- -->
     <div id="loginQuickEnterWrap" style="display:none;">
-      <button onclick="quickEnterApp()" style="background:var(--primary); font-size:16px; padding:14px;">🎁 Enter App — Free Trial</button>
+      <button onclick="quickEnterApp()" class="trialCircleBtn" id="trialCircleBtn">
+        <span class="tcbIcon">🎁</span>
+        <span class="tcbLine1">Click Here</span>
+        <span class="tcbLine2" id="tcbDaysLine">for 30 Days</span>
+        <span class="tcbLine3">Free Use</span>
+      </button>
     </div>
 
     <!-- ---------- عام PIN entry — صرف اسی وقت نظر آئے گی جب Admin نے اپنا PIN بدل لیا ہو (یعنی حقیقی/سنجیدہ استعمال شروع ہو چکا) ---------- -->
@@ -1973,12 +1999,12 @@
          اسے ہٹا دیا گیا؛ اب صرف دائیں طرف کا ورژن نمبر ہی تازگی کی تصدیق کے لیے کافی ہے) ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">PLAYSTORE FINAL</span>
-      <span class="nastaleeqSparkle">جاگدے رہنا۔۔۔۔ساڈے تے نہ رہنا</span>
+      <span class="nastaleeqSparkle">جاگدے رہـنا۔۔۔۔ساڈے تے نہ رہـنا</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH04</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH06</span>
     </div>
   </div>
 
@@ -5961,21 +5987,49 @@ async function setupLoginScreen(){
     const trialActive = !!AppState.settings.isOnFreeTrial && isSubscriptionActive();
 
     const statusEl = document.getElementById('loginSubStatus');
-    if(isSubscriptionActive()){
-      const days = daysLeftInSubscription();
-      statusEl.textContent = AppState.settings.isOnFreeTrial
-        ? `🎁 Free Trial Active — ${days} day${days===1?'':'s'} remaining`
-        : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
-    } else {
-      statusEl.textContent = `⚠️ Trial ended — please contact the developer to continue.`;
-    }
+    const circleWrap = document.getElementById('loginQuickEnterWrap');
+    const circleBtn = document.getElementById('trialCircleBtn');
+    const daysLine = document.getElementById('tcbDaysLine');
 
     const defaultHash = await hashPin('1234');
     const admin = usersData.find(u => u.role === 'admin' && u.is_active);
     const stillDefaultPin = admin && admin.pin === defaultHash;
-
     const skipPin = stillDefaultPin || trialActive;
-    document.getElementById('loginQuickEnterWrap').style.display = skipPin ? 'block' : 'none';
+
+    // ---------- گول بٹن کے اندر متن — ٹرائل کے دوران دن گنتی کے ساتھ، ورنہ عام "Enter App" ----------
+    if(skipPin && circleBtn){
+      if(trialActive){
+        const days = daysLeftInSubscription();
+        circleBtn.querySelector('.tcbIcon').textContent = '🎁';
+        circleBtn.querySelector('.tcbLine1').textContent = 'Click Here';
+        daysLine.textContent = `${days} Day${days===1?'':'s'} Left`;
+        circleBtn.querySelector('.tcbLine3').textContent = 'Free Use';
+      } else {
+        // ---------- Subscribed صارف ابھی تک ڈیفالٹ PIN پر ہو (کم عام صورت) ----------
+        circleBtn.querySelector('.tcbIcon').textContent = '✅';
+        circleBtn.querySelector('.tcbLine1').textContent = 'Enter App';
+        const days = daysLeftInSubscription();
+        daysLine.textContent = `${days} Day${days===1?'':'s'} Left`;
+        circleBtn.querySelector('.tcbLine3').textContent = 'Subscribed';
+      }
+    }
+
+    // ---------- سٹیٹس بیج صرف اُس وقت نظر آئے جب گول بٹن نظر نہ آ رہا ہو (یعنی اصل PIN لاگ ان کے ساتھ) ----------
+    if(!skipPin){
+      if(isSubscriptionActive()){
+        const days = daysLeftInSubscription();
+        statusEl.className = 'subscribedBadge';
+        statusEl.textContent = `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
+      } else {
+        statusEl.className = 'trialEndedBadge';
+        statusEl.textContent = `⏰ Your Free Trial Has Ended — Please Subscribe to Continue`;
+      }
+      statusEl.style.display = 'block';
+    } else {
+      statusEl.style.display = 'none';
+    }
+
+    circleWrap.style.display = skipPin ? 'block' : 'none';
     document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
 
     // ---------- ٹرائل کے دوران "Login" کا لفظ خود بھی کنفیوژن پیدا کرتا ہے — چھپا دیں، صرف ٹرائل ختم ہونے پر واپس نظر آئے ----------
