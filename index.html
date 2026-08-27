@@ -17,7 +17,7 @@
 <!-- ---------- Google Fonts (7 پیارے انگلش فونٹس — صرف ہلکے وزن، ایپ کو بھاری نہیں کرتے) ---------- -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&family=Roboto:wght@300;400;700&family=Lato:wght@300;400;700&family=Roboto+Condensed:wght@400;700&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;700&family=Roboto:wght@300;400;700&family=Lato:wght@300;400;700&family=Roboto+Condensed:wght@400;700&family=Carlito:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* ===================== THEME VARIABLES (بعد میں Theme Selector یہاں تبدیل کرے گا) ===================== */
   :root{
@@ -61,6 +61,22 @@
   @keyframes testShimmer{
     0%{ background-position:0% 50%; }
     100%{ background-position:300% 50%; }
+  }
+  /* --- ✨ "جاگدے رہنا۔۔۔ساڈے تے نہ رہنا" — نستعلیق اردو، مسلسل رنگ بدلتی، ہلکی چمک کے ساتھ --- */
+  .nastaleeqSparkle{
+    font-family:'Noto Nastaliq Urdu', serif;
+    font-size:13px;
+    font-weight:700;
+    background:linear-gradient(90deg, #fb923c, #f472b6, #a78bfa, #38bdf8, #4ade80, #facc15, #fb923c);
+    background-size:300% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent !important;
+    animation:testShimmer 4s linear infinite, sparklePulse 1.6s ease-in-out infinite;
+    display:inline-block;
+    line-height:1.9;
+  }
+  @keyframes sparklePulse{
+    0%, 100%{ filter:drop-shadow(0 0 1px rgba(255,255,255,.4)); opacity:.92; }
+    50%{ filter:drop-shadow(0 0 5px rgba(255,255,255,.9)); opacity:1; }
   }
   /* --- 🎂 DOB Wheel Picker — Day/Month/Year تین آسان ڈراپ ڈاؤن، پرانا کیلنڈر باکس ہٹا کر (دور کے سال تک بار بار کلک کرنے کی زحمت ختم) --- */
   .dobPicker{display:flex; gap:6px; align-items:center; margin:8px 0;}
@@ -1948,16 +1964,16 @@
     <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 AIO POS</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "AIO POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
-         نیچے ایک چھوٹا ٹائم اسٹیمپ بیج بھی ہے — یہ فائل نام کا حصہ نہیں، صرف اس ڈیلیوری کی تازہ ترین بلڈ ڈیٹ/ٹائم بتاتا ہے
-         (فارمیٹ: Weekday + HHMM + am/pm + Day + Month + Year) تاکہ نمبر یاد نہ رہے تو بھی تازگی کی تصدیق ہو سکے ---------- -->
+         (پہلے یہاں ایک ٹائم اسٹیمپ بیج بھی تھا، مگر ٹائم زون/گھڑی کے فرق سے کبھی الجھن پیدا کرتا تھا —
+         اسے ہٹا دیا گیا؛ اب صرف دائیں طرف کا ورژن نمبر ہی تازگی کی تصدیق کے لیے کافی ہے) ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
       <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">PLAYSTORE FINAL</span>
-      <span id="testBuildTimestamp" style="font-size:9.5px; color:rgba(255,255,255,.8); font-weight:800; letter-spacing:.3px;">27/8/26th0625am</span>
+      <span class="nastaleeqSparkle">جاگدے رہنا۔۔۔۔ساڈے تے نہ رہنا</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH01</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH03</span>
     </div>
   </div>
 
