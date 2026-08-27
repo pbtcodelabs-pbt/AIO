@@ -704,10 +704,15 @@
   /* --- 🏷️ تصویر نہ ہونے پر خالی ڈبے کی جگہ پراڈکٹ کا نام — قابلِ ایڈجسٹ سائز کے ساتھ --- */
   .pgImageArea .pgNamePlaceholder{
     background:linear-gradient(145deg,#eef2ff,#e0e7ff); color:var(--primary-dark);
-    font-weight:800; text-align:center; line-height:1.2; padding:8px; overflow:hidden;
+    text-align:center; padding:8px; overflow:hidden;
     width:100%; height:100%; box-sizing:border-box;
-    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;
-    -webkit-box-pack:center; -webkit-box-align:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .pgNamePlaceholder .pgphTitle{
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.2; width:100%;
+  }
+  .pgNamePlaceholder .pgphSub{
+    margin-top:5px; font-size:11px; font-weight:700; opacity:.85; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;
   }
 
   /* --- نام + قیمت تصویر کے اوپر، نیچے کی طرف، ہلکے گہرے پس منظر کے ساتھ (پڑھنے میں آسانی) --- */
@@ -2034,7 +2039,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH18</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH19</span>
     </div>
   </div>
 
@@ -7537,11 +7542,18 @@ function renderBillingProductGrid(){
           ${qtyBadgeHtml}
           ${scaleBadgeHtml}
           ${stockBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `
+          <img src="${p.image}">
           <div class="pgCaption" style="background:${getProductCardCaptionBgFinal()};">
             <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 700}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(true)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(true)};">${priceLabel}</div>
           </div>
+          ` : `
+          <div class="pgPlaceholder pgNamePlaceholder" style="background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">
+            <div class="pgphTitle" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'};">${p.name}</div>
+            <div class="pgphSub">${priceLabel}</div>
+          </div>
+          `}
         </div>
         <div class="pgButtonStrip">
           ${actionAreaHtml}
@@ -13295,11 +13307,18 @@ function renderPoBrowseList(){
         <div class="pgImageArea">
           ${qtyBadgeHtml}
           ${stockBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `
+          <img src="${p.image}">
           <div class="pgCaption" style="background:${getProductCardCaptionBgFinal()};">
             <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 700}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(true)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(true)};">${priceLabel}</div>
           </div>
+          ` : `
+          <div class="pgPlaceholder pgNamePlaceholder" style="background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">
+            <div class="pgphTitle" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'};">${p.name}</div>
+            <div class="pgphSub">${priceLabel}</div>
+          </div>
+          `}
         </div>
         <div class="pgButtonStrip">
           ${actionAreaHtml}
@@ -13741,11 +13760,18 @@ function renderAdvOrderProductGrid(){
       <div class="productGridCard" data-product-id="${p.product_id}" ${cardOnClick}>
         <div class="pgImageArea">
           ${qtyBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `
+          <img src="${p.image}">
           <div class="pgCaption" style="background:${getProductCardCaptionBgFinal()};">
             <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 700}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(true)};">${p.name}</div>
             <div class="pgPrice" style="color:${getProductCardTextColorFinal(true)};">${priceLabel}</div>
           </div>
+          ` : `
+          <div class="pgPlaceholder pgNamePlaceholder" style="background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">
+            <div class="pgphTitle" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'};">${p.name}</div>
+            <div class="pgphSub">${priceLabel}</div>
+          </div>
+          `}
         </div>
         <div class="pgButtonStrip">
           ${actionAreaHtml}
