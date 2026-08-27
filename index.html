@@ -2043,7 +2043,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH21</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH22</span>
     </div>
   </div>
 
@@ -3748,6 +3748,11 @@
         <div class="previewActions" id="pscBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
+        <!-- ---------- ⚡ فاسٹ پرنٹ — خالص سادہ متن، تصویر نہیں — تھرمل پرنٹر پر بہت تیز اور قابلِ بھروسہ،
+             خاص طور پر ایسے پرنٹرز کے لیے جو تصویر/فونٹ والی پرنٹنگ میں سست یا ناکام رہتے ہوں ---------- -->
+        <div class="previewActions" style="padding-top:0;">
+          <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printInvoiceFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
+        </div>
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="pscA4ShareRow" style="padding-top:0; display:none;">
           <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="shareInvoicePdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
@@ -3980,6 +3985,9 @@
         <div class="previewActions" id="aopBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('advOrderCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
+        <div class="previewActions" style="padding-top:0;">
+          <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printAdvOrderFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
+        </div>
         <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
         <div class="previewActions" id="aopA4ShareRow" style="padding-top:0; display:none;">
           <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="shareAdvOrderPdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
@@ -4059,6 +4067,9 @@
         </div>
         <div class="previewActions" id="poBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('poCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+        </div>
+        <div class="previewActions" style="padding-top:0;">
+          <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printPoFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
         </div>
         <div class="previewActions" id="poA4ShareRow" style="padding-top:0; display:none;">
           <button style="background:#f0fdf4; color:#166534; flex:1; display:flex; align-items:center; justify-content:center;" onclick="sharePoPdf()"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Print/Share A4 PDF</button>
@@ -18819,7 +18830,189 @@ function canvasToEscPosRaster(canvas, paperWidthMM){
   return result;
 }
 
-// ---------- WhatsApp Share (ابھی صرف اسٹب) ----------
+// ---------- ⚡ فاسٹ پرنٹ — خالص سادہ متن (کوئی تصویر/فونٹ رینڈرنگ نہیں)، تھرمل پرنٹر پر بہت تیز اور قابلِ بھروسہ۔
+// جن صارفین کا پرنٹر image/raster پرنٹنگ میں سست یا ناکام ہو، ان کے لیے متبادل راستہ ---------- -->
+function padRightMono(str, len){
+  str = String(str);
+  return str.length >= len ? str.slice(0, len) : str + ' '.repeat(len - str.length);
+}
+function padLeftMono(str, len){
+  str = String(str);
+  return str.length >= len ? str.slice(0, len) : ' '.repeat(len - str.length) + str;
+}
+function centerMono(str, width){
+  str = String(str);
+  if(str.length >= width) return str.slice(0, width);
+  return ' '.repeat(Math.floor((width - str.length) / 2)) + str;
+}
+function escposTextBytes(text){
+  const encoder = new TextEncoder();
+  const init = new Uint8Array([0x1B, 0x40]); // ESC @ — پرنٹر ری سیٹ
+  const body = encoder.encode(text + '\n');
+  const feedCut = new Uint8Array([0x0A, 0x0A, 0x0A, 0x1D, 0x56, 0x00]); // کاغذ آگے + کاٹیں (سپورٹ نہ ہو تو صرف فیڈ رہے گا)
+  const result = new Uint8Array(init.length + body.length + feedCut.length);
+  result.set(init, 0);
+  result.set(body, init.length);
+  result.set(feedCut, init.length + body.length);
+  return result;
+}
+// ---------- BLE سے پرنٹر کو سادہ متن بائٹس بھیجیں — ناکامی پر خودکار براؤزر پرنٹ کی طرف چلا جائے ---------- -->
+async function sendPlainTextToPrinter(text, fallbackFn){
+  if(!navigator.bluetooth){ fallbackFn(text); return; }
+  try{
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: [
+        '000018f0-0000-1000-8000-00805f9b34fb',
+        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+        '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+        'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+        '0000ff00-0000-1000-8000-00805f9b34fb',
+      ]
+    });
+    const server = await device.gatt.connect();
+    const services = await server.getPrimaryServices();
+    let writeChar = null;
+    for(const service of services){
+      const chars = await service.getCharacteristics();
+      for(const c of chars){ if(c.properties.write || c.properties.writeWithoutResponse){ writeChar = c; break; } }
+      if(writeChar) break;
+    }
+    if(!writeChar){ fallbackFn(text); return; }
+    const bytes = escposTextBytes(text);
+    const chunkSize = 180;
+    for(let i = 0; i < bytes.length; i += chunkSize){
+      const chunk = bytes.slice(i, i + chunkSize);
+      if(writeChar.properties.writeWithoutResponse) await writeChar.writeValueWithoutResponse(chunk);
+      else await writeChar.writeValue(chunk);
+      await new Promise(r => setTimeout(r, 15));
+    }
+    alert('⚡ Fast (plain text) print sent — should print almost instantly!');
+  }catch(e){
+    fallbackFn(text); // یوزر نے منسوخ کیا یا ناکامی — براؤزر پرنٹ آزمائیں
+  }
+}
+// ---------- براؤزر کے ذریعے سادہ متن پرنٹ (RawBT/Thermer کے لیے) — تصویر کی بجائے خالص <pre> متن،
+// عام طور پر یہ ایپس متن کو خودکار طور پر تیز ترین ESC/POS متنی موڈ میں پرنٹ کر دیتی ہیں ---------- -->
+function printPlainTextViaBrowser(text){
+  applyPrintPageSize(AppState.settings.paperWidth || 80);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<pre style="font-family:'Courier New', monospace; font-size:12px; line-height:1.3; white-space:pre-wrap; margin:0; padding:4px; color:#000;">${text.replace(/</g,'&lt;')}</pre>`;
+  setTimeout(() => triggerPrint(), 60);
+}
+
+function buildInvoicePlainText(invoice){
+  const cols = (AppState.settings.paperWidth || 80) === 80 ? 42 : 32;
+  const lines = [];
+  lines.push(centerMono(AppState.settings.businessName || 'AIO POS', cols));
+  if(AppState.settings.businessPhone) lines.push(centerMono(AppState.settings.businessPhone, cols));
+  const d = new Date(invoice.created_at);
+  const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = String(d.getFullYear()).slice(-2);
+  lines.push(centerMono(`Bill#${invoice.daily_bill_no || '—'}/${invoice.monthly_bill_no || '—'} ${dd}/${mm}/${yy}`, cols));
+  lines.push(centerMono('Customer: ' + (invoice.customer_name || 'Walk-in'), cols));
+  lines.push('-'.repeat(cols));
+  const qtyW = 4, totalW = 9, nameW = cols - qtyW - totalW;
+  lines.push(padRightMono('Item', nameW) + padLeftMono('Qty', qtyW) + padLeftMono('Total', totalW));
+  lines.push('-'.repeat(cols));
+  const decimals = AppState.settings.priceDecimals ?? 0;
+  (invoice.items || []).forEach(item => {
+    const remainingQty = Math.max(0, item.qty - (item.returnQty || 0));
+    const totalTxt = (remainingQty * item.unitPrice).toFixed(decimals);
+    if(item.name.length > nameW){
+      lines.push(item.name);
+      lines.push(padRightMono('', nameW) + padLeftMono(String(remainingQty), qtyW) + padLeftMono(totalTxt, totalW));
+    } else {
+      lines.push(padRightMono(item.name, nameW) + padLeftMono(String(remainingQty), qtyW) + padLeftMono(totalTxt, totalW));
+    }
+  });
+  lines.push('-'.repeat(cols));
+  lines.push(padRightMono('Grand Total', cols - totalW) + padLeftMono('Rs.' + invoice.grand_total.toFixed(decimals), totalW));
+  lines.push('', centerMono('Thank you for your purchase!', cols), '', '', '');
+  return lines.join('\n');
+}
+
+async function printInvoiceFastText(){
+  const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
+  if(!inv){ alert('Bill not found.'); return; }
+  await sendPlainTextToPrinter(buildInvoicePlainText(inv), printPlainTextViaBrowser);
+}
+
+// ---------- ⚡ Advance Order کے لیے فاسٹ (سادہ متن) پرنٹ ---------- -->
+function buildAdvOrderPlainText(order){
+  const cols = (AppState.settings.paperWidth || 80) === 80 ? 42 : 32;
+  const lines = [];
+  lines.push(centerMono(AppState.settings.businessName || 'AIO POS', cols));
+  const d = new Date(order.createdAt);
+  const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = String(d.getFullYear()).slice(-2);
+  lines.push(centerMono(`Advance Order #${order.id} — ${dd}/${mm}/${yy}`, cols));
+  lines.push(centerMono('Customer: ' + (order.customerName || 'Walk-in'), cols));
+  if(order.customerPhone) lines.push(centerMono(order.customerPhone, cols));
+  lines.push(centerMono('(Approximate Pricing — Not a Real Bill)', cols));
+  lines.push('-'.repeat(cols));
+  const qtyW = 4, totalW = 9, nameW = cols - qtyW - totalW;
+  lines.push(padRightMono('Item', nameW) + padLeftMono('Qty', qtyW) + padLeftMono('Total', totalW));
+  lines.push('-'.repeat(cols));
+  const decimals = AppState.settings.advOrderPriceDecimals ?? 0;
+  (order.items || []).forEach(item => {
+    const totalTxt = (item.qty * item.unitPrice).toFixed(decimals);
+    if(item.name.length > nameW){
+      lines.push(item.name);
+      lines.push(padRightMono('', nameW) + padLeftMono(String(item.qty), qtyW) + padLeftMono(totalTxt, totalW));
+    } else {
+      lines.push(padRightMono(item.name, nameW) + padLeftMono(String(item.qty), qtyW) + padLeftMono(totalTxt, totalW));
+    }
+  });
+  lines.push('-'.repeat(cols));
+  const grandTotal = (order.items || []).reduce((s,i) => s + (i.qty*i.unitPrice), 0);
+  lines.push(padRightMono('Approx. Total', cols - totalW) + padLeftMono('Rs.' + grandTotal.toFixed(decimals), totalW));
+  if(order.note) lines.push('', 'Note: ' + order.note);
+  lines.push('', '', '');
+  return lines.join('\n');
+}
+async function printAdvOrderFastText(){
+  const order = advanceOrdersData.find(o => o.id === currentPreviewAdvOrderId);
+  if(!order){ alert('Order not found.'); return; }
+  await sendPlainTextToPrinter(buildAdvOrderPlainText(order), printPlainTextViaBrowser);
+}
+
+// ---------- ⚡ Purchase Order کے لیے فاسٹ (سادہ متن) پرنٹ ---------- -->
+function buildPoPlainText(po, supplier){
+  const cols = (AppState.settings.paperWidth || 80) === 80 ? 42 : 32;
+  const lines = [];
+  const received = po.status === 'received';
+  lines.push(centerMono(AppState.settings.businessName || 'AIO POS', cols));
+  lines.push(centerMono(received ? 'GOODS RECEIVED' : 'PURCHASE ORDER', cols));
+  lines.push(centerMono('Supplier: ' + (supplier?.name || '—'), cols));
+  if(supplier?.phone) lines.push(centerMono(supplier.phone, cols));
+  lines.push(centerMono('Order Date: ' + po.date, cols));
+  if(received && po.receivedDate) lines.push(centerMono('Received: ' + po.receivedDate, cols));
+  lines.push('-'.repeat(cols));
+  const qtyW = 4, totalW = 9, nameW = cols - qtyW - totalW;
+  lines.push(padRightMono('Item', nameW) + padLeftMono('Qty', qtyW) + padLeftMono('Total', totalW));
+  lines.push('-'.repeat(cols));
+  const decimals = AppState.settings.poPriceDecimals ?? 0;
+  (po.items || []).forEach(item => {
+    const totalTxt = (item.qty * item.cost).toFixed(decimals);
+    if(item.name.length > nameW){
+      lines.push(item.name);
+      lines.push(padRightMono('', nameW) + padLeftMono(String(item.qty), qtyW) + padLeftMono(totalTxt, totalW));
+    } else {
+      lines.push(padRightMono(item.name, nameW) + padLeftMono(String(item.qty), qtyW) + padLeftMono(totalTxt, totalW));
+    }
+  });
+  lines.push('-'.repeat(cols));
+  lines.push(padRightMono('Grand Total', cols - totalW) + padLeftMono('Rs.' + (po.total || 0).toFixed(decimals), totalW));
+  lines.push('', '', '');
+  return lines.join('\n');
+}
+async function printPoFastText(){
+  const s = suppliersData.find(sup => (sup.purchaseHistory || [])[currentPreviewPoIdx]);
+  const po = s ? (s.purchaseHistory || [])[currentPreviewPoIdx] : null;
+  if(!po){ alert('Purchase order not found.'); return; }
+  await sendPlainTextToPrinter(buildPoPlainText(po, s), printPlainTextViaBrowser);
+}
+
 function shareInvoiceWhatsapp(){
   const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
   if(!inv) return;
