@@ -2010,7 +2010,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH09</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH12</span>
     </div>
   </div>
 
@@ -4083,25 +4083,6 @@
           </div>
         </div>
 
-        <!-- --- 🏷️ پراڈکٹ کارڈ پر (تصویر نہ ہونے کی صورت میں) نام کا انداز — سائز، موٹائی، اور پس منظر رنگ، سب خود منتخب کریں --- -->
-        <div class="settingsCard" id="settingsCardProductNameSize">
-          <h3>🏷️ Product Card Style (No Photo)</h3>
-          <div class="settingsHint">When a product has no photo, its name is shown instead. Customize its size, boldness, and background colour here — completely independent from your app's overall theme colour.</div>
-
-          <div style="font-size:12px; font-weight:700; color:var(--muted); margin-top:10px;">Text Size</div>
-          <input type="range" min="8" max="22" step="1" id="productCardNameSizeSlider" value="13" oninput="adjustProductCardNameSize(this.value)" style="width:100%; margin-top:4px;">
-          <div style="text-align:center; margin-top:2px; font-weight:700; color:var(--primary);"><span id="productCardNameSizeLabel">13px</span></div>
-
-          <div style="font-size:12px; font-weight:700; color:var(--muted); margin-top:14px;">Boldness (Thin ↔ Extra Bold)</div>
-          <input type="range" min="400" max="900" step="100" id="productCardNameWeightSlider" value="800" oninput="adjustProductCardNameWeight(this.value)" style="width:100%; margin-top:4px;">
-          <div style="text-align:center; margin-top:2px; font-weight:700; color:var(--primary);"><span id="productCardNameWeightLabel">800</span></div>
-
-          <div style="font-size:12px; font-weight:700; color:var(--muted); margin-top:14px;">Card Background Colour</div>
-          <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
-            <input type="color" id="productCardNameBgPicker" value="#eef2ff" oninput="adjustProductCardNameBg(this.value)" style="width:44px; height:36px; border:none; border-radius:8px; padding:0; cursor:pointer;">
-            <button class="testPrintBtn" style="flex:1; margin-top:0;" onclick="resetProductCardNameBg()">↺ Reset to Theme Colour</button>
-          </div>
-        </div>
 
         <!-- --- 📣 My Ads — پہلے ہوم پیج پر تھا، اب یہاں Settings میں --- -->
         <div class="settingsCard" id="settingsCardMyAds">
@@ -6473,6 +6454,7 @@ const APP_SEARCH_INDEX = [
   {label:'Settings — Admin PIN / Password', path:'Settings', screen:'settings', keywords:'admin pin password change security cnic dob recovery login unlock developer contact'},
   {label:'Settings — App Display Size / Zoom', path:'Settings', screen:'settings', keywords:'app display size zoom text bigger smaller ui scale'},
   {label:'Settings — Danger Zone / Reset', path:'Settings', screen:'settings', keywords:'reset bills transactions master reset erase everything danger zone delete all'},
+  {label:'Product Card Style (No Photo) — Home page ⚙️', path:'Home page → gear icon', action:'openProductCardStyleFromSearch', keywords:'product card style no photo name size boldness bold background colour color placeholder text font writing style live preview'},
   {label:'Settings — Print / Paper Size', path:'Bill & Print Settings', screen:'billsettings', anchor:'settingsCardPrinter', keywords:'print paper size thermal 58mm 80mm receipt invoice style a4 test print'},
   {label:'Settings — Receipt Content', path:'Bill & Print Settings', screen:'billsettings', keywords:'receipt content sort items alphabetically salesman name sold by footer powered by'},
   {label:'Settings — Print Text Size', path:'Bill & Print Settings', screen:'billsettings', keywords:'print text size bill font size receipt'},
@@ -7525,7 +7507,7 @@ function renderBillingProductGrid(){
           ${qtyBadgeHtml}
           ${scaleBadgeHtml}
           ${stockBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -13233,7 +13215,7 @@ function renderPoBrowseList(){
         <div class="pgImageArea">
           ${qtyBadgeHtml}
           ${stockBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -13679,7 +13661,7 @@ function renderAdvOrderProductGrid(){
       <div class="productGridCard" data-product-id="${p.product_id}" ${cardOnClick}>
         <div class="pgImageArea">
           ${qtyBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -18836,6 +18818,14 @@ function adjustProductCardNameWeight(weight){
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
 }
+// ---------- ✍️ نام کا رائٹنگ سٹائل/فونٹ — ایپ کے مجموعی فونٹ سے بالکل الگ، صرف اسی جگہ کے لیے منتخب کر سکتے ہیں ----------
+function adjustProductCardNameFont(fontId){
+  AppState.settings.productCardNameFont = fontId || null; // ---------- خالی = ایپ کا ڈیفالٹ فونٹ خودکار استعمال ہو ----------
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
 // ---------- 🎨 بغیر تصویر والے کارڈ کا پس منظر رنگ — ایپ کے مجموعی تھیم رنگ (سبز/سرخ/نیلا وغیرہ) سے بالکل آزاد،
 // خود اپنی مرضی کا کوئی بھی رنگ منتخب کر سکتے ہیں (مثلاً ہمیشہ ہلکا نیلا، چاہے تھیم سبز ہو) ----------
 function adjustProductCardNameBg(hex){
@@ -19062,7 +19052,35 @@ function renderHomeSettingsPanel(){
     </div>
   `).join('');
 
-  panel.innerHTML = backupRowHtml + themeHtml + fontHtml;
+  // ---------- 🏷️ بغیر تصویر والے پراڈکٹ کارڈ کا انداز — یہیں ہوم پیج پر، تاکہ ہر تبدیلی نیچے موجود اصل کارڈز پر فوراً نظر آئے ----------
+  const pcnSize = AppState.settings.productCardNameSize || 13;
+  const pcnWeight = AppState.settings.productCardNameWeight || 800;
+  const pcnBg = AppState.settings.productCardNameBg || '#eef2ff';
+  const pcnFontId = AppState.settings.productCardNameFont || '';
+  const productCardHtml = `
+    <div class="homeQuickPanelLabel">🏷️ Product Card (No Photo)</div>
+    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Text size</div>
+    <div style="padding:0 12px 8px;">
+      <input type="range" min="8" max="22" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.nextElementSibling.textContent=this.value+'px';" style="width:100%;">
+      <div style="text-align:center; font-size:11px; font-weight:700; color:var(--primary);">${pcnSize}px</div>
+    </div>
+    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Boldness</div>
+    <div style="padding:0 12px 8px;">
+      <input type="range" min="400" max="900" step="100" value="${pcnWeight}" oninput="adjustProductCardNameWeight(this.value); this.nextElementSibling.textContent=this.value;" style="width:100%;">
+      <div style="text-align:center; font-size:11px; font-weight:700; color:var(--primary);">${pcnWeight}</div>
+    </div>
+    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Writing style</div>
+    <select onchange="adjustProductCardNameFont(this.value)" style="width:calc(100% - 24px); margin:0 12px 8px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
+      <option value="" ${!pcnFontId ? 'selected' : ''}>App Default</option>
+      ${FONT_PRESETS.map(f => `<option value="${f.id}" ${pcnFontId === f.id ? 'selected' : ''}>${f.label}</option>`).join('')}
+    </select>
+    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Background colour</div>
+    <div style="display:flex; align-items:center; gap:8px; padding:0 12px 10px;">
+      <input type="color" value="${pcnBg}" oninput="adjustProductCardNameBg(this.value)" style="width:36px; height:32px; border:none; border-radius:7px; padding:0; cursor:pointer;">
+      <button class="hsBackupBtn" style="flex:1; flex-direction:row; gap:6px; padding:8px;" onclick="resetProductCardNameBg(); renderHomeSettingsPanel();">↺ Reset</button>
+    </div>`;
+
+  panel.innerHTML = backupRowHtml + themeHtml + fontHtml + productCardHtml;
 }
 
 function toggleHomeSettingsPanel(e){
@@ -19071,6 +19089,17 @@ function toggleHomeSettingsPanel(e){
   const panel = document.getElementById('homeSettingsPanel');
   if(panel) panel.classList.toggle('open', homeSettingsPanelOpen);
   if(homeSettingsPanelOpen){ renderHomeSettingsPanel(); positionHomeQuickPanel('hbcSettingsBtn', 'homeSettingsPanel'); }
+}
+// ---------- سرچ سے "Product Card Style" منتخب کرنے پر — پہلے ہوم پیج پر لے جائیں (یہ بٹن صرف وہیں موجود ہے)،
+// پھر خودکار طور پر ⚙️ پینل خود بخود کھول دیں، تاکہ صارف کو الگ سے بٹن ڈھونڈنا نہ پڑے ----------
+function openProductCardStyleFromSearch(){
+  goTo('billing');
+  setTimeout(() => {
+    const btn = document.getElementById('hbcSettingsBtn');
+    if(btn){
+      if(!homeSettingsPanelOpen) toggleHomeSettingsPanel();
+    }
+  }, 150);
 }
 function closeHomeSettingsPanel(){
   homeSettingsPanelOpen = false;
@@ -19137,24 +19166,6 @@ function renderSettingsScreen(){
   syncPinLockUI();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
-
-  // ---------- پراڈکٹ کارڈ پر نام کے سائز والا سلائیڈر ----------
-  const pcnSlider = document.getElementById('productCardNameSizeSlider');
-  const pcnLabel = document.getElementById('productCardNameSizeLabel');
-  const pcnVal = AppState.settings.productCardNameSize || 13;
-  if(pcnSlider) pcnSlider.value = pcnVal;
-  if(pcnLabel) pcnLabel.textContent = pcnVal + 'px';
-
-  // ---------- پراڈکٹ کارڈ پر نام کی موٹائی والا سلائیڈر ----------
-  const pcwSlider = document.getElementById('productCardNameWeightSlider');
-  const pcwLabel = document.getElementById('productCardNameWeightLabel');
-  const pcwVal = AppState.settings.productCardNameWeight || 800;
-  if(pcwSlider) pcwSlider.value = pcwVal;
-  if(pcwLabel) pcwLabel.textContent = pcwVal;
-
-  // ---------- پراڈکٹ کارڈ کے پس منظر رنگ والا کلر پکر ----------
-  const pcbPicker = document.getElementById('productCardNameBgPicker');
-  if(pcbPicker) pcbPicker.value = AppState.settings.productCardNameBg || '#eef2ff';
 
   // تھیم سواچز بنائیں (ڈراپ ڈاؤن پینل کے اندر)
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
