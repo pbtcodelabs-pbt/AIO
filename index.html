@@ -1318,6 +1318,10 @@
   .invoicePreviewScrollArea{flex:1 1 auto; overflow-y:auto; min-height:0; border-top:1px solid #eee;}
   .invoicePreviewBox .previewHeader{padding:14px 18px; border-bottom:1px solid #eef1f6; display:flex; justify-content:space-between; align-items:center;}
   .previewStyleControls{display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #eef1f6;}
+  .pscMoreWrap{display:none; width:100%; flex-direction:column; gap:6px;}
+  .pscMoreWrap.open{display:flex;}
+  .pscMoreToggleBtn{border:1.5px dashed var(--primary); background:#fff; color:var(--primary-dark); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; margin-inline-start:auto;}
+  .pscEssentialRow{align-items:center;}
   .pscRow{display:flex; align-items:center; gap:4px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:4px 6px;}
   .pscLabel{font-size:11px; font-weight:700; color:var(--muted); margin-right:2px;}
   .pscRow button{border:none; background:#eef2ff; color:var(--primary-dark); font-weight:800; font-size:12px; padding:4px 9px; border-radius:6px; cursor:pointer;}
@@ -2039,7 +2043,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH20</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH21</span>
     </div>
   </div>
 
@@ -3681,51 +3685,55 @@
           </div>
         </div>
 
-        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے (کمپیکٹ — بل زیادہ نظر آئے) ---------- -->
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — صرف ضروری چیزیں (Alignment + Decimals) ہمیشہ نظر آئیں،
+             باقی سب (سائز، موٹائی، رنگ، فونٹ، A4) "More" کے نیچے دبی رہیں تاکہ بل زیادہ سے زیادہ نظر آئے ---------- -->
         <div class="previewStyleControls compactPsc">
-          <div class="pscCompactRow">
-            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
-              <span class="pscLabel">🔠</span>
-              <input type="range" id="pscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPreviewZoom('printFontScale', this.value)" style="flex:1;">
-              <span class="pscValue" id="pscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
-            </div>
-          </div>
-          <div class="pscCompactRow">
-            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
-              <span class="pscLabel">↕</span>
-              <input type="range" id="pscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPreviewZoom('printRowScale', this.value)" style="flex:1;">
-              <span class="pscValue" id="pscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
-            </div>
-          </div>
-          <div class="pscCompactRow">
-            <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁</button>
-            <button id="pscThinBtn" class="pscToggleBtn" onclick="togglePreviewBold()">Thin</button>
+          <div class="pscCompactRow pscEssentialRow">
             <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅</button>
             <button id="pscAlignCenterBtn" class="pscToggleBtn" onclick="setPreviewAlign('center')">↔</button>
             <button id="pscAlignRightBtn" class="pscToggleBtn" onclick="setPreviewAlign('right')">➡</button>
-          </div>
-          <div class="pscCompactRow">
             <div class="pscStepperGroup">
               <span class="pscLabel">.00</span>
               <button onclick="adjustPreviewStyle('priceDecimals', -1, 0, 4)">−</button>
               <span class="pscValue" id="pscDecimalsVal">0</span>
               <button onclick="adjustPreviewStyle('priceDecimals', 1, 0, 4)">+</button>
             </div>
-            <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" class="pscDropdown"></select>
+            <button type="button" class="pscMoreToggleBtn" id="pscMoreToggleBtn" onclick="togglePscMoreOptions('pscMoreWrap','pscMoreToggleBtn')">⚙️ More ▾</button>
           </div>
-          <div class="pscCompactRow">
-            <span class="pscLabel">🎨</span>
-            <div id="pscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
-          </div>
-          <div class="pscCompactRow">
-            <label class="pscCheckLabel">
-              <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)"> 🖨️ Print A4
-            </label>
-          </div>
-          <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
-          <div id="pscOrientRow" class="pscCompactRow" style="display:none;">
-            <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
-            <button type="button" id="pscOrientLandscapeBtn" onclick="setInvoiceOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+          <div class="pscMoreWrap" id="pscMoreWrap">
+            <div class="pscCompactRow">
+              <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+                <span class="pscLabel">🔠</span>
+                <input type="range" id="pscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setPreviewZoom('printFontScale', this.value)" style="flex:1;">
+                <span class="pscValue" id="pscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
+              </div>
+            </div>
+            <div class="pscCompactRow">
+              <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+                <span class="pscLabel">↕</span>
+                <input type="range" id="pscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setPreviewZoom('printRowScale', this.value)" style="flex:1;">
+                <span class="pscValue" id="pscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
+              </div>
+            </div>
+            <div class="pscCompactRow">
+              <button id="pscBoldBtn" class="pscToggleBtn" onclick="togglePreviewBold()">𝐁</button>
+              <button id="pscThinBtn" class="pscToggleBtn" onclick="togglePreviewBold()">Thin</button>
+              <select id="pscFontFamilySelect" onchange="setPreviewFontFamily(this.value)" class="pscDropdown"></select>
+            </div>
+            <div class="pscCompactRow">
+              <span class="pscLabel">🎨</span>
+              <div id="pscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
+            </div>
+            <div class="pscCompactRow">
+              <label class="pscCheckLabel">
+                <input type="checkbox" id="pscA4Chk" onchange="toggleInvoicePaperStyle(this.checked)"> 🖨️ Print A4
+              </label>
+            </div>
+            <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
+            <div id="pscOrientRow" class="pscCompactRow" style="display:none;">
+              <button type="button" id="pscOrientPortraitBtn" onclick="setInvoiceOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+              <button type="button" id="pscOrientLandscapeBtn" onclick="setInvoiceOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+            </div>
           </div>
         </div>
 
@@ -3909,51 +3917,54 @@
           <span style="cursor:pointer;" onclick="closeAdvOrderPreview()">✖</span>
         </div>
 
-        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — بالکل بل/رپورٹ جیسے، یہاں سے بدلتے ہی نیچے کینوس فوراً اسی حساب سے دوبارہ بن جاتا ہے (کمپیکٹ) ---------- -->
+        <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — بالکل بل جیسے، Alignment/Decimals ہمیشہ نظر آئیں، باقی "More" کے نیچے ---------- -->
         <div class="previewStyleControls compactPsc">
-          <div class="pscCompactRow">
-            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
-              <span class="pscLabel">🔠</span>
-              <input type="range" id="aopscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setAdvOrderZoom('advOrderFontScale', this.value)" style="flex:1;">
-              <span class="pscValue" id="aopscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
-            </div>
-          </div>
-          <div class="pscCompactRow">
-            <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
-              <span class="pscLabel">↕</span>
-              <input type="range" id="aopscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setAdvOrderZoom('advOrderRowScale', this.value)" style="flex:1;">
-              <span class="pscValue" id="aopscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
-            </div>
-          </div>
-          <div class="pscCompactRow">
-            <button id="aopscBoldBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">𝐁</button>
-            <button id="aopscThinBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">Thin</button>
+          <div class="pscCompactRow pscEssentialRow">
             <button id="aopscAlignLeftBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('left')">⬅</button>
             <button id="aopscAlignCenterBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('center')">↔</button>
             <button id="aopscAlignRightBtn" class="pscToggleBtn" onclick="setAdvOrderAlign('right')">➡</button>
-          </div>
-          <div class="pscCompactRow">
             <div class="pscStepperGroup">
               <span class="pscLabel">.00</span>
               <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', -1, 0, 4)">−</button>
               <span class="pscValue" id="aopscDecimalsVal">0</span>
               <button onclick="adjustAdvOrderStyle('advOrderPriceDecimals', 1, 0, 4)">+</button>
             </div>
-            <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" class="pscDropdown"></select>
+            <button type="button" class="pscMoreToggleBtn" id="aopscMoreToggleBtn" onclick="togglePscMoreOptions('aopscMoreWrap','aopscMoreToggleBtn')">⚙️ More ▾</button>
           </div>
-          <div class="pscCompactRow">
-            <span class="pscLabel">🎨</span>
-            <div id="aopscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
-          </div>
-          <div class="pscCompactRow">
-            <label class="pscCheckLabel">
-              <input type="checkbox" id="aopscA4Chk" onchange="toggleAdvOrderPaperStyle(this.checked)"> 🖨️ Print A4
-            </label>
-          </div>
-          <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
-          <div id="aopscOrientRow" class="pscCompactRow" style="display:none;">
-            <button type="button" id="aopscOrientPortraitBtn" onclick="setAdvOrderOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
-            <button type="button" id="aopscOrientLandscapeBtn" onclick="setAdvOrderOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+          <div class="pscMoreWrap" id="aopscMoreWrap">
+            <div class="pscCompactRow">
+              <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+                <span class="pscLabel">🔠</span>
+                <input type="range" id="aopscFontScaleSlider" min="70" max="260" step="5" value="100" oninput="setAdvOrderZoom('advOrderFontScale', this.value)" style="flex:1;">
+                <span class="pscValue" id="aopscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
+              </div>
+            </div>
+            <div class="pscCompactRow">
+              <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+                <span class="pscLabel">↕</span>
+                <input type="range" id="aopscRowScaleSlider" min="70" max="220" step="5" value="100" oninput="setAdvOrderZoom('advOrderRowScale', this.value)" style="flex:1;">
+                <span class="pscValue" id="aopscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
+              </div>
+            </div>
+            <div class="pscCompactRow">
+              <button id="aopscBoldBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">𝐁</button>
+              <button id="aopscThinBtn" class="pscToggleBtn" onclick="toggleAdvOrderBold()">Thin</button>
+              <select id="aopscFontFamilySelect" onchange="setAdvOrderFontFamily(this.value)" class="pscDropdown"></select>
+            </div>
+            <div class="pscCompactRow">
+              <span class="pscLabel">🎨</span>
+              <div id="aopscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
+            </div>
+            <div class="pscCompactRow">
+              <label class="pscCheckLabel">
+                <input type="checkbox" id="aopscA4Chk" onchange="toggleAdvOrderPaperStyle(this.checked)"> 🖨️ Print A4
+              </label>
+            </div>
+            <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
+            <div id="aopscOrientRow" class="pscCompactRow" style="display:none;">
+              <button type="button" id="aopscOrientPortraitBtn" onclick="setAdvOrderOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+              <button type="button" id="aopscOrientLandscapeBtn" onclick="setAdvOrderOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+            </div>
           </div>
         </div>
 
@@ -3985,52 +3996,55 @@
         </div>
 
         <div class="previewStyleControls compactPsc">
-          <div class="pscCompactRow">
-            <div class="pscStepperGroup">
-              <span class="pscLabel">🔠</span>
-              <button onclick="adjustPoZoomStep('poFontScale',-5)">−</button>
-              <span class="pscValue" id="popscFontScaleVal">100%</span>
-              <button onclick="adjustPoZoomStep('poFontScale',5)">+</button>
-            </div>
-            <div class="pscStepperGroup">
-              <span class="pscLabel">↕</span>
-              <button onclick="adjustPoZoomStep('poRowScale',-5)">−</button>
-              <span class="pscValue" id="popscRowScaleVal">100%</span>
-              <button onclick="adjustPoZoomStep('poRowScale',5)">+</button>
-            </div>
-          </div>
-          <div class="pscCompactRow">
-            <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁 Bold</button>
+          <div class="pscCompactRow pscEssentialRow">
+            <select id="popscAlignSelect" onchange="setPoAlign(this.value)" class="pscDropdown">
+              <option value="left">⬅ Left</option>
+              <option value="center">↔ Center</option>
+              <option value="right">➡ Right</option>
+            </select>
             <div class="pscStepperGroup">
               <span class="pscLabel">.00</span>
               <button onclick="adjustPoStyle('poPriceDecimals', -1, 0, 4)">−</button>
               <span class="pscValue" id="popscDecimalsVal">0</span>
               <button onclick="adjustPoStyle('poPriceDecimals', 1, 0, 4)">+</button>
             </div>
+            <button type="button" class="pscMoreToggleBtn" id="popscMoreToggleBtn" onclick="togglePscMoreOptions('popscMoreWrap','popscMoreToggleBtn')">⚙️ More ▾</button>
           </div>
-          <div class="pscCompactRow">
-            <select id="popscAlignSelect" onchange="setPoAlign(this.value)" class="pscDropdown">
-              <option value="left">⬅ Left</option>
-              <option value="center">↔ Center</option>
-              <option value="right">➡ Right</option>
-            </select>
-            <select id="popscVAlignSelect" onchange="setPoVAlign(this.value)" class="pscDropdown" title="Vertical align within row">
-              <option value="top">⬆ Top</option>
-              <option value="middle">↕ Middle</option>
-              <option value="bottom">⬇ Bottom</option>
-            </select>
-          </div>
-          <div class="pscCompactRow">
-            <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" class="pscDropdown"></select>
-            <select id="popscThemeSelect" onchange="setReceiptColor(this.value)" class="pscDropdown"></select>
-          </div>
-          <div class="pscCompactRow">
-            <label class="pscCheckLabel">
-              <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)"> 🖨️ Print A4
-            </label>
-            <div id="popscOrientRow" style="display:none; gap:4px; align-items:center;">
-              <button type="button" id="popscOrientPortraitBtn" onclick="setPoOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
-              <button type="button" id="popscOrientLandscapeBtn" onclick="setPoOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+          <div class="pscMoreWrap" id="popscMoreWrap">
+            <div class="pscCompactRow">
+              <div class="pscStepperGroup">
+                <span class="pscLabel">🔠</span>
+                <button onclick="adjustPoZoomStep('poFontScale',-5)">−</button>
+                <span class="pscValue" id="popscFontScaleVal">100%</span>
+                <button onclick="adjustPoZoomStep('poFontScale',5)">+</button>
+              </div>
+              <div class="pscStepperGroup">
+                <span class="pscLabel">↕</span>
+                <button onclick="adjustPoZoomStep('poRowScale',-5)">−</button>
+                <span class="pscValue" id="popscRowScaleVal">100%</span>
+                <button onclick="adjustPoZoomStep('poRowScale',5)">+</button>
+              </div>
+            </div>
+            <div class="pscCompactRow">
+              <button id="popscBoldBtn" class="pscToggleBtn" onclick="togglePoBold()">𝐁 Bold</button>
+              <select id="popscVAlignSelect" onchange="setPoVAlign(this.value)" class="pscDropdown" title="Vertical align within row">
+                <option value="top">⬆ Top</option>
+                <option value="middle">↕ Middle</option>
+                <option value="bottom">⬇ Bottom</option>
+              </select>
+            </div>
+            <div class="pscCompactRow">
+              <select id="popscFontFamilySelect" onchange="setPoFontFamily(this.value)" class="pscDropdown"></select>
+              <select id="popscThemeSelect" onchange="setReceiptColor(this.value)" class="pscDropdown"></select>
+            </div>
+            <div class="pscCompactRow">
+              <label class="pscCheckLabel">
+                <input type="checkbox" id="popscA4Chk" onchange="togglePoPaperStyle(this.checked)"> 🖨️ Print A4
+              </label>
+              <div id="popscOrientRow" style="display:none; gap:4px; align-items:center;">
+                <button type="button" id="popscOrientPortraitBtn" onclick="setPoOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+                <button type="button" id="popscOrientLandscapeBtn" onclick="setPoOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+              </div>
             </div>
           </div>
         </div>
@@ -4429,52 +4443,55 @@
     </div>
 
     <div class="previewStyleControls compactPsc" id="reportStyleControlsWrap" style="display:none;">
-      <div class="pscCompactRow">
-        <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
-          <span class="pscLabel">🔠</span>
-          <input type="range" id="rpscFontScaleSlider" min="100" max="400" step="10" value="100" oninput="setReportZoom(this.value)" style="flex:1;">
-          <span class="pscValue" id="rpscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
-        </div>
-      </div>
-      <div class="pscCompactRow">
-        <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
-          <span class="pscLabel">↕</span>
-          <input type="range" id="rpscRowScaleSlider" min="70" max="260" step="5" value="100" oninput="setReportRowZoom(this.value)" style="flex:1;">
-          <span class="pscValue" id="rpscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
-        </div>
-      </div>
-      <div class="pscCompactRow">
-        <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁</button>
-        <button id="rpscThinBtn" class="pscToggleBtn" onclick="toggleReportBold()">Thin</button>
+      <div class="pscCompactRow pscEssentialRow">
         <button id="rpscAlignLeftBtn" class="pscToggleBtn" onclick="setReportAlign('left')">⬅</button>
         <button id="rpscAlignCenterBtn" class="pscToggleBtn" onclick="setReportAlign('center')">↔</button>
         <button id="rpscAlignRightBtn" class="pscToggleBtn" onclick="setReportAlign('right')">➡</button>
-      </div>
-      <div class="pscCompactRow">
         <div class="pscStepperGroup">
           <span class="pscLabel">.00</span>
           <button onclick="adjustReportStyle('reportPriceDecimals', -1, 0, 4)">−</button>
           <span class="pscValue" id="rpscDecimalsVal">0</span>
           <button onclick="adjustReportStyle('reportPriceDecimals', 1, 0, 4)">+</button>
         </div>
-        <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" class="pscDropdown"></select>
+        <button type="button" class="pscMoreToggleBtn" id="rpscMoreToggleBtn" onclick="togglePscMoreOptions('rpscMoreWrap','rpscMoreToggleBtn')">⚙️ More ▾</button>
       </div>
-      <div class="pscCompactRow">
-        <span class="pscLabel">🎨</span>
-        <div id="rpscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
-      </div>
-      <div class="pscCompactRow">
-        <label class="pscCheckLabel">
-          <input type="checkbox" id="rpscA4Chk" onchange="toggleReportPaperStyle(this.checked)"> 🖨️ Print A4
-        </label>
-        <label id="rpscShowStockWrap" class="pscCheckLabel">
-          <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)"> Show In Stock Qty
-        </label>
-      </div>
-      <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
-      <div id="rpscOrientRow" class="pscCompactRow" style="display:none;">
-        <button type="button" id="rpscOrientPortraitBtn" onclick="setReportOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
-        <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+      <div class="pscMoreWrap" id="rpscMoreWrap">
+        <div class="pscCompactRow">
+          <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+            <span class="pscLabel">🔠</span>
+            <input type="range" id="rpscFontScaleSlider" min="100" max="400" step="10" value="100" oninput="setReportZoom(this.value)" style="flex:1;">
+            <span class="pscValue" id="rpscFontScaleVal" style="min-width:38px; text-align:right;">100%</span>
+          </div>
+        </div>
+        <div class="pscCompactRow">
+          <div style="flex:1 1 100%; display:flex; align-items:center; gap:5px;">
+            <span class="pscLabel">↕</span>
+            <input type="range" id="rpscRowScaleSlider" min="70" max="260" step="5" value="100" oninput="setReportRowZoom(this.value)" style="flex:1;">
+            <span class="pscValue" id="rpscRowScaleVal" style="min-width:38px; text-align:right;">100%</span>
+          </div>
+        </div>
+        <div class="pscCompactRow">
+          <button id="rpscBoldBtn" class="pscToggleBtn" onclick="toggleReportBold()">𝐁</button>
+          <button id="rpscThinBtn" class="pscToggleBtn" onclick="toggleReportBold()">Thin</button>
+          <select id="rpscFontFamilySelect" onchange="setReportFontFamily(this.value)" class="pscDropdown"></select>
+        </div>
+        <div class="pscCompactRow">
+          <span class="pscLabel">🎨</span>
+          <div id="rpscColorSwatches" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
+        </div>
+        <div class="pscCompactRow">
+          <label class="pscCheckLabel">
+            <input type="checkbox" id="rpscA4Chk" onchange="toggleReportPaperStyle(this.checked)"> 🖨️ Print A4
+          </label>
+          <label id="rpscShowStockWrap" class="pscCheckLabel">
+            <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)"> Show In Stock Qty
+          </label>
+        </div>
+        <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
+        <div id="rpscOrientRow" class="pscCompactRow" style="display:none;">
+          <button type="button" id="rpscOrientPortraitBtn" onclick="setReportOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
+          <button type="button" id="rpscOrientLandscapeBtn" onclick="setReportOrientation('landscape')" class="pscToggleBtn">📃 Landscape</button>
+        </div>
       </div>
     </div>
 
@@ -14343,7 +14360,7 @@ async function renderAdvOrderToCanvas(order){
   const scale = baseScale * fscale;
   const rc = getReceiptColor();
 
-  const noW = Math.round(28 * scale), variantW = Math.round(56 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  const noW = Math.round(28 * scale), variantW = Math.round(56 * scale * Math.max(1, fscale)), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
   const tableLeft = useA4 ? 40 : 8, tableRight = pxWidth - (useA4 ? 40 : 8);
   const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
   // ---------- کالمز: #, Item, Variant, Qty, Approx., Total — بالکل نارمل بل کی طرح ----------
@@ -14660,7 +14677,7 @@ async function renderPoToCanvas(){
   // خامخواہ چوڑے ڈبے نہیں بنیں گے، اور نہ ہی کوئی لکھائی کٹے گی ----------
   const measureCtx = document.createElement('canvas').getContext('2d');
   const bodyFontPx = Math.round(14 * scale), headerFontPx = Math.round(13 * scale);
-  measureCtx.font = `bold ${bodyFontPx}px ${canvasFontFamily}`;
+  measureCtx.font = `bold ${Math.round(bodyFontPx * Math.max(1, fscale))}px ${canvasFontFamily}`;
   const padX = Math.round(10 * scale);
   const noW = Math.max(Math.round(24 * scale), measureCtx.measureText('#').width + padX, measureCtx.measureText(String(po.items.length)).width + padX);
   let variantW = measureCtx.measureText('Variant').width + padX;
@@ -17551,9 +17568,15 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     img.src = receiptQrURL;
   });
 
+  // ---------- Settings کے "🔠 Print Text Size" سلائیڈر کے مطابق — پورے بل کی لکھائی کا سائز اسی تناسب سے بڑا/چھوٹا ہوتا ہے
+  // (کالمز کی چوڑائی حساب کرنے سے پہلے یہاں لے آئے، تاکہ Variant جیسے تنگ کالم بھی اسی تناسب سے چوڑے ہو سکیں) ---------- -->
+  const fscale = (AppState.settings.printFontScale || 100) / 100;
+
   // ---------- ٹیبل کالمز کی چوڑائی — پیپر سائز کے تناسب سے، تاکہ 58mm اور 80mm دونوں پر صحیح فٹ ہوں
-  // کالمز کی ترتیب: #  |  Item  |  Variant  |  Qty  |  Price  |  Total ----------
-  const noW = Math.round(28 * scale), variantW = Math.round(46 * scale), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
+  // کالمز کی ترتیب: #  |  Item  |  Variant  |  Qty  |  Price  |  Total
+  // ⚠️ Variant کالم کو fscale سے بھی جوڑا گیا ہے — ورنہ فونٹ سائز بڑھانے پر بھی یہ تنگ کالم میں فٹ ہونے کے لیے
+  // خودکار سکڑ کر ہمیشہ باریک ہی رہ جاتا تھا، چاہے باقی سارا بل موٹا/بڑا ہو جائے ---------- -->
+  const noW = Math.round(28 * scale), variantW = Math.round(46 * scale * Math.max(1, fscale)), qtyW = Math.round(50 * scale), priceW = Math.round(75 * scale), totalW = Math.round(85 * scale);
   const tableLeft = 8, tableRight = pxWidth - 8;
   const itemW = (tableRight - tableLeft) - noW - variantW - qtyW - priceW - totalW;
   const colX = [
@@ -17614,8 +17637,6 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   // نستعلیق منتخب ہونے پر پرنٹ خودکار طور پر صاف Arial پر چلا جاتا ہے (باقی سب فونٹ جوں کے توں پرنٹ ہوں گے)۔
   const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.printFontId) || FONT_PRESETS[0];
   const canvasFontFamily = selectedFontPreset.isNastaleeq ? 'Arial, sans-serif' : selectedFontPreset.family;
-  // ---------- Settings کے "🔠 Print Text Size" سلائیڈر کے مطابق — پورے بل کی لکھائی کا سائز اسی تناسب سے بڑا/چھوٹا ہوتا ہے ----------
-  const fscale = (AppState.settings.printFontScale || 100) / 100;
   const F = (spec) => spec.replace(/(\d+)px/, (m, n) => Math.round(n * fscale) + 'px') + ` ${canvasFontFamily}`;
 
   // ---------- ڈرائنگ سے پہلے یقینی بنائیں کہ منتخب فونٹ مکمل لوڈ ہو چکا ہے (خصوصاً پہلی بار Google Font کے لیے) ----------
@@ -18431,6 +18452,17 @@ function adjustPreviewStyle(settingKey, delta, min, max){
   persistAllData();
   syncPreviewStyleControls();
   rerenderInvoicePreview();
+}
+
+// ---------- ⚙️ "More" کھولنا/بند کرنا — Bill، Advance Order، Purchase Order، Reports چاروں جگہ استعمال ہوتا ہے۔
+// صرف Alignment اور Decimals ہمیشہ نظر آتے ہیں، باقی سب اس کے نیچے دبا رہتا ہے تاکہ بل/رپورٹ زیادہ سے زیادہ نظر آئے ---------- -->
+function togglePscMoreOptions(wrapId, btnId){
+  const wrap = document.getElementById(wrapId);
+  const btn = document.getElementById(btnId);
+  if(!wrap) return;
+  const nowOpen = !wrap.classList.contains('open');
+  wrap.classList.toggle('open', nowOpen);
+  if(btn) btn.textContent = nowOpen ? '⚙️ Less ▴' : '⚙️ More ▾';
 }
 
 function togglePreviewBold(){
