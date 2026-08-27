@@ -701,6 +701,12 @@
   .pgImageArea{position:relative; flex:1; min-height:0; overflow:hidden; background:#f1f5f9;}
   .pgImageArea img{width:100%; height:100%; object-fit:cover; display:block;}
   .pgImageArea .pgPlaceholder{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:26px;}
+  /* --- 🏷️ تصویر نہ ہونے پر خالی ڈبے کی جگہ پراڈکٹ کا نام — قابلِ ایڈجسٹ سائز کے ساتھ --- */
+  .pgImageArea .pgNamePlaceholder{
+    background:linear-gradient(145deg,#eef2ff,#e0e7ff); color:var(--primary-dark);
+    font-weight:800; text-align:center; line-height:1.2; padding:8px; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;
+  }
 
   /* --- نام + قیمت تصویر کے اوپر، نیچے کی طرف، ہلکے گہرے پس منظر کے ساتھ (پڑھنے میں آسانی) --- */
   .pgCaption{position:absolute; left:0; right:0; bottom:0; background:linear-gradient(transparent, rgba(0,0,0,.72) 65%); padding:14px 6px 5px; text-align:center;}
@@ -2004,7 +2010,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH06</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH09</span>
     </div>
   </div>
 
@@ -4074,6 +4080,26 @@
               <span class="categoryDropdownArrow">▾</span>
             </button>
             <div class="categoryDropdownPanel" id="fontOptionGrid"></div>
+          </div>
+        </div>
+
+        <!-- --- 🏷️ پراڈکٹ کارڈ پر (تصویر نہ ہونے کی صورت میں) نام کا انداز — سائز، موٹائی، اور پس منظر رنگ، سب خود منتخب کریں --- -->
+        <div class="settingsCard" id="settingsCardProductNameSize">
+          <h3>🏷️ Product Card Style (No Photo)</h3>
+          <div class="settingsHint">When a product has no photo, its name is shown instead. Customize its size, boldness, and background colour here — completely independent from your app's overall theme colour.</div>
+
+          <div style="font-size:12px; font-weight:700; color:var(--muted); margin-top:10px;">Text Size</div>
+          <input type="range" min="8" max="22" step="1" id="productCardNameSizeSlider" value="13" oninput="adjustProductCardNameSize(this.value)" style="width:100%; margin-top:4px;">
+          <div style="text-align:center; margin-top:2px; font-weight:700; color:var(--primary);"><span id="productCardNameSizeLabel">13px</span></div>
+
+          <div style="font-size:12px; font-weight:700; color:var(--muted); margin-top:14px;">Boldness (Thin ↔ Extra Bold)</div>
+          <input type="range" min="400" max="900" step="100" id="productCardNameWeightSlider" value="800" oninput="adjustProductCardNameWeight(this.value)" style="width:100%; margin-top:4px;">
+          <div style="text-align:center; margin-top:2px; font-weight:700; color:var(--primary);"><span id="productCardNameWeightLabel">800</span></div>
+
+          <div style="font-size:12px; font-weight:700; color:var(--muted); margin-top:14px;">Card Background Colour</div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+            <input type="color" id="productCardNameBgPicker" value="#eef2ff" oninput="adjustProductCardNameBg(this.value)" style="width:44px; height:36px; border:none; border-radius:8px; padding:0; cursor:pointer;">
+            <button class="testPrintBtn" style="flex:1; margin-top:0;" onclick="resetProductCardNameBg()">↺ Reset to Theme Colour</button>
           </div>
         </div>
 
@@ -7499,7 +7525,7 @@ function renderBillingProductGrid(){
           ${qtyBadgeHtml}
           ${scaleBadgeHtml}
           ${stockBadgeHtml}
-          ${p.image ? `<img src="${p.image}">` : `<div class="pgPlaceholder">📦</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -13207,7 +13233,7 @@ function renderPoBrowseList(){
         <div class="pgImageArea">
           ${qtyBadgeHtml}
           ${stockBadgeHtml}
-          ${p.image ? `<img src="${p.image}">` : `<div class="pgPlaceholder">📦</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -13653,7 +13679,7 @@ function renderAdvOrderProductGrid(){
       <div class="productGridCard" data-product-id="${p.product_id}" ${cardOnClick}>
         <div class="pgImageArea">
           ${qtyBadgeHtml}
-          ${p.image ? `<img src="${p.image}">` : `<div class="pgPlaceholder">📦</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -18787,6 +18813,46 @@ function applyUiZoom(pct){
   document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
 }
 
+// ---------- تصویر نہ ہونے پر پراڈکٹ کارڈ پر نظر آنے والے نام کا سائز — فوری اثر، تینوں گرڈز پر (Billing/Purchase/Advance Order) ----------
+function adjustProductCardNameSize(px){
+  const clamped = Math.max(8, Math.min(22, Number(px) || 13));
+  AppState.settings.productCardNameSize = clamped;
+  const label = document.getElementById('productCardNameSizeLabel');
+  if(label) label.textContent = clamped + 'px';
+  persistAllData();
+  // ---------- جو بھی گرڈ اس وقت اسکرین پر موجود ہو، اسے فوراً دوبارہ بنا دیں تاکہ نیا سائز فوراً نظر آئے ----------
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+// ---------- 🔤 نام کی موٹائی — 400 (باریک) سے 900 (سب سے موٹا) تک، ایپ کے تھیم رنگ سے بالکل الگ، خود منتخب کریں ----------
+function adjustProductCardNameWeight(weight){
+  const clamped = Math.max(400, Math.min(900, Number(weight) || 800));
+  AppState.settings.productCardNameWeight = clamped;
+  const label = document.getElementById('productCardNameWeightLabel');
+  if(label) label.textContent = clamped;
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+// ---------- 🎨 بغیر تصویر والے کارڈ کا پس منظر رنگ — ایپ کے مجموعی تھیم رنگ (سبز/سرخ/نیلا وغیرہ) سے بالکل آزاد،
+// خود اپنی مرضی کا کوئی بھی رنگ منتخب کر سکتے ہیں (مثلاً ہمیشہ ہلکا نیلا، چاہے تھیم سبز ہو) ----------
+function adjustProductCardNameBg(hex){
+  AppState.settings.productCardNameBg = hex;
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+function resetProductCardNameBg(){
+  AppState.settings.productCardNameBg = null; // ---------- null = ایپ کے تھیم رنگ کے مطابق خودکار (ڈیفالٹ حالت) ----------
+  const picker = document.getElementById('productCardNameBgPicker');
+  if(picker) picker.value = '#eef2ff';
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+}
+
 // ---------- بل بناتے وقت (Cart) کی لکھائی کا سائز/موٹاپن/لائن اسپیسنگ — یہ صرف بلنگ کی ٹیبل پر لاگو ہوتا ہے،
 // پوری ایپ کے Zoom سے الگ، تاکہ صرف بل بناتے وقت بڑی/موٹی/کھلی لکھائی چاہیے تو باقی ایپ چھوٹی ہی رہے ----------
 function applyCartTextSettings(){
@@ -19071,6 +19137,24 @@ function renderSettingsScreen(){
   syncPinLockUI();
   document.querySelectorAll('.uiZoomSlider').forEach(el => el.value = AppState.settings.uiZoom || 100);
   document.querySelectorAll('.uiZoomValueLabel').forEach(el => el.textContent = (AppState.settings.uiZoom || 100) + '%');
+
+  // ---------- پراڈکٹ کارڈ پر نام کے سائز والا سلائیڈر ----------
+  const pcnSlider = document.getElementById('productCardNameSizeSlider');
+  const pcnLabel = document.getElementById('productCardNameSizeLabel');
+  const pcnVal = AppState.settings.productCardNameSize || 13;
+  if(pcnSlider) pcnSlider.value = pcnVal;
+  if(pcnLabel) pcnLabel.textContent = pcnVal + 'px';
+
+  // ---------- پراڈکٹ کارڈ پر نام کی موٹائی والا سلائیڈر ----------
+  const pcwSlider = document.getElementById('productCardNameWeightSlider');
+  const pcwLabel = document.getElementById('productCardNameWeightLabel');
+  const pcwVal = AppState.settings.productCardNameWeight || 800;
+  if(pcwSlider) pcwSlider.value = pcwVal;
+  if(pcwLabel) pcwLabel.textContent = pcwVal;
+
+  // ---------- پراڈکٹ کارڈ کے پس منظر رنگ والا کلر پکر ----------
+  const pcbPicker = document.getElementById('productCardNameBgPicker');
+  if(pcbPicker) pcbPicker.value = AppState.settings.productCardNameBg || '#eef2ff';
 
   // تھیم سواچز بنائیں (ڈراپ ڈاؤن پینل کے اندر)
   document.getElementById('themeSwatchGrid').innerHTML = THEME_PRESETS.map(t => `
