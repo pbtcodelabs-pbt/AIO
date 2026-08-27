@@ -877,18 +877,25 @@
   .homeQuickPanel{
     position:fixed; top:0; left:0; z-index:900;
     background:#fff; border-radius:14px; box-shadow:0 10px 28px rgba(15,23,42,.28); width:230px;
-    max-height:min(70vh, 420px); overflow-y:auto; overflow-x:hidden; opacity:0; pointer-events:none;
+    max-height:min(52vh, 360px); overflow-y:auto; overflow-x:hidden; opacity:0; pointer-events:none;
     transform:scaleY(0.85); transform-origin:top left;
-    transition:opacity .18s ease, transform .18s ease; visibility:hidden; padding:10px 0;
+    transition:opacity .18s ease, transform .18s ease; visibility:hidden; padding:0 0 8px;
   }
   .homeQuickPanel.open{ opacity:1; pointer-events:auto; transform:scaleY(1); visibility:visible; }
-  .homeQuickPanel.wide{ width:280px; }
+  .homeQuickPanel.wide{ width:262px; }
   .homeQuickPanelLabel{ font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; padding:6px 12px 6px; }
   .homeIntensityRow{ display:flex; align-items:center; gap:8px; padding:2px 12px 10px; }
   /* ---------- ⚙️ نیا مربوط Settings پینل — Backup/Restore دو برابر بڑے بٹن، اوپر ---------- */
-  .hsBackupRow{ display:flex; gap:8px; padding:0 12px 10px; }
-  .hsBackupBtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:12px 6px; border-radius:12px; background:#eef4ff; border:1px solid #dbe6fb; cursor:pointer; font-size:12.5px; font-weight:700; color:#1e3a8a; }
+  .hsBackupRow{ display:flex; gap:8px; padding:8px 12px 6px; }
+  .hsBackupBtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 6px; border-radius:12px; background:#eef4ff; border:1px solid #dbe6fb; cursor:pointer; font-size:12px; font-weight:700; color:#1e3a8a; }
   .hsBackupBtn:active{ background:#e0ebff; }
+  /* ---------- 📑 کمپیکٹ ٹیب بار — Theme/Font/Card کے درمیان — ایک وقت میں صرف ایک حصہ نظر آئے، پینل چھوٹا رہے ---------- */
+  .hsTabBar{ display:flex; gap:4px; padding:4px 10px 8px; border-bottom:1px solid #eef1f6; margin-bottom:6px; }
+  .hsTabBtn{ flex:1; border:none; background:#f1f5f9; color:var(--muted); padding:7px 4px; border-radius:8px; font-size:10.5px; font-weight:800; cursor:pointer; text-align:center; line-height:1.3; }
+  .hsTabBtn.active{ background:var(--primary); color:#fff; }
+  .hsChipRow{ display:flex; flex-wrap:wrap; gap:6px; padding:2px 12px 8px; }
+  .hsChip{ border:1.5px solid #dbe1ea; background:#fff; color:var(--text); padding:6px 11px; border-radius:20px; font-size:11.5px; font-weight:700; cursor:pointer; }
+  .hsChip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
 
   .productCard{background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(41,29,10,.07); overflow:hidden;}
   .productHead{display:flex; justify-content:space-between; align-items:center; padding:14px 18px; cursor:pointer;}
@@ -904,37 +911,52 @@
 
   .variantTableWrap{display:none; padding:0 18px 16px;}
   .productCard.open .variantTableWrap{display:block;}
-  /* ---------- خانے پہلے سے بڑے اور آسانی سے ٹچ ہونے والے بنائے گئے (Variant/Stock کالم خاص طور پر بڑھائے گئے) ---------- */
-  table.variantTable{width:100%; border-collapse:collapse; font-size:14px; table-layout:fixed;}
-  table.variantTable th:nth-child(1), table.variantTable td:nth-child(1){width:52px;}
-  table.variantTable th:nth-child(2), table.variantTable td:nth-child(2){width:110px;}
-  table.variantTable th:nth-child(3), table.variantTable td:nth-child(3){width:120px;}
-  table.variantTable th:nth-child(4), table.variantTable td:nth-child(4){width:90px;}
-  table.variantTable th:nth-child(5), table.variantTable td:nth-child(5){width:90px;}
-  table.variantTable th:nth-child(6), table.variantTable td:nth-child(6){width:95px;}
-  table.variantTable th:nth-child(7), table.variantTable td:nth-child(7){width:95px;}
-  table.variantTable th:nth-child(8), table.variantTable td:nth-child(8){width:95px;}
-  table.variantTable th:nth-child(9), table.variantTable td:nth-child(9){width:140px;}
-  table.variantTable th:nth-child(10), table.variantTable td:nth-child(10){width:120px;}
-  table.variantTable th:nth-child(11), table.variantTable td:nth-child(11){width:44px;}
+
+  /* =====================================================================
+     🃏 نیا عمودی Variant Card ایڈیٹر — پرانی افقی (سلائیڈ کرنے والی) ٹیبل کی جگہ۔
+     ہر ویریئنٹ ایک لمبا، اوپر سے نیچے بھرنے والا کارڈ ہے — تصویر اوپر، پھر نام (لمبا خانہ)،
+     پھر جوڑوں میں (دو کالم) قیمتیں/سٹاک/ایکسپائری، آخر میں لوکیشن اور ایکشن بٹن۔
+     ===================================================================== */
+  .variantCardWrap{display:none; padding:0 14px 16px;}
+  .productCard.open .variantCardWrap{display:block;}
+  .vcNavBar{display:flex; align-items:center; justify-content:space-between; background:#eef2ff; border-radius:12px 12px 0 0; padding:10px 14px;}
+  .vcNavTitle{display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; color:var(--primary-dark);}
+  .vcMainBadge{background:var(--primary); color:#fff; font-size:10px; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:.3px;}
+  .vcNavArrows{display:flex; align-items:center; gap:6px;}
+  .vcNavBtn{border:none; background:#fff; color:var(--primary-dark); width:30px; height:30px; border-radius:8px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .vcNavBtn:disabled{opacity:.35; cursor:default;}
+  .vcCard{background:var(--card); border:1px solid #e5e9f0; border-top:none; border-radius:0 0 14px 14px; box-shadow:0 4px 16px rgba(41,29,10,.06); overflow:hidden;}
+  .vcPhotoArea{background:#f8fafc; padding:16px; display:flex; justify-content:center; border-bottom:1px solid #eef1f5;}
+  .vcPhotoBox{width:96px; height:96px; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#eef2ff; cursor:pointer; border:1.5px dashed #c7d2fe;}
+  .vcPhotoBox img{width:100%; height:100%; object-fit:cover;}
+  .vcPhotoBox .vcPhotoIcon{font-size:26px; color:var(--primary-dark);}
+  .vcFieldsArea{padding:14px 16px 4px; background:#fff;}
+  .vcFieldFull{margin-bottom:12px;}
+  .vcFieldGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
+  .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; display:block;}
+  .vcFieldWrap input, .vcFieldWrap .vcInputRow{width:100%;}
+  .vcFieldWrap input{padding:9px 10px; border:1px solid #dbe1ea; border-radius:9px; font-size:14px; background:#fafbfc;}
+  .vcFieldWrap input:focus{border-color:var(--primary); background:#fff; outline:none;}
+  .vcFieldWrap.vcNameField input{font-size:15px; font-weight:700;}
+  .vcInputRow{display:flex; gap:6px; align-items:center;}
+  .vcInputRow input{flex:1; min-width:0;}
+  .vcInputRow button{flex:0 0 34px; height:34px; border:1px solid #dbe1ea; background:#fff; border-radius:8px; cursor:pointer;}
+  .vcStockWrap{position:relative;}
+  .vcStockTag{font-size:10px; font-weight:800; margin-top:3px;}
+  .vcActionsRow{display:flex; gap:8px; padding:12px 16px 16px; background:#fff;}
+  .vcActionsRow button{flex:1; border:none; border-radius:10px; padding:10px; font-size:12.5px; font-weight:700; cursor:pointer;}
+  .vcBatchBtn{background:#eef2ff; color:var(--primary-dark);}
+  .vcDeleteBtn{background:#fef2f2; color:var(--danger);}
+  .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+
+
   .expiryInput.exp-red{background:#fef2f2; border-color:var(--danger); color:var(--danger); font-weight:700;}
   .expiryInput.exp-orange{background:#fff7ed; border-color:#fb923c; color:#c2410c; font-weight:700;}
   .expiryInput.exp-yellow{background:#fefce8; border-color:#eab308; color:#854d0e; font-weight:600;}
-  table.variantTable th{text-align:left; padding:10px 10px; color:var(--muted); font-size:11.5px; text-transform:uppercase; border-bottom:2px solid #eef1f6;}
-  table.variantTable td{padding:10px 8px; border-bottom:1px solid #f1f5f9;}
-  table.variantTable input{width:100%; padding:11px 8px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:14.5px; text-align:center; min-height:42px; box-sizing:border-box;}
-  table.variantTable input:focus{border-color:var(--primary); outline:none; box-shadow:0 0 0 3px rgba(124,58,237,.12);}
-  .lowStockTag{background:#fef2f2; color:var(--danger); font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600;}
-  .negativeStockTag{background:var(--danger); color:#fff; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:800; margin-top:3px; display:inline-block;}
   input.negativeStockInput{color:var(--danger) !important; font-weight:800 !important; border-color:var(--danger) !important;}
-  .variantImgCell{width:52px;}
-  .variantThumb{width:46px; height:46px; border-radius:50%; object-fit:cover; cursor:pointer; border:3px solid var(--primary); box-shadow:0 1px 4px rgba(0,0,0,.15);}
-  .variantImgBtn{width:44px; height:44px; border-radius:8px; border:1.5px dashed #cbd5e1; background:#f8fafc; cursor:pointer; font-size:16px; color:var(--muted);}
   .addVariantBtn{margin-top:10px; padding:8px 16px; background:#eef2ff; color:var(--primary-dark); border:1px dashed var(--primary); border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;}
   .collapseCardBtn{margin-top:8px; width:100%; padding:11px 16px; background:var(--primary); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:13.5px; font-weight:700; box-shadow:0 2px 6px rgba(0,0,0,.15);}
   .collapseCardBtn:active{opacity:.85;}
-  .variantRowActions{display:flex; gap:6px;}
-  .variantRowActions button{border:none; background:none; cursor:pointer; font-size:14px;}
 
   /* --- New Product Modal --- */
   .modalBoxWide{background:#fff; border-radius:var(--radius); padding:24px; width:420px; max-height:85vh; max-height:85dvh; overflow-y:auto;}
@@ -1740,7 +1762,7 @@
 
     /* --- Tables: عمودی سکرول کی بجائے افقی سکرول تاکہ کالم نہ ٹوٹیں (صرف اصل کارٹ/ویریئنٹ ٹیبل پر — کسی بھی modal کے اندر موجود چھوٹے ٹیبل پر نہیں، ورنہ وہ modal سے باہر نکل جاتا ہے) --- */
     .cartWrap, .variantTableWrap{overflow-x:auto;}
-    .cartWrap table.cartTable, .variantTableWrap table.variantTable{min-width:480px;}
+    .cartWrap table.cartTable{min-width:480px;}
 
     /* --- Modal کے اندر موجود چھوٹے ٹیبلز (جیسے پرچیز آرڈر) اپنی چوڑائی میں ہی سمٹے رہیں، افقی سکرول سے --- */
     .modalBoxWide table.cartTable{min-width:0; width:100%;}
@@ -2010,7 +2032,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH12</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS278TH16</span>
     </div>
   </div>
 
@@ -2066,6 +2088,10 @@
   <!-- ---------- MAIN CONTENT AREA ---------- -->
   <div id="mainArea">
 
+    <!-- ---------- ⚙️ مربوط Settings پاپ اپ پینل — یہاں، تمام اسکرینز سے باہر رکھا گیا ہے، تاکہ چاہے Home ہو یا
+         Billing، کسی بھی ⚙️ بٹن سے کھلے، ہمیشہ نظر آئے (اسکرین کے اندر ہوتا تو دوسری اسکرین پر جانے سے چھپ جاتا) ---------- -->
+    <div class="homeQuickPanel wide" id="homeSettingsPanel"></div>
+
     <!-- BILLING (Admin + Salesman دونوں کو نظر آتی ہے) — پورا صفحہ صرف پراڈکٹس کے لیے، باقی سب فلوٹنگ کارٹ بار میں -->
     <!-- ===================== 🏠 HOME SCREEN — اصل مین پیج، لاگ ان کے فوراً بعد یہی کھلتا ہے ===================== -->
     <div class="screen" id="screen-home">
@@ -2095,8 +2121,6 @@
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
-        <!-- ---------- ⚙️ ہوم پیج پر ایک ہی مربوط Settings پاپ اپ پینل — Backup/Restore + Theme + Font سب اکٹھے ---------- -->
-        <div class="homeQuickPanel wide" id="homeSettingsPanel"></div>
         <!-- ---------- ☁️/📥 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
         <div class="hbcLastBackupLine admin-only" id="hbcLastBackupLine"></div>
       </div>
@@ -2138,6 +2162,10 @@
             <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
             <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
           </div>
+
+          <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر، تاکہ تھیم/فونٹ/Product Card میں
+               کوئی بھی تبدیلی کرتے وقت نیچے موجود اصل پراڈکٹ کارڈز ہمیشہ نظر آتے رہیں ---------- -->
+          <button class="fontsFabMain" id="hbcSettingsBtnBilling" onclick="toggleHomeSettingsPanel(event, 'hbcSettingsBtnBilling')" title="Settings" style="flex:0 0 auto;">⚙️</button>
 
           <!-- ---------- FONTS بٹن — کاؤنٹر سیل کے دائیں طرف، مستقل جگہ پر (پراڈکٹس پر کبھی نہیں چڑھتا) ---------- -->
           <div id="fontsFab" class="fontsFab">
@@ -7507,7 +7535,7 @@ function renderBillingProductGrid(){
           ${qtyBadgeHtml}
           ${scaleBadgeHtml}
           ${stockBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -9686,64 +9714,112 @@ function renderProductList(query = ''){
           <span class="chevron">▶</span>
         </div>
       </div>
-      <div class="variantTableWrap">
-        <table class="variantTable">
-          <thead>
-            <tr>
-              <th>Photo</th><th>Variant</th><th>Barcode</th><th>Purchase</th><th>Retail</th><th>Wholesale</th><th>Stock</th><th>Low Stock Limit</th><th>Expiry Date</th><th>Location</th><th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${p.variants.map(v => renderVariantRow(p.product_id, v)).join('')}
-          </tbody>
-        </table>
-        <button class="addVariantBtn" onclick="addVariantRow(${p.product_id})">+ Add new variant (e.g. 100g)</button>
-        <button class="collapseCardBtn" onclick="toggleProductCard(${p.product_id})">▲ Done — Collapse this product</button>
+      <div class="variantCardWrap" id="vcWrap-${p.product_id}">
+        ${renderVariantCardSection(p.product_id)}
       </div>
     </div>
   `).join('');
 }
 
-function renderVariantRow(productId, v){
-  const isLow = v.stock <= v.lowStockAt;
+// ---------- ہر پراڈکٹ کے لیے فی الوقت کون سا ویریئنٹ کارڈ کھلا ہوا ہے، یاد رکھا جاتا ہے ----------
+let activeVariantIndexByProduct = new Map();
+
+function renderVariantCardSection(productId){
+  const p = productsData.find(pr => pr.product_id === productId);
+  if(!p || !p.variants.length) return '';
+  let idx = activeVariantIndexByProduct.get(productId) ?? 0;
+  idx = Math.max(0, Math.min(p.variants.length - 1, idx));
+  activeVariantIndexByProduct.set(productId, idx);
+  const v = p.variants[idx];
+  const isLow = v.stock <= v.lowStockAt && v.stock >= 0;
   const isNegative = v.stock < 0;
-  const expiryTier = getExpiryTier(v.expiryDate); // null | 'exp-yellow' | 'exp-orange' | 'exp-red'
+  const expiryTier = getExpiryTier(v.expiryDate);
+
   return `
-    <tr data-variant-id="${v.variant_id}">
-      <td class="variantImgCell">
-        ${v.image
-          ? `<img src="${v.image}" class="variantThumb" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Tap to change photo">`
-          : `<button class="variantImgBtn" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Add photo">📷</button>`}
-      </td>
-      <td><input value="${v.label}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)"></td>
-      <td>
-        <div style="display:flex; gap:4px; align-items:center;">
-          <input id="variantBarcode-${v.variant_id}" value="${v.barcode}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)" style="flex:1; min-width:50px;">
-          <button type="button" onclick="openBarcodeScanner('variantBarcode-${v.variant_id}')" title="Scan barcode" style="flex:0 0 28px; padding:2px 0; font-size:13px; border:1px solid #dbe1ea; background:#fff; border-radius:6px; cursor:pointer;">📷</button>
+    <div class="vcNavBar">
+      <div class="vcNavTitle">
+        ${idx === 0 ? `<span class="vcMainBadge">MAIN</span>` : ''}
+        <span>Variant ${idx + 1} of ${p.variants.length}</span>
+      </div>
+      <div class="vcNavArrows">
+        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, -1)" ${idx === 0 ? 'disabled' : ''} title="Previous variant">◀</button>
+        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, 1)" ${idx === p.variants.length - 1 ? 'disabled' : ''} title="Next variant">▶</button>
+      </div>
+    </div>
+    <div class="vcCard">
+      <div class="vcPhotoArea">
+        <div class="vcPhotoBox" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Tap to add/change photo">
+          ${v.image ? `<img src="${v.image}">` : `<span class="vcPhotoIcon">📷</span>`}
         </div>
-      </td>
-      <td><input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)"></td>
-      <td><input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)"></td>
-      <td><input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></td>
-      <td id="stockCell-${v.variant_id}">
-        <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
-        <div class="lowStockTag" id="lowStockTag-${v.variant_id}" style="display:${isLow && !isNegative ? 'block' : 'none'};">⚠️ Low Stock</div>
-        <div class="negativeStockTag" id="negativeStockTag-${v.variant_id}" style="display:${isNegative ? 'block' : 'none'};">❌ Negative Stock</div>
-      </td>
-      <td>
-        <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value)">
-      </td>
-      <td>
-        <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
-      </td>
-      <td><input value="${v.location}" placeholder="Aisle/Shelf/Warehouse" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)"></td>
-      <td class="variantRowActions">
-        <button title="Manage expiry batches (multiple boxes, different expiry dates)" onclick="openVariantBatchesModal(${productId},${v.variant_id})" style="border:none; background:#eef2ff; color:var(--primary-dark); width:28px; height:28px; border-radius:8px; font-size:13px; cursor:pointer;">🗓️${v.batches && v.batches.length > 1 ? `<span style="display:block; font-size:8px; font-weight:800; margin-top:-2px;">${v.batches.length}</span>` : ''}</button>
-        <button title="Delete" onclick="deleteVariant(${productId},${v.variant_id})">🗑️</button>
-      </td>
-    </tr>
+      </div>
+      <div class="vcFieldsArea">
+        <div class="vcFieldWrap vcFieldFull vcNameField">
+          <span class="vcFieldLabel">Variant Name / Size</span>
+          <input value="${v.label}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)">
+        </div>
+        <div class="vcFieldWrap vcFieldFull">
+          <span class="vcFieldLabel">Barcode</span>
+          <div class="vcInputRow">
+            <input id="variantBarcode-${v.variant_id}" value="${v.barcode}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)">
+            <button type="button" onclick="openBarcodeScanner('variantBarcode-${v.variant_id}')" title="Scan barcode">📷</button>
+          </div>
+        </div>
+        <div class="vcFieldGrid">
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Purchase Price</span>
+            <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Retail Price</span>
+            <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Wholesale Price</span>
+            <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)">
+          </div>
+          <div class="vcFieldWrap vcStockWrap">
+            <span class="vcFieldLabel">Stock</span>
+            <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
+            <div class="vcStockTag" id="lowStockTag-${v.variant_id}" style="display:${isLow ? 'block' : 'none'}; color:#b45309;">⚠️ Low Stock</div>
+            <div class="vcStockTag" id="negativeStockTag-${v.variant_id}" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger);">❌ Negative Stock</div>
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Low Stock Alert At</span>
+            <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value)">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Expiry Date</span>
+            <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
+          </div>
+        </div>
+        <div class="vcFieldWrap vcFieldFull">
+          <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
+          <input value="${v.location}" placeholder="e.g. Aisle 4, Shelf B" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)">
+        </div>
+      </div>
+      <div class="vcActionsRow">
+        <button class="vcBatchBtn" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : ''}</button>
+        <button class="vcDeleteBtn" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete This Variant</button>
+      </div>
+    </div>
+    <div class="vcBottomBtns">
+      <button class="addVariantBtn" onclick="addVariantRow(${productId})">+ Add New Variant (e.g. 100g)</button>
+      <button class="collapseCardBtn" onclick="toggleProductCard(${productId})">▲ Done — Collapse this product</button>
+    </div>
   `;
 }
+
+// ---------- Prev/Next بٹن — پورا کارڈ دوبارہ نہیں، صرف اسی پراڈکٹ کا ویریئنٹ سیکشن دوبارہ بناتا ہے (تیز، جھٹکا نہیں لگتا) ----------
+function changeActiveVariant(productId, delta){
+  const p = productsData.find(pr => pr.product_id === productId);
+  if(!p) return;
+  let idx = activeVariantIndexByProduct.get(productId) ?? 0;
+  idx = Math.max(0, Math.min(p.variants.length - 1, idx + delta));
+  activeVariantIndexByProduct.set(productId, idx);
+  const wrap = document.getElementById(`vcWrap-${productId}`);
+  if(wrap) wrap.innerHTML = renderVariantCardSection(productId);
+}
+
 
 // ---------- ایکسپائری تاریخ سے رنگ کا درجہ (tier) نکالیں: 30 دن=پیلا, 15=نارنجی, 7 یا کم=سرخ ----------
 function getExpiryTier(expiryDate){
@@ -10585,6 +10661,8 @@ function addVariantRow(productId){
     label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
   });
 
+  // ---------- نیا ویریئنٹ شامل ہوتے ہی اسی کا کارڈ فوراً سامنے لے آئیں، تاکہ صارف فوراً اس میں تفصیلات بھر سکے ----------
+  activeVariantIndexByProduct.set(productId, product.variants.length - 1);
   openProductCards.add(productId);
   rerenderProductListPreserveScroll();
 }
@@ -13215,7 +13293,7 @@ function renderPoBrowseList(){
         <div class="pgImageArea">
           ${qtyBadgeHtml}
           ${stockBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -13661,7 +13739,7 @@ function renderAdvOrderProductGrid(){
       <div class="productGridCard" data-product-id="${p.product_id}" ${cardOnClick}>
         <div class="pgImageArea">
           ${qtyBadgeHtml}
-          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${AppState.settings.productCardNameBg ? AppState.settings.productCardNameBg : 'linear-gradient(145deg,#eef2ff,#e0e7ff)'};">${p.name}</div>`}
+          ${(p.image && String(p.image).trim()) ? `<img src="${p.image}">` : `<div class="pgPlaceholder pgNamePlaceholder" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">${p.name}</div>`}
           <div class="pgCaption">
             <div class="pgName" style="font-size:${nameFontSize};">${p.name}</div>
             <div class="pgPrice">${priceLabel}</div>
@@ -18835,8 +18913,42 @@ function adjustProductCardNameBg(hex){
   try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
   try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
 }
+// ---------- 🔅🔆 چنے گئے پس منظر رنگ کو ہلکا/گہرا کرنے کا سلائیڈر — بالکل ایپ کے Theme Shade سلائیڈر جیسا ----------
+function adjustProductCardNameBgIntensity(val){
+  AppState.settings.productCardNameBgIntensity = Math.max(-40, Math.min(40, Number(val) || 0));
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+// ---------- ✍️🎨 نام کی لکھائی کا رنگ — خود منتخب کریں (مثلاً گہرے کارڈ پر سفید، ہلکے کارڈ پر گہرا) ----------
+function adjustProductCardNameColor(hex){
+  AppState.settings.productCardNameColor = hex;
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+function resetProductCardNameColor(){
+  AppState.settings.productCardNameColor = null; // ---------- null = خودکار (تھیم کے مطابق) ----------
+  persistAllData();
+  try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
+}
+// ---------- کارڈ پر حتمی پس منظر رنگ نکالیں — اگر کچھ بھی خود سے منتخب نہ کیا ہو تو وہی خوبصورت ڈیفالٹ gradient،
+// ورنہ منتخب رنگ + Shade سلائیڈر کا اثر ملا کر ----------
+function getProductCardBgFinal(){
+  const base = AppState.settings.productCardNameBg;
+  const intensity = AppState.settings.productCardNameBgIntensity || 0;
+  if(!base && !intensity) return 'linear-gradient(145deg,#eef2ff,#e0e7ff)';
+  const effectiveBase = base || '#eef2ff';
+  return intensity ? shiftColorLightness(effectiveBase, intensity) : effectiveBase;
+}
+function getProductCardTextColorFinal(){
+  return AppState.settings.productCardNameColor || 'var(--primary-dark)';
+}
 function resetProductCardNameBg(){
   AppState.settings.productCardNameBg = null; // ---------- null = ایپ کے تھیم رنگ کے مطابق خودکار (ڈیفالٹ حالت) ----------
+  AppState.settings.productCardNameBgIntensity = 0;
   const picker = document.getElementById('productCardNameBgPicker');
   if(picker) picker.value = '#eef2ff';
   persistAllData();
@@ -19015,6 +19127,13 @@ function positionHomeQuickPanel(btnId, panelId){
 // ---------- چھوٹا رنگین Google Drive جیسا آئیکن (SVG) — صرف پہچان کے لیے، سرکاری لوگو نہیں ----------
 const DRIVE_MINI_ICON = `<svg viewBox="0 0 40 34" width="20" height="17"><polygon points="14,2 26,2 38,22 26,22" fill="#34a853"/><polygon points="8,32 20,32 26,22 14,22" fill="#ffbc04"/><polygon points="2,22 14,2 20,12 8,32" fill="#4285f4"/></svg>`;
 
+let homeSettingsActiveTab = 'theme'; // ---------- theme | font | card — ایک وقت میں صرف ایک حصہ نظر آئے، پینل چھوٹا رہے ----------
+
+function switchHomeSettingsTab(tab){
+  homeSettingsActiveTab = tab;
+  renderHomeSettingsPanel();
+}
+
 function renderHomeSettingsPanel(){
   const panel = document.getElementById('homeSettingsPanel');
   if(!panel) return;
@@ -19027,9 +19146,19 @@ function renderHomeSettingsPanel(){
       <div class="hsBackupBtn" onclick="restoreFromGoogleDrive(); closeHomeSettingsPanel();">${DRIVE_MINI_ICON}<span>Restore</span></div>
     </div>` : '';
 
-  const themeHtml = `
-    <div class="homeQuickPanelLabel">Colour Theme</div>
-    <div class="themeSwatchGrid" style="padding:2px 12px 10px;">
+  // ---------- تین کمپیکٹ ٹیب — Theme / Font / Product Card — دبانے پر صرف اسی کا مواد نظر آئے ----------
+  const tabBarHtml = `
+    <div class="hsTabBar">
+      <button class="hsTabBtn ${homeSettingsActiveTab === 'theme' ? 'active' : ''}" onclick="switchHomeSettingsTab('theme')">🎨<br>Theme</button>
+      <button class="hsTabBtn ${homeSettingsActiveTab === 'font' ? 'active' : ''}" onclick="switchHomeSettingsTab('font')">🔤<br>App Font</button>
+      <button class="hsTabBtn ${homeSettingsActiveTab === 'card' ? 'active' : ''}" onclick="switchHomeSettingsTab('card')">🏷️<br>Card</button>
+    </div>`;
+
+  let tabContentHtml = '';
+
+  if(homeSettingsActiveTab === 'theme'){
+    tabContentHtml = `
+    <div class="themeSwatchGrid" style="padding:2px 12px 8px;">
       ${THEME_PRESETS.map(t => `
         <div class="themeSwatch ${t.id === AppState.settings.themeId ? 'active' : ''}"
              data-theme="${t.id}" title="${t.name}"
@@ -19043,62 +19172,79 @@ function renderHomeSettingsPanel(){
       <input type="range" min="-40" max="40" step="2" value="${intensity}" oninput="adjustThemeIntensity(this.value)" style="flex:1;">
       <span style="font-size:15px;">🔆</span>
     </div>`;
+  }
 
-  const fontHtml = '<div class="homeQuickPanelLabel">Font Style</div>' + FONT_PRESETS.map(f => `
-    <div class="fontOptionRow ${AppState.settings.fontId === f.id ? 'active' : ''}"
-         data-font="${f.id}" onclick="applyFont('${f.id}'); renderHomeSettingsPanel();">
-      <span class="fontPreviewText" style="font-family:${f.family};">${f.label}</span>
-      <span class="fontCheckMark">✓</span>
-    </div>
-  `).join('');
-
-  // ---------- 🏷️ بغیر تصویر والے پراڈکٹ کارڈ کا انداز — یہیں ہوم پیج پر، تاکہ ہر تبدیلی نیچے موجود اصل کارڈز پر فوراً نظر آئے ----------
-  const pcnSize = AppState.settings.productCardNameSize || 13;
-  const pcnWeight = AppState.settings.productCardNameWeight || 800;
-  const pcnBg = AppState.settings.productCardNameBg || '#eef2ff';
-  const pcnFontId = AppState.settings.productCardNameFont || '';
-  const productCardHtml = `
-    <div class="homeQuickPanelLabel">🏷️ Product Card (No Photo)</div>
-    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Text size</div>
-    <div style="padding:0 12px 8px;">
-      <input type="range" min="8" max="22" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.nextElementSibling.textContent=this.value+'px';" style="width:100%;">
-      <div style="text-align:center; font-size:11px; font-weight:700; color:var(--primary);">${pcnSize}px</div>
-    </div>
-    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Boldness</div>
-    <div style="padding:0 12px 8px;">
-      <input type="range" min="400" max="900" step="100" value="${pcnWeight}" oninput="adjustProductCardNameWeight(this.value); this.nextElementSibling.textContent=this.value;" style="width:100%;">
-      <div style="text-align:center; font-size:11px; font-weight:700; color:var(--primary);">${pcnWeight}</div>
-    </div>
-    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Writing style</div>
-    <select onchange="adjustProductCardNameFont(this.value)" style="width:calc(100% - 24px); margin:0 12px 8px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
-      <option value="" ${!pcnFontId ? 'selected' : ''}>App Default</option>
-      ${FONT_PRESETS.map(f => `<option value="${f.id}" ${pcnFontId === f.id ? 'selected' : ''}>${f.label}</option>`).join('')}
-    </select>
-    <div style="padding:2px 12px 4px; font-size:11px; color:var(--muted);">Background colour</div>
-    <div style="display:flex; align-items:center; gap:8px; padding:0 12px 10px;">
-      <input type="color" value="${pcnBg}" oninput="adjustProductCardNameBg(this.value)" style="width:36px; height:32px; border:none; border-radius:7px; padding:0; cursor:pointer;">
-      <button class="hsBackupBtn" style="flex:1; flex-direction:row; gap:6px; padding:8px;" onclick="resetProductCardNameBg(); renderHomeSettingsPanel();">↺ Reset</button>
+  else if(homeSettingsActiveTab === 'font'){
+    // ---------- فونٹ کی مکمل چوڑی فہرست کی بجائے چھوٹے چھوٹے chip بٹن — کم جگہ گھیرتے ہیں ----------
+    tabContentHtml = `
+    <div class="hsChipRow">
+      ${FONT_PRESETS.map(f => `
+        <button class="hsChip ${AppState.settings.fontId === f.id ? 'active' : ''}" style="font-family:${f.family};" onclick="applyFont('${f.id}'); renderHomeSettingsPanel();">${f.label}</button>
+      `).join('')}
     </div>`;
+  }
 
-  panel.innerHTML = backupRowHtml + themeHtml + fontHtml + productCardHtml;
+  else if(homeSettingsActiveTab === 'card'){
+    const pcnSize = AppState.settings.productCardNameSize || 13;
+    const pcnWeight = AppState.settings.productCardNameWeight || 800;
+    const pcnBg = AppState.settings.productCardNameBg || '#eef2ff';
+    const pcnBgIntensity = AppState.settings.productCardNameBgIntensity || 0;
+    const pcnColor = AppState.settings.productCardNameColor || '#166534';
+    const pcnFontId = AppState.settings.productCardNameFont || '';
+    tabContentHtml = `
+    <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Text size — ${pcnSize}px</div>
+    <div style="padding:0 12px 6px;">
+      <input type="range" min="8" max="22" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.previousElementSibling.textContent='Text size — '+this.value+'px';" style="width:100%;">
+    </div>
+    <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Boldness — ${pcnWeight}</div>
+    <div style="padding:0 12px 6px;">
+      <input type="range" min="400" max="900" step="100" value="${pcnWeight}" oninput="adjustProductCardNameWeight(this.value); this.previousElementSibling.textContent='Boldness — '+this.value;" style="width:100%;">
+    </div>
+    <div class="homeQuickPanelLabel" style="padding-bottom:2px;">Writing Style</div>
+    <div class="hsChipRow" style="padding-top:0;">
+      <button class="hsChip ${!pcnFontId ? 'active' : ''}" onclick="adjustProductCardNameFont(''); renderHomeSettingsPanel();">Default</button>
+      ${FONT_PRESETS.map(f => `
+        <button class="hsChip ${pcnFontId === f.id ? 'active' : ''}" style="font-family:${f.family};" onclick="adjustProductCardNameFont('${f.id}'); renderHomeSettingsPanel();">${f.label}</button>
+      `).join('')}
+    </div>
+    <div style="padding:4px 12px 2px; font-size:11px; color:var(--muted);">Background colour</div>
+    <div style="display:flex; align-items:center; gap:8px; padding:0 12px 6px;">
+      <input id="productCardNameBgPicker" type="color" value="${pcnBg}" oninput="adjustProductCardNameBg(this.value)" style="width:36px; height:32px; border:none; border-radius:7px; padding:0; cursor:pointer;">
+      <button class="hsBackupBtn" style="flex:1; flex-direction:row; gap:6px; padding:8px;" onclick="resetProductCardNameBg(); renderHomeSettingsPanel();">↺ Reset</button>
+    </div>
+    <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Background Shade — Light ↔ Dark</div>
+    <div class="homeIntensityRow">
+      <span style="font-size:15px;">🔅</span>
+      <input type="range" min="-40" max="40" step="2" value="${pcnBgIntensity}" oninput="adjustProductCardNameBgIntensity(this.value)" style="flex:1;">
+      <span style="font-size:15px;">🔆</span>
+    </div>
+    <div style="padding:4px 12px 2px; font-size:11px; color:var(--muted);">Text (Writing) Colour</div>
+    <div style="display:flex; align-items:center; gap:8px; padding:0 12px 8px;">
+      <input type="color" value="${pcnColor}" oninput="adjustProductCardNameColor(this.value)" style="width:36px; height:32px; border:none; border-radius:7px; padding:0; cursor:pointer;">
+      <button class="hsBackupBtn" style="flex:1; flex-direction:row; gap:6px; padding:8px;" onclick="resetProductCardNameColor(); renderHomeSettingsPanel();">↺ Auto</button>
+    </div>`;
+  }
+
+  panel.innerHTML = backupRowHtml + tabBarHtml + tabContentHtml;
 }
 
-function toggleHomeSettingsPanel(e){
+let homeSettingsTriggerBtnId = 'hbcSettingsBtnBilling'; // ---------- کون سا ⚙️ بٹن (Home یا Billing) دبایا گیا، اسی کے قریب پینل کھلے ----------
+function toggleHomeSettingsPanel(e, btnId){
   if(e) e.stopPropagation();
+  homeSettingsTriggerBtnId = btnId || (e && e.currentTarget && e.currentTarget.id) || homeSettingsTriggerBtnId;
   homeSettingsPanelOpen = !homeSettingsPanelOpen;
   const panel = document.getElementById('homeSettingsPanel');
   if(panel) panel.classList.toggle('open', homeSettingsPanelOpen);
-  if(homeSettingsPanelOpen){ renderHomeSettingsPanel(); positionHomeQuickPanel('hbcSettingsBtn', 'homeSettingsPanel'); }
+  if(homeSettingsPanelOpen){ renderHomeSettingsPanel(); positionHomeQuickPanel(homeSettingsTriggerBtnId, 'homeSettingsPanel'); }
 }
-// ---------- سرچ سے "Product Card Style" منتخب کرنے پر — پہلے ہوم پیج پر لے جائیں (یہ بٹن صرف وہیں موجود ہے)،
-// پھر خودکار طور پر ⚙️ پینل خود بخود کھول دیں، تاکہ صارف کو الگ سے بٹن ڈھونڈنا نہ پڑے ----------
+// ---------- سرچ سے "Product Card Style" منتخب کرنے پر — پہلے Billing اسکرین پر لے جائیں (جہاں اصل پراڈکٹ کارڈز نظر آتے ہیں)،
+// پھر خودکار طور پر ⚙️ پینل خود بخود "Card" ٹیب پر کھول دیں، تاکہ صارف کو الگ سے بٹن ڈھونڈنا نہ پڑے ----------
 function openProductCardStyleFromSearch(){
   goTo('billing');
   setTimeout(() => {
-    const btn = document.getElementById('hbcSettingsBtn');
-    if(btn){
-      if(!homeSettingsPanelOpen) toggleHomeSettingsPanel();
-    }
+    homeSettingsActiveTab = 'card';
+    if(!homeSettingsPanelOpen) toggleHomeSettingsPanel(null, 'hbcSettingsBtnBilling');
+    else { renderHomeSettingsPanel(); positionHomeQuickPanel('hbcSettingsBtnBilling', 'homeSettingsPanel'); }
   }, 150);
 }
 function closeHomeSettingsPanel(){
@@ -19107,14 +19253,16 @@ function closeHomeSettingsPanel(){
 }
 document.addEventListener('click', (e) => {
   const sp = document.getElementById('homeSettingsPanel');
-  const sb = document.getElementById('hbcSettingsBtn');
-  if(homeSettingsPanelOpen && sp && !sp.contains(e.target) && sb && !sb.contains(e.target)) closeHomeSettingsPanel();
+  const sb1 = document.getElementById('hbcSettingsBtn');
+  const sb2 = document.getElementById('hbcSettingsBtnBilling');
+  const clickedTrigger = (sb1 && sb1.contains(e.target)) || (sb2 && sb2.contains(e.target));
+  if(homeSettingsPanelOpen && sp && !sp.contains(e.target) && !clickedTrigger) closeHomeSettingsPanel();
 });
 window.addEventListener('resize', () => {
-  if(homeSettingsPanelOpen) positionHomeQuickPanel('hbcSettingsBtn', 'homeSettingsPanel');
+  if(homeSettingsPanelOpen) positionHomeQuickPanel(homeSettingsTriggerBtnId, 'homeSettingsPanel');
 });
 window.addEventListener('scroll', () => {
-  if(homeSettingsPanelOpen) positionHomeQuickPanel('hbcSettingsBtn', 'homeSettingsPanel');
+  if(homeSettingsPanelOpen) positionHomeQuickPanel(homeSettingsTriggerBtnId, 'homeSettingsPanel');
 }, true);
 
 // ---------- Settings اسکرین کھلتے وقت سب کچھ رینڈر + پرنٹر خودکار تلاش ----------
