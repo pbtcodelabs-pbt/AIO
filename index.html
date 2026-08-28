@@ -2061,7 +2061,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA01</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA02</span>
     </div>
   </div>
 
@@ -5059,6 +5059,8 @@ function persistAllData(){
   if(typeof invoicesData !== 'undefined') saveToStorage('invoices', invoicesData);
   if(typeof usersData !== 'undefined') saveToStorage('users', usersData);
   if(typeof approvalRequests !== 'undefined') saveToStorage('approvalRequests', approvalRequests);
+  if(typeof pendingBillsData !== 'undefined') saveToStorage('pendingBills', pendingBillsData);
+  if(typeof nextPendingId !== 'undefined') saveToStorage('nextPendingId', nextPendingId);
   if(typeof nextProductId !== 'undefined') saveToStorage('nextProductId', nextProductId);
   if(typeof nextVariantId !== 'undefined') saveToStorage('nextVariantId', nextVariantId);
   if(typeof nextCustomerId !== 'undefined') saveToStorage('nextCustomerId', nextCustomerId);
@@ -5221,6 +5223,8 @@ function buildBackupObject(){
     nextPaymentId,
     advanceOrders: advanceOrdersData,
     nextAdvOrderId,
+    pendingBills: pendingBillsData,
+    nextPendingId,
     customCategories: customCategories,
     expiryAlertDays: expiryAlertDays,
     quickDockItems: quickDockItems,
@@ -5642,6 +5646,8 @@ function proceedWithImport(){
       nextPaymentId = backup.nextPaymentId || nextPaymentId;
       if(typeof advanceOrdersData !== 'undefined'){ advanceOrdersData.length = 0; advanceOrdersData.push(...(backup.advanceOrders || [])); }
       nextAdvOrderId = backup.nextAdvOrderId || nextAdvOrderId;
+      if(typeof pendingBillsData !== 'undefined'){ pendingBillsData.length = 0; pendingBillsData.push(...(backup.pendingBills || [])); }
+      nextPendingId = backup.nextPendingId || nextPendingId;
       // ---------- مکمل آڈٹ کے بعد ملیں: یہ دو بھی بحال کریں ----------
       if(typeof customCategories !== 'undefined' && backup.customCategories){ customCategories.length = 0; customCategories.push(...backup.customCategories); }
       if(backup.expiryAlertDays != null) expiryAlertDays = backup.expiryAlertDays;
@@ -7179,15 +7185,8 @@ function deleteBillingCartDraft(){
 }
 
 // ---------- Bills Awaiting Approval (سیلزمین کے بھیجے ہوئے بل جو ایڈمن کی منظوری کے منتظر ہیں) ----------
-let pendingBillsData = [
-  {pending_id:1, salesman_name:'Aslam Bhai', customer_id:1, customer_name:'Muhammad Usman', sale_mode:'retail', payment_method:'cash',
-   items:[{variant_id:1, name:'Lipton Tea 1kg', qty:2, unitPrice:850}, {variant_id:3, name:'Lipton Tea 250g', qty:5, unitPrice:240}],
-   status:'pending', admin_note:'', submitted_at: new Date(Date.now()-25*60000).toISOString(), acknowledged:false},
-  {pending_id:2, salesman_name:'Aslam Bhai', customer_id:null, customer_name:'Walk-in Customer', sale_mode:'retail', payment_method:'cash',
-   items:[{variant_id:2, name:'Lipton Tea 500g', qty:3, unitPrice:450}],
-   status:'pending', admin_note:'', submitted_at: new Date(Date.now()-8*60000).toISOString(), acknowledged:false},
-];
-let nextPendingId = 3;
+let pendingBillsData = loadFromStorage('pendingBills', []);
+let nextPendingId = loadFromStorage('nextPendingId', 1);
 
 /* =====================================================================
    BARCODE SCANNER (کیمرہ سے لائیو بارکوڈ اسکین — BarcodeDetector API)
@@ -11255,15 +11254,9 @@ function jumpToProduct(productId){
    ===================================================================== */
 
 // ---------- Dummy Data (بعد میں یہ اصل DB سے آئے گا) ----------
-const CUSTOMERS_SEED_DATA = [
-  {customer_id:1, name:'Muhammad Usman', phone:'923001234567', address:'Gulberg, Lahore', keywords:'', wallet_balance:1500, total_receivable:3200,
-    walletHistory:[{type:'deposit', amount:2000, date:'2026-06-20'}, {type:'redeem', amount:500, date:'2026-06-25'}]},
-  {customer_id:2, name:'Fatima Store', phone:'923214567890', address:'Saddar, Karachi', keywords:'', wallet_balance:0, total_receivable:8500,
-    walletHistory:[]},
-  {customer_id:3, name:'Walk-in Customer — Ali', phone:'', address:'', keywords:'', wallet_balance:0, total_receivable:0, walletHistory:[]},
-];
+const CUSTOMERS_SEED_DATA = [];
 let customersData = loadFromStorage('customers', CUSTOMERS_SEED_DATA);
-let nextCustomerId = loadFromStorage('nextCustomerId', 4);
+let nextCustomerId = loadFromStorage('nextCustomerId', 1);
 
 /* =====================================================================
    📝 ADVANCE ORDERS — رف ایڈوانس آرڈر (بل/اسٹاک کو فوری متاثر نہیں کرتے)
@@ -17225,10 +17218,7 @@ function resolveApproval(requestId, decision){
    ===================================================================== */
 
 // ---------- Dummy Invoices (صرف پہلی بار — بعد میں نئے bills اسی array کے اوپر جُڑتے جائیں گے، اور localStorage میں محفوظ رہیں گے) ----------
-const INVOICES_SEED_DATA = [
-  {invoice_id:1, invoice_no:'INV-0042', customer_name:'Muhammad Usman', customer_phone:'923001234567', sold_by:'Aslam Bhai', sale_mode:'retail',
-    items:[{name:'Lipton Tea 1kg', qty:2, unitPrice:850},{name:'Sugar 1kg', qty:1, unitPrice:160}], grand_total:1860, status:'completed', created_at:new Date().toISOString()},
-];
+const INVOICES_SEED_DATA = [];
 let invoicesData = loadFromStorage('invoices', INVOICES_SEED_DATA);
 
 // ---------- Bill History: Status Tabs (All / Pending / Clear) ----------
@@ -20325,6 +20315,45 @@ async function purchaseViaPlayBilling(sku, days){
     }
   }
 }
+
+// ---------- 🔄 Renewal Sync — جب مقامی سبسکرپشن ختم ہو چکی ہو یا 2 دن میں ختم ہونے والی ہو، Google Play سے
+// تازہ ترین فعال خریداری کی تصدیق لیں۔ یہ ضروری ہے کیونکہ اگر Google خودکار طور پر renew کر کے صارف سے
+// پیسے کاٹ لے، تو ایپ کو خود بخود اس کی خبر نہیں ہوتی (Play کوئی پیغام یہاں براہِ راست نہیں بھیجتا) —
+// اس لیے ہر بار ایپ کھلنے/دوبارہ نظر آنے پر یہ فنکشن Play کی فہرست چیک کر کے مقامی تاریخ درست کر دیتا ہے،
+// تاکہ ادائیگی کرنے والے صارف کو کبھی غلطی سے "Subscription Expired" نہ دکھے ----------
+async function syncPlayBillingRenewal(){
+  if(!isPlayBillingAvailable()) return;
+  const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
+  if(daysLeft > 2) return; // ---------- فعال دورانیے کے دوران بار بار تاریخ نہ بدلیں، صرف تجدید کے قریب/بعد چیک کریں ----------
+  try{
+    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+    const purchases = await service.listPurchases();
+    if(!purchases || purchases.length === 0) return; // ---------- کوئی فعال Play خریداری نہیں ملی — مقامی حالت کو نہ چھیڑیں ----------
+
+    let bestDays = 0, matched = false;
+    purchases.forEach(p => {
+      const prod = PLAY_BILLING_PRODUCTS.find(x => x.sku === p.itemId);
+      if(prod && prod.days > bestDays){ bestDays = prod.days; matched = true; }
+    });
+    if(!matched) return;
+
+    const base = isSubscriptionActive() ? new Date(AppState.settings.subscriptionExpiry) : new Date();
+    base.setDate(base.getDate() + bestDays);
+    const newExpiryStr = base.toISOString().slice(0,10);
+    if(newExpiryStr !== AppState.settings.subscriptionExpiry){
+      AppState.settings.subscriptionExpiry = newExpiryStr;
+      AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+      AppState.settings.isOnFreeTrial = false;
+      AppState.settings.subscriptionViaPlayBilling = true;
+      persistAllData();
+      renderSubscriptionBanner();
+    }
+  }catch(err){
+    // ---------- خاموشی سے ناکام ہو جائے — انٹرنیٹ نہ ہو یا Play Store کے باہر چلے تو صارف کو تنگ نہ کریں ----------
+  }
+}
+document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ syncPlayBillingRenewal(); }catch(e){} }, 1500); });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ syncPlayBillingRenewal(); }catch(e){} } });
 
 /* =====================================================================
    🎁 ADMIN GIFT ACCESS — Google Play Billing سے بالکل الگ، نجی نظام۔
