@@ -38,6 +38,27 @@
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{font-family:var(--font); font-weight:var(--font-weight); background:var(--bg); color:var(--text); height:100vh; overflow:hidden;}
+  /* =====================================================================
+     📊 پتلی Progress Bar — بیک اپ/ری سٹور کے دوران اوپر نظر آتی ہے، بھرتی جاتی ہے،
+     100% ہونے پر سبز ✅ پیغام دکھا کر خود بخود غائب ہو جاتی ہے
+     ===================================================================== */
+  #thinProgressWrap{
+    position:fixed; top:0; left:0; right:0; z-index:99999;
+    display:none; flex-direction:column; align-items:center;
+    background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.15);
+    padding:8px 14px 10px; transition:opacity .25s ease;
+  }
+  #thinProgressWrap.show{ display:flex; }
+  #thinProgressLabel{ font-size:12px; font-weight:700; color:var(--primary-dark); margin-bottom:5px; text-align:center; }
+  #thinProgressLabel.success{ color:#166534; }
+  #thinProgressTrack{ width:100%; max-width:340px; height:5px; background:#e5e9f0; border-radius:10px; overflow:hidden; }
+  #thinProgressFill{ height:100%; width:0%; background:linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius:10px; transition:width .2s ease; }
+  #thinProgressFill.indeterminate{ width:35% !important; animation:thinProgressSlide 1.1s ease-in-out infinite; }
+  #thinProgressFill.success{ background:#22c55e; width:100% !important; }
+  @keyframes thinProgressSlide{
+    0%{ margin-left:-35%; }
+    100%{ margin-left:100%; }
+  }
 
   /* ===================== LOGIN SCREEN ===================== */
   #loginScreen{
@@ -1840,6 +1861,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 </head>
 <body>
+<!-- ---------- 📊 پتلی Progress Bar — بیک اپ/ری سٹور کے دوران ہمیشہ اوپر نظر آئے گی ---------- -->
+<div id="thinProgressWrap">
+  <div id="thinProgressLabel">Backing up...</div>
+  <div id="thinProgressTrack"><div id="thinProgressFill"></div></div>
+</div>
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
 <div id="updateToast">
   <span>🔄 New update available</span>
@@ -2030,12 +2056,12 @@
          (پہلے یہاں ایک ٹائم اسٹیمپ بیج بھی تھا، مگر ٹائم زون/گھڑی کے فرق سے کبھی الجھن پیدا کرتا تھا —
          اسے ہٹا دیا گیا؛ اب صرف دائیں طرف کا ورژن نمبر ہی تازگی کی تصدیق کے لیے کافی ہے) ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand" style="display:inline;">AIO POS</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline;">PLAYSTORE FINAL</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS288FR04</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOPS288FR03</span>
     </div>
   </div>
 
@@ -5061,6 +5087,109 @@ setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خو
 // ---------- بیک اپ فائل کا نام: BK.AIO + دن(2 حرف) + تاریخ + مہینہ(بغیر زیرو) + وقت(24گھنٹے) + .json ----------
 // مثال: 10 جولائی 2026، جمعہ، شام 6:28 → BK.AIOFR1071828.json
 
+// =====================================================================
+// 📊 پتلی Progress Bar — Backup/Restore کے دوران استعمال ہوتی ہے
+// =====================================================================
+function showThinProgress(label){
+  const wrap = document.getElementById('thinProgressWrap');
+  const lbl = document.getElementById('thinProgressLabel');
+  const fill = document.getElementById('thinProgressFill');
+  if(!wrap) return;
+  lbl.textContent = label;
+  lbl.classList.remove('success');
+  fill.classList.remove('success');
+  fill.classList.add('indeterminate');
+  fill.style.width = '0%';
+  wrap.classList.add('show');
+}
+function updateThinProgress(percent){
+  const fill = document.getElementById('thinProgressFill');
+  if(!fill) return;
+  fill.classList.remove('indeterminate');
+  fill.style.width = Math.max(0, Math.min(100, percent)) + '%';
+}
+function finishThinProgressSuccess(message){
+  const lbl = document.getElementById('thinProgressLabel');
+  const fill = document.getElementById('thinProgressFill');
+  if(!lbl || !fill) return;
+  fill.classList.remove('indeterminate');
+  fill.classList.add('success');
+  lbl.textContent = '✅ ' + message;
+  lbl.classList.add('success');
+  setTimeout(() => {
+    document.getElementById('thinProgressWrap')?.classList.remove('show');
+  }, 1800);
+}
+function hideThinProgress(){
+  document.getElementById('thinProgressWrap')?.classList.remove('show');
+}
+
+// =====================================================================
+// ⏰ خودکار (بغیر بٹن دبائے) بیک اپ — دن میں دو بار: 1) جب بھی آج پہلی دفعہ ایپ کھلے،
+// 2) اگر آج شام 8 بجے یا اس کے بعد ایپ کھلی ہو اور آج شام کا بیک اپ ابھی نہیں ہوا
+// (نوٹ: یہ حقیقی پس منظر ٹائمر نہیں — ویب ایپ فون بند ہونے پر خود سے نہیں چل سکتی؛
+// اصل عمل درآمد یہی ہے کہ جب بھی صارف ایپ کھولے، اس وقت چیک ہو جاتا ہے) ---------- -->
+function checkAndRunScheduledAutoBackups(){
+  if(!AppState.settings.gdriveAccountEmail) return; // ---------- Google Drive ابھی جڑا نہیں، خاموش بیک اپ ممکن نہیں ----------
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const hour = now.getHours();
+
+  if(AppState.settings.lastAutoBackupMorningDate !== todayStr){
+    AppState.settings.lastAutoBackupMorningDate = todayStr;
+    persistAllData();
+    setTimeout(() => silentAutoBackupToGoogleDrive(), 1200);
+  } else if(hour >= 20 && AppState.settings.lastAutoBackupEveningDate !== todayStr){
+    AppState.settings.lastAutoBackupEveningDate = todayStr;
+    persistAllData();
+    setTimeout(() => silentAutoBackupToGoogleDrive(), 1200);
+  }
+}
+// ---------- خاموش بیک اپ — کوئی بٹن، کوئی رکاوٹ نہیں، بس پتلی Progress Bar اوپر نظر آئے گی ---------- -->
+async function silentAutoBackupToGoogleDrive(){
+  const client = getGDriveTokenClient();
+  if(!client) return;
+  client.callback = async (resp) => {
+    if(resp.error) return; // ---------- خاموشی سے ناکام ہو تو بھی صارف کو تنگ نہ کریں، اگلی بار خودکار دوبارہ کوشش ہوگی ----------
+    gDriveAccessToken = resp.access_token;
+    try{
+      const folderId = await ensureGDriveBackupFolder();
+      const fileName = generateBackupFileName();
+      const backup = buildBackupObject();
+      const fileContent = JSON.stringify(backup);
+      const metadata = { name: fileName, mimeType: 'application/json', parents: [folderId] };
+      const boundary = '-------aiopos' + Date.now();
+      const multipartBody =
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+        `--${boundary}\r\nContent-Type: application/json\r\n\r\n${fileContent}\r\n` +
+        `--${boundary}--`;
+
+      showThinProgress('☁️ Auto Backup in progress...');
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + gDriveAccessToken);
+        xhr.setRequestHeader('Content-Type', `multipart/related; boundary=${boundary}`);
+        xhr.upload.onprogress = (e) => { if(e.lengthComputable) updateThinProgress((e.loaded / e.total) * 100); };
+        xhr.onload = () => { if(xhr.status >= 200 && xhr.status < 300) resolve(); else reject(new Error('failed')); };
+        xhr.onerror = () => reject(new Error('network error'));
+        xhr.send(multipartBody);
+      });
+
+      AppState.settings.lastBackupFileName = fileName;
+      AppState.settings.lastBackupAt = new Date().toISOString();
+      AppState.settings.lastGDriveBackupAt = new Date().toISOString();
+      persistAllData();
+      renderHomeLastBackupLine();
+      finishThinProgressSuccess('Auto Backup Successful!');
+    }catch(err){
+      hideThinProgress(); // ---------- خودکار بیک اپ ناکام ہو تو خاموشی سے چھپا دیں، صارف کو الارم نہ کریں ----------
+    }
+  };
+  const requestOptions = { prompt: '', hint: AppState.settings.gdriveAccountEmail };
+  client.requestAccessToken(requestOptions);
+}
+
 function generateBackupFileName(){
   const now = new Date();
   const dayNames = ['SU','MO','TU','WE','TH','FR','SA'];
@@ -5224,19 +5353,24 @@ async function backupToGoogleDrive(){
         `--${boundary}\r\nContent-Type: application/json\r\n\r\n${fileContent}\r\n` +
         `--${boundary}--`;
 
-      const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + gDriveAccessToken,
-          'Content-Type': `multipart/related; boundary=${boundary}`,
-        },
-        body: multipartBody,
+      showThinProgress('☁️ Backing up to Google Drive...');
+      // ---------- XMLHttpRequest استعمال کیا تاکہ اپلوڈ کی حقیقی پیش رفت (٪) پتلی بار پر نظر آ سکے —
+      // fetch() یہ سہولت خود سے نہیں دیتا ---------- -->
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + gDriveAccessToken);
+        xhr.setRequestHeader('Content-Type', `multipart/related; boundary=${boundary}`);
+        xhr.upload.onprogress = (e) => {
+          if(e.lengthComputable) updateThinProgress((e.loaded / e.total) * 100);
+        };
+        xhr.onload = () => {
+          if(xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error('Upload failed: ' + xhr.status + ' ' + xhr.responseText));
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload.'));
+        xhr.send(multipartBody);
       });
-
-      if(!uploadRes.ok){
-        const errText = await uploadRes.text();
-        throw new Error('Upload failed: ' + uploadRes.status + ' ' + errText);
-      }
 
       AppState.settings.lastBackupFileName = fileName;
       AppState.settings.lastBackupAt = new Date().toISOString();
@@ -5261,11 +5395,13 @@ async function backupToGoogleDrive(){
         }
       }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
 
+      finishThinProgressSuccess('Backup Successful!');
       showBackupConfirmModal('export', fileName + ' (Google Drive)', {
         products: productsData.length, customers: customersData.length, invoices: invoicesData.length,
         accountEmail
       });
     }catch(err){
+      hideThinProgress();
       alert('Could not upload to Google Drive: ' + err.message);
     }finally{
       if(btn){ btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 40 34" width="20" height="17"><polygon points="14,2 26,2 38,22 26,22" fill="#34a853"/><polygon points="8,32 20,32 26,22 14,22" fill="#ffbc04"/><polygon points="2,22 14,2 20,12 8,32" fill="#4285f4"/></svg> Backup to Google Drive'; }
@@ -5364,21 +5500,38 @@ function renderGDriveFileList(files){
 async function selectGDriveBackupFile(fileId, fileName){
   document.getElementById('gdriveRestoreModal').classList.remove('show');
   try{
-    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-      headers: { 'Authorization': 'Bearer ' + gDriveAccessToken }
+    showThinProgress('☁️ Restoring from Google Drive...');
+    const backup = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + gDriveAccessToken);
+      xhr.onprogress = (e) => {
+        if(e.lengthComputable) updateThinProgress((e.loaded / e.total) * 100);
+        else updateThinProgress(60); // ---------- سائز معلوم نہ ہو تو بھی درمیانی جگہ دکھا دیں تاکہ بار خالی نہ لگے ----------
+      };
+      xhr.onload = () => {
+        if(xhr.status >= 200 && xhr.status < 300){
+          try{ resolve(JSON.parse(xhr.responseText)); }
+          catch(e){ reject(new Error('Invalid backup file format.')); }
+        } else reject(new Error('Download failed: ' + xhr.status));
+      };
+      xhr.onerror = () => reject(new Error('Network error during download.'));
+      xhr.send();
     });
-    if(!res.ok) throw new Error('Download failed: ' + res.status);
-    const backup = await res.json();
     if(!backup.products || !backup.customers){
+      hideThinProgress();
       showBackupConfirmModal('error', fileName, {message:'This does not look like a valid AIO POS backup file.'});
       return;
     }
+    updateThinProgress(100);
+    finishThinProgressSuccess('Restore Complete!');
     // ---------- اسی موجودہ تصدیقی پاپ اپ کا استعمال — بالکل جیسے مقامی فائل سے بحال کرتے وقت ہوتا ہے ----------
     pendingImportBackup = backup;
     pendingImportFileName = fileName + ' (Google Drive)';
     document.getElementById('importConfirmFileChip').textContent = '📄 ' + pendingImportFileName;
     document.getElementById('importConfirmModal').classList.add('show');
   }catch(err){
+    hideThinProgress();
     alert('Could not download the file: ' + err.message);
   }
 }
@@ -6169,7 +6322,10 @@ function finishLogin(user, forceRemember){
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
   if(user.role === 'admin'){
     if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
-    else setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+    else{
+      setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
+      checkAndRunScheduledAutoBackups(); // ---------- ⏰ صبح/شام خودکار بیک اپ چیک — بغیر کسی بٹن کے ----------
+    }
   }
 }
 
