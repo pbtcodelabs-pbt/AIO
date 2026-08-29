@@ -954,7 +954,7 @@
   .vcFieldsArea{padding:16px 16px 8px; background:linear-gradient(180deg, #f4f7fb, #eef2f7);}
   .vcFieldFull{margin-bottom:14px;}
   .vcFieldGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;}
-  .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--primary-dark); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; display:block;}
+  .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--primary-dark); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between; gap:6px;}
   .vcFieldWrap{background:#fff; border-radius:12px; padding:8px 10px; box-shadow:0 2px 8px rgba(30,41,59,.06); border:1px solid #e7ebf1;}
   .vcFieldWrap input, .vcFieldWrap .vcInputRow{width:100%;}
   .vcFieldWrap input{padding:6px 2px; border:none; border-radius:0; font-size:15px; font-weight:700; background:transparent; color:#1e293b;}
@@ -2088,7 +2088,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA07</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA08</span>
     </div>
   </div>
 
@@ -10007,9 +10007,8 @@ function renderVariantCardSection(productId){
             <input type="number" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)">
           </div>` : ''}
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Retail Price</span>
+            <span class="vcFieldLabel">Retail Price ${AppState.settings.markupPricingEnabled ? `<span id="marginTag-${v.variant_id}" style="${marginTagStyle(v)}">${marginTagText(v)}</span>` : ''}</span>
             <input type="number" id="retailInput-${v.variant_id}" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
-            ${AppState.settings.markupPricingEnabled ? `<div class="vcStockTag" id="marginTag-${v.variant_id}" style="${marginTagStyle(v)}">${marginTagText(v)}</div>` : ''}
           </div>
           <div class="vcFieldWrap">
             <span class="vcFieldLabel">Wholesale Price</span>
@@ -10839,24 +10838,19 @@ function updateDefaultMarkupPercent(value){
   AppState.settings.defaultMarkupPercent = parseFloat(value) || 0;
   persistAllData();
 }
-// ---------- صرف اصل حاصل شدہ منافع % دکھانا — کوئی warning/تنبیہ نہیں، جتنا چاہے منافع رکھنا خالصتاً صارف کی اپنی مرضی ہے ----------
+// ---------- صرف اصل حاصل شدہ منافع % دکھانا — کوئی warning/تنبیہ نہیں، جتنا چاہے منافع رکھنا خالصتاً صارف کی اپنی مرضی ہے۔
+// اب یہ Retail Price کے اپنے لیبل کے ساتھ ہی (ایک ہی خانے میں) inline دکھایا جاتا ہے، الگ لائن میں نہیں ----------
 function marginTagText(v){
   const purchase = parseFloat(v.purchase) || 0;
   const retail = parseFloat(v.retail) || 0;
   if(purchase <= 0) return '';
   const actualMargin = ((retail - purchase) / purchase) * 100;
-  return `📊 Margin: ${actualMargin.toFixed(0)}%`;
+  return `📊 ${actualMargin.toFixed(0)}%`;
 }
 function marginTagStyle(v){
   const purchase = parseFloat(v.purchase) || 0;
   if(purchase <= 0) return 'display:none;';
-  return 'display:block; color:#15803d;';
-}
-function refreshMarginTag(variantId, v){
-  const tag = document.getElementById(`marginTag-${variantId}`);
-  if(!tag) return;
-  tag.textContent = marginTagText(v);
-  tag.setAttribute('style', marginTagStyle(v));
+  return 'display:inline; font-size:10.5px; font-weight:800; color:#15803d; text-transform:none; letter-spacing:0;';
 }
 
 function updateVariantField(productId, variantId, field, value, inputEl){
