@@ -2088,7 +2088,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA08</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA09</span>
     </div>
   </div>
 
@@ -9999,16 +9999,16 @@ function renderVariantCardSection(productId){
         <div class="vcFieldGrid">
           <div class="vcFieldWrap">
             <span class="vcFieldLabel">Purchase Price</span>
-            <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
+            <input type="number" id="purchaseInput-${v.variant_id}" value="${v.purchase}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'purchase',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
           </div>
           ${AppState.settings.markupPricingEnabled ? `
           <div class="vcFieldWrap">
             <span class="vcFieldLabel">Markup %</span>
-            <input type="number" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)">
+            <input type="number" id="markupInput-${v.variant_id}" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'markupPercent',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)">
           </div>` : ''}
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Retail Price ${AppState.settings.markupPricingEnabled ? `<span id="marginTag-${v.variant_id}" style="${marginTagStyle(v)}">${marginTagText(v)}</span>` : ''}</span>
-            <input type="number" id="retailInput-${v.variant_id}" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
+            <span class="vcFieldLabel">Retail Price</span>
+            <input type="number" id="retailInput-${v.variant_id}" value="${v.retail}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'retail',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
           </div>
           <div class="vcFieldWrap">
             <span class="vcFieldLabel">Wholesale Price</span>
@@ -10838,19 +10838,37 @@ function updateDefaultMarkupPercent(value){
   AppState.settings.defaultMarkupPercent = parseFloat(value) || 0;
   persistAllData();
 }
-// ---------- صرف اصل حاصل شدہ منافع % دکھانا — کوئی warning/تنبیہ نہیں، جتنا چاہے منافع رکھنا خالصتاً صارف کی اپنی مرضی ہے۔
-// اب یہ Retail Price کے اپنے لیبل کے ساتھ ہی (ایک ہی خانے میں) inline دکھایا جاتا ہے، الگ لائن میں نہیں ----------
-function marginTagText(v){
-  const purchase = parseFloat(v.purchase) || 0;
-  const retail = parseFloat(v.retail) || 0;
-  if(purchase <= 0) return '';
-  const actualMargin = ((retail - purchase) / purchase) * 100;
-  return `📊 ${actualMargin.toFixed(0)}%`;
-}
-function marginTagStyle(v){
-  const purchase = parseFloat(v.purchase) || 0;
-  if(purchase <= 0) return 'display:none;';
-  return 'display:inline; font-size:10.5px; font-weight:800; color:#15803d; text-transform:none; letter-spacing:0;';
+
+// ---------- 💹 Live Markup Sync — ٹائپ کرتے ہی (oninput پر، blur کا انتظار کیے بغیر) فوری طور پر ہم آہنگ کرتا ہے۔
+// صرف دو خانے نظر آتے ہیں: Purchase Price اور Markup % — Retail Price خودکار بنتی ہے۔
+// اگر صارف خود Retail Price بدلے، تو اصل حاصل شدہ منافع % الٹا حساب لگا کر اسی Markup % کے خانے میں لکھ دیا جاتا ہے —
+// کہیں الگ سے مارجن نہیں دکھایا جاتا، سب کچھ ایک ہی جگہ (Markup % خانہ) میں نظر آتا ہے ----------
+function liveMarkupSync(productId, variantId, field, value){
+  if(!AppState.settings.markupPricingEnabled) return;
+  const product = productsData.find(p => p.product_id === productId);
+  const variant = product?.variants.find(v => v.variant_id === variantId);
+  if(!variant) return;
+  const num = parseFloat(value);
+
+  if(field === 'purchase'){
+    variant.purchase = isNaN(num) ? 0 : num;
+    const markup = variant.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0;
+    variant.retail = Math.round((variant.purchase || 0) * (1 + markup / 100) * 100) / 100;
+    const retailInput = document.getElementById(`retailInput-${variantId}`);
+    if(retailInput) retailInput.value = variant.retail;
+  } else if(field === 'markupPercent'){
+    variant.markupPercent = isNaN(num) ? 0 : num;
+    variant.retail = Math.round((variant.purchase || 0) * (1 + variant.markupPercent / 100) * 100) / 100;
+    const retailInput = document.getElementById(`retailInput-${variantId}`);
+    if(retailInput) retailInput.value = variant.retail;
+  } else if(field === 'retail'){
+    variant.retail = isNaN(num) ? 0 : num;
+    if((variant.purchase || 0) > 0){
+      variant.markupPercent = Math.round(((variant.retail - variant.purchase) / variant.purchase) * 1000) / 10;
+      const markupInput = document.getElementById(`markupInput-${variantId}`);
+      if(markupInput) markupInput.value = variant.markupPercent;
+    }
+  }
 }
 
 function updateVariantField(productId, variantId, field, value, inputEl){
@@ -10865,20 +10883,8 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   // پورا variant سیکشن دوبارہ render کیا جاتا ہے (صرف getElementById پر انحصار نہیں) —
   // اس طرح تینوں فیلڈز (Purchase, Markup%, Retail) ہمیشہ 100% ایک دوسرے سے ہم آہنگ رہتی ہیں،
   // چاہے کوئی سا بھی فیلڈ تبدیل ہو ----------
-  if(AppState.settings.markupPricingEnabled && (field === 'purchase' || field === 'markupPercent')){
-    openProductCards.add(productId);
-    const markup = variant.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0;
-    variant.retail = Math.round((variant.purchase || 0) * (1 + markup / 100) * 100) / 100;
-    const wrap = document.getElementById(`vcWrap-${productId}`);
-    if(wrap){ wrap.innerHTML = renderVariantCardSection(productId); }
-    persistAllData();
-    return;
-  }
-  if(AppState.settings.markupPricingEnabled && field === 'retail'){
-    openProductCards.add(productId);
-    const wrap = document.getElementById(`vcWrap-${productId}`);
-    if(wrap){ wrap.innerHTML = renderVariantCardSection(productId); }
-    persistAllData();
+  if(AppState.settings.markupPricingEnabled && (field === 'purchase' || field === 'markupPercent' || field === 'retail')){
+    // ---------- oninput پر liveMarkupSync پہلے ہی فوری طور پر ہم آہنگ کر چکا ہے — یہاں صرف حتمی قدر محفوظ رکھنا کافی ہے ----------
     return;
   }
 
