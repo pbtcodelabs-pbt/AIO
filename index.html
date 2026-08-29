@@ -2022,9 +2022,34 @@
 
 <div id="subscriptionGateScreen" style="display:none; position:fixed; inset:0; z-index:3000; background:var(--bg); align-items:center; justify-content:center; flex-direction:column; padding:20px;">
   <div class="loginBox" style="max-width:340px;">
-    <h2>🔒 Subscription Required</h2>
+    <!-- ---------- 🔐 پوشیدہ Admin شارٹ کٹ — اسی ہیڈنگ کو 7 بار جلدی جلدی ٹیپ کرنے سے کھلتا ہے۔
+         عام صارف کو کوئی بٹن نظر نہیں آتا، صرف Admin کو معلوم طریقہ ---------- -->
+    <h2 onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">🔒 Subscription Required</h2>
     <p id="subGateStatus" style="font-size:13px; color:var(--muted); margin-bottom:14px;"></p>
     <button onclick="openPackagePlansModal()" style="margin-top:6px;">🎟️ View Subscription Plans</button>
+  </div>
+</div>
+
+<!-- ---------- 🎁 Quick Admin Gift Code — لاک اسکرین سے پوشیدہ طریقے (7 ٹیپ) سے کھلنے والا، PIN سے محفوظ ---------- -->
+<div class="modalOverlay" id="quickGiftGenModal" style="z-index:4000;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:340px;">
+    <h3>🎁 Quick Gift Code</h3>
+    <div id="quickGiftGenLocked">
+      <div class="settingsHint">Enter your Admin login PIN to generate a gift code.</div>
+      <input type="password" id="quickGiftPinInput" placeholder="Your Admin login PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockQuickGiftGen()">
+      <button class="testPrintBtn" style="margin-top:10px;" onclick="unlockQuickGiftGen()">🔓 Unlock</button>
+      <div id="quickGiftPinError" style="color:var(--danger); font-size:12px; margin-top:6px; text-align:center;"></div>
+    </div>
+    <div id="quickGiftGenUnlocked" style="display:none;">
+      <div class="settingsSubLabel">Number of days (e.g. 30)</div>
+      <input type="number" id="quickGiftDaysInput" placeholder="e.g. 30" min="1" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;">
+      <button class="testPrintBtn" style="margin-top:10px;" onclick="generateQuickGiftCode()">🎁 Generate Code</button>
+      <div id="quickGiftCodeBox" style="display:none; margin-top:12px; background:#eef2ff; border-radius:10px; padding:12px; text-align:center;">
+        <div id="quickGiftCodeText" style="font-weight:800; font-size:14px; word-break:break-all; color:var(--primary-dark);"></div>
+        <button class="testPrintBtn" style="margin-top:8px;" onclick="copyQuickGiftCode()">📋 Copy Code</button>
+      </div>
+    </div>
+    <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="closeQuickGiftGenModal()">Close</button>
   </div>
 </div>
 
@@ -2061,7 +2086,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA02</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA04</span>
     </div>
   </div>
 
@@ -4210,7 +4235,7 @@
         </div>
 
         <!-- --- 🔐 Admin Control — PIN سے محفوظ، ڈویلپر کی رابطہ معلومات یہاں سے بدلی جائیں --- -->
-        <div class="settingsCard">
+        <div class="settingsCard" id="settingsCardAdminControl">
           <h3>🔐 Admin Control</h3>
           <div id="adminControlLocked">
             <div class="settingsHint">Enter your app login PIN (the same one you use as Admin to open this app) to edit developer contact details.</div>
@@ -6663,6 +6688,9 @@ const APP_SEARCH_INDEX = [
   {label:'My Account — Business Info', path:'My Account', screen:'myaccount', keywords:'my account business info name logo owner address phone shop details'},
   {label:'My Account — Payment Accounts', path:'My Account', screen:'myaccount', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive card poster receipt'},
   {label:'My Account — My Diary', path:'My Account', screen:'myaccount', keywords:'my diary shortcut personal ledger khata'},
+  {label:'Settings — Admin Control', path:'Settings', screen:'settings', anchor:'settingsCardAdminControl', keywords:'admin control developer contact whatsapp pin unlock edit'},
+  {label:'Admin Gift Access — Generate Code', path:'My Account', screen:'myaccount', keywords:'admin gift access generate code free days subscription developer redeem support testing goodwill'},
+  {label:'Redeem Gift Code', path:'Subscription screen (appears when expired)', screen:'myaccount', keywords:'redeem gift code apply free days subscription activate expired have a gift code'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
   {label:'Settings — Opening Cash Balance', path:'Settings', screen:'settings', keywords:'opening cash balance starting amount till'},
   {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', anchor:'settingsCardBackup', keywords:'backup export import restore data save json downloads last backup google drive local file'},
@@ -20411,6 +20439,75 @@ async function generateGiftCode(){
   document.getElementById('generatedGiftCodeText').textContent = code;
   document.getElementById('generatedGiftCodeBox').style.display = 'block';
   daysInput.value = '';
+}
+
+// ---------- 🔐 پوشیدہ Admin شارٹ کٹ — لاک اسکرین کے ہیڈنگ کو 3 سیکنڈ کے اندر 7 بار ٹیپ کرنے پر کھلتا ہے۔
+// عام صارف کے لیے یہ بالکل عام سا heading ہی رہتا ہے، کوئی بٹن نظر نہیں آتا ----------
+let __gateTapCount = 0, __gateTapTimer = null;
+function handleGateSecretTap(){
+  __gateTapCount++;
+  if(__gateTapTimer) clearTimeout(__gateTapTimer);
+  __gateTapTimer = setTimeout(() => { __gateTapCount = 0; }, 3000);
+  if(__gateTapCount >= 7){
+    __gateTapCount = 0;
+    clearTimeout(__gateTapTimer);
+    openQuickGiftGenModal();
+  }
+}
+
+function openQuickGiftGenModal(){
+  document.getElementById('quickGiftGenLocked').style.display = 'block';
+  document.getElementById('quickGiftGenUnlocked').style.display = 'none';
+  document.getElementById('quickGiftPinInput').value = '';
+  document.getElementById('quickGiftPinError').textContent = '';
+  document.getElementById('quickGiftCodeBox').style.display = 'none';
+  document.getElementById('quickGiftGenModal').classList.add('show');
+}
+
+function closeQuickGiftGenModal(){
+  document.getElementById('quickGiftGenModal').classList.remove('show');
+}
+
+// ---------- وہی Admin login PIN جو باقی ایپ میں استعمال ہوتا ہے — کوئی الگ PIN یاد رکھنے کی ضرورت نہیں ----------
+async function unlockQuickGiftGen(){
+  const entered = document.getElementById('quickGiftPinInput').value.trim();
+  const enteredHash = await hashPin(entered);
+  const validAdmin = usersData.some(u => u.role === 'admin' && u.is_active && u.pin === enteredHash);
+  if(!validAdmin){
+    document.getElementById('quickGiftPinError').textContent = '❌ Incorrect PIN.';
+    return;
+  }
+  document.getElementById('quickGiftPinError').textContent = '';
+  document.getElementById('quickGiftPinInput').value = '';
+  document.getElementById('quickGiftGenLocked').style.display = 'none';
+  document.getElementById('quickGiftGenUnlocked').style.display = 'block';
+}
+
+async function generateQuickGiftCode(){
+  const daysInput = document.getElementById('quickGiftDaysInput');
+  const days = parseInt(daysInput.value, 10);
+  if(!days || days < 1){ alert('براہ کرم دنوں کی درست تعداد لکھیں۔'); return; }
+
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + 30);
+  const expiryStr = toYYYYMMDD(expiry);
+
+  const fullHash = await sha256Hex(`${days}|${expiryStr}|${GIFT_CODE_SALT}`);
+  const checksum = fullHash.slice(0, 10).toUpperCase();
+  const code = `AIOGIFT-${days}-${expiryStr}-${checksum}`;
+
+  document.getElementById('quickGiftCodeText').textContent = code;
+  document.getElementById('quickGiftCodeBox').style.display = 'block';
+  daysInput.value = '';
+}
+
+function copyQuickGiftCode(){
+  const text = document.getElementById('quickGiftCodeText').textContent;
+  navigator.clipboard?.writeText(text).then(() => {
+    alert('✅ Code copied!');
+  }).catch(() => {
+    alert('Copy failed — please select and copy the code manually.');
+  });
 }
 
 function copyGiftCode(){
