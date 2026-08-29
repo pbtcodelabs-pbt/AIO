@@ -951,17 +951,19 @@
   .vcPhotoBox{width:96px; height:96px; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#eef2ff; cursor:pointer; border:1.5px dashed #c7d2fe;}
   .vcPhotoBox img{width:100%; height:100%; object-fit:cover;}
   .vcPhotoBox .vcPhotoIcon{font-size:26px; color:var(--primary-dark);}
-  .vcFieldsArea{padding:14px 16px 4px; background:#fff;}
-  .vcFieldFull{margin-bottom:12px;}
-  .vcFieldGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;}
-  .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; display:block;}
+  .vcFieldsArea{padding:16px 16px 8px; background:linear-gradient(180deg, #f4f7fb, #eef2f7);}
+  .vcFieldFull{margin-bottom:14px;}
+  .vcFieldGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;}
+  .vcFieldLabel{font-size:10.5px; font-weight:800; color:var(--primary-dark); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; display:block;}
+  .vcFieldWrap{background:#fff; border-radius:12px; padding:8px 10px; box-shadow:0 2px 8px rgba(30,41,59,.06); border:1px solid #e7ebf1;}
   .vcFieldWrap input, .vcFieldWrap .vcInputRow{width:100%;}
-  .vcFieldWrap input{padding:9px 10px; border:1px solid #dbe1ea; border-radius:9px; font-size:14px; background:#fafbfc;}
-  .vcFieldWrap input:focus{border-color:var(--primary); background:#fff; outline:none;}
-  .vcFieldWrap.vcNameField input{font-size:15px; font-weight:700;}
+  .vcFieldWrap input{padding:6px 2px; border:none; border-radius:0; font-size:15px; font-weight:700; background:transparent; color:#1e293b;}
+  .vcFieldWrap input:focus{outline:none;}
+  .vcFieldWrap:focus-within{border-color:var(--primary); box-shadow:0 2px 10px rgba(37,99,235,.15);}
+  .vcFieldWrap.vcNameField input{font-size:16px; font-weight:800;}
   .vcInputRow{display:flex; gap:6px; align-items:center;}
   .vcInputRow input{flex:1; min-width:0;}
-  .vcInputRow button{flex:0 0 34px; height:34px; border:1px solid #dbe1ea; background:#fff; border-radius:8px; cursor:pointer;}
+  .vcInputRow button{flex:0 0 34px; height:34px; border:1px solid #dbe1ea; background:#f8fafc; border-radius:8px; cursor:pointer;}
   .vcStockWrap{position:relative;}
   .vcStockTag{font-size:10px; font-weight:800; margin-top:3px;}
   .vcActionsRow{display:flex; gap:8px; padding:12px 16px 16px; background:#fff;}
@@ -2086,7 +2088,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA06</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA07</span>
     </div>
   </div>
 
@@ -10865,16 +10867,25 @@ function updateVariantField(productId, variantId, field, value, inputEl){
   const numericFields = ['purchase','retail','wholesale','stock','lowStockAt','markupPercent'];
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
 
-  // ---------- Markup % فعال ہو تو: Purchase یا Markup% بدلنے پر Retail خودکار حساب ہو، Retail خود بدلنے پر صرف مارجن دکھایا جائے ----------
+  // ---------- Markup % فعال ہو تو: Purchase یا Markup% بدلنے پر Retail خودکار حساب ہو۔
+  // پورا variant سیکشن دوبارہ render کیا جاتا ہے (صرف getElementById پر انحصار نہیں) —
+  // اس طرح تینوں فیلڈز (Purchase, Markup%, Retail) ہمیشہ 100% ایک دوسرے سے ہم آہنگ رہتی ہیں،
+  // چاہے کوئی سا بھی فیلڈ تبدیل ہو ----------
   if(AppState.settings.markupPricingEnabled && (field === 'purchase' || field === 'markupPercent')){
+    openProductCards.add(productId);
     const markup = variant.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0;
     variant.retail = Math.round((variant.purchase || 0) * (1 + markup / 100) * 100) / 100;
-    const retailInput = document.getElementById(`retailInput-${variantId}`);
-    if(retailInput) retailInput.value = variant.retail;
-    refreshMarginTag(variantId, variant);
+    const wrap = document.getElementById(`vcWrap-${productId}`);
+    if(wrap){ wrap.innerHTML = renderVariantCardSection(productId); }
+    persistAllData();
+    return;
   }
   if(AppState.settings.markupPricingEnabled && field === 'retail'){
-    refreshMarginTag(variantId, variant);
+    openProductCards.add(productId);
+    const wrap = document.getElementById(`vcWrap-${productId}`);
+    if(wrap){ wrap.innerHTML = renderVariantCardSection(productId); }
+    persistAllData();
+    return;
   }
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
