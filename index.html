@@ -2086,7 +2086,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA04</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA06</span>
     </div>
   </div>
 
@@ -4212,6 +4212,18 @@
             <div class="settingsSubLabel">Tax Percentage</div>
             <input type="number" id="taxPercentInput" min="0" max="100" step="0.5" placeholder="e.g. 5" onfocus="this.select()" onchange="setTaxPercent(this.value)">
           </div>
+        </div>
+
+        <!-- --- 💹 Percentage Markup Pricing — قیمتِ خرید پر خودکار % منافع لگا کر قیمتِ فروخت بنانا (اختیاری) --- -->
+        <div class="settingsCard" id="settingsCardMarkupPricing">
+          <h3>💹 Percentage Markup Pricing</h3>
+          <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="markupPricingChk" onchange="toggleMarkupPricing(this.checked)" style="width:18px; height:18px; margin:0;">
+            Enable % Markup Pricing (auto-calculate Retail Price from Purchase Price + %)
+          </label>
+          <div class="settingsHint">When on: enter Purchase Price + your markup % on each variant, and Retail Price fills in automatically. If you type a Retail Price yourself instead, the app will simply show your actual profit margin % below it — for your own information only.</div>
+          <div class="settingsSubLabel" style="margin-top:10px;">Default Markup %</div>
+          <input type="number" id="defaultMarkupPercentInput" placeholder="e.g. 20" min="0" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px;" onchange="updateDefaultMarkupPercent(this.value)">
         </div>
 
         <!-- --- 📦 Track Inventory — آن ہو تو سٹاک ختم ہونے پر بل مزید نہیں بنے گا (ہمیشہ کی طرح روکا جائے گا)،
@@ -6689,6 +6701,7 @@ const APP_SEARCH_INDEX = [
   {label:'My Account — Payment Accounts', path:'My Account', screen:'myaccount', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive card poster receipt'},
   {label:'My Account — My Diary', path:'My Account', screen:'myaccount', keywords:'my diary shortcut personal ledger khata'},
   {label:'Settings — Admin Control', path:'Settings', screen:'settings', anchor:'settingsCardAdminControl', keywords:'admin control developer contact whatsapp pin unlock edit'},
+  {label:'Settings — Percentage Markup Pricing', path:'Settings', screen:'settings', anchor:'settingsCardMarkupPricing', keywords:'markup percent profit margin auto price calculate purchase retail percentage'},
   {label:'Admin Gift Access — Generate Code', path:'My Account', screen:'myaccount', keywords:'admin gift access generate code free days subscription developer redeem support testing goodwill'},
   {label:'Redeem Gift Code', path:'Subscription screen (appears when expired)', screen:'myaccount', keywords:'redeem gift code apply free days subscription activate expired have a gift code'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
@@ -9986,9 +9999,15 @@ function renderVariantCardSection(productId){
             <span class="vcFieldLabel">Purchase Price</span>
             <input type="number" value="${v.purchase}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
           </div>
+          ${AppState.settings.markupPricingEnabled ? `
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Markup %</span>
+            <input type="number" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)">
+          </div>` : ''}
           <div class="vcFieldWrap">
             <span class="vcFieldLabel">Retail Price</span>
-            <input type="number" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
+            <input type="number" id="retailInput-${v.variant_id}" value="${v.retail}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
+            ${AppState.settings.markupPricingEnabled ? `<div class="vcStockTag" id="marginTag-${v.variant_id}" style="${marginTagStyle(v)}">${marginTagText(v)}</div>` : ''}
           </div>
           <div class="vcFieldWrap">
             <span class="vcFieldLabel">Wholesale Price</span>
@@ -10808,13 +10827,55 @@ function toggleProductCard(productId){
 // جاتی تھی (نیا DOM node بن جاتا، پرانا focus/tap ضائع ہو جاتا)۔ اب صرف ڈیٹا خاموشی سے اپڈیٹ ہوتا ہے،
 // اور صرف Stock/Low-Stock-Limit یا Expiry Date بدلنے پر متعلقہ چھوٹا سا بیج/رنگ خود بخود (بغیر پوری لسٹ
 // دوبارہ بنائے) اپڈیٹ ہو جاتا ہے — باقی پوری اسکرین ساکن رہتی ہے، صارف بلا رکاوٹ اگلی فیلڈ میں جا سکتا ہے۔
+// ---------- 💹 Percentage Markup Pricing — قیمتِ خرید + % سے قیمتِ فروخت خودکار بنانا (اختیاری فیچر) ----------
+function toggleMarkupPricing(checked){
+  AppState.settings.markupPricingEnabled = checked;
+  persistAllData();
+  refreshAllScreens();
+}
+function updateDefaultMarkupPercent(value){
+  AppState.settings.defaultMarkupPercent = parseFloat(value) || 0;
+  persistAllData();
+}
+// ---------- صرف اصل حاصل شدہ منافع % دکھانا — کوئی warning/تنبیہ نہیں، جتنا چاہے منافع رکھنا خالصتاً صارف کی اپنی مرضی ہے ----------
+function marginTagText(v){
+  const purchase = parseFloat(v.purchase) || 0;
+  const retail = parseFloat(v.retail) || 0;
+  if(purchase <= 0) return '';
+  const actualMargin = ((retail - purchase) / purchase) * 100;
+  return `📊 Margin: ${actualMargin.toFixed(0)}%`;
+}
+function marginTagStyle(v){
+  const purchase = parseFloat(v.purchase) || 0;
+  if(purchase <= 0) return 'display:none;';
+  return 'display:block; color:#15803d;';
+}
+function refreshMarginTag(variantId, v){
+  const tag = document.getElementById(`marginTag-${variantId}`);
+  if(!tag) return;
+  tag.textContent = marginTagText(v);
+  tag.setAttribute('style', marginTagStyle(v));
+}
+
 function updateVariantField(productId, variantId, field, value, inputEl){
   const product = productsData.find(p => p.product_id === productId);
   const variant = product?.variants.find(v => v.variant_id === variantId);
   if(!variant) return;
 
-  const numericFields = ['purchase','retail','wholesale','stock','lowStockAt'];
+  const numericFields = ['purchase','retail','wholesale','stock','lowStockAt','markupPercent'];
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
+
+  // ---------- Markup % فعال ہو تو: Purchase یا Markup% بدلنے پر Retail خودکار حساب ہو، Retail خود بدلنے پر صرف مارجن دکھایا جائے ----------
+  if(AppState.settings.markupPricingEnabled && (field === 'purchase' || field === 'markupPercent')){
+    const markup = variant.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0;
+    variant.retail = Math.round((variant.purchase || 0) * (1 + markup / 100) * 100) / 100;
+    const retailInput = document.getElementById(`retailInput-${variantId}`);
+    if(retailInput) retailInput.value = variant.retail;
+    refreshMarginTag(variantId, variant);
+  }
+  if(AppState.settings.markupPricingEnabled && field === 'retail'){
+    refreshMarginTag(variantId, variant);
+  }
 
   // TODO: یہاں product_variants table میں UPDATE query چلے گی
   openProductCards.add(productId); // کارڈ کھلا رہے گا، محض حفاظتی ریکارڈ کے لیے (اب اصل رینڈر پر انحصار نہیں)
@@ -19787,6 +19848,9 @@ function renderSettingsScreen(){
   document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
 
   document.getElementById('trackInventoryChk').checked = !!AppState.settings.trackInventory;
+
+  document.getElementById('markupPricingChk').checked = !!AppState.settings.markupPricingEnabled;
+  document.getElementById('defaultMarkupPercentInput').value = AppState.settings.defaultMarkupPercent || '';
 }
 
 /* =====================================================================
