@@ -1884,7 +1884,7 @@
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
   <div class="loginBox">
-    <h2 id="loginHeading">🔐 Login</h2>
+    <h2 id="loginHeading" onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">🔐 Login</h2>
 
     <!-- ---------- 🎉 خوش آمدید بینر — بیٹا ٹیسٹنگ کی صاف وضاحت، پہلی نظر میں ---------- -->
     <div class="welcomeTrialBanner">
@@ -2088,7 +2088,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO298SA09</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO308SU01</span>
     </div>
   </div>
 
@@ -4294,6 +4294,10 @@
 
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
+
+            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🔒 This Device Only</div>
+            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">If PIN Lock is OFF, the app normally re-opens straight to Home automatically. Use this to force the Login/Lock screen to appear right now — for example, to reach the hidden Quick Gift Code option there. It undoes itself the moment you log back in with your PIN.</div>
+            <button class="testPrintBtn" style="background:#7c2d12;" onclick="fullLogoutAllAccounts()">🔒 Log Out From All Accounts</button>
           </div>
         </div>
 
@@ -6344,6 +6348,12 @@ async function login(){
 
 // ---------- لاگ ان مکمل کرنے کا مشترکہ حصہ (عام PIN اور ماسٹر PIN دونوں یہاں سے گزرتے ہیں) ----------
 function finishLogin(user, forceRemember){
+  // ---------- صارف نے خود PIN ڈال کر لاگ ان کر لیا — "Log Out From All Accounts" کی روک ختم کریں ----------
+  if(AppState.settings.forceLoginScreen){
+    AppState.settings.forceLoginScreen = false;
+    persistAllData();
+  }
+
   const rememberChk = document.getElementById('rememberPinChk');
   if(forceRemember || (rememberChk && rememberChk.checked)){
     saveToStorage('rememberedSession', { user_id: user.user_id });
@@ -6442,6 +6452,11 @@ function showSubscriptionGate(){
 
 // ---------- اگر اس ڈیوائس پر پن یاد رکھا ہوا ہے تو خودکار لاگ ان کر دیں (لاگ ان اسکرین دکھائے بغیر) ----------
 function tryAutoLogin(){
+  // ---------- 🔒 اگر "Log Out From All Accounts" استعمال ہوا ہو تو کوئی بھی خودکار لاگ ان نہ چلے —
+  // اصل Login/Lock اسکرین ہی نظر آئے، جب تک صارف خود دوبارہ PIN ڈال کر لاگ ان نہ کرے ----------
+  if(AppState.settings.forceLoginScreen === true){
+    return false;
+  }
   // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
   // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
   if(AppState.settings.pinLockEnabled === false){
@@ -6512,6 +6527,22 @@ function logout(){
   saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
+}
+
+// ---------- 🔒 Log Out From All Accounts — آپ کی اپنی ڈیوائس پر PIN Lock بند ہونے کی وجہ سے عام Logout بھی
+// خودکار دوبارہ لاگ ان ہو جاتا ہے۔ یہ بٹن اُس خودکار لاگ ان کو عارضی طور پر روک دیتا ہے، تاکہ اصل
+// Login/Lock اسکرین نظر آئے (جہاں سے 7 بار ٹیپ کر کے Quick Gift Code بھی کھولا جا سکتا ہے)۔
+// اگلی بار جب آپ خود PIN ڈال کر لاگ ان کریں گے، خودکار لاگ ان دوبارہ معمول پر آ جائے گا ----------
+function fullLogoutAllAccounts(){
+  AppState.settings.forceLoginScreen = true;
+  persistAllData();
+  AppState.currentUser = null;
+  AppState.currentRole = null;
+  saveToStorage('rememberedSession', null);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  const pinInput = document.getElementById('pinInput');
+  if(pinInput) pinInput.value = '';
 }
 
 // ---------- NAVIGATION LOGIC ----------
