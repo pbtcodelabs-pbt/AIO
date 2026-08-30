@@ -1394,6 +1394,20 @@
   .settingsCard h3{font-size:15px; font-weight:700; margin-bottom:4px;}
   .settingsCard .settingsHint{font-size:12px; color:var(--muted); margin-bottom:16px;}
   .settingsSubLabel{font-size:12px; font-weight:700; color:var(--muted); margin:16px 0 8px;}
+  /* ---------- ⚙️ Settings صفحہ صرف — زیادہ کمپیکٹ، کم اسکرول (My Account/Bill Settings پر کوئی اثر نہیں) ---------- */
+  #screen-settings .settingsWrap{gap:10px;}
+  #screen-settings .settingsCard{padding:13px 15px;}
+  #screen-settings .settingsCard h3{font-size:14px; margin-bottom:6px;}
+  #screen-settings .settingsHint{font-size:11px; margin-bottom:8px; line-height:1.35;}
+  #screen-settings .settingsSubLabel{margin:10px 0 5px;}
+  /* ---------- 🏦 My Account اور 🧾 Bill & Print Settings — وہی کمپیکٹ انداز، الگ سے۔
+       نوٹ: صرف heading/hint/label کا سائز اور فاصلہ کم کیا گیا ہے — کوئی <input> فیلڈ نہیں چھیڑا گیا،
+       اس لیے Address جیسی جگہوں پر لکھی گئی عبارت کبھی چھوٹی/کٹی ہوئی نظر نہیں آئے گی ---------- */
+  #screen-myaccount .settingsCard, #screen-billsettings .settingsCard{padding:13px 15px;}
+  #screen-myaccount .settingsCard h3, #screen-billsettings .settingsCard h3{font-size:14px; margin-bottom:6px;}
+  #screen-myaccount .settingsHint, #screen-billsettings .settingsHint{font-size:11px; margin-bottom:8px; line-height:1.35;}
+  #screen-myaccount .settingsSubLabel, #screen-billsettings .settingsSubLabel{margin:10px 0 5px;}
+  #screen-myaccount > .settingsCard, #screen-billsettings > .settingsCard{margin-bottom:10px;}
   .settingsSubLabel:first-of-type{margin-top:0;}
 
   /* --- My Payment Accounts: کارڈ لسٹ + ڈیلیٹ بٹن (لامحدود اکاؤنٹس) --- */
@@ -2088,7 +2102,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO308SU01</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO308SU04</span>
     </div>
   </div>
 
@@ -4169,7 +4183,7 @@
         <!-- --- تھیم اور ظاہری شکل — کمپیکٹ ڈراپ ڈاؤن، صرف منتخب شدہ چیز نظر آتی ہے، دبانے پر باقی آپشنز کھلتے ہیں --- -->
         <div class="settingsCard" id="settingsCardTheme">
           <h3>🎨 Theme & Appearance</h3>
-          <div class="settingsHint">Quick Font & Theme buttons are now on the Home page, under the business name.</div>
+          <div class="settingsHint">Quick buttons: Home page, under business name.</div>
 
           <!-- ---------- یہ دونوں پوشیدہ رکھے گئے ہیں — پرانا کوڈ اور کہیں انہیں id سے ڈھونڈتا ہے، اس لیے حذف نہیں کیے ---------- -->
           <div class="categoryDropdownWrap" id="themeDropdownWrap" style="display:none;">
@@ -4223,7 +4237,7 @@
             <input type="checkbox" id="markupPricingChk" onchange="toggleMarkupPricing(this.checked)" style="width:18px; height:18px; margin:0;">
             Enable % Markup Pricing (auto-calculate Retail Price from Purchase Price + %)
           </label>
-          <div class="settingsHint">When on: enter Purchase Price + your markup % on each variant, and Retail Price fills in automatically. If you type a Retail Price yourself instead, the app will simply show your actual profit margin % below it — for your own information only.</div>
+          <div class="settingsHint">Auto-calculates Retail Price from Purchase + %.</div>
           <div class="settingsSubLabel" style="margin-top:10px;">Default Markup %</div>
           <input type="number" id="defaultMarkupPercentInput" placeholder="e.g. 20" min="0" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px;" onchange="updateDefaultMarkupPercent(this.value)">
         </div>
@@ -4252,7 +4266,7 @@
         <div class="settingsCard" id="settingsCardAdminControl">
           <h3>🔐 Admin Control</h3>
           <div id="adminControlLocked">
-            <div class="settingsHint">Enter your app login PIN (the same one you use as Admin to open this app) to edit developer contact details.</div>
+            <div class="settingsHint">Enter your Admin PIN to edit developer contact.</div>
             <input type="password" id="adminPinInput" placeholder="Your Admin login PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockAdminControl()">
             <button class="testPrintBtn" style="margin-top:10px;" onclick="unlockAdminControl()">🔓 Unlock</button>
             <div id="adminPinError" style="color:var(--danger); font-size:12px; margin-top:6px; text-align:center;"></div>
@@ -4264,16 +4278,14 @@
             <input type="text" id="devSmsInput" placeholder="e.g. 03206793793" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Developer Gmail</div>
             <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">App Share Link</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Paste your live GitHub Pages link here. The 📤 Share button on the Login and Home screens will send this link on WhatsApp/etc — update it anytime the link changes, and it updates everywhere automatically.</div>
+            <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">App Share Link</div>
             <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Write your own message here (e.g. "Our app is very good, please use it") — it will be sent along with the link above when the 📤 Share button is pressed.</div>
-            <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="3" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
-            <div class="settingsSubLabel">One Admin PIN for Everything</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">This panel now unlocks with your app login PIN — no separate PIN to remember. To change it, go to <b>Home → Users</b>, tap the Admin user's <b>✏️ Set Custom PIN</b> button, and enter your new PIN there.</div>
+            <div class="settingsSubLabel">Share Message</div>
+            <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="2" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
+            <div class="settingsHint" style="margin-top:0;">PIN unlocks here too — change it via Home → Users → ✏️ Set Custom PIN.</div>
 
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">Set this up now, while you still have access — if you ever forget your Admin PIN, you'll be able to reset it yourself on the login screen using your date of birth. No typing, no risk of a typo — just pick it from the calendar. (For security, this box always shows blank when you reopen this screen — that does NOT mean it wasn't saved.)</div>
+            <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
+            <div class="settingsHint" style="margin-top:0;">Set your DOB now — lets you reset a forgotten PIN later.</div>
             <div class="dobPicker" style="margin-bottom:8px;">
               <select id="securityDobInput_day" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
               <select id="securityDobInput_month" onchange="dpOnMonthChange('securityDobInput'); saveAdminControl();"></select>
@@ -4285,8 +4297,7 @@
             </div>
             <input type="hidden" id="securityDobInput" value="">
 
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🔒 PIN Lock</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">When ON (default), the app always asks for your PIN before opening — recommended. When OFF, the app opens straight to Home for anyone who picks up this phone, no PIN asked at all. Only turn this off if you're the sole user of this phone and no staff/Salesman accounts exist.</div>
+            <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">🔒 PIN Lock</div>
             <div style="display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border-radius:10px; padding:10px 12px;">
               <span id="pinLockStatusLabel" style="font-size:13px; font-weight:700;">🔒 PIN Lock is ON</span>
               <button id="pinLockToggleBtn" onclick="onPinLockToggleClick()" style="padding:7px 16px; border:none; border-radius:20px; font-weight:800; font-size:12px; cursor:pointer; background:var(--success); color:#fff;">ON</button>
@@ -4295,8 +4306,7 @@
             <button class="testPrintBtn" onclick="saveAdminControl()">💾 Save</button>
             <div id="adminSaveMsg" style="color:var(--success); font-size:12px; margin-top:6px; text-align:center;"></div>
 
-            <div class="settingsSubLabel" style="margin-top:18px; padding-top:14px; border-top:1px solid #eef2f7;">🔒 This Device Only</div>
-            <div class="settingsHint" style="margin-top:0; margin-bottom:6px;">If PIN Lock is OFF, the app normally re-opens straight to Home automatically. Use this to force the Login/Lock screen to appear right now — for example, to reach the hidden Quick Gift Code option there. It undoes itself the moment you log back in with your PIN.</div>
+            <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">🔒 This Device Only</div>
             <button class="testPrintBtn" style="background:#7c2d12;" onclick="fullLogoutAllAccounts()">🔒 Log Out From All Accounts</button>
           </div>
         </div>
@@ -4304,14 +4314,14 @@
         <!-- --- ⚠️ Danger Zone — صرف Admin، PIN درکار، دونوں عمل ناقابلِ واپسی --- -->
         <div class="settingsCard" style="border:2px solid #fecaca; background:#fff7f7;">
           <h3 style="color:#b91c1c;">⚠️ Danger Zone</h3>
-          <div class="settingsHint">These actions cannot be undone. Export a backup first if you're unsure.</div>
+          <div class="settingsHint">Cannot be undone. Backup first.</div>
 
-          <div style="margin-top:14px; padding-top:14px; border-top:1px solid #fecaca;">
+          <div style="margin-top:10px; padding-top:10px; border-top:1px solid #fecaca;">
             <div class="settingsSubLabel">🧾 Reset Bills &amp; Transactions</div>
             <button class="testPrintBtn" style="margin-top:8px; background:#fff7ed; color:#c2410c; border:1px solid #fdba74;" onclick="requestSoftResetAuth()">🧾 Reset Bills &amp; Transactions…</button>
           </div>
 
-          <div style="margin-top:16px; padding-top:14px; border-top:1px solid #fecaca;">
+          <div style="margin-top:12px; padding-top:10px; border-top:1px solid #fecaca;">
             <div class="settingsSubLabel" style="color:#b91c1c;">🔥 Master Reset — Erase Everything</div>
             <button class="testPrintBtn" style="margin-top:8px; background:#b91c1c; color:#fff;" onclick="requestMasterResetAuth()">🔥 Master Reset — Erase Everything…</button>
           </div>
@@ -4421,12 +4431,12 @@
       <!-- --- 🎁 Admin Gift Access — کسی بھی بندے کو مفت دنوں کا کوڈ بنا کر دیں (Play Billing سے بالکل الگ، صرف Admin کے استعمال کے لیے، عام صارف کو نظر نہیں آتا) --- -->
       <div class="settingsCard">
         <h3>🎁 Admin Gift Access</h3>
-        <div class="settingsHint">Generate a private free-access code for anyone — for support, testing, or goodwill. Never advertised to regular users.</div>
+        <div class="settingsHint">Private free-access code — support/testing/goodwill only. Never advertised.</div>
         <input type="number" id="giftDaysInput" placeholder="Number of days (e.g. 30)" min="1" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <button class="testPrintBtn" style="margin-top:8px;" onclick="generateGiftCode()">🎁 Generate Code</button>
         <div id="generatedGiftCodeBox" style="display:none; margin-top:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px;">
           <div id="generatedGiftCodeText" style="font-family:monospace; font-size:13px; font-weight:700; word-break:break-all; color:#166534;"></div>
-          <div style="font-size:11px; color:var(--muted); margin-top:6px;">Valid for 30 days. Share this code with the person — they can enter it under Package Plans → "Have a gift code?".</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:6px;">Valid 30 days. Enter under Package Plans → "Have a gift code?".</div>
           <button class="testPrintBtn" style="margin-top:8px; background:#0ea5e9;" onclick="copyGiftCode()">📋 Copy Code</button>
         </div>
       </div>
@@ -10393,6 +10403,10 @@ function formatPhoneForWhatsApp(phone){
 }
 
 // ---------- فون کی کتاب سے کسٹمر/سپلائر منتخب کریں — نام اور نمبر دونوں خودکار بھر جائیں ----------
+// ---------- پہلی بار Contact Picker استعمال ہونے پر Android کا اجازت (Permission) ڈائیلاگ درمیان میں آ جاتا ہے،
+// جس کی وجہ سے پہلا نتیجہ خالی آ جاتا ہے — اجازت مل جانے کے بعد دوسری کوشش ہمیشہ ٹھیک کام کرتی ہے۔
+// اسی لیے پہلی بار خالی نتیجہ آنے پر ایپ خود بخود دوبارہ کوشش کرتی ہے، صارف کو دوبارہ بٹن دبانے کی ضرورت نہیں ----------
+let __contactPickerWarmedUp = false;
 async function pickContactForNewParty(){
   if(!('contacts' in navigator && 'ContactsManager' in window)){
     alert('This phone/browser does not support access to contacts — please type the name and number manually.');
@@ -10401,7 +10415,15 @@ async function pickContactForNewParty(){
   try{
     const props = ['name', 'tel'];
     const contacts = await navigator.contacts.select(props, {multiple: false});
-    if(!contacts || contacts.length === 0) return;
+    if(!contacts || contacts.length === 0){
+      // ---------- پہلی بار خالی آیا ہو (پرمیشن ڈائیلاگ کی وجہ سے) تو خاموشی سے ایک بار خود دوبارہ کوشش کریں ----------
+      if(!__contactPickerWarmedUp){
+        __contactPickerWarmedUp = true;
+        return pickContactForNewParty();
+      }
+      return;
+    }
+    __contactPickerWarmedUp = true;
     const c = contacts[0];
     if(c.name && c.name.length) document.getElementById('npPartyName').value = c.name[0];
     if(c.tel && c.tel.length){
@@ -20078,7 +20100,6 @@ async function saveAdminControl(){
   AppState.settings.appShareLink = document.getElementById('appShareLinkInput').value.trim();
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   await saveSecurityRecoveryInfo();
-  dpReset('securityDobInput');
   persistAllData();
   document.getElementById('adminSaveMsg').textContent = '✅ Saved!';
   setTimeout(() => { document.getElementById('adminSaveMsg').textContent = ''; }, 2000);
