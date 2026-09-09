@@ -2106,7 +2106,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST03</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST04</span>
     </div>
   </div>
 
@@ -2475,24 +2475,71 @@
       </div>
     </div>
 
-    <!-- NEW PRODUCT (PARENT) MODAL — صرف parent بنے گا، variants بعد میں کارڈ کھول کر شامل ہوں گے -->
+    <!-- NEW PRODUCT (PARENT) MODAL — پہلی/واحد آئٹم کی مکمل تفصیل یہیں مل جاتی ہے؛ صرف اضافی سائز/ویریئنٹ چاہیے ہو تو محفوظ ہونے کے بعد کھلنے والے کارڈ سے "+ Add New Variant" -->
     <div class="modalOverlay" id="newProductModal" onclick="if(event.target===this) closeNewProductModal()">
       <div class="modalBoxWide">
-        <h3 id="newProductModalTitle">📦 New Product (Parent Item)</h3>
+        <h3 id="newProductModalTitle">📦 New Product</h3>
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
           <div id="npProductPhotoPreview" style="width:72px; height:56px; border-radius:10px; background:#eef2ff; color:var(--primary-dark); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden; border:1.5px solid #dbe1ea; flex:0 0 auto;">📦</div>
           <button type="button" onclick="triggerNewProductPhotoUpload()" style="padding:6px 14px; border:1.5px dashed #cbd5e1; background:#fff; border-radius:8px; color:var(--muted); cursor:pointer; font-size:12px;">📷 Add Photo</button>
         </div>
-        <input type="text" id="npName" placeholder="Product name (e.g. Lipton Tea)">
-        <input type="text" id="npCategory" placeholder="Category (optional)" list="categoryDatalist" autocomplete="off">
-        <datalist id="categoryDatalist"></datalist>
-        <div style="display:flex; gap:8px; margin-bottom:10px;">
-          <input type="text" id="npBarcode" placeholder="Barcode (scan or type — optional)" style="flex:1; margin-bottom:0;">
-          <button type="button" onclick="openBarcodeScanner('npBarcode')" title="Scan barcode" style="flex:0 0 46px; padding:0; border:1.5px solid #dbe1ea; background:#fff; border-radius:8px; cursor:pointer; font-size:16px;">📷</button>
+
+        <div class="vcFieldWrap vcFieldFull vcNameField">
+          <span class="vcFieldLabel">Product Name</span>
+          <input type="text" id="npName" placeholder="e.g. Lipton Tea">
         </div>
+        <div class="vcFieldWrap vcFieldFull">
+          <span class="vcFieldLabel">Category (optional)</span>
+          <input type="text" id="npCategory" placeholder="e.g. Beverages" list="categoryDatalist" autocomplete="off">
+        </div>
+        <datalist id="categoryDatalist"></datalist>
+        <div class="vcFieldWrap vcFieldFull">
+          <span class="vcFieldLabel">Barcode (optional)</span>
+          <div class="vcInputRow">
+            <input id="npBarcode" placeholder="Scan or type">
+            <button type="button" onclick="openBarcodeScanner('npBarcode')" title="Scan barcode">📷</button>
+          </div>
+        </div>
+
+        <div class="vcFieldGrid">
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Purchase Price</span>
+            <input type="number" id="npPurchase" value="0" onfocus="this.select()" oninput="npLiveMarkupSync('purchase',this.value)">
+          </div>
+          <div class="vcFieldWrap" id="npMarkupWrap" style="display:none;">
+            <span class="vcFieldLabel">Markup %</span>
+            <input type="number" id="npMarkup" value="0" onfocus="this.select()" oninput="npLiveMarkupSync('markupPercent',this.value)">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Retail Price</span>
+            <input type="number" id="npRetail" value="0" onfocus="this.select()" oninput="npLiveMarkupSync('retail',this.value)">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Wholesale Price</span>
+            <input type="number" id="npWholesale" value="0" onfocus="this.select()">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Stock</span>
+            <input type="number" id="npStock" value="0" onfocus="this.select()">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Low Stock Alert At</span>
+            <input type="number" id="npLowStockAt" value="5" onfocus="this.select()">
+          </div>
+          <div class="vcFieldWrap">
+            <span class="vcFieldLabel">Expiry Date (optional)</span>
+            <input type="date" id="npExpiry">
+          </div>
+        </div>
+        <div class="vcFieldWrap vcFieldFull">
+          <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
+          <input type="text" id="npLocation" placeholder="e.g. Aisle 4, Shelf B">
+        </div>
+        <div class="settingsHint" id="npAddVariantHint" style="margin-top:0; margin-bottom:14px;"></div>
+
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewProductModal()">Cancel</button>
-          <button class="saveBtn" id="newProductSaveBtn" onclick="saveNewProduct()">Create + Add First Variant</button>
+          <button class="saveBtn" id="newProductSaveBtn" onclick="saveNewProduct()">Create Product</button>
         </div>
       </div>
     </div>
@@ -11190,6 +11237,28 @@ function deleteVariant(productId, variantId){
   rerenderProductListPreserveScroll();
 }
 
+// ---------- New Product Modal کے اندر Purchase/Markup%/Retail کو ہم آہنگ رکھیں (ابھی تک کوئی حقیقی variant نہیں بنا، اس لیے سیدھا فارم کے خانوں پر ہی کام) ----------
+function npLiveMarkupSync(field, value){
+  if(!AppState.settings.markupPricingEnabled) return;
+  const num = parseFloat(value);
+  const purchaseEl = document.getElementById('npPurchase');
+  const markupEl = document.getElementById('npMarkup');
+  const retailEl = document.getElementById('npRetail');
+  if(field === 'purchase'){
+    const purchase = isNaN(num) ? 0 : num;
+    const markup = parseFloat(markupEl?.value) || AppState.settings.defaultMarkupPercent || 0;
+    if(retailEl) retailEl.value = Math.round(purchase * (1 + markup / 100) * 100) / 100;
+  } else if(field === 'markupPercent'){
+    const purchase = parseFloat(purchaseEl?.value) || 0;
+    const markup = isNaN(num) ? 0 : num;
+    if(retailEl) retailEl.value = Math.round(purchase * (1 + markup / 100) * 100) / 100;
+  } else if(field === 'retail'){
+    const purchase = parseFloat(purchaseEl?.value) || 0;
+    const retail = isNaN(num) ? 0 : num;
+    if(purchase > 0 && markupEl) markupEl.value = Math.round(((retail - purchase) / purchase) * 1000) / 10;
+  }
+}
+
 // ---------- New Product (Parent) Modal ----------
 let npProductPhotoDataUrl = null;
 let editingProductId = null; // null = نیا پراڈکٹ بن رہا ہے، ورنہ اسی ID والا موجودہ پراڈکٹ ایڈٹ ہو رہا ہے
@@ -11225,24 +11294,47 @@ function openNewProductModal(productId = null){
   editingProductId = productId;
   npProductPhotoDataUrl = null;
   renderCategoryDatalist(); // ---------- ہر بار موڈل کھلنے پر تازہ ترین کیٹیگری فہرست دکھائیں ----------
+  const markupWrap = document.getElementById('npMarkupWrap');
+  if(markupWrap) markupWrap.style.display = AppState.settings.markupPricingEnabled ? '' : 'none';
 
   if(productId){
     const product = productsData.find(p => p.product_id === productId);
     if(!product) return;
+    const v = product.variants[0] || {};
     document.getElementById('newProductModalTitle').textContent = '✏️ Edit Product';
     document.getElementById('newProductSaveBtn').textContent = 'Save Changes';
     document.getElementById('npName').value = product.name || '';
     document.getElementById('npCategory').value = product.category || '';
-    document.getElementById('npBarcode').value = product.variants[0]?.barcode || '';
-    npProductPhotoDataUrl = product.variants[0]?.image || null;
+    document.getElementById('npBarcode').value = v.barcode || '';
+    document.getElementById('npPurchase').value = v.purchase ?? 0;
+    document.getElementById('npMarkup').value = v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0;
+    document.getElementById('npRetail').value = v.retail ?? 0;
+    document.getElementById('npWholesale').value = v.wholesale ?? 0;
+    document.getElementById('npStock').value = v.stock ?? 0;
+    document.getElementById('npLowStockAt').value = v.lowStockAt ?? 5;
+    document.getElementById('npExpiry').value = v.expiryDate || '';
+    document.getElementById('npLocation').value = v.location || '';
+    npProductPhotoDataUrl = v.image || null;
     renderProductPhotoPreview(npProductPhotoDataUrl);
+    document.getElementById('npAddVariantHint').textContent = product.variants.length > 1
+      ? `ℹ️ This product has ${product.variants.length} variants. These fields edit variant 1 only — open the product card to edit the others.`
+      : '';
   } else {
-    document.getElementById('newProductModalTitle').textContent = '📦 New Product (Parent Item)';
-    document.getElementById('newProductSaveBtn').textContent = 'Create + Add First Variant';
+    document.getElementById('newProductModalTitle').textContent = '📦 New Product';
+    document.getElementById('newProductSaveBtn').textContent = 'Create Product';
     document.getElementById('npName').value = '';
     document.getElementById('npCategory').value = '';
     document.getElementById('npBarcode').value = '';
+    document.getElementById('npPurchase').value = 0;
+    document.getElementById('npMarkup').value = AppState.settings.defaultMarkupPercent ?? 0;
+    document.getElementById('npRetail').value = 0;
+    document.getElementById('npWholesale').value = 0;
+    document.getElementById('npStock').value = 0;
+    document.getElementById('npLowStockAt').value = 5;
+    document.getElementById('npExpiry').value = '';
+    document.getElementById('npLocation').value = '';
     renderProductPhotoPreview(null);
+    document.getElementById('npAddVariantHint').innerHTML = 'ℹ️ Only sell one size/type of this item? You\'re all set — just tap Create Product below. Need multiple sizes/variants (e.g. 500g, 1kg)? Save this one first, then use "+ Add New Variant" on the product card.';
   }
 
   document.getElementById('newProductModal').classList.add('show');
@@ -11259,6 +11351,14 @@ function saveNewProduct(){
   const name = document.getElementById('npName').value.trim();
   const category = document.getElementById('npCategory').value.trim();
   const barcode = document.getElementById('npBarcode').value.trim();
+  const purchase = parseFloat(document.getElementById('npPurchase').value) || 0;
+  const markupPercent = parseFloat(document.getElementById('npMarkup').value) || 0;
+  const retail = parseFloat(document.getElementById('npRetail').value) || 0;
+  const wholesale = parseFloat(document.getElementById('npWholesale').value) || 0;
+  const stock = parseFloat(document.getElementById('npStock').value) || 0;
+  const lowStockAt = parseFloat(document.getElementById('npLowStockAt').value) || 0;
+  const expiryDate = document.getElementById('npExpiry').value || '';
+  const location = document.getElementById('npLocation').value.trim();
 
   if(!name){
     alert('Please enter product name.');
@@ -11277,14 +11377,27 @@ function saveNewProduct(){
   }
 
   if(editingProductId){
-    // ---------- موجودہ پراڈکٹ ایڈٹ ہو رہا ہے — نام/کیٹیگری/پہلی تصویر/پہلے ویرینٹ کا بارکوڈ اپڈیٹ کریں، باقی variants جوں کے توں رہیں ----------
+    // ---------- موجودہ پراڈکٹ ایڈٹ ہو رہا ہے — نام/کیٹیگری اور پہلے ویرینٹ کی مکمل تفصیل اپڈیٹ کریں، باقی variants جوں کے توں رہیں ----------
     const product = productsData.find(p => p.product_id === editingProductId);
     if(product){
       product.name = name;
       product.category = category;
       if(product.variants[0]){
-        product.variants[0].image = npProductPhotoDataUrl || product.variants[0].image;
-        product.variants[0].barcode = barcode;
+        const v0 = product.variants[0];
+        v0.image = npProductPhotoDataUrl || v0.image;
+        v0.barcode = barcode;
+        v0.purchase = purchase;
+        if(AppState.settings.markupPricingEnabled) v0.markupPercent = markupPercent;
+        v0.retail = retail;
+        v0.wholesale = wholesale;
+        v0.stock = stock;
+        v0.lowStockAt = lowStockAt;
+        v0.expiryDate = expiryDate;
+        v0.location = location;
+        if(!v0.batches || v0.batches.length <= 1){
+          v0.batches = [{batchId: (v0.batches && v0.batches[0]?.batchId) || nextBatchId++, qty: v0.stock, expiryDate: v0.expiryDate || ''}];
+          saveToStorage('nextBatchId', nextBatchId);
+        }
       }
     }
     closeNewProductModal();
@@ -11298,15 +11411,21 @@ function saveNewProduct(){
     product_id: nextProductId++,
     name, category,
     variants: [
-      {variant_id: nextVariantId++, label:'Default', barcode, purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', expiryDate:'', image: npProductPhotoDataUrl || null}
+      {
+        variant_id: nextVariantId++, label:'Default', barcode,
+        purchase, markupPercent: AppState.settings.markupPricingEnabled ? markupPercent : undefined,
+        retail, wholesale, stock, lowStockAt, location, expiryDate,
+        image: npProductPhotoDataUrl || null,
+        batches: [{batchId: nextBatchId++, qty: stock, expiryDate: expiryDate || ''}]
+      }
     ]
   };
+  saveToStorage('nextBatchId', nextBatchId);
   productsData.push(newProduct);
   persistAllData();
 
   closeNewProductModal();
   renderProductList();
-  document.getElementById(`pcard-${newProduct.product_id}`)?.classList.add('open');
 }
 
 // ---------- پورا پراڈکٹ (سب variants سمیت) ڈیلیٹ کریں ----------
