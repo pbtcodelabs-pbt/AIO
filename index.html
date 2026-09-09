@@ -2106,7 +2106,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST02</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST03</span>
     </div>
   </div>
 
@@ -4962,6 +4962,7 @@ const cloudAuthReady = new Promise((resolve) => { cloudAuthReadyResolve = resolv
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
 const CLOUD_DOC_TYPES = ['products','customers','suppliers']; // ---------- فی الحال صرف یہ تین — باقی (bills وغیرہ) اگلے مرحلے میں ----------
 const cloudUnsubscribers = {}; // ---------- ہر docType کا فعال onSnapshot listener، Business ID بدلنے پر پرانا بند کرنا ضروری ----------
+const cloudInitialFetchDone = {}; // ---------- ہر docType کے لیے: کیا کلاؤڈ سے پہلی بار جواب مل چکا؟ جب تک نہیں ملا، push روکا جائے (ورنہ Join کے فوراً بعد پرانا مقامی ڈیٹا کلاؤڈ کا اصل ڈیٹا مٹا سکتا ہے — race condition) ----------
 
 function initCloudSync(){
   try{
@@ -5010,6 +5011,7 @@ async function joinBusinessById(newId){
   }
   // ---------- پرانے listeners بند کریں تاکہ پرانے Business کا ڈیٹا نئے پر اوورلیپ نہ کرے ----------
   Object.keys(cloudUnsubscribers).forEach(k => { try{ cloudUnsubscribers[k](); }catch(e){} delete cloudUnsubscribers[k]; });
+  Object.keys(cloudInitialFetchDone).forEach(k => delete cloudInitialFetchDone[k]); // ---------- نئے Business کے لیے دوبارہ "پہلے جواب کا انتظار" شروع کریں ----------
   AppState.settings.businessId = newId;
   saveToStorage('settings', AppState.settings); // ---------- جان بوجھ کر persistAllData() نہیں — ورنہ اس ڈیوائس کا مقامی ڈیٹا نئے Business پر پش ہو کر مالک کا اصل کلاؤڈ ڈیٹا اوورلیٹ (overwrite) کر سکتا تھا ----------
   await cloudAuthReady;
@@ -5021,6 +5023,10 @@ async function joinBusinessById(newId){
 // ---------- ہر docType کے لیے، اُس وقت کا پورا لوکل array کلاؤڈ پر بھیجیں ----------
 async function pushDocTypeToCloud(docType, items){
   try{
+    if(!cloudInitialFetchDone[docType]){
+      console.warn('☁️ ابھی کلاؤڈ سے پہلا جواب نہیں ملا (' + docType + ') — push روک دیا، ورنہ اصل ڈیٹا اوورلیٹ ہو سکتا تھا۔');
+      return;
+    }
     await cloudAuthReady;
     if(!cloudDb) return;
     const bizId = getOrCreateBusinessId();
@@ -5039,6 +5045,7 @@ function startCloudListeners(){
     if(cloudUnsubscribers[docType]) return; // ---------- پہلے سے چل رہا ہے تو دوبارہ شروع نہ کریں ----------
     cloudUnsubscribers[docType] = cloudDb.collection('businesses').doc(bizId).collection('store').doc(docType)
       .onSnapshot((snap) => {
+        cloudInitialFetchDone[docType] = true; // ---------- کلاؤڈ سے پہلی بار جواب مل گیا (چاہے ڈیٹا موجود ہو یا نہ ہو) — اب push کرنا محفوظ ہے ----------
         if(!snap.exists) return; // ---------- ابھی تک کچھ پش نہیں ہوا، مقامی ڈیٹا برقرار رہے ----------
         const data = snap.data();
         if(!data || !Array.isArray(data.items)) return;
