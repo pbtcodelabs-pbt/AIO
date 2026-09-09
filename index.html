@@ -2106,7 +2106,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST01</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST02</span>
     </div>
   </div>
 
@@ -4995,7 +4995,7 @@ function getOrCreateBusinessId(){
   if(AppState.settings.businessId) return AppState.settings.businessId;
   const id = 'BIZ-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
   AppState.settings.businessId = id;
-  persistAllData();
+  saveToStorage('settings', AppState.settings); // ---------- جان بوجھ کر persistAllData() نہیں — وہ Products/Customers/Suppliers بھی کلاؤڈ پر پش کر دیتا، یہاں صرف سیٹنگ محفوظ کرنی ہے ----------
   try{ renderCloudSyncCard(); }catch(e){}
   return id;
 }
@@ -5005,13 +5005,13 @@ async function joinBusinessById(newId){
   newId = String(newId || '').trim().toUpperCase();
   if(!newId){ alert('براہ کرم Business Code درج کریں۔'); return; }
   if(newId === AppState.settings.businessId){ alert('یہ کوڈ پہلے سے فعال ہے۔'); return; }
-  if(!confirm('⚠️ اس کوڈ سے جُڑنے پر اس ڈیوائس کے موجودہ Products/Customers/Suppliers کی جگہ اس کاروبار کا کلاؤڈ ڈیٹا نظر آنے لگے گا۔\n\nجاری رکھیں؟')){
+  if(!confirm('یہ کوڈ جوائن ہوگا:\n\n' + newId + '\n\n⚠️ اوپر لکھا کوڈ دیکھ لیں — بالکل ویسا ہی ہے جیسا مالک نے بھیجا؟ اگر ٹھیک ہے تو OK دبائیں۔')){
     return;
   }
   // ---------- پرانے listeners بند کریں تاکہ پرانے Business کا ڈیٹا نئے پر اوورلیپ نہ کرے ----------
   Object.keys(cloudUnsubscribers).forEach(k => { try{ cloudUnsubscribers[k](); }catch(e){} delete cloudUnsubscribers[k]; });
   AppState.settings.businessId = newId;
-  persistAllData();
+  saveToStorage('settings', AppState.settings); // ---------- جان بوجھ کر persistAllData() نہیں — ورنہ اس ڈیوائس کا مقامی ڈیٹا نئے Business پر پش ہو کر مالک کا اصل کلاؤڈ ڈیٹا اوورلیٹ (overwrite) کر سکتا تھا ----------
   await cloudAuthReady;
   startCloudListeners();
   try{ renderCloudSyncCard(); }catch(e){}
