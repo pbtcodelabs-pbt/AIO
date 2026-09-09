@@ -1,94 +1,69 @@
-// ---------- 🏷️ صدام فروٹ منڈی — Service Worker ----------
-// یہ نمبر HTML فائل کے APP_BUILD_VERSION جیسا نہیں ہوتا (وہ اردو میں ہے، یہ ہمیشہ انگریزی/ASCII میں رہے گا) —
-// صرف کیش کا نام بدلنے کے لیے استعمال ہوتا ہے تاکہ پرانی فائلیں خودکار صاف ہو کر نئی لوڈ ہو جائیں۔
-// ہر نئی ڈیلیوری پر یہ نمبر لازمی بدلیں (فائل کے نام جیسا ہی رکھیں) ----------
-const CACHE_VERSION = 'FM9SEPWE0458PM';
-const CACHE_NAME = 'saddam-fruit-mandi-' + CACHE_VERSION;
-
-const PRECACHE_URLS = [
+// ======================================================================
+// 🔄 AIO POS — Service Worker (آف لائن سپورٹ + خودکار اپڈیٹ)
+// ہر نئی فائل نمبر کے ساتھ CACHE_NAME بھی بدل دیں (نیچے v43 کو v44 وغیرہ کر دیں)
+// تاکہ صارف کے فون پر پرانا ورژن کیش سے نہ چپکا رہے۔
+// ======================================================================
+const CACHE_NAME = 'AIOTEST04';
+const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './favicon-32.png',
-  './icon-180.png',
   './icon-192.png',
   './icon-512.png',
-  './JameelNooriNastaleeq-Regular.ttf',
-  './JameelNooriNastaleeq-Kasheeda.ttf',
-  // ---------- 🆕 صدام کی ہدایت (FM8SEPTU4): 3 نئے فونٹ — fonts/ فولڈر میں ---------- -->
-  './fonts/PTSimpleBoldRuled.ttf',
-  './fonts/ThuluthAlsmt.ttf',
-  './fonts/JameelKhushkhati.ttf',
-  // ---------- 🐛 صدام کی ہدایت (FM6SEPSU4): PDMS_Multan_Regular.ttf یہاں سے ہٹا دیا — یہ فائل ریپو میں
-  // موجود ہی نہیں تھی، ہر install پر ناکام رہتی تھی، ہٹانے سے precache تیز اور صاف ہو گیا ---------- -->
-  // ---------- 🐛 صدام کی ہدایت: "پرنٹ (A4)" بٹن انٹرنیٹ نہ ہونے پر کام کرے، اس لیے jsPDF بھی پہلے سے کیش ----------
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  './icon-512-maskable.png'
 ];
 
-// ---------- انسٹال — نیا ورژن آتے ہی سب ضروری فائلیں پیشگی کیش کر لیں ----------
+// ---------- انسٹال: بنیادی فائلیں پہلے سے کیش کر لیں — ہر فائل الگ الگ، ایک دوسرے سے آزاد۔
+// پہلے cache.addAll() تھا (سب یا کچھ نہیں) — ایک فائل ناکام ہونے پر پوری کیشنگ خاموشی سے ناکام ہو جاتی تھی،
+// نتیجتاً آف لائن پر ایپ بالکل خالی رہ جاتی تھی۔ اب ہر فائل انفرادی طور پر کیش ہوتی ہے ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return Promise.all(
-        PRECACHE_URLS.map((url) =>
-          cache.add(url).catch((err) => {
-            console.warn('Precache failed for', url, err);
-          })
+    caches.open(CACHE_NAME)
+      .then((cache) => Promise.all(
+        CORE_ASSETS.map((url) =>
+          cache.add(url).catch((err) => console.warn('Precache failed for', url, err))
         )
-      );
-    }).then(() => self.skipWaiting())
+      ))
+      .then(() => self.skipWaiting())
   );
 });
 
-// ---------- ایکٹیویٹ — پرانے ورژن کے کیش خودکار صاف کر دیں ----------
+// ---------- ایکٹیویٹ: پرانے ورژن کے کیش صاف کر دیں ----------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       )
     ).then(() => self.clients.claim())
   );
 });
 
-// ---------- فیچ — اسی اوریجن کی فائلیں: پہلے کیش، نہ ملے تو نیٹ ورک (اور نیٹ ورک سے ملنے پر خودکار کیش اپڈیٹ) ----------
+// ---------- فیچ: پہلے نیٹ ورک آزمائیں (تازہ ترین ملے)۔ ناکام ہو تو پہلے وہی مانگی گئی فائل کیش سے دیں —
+// صرف اسی وقت index.html پر واپس جائیں جب صفحہ کھولنے کی درخواست ہو (navigation) اور کچھ بھی کیش میں نہ ملے۔
+// (پہلے یہ ہر ناکام درخواست پر خاموشی سے index.html دکھا دیتا تھا — چاہے آپ aiotest.html کھول رہے ہوں —
+// اسی وجہ سے کبھی کبھار غلط فائل نظر آتی تھی، یہی اصل خرابی تھی) ----------
 self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-
-  const url = new URL(req.url);
-
-  // ---------- 🐛 صدام کی ہدایت: مخصوص، محفوظ CDN فائلیں (jsPDF، گوگل فونٹس) بھی کیش ہوں —
-  // باقی سب (Firestore کالز وغیرہ) ہمیشہ کی طرح براہ راست نیٹ ورک پر ہی رہیں ---------- -->
-  const CACHEABLE_CROSS_ORIGIN_HOSTS = ['cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
-  if (url.origin !== self.location.origin) {
-    if (CACHEABLE_CROSS_ORIGIN_HOSTS.includes(url.hostname)) {
-      event.respondWith(
-        caches.match(req).then((cached) => {
-          if (cached) return cached;
-          return fetch(req).then((res) => {
-            const resClone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
-            return res;
-          }).catch(() => cached);
-        })
-      );
-    }
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const networkFetch = fetch(req).then((res) => {
-        if (res && res.status === 200) {
-          const resClone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
-        }
-        return res;
-      }).catch(() => cached);
-      return cached || networkFetch;
-    })
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() =>
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached; // ---------- بالکل وہی مانگی گئی فائل مل گئی — یہی واپس دیں ----------
+          if (event.request.mode === 'navigate') return caches.match('./index.html'); // ---------- صرف صفحہ کھولنے پر ہی آخری سہارا ----------
+          return new Response('', { status: 504, statusText: 'Offline' }); // ---------- دوسری فائلوں کے لیے غلط متبادل کبھی نہ دیں ----------
+        })
+      )
   );
+});
+
+// ---------- "ابھی اپڈیٹ کریں" بٹن سے فوری کنٹرول سنبھالیں ----------
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
