@@ -2092,18 +2092,18 @@
   <!-- ---------- MOBILE TOPBAR (صرف چھوٹی اسکرین پر نظر آتی ہے) ---------- -->
   <div id="mobileTopbar">
     <button id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
-    <span id="mobileBrandText" class="mobileBrand" style="display:none;">🧾 AIO POS</span>
+    <span id="mobileBrandText" class="mobileBrand" style="display:inline;">🧾 AIO POS</span>
     <!-- ---------- 🧪 صرف ٹیسٹ فائل میں: یہ لیبل "AIO POS" کی بالکل اسی جگہ، اسی بڑے سائز میں کھڑا ہو کر اسے ڈھانپ لیتا ہے —
          آئیکن کے بغیر، مسلسل چمکتا ہوا۔ دائیں طرف والا اصل ماسٹر ورژن اس سے بالکل بے اثر رہتا ہے۔
          (پہلے یہاں ایک ٹائم اسٹیمپ بیج بھی تھا، مگر ٹائم زون/گھڑی کے فرق سے کبھی الجھن پیدا کرتا تھا —
          اسے ہٹا دیا گیا؛ اب صرف دائیں طرف کا ورژن نمبر ہی تازگی کی تصدیق کے لیے کافی ہے) ---------- -->
     <div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:inline; font-size:22px; letter-spacing:.5px;">AIO POS</span>
+      <span id="testBuildLabel" class="mobileBrand testBuildGlow" style="display:none; font-size:22px; letter-spacing:.5px;">AIO POS</span>
     </div>
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST07</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST08</span>
     </div>
   </div>
 
@@ -5115,11 +5115,20 @@ function aioGetDocTypeMeta(docType){
   return null;
 }
 
+// ---------- ہر docType کی آخری کامیابی سے بھیجی گئی JSON یاد رکھیں — تاکہ بلا وجہ (بغیر کسی تبدیلی کے)
+// دوبارہ Firestore پر write نہ ہو (پہلے persistAllData ہر 1.5 سیکنڈ بعد غیر مشروط push کر رہا تھا) ----------
+const aioLastPushedJSON = {};
+
 // ---------- پورا مقامی array کلاؤڈ پر بھیجیں (JSON سٹرنگ کی صورت، Fruit Mandi کی طرح) ----------
 async function pushDocTypeToCloud(docType, items){
   const meta = aioGetDocTypeMeta(docType);
   if(!meta) return false;
   saveToStorage(docType, items); // ---------- آف لائن فال بیک ہمیشہ پہلے مقامی طور پر محفوظ کریں ----------
+  const itemsJSON = JSON.stringify(items);
+  // ---------- اگر ڈیٹا آخری کامیاب push جیسا ہی ہے اور کوئی pending retry بھی نہیں تو Firestore write سکِپ کریں ----------
+  if(aioLastPushedJSON[docType] === itemsJSON && !AppState.settings[docType + 'PendingSync']){
+    return true;
+  }
   const bizId = getOrCreateBusinessId();
   try{
     const res = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`, {
@@ -5127,7 +5136,7 @@ async function pushDocTypeToCloud(docType, items){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fields: {
-          json: { stringValue: JSON.stringify(items) },
+          json: { stringValue: itemsJSON },
           nextId: { integerValue: String(meta.nextIdVar()) },
           updatedAt: { integerValue: String(Date.now()) }
         }
@@ -5136,7 +5145,7 @@ async function pushDocTypeToCloud(docType, items){
     const ok = !!(res && res.ok);
     AppState.settings[docType + 'PendingSync'] = !ok;
     saveToStorage('settings', AppState.settings);
-    if(ok) cloudSyncStatus = 'online';
+    if(ok){ cloudSyncStatus = 'online'; aioLastPushedJSON[docType] = itemsJSON; }
     return ok;
   }catch(e){
     AppState.settings[docType + 'PendingSync'] = true;
@@ -5190,11 +5199,11 @@ function applyCloudDocTypeUI(docType){
   }
 }
 
-// ---------- ہر 12 سیکنڈ بعد خودکار fetch — Fruit Mandi جیسا "تقریباً real-time" تجربہ ----------
+// ---------- ہر 6 سیکنڈ بعد خودکار fetch — Fruit Mandi جیسا "تقریباً real-time" تجربہ (پہلے 12 سیکنڈ تھا) ----------
 function startCloudPolling(){
   stopCloudPolling();
   CLOUD_DOC_TYPES.forEach(docType => {
-    cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, 12000);
+    cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, 6000);
   });
 }
 function stopCloudPolling(){
