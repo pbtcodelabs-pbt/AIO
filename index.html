@@ -2103,7 +2103,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST05</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST06</span>
     </div>
   </div>
 
@@ -2188,7 +2188,7 @@
           </div>
         </div>
         <div class="hbcIconsRow">
-          <button class="hbcSettingsGearBtn" id="hbcSettingsBtn" onclick="toggleHomeSettingsPanel(event)" title="Settings">⚙️</button>
+          <button class="hbcSettingsGearBtn" id="hbcSettingsBtn" onclick="goTo('settings')" title="Settings">⚙️</button>
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
         </div>
@@ -2236,7 +2236,7 @@
 
           <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر، تاکہ تھیم/فونٹ/Product Card میں
                کوئی بھی تبدیلی کرتے وقت نیچے موجود اصل پراڈکٹ کارڈز ہمیشہ نظر آتے رہیں ---------- -->
-          <button class="fontsFabMain" id="hbcSettingsBtnBilling" onclick="toggleHomeSettingsPanel(event, 'hbcSettingsBtnBilling')" title="Settings" style="flex:0 0 auto;">⚙️</button>
+          <button class="fontsFabMain" id="hbcSettingsBtnBilling" onclick="goTo('settings')" title="Settings" style="flex:0 0 auto;">⚙️</button>
 
           <!-- ---------- FONTS بٹن — کاؤنٹر سیل کے دائیں طرف، مستقل جگہ پر (پراڈکٹس پر کبھی نہیں چڑھتا) ---------- -->
           <div id="fontsFab" class="fontsFab">
