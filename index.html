@@ -2136,7 +2136,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST14</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST16</span>
     </div>
   </div>
 
@@ -5129,7 +5129,7 @@ async function aioAuthFetch(path, options = {}){
 }
 
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
-const CLOUD_DOC_TYPES = ['products','customers','suppliers']; // ---------- فی الحال صرف یہ تین — باقی بعد کے مرحلے میں ----------
+const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills']; // ---------- AIOTEST15: Staff اکاؤنٹس اور بل/منظوری بھی اب دو فون کے درمیان sync ہوتے ہیں ----------
 const cloudPollTimers = {};
 
 function initCloudSync(){
@@ -5162,9 +5162,7 @@ async function joinBusinessById(newId){
   CLOUD_DOC_TYPES.forEach(t => { AppState.settings[t + 'PendingSync'] = false; });
   AppState.settings.businessId = newId;
   saveToStorage('settings', AppState.settings);
-  await fetchDocTypeFromCloud('products', false);
-  await fetchDocTypeFromCloud('customers', false);
-  await fetchDocTypeFromCloud('suppliers', false);
+  for(const docType of CLOUD_DOC_TYPES){ await fetchDocTypeFromCloud(docType, false); }
   startCloudPolling();
   try{ renderCloudSyncCard(); }catch(e){}
   alert('✅ اب اس کاروبار سے جُڑ گئے — ڈیٹا لوڈ ہو گیا۔');
@@ -5176,6 +5174,12 @@ function aioGetDocTypeMeta(docType){
   if(docType === 'products') return { get data(){ return productsData; }, set data(v){ productsData.length=0; productsData.push(...v); }, seed: PRODUCTS_SEED_DATA, idKey: 'nextProductId', nextIdVar: () => nextProductId, setNextId: (v) => { nextProductId = v; }, matchKey: 'product_id', nameKey: 'name' };
   if(docType === 'customers') return { get data(){ return customersData; }, set data(v){ customersData.length=0; customersData.push(...v); }, seed: CUSTOMERS_SEED_DATA, idKey: 'nextCustomerId', nextIdVar: () => nextCustomerId, setNextId: (v) => { nextCustomerId = v; }, matchKey: 'customer_id', nameKey: 'name' };
   if(docType === 'suppliers') return { get data(){ return suppliersData; }, set data(v){ suppliersData.length=0; suppliersData.push(...v); }, seed: SUPPLIERS_SEED_DATA, idKey: 'nextSupplierId', nextIdVar: () => nextSupplierId, setNextId: (v) => { nextSupplierId = v; }, matchKey: 'supplier_id', nameKey: 'name' };
+  // ---------- AIOTEST15: Users/Staff — تاکہ Admin کے فون پر بنایا گیا Salesman خود اپنے فون پر لاگ ان کر سکے ----------
+  if(docType === 'users') return { get data(){ return usersData; }, set data(v){ usersData.length=0; usersData.push(...v); }, seed: USERS_SEED_DATA, idKey: 'nextUserId', nextIdVar: () => nextUserId, setNextId: (v) => { nextUserId = v; }, matchKey: 'user_id', nameKey: 'name' };
+  // ---------- AIOTEST15: Bills/Invoices — invoice_id ہمیشہ Date.now() سے بنتا ہے، کوئی سیریل کاؤنٹر نہیں، اس لیے nextId غیر ضروری (0 پر رکھا) ----------
+  if(docType === 'invoices') return { get data(){ return invoicesData; }, set data(v){ invoicesData.length=0; invoicesData.push(...v); }, seed: INVOICES_SEED_DATA, idKey: 'nextInvoiceId', nextIdVar: () => 0, setNextId: () => {}, matchKey: 'invoice_id', nameKey: 'invoice_no' };
+  // ---------- AIOTEST15: Bills Awaiting Approval — سیلزمین کے فون سے Admin کے فون تک پہنچنے کے لیے ضروری ----------
+  if(docType === 'pendingbills') return { get data(){ return pendingBillsData; }, set data(v){ pendingBillsData.length=0; pendingBillsData.push(...v); }, seed: PENDING_BILLS_SEED_DATA, idKey: 'nextPendingId', nextIdVar: () => nextPendingId, setNextId: (v) => { nextPendingId = v; }, matchKey: 'pending_id', nameKey: 'salesman_name' };
   return null;
 }
 
@@ -5260,14 +5264,27 @@ function applyCloudDocTypeUI(docType){
     try{ if(typeof renderPartyList === 'function') renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
   } else if(docType === 'suppliers'){
     try{ if(typeof renderSupplierList === 'function') renderSupplierList(); }catch(e){}
+  } else if(docType === 'users'){
+    // ---------- AIOTEST15: دوسرے فون سے آیا نیا/بدلا ہوا اسٹاف — لسٹ اور اپنی سکرین رسائی دونوں تازہ کریں ----------
+    try{ if(document.getElementById('screen-users')?.classList.contains('active') && typeof renderUserList === 'function') renderUserList(); }catch(e){}
+    try{ if(typeof applyScreenAuthorizationToNav === 'function' && AppState.currentRole) applyScreenAuthorizationToNav(); }catch(e){}
+  } else if(docType === 'invoices'){
+    try{ if(document.getElementById('screen-billhistory')?.classList.contains('active') && typeof renderBillHistory === 'function') renderBillHistory(); }catch(e){}
+  } else if(docType === 'pendingbills'){
+    // ---------- AIOTEST15: دوسرے فون سے نیا Pending Bill آیا — بینر فوری اپڈیٹ کریں، ماڈل کھلا ہو تو وہ بھی ----------
+    try{ if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner(); }catch(e){}
+    try{ if(document.getElementById('pendingBillsListModal')?.classList.contains('show') && typeof renderPendingBillsListModal === 'function') renderPendingBillsListModal(); }catch(e){}
   }
 }
 
-// ---------- ہر 6 سیکنڈ بعد خودکار fetch — Fruit Mandi جیسا "تقریباً real-time" تجربہ (پہلے 12 سیکنڈ تھا) ----------
+// ---------- AIOTEST16: ہر ڈیٹا ٹائپ کی اپنی پولنگ رفتار — Pending Bills تیز (منظوری میں تاخیر قابلِ قبول نہیں)،
+// باقی سب سست (Firebase کی مفت روزانہ حد سب صارفین میں مشترک ہے، اس لیے غیر ضروری تیزی سے بچنا ضروری ہے) ----------
+const CLOUD_POLL_INTERVALS = { pendingbills: 15000, default: 45000 };
 function startCloudPolling(){
   stopCloudPolling();
   CLOUD_DOC_TYPES.forEach(docType => {
-    cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, 6000);
+    const interval = CLOUD_POLL_INTERVALS[docType] || CLOUD_POLL_INTERVALS.default;
+    cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, interval);
   });
 }
 function stopCloudPolling(){
@@ -5485,10 +5502,10 @@ function persistAllData(){
   if(typeof customCategories !== 'undefined') saveToStorage('customCategories', customCategories);
   if(typeof customersData !== 'undefined') saveCustomersLight();
   if(typeof suppliersData !== 'undefined') saveSuppliersLight();
-  if(typeof invoicesData !== 'undefined') saveToStorage('invoices', invoicesData);
-  if(typeof usersData !== 'undefined') saveToStorage('users', usersData);
+  if(typeof invoicesData !== 'undefined'){ saveToStorage('invoices', invoicesData); try{ pushDocTypeToCloud('invoices', invoicesData); }catch(e){} }
+  if(typeof usersData !== 'undefined'){ saveToStorage('users', usersData); try{ pushDocTypeToCloud('users', usersData); }catch(e){} }
   if(typeof approvalRequests !== 'undefined') saveToStorage('approvalRequests', approvalRequests);
-  if(typeof pendingBillsData !== 'undefined') saveToStorage('pendingBills', pendingBillsData);
+  if(typeof pendingBillsData !== 'undefined'){ saveToStorage('pendingBills', pendingBillsData); try{ pushDocTypeToCloud('pendingbills', pendingBillsData); }catch(e){} }
   if(typeof nextPendingId !== 'undefined') saveToStorage('nextPendingId', nextPendingId);
   if(typeof nextProductId !== 'undefined') saveToStorage('nextProductId', nextProductId);
   if(typeof nextVariantId !== 'undefined') saveToStorage('nextVariantId', nextVariantId);
@@ -7756,6 +7773,7 @@ function deleteBillingCartDraft(){
 }
 
 // ---------- Bills Awaiting Approval (سیلزمین کے بھیجے ہوئے بل جو ایڈمن کی منظوری کے منتظر ہیں) ----------
+const PENDING_BILLS_SEED_DATA = []; // ---------- AIOTEST15: خالی فہرست — نئے ڈیوائس پر seed-تحفظ چیک کے لیے درکار ----------
 let pendingBillsData = loadFromStorage('pendingBills', []);
 let nextPendingId = loadFromStorage('nextPendingId', 1);
 
