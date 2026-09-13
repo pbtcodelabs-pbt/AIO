@@ -2103,7 +2103,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST06</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST07</span>
     </div>
   </div>
 
@@ -2234,9 +2234,11 @@
             <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
           </div>
 
-          <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر، تاکہ تھیم/فونٹ/Product Card میں
-               کوئی بھی تبدیلی کرتے وقت نیچے موجود اصل پراڈکٹ کارڈز ہمیشہ نظر آتے رہیں ---------- -->
+          <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر ---------- -->
           <button class="fontsFabMain" id="hbcSettingsBtnBilling" onclick="goTo('settings')" title="Settings" style="flex:0 0 auto;">⚙️</button>
+
+          <!-- ---------- 🏷️ Product Card Style بٹن — الگ سے، تاکہ تبدیلی کرتے وقت نیچے موجود اصل پراڈکٹ کارڈز لائیو نظر آتے رہیں ---------- -->
+          <button class="fontsFabMain" id="cardStyleBtnBilling" onclick="switchHomeSettingsTab('card'); toggleHomeSettingsPanel(event, 'cardStyleBtnBilling');" title="Product Card Style" style="flex:0 0 auto;">🏷️</button>
 
           <!-- ---------- FONTS بٹن — کاؤنٹر سیل کے دائیں طرف، مستقل جگہ پر (پراڈکٹس پر کبھی نہیں چڑھتا) ---------- -->
           <div id="fontsFab" class="fontsFab">
@@ -4228,20 +4230,19 @@
           <div style="text-align:center; margin-top:4px; font-weight:700; color:var(--primary);"><span class="uiZoomValueLabel">100%</span></div>
         </div>
 
-        <!-- --- تھیم اور ظاہری شکل — کمپیکٹ ڈراپ ڈاؤن، صرف منتخب شدہ چیز نظر آتی ہے، دبانے پر باقی آپشنز کھلتے ہیں --- -->
+        <!-- --- تھیم اور ظاہری شکل --- -->
         <div class="settingsCard" id="settingsCardTheme">
           <h3>🎨 Theme & Appearance</h3>
-          <div class="settingsHint">Quick buttons: Home page, under business name.</div>
+          <div class="settingsHint">Pick a color theme and font style for the app.</div>
 
-          <!-- ---------- یہ دونوں پوشیدہ رکھے گئے ہیں — پرانا کوڈ اور کہیں انہیں id سے ڈھونڈتا ہے، اس لیے حذف نہیں کیے ---------- -->
-          <div class="categoryDropdownWrap" id="themeDropdownWrap" style="display:none;">
+          <div class="categoryDropdownWrap" id="themeDropdownWrap">
             <button type="button" class="categoryDropdownBtn" id="themeDropdownBtn" onclick="toggleThemeDropdown(event)">
               <span id="themeDropdownLabel" style="display:flex; align-items:center; gap:8px;"><span id="themeDropdownDot" style="width:16px; height:16px; border-radius:50%; display:inline-block; flex:0 0 auto;"></span><span id="themeDropdownName">—</span></span>
               <span class="categoryDropdownArrow">▾</span>
             </button>
             <div class="categoryDropdownPanel" id="themeSwatchGrid" style="padding:12px;"></div>
           </div>
-          <div class="categoryDropdownWrap" id="fontDropdownWrap" style="display:none;">
+          <div class="categoryDropdownWrap" id="fontDropdownWrap" style="margin-top:10px;">
             <button type="button" class="categoryDropdownBtn" id="fontDropdownBtn" onclick="toggleFontDropdown(event)">
               <span id="fontDropdownLabel">—</span>
               <span class="categoryDropdownArrow">▾</span>
@@ -20181,8 +20182,8 @@ function openProductCardStyleFromSearch(){
   goTo('billing');
   setTimeout(() => {
     homeSettingsActiveTab = 'card';
-    if(!homeSettingsPanelOpen) toggleHomeSettingsPanel(null, 'hbcSettingsBtnBilling');
-    else { renderHomeSettingsPanel(); positionHomeQuickPanel('hbcSettingsBtnBilling', 'homeSettingsPanel'); }
+    if(!homeSettingsPanelOpen) toggleHomeSettingsPanel(null, 'cardStyleBtnBilling');
+    else { renderHomeSettingsPanel(); positionHomeQuickPanel('cardStyleBtnBilling', 'homeSettingsPanel'); }
   }, 150);
 }
 function closeHomeSettingsPanel(){
