@@ -2103,7 +2103,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST08</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST11</span>
     </div>
   </div>
 
@@ -3466,6 +3466,18 @@
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewUserModal()">Cancel</button>
           <button class="saveBtn" onclick="saveNewUser()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN AUTHORIZATION MODAL (AIOTEST10) -->
+    <div class="modalOverlay" id="screensModal" onclick="if(event.target===this) closeScreensModal()">
+      <div class="modalBox">
+        <h3>🖥️ Screen Access — <span id="screensModalUserName"></span></h3>
+        <div id="screensModalList" style="max-height:320px; overflow-y:auto; margin-bottom:12px;"></div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeScreensModal()">Cancel</button>
+          <button class="saveBtn" onclick="saveUserScreens()">Save</button>
         </div>
       </div>
     </div>
@@ -5993,6 +6005,7 @@ function proceedWithImport(){
       suppliersData.length = 0; suppliersData.push(...(backup.suppliers || []));
       invoicesData.length = 0; invoicesData.push(...(backup.invoices || []));
       usersData.length = 0; usersData.push(...(backup.users || []));
+      usersData.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; }); // پرانی بیک اپ فائل میں screens[] نہیں ہوتا تھا
       approvalRequests.length = 0; approvalRequests.push(...(backup.approvalRequests || []));
       nextProductId = backup.nextProductId || nextProductId;
       nextVariantId = backup.nextVariantId || nextVariantId;
@@ -6832,6 +6845,26 @@ function applyRole(role, name){
   document.getElementById('userTag').innerHTML =
     (role==='admin' ? '👑 Admin: ' : '🧑‍💼 Salesman: ') + AppState.currentUser.name +
     (role==='salesman' ? renderTodaysBillBadge() : '');
+
+  applyScreenAuthorizationToNav();
+}
+
+// ---------- AIOTEST11 فکس: پہلے صرف admin-only نیو آئٹمز کو چھپایا/دکھایا جاتا تھا، اور Home/Billing/Bill
+// History ہمیشہ نظر آتے تھے — یہ غلط تھا۔ اب Admin لاگ ان پر ساری اسکرینز CSS کے مطابق نظر آئیں گی، لیکن
+// Salesman لاگ ان پر ہر نیو آئٹم کی نمائش صرف اسی ملازم کی اپنی u.screens فہرست پر منحصر ہے — چاہے وہ
+// اسکرین admin-only ہو یا نہ ہو۔ ایک بھی اسکرین خودکار نہیں دکھائی جاتی ----------
+function applyScreenAuthorizationToNav(){
+  const navItems = document.querySelectorAll('#sidebar .navItem[data-screen]');
+  if(AppState.currentRole === 'admin'){
+    navItems.forEach(el => { el.style.display = ''; }); // انلائن اسٹائل ہٹا دیں، CSS خود سنبھال لے گا (ایڈمن کو سب نظر آتی ہیں)
+    return;
+  }
+  const currentEmployee = usersData.find(x => x.name === AppState.currentUser?.name && x.role === 'salesman');
+  const allowedScreens = (currentEmployee && Array.isArray(currentEmployee.screens)) ? currentEmployee.screens : [];
+  navItems.forEach(el => {
+    const key = el.getAttribute('data-screen');
+    el.style.display = allowedScreens.includes(key) ? 'flex' : 'none';
+  });
 }
 
 // ---------- سیلزمین کے اپنے سائیڈ بار ٹیگ کے نیچے آج کے بلوں کی گنتی (چھوٹا بیج) ----------
@@ -6905,11 +6938,26 @@ function goTo(screenName, _isHistoryNav){
   // ---------- Customers/Suppliers الگ الگ نیویگیشن اندراج ہیں مگر اندرونی طور پر ایک ہی DOM اسکرین (screen-parties) شیئر کرتے ہیں تاکہ غلطی سے غلط موڈ پر پارٹی/بل نہ بن جائے ----------
   const actualScreenId = (screenName === 'customers' || screenName === 'suppliers') ? 'parties' : screenName;
 
-  // Role guard: اگر salesman admin-only اسکرین پر جانے کی کوشش کرے تو روک دیں
+  // ---------- AIOTEST11 فکس: پچھلی بار غلطی سے Home/Billing/Bill History کو ہمیشہ کھلا چھوڑ دیا گیا تھا —
+  // یہ غلط تھا۔ اب کوئی بھی اسکرین خودکار نہیں ملتی۔ ہر Salesman کو بالکل وہی اسکرینیں ملیں گی جو ایڈمن نے
+  // Users اسکرین سے اس کے لیے منتخب کی ہیں — ایک زیادہ نہیں، ایک کم نہیں۔ فیصلہ 100% ایڈمن کا ہے ----------
   const targetEl = document.getElementById('screen-' + actualScreenId);
-  if(targetEl.classList.contains('admin-only') && AppState.currentRole !== 'admin'){
-    alert('Access to this section is admin-only.');
-    return;
+  if(AppState.currentRole === 'salesman'){
+    const currentEmployee = usersData.find(x => x.name === AppState.currentUser?.name && x.role === 'salesman');
+    const allowedScreens = (currentEmployee && Array.isArray(currentEmployee.screens)) ? currentEmployee.screens : [];
+    if(!allowedScreens.includes(screenName)){
+      // ---------- خالی screens[] کا مطلب ہے ایڈمن نے ابھی تک کچھ بھی Assign نہیں کیا — ایسے ملازم کو
+      // خالی/ٹوٹی ہوئی اسکرین پر مت چھوڑیں، صاف پیغام کے ساتھ لاگ آؤٹ کر دیں ----------
+      if(allowedScreens.length === 0){
+        alert('کوئی اسکرین ابھی آپ کے لیے مقرر نہیں ہوئی۔ ایڈمن سے رابطہ کریں (Users > Screens)۔');
+        logout();
+        return;
+      }
+      // ---------- کوئی اجازت یافتہ اسکرین موجود ہے مگر یہ خاص اسکرین نہیں — مثلاً لاگ ان کے بعد خودکار
+      // Home پر بھیجا گیا مگر Home اسائن نہیں — تو خاموشی سے اس کی اپنی پہلی اجازت یافتہ اسکرین پر بھیج دیں ----------
+      goTo(allowedScreens[0], _isHistoryNav);
+      return;
+    }
   }
 
   // ---------- ہسٹری صرف اُس وقت اپڈیٹ کریں جب یہ ایک عام (نئی) نیویگیشن ہو، Back/Forward بٹن سے نہ ہو،
@@ -17560,9 +17608,9 @@ function renderTrendsScreen(){
 
 // ---------- Dummy Users Data ----------
 const USERS_SEED_DATA = [
-  {user_id:1, name:'Admin User', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', role:'admin', is_active:true}, // PIN: 1234
-  {user_id:2, name:'Aslam Bhai', username:'aslam', pin:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', role:'salesman', is_active:true}, // PIN: 1111
-  {user_id:3, name:'Bilal', username:'bilal', pin:'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9', role:'salesman', is_active:false}, // PIN: 2222
+  {user_id:1, name:'Admin User', username:'admin', pin:'03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', role:'admin', is_active:true, screens:[]}, // PIN: 1234
+  {user_id:2, name:'Aslam Bhai', username:'aslam', pin:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', role:'salesman', is_active:true, screens:[]}, // PIN: 1111
+  {user_id:3, name:'Bilal', username:'bilal', pin:'edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9', role:'salesman', is_active:false, screens:[]}, // PIN: 2222
 ];
 let usersData = loadFromStorage('users', USERS_SEED_DATA);
 // ---------- حفاظتی تدبیر: اگر localStorage میں کوئی پرانا/خراب ڈیٹا ہو جس میں کوئی درست Admin موجود نہ ہو،
@@ -17570,7 +17618,33 @@ let usersData = loadFromStorage('users', USERS_SEED_DATA);
 if(!Array.isArray(usersData) || !usersData.some(u => u.role === 'admin' && u.is_active)){
   usersData = USERS_SEED_DATA;
 }
+// ---------- AIOTEST10: Screen Authorization — پرانے محفوظ شدہ یوزرز میں screens[] فیلڈ نہیں ہوتا تھا،
+// اسے خالی فہرست کے ساتھ شامل کریں تاکہ آج کا رویہ بالکل نہ بدلے (خالی فہرست = پہلے جیسا ہی، یعنی
+// Salesman کو کوئی بھی admin-only اسکرین تب تک نہیں ملتی جب تک مالک خود Users اسکرین سے اسے اجازت نہ دے) ----------
+usersData.forEach(u => { if(!Array.isArray(u.screens)) u.screens = []; });
 let nextUserId = loadFromStorage('nextUserId', 4);
+
+// ---------- Screen Authorization: مکمل فہرست — سائیڈ مینیو کی ہر ایک اسکرین یہاں شامل ہے،
+// کوئی بھی اسکرین ہارڈ کوڈڈ/خودکار نہیں دی جاتی۔ 100% فیصلہ ایڈمن کا ہے — جتنی اسکرینز ایڈمن کسی
+// ملازم کو Assign کرے، بالکل اتنی ہی ملیں گی، ایک زیادہ یا کم نہیں (Fruit Mandi POS کے
+// ASSIGNABLE_SCREENS طریقے کی نقل، مگر یہاں AIO POS کی اپنی مکمل اسکرین فہرست ہے) ----------
+const ASSIGNABLE_SCREENS = [
+  {key:'home', label:'🏠 Home'},
+  {key:'billing', label:'🛒 Billing'},
+  {key:'billhistory', label:'🧾 Bill History'},
+  {key:'dashboard', label:'📊 Dashboard'},
+  {key:'products', label:'📦 Products'},
+  {key:'stockadjustment', label:'🧮 Stock Adjustment'},
+  {key:'customers', label:'🧑‍🤝‍🧑 Customers'},
+  {key:'suppliers', label:'🚚 Suppliers'},
+  {key:'purchaseorders', label:'📦 Purchase Orders'},
+  {key:'mydiary', label:'📔 My Diary'},
+  {key:'expenditure', label:'💸 Expenditure'},
+  {key:'myaccount', label:'🏦 My Account'},
+  {key:'billsettings', label:'🖨️ Bill & Print Settings'},
+  {key:'settings', label:'⚙️ Settings'},
+  {key:'users', label:'🔑 Users'},
+];
 
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
 const APPROVAL_REQUESTS_SEED_DATA = [
@@ -17603,9 +17677,45 @@ function renderUserList(){
         <button class="btnResetPin" onclick="setCustomUserPin(${u.user_id})">✏️ Set Custom PIN</button>
         <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
         <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 Change Role</button>
+        ${u.role === 'salesman' ? `<button class="btnResetPin" onclick="openScreensModal(${u.user_id})">🖥️ Screens (${(u.screens||[]).length})</button>` : ''}
       </div>
     </div>
   `).join('');
+}
+
+// ---------- AIOTEST10: Screen Authorization Modal — مالک یہاں سے ہر Salesman کو انفرادی طور پر
+// مخصوص admin-only اسکرینز تک رسائی دے/ہٹا سکتا ہے (Fruit Mandi POS کے طریقے کی نقل) ----------
+let screensModalTargetId = null;
+function openScreensModal(userId){
+  const u = usersData.find(x => x.user_id === userId);
+  if(!u) return;
+  screensModalTargetId = userId;
+  document.getElementById('screensModalUserName').textContent = u.name;
+  const box = document.getElementById('screensModalList');
+  box.innerHTML = ASSIGNABLE_SCREENS.map(s => `
+    <label style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:14px;">
+      <input type="checkbox" data-screenkey="${s.key}" ${u.screens.includes(s.key) ? 'checked' : ''}>
+      ${s.label}
+    </label>
+  `).join('');
+  document.getElementById('screensModal').classList.add('show');
+}
+function closeScreensModal(){
+  document.getElementById('screensModal').classList.remove('show');
+  screensModalTargetId = null;
+}
+function saveUserScreens(){
+  const u = usersData.find(x => x.user_id === screensModalTargetId);
+  if(!u){ closeScreensModal(); return; }
+  const checked = [];
+  document.querySelectorAll('#screensModalList input[type="checkbox"]').forEach(cb => {
+    if(cb.checked) checked.push(cb.getAttribute('data-screenkey'));
+  });
+  u.screens = checked;
+  saveToStorage('users', usersData);
+  closeScreensModal();
+  renderUserList();
+  applyScreenAuthorizationToNav(); // اگر یہی ملازم اس وقت لاگ ان ہے تو مینیو فوری تازہ ہو جائے
 }
 
 function toggleUserActive(userId){
@@ -17694,7 +17804,7 @@ async function saveNewUser(){
     alert('This PIN is already used by another user. Please choose a different PIN.');
     return;
   }
-  usersData.push({user_id: nextUserId++, name, username, pin: hashedPin, role, is_active:true});
+  usersData.push({user_id: nextUserId++, name, username, pin: hashedPin, role, is_active:true, screens:[]});
 
   closeNewUserModal();
   renderUserList();
