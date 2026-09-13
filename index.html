@@ -89,31 +89,52 @@
   .dobPicker .dpYearWrap{flex:1.5; display:flex; gap:4px; align-items:center; min-width:0;}
   .dobPicker .dpYearWrap select, .dobPicker .dpYearWrap input.dpYearManual{flex:1; min-width:0; padding:10px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; text-align:center;}
   .dpYearToggleBtn{border:none; background:#eef2ff; color:var(--primary-dark); border-radius:8px; padding:10px 7px; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; flex:0 0 auto;}
-  .welcomeTrialBanner{background:linear-gradient(145deg,#dcfce7,#bbf7d0); border:1.5px solid #86efac; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center;}
-  .welcomeTrialBanner .wtbHeadline{font-size:15px; font-weight:800; color:#166534; line-height:1.3;}
-  .welcomeTrialBanner .wtbSubline{font-size:12.5px; font-weight:700; color:#166534; margin-top:4px;}
-  .welcomeTrialBanner .wtbUrduNote{font-size:12.5px; color:#3f6212; margin-top:10px; line-height:1.7;}
-
-  /* --- 🎁 ٹرائل کے دوران ایک ہی بڑا گول بٹن — پہلے دو الگ ڈبے (سٹیٹس + Enter بٹن) تھے،
-     اب دونوں مل کر ایک خوبصورت، دھیرے دھیرے دھڑکتا ہوا دائرہ بن گیا ---------- */
-  .trialCircleBtn{
-    width:172px; height:172px; border-radius:50%; border:none; cursor:pointer;
-    background:radial-gradient(circle at 35% 30%, #34d399, var(--primary) 70%);
-    color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:2px; margin:6px auto 4px; box-shadow:0 10px 30px rgba(16,185,129,.45), 0 0 0 6px rgba(52,211,153,.15);
-    animation:trialCirclePulse 2.4s ease-in-out infinite;
-  }
-  .trialCircleBtn:active{ transform:scale(.96); }
-  @keyframes trialCirclePulse{
-    0%, 100%{ box-shadow:0 10px 30px rgba(16,185,129,.45), 0 0 0 6px rgba(52,211,153,.15); }
-    50%{ box-shadow:0 10px 34px rgba(16,185,129,.55), 0 0 0 12px rgba(52,211,153,.05); }
-  }
-  .trialCircleBtn .tcbIcon{ font-size:28px; line-height:1; }
-  .trialCircleBtn .tcbLine1{ font-size:16px; font-weight:900; margin-top:2px; }
-  .trialCircleBtn .tcbLine2{ font-size:12.5px; font-weight:700; opacity:.95; }
-  .trialCircleBtn .tcbLine3{ font-size:10.5px; font-weight:600; opacity:.85; margin-top:2px; }
   .trialEndedBadge{background:linear-gradient(145deg,#fef2f2,#fee2e2); border:1.5px solid #fca5a5; border-radius:12px; padding:14px 16px; margin-bottom:14px; text-align:center; color:#991b1b; font-weight:800; font-size:14px;}
   .subscribedBadge{background:#eef2ff; border-radius:10px; padding:10px 14px; margin-bottom:14px; font-size:13px; font-weight:700; color:var(--primary-dark); text-align:center;}
+
+  /* ===================== AIOTEST12: صاف، الگ الگ Admin/Salesman لاگ ان ===================== */
+  /* --- 🔀 اوپر دو الگ ٹیب: 👑 Admin اور 🧑‍💼 Salesman — جو منتخب ہو وہی نمایاں --- */
+  .loginRoleTabs{display:flex; gap:8px; margin-bottom:16px;}
+  .loginRoleTab{
+    flex:1; border:1.5px solid #dbe1ea; background:#f8fafc; color:var(--muted);
+    padding:11px 6px; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:2px; transition:all .15s ease;
+  }
+  .loginRoleTab .lrtIcon{font-size:19px;}
+  .loginRoleTab.active{background:var(--primary); border-color:var(--primary); color:#fff; box-shadow:0 4px 12px rgba(15,118,110,.28);}
+  .loginPanel{display:none;}
+  .loginPanel.active{display:block;}
+  .loginBox select{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:15px; text-align:center; background:#fff; color:var(--text);}
+  /* --- 👁️ PIN دکھانے/چھپانے والا آنکھ آئیکن، ان پٹ کے اندر دائیں طرف --- */
+  .loginPinFieldWrap{position:relative;}
+  .loginPinFieldWrap input{padding-left:38px !important;}
+  .loginPinEyeBtn{
+    position:absolute; left:6px; top:50%; transform:translateY(-50%); background:none; border:none;
+    font-size:17px; cursor:pointer; padding:6px; width:auto !important; margin:0 !important; color:var(--muted);
+  }
+  /* --- 🔒 غلط PIN بار بار درج ہونے پر لاک آؤٹ پیغام --- */
+  .loginLockoutBox{
+    background:linear-gradient(145deg,#fef2f2,#fee2e2); border:1.5px solid #fca5a5; border-radius:12px;
+    padding:14px 16px; margin-bottom:14px; text-align:center; color:#991b1b; font-weight:800; font-size:13.5px; line-height:1.6;
+  }
+  .loginAttemptsHint{font-size:11.5px; color:var(--danger); font-weight:700; margin-top:2px; text-align:center;}
+
+  /* ===================== AIOTEST12: Screen Access Modal — خوبصورت Capsule چیک باکس ===================== */
+  #screensModal .modalBox{width:340px;}
+  .screensModalTopRow{display:flex; gap:8px; margin-bottom:10px;}
+  .screensModalActionBtn{
+    flex:1; border:1.5px solid #dbe1ea; background:#f8fafc; color:var(--primary-dark);
+    padding:8px 4px; border-radius:10px; font-size:12px; font-weight:800; cursor:pointer;
+  }
+  .screenChipGrid{display:flex; flex-wrap:wrap; gap:8px; padding:2px 0 4px;}
+  .screenChip{
+    display:flex; align-items:center; gap:6px; border:1.5px solid #dbe1ea; background:#f8fafc; color:var(--text);
+    padding:8px 13px; border-radius:20px; font-size:12.5px; font-weight:700; cursor:pointer; user-select:none; transition:all .12s ease;
+  }
+  .screenChip input{display:none;}
+  .screenChip .scDot{width:7px; height:7px; border-radius:50%; background:#cbd5e1; flex:0 0 auto;}
+  .screenChip.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .screenChip.active .scDot{background:#fff;}
 
   /* --- 🏪 Home Business Card — صرف Billing (ہوم) پیج پر، دکان کی پہچان ---
      نوٹ: نام والی لائن اور آئیکنز کو دو الگ الگ قطاروں میں رکھا گیا ہے تاکہ
@@ -1899,36 +1920,47 @@
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
   <div class="loginBox">
-    <h2 id="loginHeading" onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">🔐 Login</h2>
+    <h2 id="loginHeading" onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">🔐 AIO POS Login</h2>
 
-    <!-- ---------- 🎉 خوش آمدید بینر — بیٹا ٹیسٹنگ کی صاف وضاحت، پہلی نظر میں ---------- -->
-    <div class="welcomeTrialBanner">
-      <div class="wtbHeadline">🎉 Best Billing App — Try it FREE for 30 Days!</div>
-      <div class="wtbSubline">Your 30-Day Free Trial starts now.</div>
-      <div class="wtbUrduNote">This app is currently in Beta (testing) version. Please don't forget to take daily backups, and keep running your old method alongside it too. If you notice any issue — big or small — please report it to the developer right away, so this app can become the best it can be for you.</div>
-    </div>
-
-    <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — صرف "ٹرائل ختم" یا "Subscribed" پر نظر آئے، ٹرائل ایکٹو میں نیچے گول بٹن ہی سب کچھ بتا دیتا ہے ---------- -->
+    <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
 
-    <!-- ---------- ڈیفالٹ PIN (1234) پر موجود نئے/ٹرائل صارف کے لیے — ایک ہی بڑا گول بٹن، سٹیٹس اور Enter دونوں ایک ساتھ ---------- -->
-    <div id="loginQuickEnterWrap" style="display:none;">
-      <button onclick="quickEnterApp()" class="trialCircleBtn" id="trialCircleBtn">
-        <span class="tcbIcon">🎁</span>
-        <span class="tcbLine1">Click Here</span>
-        <span class="tcbLine2" id="tcbDaysLine">for 30 Days</span>
-        <span class="tcbLine3">Free Use</span>
+    <!-- ---------- 🔀 صاف الگ الگ داخلہ: 👑 Admin اور 🧑‍💼 Salesman — کوئی ابہام نہیں کہ کس طور پر لاگ ان ہو رہے ہیں ---------- -->
+    <div class="loginRoleTabs">
+      <button type="button" class="loginRoleTab active" id="loginTabAdmin" onclick="switchLoginRole('admin')">
+        <span class="lrtIcon">👑</span><span>Admin</span>
+      </button>
+      <button type="button" class="loginRoleTab" id="loginTabSalesman" onclick="switchLoginRole('salesman')">
+        <span class="lrtIcon">🧑‍💼</span><span>Salesman</span>
       </button>
     </div>
 
-    <!-- ---------- عام PIN entry — صرف اسی وقت نظر آئے گی جب Admin نے اپنا PIN بدل لیا ہو (یعنی حقیقی/سنجیدہ استعمال شروع ہو چکا) ---------- -->
-    <div id="loginPinWrap" style="display:none;">
-      <input type="password" id="pinInput" placeholder="Enter your PIN" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+    <!-- ---------- 🔒 لاک آؤٹ پیغام — بار بار غلط PIN پر نظر آئے، اس دوران Enter بٹن بند رہے ---------- -->
+    <div id="loginLockoutBox" class="loginLockoutBox" style="display:none;"></div>
+
+    <div id="loginFormArea">
+      <!-- ---------- 👑 Admin پینل — صرف PIN، کوئی نام منتخب کرنے کی ضرورت نہیں (ایک ہی Admin اکاؤنٹ) ---------- -->
+      <div class="loginPanel active" id="loginPanelAdmin">
+        <div class="loginPinFieldWrap">
+          <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputAdmin', this)">👁️</button>
+          <input type="password" id="pinInputAdmin" placeholder="Admin PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+        </div>
+      </div>
+
+      <!-- ---------- 🧑‍💼 Salesman پینل — پہلے اپنا نام منتخب کریں، پھر اپنا PIN ---------- -->
+      <div class="loginPanel" id="loginPanelSalesman">
+        <select id="loginSalesmanSelect"></select>
+        <div class="loginPinFieldWrap">
+          <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputSalesman', this)">👁️</button>
+          <input type="password" id="pinInputSalesman" placeholder="اپنا PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+        </div>
+      </div>
+
       <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
         <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
         🔒 Remember me on this device
       </label>
-      <button onclick="login()">Enter</button>
+      <button id="loginEnterBtn" onclick="login()">Enter</button>
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
@@ -2103,7 +2135,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST11</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST12</span>
     </div>
   </div>
 
@@ -3470,11 +3502,15 @@
       </div>
     </div>
 
-    <!-- SCREEN AUTHORIZATION MODAL (AIOTEST10) -->
+    <!-- SCREEN AUTHORIZATION MODAL (AIOTEST12: خوبصورت Capsule چیک باکس، کمپیکٹ) -->
     <div class="modalOverlay" id="screensModal" onclick="if(event.target===this) closeScreensModal()">
       <div class="modalBox">
         <h3>🖥️ Screen Access — <span id="screensModalUserName"></span></h3>
-        <div id="screensModalList" style="max-height:320px; overflow-y:auto; margin-bottom:12px;"></div>
+        <div class="screensModalTopRow">
+          <button type="button" class="screensModalActionBtn" onclick="setAllScreenChips(true)">✅ Select All</button>
+          <button type="button" class="screensModalActionBtn" onclick="setAllScreenChips(false)">◻️ Clear All</button>
+        </div>
+        <div id="screensModalList" class="screenChipGrid" style="max-height:320px; overflow-y:auto; margin-bottom:12px;"></div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeScreensModal()">Cancel</button>
           <button class="saveBtn" onclick="saveUserScreens()">Save</button>
@@ -6578,106 +6614,171 @@ function sendDevChat(channel){
 // جب تک فری ٹرائل فعال ہے (چاہے Admin نے PIN بدل بھی لیا ہو) تو نئے/عام صارف کو PIN کی کنفیوژن میں بالکل نہیں ڈالنا —
 // سیدھا "Enter App" بٹن دکھائیں، "Login" کا لفظ اور PIN باکس دونوں چھپے رہیں۔
 // ٹرائل ختم ہونے کے بعد (یا پیڈ سبسکرپشن پر) ہی اصل PIN لاگ ان واپس آئے گا ----------
+// ---------- AIOTEST12: اب Trial کے دوران بھی PIN چھوڑ کر اندر جانے والا شارٹ کٹ ختم — ہمیشہ اصل
+// Admin/Salesman ٹیب اور PIN درج کر کے ہی لاگ ان ہوگا، تاکہ نیچے والا Lockout نظام حقیقی معنوں میں کام کرے ---------- */
 async function setupLoginScreen(){
-  // ---------- کوئی بھی غیر متوقع خرابی ہو (پرانا براؤزر، ڈیٹا کرپشن وغیرہ) تو صارف کبھی بھی خالی/غیر فعال اسکرین پر نہ رہے —
-  // ناکامی کی صورت میں محفوظ ترین حالت (Free Trial کا سیدھا بٹن) خودکار دکھائیں ----------
   try{
-    getOrCreateDeviceUID(); // ---------- پہلی بار کھلنے پر یہیں سے 7 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے ----------
-
-    const trialActive = !!AppState.settings.isOnFreeTrial && isSubscriptionActive();
+    getOrCreateDeviceUID(); // ---------- پہلی بار کھلنے پر یہیں سے 30 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے ----------
 
     const statusEl = document.getElementById('loginSubStatus');
-    const circleWrap = document.getElementById('loginQuickEnterWrap');
-    const circleBtn = document.getElementById('trialCircleBtn');
-    const daysLine = document.getElementById('tcbDaysLine');
-
-    const defaultHash = await hashPin('1234');
-    const admin = usersData.find(u => u.role === 'admin' && u.is_active);
-    const stillDefaultPin = admin && admin.pin === defaultHash;
-    const skipPin = stillDefaultPin || trialActive;
-
-    // ---------- گول بٹن کے اندر متن — ٹرائل کے دوران دن گنتی کے ساتھ، ورنہ عام "Enter App" ----------
-    if(skipPin && circleBtn){
-      if(trialActive){
-        const days = daysLeftInSubscription();
-        circleBtn.querySelector('.tcbIcon').textContent = '🎁';
-        circleBtn.querySelector('.tcbLine1').textContent = 'Click Here';
-        daysLine.textContent = `${days} Day${days===1?'':'s'} Left`;
-        circleBtn.querySelector('.tcbLine3').textContent = 'Free Use';
-      } else {
-        // ---------- Subscribed صارف ابھی تک ڈیفالٹ PIN پر ہو (کم عام صورت) ----------
-        circleBtn.querySelector('.tcbIcon').textContent = '✅';
-        circleBtn.querySelector('.tcbLine1').textContent = 'Enter App';
-        const days = daysLeftInSubscription();
-        daysLine.textContent = `${days} Day${days===1?'':'s'} Left`;
-        circleBtn.querySelector('.tcbLine3').textContent = 'Subscribed';
-      }
-    }
-
-    // ---------- سٹیٹس بیج صرف اُس وقت نظر آئے جب گول بٹن نظر نہ آ رہا ہو (یعنی اصل PIN لاگ ان کے ساتھ) ----------
-    if(!skipPin){
-      if(isSubscriptionActive()){
-        const days = daysLeftInSubscription();
-        statusEl.className = 'subscribedBadge';
-        statusEl.textContent = `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
-      } else {
-        statusEl.className = 'trialEndedBadge';
-        statusEl.textContent = `⏰ Your Free Trial Has Ended — Please Subscribe to Continue`;
-      }
-      statusEl.style.display = 'block';
+    if(isSubscriptionActive()){
+      const days = daysLeftInSubscription();
+      statusEl.className = AppState.settings.isOnFreeTrial ? 'subscribedBadge' : 'subscribedBadge';
+      statusEl.textContent = AppState.settings.isOnFreeTrial
+        ? `🎁 Free Trial — ${days} day${days===1?'':'s'} remaining`
+        : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
     } else {
-      statusEl.style.display = 'none';
+      statusEl.className = 'trialEndedBadge';
+      statusEl.textContent = `⏰ Your Free Trial Has Ended — Please Subscribe to Continue`;
     }
+    statusEl.style.display = 'block';
 
-    circleWrap.style.display = skipPin ? 'block' : 'none';
-    document.getElementById('loginPinWrap').style.display = skipPin ? 'none' : 'block';
-
-    // ---------- ٹرائل کے دوران "Login" کا لفظ خود بھی کنفیوژن پیدا کرتا ہے — چھپا دیں، صرف ٹرائل ختم ہونے پر واپس نظر آئے ----------
-    const heading = document.getElementById('loginHeading');
-    if(heading) heading.style.display = skipPin ? 'none' : 'block';
+    switchLoginRole('admin');
+    populateLoginSalesmanList();
+    refreshLoginLockoutUI();
   }catch(err){
-    console.error('setupLoginScreen ناکام ہو گیا، محفوظ حالت پر واپس جا رہے ہیں:', err);
-    const statusEl = document.getElementById('loginSubStatus');
-    if(statusEl && !statusEl.textContent) statusEl.textContent = '🎁 Free Trial';
-    const heading = document.getElementById('loginHeading');
-    if(heading) heading.style.display = 'none';
-    const quickWrap = document.getElementById('loginQuickEnterWrap');
-    const pinWrap = document.getElementById('loginPinWrap');
-    if(quickWrap) quickWrap.style.display = 'block';
-    if(pinWrap) pinWrap.style.display = 'none';
+    console.error('setupLoginScreen ناکام ہو گیا:', err);
   }
 }
 
-// ---------- ڈیفالٹ PIN پر — بغیر ٹائپ کیے سیدھا اندر داخل ہوں ----------
-function quickEnterApp(){
-  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
-  if(!admin){ alert('No active Admin account found.'); return; }
-  // ---------- یہاں سے داخل ہونے پر بھی سیشن یاد رکھیں — اگلی بار ایپ کھلنے پر دوبارہ لاگ ان اسکرین نہ دکھے ----------
-  finishLogin(admin, true);
+// ---------- 🔀 Admin/Salesman ٹیب سوئچ — ہر ایک کا اپنا الگ PIN فیلڈ، کوئی الجھن نہیں ---------- */
+function switchLoginRole(role){
+  document.getElementById('loginTabAdmin').classList.toggle('active', role === 'admin');
+  document.getElementById('loginTabSalesman').classList.toggle('active', role === 'salesman');
+  document.getElementById('loginPanelAdmin').classList.toggle('active', role === 'admin');
+  document.getElementById('loginPanelSalesman').classList.toggle('active', role === 'salesman');
+  AppState._loginActiveRole = role;
+  if(role === 'salesman') populateLoginSalesmanList();
+}
+
+// ---------- Salesman ٹیب کھلتے ہی فعال ملازمین کی تازہ ترین فہرست ڈراپ ڈاؤن میں بھریں ---------- */
+function populateLoginSalesmanList(){
+  const sel = document.getElementById('loginSalesmanSelect');
+  if(!sel) return;
+  const activeSalesmen = usersData.filter(u => u.role === 'salesman' && u.is_active);
+  if(activeSalesmen.length === 0){
+    sel.innerHTML = '<option value="">No active Salesman account</option>';
+    return;
+  }
+  sel.innerHTML = activeSalesmen.map(u => `<option value="${u.user_id}">${u.name}</option>`).join('');
+}
+
+// ---------- 👁️ PIN دکھائیں/چھپائیں ---------- */
+function toggleLoginPinVisibility(inputId, btn){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.textContent = showing ? '👁️' : '🙈';
+}
+
+/* =====================================================================
+   🔒 AIOTEST12: لاگ ان لاک آؤٹ — مسلسل غلط PIN پر عارضی طور پر داخلہ بند
+   5 غلط کوششوں کے بعد 60 سیکنڈ کے لیے Enter بٹن بند ہو جاتا ہے
+   ===================================================================== */
+const LOGIN_LOCKOUT_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_SECONDS = 60;
+function getLoginSecurity(){
+  return loadFromStorage('loginSecurity', { failedAttempts: 0, lockedUntil: null });
+}
+function saveLoginSecurity(sec){
+  saveToStorage('loginSecurity', sec);
+}
+function isLoginLockedOut(){
+  const sec = getLoginSecurity();
+  return !!(sec.lockedUntil && sec.lockedUntil > Date.now());
+}
+function recordFailedLoginAttempt(){
+  const sec = getLoginSecurity();
+  sec.failedAttempts = (sec.failedAttempts || 0) + 1;
+  if(sec.failedAttempts >= LOGIN_LOCKOUT_MAX_ATTEMPTS){
+    sec.lockedUntil = Date.now() + (LOGIN_LOCKOUT_SECONDS * 1000);
+    sec.failedAttempts = 0;
+  }
+  saveLoginSecurity(sec);
+  refreshLoginLockoutUI();
+}
+function resetLoginSecurity(){
+  saveLoginSecurity({ failedAttempts: 0, lockedUntil: null });
+  refreshLoginLockoutUI();
+}
+let _loginLockoutTimer = null;
+function refreshLoginLockoutUI(){
+  const box = document.getElementById('loginLockoutBox');
+  const formArea = document.getElementById('loginFormArea');
+  if(!box || !formArea) return;
+  clearInterval(_loginLockoutTimer);
+  const sec = getLoginSecurity();
+
+  if(sec.lockedUntil && sec.lockedUntil > Date.now()){
+    formArea.style.opacity = '.45';
+    formArea.style.pointerEvents = 'none';
+    box.style.display = 'block';
+    const tick = () => {
+      const secsLeft = Math.max(0, Math.ceil((sec.lockedUntil - Date.now()) / 1000));
+      box.textContent = `🔒 Too many wrong attempts. Please wait ${secsLeft}s before trying again.`;
+      if(secsLeft <= 0){
+        clearInterval(_loginLockoutTimer);
+        resetLoginSecurity();
+        formArea.style.opacity = '';
+        formArea.style.pointerEvents = '';
+        box.style.display = 'none';
+      }
+    };
+    tick();
+    _loginLockoutTimer = setInterval(tick, 1000);
+  } else {
+    box.style.display = 'none';
+    formArea.style.opacity = '';
+    formArea.style.pointerEvents = '';
+    const attemptsHint = document.getElementById('loginAttemptsHintText');
+    if(attemptsHint) attemptsHint.remove();
+    if(sec.failedAttempts > 0){
+      const remaining = LOGIN_LOCKOUT_MAX_ATTEMPTS - sec.failedAttempts;
+      const hint = document.createElement('div');
+      hint.id = 'loginAttemptsHintText';
+      hint.className = 'loginAttemptsHint';
+      hint.textContent = `⚠️ Wrong PIN. ${remaining} attempt${remaining===1?'':'s'} left before lockout.`;
+      formArea.appendChild(hint);
+    }
+  }
 }
 
 async function login(){
-  const pin = document.getElementById('pinInput').value.trim();
-  if(pin.length < 4){
-    alert('Please enter your PIN (at least 4 digits).');
-    return;
+  if(isLoginLockedOut()) return;
+
+  const role = AppState._loginActiveRole || 'admin';
+  let user = null;
+
+  if(role === 'admin'){
+    const pin = document.getElementById('pinInputAdmin').value.trim();
+    if(pin.length < 4){ alert('Please enter your Admin PIN (at least 4 digits).'); return; }
+    const enteredHash = await hashPin(pin);
+    user = usersData.find(u => u.role === 'admin' && u.pin === enteredHash);
+    document.getElementById('pinInputAdmin').value = '';
+  } else {
+    const sel = document.getElementById('loginSalesmanSelect');
+    const selectedId = sel && sel.value ? Number(sel.value) : null;
+    if(!selectedId){ alert('Please select your name first.'); return; }
+    const pin = document.getElementById('pinInputSalesman').value.trim();
+    if(pin.length < 4){ alert('Please enter your PIN (at least 4 digits).'); return; }
+    const enteredHash = await hashPin(pin);
+    const candidate = usersData.find(u => u.user_id === selectedId && u.role === 'salesman');
+    if(candidate && candidate.pin === enteredHash) user = candidate;
+    document.getElementById('pinInputSalesman').value = '';
   }
 
-  // ---------- PIN کبھی پلین ٹیکسٹ میں compare نہیں ہوتا — پہلے hash بنائیں پھر محفوظ شدہ hash سے موازنہ کریں ----------
-  const enteredHash = await hashPin(pin);
-  const user = usersData.find(u => u.pin === enteredHash);
-
   if(!user){
-    alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
-    document.getElementById('pinInput').value = '';
+    recordFailedLoginAttempt();
+    if(!isLoginLockedOut()) alert('Incorrect PIN. Please try again, or contact Admin if you forgot it.');
     return;
   }
   if(!user.is_active){
     alert('This account has been deactivated. Please contact Admin.');
-    document.getElementById('pinInput').value = '';
     return;
   }
 
+  resetLoginSecurity();
   // ---------- Remember PIN: اگر چیک باکس آن ہے تو اس ڈیوائس پر سیشن یاد رکھ لیں (localStorage) تاکہ فائل دوبارہ کھلنے پر پن نہ مانگے ----------
   finishLogin(user);
 }
@@ -6699,7 +6800,7 @@ function finishLogin(user, forceRemember){
 
   applyRole(user.role, user.name);
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('pinInput').value = '';
+  clearLoginPinFields();
 
   // ---------- سبسکرپشن فعال نہ ہو تو ایپ نہیں کھلے گی، فعال سازی صفحہ دکھایا جائے گا ----------
   // (getOrCreateDeviceUID یہاں پہلے چلانا ضروری ہے — بالکل نئے ڈیوائس پر یہی 7 دن کا مفت ٹرائل شروع کرتا ہے)
@@ -6876,10 +6977,18 @@ function renderTodaysBillBadge(){
   return `<div style="font-size:11px; opacity:.85; margin-top:3px; font-weight:600;">🧾 Today: ${todaysCount} bill(s)</div>`;
 }
 
+// ---------- AIOTEST12: اب دو الگ PIN فیلڈز ہیں (Admin/Salesman) — دونوں یہاں سے صاف کریں ---------- */
+function clearLoginPinFields(){
+  const a = document.getElementById('pinInputAdmin');
+  const s = document.getElementById('pinInputSalesman');
+  if(a) a.value = '';
+  if(s) s.value = '';
+}
+
 function logout(){
   AppState.currentUser = null;
   AppState.currentRole = null;
-  document.getElementById('pinInput').value = '';
+  clearLoginPinFields();
   saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -6897,8 +7006,7 @@ function fullLogoutAllAccounts(){
   saveToStorage('rememberedSession', null);
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
-  const pinInput = document.getElementById('pinInput');
-  if(pinInput) pinInput.value = '';
+  clearLoginPinFields();
 }
 
 // ---------- NAVIGATION LOGIC ----------
@@ -17692,13 +17800,28 @@ function openScreensModal(userId){
   screensModalTargetId = userId;
   document.getElementById('screensModalUserName').textContent = u.name;
   const box = document.getElementById('screensModalList');
+  // ---------- AIOTEST12: صاف Capsule Chip — لمبی فہرست کی بجائے چھوٹے، خوبصورت گول بٹن جو ٹیپ کرنے پر رنگ بدل جائیں ---------- */
   box.innerHTML = ASSIGNABLE_SCREENS.map(s => `
-    <label style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:14px;">
+    <label class="screenChip ${u.screens.includes(s.key) ? 'active' : ''}" onclick="toggleScreenChip(this)">
       <input type="checkbox" data-screenkey="${s.key}" ${u.screens.includes(s.key) ? 'checked' : ''}>
-      ${s.label}
+      <span class="scDot"></span>${s.label}
     </label>
   `).join('');
   document.getElementById('screensModal').classList.add('show');
+}
+// ---------- چپ پر ٹیپ کرنے پر چیک باکس + رنگ دونوں ایک ساتھ بدلیں ---------- */
+function toggleScreenChip(labelEl){
+  const cb = labelEl.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  labelEl.classList.toggle('active', cb.checked);
+}
+// ---------- ✅ Select All / ◻️ Clear All ---------- */
+function setAllScreenChips(state){
+  document.querySelectorAll('#screensModalList .screenChip').forEach(chip => {
+    const cb = chip.querySelector('input[type="checkbox"]');
+    cb.checked = state;
+    chip.classList.toggle('active', state);
+  });
 }
 function closeScreensModal(){
   document.getElementById('screensModal').classList.remove('show');
