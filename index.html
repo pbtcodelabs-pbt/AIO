@@ -1875,10 +1875,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
-  <!-- ---------- ☁️ Firebase (Cloud Sync) — Multi-Device/Multi-Employee کے لیے، compat SDK (پرانے سادہ script-tag انداز میں، module bundler کی ضرورت نہیں) ---------- -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <!-- ---------- ☁️ Cloud Sync اب سیدھا REST API (fetch) سے کام کرتا ہے — کسی بیرونی Firebase SDK کی ضرورت نہیں (Fruit Mandi کا ثابت شدہ طریقہ) ---------- -->
 </head>
 <body>
 <!-- ---------- 📊 پتلی Progress Bar — بیک اپ/ری سٹور کے دوران ہمیشہ اوپر نظر آئے گی ---------- -->
@@ -2106,7 +2103,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST04</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST05</span>
     </div>
   </div>
 
@@ -4978,8 +4975,12 @@
 const STORAGE_PREFIX = 'aioPos_';
 
 /* =====================================================================
-   ☁️ CLOUD SYNC (Firebase) — Multi-Device / Multi-Employee
+   ☁️ CLOUD SYNC — Multi-Device / Multi-Employee (Fruit Mandi کے ثابت شدہ
+   طریقے کی بنیاد پر — REST API، بغیر کسی بیرونی Firebase SDK کے)
    ---------------------------------------------------------------------
+   ⚠️ یہ AIO POS کا اپنا، الگ Firebase پروجیکٹ ہے (aio-pos-backup) —
+   Fruit Mandi کے پروجیکٹ سے مکمل الگ، تاکہ دونوں کا ڈیٹا کبھی مکس نہ ہو۔
+
    ہر کاروبار (اس ایپ کا ہر گاہک) ایک منفرد "Business Code" رکھتا ہے۔
    مالک کے پہلے ڈیوائس پر یہ خودکار بنتا ہے۔ مالک یہی کوڈ اپنے ملازمین کو
    دیتا ہے (WhatsApp پر) — وہ Settings > ☁️ Cloud Sync میں یہ کوڈ درج کر کے
@@ -4988,62 +4989,97 @@ const STORAGE_PREFIX = 'aioPos_';
 
    ڈیٹا ڈھانچہ: /businesses/{businessId}/store/{docType}
    ہر docType (products, customers, suppliers, ...) اپنے آپ میں ایک ہی
-   دستاویز ہے جس میں پورا array محفوظ ہوتا ہے — بالکل اسی طرح جیسے
-   localStorage میں پورا array ایک ہی وقت میں محفوظ ہوتا ہے۔ اس سے
-   کوڈ سادہ رہتا ہے اور کئی ڈیوائسز کے درمیان تصادم (conflict) کم ہوتا ہے۔
+   دستاویز ہے جس میں پورا array ایک JSON سٹرنگ کی صورت محفوظ ہوتا ہے —
+   بالکل Fruit Mandi کی طرح (نیٹِو Firestore array/map کی بجائے، جو سادہ
+   اور کم پیچیدہ ہے)۔ Real-time listener کی بجائے: ہر تبدیلی پر فوری push،
+   اور ہر چند سیکنڈ بعد خودکار fetch (polling) — Fruit Mandi میں یہی طریقہ
+   قابلِ اعتماد ثابت ہوا۔
    ===================================================================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyBdoyFrqJ67OonYVIoCM6rjeBDI1hZBGKE",
-  authDomain: "aio-pos-backup.firebaseapp.com",
-  projectId: "aio-pos-backup",
-  storageBucket: "aio-pos-backup.firebasestorage.app",
-  messagingSenderId: "751661674362",
-  appId: "1:751661674362:web:93edfa9bd652dd6b6f30c3"
-};
-let cloudDb = null;
-let cloudAuthUid = null;
-let cloudAuthReadyResolve = null;
-// ---------- یہ Promise تب تک "pending" رہتا ہے جب تک Anonymous Auth مکمل نہ ہو —
-// پش/فیچ فنکشنز اسی کا انتظار کرتے ہیں تاکہ Auth مکمل ہونے سے پہلے کوئی کوشش ناکام نہ ہو ----------
-const cloudAuthReady = new Promise((resolve) => { cloudAuthReadyResolve = resolve; });
-let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
-const CLOUD_DOC_TYPES = ['products','customers','suppliers']; // ---------- فی الحال صرف یہ تین — باقی (bills وغیرہ) اگلے مرحلے میں ----------
-const cloudUnsubscribers = {}; // ---------- ہر docType کا فعال onSnapshot listener، Business ID بدلنے پر پرانا بند کرنا ضروری ----------
-const cloudInitialFetchDone = {}; // ---------- ہر docType کے لیے: کیا کلاؤڈ سے پہلی بار جواب مل چکا؟ جب تک نہیں ملا، push روکا جائے (ورنہ Join کے فوراً بعد پرانا مقامی ڈیٹا کلاؤڈ کا اصل ڈیٹا مٹا سکتا ہے — race condition) ----------
+const AIO_FIREBASE_PROJECT_ID = 'aio-pos-backup';
+const AIO_FIREBASE_API_KEY = 'AIzaSyBdoyFrqJ67OonYVIoCM6rjeBDI1hZBGKE';
+const AIO_FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${AIO_FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+const AIO_AUTH_SIGNUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${AIO_FIREBASE_API_KEY}`;
+const AIO_AUTH_REFRESH_URL = `https://securetoken.googleapis.com/v1/token?key=${AIO_FIREBASE_API_KEY}`;
+window.__cloudSyncError = null; // ---------- 🩺 تشخیصی: آخری Cloud Sync ناکامی کی وجہ (Settings میں دکھانے کے لیے) ----------
 
-function initCloudSync(){
+// ---------- موجودہ ID Token واپس کریں (میعاد ختم ہو تو خاموشی سے refresh، بالکل نیا ڈیوائس ہو تو نئی anonymous شناخت) ----------
+async function aioEnsureAuth(){
+  const auth = AppState.settings.aioFbAuth;
+  if(auth && auth.idToken && auth.expiresAt && auth.expiresAt > Date.now() + 60000){
+    window.__cloudSyncError = null;
+    return auth.idToken;
+  }
   try{
-    if(!window.firebase){ console.warn('☁️ Firebase SDK لوڈ نہیں ہو سکا — انٹرنیٹ چیک کریں۔'); cloudSyncStatus = 'error'; return; }
-    if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    cloudDb = firebase.firestore();
-    firebase.auth().onAuthStateChanged((user) => {
-      if(user){
-        cloudAuthUid = user.uid;
+    if(auth && auth.refreshToken){
+      const res = await fetch(AIO_AUTH_REFRESH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(auth.refreshToken)}`
+      });
+      if(res.ok){
+        const data = await res.json();
+        AppState.settings.aioFbAuth = {
+          localId: data.user_id, idToken: data.id_token, refreshToken: data.refresh_token,
+          expiresAt: Date.now() + (parseInt(data.expires_in || '3600') * 1000)
+        };
+        saveToStorage('settings', AppState.settings);
+        window.__cloudSyncError = null;
         cloudSyncStatus = 'online';
-        if(cloudAuthReadyResolve){ cloudAuthReadyResolve(); cloudAuthReadyResolve = null; }
-        getOrCreateBusinessId(); // ---------- Auth ملتے ہی، اگر Business ID موجود نہیں تو بنا دیں ----------
-        startCloudListeners();
-      } else {
-        firebase.auth().signInAnonymously().catch((e) => {
-          console.warn('☁️ Anonymous sign-in ناکام:', e);
-          cloudSyncStatus = 'error';
-        });
+        return AppState.settings.aioFbAuth.idToken;
       }
+    }
+    const res = await fetch(AIO_AUTH_SIGNUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ returnSecureToken: true })
     });
+    if(!res.ok){
+      let reason = `HTTP ${res.status}`;
+      try{ const errBody = await res.json(); if(errBody?.error?.message) reason = errBody.error.message; }catch(e2){}
+      window.__cloudSyncError = `Auth failed (${reason}) on ${location.hostname}`;
+      cloudSyncStatus = 'error';
+      return null;
+    }
+    const data = await res.json();
+    AppState.settings.aioFbAuth = {
+      localId: data.localId, idToken: data.idToken, refreshToken: data.refreshToken,
+      expiresAt: Date.now() + (parseInt(data.expiresIn || '3600') * 1000)
+    };
+    saveToStorage('settings', AppState.settings);
+    window.__cloudSyncError = null;
+    cloudSyncStatus = 'online';
+    return AppState.settings.aioFbAuth.idToken;
   }catch(e){
-    console.warn('☁️ Cloud Sync شروع کرنے میں مسئلہ:', e);
+    window.__cloudSyncError = `Network/Auth error on ${location.hostname}: ${e.message}`;
     cloudSyncStatus = 'error';
+    return null; // ---------- آف لائن — کوئی مسئلہ نہیں، اگلی بار انٹرنیٹ ملنے پر دوبارہ کوشش ----------
   }
 }
+// ---------- Firestore کو authenticated (Bearer token) درخواست ----------
+async function aioAuthFetch(path, options = {}){
+  const token = await aioEnsureAuth();
+  if(!token) throw new Error('offline-or-auth-failed');
+  const headers = Object.assign({}, options.headers, { 'Authorization': `Bearer ${token}` });
+  return fetch(`${AIO_FIRESTORE_BASE}/${path}`, Object.assign({}, options, { headers }));
+}
 
-// ---------- ہر کاروبار کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے۔
-// getOrCreateDeviceUID() سے جان بوجھ کر الگ ہے: deviceUID ہر ڈیوائس کا اپنا ہے (ٹرائل/لائسنس کے لیے)،
-// businessId کئی ڈیوائسز میں مشترک ہوتا ہے (کلاؤڈ ڈیٹا کے لیے) ----------
+let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
+const CLOUD_DOC_TYPES = ['products','customers','suppliers']; // ---------- فی الحال صرف یہ تین — باقی بعد کے مرحلے میں ----------
+const cloudPollTimers = {};
+
+function initCloudSync(){
+  getOrCreateBusinessId();
+  aioEnsureAuth().then((token) => {
+    if(token){ startCloudPolling(); }
+  });
+}
+
+// ---------- ہر کاروبار کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
 function getOrCreateBusinessId(){
   if(AppState.settings.businessId) return AppState.settings.businessId;
   const id = 'BIZ-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
   AppState.settings.businessId = id;
-  saveToStorage('settings', AppState.settings); // ---------- جان بوجھ کر persistAllData() نہیں — وہ Products/Customers/Suppliers بھی کلاؤڈ پر پش کر دیتا، یہاں صرف سیٹنگ محفوظ کرنی ہے ----------
+  saveToStorage('settings', AppState.settings);
   try{ renderCloudSyncCard(); }catch(e){}
   return id;
 }
@@ -5056,71 +5092,119 @@ async function joinBusinessById(newId){
   if(!confirm('یہ کوڈ جوائن ہوگا:\n\n' + newId + '\n\n⚠️ اوپر لکھا کوڈ دیکھ لیں — بالکل ویسا ہی ہے جیسا مالک نے بھیجا؟ اگر ٹھیک ہے تو OK دبائیں۔')){
     return;
   }
-  // ---------- پرانے listeners بند کریں تاکہ پرانے Business کا ڈیٹا نئے پر اوورلیپ نہ کرے ----------
-  Object.keys(cloudUnsubscribers).forEach(k => { try{ cloudUnsubscribers[k](); }catch(e){} delete cloudUnsubscribers[k]; });
-  Object.keys(cloudInitialFetchDone).forEach(k => delete cloudInitialFetchDone[k]); // ---------- نئے Business کے لیے دوبارہ "پہلے جواب کا انتظار" شروع کریں ----------
+  stopCloudPolling();
+  // ---------- نئے Business کے لیے پرانی pendingSync حالتیں صاف کریں ----------
+  CLOUD_DOC_TYPES.forEach(t => { AppState.settings[t + 'PendingSync'] = false; });
   AppState.settings.businessId = newId;
-  saveToStorage('settings', AppState.settings); // ---------- جان بوجھ کر persistAllData() نہیں — ورنہ اس ڈیوائس کا مقامی ڈیٹا نئے Business پر پش ہو کر مالک کا اصل کلاؤڈ ڈیٹا اوورلیٹ (overwrite) کر سکتا تھا ----------
-  await cloudAuthReady;
-  startCloudListeners();
+  saveToStorage('settings', AppState.settings);
+  await fetchDocTypeFromCloud('products', false);
+  await fetchDocTypeFromCloud('customers', false);
+  await fetchDocTypeFromCloud('suppliers', false);
+  startCloudPolling();
   try{ renderCloudSyncCard(); }catch(e){}
-  alert('✅ اب اس کاروبار سے جُڑ گئے — ڈیٹا لوڈ ہو رہا ہے۔');
+  alert('✅ اب اس کاروبار سے جُڑ گئے — ڈیٹا لوڈ ہو گیا۔');
 }
 
-// ---------- ہر docType کے لیے، اُس وقت کا پورا لوکل array کلاؤڈ پر بھیجیں ----------
+// ---------- ہر docType کا اپنا مقامی array + seed ڈیٹا حوالہ — تاکہ نیچے عمومی (generic) push/fetch فنکشنز
+// ہر ٹائپ کے لیے دوبارہ الگ الگ نہ لکھنے پڑیں ----------
+function aioGetDocTypeMeta(docType){
+  if(docType === 'products') return { get data(){ return productsData; }, set data(v){ productsData.length=0; productsData.push(...v); }, seed: PRODUCTS_SEED_DATA, idKey: 'nextProductId', nextIdVar: () => nextProductId, setNextId: (v) => { nextProductId = v; }, matchKey: 'product_id', nameKey: 'name' };
+  if(docType === 'customers') return { get data(){ return customersData; }, set data(v){ customersData.length=0; customersData.push(...v); }, seed: CUSTOMERS_SEED_DATA, idKey: 'nextCustomerId', nextIdVar: () => nextCustomerId, setNextId: (v) => { nextCustomerId = v; }, matchKey: 'customer_id', nameKey: 'name' };
+  if(docType === 'suppliers') return { get data(){ return suppliersData; }, set data(v){ suppliersData.length=0; suppliersData.push(...v); }, seed: SUPPLIERS_SEED_DATA, idKey: 'nextSupplierId', nextIdVar: () => nextSupplierId, setNextId: (v) => { nextSupplierId = v; }, matchKey: 'supplier_id', nameKey: 'name' };
+  return null;
+}
+
+// ---------- پورا مقامی array کلاؤڈ پر بھیجیں (JSON سٹرنگ کی صورت، Fruit Mandi کی طرح) ----------
 async function pushDocTypeToCloud(docType, items){
+  const meta = aioGetDocTypeMeta(docType);
+  if(!meta) return false;
+  saveToStorage(docType, items); // ---------- آف لائن فال بیک ہمیشہ پہلے مقامی طور پر محفوظ کریں ----------
+  const bizId = getOrCreateBusinessId();
   try{
-    if(!cloudInitialFetchDone[docType]){
-      console.warn('☁️ ابھی کلاؤڈ سے پہلا جواب نہیں ملا (' + docType + ') — push روک دیا، ورنہ اصل ڈیٹا اوورلیٹ ہو سکتا تھا۔');
-      return;
-    }
-    await cloudAuthReady;
-    if(!cloudDb) return;
-    const bizId = getOrCreateBusinessId();
-    await cloudDb.collection('businesses').doc(bizId).collection('store').doc(docType)
-      .set({ items: items, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    const res = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          json: { stringValue: JSON.stringify(items) },
+          nextId: { integerValue: String(meta.nextIdVar()) },
+          updatedAt: { integerValue: String(Date.now()) }
+        }
+      })
+    });
+    const ok = !!(res && res.ok);
+    AppState.settings[docType + 'PendingSync'] = !ok;
+    saveToStorage('settings', AppState.settings);
+    if(ok) cloudSyncStatus = 'online';
+    return ok;
   }catch(e){
-    console.warn('☁️ کلاؤڈ پر بھیجنے میں مسئلہ (' + docType + '):', e);
+    AppState.settings[docType + 'PendingSync'] = true;
+    saveToStorage('settings', AppState.settings);
+    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
   }
 }
 
-// ---------- ہر docType پر real-time listener — کسی بھی دوسرے ڈیوائس سے تبدیلی آتے ہی خودکار یہاں بھی اپڈیٹ ----------
-function startCloudListeners(){
-  if(!cloudDb) return;
-  const bizId = getOrCreateBusinessId();
-  CLOUD_DOC_TYPES.forEach((docType) => {
-    if(cloudUnsubscribers[docType]) return; // ---------- پہلے سے چل رہا ہے تو دوبارہ شروع نہ کریں ----------
-    cloudUnsubscribers[docType] = cloudDb.collection('businesses').doc(bizId).collection('store').doc(docType)
-      .onSnapshot((snap) => {
-        cloudInitialFetchDone[docType] = true; // ---------- کلاؤڈ سے پہلی بار جواب مل گیا (چاہے ڈیٹا موجود ہو یا نہ ہو) — اب push کرنا محفوظ ہے ----------
-        if(!snap.exists) return; // ---------- ابھی تک کچھ پش نہیں ہوا، مقامی ڈیٹا برقرار رہے ----------
-        const data = snap.data();
-        if(!data || !Array.isArray(data.items)) return;
-        applyCloudDocType(docType, data.items);
-      }, (err) => {
-        console.warn('☁️ لسنر میں مسئلہ (' + docType + '):', err);
-      });
-  });
+// ---------- کلاؤڈ سے تازہ ترین ڈیٹا لائیں — Fruit Mandi کا حفاظتی اصول شامل: اگر مقامی ڈیٹا ابھی تک صرف
+// اَن چھوا seed ڈیٹا ہے تو کبھی push نہ کریں (خالی/ڈیفالٹ ڈیٹا کلاؤڈ پر بھیج کر اصل محفوظ شدہ ڈیٹا مٹا سکتا تھا) ----------
+async function fetchDocTypeFromCloud(docType, silent){
+  const meta = aioGetDocTypeMeta(docType);
+  if(!meta) return false;
+  const looksLikeUntouchedSeed = meta.data.length <= meta.seed.length &&
+    meta.data.every(item => meta.seed.some(s => s[meta.matchKey] === item[meta.matchKey] && s[meta.nameKey] === item[meta.nameKey]));
+  if(AppState.settings[docType + 'PendingSync'] && !looksLikeUntouchedSeed){
+    return await pushDocTypeToCloud(docType, meta.data);
+  }
+  try{
+    const bizId = getOrCreateBusinessId();
+    const res = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`);
+    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا (بالکل نیا کاروبار) ----------
+    if(!res.ok) return false;
+    const doc = await res.json();
+    const jsonStr = doc.fields?.json?.stringValue;
+    if(!jsonStr) return false;
+    const cloudItems = JSON.parse(jsonStr);
+    if(!Array.isArray(cloudItems)) return false;
+    meta.data = cloudItems;
+    const cloudNextId = parseInt(doc.fields?.nextId?.integerValue || '0');
+    if(cloudNextId > meta.nextIdVar()) meta.setNextId(cloudNextId);
+    saveToStorage(docType, meta.data);
+    cloudSyncStatus = 'online';
+    if(!silent) applyCloudDocTypeUI(docType);
+    return true;
+  }catch(e){
+    return false; // ---------- آف لائن — موجودہ مقامی فہرست پر ہی کام چلے گا ----------
+  }
 }
 
-// ---------- کلاؤڈ سے آیا ہوا ڈیٹا مقامی متغیر میں رکھیں اور متعلقہ سکرین دوبارہ بنائیں ----------
-function applyCloudDocType(docType, items){
+// ---------- کلاؤڈ سے نیا ڈیٹا آنے پر متعلقہ سکرین دوبارہ بنائیں ----------
+function applyCloudDocTypeUI(docType){
+  try{ hydratePhotosFromIndexedDB(); }catch(e){}
   if(docType === 'products'){
-    productsData.length = 0; productsData.push(...items);
-    saveToStorage('products', productsData);
-    try{ hydratePhotosFromIndexedDB(); }catch(e){}
     try{ if(typeof renderBillingProductGrid === 'function') renderBillingProductGrid(); }catch(e){}
     try{ if(typeof renderProductList === 'function') renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
   } else if(docType === 'customers'){
-    customersData.length = 0; customersData.push(...items);
-    saveToStorage('customers', customersData);
     try{ if(typeof renderPartyList === 'function') renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
   } else if(docType === 'suppliers'){
-    suppliersData.length = 0; suppliersData.push(...items);
-    saveToStorage('suppliers', suppliersData);
     try{ if(typeof renderSupplierList === 'function') renderSupplierList(); }catch(e){}
   }
 }
+
+// ---------- ہر 12 سیکنڈ بعد خودکار fetch — Fruit Mandi جیسا "تقریباً real-time" تجربہ ----------
+function startCloudPolling(){
+  stopCloudPolling();
+  CLOUD_DOC_TYPES.forEach(docType => {
+    cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, 12000);
+  });
+}
+function stopCloudPolling(){
+  Object.keys(cloudPollTimers).forEach(k => { if(cloudPollTimers[k]){ clearInterval(cloudPollTimers[k]); delete cloudPollTimers[k]; } });
+}
+window.addEventListener('online', () => {
+  CLOUD_DOC_TYPES.forEach(docType => {
+    if(AppState?.settings?.[docType + 'PendingSync']) pushDocTypeToCloud(docType, aioGetDocTypeMeta(docType).data);
+  });
+});
+
 
 // ================= PIN Hashing (SHA-256) — عارضی حفاظت جب تک Firebase Auth نہیں آتا =================
 // نوٹ: یہ localStorage میں پلین ٹیکسٹ PIN رکھنے سے بہتر ہے، لیکن حتمی حل نہیں —
