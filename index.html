@@ -2136,7 +2136,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST16</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST17</span>
     </div>
   </div>
 
@@ -2211,6 +2211,14 @@
         <span class="pbIcon">🔔</span>
         <span class="pbText" id="pendingBillsBannerTextHome">Bills Awaiting Approval</span>
         <span class="pbCount" id="pendingBillsBannerCountHome">0</span>
+        <span class="pbArrow">›</span>
+      </div>
+
+      <!-- ---------- AIOTEST17: کسٹمر کیٹلاگ لنک سے آئے نئے آرڈرز ---------- -->
+      <div class="pendingBillsBanner" id="customerOrdersBannerHome" onclick="openCustomerOrdersList()" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+        <span class="pbIcon">📥</span>
+        <span class="pbText" id="customerOrdersBannerTextHome">New Customer Orders</span>
+        <span class="pbCount" id="customerOrdersBannerCountHome">0</span>
         <span class="pbArrow">›</span>
       </div>
 
@@ -2972,6 +2980,23 @@
         </div>
         <div class="profileBody">
           <div id="pendingBillsListBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- AIOTEST17: کسٹمر آرڈرز کی فہرست ---------- -->
+    <div class="modalOverlay" id="customerOrdersListModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:420px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">📥</div>
+          <div class="pInfo">
+            <div class="pName">Customer Orders</div>
+            <div class="pMeta">From your online catalog link</div>
+          </div>
+          <span class="closeBtn" onclick="document.getElementById('customerOrdersListModal').classList.remove('show')">✖</span>
+        </div>
+        <div class="profileBody">
+          <div id="customerOrdersListWrap"></div>
         </div>
       </div>
     </div>
@@ -4545,6 +4570,13 @@
         <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
       </div>
 
+      <!-- --- AIOTEST17: 🛍️ آن لائن کیٹلاگ — کسٹمر ایپ انسٹال کیے بغیر یہ لنک کھول کر آرڈر دے سکتا ہے --- -->
+      <div class="settingsCard">
+        <h3>🛍️ Online Catalog for Customers</h3>
+        <div class="settingsHint">Share this link on WhatsApp — customers can view your products and place an order without installing the app. New orders appear right here on your Home screen.</div>
+        <button class="testPrintBtn" style="margin-top:10px;" onclick="shareCatalogLink()">🔗 Share Catalog Link</button>
+      </div>
+
       <!-- --- 💳 میرے پیمنٹ اکاؤنٹس (Reminders میں خودکار شامل ہوں گے) --- -->
       <div class="settingsCard" id="settingsCardPaymentAccounts">
         <h3>💳 My Payment Accounts</h3>
@@ -5286,6 +5318,9 @@ function startCloudPolling(){
     const interval = CLOUD_POLL_INTERVALS[docType] || CLOUD_POLL_INTERVALS.default;
     cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, interval);
   });
+  // ---------- AIOTEST17: کسٹمر آرڈرز کی اپنی الگ subcollection ہے (عام docType نہیں)، اس لیے الگ ٹائمر ----------
+  fetchCustomerOrdersFromCloud();
+  cloudPollTimers['__customerOrders'] = setInterval(fetchCustomerOrdersFromCloud, 20000);
 }
 function stopCloudPolling(){
   Object.keys(cloudPollTimers).forEach(k => { if(cloudPollTimers[k]){ clearInterval(cloudPollTimers[k]); delete cloudPollTimers[k]; } });
@@ -5296,6 +5331,157 @@ window.addEventListener('online', () => {
   });
 });
 
+
+/* =====================================================================
+   AIOTEST17: کسٹمر آرڈر سسٹم — کیٹلاگ لنک (order.html) کے ذریعے کوئی بھی
+   کسٹمر ایپ انسٹال کیے بغیر پراڈکٹ دیکھ کر آرڈر بھیج سکتا ہے۔ یہ الگ
+   فائل ہے، اسی Firebase پروجیکٹ کو استعمال کرتی ہے۔ ہر آرڈر اپنی الگ
+   Firestore دستاویز (customerOrders/{orderId}) کے طور پر بنتا ہے — پوری
+   فہرست کو دوبارہ نہ لکھنا پڑے، تاکہ ایک وقت میں کئی کسٹمر آرڈر بھیجیں تو
+   کوئی ایک دوسرے کا آرڈر مٹا نہ دے۔
+   ⚠️ ضروری: Firebase Console → Firestore → Rules میں یہ رول شامل کرنا ہوگا
+   (موجودہ /store/{docType} رول اسے کور نہیں کرتا):
+     match /businesses/{bizId}/customerOrders/{orderId} {
+       allow read, write: if request.auth != null;
+     }
+   ===================================================================== */
+let customerOrdersData = loadFromStorage('customerOrders', []);
+
+// ---------- کاروبار کا نام/فون — کیٹلاگ پیج پر دکھانے کے لیے، ایک چھوٹی سی الگ دستاویز میں محفوظ ----------
+async function pushStoreInfoToCloud(){
+  const bizId = getOrCreateBusinessId();
+  const s = AppState.settings;
+  const payload = { businessName: s.businessName || 'AIO POS', businessPhone: s.businessPhone || '' };
+  const payloadJSON = JSON.stringify(payload);
+  if(aioLastPushedJSON['storeinfo'] === payloadJSON) return true;
+  try{
+    const res = await aioAuthFetch(`businesses/${bizId}/store/storeinfo?key=${AIO_FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: {
+        businessName: { stringValue: payload.businessName },
+        businessPhone: { stringValue: payload.businessPhone }
+      }})
+    });
+    if(res && res.ok) aioLastPushedJSON['storeinfo'] = payloadJSON;
+    return !!(res && res.ok);
+  }catch(e){ return false; }
+}
+
+// ---------- کسٹمر کیٹلاگ پیج سے آئے تمام نئے آرڈرز کی فہرست لائیں (پوری subcollection پڑھیں) ----------
+async function fetchCustomerOrdersFromCloud(){
+  try{
+    const bizId = getOrCreateBusinessId();
+    const res = await aioAuthFetch(`businesses/${bizId}/customerOrders?key=${AIO_FIREBASE_API_KEY}`);
+    if(!res || !res.ok) return false;
+    const data = await res.json();
+    const docs = Array.isArray(data) ? data.filter(d => d.document).map(d => d.document) : (data.documents || []);
+    const parsed = docs.map(doc => {
+      const f = doc.fields || {};
+      const orderId = doc.name.split('/').pop();
+      let items = [];
+      try{ items = JSON.parse(f.itemsJson?.stringValue || '[]'); }catch(e2){}
+      return {
+        order_id: orderId,
+        customer_name: f.customerName?.stringValue || 'Unknown',
+        customer_phone: f.customerPhone?.stringValue || '',
+        note: f.note?.stringValue || '',
+        items,
+        submitted_at: f.submittedAt?.stringValue || ''
+      };
+    });
+    parsed.sort((a,b) => (b.submitted_at||'').localeCompare(a.submitted_at||''));
+    customerOrdersData = parsed;
+    saveToStorage('customerOrders', customerOrdersData);
+    try{ renderCustomerOrdersBanner(); }catch(e){}
+    try{ if(document.getElementById('customerOrdersListModal')?.classList.contains('show')) renderCustomerOrdersListModal(); }catch(e){}
+    return true;
+  }catch(e){ return false; }
+}
+
+// ---------- آرڈر نمٹا دیا/کارٹ میں شامل ہو گیا — Firestore سے وہ دستاویز حذف کریں ----------
+async function deleteCustomerOrderFromCloud(orderId){
+  try{
+    const bizId = getOrCreateBusinessId();
+    await aioAuthFetch(`businesses/${bizId}/customerOrders/${orderId}?key=${AIO_FIREBASE_API_KEY}`, { method: 'DELETE' });
+  }catch(e){}
+  customerOrdersData = customerOrdersData.filter(o => o.order_id !== orderId);
+  saveToStorage('customerOrders', customerOrdersData);
+  renderCustomerOrdersBanner();
+}
+
+function renderCustomerOrdersBanner(){
+  const count = customerOrdersData.length;
+  const isAdmin = AppState.currentRole === 'admin';
+  ['Home'].forEach(suffix => {
+    const banner = document.getElementById('customerOrdersBanner' + suffix);
+    if(!banner) return;
+    if(count === 0 || !isAdmin){ banner.classList.remove('show'); return; }
+    banner.classList.add('show');
+    document.getElementById('customerOrdersBannerText' + suffix).textContent =
+      count === 1 ? '1 new order from a customer' : `${count} new orders from customers`;
+    document.getElementById('customerOrdersBannerCount' + suffix).textContent = count;
+  });
+}
+
+function openCustomerOrdersList(){
+  renderCustomerOrdersListModal();
+  document.getElementById('customerOrdersListModal').classList.add('show');
+}
+function renderCustomerOrdersListModal(){
+  const wrap = document.getElementById('customerOrdersListWrap');
+  if(!wrap) return;
+  if(customerOrdersData.length === 0){
+    wrap.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted);">No new customer orders.</div>`;
+    return;
+  }
+  wrap.innerHTML = customerOrdersData.map(o => `
+    <div style="border:1.5px solid #dbe1ea; border-radius:12px; padding:12px; margin-bottom:10px;">
+      <div style="font-weight:800; font-size:14px;">${o.customer_name} <span style="font-weight:600; color:var(--muted); font-size:12px;">— ${o.customer_phone}</span></div>
+      <div style="font-size:12.5px; margin:6px 0; color:var(--text);">
+        ${o.items.map(i => `${i.qty} × ${i.name}${i.label ? ' ('+i.label+')' : ''} — Rs. ${i.unitPrice}`).join('<br>')}
+      </div>
+      ${o.note ? `<div style="font-size:12px; color:var(--muted); margin-bottom:6px;">📝 ${o.note}</div>` : ''}
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="saveBtn" style="flex:1;" onclick="addCustomerOrderToCart('${o.order_id}')">🛒 Add to Billing Cart</button>
+        <button class="cancelBtn" style="flex:0 0 auto;" onclick="deleteCustomerOrderFromCloud('${o.order_id}')">🗑️ Dismiss</button>
+      </div>
+    </div>
+  `).join('');
+}
+// ---------- کسٹمر کے آرڈر کردہ آئٹمز کو براہ راست Billing کارٹ میں ڈال دیں — Admin وہاں جا کر معمول کے مطابق بل مکمل کرے ----------
+function addCustomerOrderToCart(orderId){
+  const o = customerOrdersData.find(x => x.order_id === orderId);
+  if(!o) return;
+  o.items.forEach(i => {
+    const existing = Billing.cart.find(c => c.variant_id === i.variant_id);
+    if(existing) existing.qty += i.qty;
+    else Billing.cart.push({ variant_id: i.variant_id, name: i.name, label: i.label || '', qty: i.qty, unitPrice: i.unitPrice, unit: i.unit || 'pcs' });
+  });
+  deleteCustomerOrderFromCloud(orderId);
+  document.getElementById('customerOrdersListModal').classList.remove('show');
+  goTo('billing');
+  try{ renderCart(); }catch(e){}
+  alert(`✅ ${o.customer_name}'s order added to your Billing cart. Review and complete the sale.`);
+}
+
+// ---------- کیٹلاگ لنک بنائیں اور شیئر کریں (My Account میں بٹن سے) ----------
+async function shareCatalogLink(){
+  const base = (AppState.settings.appShareLink || '').trim();
+  if(!base){
+    alert('پہلے Settings → Admin Control میں "App Share Link" درج کریں (وہی GitHub Pages لنک جو AIO POS ایپ کے لیے استعمال ہوتا ہے)۔');
+    return;
+  }
+  const bizId = getOrCreateBusinessId();
+  const link = base.replace(/\/?$/, '/') + 'order.html?biz=' + bizId;
+  const text = `${AppState.settings.businessName || 'Our Shop'} — Order online here:\n${link}`;
+  if(navigator.share){
+    try{ await navigator.share({ title: 'Order Online', text }); }
+    catch(err){}
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+}
 
 // ================= PIN Hashing (SHA-256) — عارضی حفاظت جب تک Firebase Auth نہیں آتا =================
 // نوٹ: یہ localStorage میں پلین ٹیکسٹ PIN رکھنے سے بہتر ہے، لیکن حتمی حل نہیں —
@@ -5506,6 +5692,7 @@ function persistAllData(){
   if(typeof usersData !== 'undefined'){ saveToStorage('users', usersData); try{ pushDocTypeToCloud('users', usersData); }catch(e){} }
   if(typeof approvalRequests !== 'undefined') saveToStorage('approvalRequests', approvalRequests);
   if(typeof pendingBillsData !== 'undefined'){ saveToStorage('pendingBills', pendingBillsData); try{ pushDocTypeToCloud('pendingbills', pendingBillsData); }catch(e){} }
+  try{ pushStoreInfoToCloud(); }catch(e){} // ---------- AIOTEST17: کیٹلاگ پیج کے لیے کاروبار کا نام/فون ----------
   if(typeof nextPendingId !== 'undefined') saveToStorage('nextPendingId', nextPendingId);
   if(typeof nextProductId !== 'undefined') saveToStorage('nextProductId', nextProductId);
   if(typeof nextVariantId !== 'undefined') saveToStorage('nextVariantId', nextVariantId);

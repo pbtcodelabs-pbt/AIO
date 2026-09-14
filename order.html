@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Order Online</title>
+<style>
+  :root{ --primary:#0e8a6d; --primary-dark:#0a6350; --bg:#f4f7f6; --text:#1e293b; --muted:#64748b; --danger:#dc2626; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,Segoe UI,Roboto,Tahoma,sans-serif; background:var(--bg); color:var(--text); padding-bottom:90px; }
+  .topBar{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; padding:18px 16px; text-align:center; }
+  .topBar h1{ margin:0; font-size:20px; }
+  .topBar .sub{ font-size:12px; opacity:.9; margin-top:4px; }
+  .wrap{ padding:14px; max-width:520px; margin:0 auto; }
+  .loadingBox, .errorBox{ text-align:center; padding:40px 20px; color:var(--muted); }
+  .errorBox{ color:var(--danger); font-weight:700; }
+  .catCard{ background:#fff; border-radius:12px; padding:12px 14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .catName{ font-weight:800; font-size:15px; margin-bottom:8px; }
+  .variantRow{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 0; border-top:1px solid #f0f2f5; }
+  .variantRow:first-of-type{ border-top:none; }
+  .vInfo{ min-width:0; }
+  .vLabel{ font-size:13.5px; font-weight:700; }
+  .vPrice{ font-size:12.5px; color:var(--primary-dark); font-weight:800; }
+  .vStockBadge{ font-size:10.5px; color:var(--muted); margin-inline-start:6px; }
+  .qtyBox{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .qtyBtn{ width:30px; height:30px; border-radius:8px; border:1.5px solid #dbe1ea; background:#f8fafc; font-size:16px; font-weight:800; cursor:pointer; }
+  .qtyVal{ min-width:22px; text-align:center; font-weight:800; }
+  .cartBar{ position:fixed; left:0; right:0; bottom:0; background:#fff; box-shadow:0 -2px 12px rgba(0,0,0,.12); padding:12px 16px; display:none; align-items:center; justify-content:space-between; gap:10px; }
+  .cartBar.show{ display:flex; }
+  .cartTotal{ font-weight:800; font-size:15px; }
+  .cartBtn{ background:var(--primary); color:#fff; border:none; border-radius:10px; padding:11px 18px; font-weight:800; font-size:14px; cursor:pointer; }
+  .modalOverlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; align-items:flex-end; justify-content:center; }
+  .modalOverlay.show{ display:flex; }
+  .modalBox{ background:#fff; border-radius:16px 16px 0 0; width:100%; max-width:520px; padding:18px; max-height:85vh; overflow-y:auto; }
+  .modalBox h2{ margin:0 0 12px; font-size:17px; }
+  .modalBox input, .modalBox textarea{ width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; font-family:inherit; }
+  .modalBtns{ display:flex; gap:8px; margin-top:6px; }
+  .modalBtns button{ flex:1; padding:12px; border-radius:10px; font-weight:800; font-size:14px; border:none; cursor:pointer; }
+  .btnCancel{ background:#f1f5f9; color:var(--text); }
+  .btnSubmit{ background:var(--primary); color:#fff; }
+  .thankYou{ text-align:center; padding:50px 20px; }
+  .thankYou .big{ font-size:44px; }
+</style>
+</head>
+<body>
+
+<div class="topBar">
+  <h1 id="storeName">Loading…</h1>
+  <div class="sub" id="storeSub">Please wait</div>
+</div>
+
+<div class="wrap" id="wrap">
+  <div class="loadingBox" id="loadingBox">🔄 Loading catalog…</div>
+</div>
+
+<div class="cartBar" id="cartBar">
+  <div class="cartTotal" id="cartTotalText">Rs. 0</div>
+  <button class="cartBtn" onclick="openCheckout()">🛒 Place Order</button>
+</div>
+
+<div class="modalOverlay" id="checkoutModal" onclick="if(event.target===this) closeCheckout()">
+  <div class="modalBox">
+    <h2>📝 Your Details</h2>
+    <input type="text" id="custName" placeholder="Your Name *" required>
+    <input type="tel" id="custPhone" placeholder="Phone Number (WhatsApp) *" required>
+    <textarea id="custNote" placeholder="Any note for the shop (optional)" rows="2"></textarea>
+    <div id="checkoutError" style="color:#dc2626; font-size:12.5px; margin-bottom:6px;"></div>
+    <div class="modalBtns">
+      <button class="btnCancel" onclick="closeCheckout()">Cancel</button>
+      <button class="btnSubmit" onclick="submitOrder()">✅ Confirm Order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const AIO_FIREBASE_PROJECT_ID = 'aio-pos-backup';
+const AIO_FIREBASE_API_KEY = 'AIzaSyBdoyFrqJ67OonYVIoCM6rjeBDI1hZBGKE';
+const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${AIO_FIREBASE_PROJECT_ID}/databases/(default)/documents`;
+const AUTH_SIGNUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${AIO_FIREBASE_API_KEY}`;
+
+const params = new URLSearchParams(location.search);
+const bizId = (params.get('biz') || '').trim().toUpperCase();
+
+let idToken = null;
+let products = [];
+let cart = {}; // variant_id -> {name,label,unitPrice,qty,unit,product_id}
+
+async function ensureAuth(){
+  const res = await fetch(AUTH_SIGNUP_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ returnSecureToken:true })
+  });
+  if(!res.ok) throw new Error('auth-failed');
+  const data = await res.json();
+  idToken = data.idToken;
+}
+
+async function authFetch(path, options={}){
+  const headers = Object.assign({}, options.headers, { 'Authorization': `Bearer ${idToken}` });
+  return fetch(`${FIRESTORE_BASE}/${path}`, Object.assign({}, options, { headers }));
+}
+
+async function loadStoreInfo(){
+  try{
+    const res = await authFetch(`businesses/${bizId}/store/storeinfo?key=${AIO_FIREBASE_API_KEY}`);
+    if(!res.ok) return;
+    const doc = await res.json();
+    const name = doc.fields?.businessName?.stringValue;
+    if(name){
+      document.getElementById('storeName').textContent = name;
+      document.title = name + ' — Order Online';
+    }
+    document.getElementById('storeSub').textContent = 'Browse products and place your order below';
+  }catch(e){}
+}
+
+async function loadProducts(){
+  const res = await authFetch(`businesses/${bizId}/store/products?key=${AIO_FIREBASE_API_KEY}`);
+  if(!res.ok) throw new Error('products-fetch-failed');
+  const doc = await res.json();
+  const jsonStr = doc.fields?.json?.stringValue;
+  products = jsonStr ? JSON.parse(jsonStr) : [];
+}
+
+function renderCatalog(){
+  const wrap = document.getElementById('wrap');
+  if(products.length === 0){
+    wrap.innerHTML = `<div class="loadingBox">No products available right now.</div>`;
+    return;
+  }
+  wrap.innerHTML = products.map(p => `
+    <div class="catCard">
+      <div class="catName">${p.name}</div>
+      ${(p.variants||[]).map(v => `
+        <div class="variantRow">
+          <div class="vInfo">
+            <div class="vLabel">${v.label || p.name}${v.stock===0 ? '<span class="vStockBadge">(Limited stock — still orderable)</span>' : ''}</div>
+            <div class="vPrice">Rs. ${v.retail}</div>
+          </div>
+          <div class="qtyBox">
+            <button class="qtyBtn" onclick="changeQty(${v.variant_id}, -1, '${p.name.replace(/'/g,"\\'")}', '${(v.label||'').replace(/'/g,"\\'")}', ${v.retail}, ${p.product_id})">−</button>
+            <span class="qtyVal" id="qty_${v.variant_id}">0</span>
+            <button class="qtyBtn" onclick="changeQty(${v.variant_id}, 1, '${p.name.replace(/'/g,"\\'")}', '${(v.label||'').replace(/'/g,"\\'")}', ${v.retail}, ${p.product_id})">+</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ---------- سٹاک چاہے 0 ہو، آرڈر دینے سے کبھی نہیں روکا جاتا — دکاندار خود فیصلہ کرے گا ----------
+function changeQty(variantId, delta, name, label, price, productId){
+  const key = variantId;
+  if(!cart[key]) cart[key] = { variant_id: variantId, name, label, unitPrice: price, qty: 0, product_id: productId };
+  cart[key].qty = Math.max(0, cart[key].qty + delta);
+  document.getElementById('qty_'+variantId).textContent = cart[key].qty;
+  updateCartBar();
+}
+
+function updateCartBar(){
+  const items = Object.values(cart).filter(i => i.qty > 0);
+  const total = items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+  const bar = document.getElementById('cartBar');
+  if(items.length === 0){ bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  document.getElementById('cartTotalText').textContent = `${items.reduce((s,i)=>s+i.qty,0)} item(s) — Rs. ${total.toLocaleString()}`;
+}
+
+function openCheckout(){
+  document.getElementById('checkoutError').textContent = '';
+  document.getElementById('checkoutModal').classList.add('show');
+}
+function closeCheckout(){
+  document.getElementById('checkoutModal').classList.remove('show');
+}
+
+async function submitOrder(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const note = document.getElementById('custNote').value.trim();
+  if(!name || !phone){
+    document.getElementById('checkoutError').textContent = 'Please enter your name and phone number.';
+    return;
+  }
+  const items = Object.values(cart).filter(i => i.qty > 0);
+  if(items.length === 0){
+    document.getElementById('checkoutError').textContent = 'Your cart is empty.';
+    return;
+  }
+  const payload = {
+    fields: {
+      customerName: { stringValue: name },
+      customerPhone: { stringValue: phone },
+      note: { stringValue: note },
+      itemsJson: { stringValue: JSON.stringify(items) },
+      submittedAt: { stringValue: new Date().toISOString() }
+    }
+  };
+  try{
+    const res = await authFetch(`businesses/${bizId}/customerOrders?key=${AIO_FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('submit-failed');
+    showThankYou(name);
+  }catch(e){
+    document.getElementById('checkoutError').textContent = '❌ Could not send order — please check your internet connection and try again.';
+  }
+}
+
+function showThankYou(name){
+  document.getElementById('checkoutModal').classList.remove('show');
+  document.getElementById('cartBar').classList.remove('show');
+  document.getElementById('wrap').innerHTML = `
+    <div class="thankYou">
+      <div class="big">✅</div>
+      <h2>Thank you, ${name}!</h2>
+      <p style="color:var(--muted); font-size:14px;">Your order has been sent. The shop will contact you shortly on the number you provided.</p>
+    </div>`;
+}
+
+async function init(){
+  if(!bizId){
+    document.getElementById('wrap').innerHTML = `<div class="errorBox">⚠️ Invalid link — no business code found. Please ask the shop for the correct link.</div>`;
+    document.getElementById('storeName').textContent = 'Order Online';
+    return;
+  }
+  try{
+    await ensureAuth();
+    await loadStoreInfo();
+    await loadProducts();
+    renderCatalog();
+  }catch(e){
+    document.getElementById('wrap').innerHTML = `<div class="errorBox">⚠️ Could not load the catalog. Please check your internet connection and reload the page.</div>`;
+  }
+}
+init();
+</script>
+</body>
+</html>
