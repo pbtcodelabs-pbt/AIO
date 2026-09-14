@@ -2136,7 +2136,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST17</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST18</span>
     </div>
   </div>
 
@@ -2241,6 +2241,7 @@
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
           <button class="hbcChatBtn" onclick="logout()" title="Logout" style="background:rgba(239,68,68,.85); color:#fff;">🚪</button>
+          <button class="hbcChatBtn admin-only" onclick="openConnectHub()" title="Connect / Join / Contact" style="background:rgba(59,130,246,.85); color:#fff;">🔗</button>
         </div>
         <!-- ---------- ☁️/📥 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
         <div class="hbcLastBackupLine admin-only" id="hbcLastBackupLine"></div>
@@ -2997,6 +2998,42 @@
         </div>
         <div class="profileBody">
           <div id="customerOrdersListWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- AIOTEST18: 🔗 Connect Hub — سب "کنیکٹ/جوائن/رابطہ" بٹن ایک ہی جگہ، Fruit Mandi کے ہاٹ لائن انداز میں ---------- -->
+    <div class="modalOverlay" id="connectHubModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:420px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">🔗</div>
+          <div class="pInfo">
+            <div class="pName">Connect Hub</div>
+            <div class="pMeta">Staff, Customers & Developer — all in one place</div>
+          </div>
+          <span class="closeBtn" onclick="document.getElementById('connectHubModal').classList.remove('show')">✖</span>
+        </div>
+        <div class="profileBody">
+
+          <div class="settingsSubLabel">👥 Your Business Code (give to staff)</div>
+          <div class="settingsHint" style="margin-top:0;">Staff enter this code on their own phone to join your data.</div>
+          <div style="display:flex; gap:8px; margin:6px 0 16px;">
+            <input type="text" id="hubBusinessCodeDisplay" readonly style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-weight:700; text-align:center; background:#f8fafc;">
+            <button class="testPrintBtn" style="width:auto; padding:0 16px; margin-top:0;" onclick="hubCopyBusinessCode()">📋 Copy</button>
+          </div>
+
+          <div class="settingsSubLabel">🔌 Join a Business (for a staff phone)</div>
+          <div style="display:flex; gap:8px; margin:6px 0 16px;">
+            <input type="text" id="hubJoinBusinessInput" placeholder="e.g. BIZ-AB12-CD34-EF56" style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; text-align:center;">
+            <button class="testPrintBtn" style="width:auto; padding:0 16px; margin-top:0;" onclick="joinBusinessById(document.getElementById('hubJoinBusinessInput').value)">🔗 Join</button>
+          </div>
+
+          <div class="settingsSubLabel">🛍️ Customer Ordering</div>
+          <button class="testPrintBtn" style="margin-bottom:16px;" onclick="shareCatalogLink()">🔗 Share Catalog Link with Customers</button>
+
+          <div class="settingsSubLabel">👨‍💻 Developer</div>
+          <button class="testPrintBtn" onclick="document.getElementById('connectHubModal').classList.remove('show'); openDevChat('support');">💬 Contact Developer</button>
+
         </div>
       </div>
     </div>
@@ -9387,23 +9424,21 @@ function openPendingBillsList(){
   document.getElementById('pendingBillsListModal').classList.add('show');
 }
 function renderPendingBillsListModal(){
-  const pendingCount = pendingBillsData.filter(p => p.status === 'pending').length;
-  document.getElementById('pendingListMeta').textContent = `${pendingCount} pending`;
+  const pendingOnly = pendingBillsData.filter(p => p.status === 'pending'); // ---------- صرف Pending دکھائیں — Approved/Rejected یہاں کبھی نظر نہیں آنے چاہئیں ----------
+  document.getElementById('pendingListMeta').textContent = `${pendingOnly.length} pending`;
 
   const body = document.getElementById('pendingBillsListBody');
-  if(pendingBillsData.length === 0){
-    body.innerHTML = `<div class="profileEmpty">No bills submitted yet</div>`;
+  if(pendingOnly.length === 0){
+    body.innerHTML = `<div class="profileEmpty">No bills awaiting approval</div>`;
     return;
   }
 
-  body.innerHTML = pendingBillsData.map(p => {
+  body.innerHTML = pendingOnly.map(p => {
     const total = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
-    const tagClass = p.status === 'pending' ? 'pending' : p.status === 'approved' ? 'approved' : 'rejected';
-    const tagLabel = p.status === 'pending' ? 'PENDING' : p.status === 'approved' ? 'APPROVED' : 'REJECTED';
     return `
-      <div class="pendingRow status-${p.status}" onclick="${p.status === 'pending' ? `openPendingReview(${p.pending_id})` : ''}">
+      <div class="pendingRow status-${p.status}" onclick="openPendingReview(${p.pending_id})">
         <div class="prLeft">
-          <div class="prSalesman"><span class="pendingStatusTag ${tagClass}">${tagLabel}</span>👤 ${p.salesman_name}</div>
+          <div class="prSalesman"><span class="pendingStatusTag pending">PENDING</span>👤 ${p.salesman_name}</div>
           <div class="prMeta">${p.customer_name} • ${p.items.length} item(s) • ${new Date(p.submitted_at).toLocaleString()}</div>
         </div>
         <div class="prAmount">Rs. ${total.toLocaleString()}</div>
@@ -20742,6 +20777,25 @@ function copyBusinessCode(){
   const code = AppState.settings.businessId || '';
   if(!code){ alert('کوڈ ابھی تیار نہیں ہوا — ذرا انتظار کریں اور دوبارہ کوشش کریں۔'); return; }
   const el = document.getElementById('businessCodeDisplay');
+  if(el){ el.select(); el.setSelectionRange(0, 99999); }
+  try{
+    navigator.clipboard.writeText(code);
+    alert('✅ Business Code کاپی ہو گیا:\n' + code);
+  }catch(e){
+    alert('کوڈ: ' + code + '\n(دستی طور پر کاپی کر لیں)');
+  }
+}
+
+// ---------- AIOTEST18: 🔗 Connect Hub — Home سے ایک ہی جگہ Business Code، Join، کیٹلاگ شیئر، ڈویلپر رابطہ ----------
+function openConnectHub(){
+  const el = document.getElementById('hubBusinessCodeDisplay');
+  if(el) el.value = AppState.settings.businessId || '(بن رہا ہے...)';
+  document.getElementById('connectHubModal').classList.add('show');
+}
+function hubCopyBusinessCode(){
+  const code = AppState.settings.businessId || '';
+  if(!code){ alert('کوڈ ابھی تیار نہیں ہوا — ذرا انتظار کریں اور دوبارہ کوشش کریں۔'); return; }
+  const el = document.getElementById('hubBusinessCodeDisplay');
   if(el){ el.select(); el.setSelectionRange(0, 99999); }
   try{
     navigator.clipboard.writeText(code);
