@@ -2136,7 +2136,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST22</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST24</span>
     </div>
   </div>
 
@@ -4942,9 +4942,15 @@
 
 <!-- PRODUCT CSV IMPORT PREVIEW MODAL -->
 <div class="modalOverlay" id="productImportPreviewModal" onclick="if(event.target===this) this.classList.remove('show')">
-  <div class="backupConfirmBox">
+  <div class="backupConfirmBox" style="max-width:440px;">
     <div class="backupConfirmIconWrap"><span>📋</span></div>
     <h3>Ready to Import?</h3>
+    <!-- ---------- AIOTEST24: کالم میپنگ دکھائیں اور بدلنے دیں — خودکار اندازہ ہمیشہ درست نہیں ہوتا،
+    خاص طور پر جب کسی دوسری ایپ سے ایکسپورٹ کیا گیا ڈیٹا ہو۔ اب صارف خود تصدیق/درستی کر سکتا ہے، درآمد سے پہلے ---------- -->
+    <div style="text-align:left; max-height:280px; overflow-y:auto; margin:10px 0; border:1px solid #eef1f6; border-radius:10px; padding:8px 10px;">
+      <div style="font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px;">Column Mapping — check these are correct:</div>
+      <div id="productImportMappingRows"></div>
+    </div>
     <div id="productImportPreviewText" style="font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:6px;"></div>
     <div style="background:#fff7ed; color:#c2410c; border-radius:10px; padding:10px 12px; font-size:11.5px; margin-top:10px;">Existing products with the same name will get new/updated variants — nothing will be deleted.</div>
     <button class="backupConfirmCloseBtn" onclick="confirmProductCsvImport()">✅ Confirm Import</button>
@@ -5259,6 +5265,10 @@ function aioGetDocTypeMeta(docType){
 // ---------- ہر docType کی آخری کامیابی سے بھیجی گئی JSON یاد رکھیں — تاکہ بلا وجہ (بغیر کسی تبدیلی کے)
 // دوبارہ Firestore پر write نہ ہو (پہلے persistAllData ہر 1.5 سیکنڈ بعد غیر مشروط push کر رہا تھا) ----------
 const aioLastPushedJSON = {};
+// ---------- AIOTEST23: تصادم کی حفاظت — آخری بار جو updatedAt ہم نے کلاؤڈ سے دیکھا/خود لکھا وہ یاد رکھیں۔
+// اگلی push سے پہلے یہ چیک کریں کہ کہیں دوسرے فون نے ہمارے آخری fetch کے بعد کچھ نیا نہیں لکھ دیا —
+// ورنہ ہماری "پوری فہرست دوبارہ لکھنے" والی push اس کے ابھی ابھی کیے گئے تبدیلی کو مٹا دے گی، بغیر کسی کو پتا چلے ----------
+const aioLastKnownUpdatedAt = {};
 
 // ---------- پورا مقامی array کلاؤڈ پر بھیجیں (JSON سٹرنگ کی صورت، Fruit Mandi کی طرح) ----------
 async function pushDocTypeToCloud(docType, items){
@@ -5272,6 +5282,27 @@ async function pushDocTypeToCloud(docType, items){
   }
   const bizId = getOrCreateBusinessId();
   try{
+    // ---------- AIOTEST23: لکھنے سے پہلے، کلاؤڈ پر موجودہ updatedAt چیک کریں —
+    // اگر ہمارے آخری فیچ کے بعد کسی اور فون نے یہاں لکھا ہے تو ابھی مت لکھیں (تصادم!) ----------
+    if(aioLastKnownUpdatedAt[docType] !== undefined){
+      try{
+        const checkRes = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`);
+        if(checkRes && checkRes.ok){
+          const checkDoc = await checkRes.json();
+          const cloudUpdatedAt = parseInt(checkDoc.fields?.updatedAt?.integerValue || '0');
+          if(cloudUpdatedAt && cloudUpdatedAt !== aioLastKnownUpdatedAt[docType]){
+            // ---------- تصادم مل گیا — ہماری تبدیلی مقامی طور پر محفوظ رہے گی (pendingSync=true رہے گا)،
+            // لیکن ابھی کلاؤڈ پر نہیں لکھیں گے۔ پہلے ان کا نیا ڈیٹا لے کر دیکھیں گے ----------
+            AppState.settings[docType + 'PendingSync'] = true;
+            saveToStorage('settings', AppState.settings);
+            try{ notifySyncConflict(docType); }catch(e){}
+            await fetchDocTypeFromCloud(docType, true);
+            return false;
+          }
+        }
+      }catch(e){ /* چیک ناکام ہو تو آگے بڑھ کر معمول کے مطابق لکھ دیں — انٹرنیٹ کا عارضی مسئلہ ہو سکتا ہے */ }
+    }
+    const newUpdatedAt = Date.now();
     const res = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -5279,20 +5310,30 @@ async function pushDocTypeToCloud(docType, items){
         fields: {
           json: { stringValue: itemsJSON },
           nextId: { integerValue: String(meta.nextIdVar()) },
-          updatedAt: { integerValue: String(Date.now()) }
+          updatedAt: { integerValue: String(newUpdatedAt) }
         }
       })
     });
     const ok = !!(res && res.ok);
     AppState.settings[docType + 'PendingSync'] = !ok;
     saveToStorage('settings', AppState.settings);
-    if(ok){ cloudSyncStatus = 'online'; aioLastPushedJSON[docType] = itemsJSON; }
+    if(ok){ cloudSyncStatus = 'online'; aioLastPushedJSON[docType] = itemsJSON; aioLastKnownUpdatedAt[docType] = newUpdatedAt; }
     return ok;
   }catch(e){
     AppState.settings[docType + 'PendingSync'] = true;
     saveToStorage('settings', AppState.settings);
     return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
   }
+}
+
+// ---------- AIOTEST23: تصادم کا نرم پیغام — صرف Admin کو، صرف ایک بار فی سیشن فی ٹائپ (بار بار پریشان نہ کریں) ----------
+const aioConflictNotified = {};
+function notifySyncConflict(docType){
+  if(aioConflictNotified[docType]) return;
+  aioConflictNotified[docType] = true;
+  if(AppState.currentRole !== 'admin') return;
+  const labels = { products:'Products', customers:'Customers', suppliers:'Suppliers', users:'Staff', invoices:'Bills', pendingbills:'Pending Approvals' };
+  console.warn(`Sync conflict on ${docType} — another device updated this first. Re-fetching before retrying.`);
 }
 
 // ---------- کلاؤڈ سے تازہ ترین ڈیٹا لائیں — Fruit Mandi کا حفاظتی اصول شامل: اگر مقامی ڈیٹا ابھی تک صرف
@@ -5318,6 +5359,8 @@ async function fetchDocTypeFromCloud(docType, silent){
     meta.data = cloudItems;
     const cloudNextId = parseInt(doc.fields?.nextId?.integerValue || '0');
     if(cloudNextId > meta.nextIdVar()) meta.setNextId(cloudNextId);
+    aioLastKnownUpdatedAt[docType] = parseInt(doc.fields?.updatedAt?.integerValue || '0'); // ---------- AIOTEST23: تصادم چیک کے لیے یاد رکھیں ----------
+    aioLastPushedJSON[docType] = jsonStr; // ---------- یہ ابھی تازہ ترین کلاؤڈ حالت ہے، اسے "ہماری آخری push" بھی سمجھیں تاکہ فوری بعد میں دوبارہ push نہ ہو ----------
     saveToStorage(docType, meta.data);
     cloudSyncStatus = 'online';
     if(!silent) applyCloudDocTypeUI(docType);
@@ -10097,6 +10140,9 @@ function downloadProductCsvTemplate(){
 }
 
 let pendingProductImportRows = [];
+let pendingProductCsvHeaders = [];   // ---------- AIOTEST24: اپ لوڈ کی گئی فائل کے اصل کالم نام — میپنگ ڈراپ ڈاؤن بھرنے کے لیے ----------
+let pendingProductCsvDataRows = [];  // ---------- AIOTEST24: ہیڈر کے بغیر باقی تمام قطاریں — میپنگ بدلنے پر دوبارہ استعمال ہوتی ہیں ----------
+let pendingProductFieldMap = {};     // ---------- AIOTEST24: field → کالم نمبر (یا -1 = فائل میں موجود نہیں) — صارف اسے دستی طور پر بدل سکتا ہے ----------
 const PRODUCT_FIELD_SYNONYMS = {
   'product name': ['product name','name','item name','item','product','title'],
   'category': ['category','cat','group','type'],
@@ -10114,15 +10160,27 @@ const PRODUCT_FIELD_SYNONYMS = {
 function processProductCsvText(text){
   const rows = parseCSV(text);
   if(rows.length < 2){ alert('No data found — the first row must be a header, with at least one data row below it.'); return false; }
-  const fieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
-  const objs = rows.slice(1).map(r => {
+  pendingProductCsvHeaders = rows[0];
+  pendingProductCsvDataRows = rows.slice(1);
+  pendingProductFieldMap = buildFuzzyFieldMap(rows[0], PRODUCT_FIELD_SYNONYMS);
+  rebuildPendingProductRowsFromMapping();
+  showProductImportPreview();
+  return true;
+}
+// ---------- AIOTEST24: موجودہ میپنگ (خودکار یا صارف کی درستی شدہ) کے مطابق rows دوبارہ بنائیں ----------
+function rebuildPendingProductRowsFromMapping(){
+  const objs = pendingProductCsvDataRows.map(r => {
     const o = {};
-    Object.keys(fieldMap).forEach(field => { o[field] = fieldMap[field] >= 0 ? (r[fieldMap[field]] || '').trim() : ''; });
+    Object.keys(pendingProductFieldMap).forEach(field => { o[field] = pendingProductFieldMap[field] >= 0 ? (r[pendingProductFieldMap[field]] || '').trim() : ''; });
     return o;
   });
   pendingProductImportRows = objs.filter(o => (o['product name'] || '').trim());
-  showProductImportPreview();
-  return true;
+}
+// ---------- AIOTEST24: صارف نے میپنگ ڈراپ ڈاؤن بدلی — دوبارہ حساب لگائیں اور خلاصہ تازہ کریں ----------
+function onProductImportMappingChange(field, selectEl){
+  pendingProductFieldMap[field] = parseInt(selectEl.value, 10);
+  rebuildPendingProductRowsFromMapping();
+  renderProductImportSummaryText();
 }
 function handleProductCsvFileSelect(event){
   const file = event.target.files[0];
@@ -10131,10 +10189,10 @@ function handleProductCsvFileSelect(event){
   event.target.value = ''; // ---------- اگر وہی فائل دوبارہ منتخب کریں تو بھی change ایونٹ چلے ----------
 }
 
-function showProductImportPreview(){
+function renderProductImportSummaryText(){
   const objs = pendingProductImportRows;
   if(objs.length === 0){
-    alert('No valid rows found. Make sure the "Product Name" column is filled and the first row has the correct headers.');
+    document.getElementById('productImportPreviewText').innerHTML = '<span style="color:#dc2626;">No valid rows — make sure "Product Name" is mapped to a column above.</span>';
     return;
   }
   const productNames = new Set(objs.map(o => o['product name']));
@@ -10146,6 +10204,37 @@ function showProductImportPreview(){
   document.getElementById('productImportPreviewText').innerHTML =
     `Found <b>${objs.length}</b> row(s) across <b>${productNames.size}</b> product(s).<br>` +
     `${newCount} new product(s) will be added, ${updateCount} existing product(s) will get new/updated variants.`;
+}
+
+function showProductImportPreview(){
+  if(pendingProductImportRows.length === 0 && pendingProductCsvHeaders.length === 0){
+    alert('No valid rows found. Make sure the "Product Name" column is filled and the first row has the correct headers.');
+    return;
+  }
+  const mappingWrap = document.getElementById('productImportMappingRows').parentElement;
+  if(pendingProductCsvHeaders.length === 0){
+    // ---------- AIOTEST24: سکین شدہ فوٹو سے آیا ڈیٹا — پہلے سے مکمل mapped ہے، دکھانے کی ضرورت نہیں ----------
+    mappingWrap.style.display = 'none';
+  } else {
+    mappingWrap.style.display = 'block';
+    // ---------- AIOTEST24: ہر AIO فیلڈ کے لیے ایک ڈراپ ڈاؤن — فائل کے اصل کالم ناموں سے، خودکار اندازہ پہلے سے منتخب ----------
+    const fieldLabels = {
+      'product name': 'Product Name *', 'category': 'Category', 'variant label': 'Variant Label',
+      'barcode': 'Barcode', 'purchase price': 'Purchase Price', 'retail price': 'Retail Price',
+      'wholesale price': 'Wholesale Price', 'stock': 'Stock', 'low stock alert': 'Low Stock Alert',
+      'expiry date (yyyy-mm-dd)': 'Expiry Date', 'location': 'Location'
+    };
+    document.getElementById('productImportMappingRows').innerHTML = Object.keys(fieldLabels).map(field => {
+      const options = ['<option value="-1">— not in file —</option>']
+        .concat(pendingProductCsvHeaders.map((h, i) => `<option value="${i}" ${pendingProductFieldMap[field]===i?'selected':''}>${h}</option>`));
+      return `
+        <div style="display:flex; align-items:center; gap:8px; padding:4px 0;">
+          <div style="flex:0 0 110px; font-size:11.5px; color:var(--text);">${fieldLabels[field]}</div>
+          <select onchange="onProductImportMappingChange('${field}', this)" style="flex:1; padding:6px; border:1px solid #dbe1ea; border-radius:6px; font-size:11.5px;">${options.join('')}</select>
+        </div>`;
+    }).join('');
+  }
+  renderProductImportSummaryText();
   document.getElementById('productImportPreviewModal').classList.add('show');
 }
 
@@ -10626,6 +10715,7 @@ function finalizeScanImport(){
     }));
     if(objs.length === 0){ alert('No product name entered — please type a name first.'); return; }
     pendingProductImportRows = objs;
+    pendingProductCsvHeaders = []; // ---------- AIOTEST24: یہ سکین شدہ فہرست ہے، اصل CSV کالم نہیں — میپنگ باکس نہیں دکھانا ----------
     showProductImportPreview();
   } else {
     const objs = scanReviewRows.filter(r => (r.name || '').trim()).map(r => ({
