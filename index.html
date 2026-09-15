@@ -2136,7 +2136,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST21</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST22</span>
     </div>
   </div>
 
@@ -4475,6 +4475,9 @@
             <input type="text" id="devEmailInput" placeholder="e.g. you@gmail.com" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">App Share Link</div>
             <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
+            <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">👥 Staff Limit (Testing Only)</div>
+            <div class="settingsHint" style="margin-top:0;">AIOTEST22: عارضی — Play Billing پیکج تیار ہونے تک، یہاں سے دستی طور پر Salesman کی زیادہ سے زیادہ تعداد آزمائیں۔ خالی چھوڑیں = لامحدود۔</div>
+            <input type="number" id="staffLimitInput" placeholder="e.g. 2 (leave empty = unlimited)" min="0" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Share Message</div>
             <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="2" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
             <div class="settingsHint" style="margin-top:0;">PIN unlocks here too — change it via Home → Users → ✏️ Set Custom PIN.</div>
@@ -6450,6 +6453,7 @@ const DEFAULT_SETTINGS = {
   // ---------- 🔗 ایپ کا لائیو لنک (GitHub Pages وغیرہ) — Login/Home پر 📤 Share بٹن اسی لنک کو
   // WhatsApp/کسی بھی ایپ پر بھیجتا ہے۔ یہاں سے بدلیں تو ہر جگہ خودکار نیا لنک استعمال ہوگا ----------
   appShareLink: '',
+  staffLimit: null, // ---------- AIOTEST22: null = لامحدود (فی الحال ٹیسٹنگ کے دوران) — Play Billing پیکج طے ہونے کے بعد اصل نمبر خودکار سیٹ ہوگا۔ عارضی طور پر Admin Control سے دستی بھی سیٹ کیا جا سکتا ہے ----------
   // ---------- 📝 شیئر کرتے وقت لنک کے ساتھ جانے والا تعارفی پیغام — خالی ہو تو ڈیفالٹ پیغام استعمال ہوگا ----------
   appShareMessage: '',
   // ---------- 🏦 آپ کے اکاؤنٹس — سبسکرپشن کی رقم وصول کرنے کے لیے، کسٹمر Package Plans میں اپنی مرضی کا بینک/والیٹ چن سکے ----------
@@ -18194,6 +18198,19 @@ async function saveNewUser(){
     return;
   }
 
+  // ---------- AIOTEST22: پیکج کی حد — صرف Salesman پر لاگو، Admin ہمیشہ شامل ہے اور شمار نہیں ہوتا۔
+  // staffLimit=null کا مطلب فی الحال لامحدود (Play Billing وائرنگ سے پہلے کا عارضی مرحلہ) ----------
+  if(role === 'salesman'){
+    const limit = AppState.settings.staffLimit;
+    if(typeof limit === 'number'){
+      const currentStaffCount = usersData.filter(u => u.role === 'salesman').length;
+      if(currentStaffCount >= limit){
+        alert(`⚠️ Your current plan allows up to ${limit} staff member(s). Please upgrade your plan to add more.`);
+        return;
+      }
+    }
+  }
+
   // ---------- PIN کبھی plain text محفوظ نہیں ہوتا — پہلے hash بنا کر پھر duplicate چیک اور save کریں ----------
   const hashedPin = await hashPin(pin);
   if(usersData.some(u => u.pin === hashedPin)){
@@ -21027,6 +21044,7 @@ async function unlockAdminControl(){
   document.getElementById('devSmsInput').value = AppState.settings.devSms || '';
   document.getElementById('devEmailInput').value = AppState.settings.devEmail || '';
   document.getElementById('appShareLinkInput').value = AppState.settings.appShareLink || '';
+  document.getElementById('staffLimitInput').value = (AppState.settings.staffLimit === null || AppState.settings.staffLimit === undefined) ? '' : AppState.settings.staffLimit;
   document.getElementById('appShareMessageInput').value = AppState.settings.appShareMessage || '';
   // ---------- سیکیورٹی: یہ باکس ہمیشہ خالی کھلے، چاہے پچھلی بار کچھ ٹائپ کر کے سیو کیا گیا ہو —
   // ورنہ ٹائپ کیا گیا جواب اسکرین پر نظر آتا رہتا ہے جو مقصد کے خلاف ہے ----------
@@ -21038,6 +21056,8 @@ async function saveAdminControl(){
   AppState.settings.devSms = document.getElementById('devSmsInput').value.trim();
   AppState.settings.devEmail = document.getElementById('devEmailInput').value.trim();
   AppState.settings.appShareLink = document.getElementById('appShareLinkInput').value.trim();
+  const slRaw = document.getElementById('staffLimitInput').value.trim();
+  AppState.settings.staffLimit = slRaw === '' ? null : Math.max(0, parseInt(slRaw, 10) || 0);
   AppState.settings.appShareMessage = document.getElementById('appShareMessageInput').value.trim();
   await saveSecurityRecoveryInfo();
   persistAllData();
