@@ -2136,7 +2136,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST24</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST26</span>
     </div>
   </div>
 
@@ -3060,6 +3060,8 @@
           <div class="totalsBox" style="margin-top:10px;">
             <div class="grand"><span>Grand Total</span><span id="reviewGrandTotal">Rs. 0</span></div>
           </div>
+          <!-- ---------- AIOTEST26: منظوری سے پہلے اصل بل کیسا دکھے گا، بالکل ویسا ہی دیکھ لیں — Fruit Mandi طرز ---------- -->
+          <button class="testPrintBtn" style="margin-top:8px;" onclick="previewPendingBillBeforeApproval()">👁️ Preview Bill</button>
           <div class="reviewActionBtns">
             <button class="btnReject" onclick="rejectPendingBill()">❌ Reject</button>
             <button class="btnApprove" onclick="approvePendingBill()">✅ Approve & Create Bill</button>
@@ -5208,7 +5210,7 @@ async function aioAuthFetch(path, options = {}){
 }
 
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
-const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills']; // ---------- AIOTEST15: Staff اکاؤنٹس اور بل/منظوری بھی اب دو فون کے درمیان sync ہوتے ہیں ----------
+const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests']; // ---------- AIOTEST25: Edit/Delete درخواستیں بھی اب دو فون کے درمیان sync ----------
 const cloudPollTimers = {};
 
 function initCloudSync(){
@@ -5259,6 +5261,8 @@ function aioGetDocTypeMeta(docType){
   if(docType === 'invoices') return { get data(){ return invoicesData; }, set data(v){ invoicesData.length=0; invoicesData.push(...v); }, seed: INVOICES_SEED_DATA, idKey: 'nextInvoiceId', nextIdVar: () => 0, setNextId: () => {}, matchKey: 'invoice_id', nameKey: 'invoice_no' };
   // ---------- AIOTEST15: Bills Awaiting Approval — سیلزمین کے فون سے Admin کے فون تک پہنچنے کے لیے ضروری ----------
   if(docType === 'pendingbills') return { get data(){ return pendingBillsData; }, set data(v){ pendingBillsData.length=0; pendingBillsData.push(...v); }, seed: PENDING_BILLS_SEED_DATA, idKey: 'nextPendingId', nextIdVar: () => nextPendingId, setNextId: (v) => { nextPendingId = v; }, matchKey: 'pending_id', nameKey: 'salesman_name' };
+  // ---------- AIOTEST25: Edit/Delete کی درخواستیں — پہلے صرف مقامی طور پر محفوظ ہوتی تھیں، دوسرے فون تک کبھی نہیں پہنچتی تھیں ----------
+  if(docType === 'approvalrequests') return { get data(){ return approvalRequests; }, set data(v){ approvalRequests.length=0; approvalRequests.push(...v); }, seed: APPROVAL_REQUESTS_SEED_DATA, idKey: 'nextRequestId', nextIdVar: () => nextRequestId, setNextId: (v) => { nextRequestId = v; }, matchKey: 'request_id', nameKey: 'requested_by' };
   return null;
 }
 
@@ -5390,12 +5394,15 @@ function applyCloudDocTypeUI(docType){
     // ---------- AIOTEST15: دوسرے فون سے نیا Pending Bill آیا — بینر فوری اپڈیٹ کریں، ماڈل کھلا ہو تو وہ بھی ----------
     try{ if(typeof renderPendingBillsBanner === 'function') renderPendingBillsBanner(); }catch(e){}
     try{ if(document.getElementById('pendingBillsListModal')?.classList.contains('show') && typeof renderPendingBillsListModal === 'function') renderPendingBillsListModal(); }catch(e){}
+  } else if(docType === 'approvalrequests'){
+    // ---------- AIOTEST25: دوسرے فون سے نئی Edit/Delete درخواست آئی — Approvals سکرین کھلی ہو تو تازہ کریں ----------
+    try{ if(document.getElementById('screen-users')?.classList.contains('active') && typeof renderApprovalList === 'function') renderApprovalList(); }catch(e){}
   }
 }
 
 // ---------- AIOTEST16: ہر ڈیٹا ٹائپ کی اپنی پولنگ رفتار — Pending Bills تیز (منظوری میں تاخیر قابلِ قبول نہیں)،
 // باقی سب سست (Firebase کی مفت روزانہ حد سب صارفین میں مشترک ہے، اس لیے غیر ضروری تیزی سے بچنا ضروری ہے) ----------
-const CLOUD_POLL_INTERVALS = { pendingbills: 15000, default: 45000 };
+const CLOUD_POLL_INTERVALS = { pendingbills: 15000, approvalrequests: 15000, default: 45000 };
 function startCloudPolling(){
   stopCloudPolling();
   CLOUD_DOC_TYPES.forEach(docType => {
@@ -5784,7 +5791,7 @@ function persistAllData(){
   if(typeof suppliersData !== 'undefined') saveSuppliersLight();
   if(typeof invoicesData !== 'undefined'){ saveToStorage('invoices', invoicesData); try{ pushDocTypeToCloud('invoices', invoicesData); }catch(e){} }
   if(typeof usersData !== 'undefined'){ saveToStorage('users', usersData); try{ pushDocTypeToCloud('users', usersData); }catch(e){} }
-  if(typeof approvalRequests !== 'undefined') saveToStorage('approvalRequests', approvalRequests);
+  if(typeof approvalRequests !== 'undefined'){ saveToStorage('approvalRequests', approvalRequests); try{ pushDocTypeToCloud('approvalrequests', approvalRequests); }catch(e){} }
   if(typeof pendingBillsData !== 'undefined'){ saveToStorage('pendingBills', pendingBillsData); try{ pushDocTypeToCloud('pendingbills', pendingBillsData); }catch(e){} }
   try{ pushStoreInfoToCloud(); }catch(e){} // ---------- AIOTEST17: کیٹلاگ پیج کے لیے کاروبار کا نام/فون ----------
   if(typeof nextPendingId !== 'undefined') saveToStorage('nextPendingId', nextPendingId);
@@ -9575,6 +9582,41 @@ function addReviewItem(variantId){
   document.getElementById('reviewAddItemInput').value = '';
   document.getElementById('reviewSearchResults').classList.remove('show');
   renderPendingReview();
+}
+
+// ---------- AIOTEST26: منظوری سے پہلے حقیقی بل کی شکل میں تصویری Preview — Fruit Mandi کے پیٹرن پر،
+// موجودہ Billing کے "Preview Bill Before Completing" جیسی ہی canvas rendering استعمال کرتا ہے، کچھ بھی محفوظ نہیں کرتا ----------
+async function previewPendingBillBeforeApproval(){
+  const p = pendingBillsData.find(x => x.pending_id === activeReviewPendingId);
+  if(!p) return;
+  const customer = p.customer_id ? customersData.find(c => c.customer_id === p.customer_id) : null;
+  const subtotal = p.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
+  const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
+  const taxAmount = Math.round(subtotal * taxPercent / 100);
+  const grandTotal = subtotal + taxAmount;
+  const previousBalance = customer ? customer.total_receivable : 0;
+
+  const draftInvoice = {
+    invoice_id: 'DRAFT',
+    ...generateBillNumbers(), // ---------- صرف پڑھتا ہے، کچھ بھی محفوظ/شمار نہیں بدلتا — پریویو کے لیے بے خطر ----------
+    invoice_no: 'DRAFT PREVIEW — Not Yet Approved',
+    customer_id: p.customer_id,
+    customer_name: p.customer_name || (customer ? customer.name : 'Walk-in Customer'),
+    customer_phone: customer ? customer.phone : '',
+    sold_by: p.salesman_name,
+    sale_mode: p.sale_mode || 'retail',
+    payment_method: p.payment_method || 'cash',
+    items: JSON.parse(JSON.stringify(p.items)),
+    discount: 0, tax_percent: taxPercent, tax_amount: taxAmount,
+    grand_total: grandTotal,
+    previous_balance: previousBalance,
+    status: 'draft',
+    created_at: new Date().toISOString()
+  };
+
+  await renderInvoiceToCanvas(draftInvoice);
+  const canvas = document.getElementById('invoiceCanvas');
+  showImageSharePreview(canvas, 'Pending_Bill_Preview.png', `👁️ Preview — Submitted by ${p.salesman_name}`, 'Bill preview');
 }
 
 // ---------- Approve: اصل invoice بن جائے گا (سیلزمین کے نام کے ساتھ، ایڈمن کی تبدیلیوں سمیت) ----------
@@ -18357,9 +18399,24 @@ function renderApprovalList(){
 function resolveApproval(requestId, decision){
   const r = approvalRequests.find(x => x.request_id === requestId);
   if(!r) return;
-
-  // TODO: یہاں approval_requests table UPDATE ہوگا، اور 'approved' ہونے پر اصل bill edit/delete کی اجازت ملے گی
   r.status = decision;
+
+  // ---------- AIOTEST25: پہلے صرف status بدلتا تھا — منظوری کے باوجود بل ڈیلیٹ نہیں ہوتا تھا۔ اب Approve پر واقعی عمل بھی ہو ----------
+  if(decision === 'approved' && r.action_type === 'delete_bill'){
+    const inv = invoicesData.find(i => i.invoice_no === r.target);
+    if(inv && inv.status !== 'voided'){
+      executeVoidBill(inv);
+      alert(`✅ Approved — "${r.target}" has been voided (stock/cash/receivable reversed).`);
+    } else if(inv && inv.status === 'voided'){
+      alert('ℹ️ Approved — that bill was already voided, nothing more to do.');
+    } else {
+      alert('⚠️ Approved, but that bill could not be found (may have been removed already) — no changes made to any bill.');
+    }
+  } else if(decision === 'approved' && r.action_type === 'edit_bill'){
+    alert('ℹ️ Edit request approved. Note: AIO POS does not yet have a bill-editing screen — to correct the bill, void it and create a new one with the right details.');
+  }
+
+  persistAllData();
   renderApprovalList();
 }
 
@@ -18735,7 +18792,15 @@ function adminVoidBill(invoiceId){
     return;
   }
   if(!confirm('Void this bill? Stock will be restored, any cash/receivable/wallet effects will be reversed, and it will move out of the main list into the 🗑️ Voided tab.')) return;
+  executeVoidBill(inv);
+  persistAllData();
+  renderBillHistory();
+  alert('✅ Bill voided — stock and any cash/receivable/wallet effects have been reversed.');
+}
 
+// ---------- AIOTEST25: adminVoidBill کے confirm/alert سے الگ کر کے — تاکہ یہی اصل حساب کتاب Salesman کی منظور شدہ
+// Delete درخواست پر بھی چل سکے (وہاں دوبارہ پوچھنے کی ضرورت نہیں، Admin پہلے ہی Approve دبا چکا ہے) ----------
+function executeVoidBill(inv){
   // ---------- اسٹاک واپس کریں — بل کے ہر آئٹم کی مقدار اسٹاک میں دوبارہ شامل کریں ----------
   inv.items.forEach(item => {
     productsData.forEach(p => {
@@ -18764,9 +18829,6 @@ function adminVoidBill(invoiceId){
 
   // TODO: یہاں invoices.status = 'voided' کا DB UPDATE ہوگا
   inv.status = 'voided';
-  persistAllData();
-  renderBillHistory();
-  alert('✅ Bill voided — stock and any cash/receivable/wallet effects have been reversed.');
 }
 
 // ---------- Salesman: Edit/Delete کے لیے Admin سے منظوری مانگنی پڑے گی ----------
@@ -18793,7 +18855,7 @@ function sendApprovalRequest(){
   const inv = invoicesData.find(i => i.invoice_id === pendingRequestInvoiceId);
   if(!inv) return;
 
-  // TODO: یہاں approval_requests table میں INSERT ہوگا
+  // ---------- AIOTEST25: یہ اب دوسرے فون تک بھی پہنچتا ہے (Cloud Sync) — TODO مکمل ----------
   approvalRequests.unshift({
     request_id: nextRequestId++,
     requested_by: AppState.currentUser?.name || 'Unknown',
