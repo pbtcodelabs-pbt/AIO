@@ -60,15 +60,33 @@
     100%{ margin-left:100%; }
   }
 
-  /* ===================== LOGIN SCREEN ===================== */
+  /* ===================== LOGIN SCREEN — AIOTEST31: مزید خوبصورت/ایڈوانس ظاہری شکل ===================== */
   #loginScreen{
-    position:fixed; inset:0; background:linear-gradient(135deg,var(--primary-dark),var(--primary));
-    display:flex; align-items:center; justify-content:center; z-index:999;
+    position:fixed; inset:0; z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,.10), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255,255,255,.08), transparent 40%),
+      linear-gradient(135deg,var(--primary-dark),var(--primary));
+    overflow:hidden;
   }
-  .loginBox{background:var(--card); padding:32px; border-radius:var(--radius); width:300px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,.3);}
-  .loginBox h2{margin-bottom:20px; color:var(--primary-dark);}
-  .loginBox input{width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; text-align:center;}
-  .loginBox button{width:100%; padding:12px; margin-top:10px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer;}
+  .loginBox{
+    background:var(--card); padding:30px 28px 26px; border-radius:22px; width:310px; text-align:center;
+    box-shadow:0 25px 60px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.08);
+    animation:loginBoxIn .45s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes loginBoxIn{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .loginLogoBadge{
+    width:58px; height:58px; margin:0 auto 12px; border-radius:18px;
+    background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+    display:flex; align-items:center; justify-content:center; font-size:28px;
+    box-shadow:0 8px 20px rgba(15,118,110,.35);
+  }
+  .loginBox h2{margin-bottom:22px; color:var(--primary-dark); font-size:19px; letter-spacing:.2px;}
+  .loginBox input{width:100%; padding:13px; margin:8px 0; border:1.5px solid #e2e8f0; border-radius:12px; font-size:16px; text-align:center; background:#f8fafc; transition:border-color .15s, background .15s, box-shadow .15s;}
+  .loginBox input:focus{outline:none; border-color:var(--primary); background:#fff; box-shadow:0 0 0 4px rgba(15,118,110,.12);}
+  .loginBox button{width:100%; padding:13px; margin-top:10px; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 6px 16px rgba(15,118,110,.3); transition:transform .1s ease, box-shadow .1s ease;}
+  .loginBox button:active{transform:translateY(1px) scale(.99); box-shadow:0 3px 8px rgba(15,118,110,.25);}
   .loginHint{margin-top:14px; font-size:12px; color:var(--muted);}
   /* --- 🧪 Test Build لیبل — "AIO POS" کی جگہ، اسی بڑے سائز میں، خوبصورت رنگین چمک (صرف aiotestXX.html فائلوں میں نظر آتا ہے)
        پہلے صرف ایک زرد رنگ کی روشنی/مدھم ہوتی تھی جو آنکھوں کو تھکا رہی تھی — اب اس کی جگہ نرم، مسلسل بہتا ہوا رنگین Shimmer ہے --- */
@@ -1921,7 +1939,8 @@
 <!-- ===================== LOGIN SCREEN ===================== -->
 <div id="loginScreen">
   <div class="loginBox">
-    <h2 id="loginHeading" onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">🔐 AIO POS Login</h2>
+    <div class="loginLogoBadge">🧾</div>
+    <h2 id="loginHeading" onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">AIO POS Login</h2>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2080,13 +2099,14 @@
   </div>
 </div>
 
-<!-- ---------- 🎁 Quick Admin Gift Code — لاک اسکرین سے پوشیدہ طریقے (7 ٹیپ) سے کھلنے والا، PIN سے محفوظ ---------- -->
+<!-- ---------- AIOTEST29: 🎁 Quick Developer Gift Code — لاک اسکرین سے پوشیدہ طریقے (7 ٹیپ) سے کھلنے والا،
+صرف ڈویلپر کے اپنے پاس ورڈ سے محفوظ (دکان کے Admin PIN سے بالکل الگ — دکاندار خود اسے نہیں کھول سکتا) ---------- -->
 <div class="modalOverlay" id="quickGiftGenModal" style="z-index:4000;" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modalBox" style="max-width:340px;">
-    <h3>🎁 Quick Gift Code</h3>
+    <h3>🎁 Developer Gift Code</h3>
     <div id="quickGiftGenLocked">
-      <div class="settingsHint">Enter your Admin login PIN to generate a gift code.</div>
-      <input type="password" id="quickGiftPinInput" placeholder="Your Admin login PIN" maxlength="8" inputmode="numeric" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockQuickGiftGen()">
+      <div class="settingsHint">Enter Developer Password to generate a gift code.</div>
+      <input type="password" id="quickGiftPinInput" placeholder="Developer Password" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockQuickGiftGen()">
       <button class="testPrintBtn" style="margin-top:10px;" onclick="unlockQuickGiftGen()">🔓 Unlock</button>
       <div id="quickGiftPinError" style="color:var(--danger); font-size:12px; margin-top:6px; text-align:center;"></div>
     </div>
@@ -2136,7 +2156,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST26</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST31</span>
     </div>
   </div>
 
@@ -4635,19 +4655,9 @@
         <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
 
-      <!-- --- 🎁 Admin Gift Access — کسی بھی بندے کو مفت دنوں کا کوڈ بنا کر دیں (Play Billing سے بالکل الگ، صرف Admin کے استعمال کے لیے، عام صارف کو نظر نہیں آتا) --- -->
-      <div class="settingsCard">
-        <h3>🎁 Admin Gift Access</h3>
-        <div class="settingsHint">Private free-access code — support/testing/goodwill only. Never advertised.</div>
-        <input type="number" id="giftDaysInput" placeholder="Number of days (e.g. 30)" min="1" style="width:100%; padding:9px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <button class="testPrintBtn" style="margin-top:8px;" onclick="generateGiftCode()">🎁 Generate Code</button>
-        <div id="generatedGiftCodeBox" style="display:none; margin-top:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px;">
-          <div id="generatedGiftCodeText" style="font-family:monospace; font-size:13px; font-weight:700; word-break:break-all; color:#166534;"></div>
-          <div style="font-size:11px; color:var(--muted); margin-top:6px;">Valid 30 days. Enter under Package Plans → "Have a gift code?".</div>
-          <button class="testPrintBtn" style="margin-top:8px; background:#0ea5e9;" onclick="copyGiftCode()">📋 Copy Code</button>
-        </div>
-      </div>
-
+      <!-- --- AIOTEST29: پرانا "My Account → Admin Gift Access" کارڈ ہٹا دیا — یہ ہر Admin (یعنی دکاندار خود) کو
+      بغیر کسی ڈویلپر پاس ورڈ کے نظر آتا تھا، صرف اپنے ہی PIN سے کھل جاتا تھا۔ اب صرف ایک ہی، محفوظ راستہ ہے:
+      لاگ ان/لاک سکرین پر 7 بار ٹیپ → Developer Password (نیچے دیکھیں) --->
       <!-- --- 🔒 Privacy Policy — Play Store کے لیے لازمی: ایپ کے اندر سے بھی قابلِ رسائی ہونا چاہیے، صرف Play Console لسٹنگ میں کافی نہیں --- -->
       <div class="settingsCard">
         <h3>🔒 Privacy Policy</h3>
@@ -5210,7 +5220,7 @@ async function aioAuthFetch(path, options = {}){
 }
 
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
-const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests']; // ---------- AIOTEST25: Edit/Delete درخواستیں بھی اب دو فون کے درمیان sync ----------
+const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses']; // ---------- AIOTEST27: Advance Orders/Recovery/Finance بھی شامل ----------
 const cloudPollTimers = {};
 
 function initCloudSync(){
@@ -5263,6 +5273,13 @@ function aioGetDocTypeMeta(docType){
   if(docType === 'pendingbills') return { get data(){ return pendingBillsData; }, set data(v){ pendingBillsData.length=0; pendingBillsData.push(...v); }, seed: PENDING_BILLS_SEED_DATA, idKey: 'nextPendingId', nextIdVar: () => nextPendingId, setNextId: (v) => { nextPendingId = v; }, matchKey: 'pending_id', nameKey: 'salesman_name' };
   // ---------- AIOTEST25: Edit/Delete کی درخواستیں — پہلے صرف مقامی طور پر محفوظ ہوتی تھیں، دوسرے فون تک کبھی نہیں پہنچتی تھیں ----------
   if(docType === 'approvalrequests') return { get data(){ return approvalRequests; }, set data(v){ approvalRequests.length=0; approvalRequests.push(...v); }, seed: APPROVAL_REQUESTS_SEED_DATA, idKey: 'nextRequestId', nextIdVar: () => nextRequestId, setNextId: (v) => { nextRequestId = v; }, matchKey: 'request_id', nameKey: 'requested_by' };
+  // ---------- AIOTEST27: باقی رہ جانے والی تین چیزیں — Advance Orders، Recovery/Payments، Finance/Expenditure —
+  // یہ بھی اب دو فون کے درمیان sync ہوں گی۔ کسی کا بھی خالی seed ([]) ہے، لہٰذا نئے ڈیوائس پر ہمیشہ محفوظ طریقے سے fetch-only ہوگا ----------
+  if(docType === 'advanceorders') return { get data(){ return advanceOrdersData; }, set data(v){ advanceOrdersData.length=0; advanceOrdersData.push(...v); }, seed: [], idKey: 'nextAdvOrderId', nextIdVar: () => nextAdvOrderId, setNextId: (v) => { nextAdvOrderId = v; }, matchKey: 'id', nameKey: 'customerName' };
+  if(docType === 'payments') return { get data(){ return paymentsData; }, set data(v){ paymentsData.length=0; paymentsData.push(...v); }, seed: [], idKey: 'nextPaymentId', nextIdVar: () => nextPaymentId, setNextId: (v) => { nextPaymentId = v; }, matchKey: 'payment_id', nameKey: 'party_name',
+    // ---------- AIOTEST27: Slip کی تصویر (base64) Firestore کی 1MB فی دستاویز حد سے ٹکرا سکتی ہے — کلاؤڈ پر کبھی نہ بھیجیں، صرف اسی فون تک محدود رہے ----------
+    stripForCloud: (p) => ({...p, slip_image: null}) };
+  if(docType === 'expenses') return { get data(){ return expenseData; }, set data(v){ expenseData.length=0; expenseData.push(...v); }, seed: [], idKey: 'nextExpenseId', nextIdVar: () => nextExpenseId, setNextId: (v) => { nextExpenseId = v; }, matchKey: 'id', nameKey: 'name' };
   return null;
 }
 
@@ -5274,12 +5291,15 @@ const aioLastPushedJSON = {};
 // ورنہ ہماری "پوری فہرست دوبارہ لکھنے" والی push اس کے ابھی ابھی کیے گئے تبدیلی کو مٹا دے گی، بغیر کسی کو پتا چلے ----------
 const aioLastKnownUpdatedAt = {};
 
-// ---------- پورا مقامی array کلاؤڈ پر بھیجیں (JSON سٹرنگ کی صورت، Fruit Mandi کی طرح) ----------
+// ---------- پورا مقامی array کلاؤڈ پر بھیجیں (JSON سٹرنگ کی صورت، Fruit Mandi کی طرح)۔
+// AIOTEST27: اگر meta.stripForCloud موجود ہو (جیسے payments کی slip تصویر) تو مقامی طور پر مکمل ڈیٹا محفوظ رہتا ہے،
+// صرف کلاؤڈ پر بھیجنے والی کاپی سے وہ بھاری/حساس فیلڈ ہٹا دی جاتی ہے ----------
 async function pushDocTypeToCloud(docType, items){
   const meta = aioGetDocTypeMeta(docType);
   if(!meta) return false;
-  saveToStorage(docType, items); // ---------- آف لائن فال بیک ہمیشہ پہلے مقامی طور پر محفوظ کریں ----------
-  const itemsJSON = JSON.stringify(items);
+  saveToStorage(docType, items); // ---------- آف لائن فال بیک ہمیشہ پہلے مقامی طور پر (مکمل ڈیٹا سمیت) محفوظ کریں ----------
+  const cloudItems = meta.stripForCloud ? items.map(meta.stripForCloud) : items;
+  const itemsJSON = JSON.stringify(cloudItems);
   // ---------- اگر ڈیٹا آخری کامیاب push جیسا ہی ہے اور کوئی pending retry بھی نہیں تو Firestore write سکِپ کریں ----------
   if(aioLastPushedJSON[docType] === itemsJSON && !AppState.settings[docType + 'PendingSync']){
     return true;
@@ -5360,7 +5380,13 @@ async function fetchDocTypeFromCloud(docType, silent){
     if(!jsonStr) return false;
     const cloudItems = JSON.parse(jsonStr);
     if(!Array.isArray(cloudItems)) return false;
+    // ---------- AIOTEST27: payments کی slip تصویر کبھی کلاؤڈ پر نہیں جاتی (سائز کی وجہ سے) — فیچ سے پہلے پرانی مقامی
+    // تصویریں محفوظ کر لیں، ورنہ نیچے والا overwrite اسی فون کی اپنی کھینچی تصویریں بھی مٹا دے گا ----------
+    const oldLocalById = (docType === 'payments') ? new Map(meta.data.map(p => [p.payment_id, p.slip_image])) : null;
     meta.data = cloudItems;
+    if(oldLocalById){
+      meta.data.forEach(p => { if(!p.slip_image && oldLocalById.has(p.payment_id)) p.slip_image = oldLocalById.get(p.payment_id); });
+    }
     const cloudNextId = parseInt(doc.fields?.nextId?.integerValue || '0');
     if(cloudNextId > meta.nextIdVar()) meta.setNextId(cloudNextId);
     aioLastKnownUpdatedAt[docType] = parseInt(doc.fields?.updatedAt?.integerValue || '0'); // ---------- AIOTEST23: تصادم چیک کے لیے یاد رکھیں ----------
@@ -5397,6 +5423,12 @@ function applyCloudDocTypeUI(docType){
   } else if(docType === 'approvalrequests'){
     // ---------- AIOTEST25: دوسرے فون سے نئی Edit/Delete درخواست آئی — Approvals سکرین کھلی ہو تو تازہ کریں ----------
     try{ if(document.getElementById('screen-users')?.classList.contains('active') && typeof renderApprovalList === 'function') renderApprovalList(); }catch(e){}
+  } else if(docType === 'advanceorders'){
+    try{ if(document.getElementById('screen-advanceorders')?.classList.contains('active') && typeof renderAdvanceOrdersScreen === 'function') renderAdvanceOrdersScreen(); }catch(e){}
+  } else if(docType === 'payments'){
+    try{ if(document.getElementById('screen-payments')?.classList.contains('active') && typeof renderPaymentsScreen === 'function') renderPaymentsScreen(); }catch(e){}
+  } else if(docType === 'expenses'){
+    try{ if(document.getElementById('screen-expenditure')?.classList.contains('active') && typeof renderExpenseList === 'function') renderExpenseList(); }catch(e){}
   }
 }
 
@@ -5803,13 +5835,13 @@ function persistAllData(){
   if(typeof nextRequestId !== 'undefined') saveToStorage('nextRequestId', nextRequestId);
   if(typeof AppState !== 'undefined') saveToStorage('settings', AppState.settings);
   if(typeof quickDockItems !== 'undefined') saveToStorage('quickDockItems', quickDockItems);
-  if(typeof advanceOrdersData !== 'undefined') saveToStorage('advanceOrders', advanceOrdersData);
+  if(typeof advanceOrdersData !== 'undefined'){ saveToStorage('advanceOrders', advanceOrdersData); try{ pushDocTypeToCloud('advanceorders', advanceOrdersData); }catch(e){} }
   if(typeof nextAdvOrderId !== 'undefined') saveToStorage('nextAdvOrderId', nextAdvOrderId);
-  if(typeof paymentsData !== 'undefined') saveToStorage('payments', paymentsData);
+  if(typeof paymentsData !== 'undefined'){ saveToStorage('payments', paymentsData); try{ pushDocTypeToCloud('payments', paymentsData); }catch(e){} }
   if(typeof nextPaymentId !== 'undefined') saveToStorage('nextPaymentId', nextPaymentId);
   if(typeof diaryData !== 'undefined') saveToStorage('diary', diaryData);
   if(typeof nextDiaryId !== 'undefined') saveToStorage('nextDiaryId', nextDiaryId);
-  if(typeof expenseData !== 'undefined') saveToStorage('expenses', expenseData);
+  if(typeof expenseData !== 'undefined'){ saveToStorage('expenses', expenseData); try{ pushDocTypeToCloud('expenses', expenseData); }catch(e){} }
   if(typeof nextExpenseId !== 'undefined') saveToStorage('nextExpenseId', nextExpenseId);
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
@@ -6608,7 +6640,7 @@ function getDeveloperContact(){
 }
 
 // ---------- ہر انسٹالیشن کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
-// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 30 دن کا مفت (Beta) ٹرائل بھی شروع ہو جاتا ہے — تاکہ
+// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 14 دن کا مفت (Beta) ٹرائل بھی شروع ہو جاتا ہے — تاکہ
 // کسی نئے صارف کو فائل کھولتے ہی PIN/Activation کے چکر میں نہ الجھنا پڑے، وہ فوراً ایپ آزما سکے۔
 function getOrCreateDeviceUID(){
   if(AppState.settings.deviceUID) return AppState.settings.deviceUID;
@@ -6616,7 +6648,7 @@ function getOrCreateDeviceUID(){
   AppState.settings.deviceUID = uid;
   if(!AppState.settings.subscriptionExpiry && !AppState.settings.freeTrialGranted){
     const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 30);
+    trialEnd.setDate(trialEnd.getDate() + 14); // ---------- AIOTEST28: پہلے 30 دن تھا، اب 14 دن ----------
     AppState.settings.subscriptionExpiry = trialEnd.toISOString().slice(0,10);
     AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
     AppState.settings.freeTrialGranted = true;
@@ -7538,7 +7570,6 @@ const APP_SEARCH_INDEX = [
   {label:'My Account — My Diary', path:'My Account', screen:'myaccount', keywords:'my diary shortcut personal ledger khata'},
   {label:'Settings — Admin Control', path:'Settings', screen:'settings', anchor:'settingsCardAdminControl', keywords:'admin control developer contact whatsapp pin unlock edit'},
   {label:'Settings — Percentage Markup Pricing', path:'Settings', screen:'settings', anchor:'settingsCardMarkupPricing', keywords:'markup percent profit margin auto price calculate purchase retail percentage'},
-  {label:'Admin Gift Access — Generate Code', path:'My Account', screen:'myaccount', keywords:'admin gift access generate code free days subscription developer redeem support testing goodwill'},
   {label:'Redeem Gift Code', path:'Subscription screen (appears when expired)', screen:'myaccount', keywords:'redeem gift code apply free days subscription activate expired have a gift code'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
   {label:'Settings — Opening Cash Balance', path:'Settings', screen:'settings', keywords:'opening cash balance starting amount till'},
@@ -21661,24 +21692,8 @@ function fromYYYYMMDD(s){
   return new Date(y, m-1, d);
 }
 
-// ---------- Admin کوڈ بنائیں — 30 دن کے اندر کہیں بھی ایک بار قابلِ استعمال ----------
-async function generateGiftCode(){
-  const daysInput = document.getElementById('giftDaysInput');
-  const days = parseInt(daysInput.value, 10);
-  if(!days || days < 1){ alert('براہ کرم دنوں کی درست تعداد لکھیں۔'); return; }
-
-  const expiry = new Date();
-  expiry.setDate(expiry.getDate() + 30); // ---------- کوڈ خود 30 دن میں expire ہو جائے گا اگر استعمال نہ ہو ----------
-  const expiryStr = toYYYYMMDD(expiry);
-
-  const fullHash = await sha256Hex(`${days}|${expiryStr}|${GIFT_CODE_SALT}`);
-  const checksum = fullHash.slice(0, 10).toUpperCase();
-  const code = `AIOGIFT-${days}-${expiryStr}-${checksum}`;
-
-  document.getElementById('generatedGiftCodeText').textContent = code;
-  document.getElementById('generatedGiftCodeBox').style.display = 'block';
-  daysInput.value = '';
-}
+// ---------- AIOTEST29: پرانا نا محفوظ generateGiftCode() (My Account میں، صرف Admin PIN سے) ہٹا دیا گیا —
+// اب صرف Developer Password والا generateQuickGiftCode() ہی موجود ہے ----------
 
 // ---------- 🔐 پوشیدہ Admin شارٹ کٹ — لاک اسکرین کے ہیڈنگ کو 3 سیکنڈ کے اندر 7 بار ٹیپ کرنے پر کھلتا ہے۔
 // عام صارف کے لیے یہ بالکل عام سا heading ہی رہتا ہے، کوئی بٹن نظر نہیں آتا ----------
@@ -21707,13 +21722,13 @@ function closeQuickGiftGenModal(){
   document.getElementById('quickGiftGenModal').classList.remove('show');
 }
 
-// ---------- وہی Admin login PIN جو باقی ایپ میں استعمال ہوتا ہے — کوئی الگ PIN یاد رکھنے کی ضرورت نہیں ----------
-async function unlockQuickGiftGen(){
+// ---------- AIOTEST29: صرف ڈویلپر کا اپنا پاس ورڈ — دکان کے Admin PIN سے مکمل الگ۔
+// یہ پاس ورڈ صرف کوڈ میں لکھا ہوا ہے، کسی صارف کو کبھی نظر نہیں آتا اور کہیں دکھایا نہیں جاتا ----------
+const DEVELOPER_GIFT_PASSWORD = '857766';
+function unlockQuickGiftGen(){
   const entered = document.getElementById('quickGiftPinInput').value.trim();
-  const enteredHash = await hashPin(entered);
-  const validAdmin = usersData.some(u => u.role === 'admin' && u.is_active && u.pin === enteredHash);
-  if(!validAdmin){
-    document.getElementById('quickGiftPinError').textContent = '❌ Incorrect PIN.';
+  if(entered !== DEVELOPER_GIFT_PASSWORD){
+    document.getElementById('quickGiftPinError').textContent = '❌ Incorrect password.';
     return;
   }
   document.getElementById('quickGiftPinError').textContent = '';
@@ -21744,15 +21759,6 @@ function copyQuickGiftCode(){
   const text = document.getElementById('quickGiftCodeText').textContent;
   navigator.clipboard?.writeText(text).then(() => {
     alert('✅ Code copied!');
-  }).catch(() => {
-    alert('Copy failed — please select and copy the code manually.');
-  });
-}
-
-function copyGiftCode(){
-  const text = document.getElementById('generatedGiftCodeText').textContent;
-  navigator.clipboard?.writeText(text).then(() => {
-    alert('✅ Code copied! Share it with the person via WhatsApp or any app.');
   }).catch(() => {
     alert('Copy failed — please select and copy the code manually.');
   });
