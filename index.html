@@ -1940,17 +1940,17 @@
 <div id="loginScreen">
   <div class="loginBox">
     <div class="loginLogoBadge">🧾</div>
-    <h2 id="loginHeading" onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">AIO POS Login</h2>
+    <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
 
-    <!-- ---------- 🔀 صاف الگ الگ داخلہ: 👑 Admin اور 🧑‍💼 Salesman — کوئی ابہام نہیں کہ کس طور پر لاگ ان ہو رہے ہیں ---------- -->
-    <div class="loginRoleTabs">
+    <!-- ---------- 🔀 سنگل ایڈمن/یوزر انٹری — Salesman ٹیب/بکسہ ہوم پیج سے ہٹا دیا گیا ---------- -->
+    <div class="loginRoleTabs" style="display:none;">
       <button type="button" class="loginRoleTab active" id="loginTabAdmin" onclick="switchLoginRole('admin')">
         <span class="lrtIcon">👑</span><span>Admin</span>
       </button>
-      <button type="button" class="loginRoleTab" id="loginTabSalesman" onclick="switchLoginRole('salesman')">
+      <button type="button" class="loginRoleTab" id="loginTabSalesman" onclick="switchLoginRole('salesman')" style="display:none;">
         <span class="lrtIcon">🧑‍💼</span><span>Salesman</span>
       </button>
     </div>
@@ -1959,16 +1959,16 @@
     <div id="loginLockoutBox" class="loginLockoutBox" style="display:none;"></div>
 
     <div id="loginFormArea">
-      <!-- ---------- 👑 Admin پینل — صرف PIN، کوئی نام منتخب کرنے کی ضرورت نہیں (ایک ہی Admin اکاؤنٹ) ---------- -->
+      <!-- ---------- 👑 سنگل ایڈمن/یوزر پینل — صرف PIN، کوئی نام منتخب کرنے کی ضرورت نہیں ---------- -->
       <div class="loginPanel active" id="loginPanelAdmin">
         <div class="loginPinFieldWrap">
           <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputAdmin', this)">👁️</button>
-          <input type="password" id="pinInputAdmin" placeholder="Admin PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+          <input type="password" id="pinInputAdmin" placeholder="PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
         </div>
       </div>
 
-      <!-- ---------- 🧑‍💼 Salesman پینل — پہلے اپنا نام منتخب کریں، پھر اپنا PIN ---------- -->
-      <div class="loginPanel" id="loginPanelSalesman">
+      <!-- ---------- 🧑‍💼 Salesman پینل — اب لاگ اِن سکرین پر نظر نہیں آتا (اندرونی کوڈ کے لیے موجود ہے) ---------- -->
+      <div class="loginPanel" id="loginPanelSalesman" style="display:none;">
         <select id="loginSalesmanSelect"></select>
         <div class="loginPinFieldWrap">
           <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputSalesman', this)">👁️</button>
@@ -1981,6 +1981,9 @@
         🔒 Remember me on this device
       </label>
       <button id="loginEnterBtn" onclick="login()">Enter</button>
+
+      <!-- ---------- 🎁 ٹرائل ختم ہونے پر یہاں سے سیدھا سبسکرائب کریں ---------- -->
+      <button id="loginTrialBtn" onclick="goTo('billing'); openPackagePlansModal();" style="display:none; background:#fff7ed; color:#c2410c; border:1.5px solid #fdba74; margin-top:10px;">🎟️ 14-Day Free Trial / Subscribe</button>
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
@@ -2093,33 +2096,9 @@
   <div class="loginBox" style="max-width:340px;">
     <!-- ---------- 🔐 پوشیدہ Admin شارٹ کٹ — اسی ہیڈنگ کو 7 بار جلدی جلدی ٹیپ کرنے سے کھلتا ہے۔
          عام صارف کو کوئی بٹن نظر نہیں آتا، صرف Admin کو معلوم طریقہ ---------- -->
-    <h2 onclick="handleGateSecretTap()" style="cursor:default; user-select:none;">🔒 Subscription Required</h2>
+    <h2 style="cursor:default; user-select:none;">🔒 Subscription Required</h2>
     <p id="subGateStatus" style="font-size:13px; color:var(--muted); margin-bottom:14px;"></p>
     <button onclick="openPackagePlansModal()" style="margin-top:6px;">🎟️ View Subscription Plans</button>
-  </div>
-</div>
-
-<!-- ---------- AIOTEST29: 🎁 Quick Developer Gift Code — لاک اسکرین سے پوشیدہ طریقے (7 ٹیپ) سے کھلنے والا،
-صرف ڈویلپر کے اپنے پاس ورڈ سے محفوظ (دکان کے Admin PIN سے بالکل الگ — دکاندار خود اسے نہیں کھول سکتا) ---------- -->
-<div class="modalOverlay" id="quickGiftGenModal" style="z-index:4000;" onclick="if(event.target===this) this.classList.remove('show')">
-  <div class="modalBox" style="max-width:340px;">
-    <h3>🎁 Developer Gift Code</h3>
-    <div id="quickGiftGenLocked">
-      <div class="settingsHint">Enter Developer Password to generate a gift code.</div>
-      <input type="password" id="quickGiftPinInput" placeholder="Developer Password" style="width:100%; padding:11px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;" onkeydown="if(event.key==='Enter') unlockQuickGiftGen()">
-      <button class="testPrintBtn" style="margin-top:10px;" onclick="unlockQuickGiftGen()">🔓 Unlock</button>
-      <div id="quickGiftPinError" style="color:var(--danger); font-size:12px; margin-top:6px; text-align:center;"></div>
-    </div>
-    <div id="quickGiftGenUnlocked" style="display:none;">
-      <div class="settingsSubLabel">Number of days (e.g. 30)</div>
-      <input type="number" id="quickGiftDaysInput" placeholder="e.g. 30" min="1" style="width:100%; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:15px; text-align:center;">
-      <button class="testPrintBtn" style="margin-top:10px;" onclick="generateQuickGiftCode()">🎁 Generate Code</button>
-      <div id="quickGiftCodeBox" style="display:none; margin-top:12px; background:#eef2ff; border-radius:10px; padding:12px; text-align:center;">
-        <div id="quickGiftCodeText" style="font-weight:800; font-size:14px; word-break:break-all; color:var(--primary-dark);"></div>
-        <button class="testPrintBtn" style="margin-top:8px;" onclick="copyQuickGiftCode()">📋 Copy Code</button>
-      </div>
-    </div>
-    <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="closeQuickGiftGenModal()">Close</button>
   </div>
 </div>
 
@@ -2156,7 +2135,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST32</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST33</span>
     </div>
   </div>
 
@@ -2274,6 +2253,11 @@
         <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
       </div>
+
+      <!-- ---------- 🚀 NEAR FUTURE PLANS — ہوم پیج صاف رکھنے کے لیے ایک ہی بٹن، تفصیل موڈل میں ---------- -->
+      <button type="button" onclick="openNearFuturePlansModal()" style="width:100%; margin:6px 0 12px; padding:12px; border:none; border-radius:12px; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; font-weight:800; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+        🚀 Near Future Plans <span style="opacity:.85; font-weight:600;">— coming soon</span>
+      </button>
 
       <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
       <div id="trialReminderToast" style="display:none;">
@@ -4655,9 +4639,6 @@
         <button class="testPrintBtn" style="margin-top:10px;" onclick="goTo('mydiary')">📔 Open My Diary</button>
       </div>
 
-      <!-- --- AIOTEST29: پرانا "My Account → Admin Gift Access" کارڈ ہٹا دیا — یہ ہر Admin (یعنی دکاندار خود) کو
-      بغیر کسی ڈویلپر پاس ورڈ کے نظر آتا تھا، صرف اپنے ہی PIN سے کھل جاتا تھا۔ اب صرف ایک ہی، محفوظ راستہ ہے:
-      لاگ ان/لاک سکرین پر 7 بار ٹیپ → Developer Password (نیچے دیکھیں) --->
       <!-- --- 🔒 Privacy Policy — Play Store کے لیے لازمی: ایپ کے اندر سے بھی قابلِ رسائی ہونا چاہیے، صرف Play Console لسٹنگ میں کافی نہیں --- -->
       <div class="settingsCard">
         <h3>🔒 Privacy Policy</h3>
@@ -4853,6 +4834,35 @@
       </div>
     </div>
 
+    <!-- 🚀 NEAR FUTURE PLANS MODAL — پائپ لائن میں شامل منصوبے، ابھی لانچ نہیں ہوئے -->
+    <div class="modalOverlay" id="nearFuturePlansModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBox" style="max-width:400px;">
+        <h3 style="color:#4338ca;">🚀 Near Future Plans</h3>
+        <div class="settingsHint" style="margin-top:0;">یہ منصوبے پائپ لائن میں ہیں اور جلد لانچ ہونے والے ہیں:</div>
+        <div style="text-align:left; margin-top:10px; display:flex; flex-direction:column; gap:10px;">
+          <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
+            <div style="font-weight:800; font-size:13px;">👑 Admin + 🧑‍💼 Salesman</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Multi-user app — ایک سے زیادہ ملازم اپنے اپنے لاگ ان سے کام کر سکیں گے۔</div>
+          </div>
+          <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
+            <div style="font-weight:800; font-size:13px;">📱 Multi-Device App</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">ایک ہی کاروبار کا ڈیٹا ایک سے زیادہ ڈیوائسز پر سنکرونائز ہوگا۔</div>
+          </div>
+          <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
+            <div style="font-weight:800; font-size:13px;">💬 Online Support</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">ایپ کے اندر سے ہی براہ راست سپورٹ اور مدد۔</div>
+          </div>
+          <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
+            <div style="font-weight:800; font-size:13px;">🔗 Online Ordering via Link</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">کسٹمر ایپ ڈاؤن لوڈ کیے بغیر صرف لنک کے ذریعے آن لائن آرڈر دے سکے گا۔</div>
+          </div>
+        </div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="document.getElementById('nearFuturePlansModal').classList.remove('show')">Close</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ADD PAYMENT ACCOUNT MODAL -->
     <!-- IMAGE SHARE PREVIEW MODAL — کارڈ/پوسٹر بنانے کے فوراً بعد یہاں دکھایا جائے، سیدھا شیئر شیٹ پر نہیں کودنا ---------- -->
     <div class="modalOverlay" id="imageSharePreviewModal" style="z-index:960;" onclick="if(event.target===this) closeImageSharePreview()">
@@ -4919,15 +4929,6 @@
     <h3>🗂️ Package Plans</h3>
 
     <div id="packagePlansWrap" style="margin-top:14px;"></div>
-
-    <!-- ---------- 🎁 Gift/Admin Code Redemption — کوئی بھی صارف یہاں سے ڈویلپر کا دیا ہوا مفت دنوں کا کوڈ لگا سکتا ہے ---------- -->
-    <div style="margin-top:14px; border-top:1px solid #eef2f7; padding-top:10px;">
-      <div onclick="toggleGiftCodeBox()" style="font-size:12px; color:var(--primary-dark); font-weight:700; cursor:pointer; text-align:center;">🎁 Have a gift code?</div>
-      <div id="giftCodeBox" style="display:none; margin-top:8px; gap:8px; flex-direction:column;">
-        <input type="text" id="giftCodeInput" placeholder="e.g. AIOGIFT-30-20260930-A1B2C3D4E5" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px; text-transform:uppercase;">
-        <button class="testPrintBtn" onclick="redeemGiftCode()">🎁 Redeem Code</button>
-      </div>
-    </div>
 
     <p style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:12px; text-align:center;">
       💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
@@ -6729,6 +6730,11 @@ function maybeShowTrialReminder(daysLeft){
     setTimeout(() => { toast.style.display = 'none'; }, 4600);
   }
 }
+// ---------- 🚀 Near Future Plans — ہوم پیج پر ایک ہی صاف ستھرا بٹن، تفصیل موڈل میں ----------
+function openNearFuturePlansModal(){
+  document.getElementById('nearFuturePlansModal').classList.add('show');
+}
+
 function dismissTrialUrgentModal(){
   document.getElementById('trialUrgentModal').classList.remove('show');
 }
@@ -6990,6 +6996,10 @@ async function setupLoginScreen(){
       statusEl.textContent = `⏰ Your Free Trial Has Ended — Please Subscribe to Continue`;
     }
     statusEl.style.display = 'block';
+
+    // ---------- 🎁 ٹرائل بٹن: صرف اسی وقت نظر آئے جب ٹرائل ختم ہو چکا ہو، تاکہ ہوم پیج صاف رہے ----------
+    const trialBtn = document.getElementById('loginTrialBtn');
+    if(trialBtn) trialBtn.style.display = isSubscriptionActive() ? 'none' : 'block';
 
     switchLoginRole('admin');
     populateLoginSalesmanList();
@@ -7356,8 +7366,7 @@ function logout(){
 
 // ---------- 🔒 Log Out From All Accounts — آپ کی اپنی ڈیوائس پر PIN Lock بند ہونے کی وجہ سے عام Logout بھی
 // خودکار دوبارہ لاگ ان ہو جاتا ہے۔ یہ بٹن اُس خودکار لاگ ان کو عارضی طور پر روک دیتا ہے، تاکہ اصل
-// Login/Lock اسکرین نظر آئے (جہاں سے 7 بار ٹیپ کر کے Quick Gift Code بھی کھولا جا سکتا ہے)۔
-// اگلی بار جب آپ خود PIN ڈال کر لاگ ان کریں گے، خودکار لاگ ان دوبارہ معمول پر آ جائے گا ----------
+// Login/Lock اسکرین نظر آئے۔ اگلی بار جب آپ خود PIN ڈال کر لاگ ان کریں گے، خودکار لاگ ان دوبارہ معمول پر آ جائے گا ----------
 function fullLogoutAllAccounts(){
   AppState.settings.forceLoginScreen = true;
   persistAllData();
@@ -7574,7 +7583,6 @@ const APP_SEARCH_INDEX = [
   {label:'My Account — My Diary', path:'My Account', screen:'myaccount', keywords:'my diary shortcut personal ledger khata'},
   {label:'Settings — Admin Control', path:'Settings', screen:'settings', anchor:'settingsCardAdminControl', keywords:'admin control developer contact whatsapp pin unlock edit'},
   {label:'Settings — Percentage Markup Pricing', path:'Settings', screen:'settings', anchor:'settingsCardMarkupPricing', keywords:'markup percent profit margin auto price calculate purchase retail percentage'},
-  {label:'Redeem Gift Code', path:'Subscription screen (appears when expired)', screen:'myaccount', keywords:'redeem gift code apply free days subscription activate expired have a gift code'},
   {label:'Settings — Tax', path:'Settings', screen:'settings', anchor:'settingsCardTax', keywords:'tax percentage gst enable bill'},
   {label:'Settings — Opening Cash Balance', path:'Settings', screen:'settings', keywords:'opening cash balance starting amount till'},
   {label:'Settings — Backup / Export / Import', path:'Settings', screen:'settings', anchor:'settingsCardBackup', keywords:'backup export import restore data save json downloads last backup google drive local file'},
@@ -21684,178 +21692,6 @@ async function syncPlayBillingRenewal(){
 }
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ syncPlayBillingRenewal(); }catch(e){} }, 1500); });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ syncPlayBillingRenewal(); }catch(e){} } });
-
-/* =====================================================================
-   🎁 ADMIN GIFT ACCESS — Google Play Billing سے بالکل الگ، نجی نظام۔
-   یہ Play کا کوئی متبادل پیمنٹ نہیں (کوئی پیسہ شامل نہیں) — صرف ڈویلپر کی
-   طرف سے کسی کو ذاتی طور پر مفت رسائی دینے کا ٹول، بالکل ویسے جیسے بہت سی
-   ایپس کے پاس اندرونی support/QA override ہوتا ہے۔ کبھی بھی صارف کو
-   "یہاں سستا خریدیں" جیسے انداز میں نہ دکھائیں — صرف نجی طور پر شیئر کریں۔
-   ===================================================================== */
-const GIFT_CODE_SALT = 'AIO_POS_GIFT_9f3kQ7';
-
-// ---------- عام مقصد کی SHA-256 ہیکسا ڈیسیمل ہیش — کوڈ کی تصدیق کے لیے ----------
-async function sha256Hex(str){
-  try{
-    if(crypto && crypto.subtle && crypto.subtle.digest){
-      const data = new TextEncoder().encode(str);
-      const digest = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
-    }
-  }catch(e){ console.warn('sha256Hex ناکام:', e); }
-  // ---------- Fallback (crypto.subtle دستیاب نہ ہو تو) ----------
-  let h1 = 0x9e3779b9, h2 = 0x85ebca6b;
-  for(let i = 0; i < str.length; i++){
-    const ch = str.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
-  return (h1>>>0).toString(16).padStart(8,'0') + (h2>>>0).toString(16).padStart(8,'0');
-}
-
-// ---------- YYYYMMDD فارمیٹ میں تاریخ (کوڈ کے اندر ایمبیڈ کرنے کے لیے، مختصر رکھنے کے لیے) ----------
-function toYYYYMMDD(d){
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-}
-function fromYYYYMMDD(s){
-  const y = +s.slice(0,4), m = +s.slice(4,6), d = +s.slice(6,8);
-  return new Date(y, m-1, d);
-}
-
-// ---------- AIOTEST29: پرانا نا محفوظ generateGiftCode() (My Account میں، صرف Admin PIN سے) ہٹا دیا گیا —
-// اب صرف Developer Password والا generateQuickGiftCode() ہی موجود ہے ----------
-
-// ---------- 🔐 پوشیدہ Admin شارٹ کٹ — لاک اسکرین کے ہیڈنگ کو 3 سیکنڈ کے اندر 7 بار ٹیپ کرنے پر کھلتا ہے۔
-// عام صارف کے لیے یہ بالکل عام سا heading ہی رہتا ہے، کوئی بٹن نظر نہیں آتا ----------
-let __gateTapCount = 0, __gateTapTimer = null;
-function handleGateSecretTap(){
-  __gateTapCount++;
-  if(__gateTapTimer) clearTimeout(__gateTapTimer);
-  __gateTapTimer = setTimeout(() => { __gateTapCount = 0; }, 3000);
-  if(__gateTapCount >= 7){
-    __gateTapCount = 0;
-    clearTimeout(__gateTapTimer);
-    openQuickGiftGenModal();
-  }
-}
-
-function openQuickGiftGenModal(){
-  document.getElementById('quickGiftGenLocked').style.display = 'block';
-  document.getElementById('quickGiftGenUnlocked').style.display = 'none';
-  document.getElementById('quickGiftPinInput').value = '';
-  document.getElementById('quickGiftPinError').textContent = '';
-  document.getElementById('quickGiftCodeBox').style.display = 'none';
-  document.getElementById('quickGiftGenModal').classList.add('show');
-}
-
-function closeQuickGiftGenModal(){
-  document.getElementById('quickGiftGenModal').classList.remove('show');
-}
-
-// ---------- AIOTEST29: صرف ڈویلپر کا اپنا پاس ورڈ — دکان کے Admin PIN سے مکمل الگ۔
-// یہ پاس ورڈ صرف کوڈ میں لکھا ہوا ہے، کسی صارف کو کبھی نظر نہیں آتا اور کہیں دکھایا نہیں جاتا ----------
-const DEVELOPER_GIFT_PASSWORD = '857766';
-function unlockQuickGiftGen(){
-  const entered = document.getElementById('quickGiftPinInput').value.trim();
-  if(entered !== DEVELOPER_GIFT_PASSWORD){
-    document.getElementById('quickGiftPinError').textContent = '❌ Incorrect password.';
-    return;
-  }
-  document.getElementById('quickGiftPinError').textContent = '';
-  document.getElementById('quickGiftPinInput').value = '';
-  document.getElementById('quickGiftGenLocked').style.display = 'none';
-  document.getElementById('quickGiftGenUnlocked').style.display = 'block';
-}
-
-async function generateQuickGiftCode(){
-  const daysInput = document.getElementById('quickGiftDaysInput');
-  const days = parseInt(daysInput.value, 10);
-  if(!days || days < 1){ alert('براہ کرم دنوں کی درست تعداد لکھیں۔'); return; }
-
-  const expiry = new Date();
-  expiry.setDate(expiry.getDate() + 30);
-  const expiryStr = toYYYYMMDD(expiry);
-
-  const fullHash = await sha256Hex(`${days}|${expiryStr}|${GIFT_CODE_SALT}`);
-  const checksum = fullHash.slice(0, 10).toUpperCase();
-  const code = `AIOGIFT-${days}-${expiryStr}-${checksum}`;
-
-  document.getElementById('quickGiftCodeText').textContent = code;
-  document.getElementById('quickGiftCodeBox').style.display = 'block';
-  daysInput.value = '';
-}
-
-function copyQuickGiftCode(){
-  const text = document.getElementById('quickGiftCodeText').textContent;
-  navigator.clipboard?.writeText(text).then(() => {
-    alert('✅ Code copied!');
-  }).catch(() => {
-    alert('Copy failed — please select and copy the code manually.');
-  });
-}
-
-function toggleGiftCodeBox(){
-  const box = document.getElementById('giftCodeBox');
-  box.style.display = (box.style.display === 'none' || !box.style.display) ? 'flex' : 'none';
-}
-
-// ---------- صارف کا کوڈ لگانا — تصدیق کے بعد بالکل اسی طرح دن جوڑے جاتے ہیں جیسے Play Billing خریداری پر ----------
-async function redeemGiftCode(){
-  const input = document.getElementById('giftCodeInput');
-  const raw = (input.value || '').trim().toUpperCase();
-  const parts = raw.split('-');
-
-  if(parts.length !== 4 || parts[0] !== 'AIOGIFT'){
-    alert('❌ Invalid code format.');
-    return;
-  }
-  const [, daysStr, expiryStr, checksum] = parts;
-  const days = parseInt(daysStr, 10);
-  if(!days || !/^\d{8}$/.test(expiryStr)){
-    alert('❌ Invalid code format.');
-    return;
-  }
-
-  const expectedHash = await sha256Hex(`${days}|${expiryStr}|${GIFT_CODE_SALT}`);
-  const expectedChecksum = expectedHash.slice(0, 10).toUpperCase();
-  if(checksum !== expectedChecksum){
-    alert('❌ This code is not valid.');
-    return;
-  }
-
-  const expiryDate = fromYYYYMMDD(expiryStr);
-  const today = new Date(); today.setHours(0,0,0,0);
-  if(today > expiryDate){
-    alert('❌ This code has expired.');
-    return;
-  }
-
-  // ---------- اسی ڈیوائس پر دوبارہ استعمال نہ ہو سکے (مکمل حفاظت نہیں، مگر عام غلطی/دوبارہ کوشش روکنے کے لیے کافی) ----------
-  const usedCodes = AppState.settings.usedGiftCodes || [];
-  if(usedCodes.includes(raw)){
-    alert('❌ This code has already been used on this device.');
-    return;
-  }
-
-  // ---------- بالکل وہی منطق جو Play Billing خریداری پر استعمال ہوتی ہے ----------
-  const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
-  const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
-  base.setDate(base.getDate() + days);
-  AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
-  AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
-  AppState.settings.isOnFreeTrial = false;
-  AppState.settings.subscriptionViaAdminGift = true;
-  usedCodes.push(raw);
-  AppState.settings.usedGiftCodes = usedCodes;
-  persistAllData();
-
-  document.getElementById('packagePlansModal')?.classList.remove('show');
-  refreshAllScreens();
-  alert(`✅ Success! ${days} days added to your subscription.`);
-}
-
 
 function openPackagePlansModal(){
   selectedPlanDays = null;
