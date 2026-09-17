@@ -7291,14 +7291,20 @@ async function loginWithTouchId(){
   playTouchIdReading(); // ---------- رِنگ اور فنگر پرنٹ فوری طور پر "ڈرا" ہونا شروع — اسی دوران اصل OS بائیومیٹرک پرامپٹ بھی کھلتا ہے ----------
   setTimeout(playTouchIdScanning, 650);
   try{
-    const assertion = await navigator.credentials.get({
-      publicKey:{
-        challenge: tidRandomBytes(32),
-        allowCredentials:[{ id: tidBase64urlToBuf(stored.id), type:'public-key' }],
-        userVerification:'required',
-        timeout:60000
-      }
-    });
+    // ---------- 🛠️ فکس: سیفٹی ٹائم آؤٹ — اگر OS کا فنگر پرنٹ پرامپٹ کبھی جواب ہی نہ دے (مثلاً ایپ بیک گراؤنڈ ہو جائے/سسٹم لٹک جائے)
+    // تو بھی یہ Promise 65 سیکنڈ بعد reject ہو کر catch میں چلا جائے گا، بٹن ہمیشہ کے لیے پھنسا نہیں رہے گا ----------
+    const tidTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('tid-timeout')), 65000));
+    const assertion = await Promise.race([
+      navigator.credentials.get({
+        publicKey:{
+          challenge: tidRandomBytes(32),
+          allowCredentials:[{ id: tidBase64urlToBuf(stored.id), type:'public-key' }],
+          userVerification:'required',
+          timeout:60000
+        }
+      }),
+      tidTimeout
+    ]);
     if(!assertion){ playTouchIdFail(); return; }
     const user = usersData.find(u => u.user_id === stored.user_id);
     if(!user || !user.is_active){
@@ -7313,6 +7319,11 @@ async function loginWithTouchId(){
   }catch(err){
     console.warn('Touch ID login cancelled/failed:', err); // ---------- صارف نے منسوخ کر دیا یا فنگر پرنٹ مماثل نہیں ہوا ----------
     playTouchIdFail('Not recognized — try again or use PIN');
+  }finally{
+    // ---------- 🛠️ اصل فکس: پہلے کامیاب لاگ ان کی صورت میں _tidBusy کبھی واپس false نہیں ہوتا تھا،
+    // اسی لیے اگلی بار Logout کر کے لاگ ان اسکرین پر آنے کے بعد Touch ID بٹن دبانے کا کوئی اثر نہیں ہوتا تھا
+    // (یہی وہ اصل وجہ تھی کہ ایک دو بار کے بعد بار بار نہیں کھلتا تھا) ----------
+    _tidBusy = false;
   }
 }
 
@@ -7619,6 +7630,7 @@ function logout(){
   saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
+  refreshTouchIdUI(); // ---------- 🛠️ فکس: لاگ ان اسکرین دوبارہ نظر آتے ہی Touch ID بٹن اور _tidBusy کو تازہ/ری سیٹ کریں ----------
 }
 
 // ---------- 🔒 Log Out From All Accounts — آپ کی اپنی ڈیوائس پر PIN Lock بند ہونے کی وجہ سے عام Logout بھی
@@ -7633,6 +7645,7 @@ function fullLogoutAllAccounts(){
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   clearLoginPinFields();
+  refreshTouchIdUI(); // ---------- 🛠️ فکس: یہاں بھی Touch ID بٹن اور _tidBusy کو تازہ/ری سیٹ کریں ----------
 }
 
 // ---------- NAVIGATION LOGIC ----------
