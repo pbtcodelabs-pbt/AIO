@@ -1,9 +1,4 @@
-// ======================================================================
-// 🔄 AIO POS — Service Worker (آف لائن سپورٹ + خودکار اپڈیٹ)
-// ہر نئی فائل نمبر کے ساتھ CACHE_NAME بھی بدل دیں (نیچے v43 کو v44 وغیرہ کر دیں)
-// تاکہ صارف کے فون پر پرانا ورژن کیش سے نہ چپکا رہے۔
-// ======================================================================
-const CACHE_NAME = 'AIOTEST31';
+const CACHE_NAME = 'AIODR18SEPFR1231AM';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,22 +8,23 @@ const CORE_ASSETS = [
   './icon-512-maskable.png'
 ];
 
-// ---------- انسٹال: بنیادی فائلیں پہلے سے کیش کر لیں — ہر فائل الگ الگ، ایک دوسرے سے آزاد۔
-// پہلے cache.addAll() تھا (سب یا کچھ نہیں) — ایک فائل ناکام ہونے پر پوری کیشنگ خاموشی سے ناکام ہو جاتی تھی،
-// نتیجتاً آف لائن پر ایپ بالکل خالی رہ جاتی تھی۔ اب ہر فائل انفرادی طور پر کیش ہوتی ہے ----------
+// ---------- ⚠️ اہم درستگی: پہلے cache.addAll() استعمال ہوتا تھا — اس کا اصول یہ ہے کہ اگر ایک بھی فائل
+// (مثلاً کوئی آئیکن) نیٹ ورک کی معمولی رکاوٹ سے لوڈ نہ ہو سکے، تو پوری کیشنگ ناکام ہو جاتی ہے۔
+// پہلے اس ناکامی کو .catch(()=>{}) سے خاموشی سے چھپا دیا جاتا تھا اور skipWaiting() پھر بھی چل جاتا تھا —
+// نتیجہ: ایپ "کامیابی سے انسٹال" ظاہر ہوتی مگر کیشے اندر سے خالی رہ جاتا، اور آف لائن کچھ کام نہ کرتا۔
+// اب ہر فائل الگ الگ، آزادانہ طور پر کیش ہوتی ہے — ایک فائل ناکام ہو بھی جائے تو باقی سب محفوظ ہو جاتی ہیں ----------
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => Promise.all(
-        CORE_ASSETS.map((url) =>
-          cache.add(url).catch((err) => console.warn('Precache failed for', url, err))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(
+        CORE_ASSETS.map((asset) =>
+          cache.add(asset).catch((err) => console.warn('Cache failed for', asset, err))
         )
-      ))
-      .then(() => self.skipWaiting())
+      )
+    ).then(() => self.skipWaiting())
   );
 });
 
-// ---------- ایکٹیویٹ: پرانے ورژن کے کیش صاف کر دیں ----------
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -39,13 +35,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ---------- فیچ: پہلے نیٹ ورک آزمائیں (تازہ ترین ملے)۔ ناکام ہو تو پہلے وہی مانگی گئی فائل کیش سے دیں —
-// صرف اسی وقت index.html پر واپس جائیں جب صفحہ کھولنے کی درخواست ہو (navigation) اور کچھ بھی کیش میں نہ ملے۔
-// (پہلے یہ ہر ناکام درخواست پر خاموشی سے index.html دکھا دیتا تھا — چاہے آپ aiotest.html کھول رہے ہوں —
-// اسی وجہ سے کبھی کبھار غلط فائل نظر آتی تھی، یہی اصل خرابی تھی) ----------
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -54,16 +45,19 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() =>
+        // ---------- آف لائن: پہلے اسی درخواست کی exact کیش شدہ فائل تلاش کریں —
+        // اگر نہ ملے اور یہ صفحہ کھولنے کی درخواست (navigation) ہو، تبھی index.html واپس دیں۔
+        // ورنہ (جیسے کوئی ناکام ہونے والی script/font فائل) خالی/ناکام رہنے دیں —
+        // ورنہ غلطی سے HTML کسی JS فائل کی جگہ مل کر ایپ الجھا سکتی ہے ----------
         caches.match(event.request).then((cached) => {
-          if (cached) return cached; // ---------- بالکل وہی مانگی گئی فائل مل گئی — یہی واپس دیں ----------
-          if (event.request.mode === 'navigate') return caches.match('./index.html'); // ---------- صرف صفحہ کھولنے پر ہی آخری سہارا ----------
-          return new Response('', { status: 504, statusText: 'Offline' }); // ---------- دوسری فائلوں کے لیے غلط متبادل کبھی نہ دیں ----------
+          if (cached) return cached;
+          if (event.request.mode === 'navigate') return caches.match('./index.html');
+          return new Response('', {status: 504, statusText: 'Offline'});
         })
       )
   );
 });
 
-// ---------- "ابھی اپڈیٹ کریں" بٹن سے فوری کنٹرول سنبھالیں ----------
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
