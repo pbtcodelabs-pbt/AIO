@@ -4713,6 +4713,10 @@
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📔 My Diary Summary</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
       </button>
+      <button onclick="openStockSaleProfitReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📊 روزانہ سٹاک سیل پرافٹ رپورٹ</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">سیریل، نام، پیکنگ، پرانا/آج کا شامل/ٹوٹل/فروخت شدہ/باقی سٹاک، اور آج کا منافع — ہر آئٹم کی لائن میں</div>
+      </button>
     </div>
   </div>
 </div>
@@ -11829,12 +11833,39 @@ function liveMarkupSync(productId, variantId, field, value){
   }
 }
 
+// ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ کے لیے — دن کی شروعات پر ہر ویرینٹ کے موجودہ سٹاک کی "تصویر"
+// (snapshot) محفوظ کی جاتی ہے (پرانا سٹاک)۔ اس کے بعد دن بھر جو بھی نیا سٹاک آئے (شپمنٹ رسیو ہو یا دستی
+// طور پر سٹاک بڑھایا جائے) وہ الگ سے "آج شامل کیا گیا" میں گنا جاتا ہے۔ نوٹ: یہ نظام آج سے شروع ہو رہا
+// ہے — گزرے دنوں کا "پرانا سٹاک" دوبارہ نہیں بن سکتا کیونکہ وہ ڈیٹا پہلے کبھی محفوظ نہیں ہوا تھا ---------- -->
+let dailyStockSnapshot = loadFromStorage('dailyStockSnapshot', {date: '', opening: {}, added: {}});
+function ensureDailyStockSnapshot(){
+  const today = toLocalDateStr(new Date());
+  if(dailyStockSnapshot.date === today) return;
+  const opening = {};
+  productsData.forEach(p => (p.variants || []).forEach(v => { opening[v.variant_id] = v.stock || 0; }));
+  dailyStockSnapshot = {date: today, opening, added: {}};
+  saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
+}
+ensureDailyStockSnapshot();
+function recordStockAddedToday(variantId, deltaQty){
+  ensureDailyStockSnapshot();
+  if(deltaQty <= 0) return;
+  dailyStockSnapshot.added[variantId] = (dailyStockSnapshot.added[variantId] || 0) + deltaQty;
+  saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
+}
+
 function updateVariantField(productId, variantId, field, value, inputEl){
   const product = productsData.find(p => p.product_id === productId);
   const variant = product?.variants.find(v => v.variant_id === variantId);
   if(!variant) return;
 
   const numericFields = ['purchase','retail','wholesale','stock','lowStockAt','markupPercent'];
+  // ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ کے لیے — سٹاک دستی طور پر بڑھانے پر وہ اضافہ "آج شامل کیا گیا سٹاک" میں گنیں ---------- -->
+  if(field === 'stock'){
+    const oldStock = variant.stock || 0;
+    const newStock = parseFloat(value) || 0;
+    if(newStock > oldStock) recordStockAddedToday(variantId, newStock - oldStock);
+  }
   variant[field] = numericFields.includes(field) ? parseFloat(value) || 0 : value;
 
   // ---------- Markup % فعال ہو تو: Purchase یا Markup% بدلنے پر Retail خودکار حساب ہو۔
@@ -16645,6 +16676,7 @@ function confirmShipmentReceipt(){
       const v = p.variants.find(vv => vv.variant_id === item.variant_id);
       if(v){ v.stock += item.qty; v.purchase = item.cost; } // TODO: DB میں current_stock += qty, purchase_price اپڈیٹ
     });
+    recordStockAddedToday(item.variant_id, item.qty); // ---------- 📊 شپمنٹ رسیو ہونے پر وہ سٹاک بھی روزانہ سٹاک سیل پرافٹ رپورٹ میں "آج شامل کیا گیا" شمار ہو ---------- -->
   });
 
   // ---------- اگر مقدار/قیمت میں فرق آیا ہو تو سپلائر کا واجب الادا خودکار ایڈجسٹ ہو ----------
@@ -22973,6 +23005,18 @@ function openDiarySummaryReport(){
   setTimeout(() => renderReportToCanvas(), 100);
 }
 
+// ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ — پراڈکٹ کیٹگری بیسڈ نہیں، سیدھا پریویو کھلتی ہے ----------
+function openStockSaleProfitReport(){
+  currentReportType = 'stockprofit';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = "📊 روزانہ سٹاک سیل پرافٹ رپورٹ";
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+
 // ---------- کنٹرول بٹنوں کو موجودہ محفوظ شدہ سیٹنگز کے مطابق سیٹ کریں ----------
 function syncReportStyleControls(){
   document.getElementById('rpscFontScaleVal').textContent = (AppState.settings.reportFontScale || 100) + '%';
@@ -23164,6 +23208,7 @@ async function renderReportToCanvas(){
   if(!canvas || !currentReportType) return;
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
+  if(currentReportType === 'stockprofit'){ await renderStockSaleProfitReportToCanvas(); return; } // ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ — اپنا الگ لے آؤٹ ----------
   const ctx = canvas.getContext('2d'); // ---------- جلدی حاصل کر لیا — نیچے اونچائی ناپنے (word-wrap) کے لیے پہلے ہی چاہیے، اصل سائز سیٹ ہونے سے پہلے بھی measureText درست کام کرتا ہے ----------
   const useA4 = AppState.settings.reportPrintStyle === 'a4';
   const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
@@ -24251,6 +24296,308 @@ async function renderDiarySummaryReportToCanvas(){
   }
 }
 
+// ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ — نام، پیکنگ، پرانا سٹاک، آج شامل کیا گیا، ٹوٹل، آج فروخت شدہ،
+// باقی سٹاک، اور آج کا منافع (آج کے تمام مکمل شدہ بلوں سے اکٹھا)۔ نوٹ: "پرانا سٹاک"/"آج شامل کیا گیا" کا
+// حساب آج سے شروع ہونے والی روزانہ تصویر (snapshot) پر مبنی ہے — گزرے دنوں کا ڈیٹا دوبارہ نہیں بن سکتا
+// کیونکہ وہ پہلے کبھی محفوظ نہیں ہوا تھا۔ منسوخ شدہ (voided) بل اس حساب میں شامل نہیں کیے جاتے، تاکہ
+// فروخت/منافع کبھی غلط زیادہ نہ دکھائے ---------- -->
+async function renderStockSaleProfitReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas');
+  if(!canvas) return;
+  ensureDailyStockSnapshot();
+  const useA4 = AppState.settings.reportPrintStyle === 'a4';
+  const pxWidth = useA4 ? 850 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const ctx = canvas.getContext('2d');
+
+  const todayStr = toLocalDateStr(new Date());
+  // ---------- صرف آج کے مکمل شدہ بل — منسوخ شدہ (voided) بل شامل نہیں، ورنہ فروخت/منافع غلط زیادہ دکھے گا ---------- -->
+  const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr && inv.status !== 'voided');
+
+  // ---------- ہر ویرینٹ کے لیے آج فروخت شدہ مقدار اکٹھا کریں ---------- -->
+  const soldQtyMap = {};
+  todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
+    if(!it.variant_id) return;
+    soldQtyMap[it.variant_id] = (soldQtyMap[it.variant_id] || 0) + (it.qty || 0);
+  }));
+  const rows = [];
+  productsData.forEach(p => {
+    (p.variants || []).forEach(v => {
+      const opening = dailyStockSnapshot.opening[v.variant_id] ?? (v.stock || 0);
+      const added = dailyStockSnapshot.added[v.variant_id] || 0;
+      const total = opening + added;
+      const sold = soldQtyMap[v.variant_id] || 0;
+      const remaining = v.stock || 0;
+      const cost = v.purchase || 0;
+      // ---------- زیادہ درست منافع: ہر بل کی اپنی unitPrice سے (بجائے صرف موجودہ ریٹ کے) ---------- -->
+      let realProfit = 0;
+      todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
+        if(it.variant_id === v.variant_id) realProfit += (it.qty || 0) * ((it.unitPrice || 0) - cost);
+      }));
+      rows.push({name: p.name, label: v.label || '', opening, added, total, sold, remaining, profit: realProfit});
+    });
+  });
+  // ---------- سب سے زیادہ منافع والا آئٹم سب سے اوپر، سب سے کم (یا نقصان والا) سب سے آخر میں ---------- -->
+  rows.sort((a,b) => b.profit - a.profit);
+  rows.forEach((r, idx) => r.serial = idx + 1);
+
+  const fontScale = (AppState.settings.reportFontScale || 100) / 100;
+  const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
+  const bold = AppState.settings.reportBoldItems !== false;
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  const fontFam = selectedFontPreset.family;
+  // ---------- نام/پیکنگ اور ہیڈر لیبل منتخب شدہ اردو فونٹ میں، مگر خالص ہندسوں والے خانے صاف انگریزی/لاطینی
+  // فونٹ میں دکھائے جائیں گے — نستعلیق فونٹس میں ہندسے اکثر ٹوٹے پھوٹے یا غلط شکل میں نظر آتے ہیں ---------- -->
+  const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma');
+  const numFontFam = numberPreset.family;
+  try{ await document.fonts.load(`13px ${numFontFam}`); }catch(e){}
+  try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
+  const digitAlign = AppState.settings.reportAlign || 'left';
+  const alignForCol = (key) => key === 'name' ? 'right' : digitAlign;
+  const xForCol = (c, align) => {
+    const pad = Math.max(3, Math.round(c.width * 0.04));
+    if(align === 'right') return c.x + c.width - pad;
+    if(align === 'left') return c.x + pad;
+    return c.x + c.width/2;
+  };
+
+  const base = useA4 ? 2.1 : 1.5;
+  const fsTitle = Math.round(15 * base * fontScale);
+  const fsSubtitle = Math.round(12 * base * fontScale);
+  const fsSmall = Math.round(9 * base * fontScale);
+  const fsHeader = Math.round(8.5 * base * fontScale);
+  const fsItem = Math.round(9 * base * fontScale);
+
+  const margin = useA4 ? 40 : 6;
+  const tableLeft = margin, tableRight = pxWidth - margin;
+  const totalW = tableRight - tableLeft;
+  const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+
+  // ---------- کالمز: # | نام(+پیکنگ) | پرانا | +آج | ٹوٹل | فروخت | باقی | منافع ---------- -->
+  const wSerial = Math.round(totalW * 0.06);
+  ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
+  let maxNameTextW = 0;
+  rows.forEach(r => {
+    const w = ctx.measureText(r.name).width;
+    if(w > maxNameTextW) maxNameTextW = w;
+  });
+  const namePad = Math.max(10, Math.round(fsItem * 0.9));
+  const minNameW = Math.round(totalW * 0.15);
+  const maxNameW = Math.round(totalW * 0.44);
+  let wName = Math.min(maxNameW, Math.max(minNameW, Math.round(maxNameTextW + namePad)));
+  const wNum = Math.round((totalW - wSerial - wName) / 6);
+  wName = totalW - wSerial - wNum * 6;
+
+  const cols = [
+    {key:'serial', label:'#', width:wSerial},
+    {key:'name', label:'نام/پیکنگ', width:wName},
+    {key:'opening', label:'پرانا', width:wNum},
+    {key:'added', label:'+آج', width:wNum},
+    {key:'total', label:'ٹوٹل', width:wNum},
+    {key:'sold', label:'فروخت', width:wNum},
+    {key:'remaining', label:'باقی', width:wNum},
+    {key:'profit', label:'منافع', width:wNum},
+  ];
+  let cxPos = tableRight;
+  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
+
+  const fitCenteredLines = (text, maxWidth, basePx, weight) => {
+    const w = weight ? weight + ' ' : '';
+    const minPx = Math.max(Math.round(basePx * 0.55), 7);
+    let px = basePx;
+    ctx.font = `${w}${px}px ${fontFam}`;
+    while(ctx.measureText(text).width > maxWidth && px > minPx){ px -= 1; ctx.font = `${w}${px}px ${fontFam}`; }
+    return {text, px, weight:w};
+  };
+  const nameFit = fitCenteredLines(AppState.settings.businessName || 'AIO POS', totalW, fsTitle, 'bold');
+  const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
+  const titleFit = fitCenteredLines('روزانہ سٹاک سیل پرافٹ رپورٹ', totalW, fsSubtitle, 'bold');
+
+  let headerBandH = useA4 ? 90 : 56;
+  let bodyTop = headerBandH + headerRowH;
+  const totalsRowH = Math.round(baseRowH * 1.05);
+  const estimatedHeight = bodyTop + (rows.length * baseRowH) + totalsRowH + Math.round(fsSubtitle * 4) + 40;
+
+  canvas.width = pxWidth;
+  canvas.height = Math.max(estimatedHeight, 300);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, pxWidth, canvas.height);
+
+  const rr = useA4 ? 14 : 8;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(margin/2 + rr, margin/2);
+  ctx.arcTo(pxWidth - margin/2, margin/2, pxWidth - margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(pxWidth - margin/2, canvas.height - margin/2, margin/2, canvas.height - margin/2, rr);
+  ctx.arcTo(margin/2, canvas.height - margin/2, margin/2, margin/2, rr);
+  ctx.arcTo(margin/2, margin/2, pxWidth - margin/2, margin/2, rr);
+  ctx.closePath(); ctx.stroke();
+
+  let y = useA4 ? 24 : 14;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#1a1a1a';
+  ctx.font = `${nameFit.weight}${nameFit.px}px ${fontFam}`;
+  y += nameFit.px;
+  ctx.fillText(nameFit.text, pxWidth/2, y);
+  if(phoneFit){ y += Math.round(fsSmall * 1.6); ctx.font = `${fsSmall}px ${fontFam}`; ctx.fillText(phoneFit.text, pxWidth/2, y); }
+  y += Math.round(fsSubtitle * 1.7);
+  ctx.font = `${titleFit.weight}${titleFit.px}px ${fontFam}`;
+  ctx.fillText(titleFit.text, pxWidth/2, y);
+  y += Math.round(fsSmall * 1.8);
+  ctx.font = `${fsSmall}px ${fontFam}`;
+  const now = new Date();
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  ctx.fillText(dstr, pxWidth/2, y);
+  y += 8;
+
+  const rc = getReceiptColor();
+  const headerTop = y;
+  ctx.fillStyle = rc.bg;
+  ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3;
+  ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  ctx.fillStyle = '#0f172a';
+  cols.forEach(c => {
+    const align = alignForCol(c.key);
+    ctx.textAlign = align;
+    ctx.font = `bold ${fsHeader}px ${fontFam}`;
+    ctx.save(); ctx.beginPath(); ctx.rect(c.x, headerTop, c.width, headerRowH); ctx.clip();
+    ctx.fillText(c.label, xForCol(c, align), headerTop + headerRowH/2 + fsHeader*0.32);
+    ctx.restore();
+    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
+  });
+  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
+  y = headerTop + headerRowH;
+
+  const fitCellFont = (text, maxWidth, basePx, ff) => {
+    const fam = ff || fontFam;
+    let px = basePx;
+    ctx.font = `${px}px ${fam}`;
+    let w = ctx.measureText(text).width;
+    if(w > maxWidth && w > 0){
+      px = Math.max(3, px * (maxWidth / w) * 0.94);
+      ctx.font = `${px}px ${fam}`;
+      w = ctx.measureText(text).width;
+    }
+    let guard = 0;
+    while(w > maxWidth && px > 3 && guard < 40){ px -= 0.5; ctx.font = `${px}px ${fam}`; w = ctx.measureText(text).width; guard++; }
+    return px;
+  };
+
+  if(rows.length === 0){
+    ctx.strokeStyle = '#475569'; ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, baseRowH);
+    ctx.fillStyle = '#64748b'; ctx.font = `${fsItem}px ${fontFam}`; ctx.textAlign = 'center';
+    ctx.fillText('کوئی آئٹم نہیں ملا', pxWidth/2, y + baseRowH/2 + fsItem*0.32);
+    y += baseRowH;
+  } else {
+    rows.forEach((r, idx) => {
+      const rh = baseRowH;
+      ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f1f5f9';
+      ctx.fillRect(tableLeft, y, totalW, rh);
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+      ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
+      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
+      ctx.beginPath(); ctx.moveTo(tableRight+0.5, y); ctx.lineTo(tableRight+0.5, y+rh); ctx.stroke();
+      ctx.fillStyle = '#1a1a1a';
+      cols.forEach(c => {
+        const align = alignForCol(c.key);
+        ctx.textAlign = align;
+        const tx = xForCol(c, align);
+        let txt;
+        if(c.key === 'serial') txt = String(r.serial);
+        else if(c.key === 'name') txt = null;
+        else txt = String(r[c.key]);
+        if(c.key === 'name'){
+          const px1 = fitCellFont(r.name, c.width-6, fsItem, fontFam);
+          ctx.font = `${bold ? 'bold ' : ''}${px1}px ${fontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(r.name, tx, y + rh/2 - 3);
+          ctx.font = `${Math.round(px1*0.8)}px ${fontFam}`;
+          ctx.fillStyle = '#64748b';
+          ctx.fillText(r.label, tx, y + rh/2 + Math.round(px1*0.85));
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        } else {
+          if(c.key === 'profit') ctx.fillStyle = r.profit >= 0 ? '#065f2b' : '#991b1b';
+          const px2 = fitCellFont(txt, c.width-4, fsItem, numFontFam);
+          ctx.font = `${px2}px ${numFontFam}`;
+          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
+          ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
+          ctx.restore();
+          ctx.fillStyle = '#1a1a1a';
+        }
+      });
+      y += rh;
+    });
+  }
+
+  if(rows.length > 0){
+    let totalProfitSum = 0;
+    rows.forEach(r => { totalProfitSum += r.profit; });
+    const trh = Math.round(baseRowH * 1.05);
+    ctx.fillStyle = rc.bg;
+    ctx.fillRect(tableLeft, y, totalW, trh);
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, trh);
+    const profitCol = cols.find(c => c.key === 'profit');
+    const align = alignForCol('profit');
+    ctx.textAlign = align;
+    const tx = xForCol(profitCol, align);
+    const txt = `ٹوٹل منافع: ${Math.round(totalProfitSum).toLocaleString()}`;
+    ctx.fillStyle = totalProfitSum >= 0 ? '#065f2b' : '#991b1b';
+    const px3 = fitCellFont(txt, totalW - 8, fsItem, fontFam);
+    ctx.font = `bold ${px3}px ${fontFam}`;
+    ctx.save(); ctx.beginPath(); ctx.rect(tableLeft, y, totalW, trh); ctx.clip();
+    ctx.fillText(txt, tx, y + trh/2 + fsItem*0.32);
+    ctx.restore();
+    y += trh;
+  }
+
+  y += useA4 ? 14 : 8;
+  if(Math.abs(y - canvas.height) > 4){
+    const finalH = Math.max(Math.round(y), 300);
+    const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
+    canvas.height = finalH;
+    ctx.putImageData(imgData, 0, 0);
+  }
+}
+
+// ---------- 🖨️ روزانہ سٹاک سیل پرافٹ رپورٹ کا A4 PDF — اردو نام درست دکھانے کے لیے (jsPDF کا Helvetica
+// فونٹ اردو سپورٹ نہیں کرتا) اس کا اپنا الگ PDF نہیں بنایا جاتا، بلکہ وہی مکمل طور پر درست کینوس (نستعلیق
+// فونٹ، خودکار نام کالم چوڑائی، ٹوٹل رو سمیت) براہ راست تصویر کے طور پر A4 صفحے پر لگایا جاتا ہے — اگر
+// جدول ایک صفحے سے لمبا ہو تو خودکار کئی صفحوں میں تقسیم ہو جاتا ہے ---------- -->
+function buildStockSaleProfitPdf(orientation){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
+  const pageW = orientation === 'landscape' ? 297 : 210;
+  const pageH = orientation === 'landscape' ? 210 : 297;
+  const marginMM = 8;
+
+  const canvas = document.getElementById('reportCanvas');
+  const usableWmm = pageW - marginMM * 2;
+  const pxPerMm = canvas.width / usableWmm;
+  const usableHpx = Math.max(50, Math.floor((pageH - marginMM * 2) * pxPerMm));
+
+  let offsetY = 0;
+  let first = true;
+  while(offsetY < canvas.height){
+    const sliceH = Math.min(usableHpx, canvas.height - offsetY);
+    const sliceCanvas = document.createElement('canvas');
+    sliceCanvas.width = canvas.width;
+    sliceCanvas.height = sliceH;
+    const sctx = sliceCanvas.getContext('2d');
+    sctx.fillStyle = '#ffffff';
+    sctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+    sctx.drawImage(canvas, 0, offsetY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+    const imgData = sliceCanvas.toDataURL('image/png');
+    const imgHmm = sliceH / pxPerMm;
+    if(!first) pdf.addPage('a4', orientation);
+    pdf.addImage(imgData, 'PNG', marginMM, marginMM, usableWmm, imgHmm);
+    offsetY += sliceH;
+    first = false;
+  }
+  return pdf;
+}
+
 // ---------- Today's Sale Report کا اپنا PDF — کیش سمری اوپر پورے صفحے کی چوڑائی میں، نیچے فروخت شدہ آئٹمز
 // وہی ملٹی کالم منطق استعمال کرتے ہوئے تاکہ باقی رپورٹس جیسا ہی یکساں انداز ہو ----------
 function buildTodaySalePdf(orientation){
@@ -24557,7 +24904,7 @@ async function shareReportPdf(){
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildStockSaleProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -24587,7 +24934,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildStockSaleProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
