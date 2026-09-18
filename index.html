@@ -92,14 +92,19 @@
      👆 Touch ID / Fingerprint Unlock — پروفیشنل sensor-style آئیکن (fingerprint-in-circle),
      ٹیپ کرنے پر رِنگ + fingerprint ridges "ڈرا" ہوتی ہیں، پھر اسکین لائن، پھر ✅ کنفرمیشن
      ===================================================================== */
-  #loginTouchIdWrap{display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:14px;}
-  .touchIdCircleBtn{
-    position:relative; width:72px; height:72px; border-radius:50%; border:none; background:transparent;
-    display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; margin:0 auto;
+  #loginTouchIdWrap{display:flex; flex-direction:column; align-items:center; gap:4px; margin:10px auto 2px;}
+  /* ---------- 🛠️ فکس: پہلے یہ بٹن `.loginBox button` کے عمومی بڑے سبز اسٹائل کے نیچے دب کر ایک بڑا سبز بلاک بن جاتا تھا
+     (کیونکہ `.loginBox button` سلیکٹر `.touchIdCircleBtn` سے زیادہ specific تھا)۔ اب `.loginBox button.touchIdCircleBtn`
+     استعمال کر کے اسے مکمل طور پر override کیا اور اسے ایک چھوٹا، ہلکا، صرف انگوٹھے کی لکیروں والا دائرہ بنا دیا ---------- */
+  .loginBox button.touchIdCircleBtn{
+    position:relative; width:46px; height:46px; border-radius:50%;
+    border:1.4px solid var(--border,#dbe1ea); background:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    padding:0; margin:0 auto; box-shadow:0 2px 5px rgba(15,118,110,.10);
   }
-  .touchIdCircleBtn:active{transform:scale(.95);}
+  .loginBox button.touchIdCircleBtn:active{transform:scale(.93); box-shadow:0 1px 3px rgba(15,118,110,.12);}
   #tidRingArc{transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1), stroke .3s ease;}
-  .touchIdIconWrap{position:relative; width:32px; height:32px; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .touchIdIconWrap{position:relative; width:22px; height:22px; display:flex; align-items:center; justify-content:center; overflow:hidden;}
   #tidFpIcon{transition:opacity .2s ease;}
   #tidFpIcon path{stroke-dasharray:130; stroke-dashoffset:0; transition:stroke .3s ease;}
   #tidFpIcon.tid-draw path{animation:tidDraw .6s ease forwards;}
@@ -107,12 +112,12 @@
   @keyframes tidDraw{from{stroke-dashoffset:130;} to{stroke-dashoffset:0;}}
   .tid-idle-pulse{animation:tidIdlePulse 2.6s ease-in-out infinite;}
   @keyframes tidIdlePulse{0%,100%{opacity:1;} 50%{opacity:.5;}}
-  .tidScanLine{position:absolute; left:21px; right:21px; top:20px; height:2px; border-radius:2px; background:var(--primary); box-shadow:0 0 6px 1px var(--primary); opacity:0;}
+  .tidScanLine{position:absolute; left:4px; right:4px; top:6px; height:1.6px; border-radius:2px; background:var(--primary); box-shadow:0 0 5px 1px var(--primary); opacity:0;}
   .tidScanLine.active{animation:tidScanMove .9s ease-in-out infinite;}
-  @keyframes tidScanMove{0%{top:20px; opacity:0;} 10%{opacity:1;} 50%{top:50px;} 90%{opacity:1;} 100%{top:20px; opacity:0;}}
+  @keyframes tidScanMove{0%{top:6px; opacity:0;} 10%{opacity:1;} 50%{top:15px;} 90%{opacity:1;} 100%{top:6px; opacity:0;}}
   #tidCheckWrap{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(.6); transition:opacity .2s ease, transform .3s cubic-bezier(.34,1.56,.64,1);}
   #tidCheckWrap.show{opacity:1; transform:scale(1);}
-  #tidStatusLabel{font-size:12.5px; color:var(--muted); text-align:center; min-height:16px;}
+  #tidStatusLabel{font-size:11.5px; color:var(--muted); text-align:center; min-height:14px;}
   .touchIdDivider{display:flex; align-items:center; gap:10px; margin:2px 0 10px; color:var(--muted); font-size:11.5px;}
   .touchIdDivider::before, .touchIdDivider::after{content:''; flex:1; height:1px; background:#e2e8f0;}
   /* --- 🧪 Test Build لیبل — "AIO POS" کی جگہ، اسی بڑے سائز میں، خوبصورت رنگین چمک (صرف aiotestXX.html فائلوں میں نظر آتا ہے)
@@ -1985,28 +1990,6 @@
     <!-- ---------- 🔒 لاک آؤٹ پیغام — بار بار غلط PIN پر نظر آئے، اس دوران Enter بٹن بند رہے ---------- -->
     <div id="loginLockoutBox" class="loginLockoutBox" style="display:none;"></div>
 
-    <!-- ---------- 👆 Touch ID / Fingerprint Unlock — صرف اس وقت نظر آئے جب ڈیوائس پر پہلے سے فعال ہو، PIN سسٹم بدستور موجود رہتا ہے ---------- -->
-    <div id="loginTouchIdWrap" style="display:none;">
-      <button id="loginTouchIdBtn" type="button" class="touchIdCircleBtn" onclick="loginWithTouchId()" aria-label="Unlock with Touch ID">
-        <svg width="72" height="72" viewBox="0 0 72 72" style="position:absolute; top:0; left:0;">
-          <circle cx="36" cy="36" r="32" fill="none" stroke="var(--border, #e2e8f0)" stroke-width="1.5"></circle>
-          <circle id="tidRingArc" cx="36" cy="36" r="32" fill="none" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201" transform="rotate(-90 36 36)"></circle>
-        </svg>
-        <span class="touchIdIconWrap">
-          <svg id="tidFpIcon" class="tid-idle-pulse" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 16v-4.639c0-.51.1-.999.285-1.453M17 16v-3.185m-7.778-5.08A5.506 5.506 0 0112 7c2.28 0 4.203 1.33 4.805 3.15M10 17v-2.177M14 17v-5.147C14 10.83 13.105 10 12 10s-2 .83-2 1.853v.794"></path>
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path>
-          </svg>
-          <span id="tidCheckWrap">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
-          </span>
-          <div id="tidScanLine" class="tidScanLine"></div>
-        </span>
-      </button>
-      <div id="tidStatusLabel">Tap to unlock with Touch ID</div>
-    </div>
-    <div id="touchIdDivider" class="touchIdDivider" style="display:none;"><span>or use PIN</span></div>
-
     <div id="loginFormArea">
       <!-- ---------- 👑 سنگل ایڈمن/یوزر پینل — صرف PIN، کوئی نام منتخب کرنے کی ضرورت نہیں ---------- -->
       <div class="loginPanel active" id="loginPanelAdmin">
@@ -2014,6 +1997,29 @@
           <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputAdmin', this)">👁️</button>
           <input type="password" id="pinInputAdmin" placeholder="PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
         </div>
+      </div>
+
+      <!-- ---------- 🛠️ فکس: 👆 Touch ID اب یہاں پاسورڈ کے خانے سے فوراً نیچے ایک چھوٹے، ہلکے دائرے کی صورت میں —
+           جس پر انگوٹھے کی لکیروں کا آئیکن بنا ہے۔ ٹیپ کرتے ہی موبائل کا اپنا Touch ID/فنگر پرنٹ پرامپٹ خودبخود کھل جاتا ہے۔
+           صرف اس وقت نظر آئے جب ڈیوائس پر پہلے سے فعال ہو ---------- -->
+      <div id="loginTouchIdWrap" style="display:none;">
+        <button id="loginTouchIdBtn" type="button" class="touchIdCircleBtn" onclick="loginWithTouchId()" aria-label="Unlock with Touch ID">
+          <svg width="46" height="46" viewBox="0 0 46 46" style="position:absolute; top:0; left:0;">
+            <circle cx="23" cy="23" r="20" fill="none" stroke="var(--border, #e2e8f0)" stroke-width="1.3"></circle>
+            <circle id="tidRingArc" cx="23" cy="23" r="20" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="125.6" transform="rotate(-90 23 23)"></circle>
+          </svg>
+          <span class="touchIdIconWrap">
+            <svg id="tidFpIcon" class="tid-idle-pulse" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 16v-4.639c0-.51.1-.999.285-1.453M17 16v-3.185m-7.778-5.08A5.506 5.506 0 0112 7c2.28 0 4.203 1.33 4.805 3.15M10 17v-2.177M14 17v-5.147C14 10.83 13.105 10 12 10s-2 .83-2 1.853v.794"></path>
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path>
+            </svg>
+            <span id="tidCheckWrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+            </span>
+            <div id="tidScanLine" class="tidScanLine"></div>
+          </span>
+        </button>
+        <div id="tidStatusLabel">Tap to unlock with Touch ID</div>
       </div>
 
       <!-- ---------- 🧑‍💼 Salesman پینل — اب لاگ اِن سکرین پر نظر نہیں آتا (اندرونی کوڈ کے لیے موجود ہے) ---------- -->
@@ -7330,7 +7336,6 @@ async function loginWithTouchId(){
 // ---------- لاگ ان سکرین پر Touch ID بٹن/چیک باکس/آف کرنے کا لنک — موجودہ حالت کے مطابق دکھائیں/چھپائیں ----------
 async function refreshTouchIdUI(){
   const wrap = document.getElementById('loginTouchIdWrap');
-  const divider = document.getElementById('touchIdDivider');
   const enableLabel = document.getElementById('enableTouchIdLabel');
   const turnOffHint = document.getElementById('turnOffTouchIdHint');
   if(!wrap) return;
@@ -7341,12 +7346,10 @@ async function refreshTouchIdUI(){
   if(stored && available){
     wrap.style.display = 'flex';
     resetTouchIdVisual();
-    if(divider) divider.style.display = 'flex';
     if(enableLabel) enableLabel.style.display = 'none';
     if(turnOffHint) turnOffHint.style.display = 'block';
   } else {
     wrap.style.display = 'none';
-    if(divider) divider.style.display = 'none';
     if(turnOffHint) turnOffHint.style.display = 'none';
     // ---------- ابھی رجسٹرڈ نہیں مگر ڈیوائس سپورٹ کرتی ہے تو رجسٹر کرنے کا آپشن دکھائیں ----------
     if(enableLabel) enableLabel.style.display = available ? 'flex' : 'none';
