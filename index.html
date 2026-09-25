@@ -2066,7 +2066,7 @@
     <div style="background:#fef2f2; color:#b91c1c; border-radius:10px; padding:12px; font-size:13px; line-height:1.6; margin:10px 0;">
       If you turn this off, <b>anyone who picks up this phone</b> — a customer, a family member, anyone — will be able to open this app straight to your business data: bills, sales history, customer I Gave/I Got records, everything. No PIN will be asked.
       <br><br>
-      This is temporary — you can turn it back on any time from Home, using your date of birth. Only turn it off if you are the sole user of this phone.
+      This is temporary — you can turn it back on any time from Home, using your year of birth. Only turn it off if you are the sole user of this phone.
     </div>
     <label style="display:flex; align-items:flex-start; gap:8px; font-size:12.5px; font-weight:700; color:var(--text); margin:12px 0; cursor:pointer;">
       <input type="checkbox" id="pinLockWarningAck" style="width:17px; height:17px; margin-top:1px;" onchange="document.getElementById('pinLockConfirmBtn').disabled = !this.checked;">
@@ -2084,9 +2084,7 @@
 
     <div id="apinStepDob">
       <div class="dobPicker">
-        <select id="apinDobInput_day" onchange="dpOnChange('apinDobInput')"></select>
-        <select id="apinDobInput_month" onchange="dpOnMonthChange('apinDobInput')"></select>
-        <span class="dpYearWrap" id="apinDobInput_yearWrap">
+        <span class="dpYearWrap" id="apinDobInput_yearWrap" style="flex:1;">
           <select id="apinDobInput_year" onchange="dpOnChange('apinDobInput')"></select>
           <input type="text" id="apinDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('apinDobInput')">
           <button type="button" id="apinDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('apinDobInput')">✍️ Type</button>
@@ -2123,11 +2121,9 @@
   <div class="modalBox" style="max-width:380px;">
     <h3>🆘 Recover Admin PIN</h3>
     <div id="recoveryStep1">
-      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Date of Birth</label>
+      <label style="display:block; font-size:12px; color:var(--muted); margin:10px 0 4px;">Your Year of Birth</label>
       <div class="dobPicker">
-        <select id="recoveryDobInput_day" onchange="dpOnChange('recoveryDobInput')"></select>
-        <select id="recoveryDobInput_month" onchange="dpOnMonthChange('recoveryDobInput')"></select>
-        <span class="dpYearWrap" id="recoveryDobInput_yearWrap">
+        <span class="dpYearWrap" id="recoveryDobInput_yearWrap" style="flex:1;">
           <select id="recoveryDobInput_year" onchange="dpOnChange('recoveryDobInput')"></select>
           <input type="text" id="recoveryDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('recoveryDobInput')">
           <button type="button" id="recoveryDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('recoveryDobInput')">✍️ Type</button>
@@ -2190,7 +2186,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST35</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIOTEST37</span>
     </div>
   </div>
 
@@ -4544,11 +4540,9 @@
             <div class="settingsHint" style="margin-top:0;">PIN unlocks here too — change it via Home → Users → ✏️ Set Custom PIN.</div>
 
             <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">🆘 PIN Recovery Setup</div>
-            <div class="settingsHint" style="margin-top:0;">Set your DOB now — lets you reset a forgotten PIN later.</div>
+            <div class="settingsHint" style="margin-top:0;">Set your Year of Birth now — lets you reset a forgotten PIN later.</div>
             <div class="dobPicker" style="margin-bottom:8px;">
-              <select id="securityDobInput_day" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
-              <select id="securityDobInput_month" onchange="dpOnMonthChange('securityDobInput'); saveAdminControl();"></select>
-              <span class="dpYearWrap" id="securityDobInput_yearWrap">
+              <span class="dpYearWrap" id="securityDobInput_yearWrap" style="flex:1;">
                 <select id="securityDobInput_year" onchange="dpOnChange('securityDobInput'); saveAdminControl();"></select>
                 <input type="text" id="securityDobInput_yearManual" class="dpYearManual" inputmode="numeric" maxlength="4" placeholder="Year" style="display:none;" onchange="dpOnChange('securityDobInput'); saveAdminControl();">
                 <button type="button" id="securityDobInput_yearToggleBtn" class="dpYearToggleBtn" onclick="dpToggleYearMode('securityDobInput')">✍️ Type</button>
@@ -21640,38 +21634,24 @@ function dpBuildDayOptions(sel, maxDay, keepVal){
 }
 
 function dpInitPicker(id){
+  // ---------- اب یہ صرف سال (Year) پکر ہے — دن/مہینہ ہٹا دیے گئے ہیں (PIN Recovery صرف سال پیدائش سے) ----------
   const el = dpEls(id);
-  if(!el.day) return; // یہ ودجٹ اس صفحے پر موجود نہیں — خاموشی سے چھوڑ دیں
-  el.month.innerHTML = '<option value="">Month</option>' + DP_MONTHS.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('');
-  dpBuildDayOptions(el.day, 31, '');
+  if(!el.year) return; // یہ ودجٹ اس صفحے پر موجود نہیں — خاموشی سے چھوڑ دیں
   const nowYear = new Date().getFullYear();
   let yearHtml = '<option value="">Year</option>';
   for(let y=nowYear; y>=nowYear-100; y--){ yearHtml += `<option value="${y}">${y}</option>`; }
   el.year.innerHTML = yearHtml;
 }
 
-function dpOnMonthChange(id){
-  const el = dpEls(id);
-  const yearVal = (el.yearManual && el.yearManual.style.display !== 'none') ? el.yearManual.value.trim() : el.year.value;
-  dpBuildDayOptions(el.day, dpDaysInMonth(el.month.value, yearVal));
-  dpUpdateHidden(id);
-}
-
 function dpOnChange(id){
-  // ---------- سال بدلنے پر بھی دن کی فہرست (فروری 28/29) دوبارہ درست کریں ----------
-  const el = dpEls(id);
-  const yearVal = (el.yearManual && el.yearManual.style.display !== 'none') ? el.yearManual.value.trim() : el.year.value;
-  if(el.month.value) dpBuildDayOptions(el.day, dpDaysInMonth(el.month.value, yearVal), el.day.value);
   dpUpdateHidden(id);
 }
 
 function dpUpdateHidden(id){
   const el = dpEls(id);
-  const day = el.day.value;
-  const month = el.month.value;
   const manualActive = el.yearManual && el.yearManual.style.display !== 'none';
   const yearVal = manualActive ? el.yearManual.value.trim() : el.year.value;
-  el.hidden.value = (day && month && /^\d{4}$/.test(yearVal||'')) ? `${yearVal}-${month}-${day}` : '';
+  el.hidden.value = /^\d{4}$/.test(yearVal||'') ? yearVal : '';
 }
 
 // ---------- "✍️ Type" بٹن — سال کا ڈراپ ڈاؤن ہٹا کر سیدھا ٹائپنگ باکس دکھائیں (اور واپس بھی جا سکیں) ----------
@@ -21696,9 +21676,7 @@ function dpToggleYearMode(id){
 // ---------- ودجٹ کو بالکل خالی حالت پر واپس لے جائیں (ماڈل دوبارہ کھلنے پر) ----------
 function dpReset(id){
   const el = dpEls(id);
-  if(!el.day) return;
-  el.month.value = '';
-  dpBuildDayOptions(el.day, 31, '');
+  if(!el.year) return;
   el.year.value = '';
   if(el.yearManual){ el.yearManual.value=''; el.yearManual.style.display='none'; }
   el.year.style.display = '';
@@ -21723,7 +21701,7 @@ function openActivatePinLockModal(){
 
   if(!AppState.settings.securityDobHash){
     // ---------- DOB کبھی سیٹ ہی نہیں ہوئی — پہلے یہیں سیٹ کر کے آگے بڑھیں ----------
-    document.getElementById('apinDobError').textContent = 'ℹ️ No date of birth on file yet — enter it now to set it up.';
+    document.getElementById('apinDobError').textContent = 'ℹ️ No year of birth on file yet — enter it now to set it up.';
   }
   document.getElementById('apinStepDob').style.display = 'block';
   document.getElementById('activatePinLockModal').classList.add('show');
@@ -21732,7 +21710,7 @@ function openActivatePinLockModal(){
 async function verifyDobForPinActivation(){
   const dob = document.getElementById('apinDobInput').value;
   if(!dob){
-    document.getElementById('apinDobError').textContent = '❌ Please select your date of birth.';
+    document.getElementById('apinDobError').textContent = '❌ Please select your year of birth.';
     return;
   }
   const dobHash = await hashPin(dob);
@@ -21813,7 +21791,7 @@ function openPinRecoveryModal(){
 async function verifyPinRecovery(){
   const dob = document.getElementById('recoveryDobInput').value;
   if(!dob){
-    document.getElementById('recoveryError').textContent = '❌ Please select your date of birth.';
+    document.getElementById('recoveryError').textContent = '❌ Please select your year of birth.';
     return;
   }
   const dobHash = await hashPin(dob);
