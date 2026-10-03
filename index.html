@@ -1969,13 +1969,10 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA007</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA013</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
-
-    <!-- ---------- 📦 لاگ ان پیج سے ہی پیکج دیکھنے/خریدنے کا بٹن — 14 دن کے بعد یہیں سے سبسکرپشن ---------- -->
-    <button type="button" onclick="openPackagePlansModal()" style="display:block; margin:6px auto 10px; padding:9px 22px; border:none; border-radius:999px; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#0f172a; font-weight:900; font-size:13.5px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.5);">📦 Subscription Plans</button>
 
     <!-- ---------- 🔀 سنگل ایڈمن/یوزر انٹری — Salesman ٹیب/بکسہ ہوم پیج سے ہٹا دیا گیا ---------- -->
     <div class="loginRoleTabs" style="display:none;">
@@ -2049,6 +2046,8 @@
 
     <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
     <div id="turnOffTouchIdHint" class="loginHint" style="display:none;"><a href="javascript:void(0)" onclick="turnOffTouchId()" style="color:var(--muted); font-weight:700; text-decoration:none;">👆 Turn off Touch ID on this device</a></div>
+    <!-- ---------- 📦 پیکج دیکھنے کا چھوٹا سا لنک — سب سے آخر میں، جو دیکھنا چاہے وہ دیکھ لے ---------- -->
+    <div class="loginHint" style="margin-top:6px;"><a href="javascript:void(0)" onclick="openPackagePlansModal()" style="color:var(--muted); font-weight:700; font-size:12px; text-decoration:underline;">📦 View Subscription Plans</a></div>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
 </div>
@@ -2191,7 +2190,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA007</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA013</span>
     </div>
   </div>
 
@@ -12421,7 +12420,15 @@ function saveNewProduct(){
   persistAllData();
 
   closeNewProductModal();
+  // ---------- نیا پراڈکٹ بنتے ہی اسی کا کارڈ کھول دیں اور مین ویرینٹ سامنے رکھیں — تاکہ اسٹاک، ایکسپائری، لو اسٹاک، بارکوڈ وغیرہ فوراً بھر سکیں،
+  // اور وہیں سے "+ Add New Variant" بھی دبایا جا سکے ----------
+  openProductCards.add(newProduct.product_id);
+  activeVariantIndexByProduct.set(newProduct.product_id, 0);
   renderProductList();
+  setTimeout(() => {
+    const el = document.getElementById('pcard-' + newProduct.product_id);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 120);
 }
 
 // ---------- پورا پراڈکٹ (سب variants سمیت) ڈیلیٹ کریں ----------
@@ -22052,11 +22059,356 @@ function renderPackagePlansView(){
       <div style="padding:9px 14px; border-radius:999px; background:#fff; color:#0f172a; font-weight:900; font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,.2);">${priceLabel}</div>
     </div>`;
   }).join('') +
+  // ---------- واٹس ایپ پر پیکج کی قیمتیں بھیجنے کا بٹن — کوئی گاہک قیمت پوچھے تو ایک ٹیپ میں بھیج دیں ----------
+  `<button type="button" id="sharePlansBtn" onclick="sharePackagePlansWhatsApp()" style="display:block; width:100%; margin-top:2px; padding:12px; border:none; border-radius:14px; background:#16a34a; color:#fff; font-weight:900; font-size:14px; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,.2);">💬 Share Plans Poster on WhatsApp</button>` +
   // ---------- Google Play پالیسی کی لازمی شرط: خریداری سے پہلے، بغیر کسی اضافی کلک کے،
   // قیمت/billing cycle/auto-renewal کی صاف وضاحت نظر آنی چاہیے ----------
   `<div style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;">
     ℹ️ Subscriptions (3 Months, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>.
   </div>`;
+}
+
+
+// ---------- (پچھلا سادہ پیغام — اب صرف اس وقت چلتا ہے جب پوسٹر نہ بن سکے) 💬 پیکج کی قیمتیں — قیمتیں وہی جو Google Play سے آئیں (اپنی طرف سے کوئی قیمت نہیں لکھتے) ----------
+function sharePackagePlansTextWhatsApp(){
+  if(!playBillingDetailsCache){
+    alert('Plans are still loading. Please wait a moment and try again.');
+    return;
+  }
+  const names = { 90:'🟢 3 ماہ (90 دن)', 180:'🔵 6 ماہ (180 دن)', 365:'🟡 1 سال (365 دن)' };
+  const lines = [];
+  PLAY_BILLING_PRODUCTS.forEach(p => {
+    const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
+    if(!info) return;
+    lines.push(`${names[p.days] || p.label}: ${info.price.currency} ${Number(info.price.value).toFixed(2)}`);
+  });
+  if(lines.length === 0){
+    alert('No plans are available to share right now.');
+    return;
+  }
+  const msg =
+    `📦 *AIO POS — سبسکرپشن پیکج*\n\n` +
+    lines.join('\n') + `\n\n` +
+    `✅ پہلے 14 دن مفت ٹرائل۔\n` +
+    `🔄 ہر پیکج خودکار تجدید ہوتا ہے، آپ جب چاہیں گوگل پلے سے منسوخ کر سکتے ہیں۔\n` +
+    `💳 ادائیگی گوگل پلے کے ذریعے ہوتی ہے۔ ٹیکس گوگل کے حساب سے الگ لگ سکتا ہے۔\n\n` +
+    `📲 ایپ یہاں سے لیں:\nhttps://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+
+// ---------- 💬 پیکج کی قیمتیں واٹس ایپ پر پوسٹر کی شکل میں شیئر کریں ----------
+// قیمتیں وہی جو Google Play سے آئیں (اپنی طرف سے کوئی قیمت نہیں لکھتے)۔ پوسٹر 1080×1920 (9:16) — واٹس ایپ چیٹ اور سٹیٹس دونوں کے لیے۔
+// 🏷️ Google Play کا سرکاری بیج: PNG یا SVG فائل کو base64 data: لنک بنا کر نیچے ایک ہی جگہ لگانا ہے۔ خالی ہو تو سادہ لکھائی والا خانہ بنتا ہے۔
+const PLAY_BADGE_DATAURL = '';
+// ---------- ایپ کا اصل لوگو (icon-512.png) — پوسٹر میں براہِ راست جڑا ہوا، کسی فائل لوڈ پر انحصار نہیں ----------
+const APP_LOGO_DATAURL = 'data:image/png;base64,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';
+const PLAY_STORE_APP_LINK = 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos';
+let plansPosterFile = null;
+let plansPosterUrl = null;
+
+function posterLoadImage(src){
+  return new Promise(resolve => {
+    if(!src){ resolve(null); return; }
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+function posterRR(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function posterGlow(ctx, x, y, r, color){
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function posterText3D(ctx, txt, x, y, font, depth){
+  ctx.font = font;
+  ctx.textAlign = 'center';
+  for(let i = depth; i > 0; i--){
+    ctx.fillStyle = 'rgba(35,6,28,0.9)';
+    ctx.fillText(txt, x + i * 0.8, y + i * 1.4);
+  }
+  const gr = ctx.createLinearGradient(0, y - 90, 0, y + 10);
+  gr.addColorStop(0, '#ffffff');
+  gr.addColorStop(1, '#fbcfe8');
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.4)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
+  ctx.fillStyle = gr;
+  ctx.fillText(txt, x, y);
+  ctx.restore();
+}
+
+async function buildPlansPosterBlob(){
+  const W = 1080, H = 1920;
+  const FONT = 'Poppins, "Segoe UI", Arial, sans-serif';
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  try{
+    await Promise.all([
+      document.fonts.load(`800 60px ${FONT}`),
+      document.fonts.load(`700 30px ${FONT}`),
+      document.fonts.load(`600 30px ${FONT}`)
+    ]);
+  }catch(e){}
+
+  // ---------- Google Play سے آئی قیمتیں ----------
+  const plans = PLAY_BILLING_PRODUCTS.map(p => {
+    const info = playBillingDetailsCache && playBillingDetailsCache.find(d => d.itemId === p.sku);
+    return info ? { p, price: `${info.price.currency} ${Number(info.price.value).toFixed(2)}` } : null;
+  }).filter(Boolean);
+  if(plans.length === 0) return null;
+
+  // ---------- ایپ کا لوگو (ایپ کی اپنی آئیکن فائل) اور Play بیج ----------
+  const logo = await posterLoadImage(APP_LOGO_DATAURL);
+  const badge = await posterLoadImage(PLAY_BADGE_DATAURL);
+
+  // ---------- پس منظر ----------
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#2b0a24');
+  bg.addColorStop(0.45, '#5c1346');
+  bg.addColorStop(1, '#1d0818');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  posterGlow(ctx, 900, 160, 520, 'rgba(244,114,182,0.30)');
+  posterGlow(ctx, 120, 1560, 520, 'rgba(217,70,239,0.18)');
+  posterGlow(ctx, 540, 980, 600, 'rgba(255,255,255,0.05)');
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  for(let gx = 30; gx < W; gx += 60){
+    for(let gy = 30; gy < H; gy += 60){
+      ctx.beginPath(); ctx.arc(gx, gy, 3, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // ---------- ایپ کا اصل لوگو — 3D سایہ اور ہلکی چمک کے ساتھ ----------
+  const ls = 240, lx = (W - ls) / 2, ly = 60, lr = ls * 0.2;
+  if(logo){
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 50;
+    ctx.shadowOffsetY = 26;
+    ctx.drawImage(logo, lx, ly, ls, ls);
+    ctx.restore();
+    ctx.save();
+    posterRR(ctx, lx, ly, ls, ls, lr);
+    ctx.clip();
+    const gl = ctx.createLinearGradient(0, ly, 0, ly + ls * 0.5);
+    gl.addColorStop(0, 'rgba(255,255,255,0.22)');
+    gl.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gl;
+    ctx.fillRect(lx, ly, ls, ls * 0.5);
+    ctx.restore();
+    posterRR(ctx, lx, ly, ls, ls, lr);
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3; ctx.stroke();
+  } else {
+    posterRR(ctx, lx, ly, ls, ls, lr);
+    ctx.fillStyle = '#0f766e'; ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.font = `800 80px ${FONT}`;
+    ctx.fillText('AIO', W / 2, ly + ls / 2 + 20);
+  }
+
+  // ---------- عنوان ----------
+  posterText3D(ctx, 'AIO POS', W / 2, 410, `800 104px ${FONT}`, 9);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `700 52px ${FONT}`;
+  ctx.fillText('The Best Billing App', W / 2, 488);
+  ctx.fillStyle = '#fbcfe8';
+  ctx.font = `600 40px ${FONT}`;
+  ctx.fillText('available on Play Store', W / 2, 542);
+
+  // ---------- Google Play بیج ----------
+  if(badge){
+    const bh = 130, bw = bh * (badge.naturalWidth / badge.naturalHeight);
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8;
+    ctx.drawImage(badge, W / 2 - bw / 2, 580, bw, bh);
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8;
+    posterRR(ctx, W / 2 - 230, 585, 460, 120, 26);
+    ctx.fillStyle = '#0b1220'; ctx.fill();
+    ctx.restore();
+    posterRR(ctx, W / 2 - 230, 585, 460, 120, 26);
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#e2e8f0'; ctx.font = `600 28px ${FONT}`;
+    ctx.fillText('Available on', W / 2, 632);
+    ctx.fillStyle = '#ffffff'; ctx.font = `800 52px ${FONT}`;
+    ctx.fillText('Google Play', W / 2, 686);
+  }
+
+  // ---------- سرچ بار — Play Store کی سرچ جیسا سادہ، اندر ٹائپ کیا ہوا نام ----------
+  ctx.fillStyle = '#ffffff'; ctx.font = `700 40px ${FONT}`; ctx.textAlign = 'center';
+  ctx.fillText('Search on Play Store', W / 2, 800);
+  const bx = 120, by = 830, bw2 = 840, bh2 = 96;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 8;
+  posterRR(ctx, bx, by, bw2, bh2, 48);
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.restore();
+  // ---------- محدب شیشہ (آئیکن) ----------
+  ctx.strokeStyle = '#5f6368'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(bx + 64, by + 44, 15, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bx + 75, by + 55); ctx.lineTo(bx + 90, by + 70); ctx.stroke();
+  // ---------- اندر لکھا ہوا نام اور ٹائپنگ کا نشان ----------
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#202124'; ctx.font = `600 50px ${FONT}`;
+  ctx.fillText('AIOPOS', bx + 125, by + 66);
+  const capX = bx + 125 + ctx.measureText('AIOPOS').width + 8;
+  ctx.fillStyle = '#202124';
+  ctx.fillRect(capX, by + 24, 3, 48);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fbcfe8'; ctx.font = `500 30px ${FONT}`;
+  ctx.fillText('or type "AIO POS" with a space — both work', W / 2, 980);
+
+  // ---------- پیکج کارڈ ----------
+  ctx.fillStyle = '#ffffff'; ctx.font = `800 56px ${FONT}`; ctx.textAlign = 'center';
+  ctx.fillText('Subscription Plans', W / 2, 1100);
+  const colors = { 90: ['#2dd4bf', '#0f766e'], 180: ['#60a5fa', '#1d4ed8'], 365: ['#fcd34d', '#b45309'] };
+  plans.forEach((it, i) => {
+    const x = 70, y = 1140 + i * 194, w = 940, h = 170;
+    const c = colors[it.p.days] || colors[90];
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 18;
+    posterRR(ctx, x, y + 12, w, h, 40);
+    ctx.fillStyle = c[1]; ctx.fill();
+    ctx.restore();
+    const fg = ctx.createLinearGradient(x, y, x + w, y + h);
+    fg.addColorStop(0, c[0]); fg.addColorStop(1, c[1]);
+    posterRR(ctx, x, y, w, h, 40);
+    ctx.fillStyle = fg; ctx.fill();
+    ctx.save();
+    posterRR(ctx, x, y, w, h, 40);
+    ctx.clip();
+    const gg = ctx.createLinearGradient(0, y, 0, y + h * 0.55);
+    gg.addColorStop(0, 'rgba(255,255,255,0.38)');
+    gg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gg;
+    ctx.fillRect(x, y, w, h * 0.55);
+    ctx.restore();
+    posterRR(ctx, x, y, w, h, 40);
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3; ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
+    ctx.fillStyle = '#ffffff'; ctx.font = `800 58px ${FONT}`;
+    ctx.fillText(it.p.label, x + 48, y + 82);
+    ctx.restore();
+    const tag = `${it.p.days} days`;
+    ctx.font = `700 28px ${FONT}`;
+    const tw = ctx.measureText(tag).width + 44;
+    posterRR(ctx, x + 48, y + 104, tw, 40, 20);
+    ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(tag, x + 70, y + 133);
+
+    ctx.font = `800 46px ${FONT}`;
+    const pw = ctx.measureText(it.price).width + 72;
+    const ppx = x + w - 40 - pw;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+    posterRR(ctx, ppx, y + 35, pw, 100, 50);
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center';
+    ctx.fillText(it.price, ppx + pw / 2, y + 101);
+  });
+
+  // ---------- آخری سطریں ----------
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff'; ctx.font = `700 38px ${FONT}`;
+  ctx.fillText('Get these subscriptions from Play Store', W / 2, 1780);
+  ctx.fillStyle = '#fbcfe8'; ctx.font = `600 32px ${FONT}`;
+  ctx.fillText('Download from Play Store & get your subscription', W / 2, 1832);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = `500 24px ${FONT}`;
+  ctx.fillText('Auto-renewing plans • Cancel anytime in Google Play • Taxes may apply', W / 2, 1884);
+
+  return await new Promise(resolve => cv.toBlob(b => resolve(b), 'image/png'));
+}
+
+// ---------- بٹن دبانے پر: پوسٹر بنائیں، پھر دیکھنے کی کھڑکی کھولیں ----------
+async function sharePackagePlansWhatsApp(){
+  if(!playBillingDetailsCache){
+    alert('Plans are still loading. Please wait a moment and try again.');
+    return;
+  }
+  const btn = document.getElementById('sharePlansBtn');
+  const oldLabel = btn ? btn.textContent : '';
+  if(btn){ btn.textContent = '⏳ Preparing poster…'; btn.disabled = true; }
+  try{
+    const blob = await buildPlansPosterBlob();
+    if(!blob){ alert('No plans are available to share right now.'); return; }
+    plansPosterFile = new File([blob], 'AIO-POS-Plans.png', { type: 'image/png' });
+    if(plansPosterUrl) URL.revokeObjectURL(plansPosterUrl);
+    plansPosterUrl = URL.createObjectURL(blob);
+    showPlansPosterPreview();
+  }catch(e){
+    console.error('Poster failed:', e);
+    sharePackagePlansTextWhatsApp(); // ---------- پوسٹر نہ بنے تو سادہ پیغام ہی چلا جائے ----------
+  }finally{
+    const b2 = document.getElementById('sharePlansBtn');
+    if(b2){ b2.textContent = oldLabel || '💬 Share Plans Poster on WhatsApp'; b2.disabled = false; }
+  }
+}
+function showPlansPosterPreview(){
+  const old = document.getElementById('plansPosterModal');
+  if(old) old.remove();
+  const m = document.createElement('div');
+  m.id = 'plansPosterModal';
+  m.style.cssText = 'position:fixed; inset:0; z-index:3700; background:rgba(2,6,23,.94); display:flex; flex-direction:column; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top,0px) + 12px) 12px calc(env(safe-area-inset-bottom,0px) + 12px); overflow:auto;';
+  m.innerHTML = `
+    <img src="${plansPosterUrl}" alt="Plans poster" style="max-width:100%; max-height:68vh; border-radius:16px; box-shadow:0 10px 36px rgba(0,0,0,.7); object-fit:contain;">
+    <div style="display:flex; gap:8px; width:100%; max-width:420px;">
+      <button type="button" onclick="sendPlansPosterToWhatsApp()" style="flex:2; padding:13px; border:none; border-radius:12px; background:#16a34a; color:#fff; font-weight:900; font-size:14px; cursor:pointer;">💬 Share on WhatsApp</button>
+      <button type="button" onclick="savePlansPoster()" style="flex:1; padding:13px; border:none; border-radius:12px; background:#fbbf24; color:#0f172a; font-weight:900; font-size:14px; cursor:pointer;">💾 Save</button>
+    </div>
+    <div style="color:#94a3b8; font-size:11.5px; text-align:center; max-width:420px; line-height:1.6;">Share sends it to a chat. To post as WhatsApp Status: tap Save, then add it from your gallery in WhatsApp → Status.</div>
+    <button type="button" onclick="closePlansPosterPreview()" style="width:100%; max-width:420px; padding:11px; border:1.5px solid #475569; border-radius:12px; background:transparent; color:#e2e8f0; font-weight:700; cursor:pointer;">Close</button>`;
+  document.body.appendChild(m);
+}
+function closePlansPosterPreview(){
+  const m = document.getElementById('plansPosterModal');
+  if(m) m.remove();
+}
+function savePlansPoster(){
+  if(!plansPosterUrl) return;
+  const a = document.createElement('a');
+  a.href = plansPosterUrl;
+  a.download = 'AIO-POS-Plans.png';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 500);
+}
+async function sendPlansPosterToWhatsApp(){
+  if(!plansPosterFile) return;
+  const caption = `AIO POS — the best billing app on Google Play. Search "AIOPOS" or "AIO POS".\n${PLAY_STORE_APP_LINK}`;
+  try{
+    if(navigator.canShare && navigator.canShare({ files: [plansPosterFile] })){
+      await navigator.share({ files: [plansPosterFile], text: caption });
+      return;
+    }
+  }catch(err){
+    if(err && err.name === 'AbortError') return; // ---------- صارف نے خود منسوخ کیا ----------
+  }
+  // ---------- اس فون/براؤزر میں تصویر براہِ راست شیئر نہیں ہو سکتی — تصویر محفوظ کر دیں ----------
+  savePlansPoster();
+  alert('Poster saved to your phone. Open WhatsApp and send it from your gallery.');
 }
 
 // ---------- Home ٹائل سے یہاں پہنچتے ہیں — پہلے فہرست تازہ بنائیں، پھر modal دکھائیں ----------
