@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA003</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA004</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2188,7 +2188,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA003</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA004</span>
     </div>
   </div>
 
@@ -21876,16 +21876,17 @@ function isPlayBillingAvailable(){
 let playBillingDetailsCache = null;
 let playBillingLoadFailed = false; // ---------- ناکامی کی صورت میں Loading… ہمیشہ کے لیے اٹکنے کی بجائے خودکار Local/EasyPaisa پر واپس آ جائے ----------
 async function loadPlayBillingDetails(){
-  if(!isPlayBillingAvailable()) return null;
+  if(!isPlayBillingAvailable()){ window.pbDiag='A: Play Billing not available (getDigitalGoodsService missing)'; return null; }
   if(playBillingDetailsCache) return playBillingDetailsCache;
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
     const details = await service.getDetails(PLAY_BILLING_PRODUCTS.map(p => p.sku));
-    if(!details || details.length === 0){ playBillingLoadFailed = true; return null; }
+    if(!details || details.length === 0){ window.pbDiag='B: Google returned 0 plans'; playBillingLoadFailed = true; return null; }
     playBillingDetailsCache = details;
     return details;
   } catch(err){
     console.error('Play Billing details load failed:', err);
+    window.pbDiag='C: ' + (err && err.name) + ' - ' + (err && err.message);
     playBillingLoadFailed = true;
     return null;
   }
@@ -22014,6 +22015,7 @@ function renderPackagePlansView(){
     wrap.innerHTML = `
       <div style="text-align:center; padding:20px 10px;">
         <div style="color:var(--danger); font-weight:700; margin-bottom:12px;">⚠️ Could not load plans from Google Play. Please check your internet connection.</div>
+        <div style="font-size:12px; color:#111; background:#fef3c7; padding:8px; border-radius:8px; margin-bottom:12px; word-break:break-word;">DIAG: ${window.pbDiag||'none'}</div>
         <button class="testPrintBtn" onclick="playBillingLoadFailed=false; playBillingDetailsCache=null; renderPackagePlansView(); loadPlayBillingDetails().then(()=>renderPackagePlansView());">🔄 Try Again</button>
       </div>`;
     return;
