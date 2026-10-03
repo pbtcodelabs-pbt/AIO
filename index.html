@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA013</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA014</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2190,7 +2190,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA013</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA014</span>
     </div>
   </div>
 
@@ -21998,12 +21998,13 @@ function openPackagePlansModal(){
   selectedPlanDays = null;
   selectedPlanPrice = null;
   playBillingLoadFailed = false; // ---------- ہر بار پاپ اپ کھلنے پر دوبارہ کوشش کا موقع دیں ----------
+  window.pbDiag = '';
   renderPackagePlansView();
   document.getElementById('packagePlansModal').classList.add('show');
   // ---------- یہ ورژن ہمیشہ صرف Google Play Billing کے ذریعے چلتی ہے — قیمتیں لوڈ ہوتے ہی خودکار دوبارہ رینڈر ----------
   loadPlayBillingDetails().then(() => renderPackagePlansView());
   setTimeout(() => {
-    if(!playBillingDetailsCache){ playBillingLoadFailed = true; renderPackagePlansView(); }
+    if(!playBillingDetailsCache){ if(!window.pbDiag) window.pbDiag = 'D: no answer from Google within 6 seconds'; playBillingLoadFailed = true; renderPackagePlansView(); }
   }, 6000);
 }
 
@@ -22028,6 +22029,7 @@ function renderPackagePlansView(){
       <div style="text-align:center; padding:20px 10px;">
         <div style="color:var(--danger); font-weight:700; margin-bottom:12px;">⚠️ Could not load plans from Google Play. Please check your internet connection.</div>
         <button class="testPrintBtn" onclick="playBillingLoadFailed=false; playBillingDetailsCache=null; renderPackagePlansView(); loadPlayBillingDetails().then(()=>renderPackagePlansView());">🔄 Try Again</button>
+        <div style="font-size:10px; color:var(--muted); margin-top:10px; word-break:break-all; opacity:.8;">Code: ${(window.pbDiag || '-').toString().replace(/</g,'&lt;')}</div>
       </div>`;
     return;
   }
