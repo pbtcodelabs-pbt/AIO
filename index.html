@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA002</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA003</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2188,7 +2188,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA002</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA003</span>
     </div>
   </div>
 
@@ -21845,6 +21845,29 @@ const PLAY_BILLING_PRODUCTS = [
   { sku: 'aio_user1plus0_12m', days: 365, label: '1 Year'   },
 ];
 
+// ---------- 🔐 سرور سے خریداری کی تصدیق — مفت مدت کا راستہ بند کرنے کے لیے ----------
+// یہاں Cloudflare Worker کا لنک پیسٹ ہوگا (سرور بننے کے بعد)۔ خالی ہو تو خودکار تجدید/توسیع مکمل بند رہتی ہے،
+// یعنی کسی کو بغیر ادائیگی ایک دن بھی نہیں ملتا؛ صرف براہِ راست خریداری پر دن جڑتے ہیں۔
+const PLAY_VERIFY_URL = '';
+
+async function verifyPurchaseOnServer(purchaseToken, sku){
+  if(!PLAY_VERIFY_URL) return null;
+  try{
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    const res = await fetch(PLAY_VERIFY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ purchaseToken, sku }),
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if(!res.ok) return null;
+    const data = await res.json();
+    return (data && typeof data === 'object') ? data : null;
+  }catch(e){ return null; }
+}
+
 function isPlayBillingAvailable(){
   return typeof window.getDigitalGoodsService === 'function';
 }
@@ -21895,7 +21918,12 @@ async function purchaseViaPlayBilling(sku, days){
     const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
     const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
     base.setDate(base.getDate() + days);
-    AppState.settings.subscriptionExpiry = base.toISOString().slice(0,10);
+    let newExpiry = base.toISOString().slice(0,10);
+    // ---------- سرور ہو تو اس کی دی ہوئی اصل تاریخ ہی استعمال کریں (Google کا اپنا حساب)؛
+    // سرور نہ ہو یا جواب نہ آئے تو ادائیگی چونکہ ابھی ابھی ہوئی ہے، دن جوڑ دیں ----------
+    const ver = await verifyPurchaseOnServer(purchaseToken, sku);
+    if(ver && ver.access && ver.expiry && ver.expiry > newExpiry){ newExpiry = ver.expiry; }
+    AppState.settings.subscriptionExpiry = newExpiry;
     AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
     AppState.settings.isOnFreeTrial = false;
     AppState.settings.subscriptionViaPlayBilling = true;
@@ -21918,25 +21946,28 @@ async function purchaseViaPlayBilling(sku, days){
 // تاکہ ادائیگی کرنے والے صارف کو کبھی غلطی سے "Subscription Expired" نہ دکھے ----------
 async function syncPlayBillingRenewal(){
   if(!isPlayBillingAvailable()) return;
+  // ---------- سرور کے بغیر خودکار توسیع بند: پہلے منسوخ کرنے والا گاہک ایک مدت مفت لے سکتا تھا ----------
+  if(!PLAY_VERIFY_URL) return;
   const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
-  if(daysLeft > 2) return; // ---------- فعال دورانیے کے دوران بار بار تاریخ نہ بدلیں، صرف تجدید کے قریب/بعد چیک کریں ----------
+  if(daysLeft > 3) return; // ---------- فعال دورانیے کے دوران بار بار نہ پوچھیں ----------
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
     const purchases = await service.listPurchases();
-    if(!purchases || purchases.length === 0) return; // ---------- کوئی فعال Play خریداری نہیں ملی — مقامی حالت کو نہ چھیڑیں ----------
+    if(!purchases || purchases.length === 0) return;
 
-    let bestDays = 0, matched = false;
-    purchases.forEach(p => {
-      const prod = PLAY_BILLING_PRODUCTS.find(x => x.sku === p.itemId);
-      if(prod && prod.days > bestDays){ bestDays = prod.days; matched = true; }
-    });
-    if(!matched) return;
+    // ---------- ہر خریداری کی تصدیق سرور سے، اور صرف Google کی بتائی ہوئی اصل تاریخ مانیں۔
+    // منسوخ شدہ سبسکرپشن کی تاریخ وہی رہتی ہے جو اس نے ادا کی تھی، اس لیے کوئی مفت دن نہیں جڑتا ----------
+    let bestExpiry = '';
+    for(const p of purchases){
+      if(!PLAY_BILLING_PRODUCTS.some(x => x.sku === p.itemId)) continue;
+      const ver = await verifyPurchaseOnServer(p.purchaseToken, p.itemId);
+      if(ver && ver.access && ver.expiry && ver.expiry > bestExpiry) bestExpiry = ver.expiry;
+    }
+    if(!bestExpiry) return;
 
-    const base = isSubscriptionActive() ? new Date(AppState.settings.subscriptionExpiry) : new Date();
-    base.setDate(base.getDate() + bestDays);
-    const newExpiryStr = base.toISOString().slice(0,10);
-    if(newExpiryStr !== AppState.settings.subscriptionExpiry){
-      AppState.settings.subscriptionExpiry = newExpiryStr;
+    const current = AppState.settings.subscriptionExpiry || '';
+    if(bestExpiry > current){
+      AppState.settings.subscriptionExpiry = bestExpiry;
       AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
       AppState.settings.isOnFreeTrial = false;
       AppState.settings.subscriptionViaPlayBilling = true;
@@ -21944,7 +21975,7 @@ async function syncPlayBillingRenewal(){
       renderSubscriptionBanner();
     }
   }catch(err){
-    // ---------- خاموشی سے ناکام ہو جائے — انٹرنیٹ نہ ہو یا Play Store کے باہر چلے تو صارف کو تنگ نہ کریں ----------
+    // ---------- خاموشی سے ناکام ہو جائے — انٹرنیٹ نہ ہو تو اگلی بار دوبارہ کوشش ہوگی ----------
   }
 }
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ syncPlayBillingRenewal(); }catch(e){} }, 1500); });
