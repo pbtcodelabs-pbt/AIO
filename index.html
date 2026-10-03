@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA015</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA016</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2190,7 +2190,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA015</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA016</span>
     </div>
   </div>
 
@@ -22179,21 +22179,15 @@ async function buildPlansPosterBlob(){
   const badge = await posterLoadImage(PLAY_BADGE_DATAURL);
 
   // ---------- پس منظر ----------
-  const bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#2b0a24');
-  bg.addColorStop(0.45, '#5c1346');
-  bg.addColorStop(1, '#1d0818');
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#3a1030');
+  bg.addColorStop(0.5, '#2a0b24');
+  bg.addColorStop(1, '#1a0716');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
-  posterGlow(ctx, 900, 160, 520, 'rgba(244,114,182,0.30)');
-  posterGlow(ctx, 120, 1560, 520, 'rgba(217,70,239,0.18)');
-  posterGlow(ctx, 540, 980, 600, 'rgba(255,255,255,0.05)');
-  ctx.fillStyle = 'rgba(255,255,255,0.05)';
-  for(let gx = 30; gx < W; gx += 60){
-    for(let gy = 30; gy < H; gy += 60){
-      ctx.beginPath(); ctx.arc(gx, gy, 3, 0, Math.PI * 2); ctx.fill();
-    }
-  }
+  posterGlow(ctx, 540, 260, 620, 'rgba(244,114,182,0.10)');
+  posterRR(ctx, 28, 28, W - 56, H - 56, 36);
+  ctx.strokeStyle = 'rgba(251,207,232,0.16)'; ctx.lineWidth = 2; ctx.stroke();
 
   // ---------- ایپ کا اصل لوگو — 3D سایہ اور ہلکی چمک کے ساتھ ----------
   const ls = 240, lx = (W - ls) / 2, ly = 60, lr = ls * 0.2;
@@ -22224,13 +22218,17 @@ async function buildPlansPosterBlob(){
   }
 
   // ---------- عنوان ----------
-  posterText3D(ctx, 'AIO POS', W / 2, 410, `800 104px ${FONT}`, 9);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff'; ctx.font = `700 100px ${FONT}`;
+  ctx.fillText('AIO POS', W / 2, 410);
+  ctx.restore();
   ctx.textAlign = 'center';
   ctx.fillStyle = '#ffffff';
-  ctx.font = `700 52px ${FONT}`;
+  ctx.font = `600 48px ${FONT}`;
   ctx.fillText('The Best Billing App', W / 2, 488);
-  ctx.fillStyle = '#fbcfe8';
-  ctx.font = `600 40px ${FONT}`;
+  ctx.fillStyle = '#f0c6da';
+  ctx.font = `500 38px ${FONT}`;
   ctx.fillText('available on Play Store', W / 2, 542);
 
   // ---------- Google Play بیج ----------
@@ -22286,14 +22284,17 @@ async function buildPlansPosterBlob(){
   ctx.fillText('or type "AIO POS" with a space — both work', W / 2, 980);
 
   // ---------- پیکج کارڈ ----------
-  ctx.fillStyle = '#ffffff'; ctx.font = `800 56px ${FONT}`; ctx.textAlign = 'center';
+  const gold = ctx.createLinearGradient(W / 2 - 90, 0, W / 2 + 90, 0);
+  gold.addColorStop(0, 'rgba(230,190,110,0)'); gold.addColorStop(0.5, '#e6be6e'); gold.addColorStop(1, 'rgba(230,190,110,0)');
+  ctx.fillStyle = gold; ctx.fillRect(W / 2 - 90, 1036, 180, 3);
+  ctx.fillStyle = '#fdeaf3'; ctx.font = `700 52px ${FONT}`; ctx.textAlign = 'center';
   ctx.fillText('Subscription Plans', W / 2, 1100);
-  const colors = { 90: ['#2dd4bf', '#0f766e'], 180: ['#60a5fa', '#1d4ed8'], 365: ['#fcd34d', '#b45309'] };
+  const colors = { 90: ['#2a9d8f', '#0f5a53'], 180: ['#5b86dd', '#2c4a9e'], 365: ['#d7a64a', '#8f5f1c'] };
   plans.forEach((it, i) => {
     const x = 70, y = 1140 + i * 194, w = 940, h = 170;
     const c = colors[it.p.days] || colors[90];
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 18;
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 12;
     posterRR(ctx, x, y + 12, w, h, 40);
     ctx.fillStyle = c[1]; ctx.fill();
     ctx.restore();
@@ -22305,18 +22306,18 @@ async function buildPlansPosterBlob(){
     posterRR(ctx, x, y, w, h, 40);
     ctx.clip();
     const gg = ctx.createLinearGradient(0, y, 0, y + h * 0.55);
-    gg.addColorStop(0, 'rgba(255,255,255,0.38)');
+    gg.addColorStop(0, 'rgba(255,255,255,0.10)');
     gg.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = gg;
     ctx.fillRect(x, y, w, h * 0.55);
     ctx.restore();
     posterRR(ctx, x, y, w, h, 40);
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 2; ctx.stroke();
 
     ctx.textAlign = 'left';
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
-    ctx.fillStyle = '#ffffff'; ctx.font = `800 58px ${FONT}`;
+    ctx.fillStyle = '#ffffff'; ctx.font = `700 56px ${FONT}`;
     ctx.fillText(it.p.label, x + 48, y + 82);
     ctx.restore();
     const tag = `${it.p.days} days`;
@@ -22327,7 +22328,7 @@ async function buildPlansPosterBlob(){
     ctx.fillStyle = '#ffffff';
     ctx.fillText(tag, x + 70, y + 133);
 
-    ctx.font = `800 46px ${FONT}`;
+    ctx.font = `700 46px ${FONT}`;
     const pw = ctx.measureText(it.price).width + 72;
     const ppx = x + w - 40 - pw;
     ctx.save();
@@ -22340,13 +22341,16 @@ async function buildPlansPosterBlob(){
   });
 
   // ---------- آخری سطریں ----------
+  const gold2 = ctx.createLinearGradient(W / 2 - 90, 0, W / 2 + 90, 0);
+  gold2.addColorStop(0, 'rgba(230,190,110,0)'); gold2.addColorStop(0.5, '#e6be6e'); gold2.addColorStop(1, 'rgba(230,190,110,0)');
+  ctx.fillStyle = gold2; ctx.fillRect(W / 2 - 90, 1728, 180, 3);
   ctx.textAlign = 'center';
   ctx.fillStyle = '#ffffff'; ctx.font = `700 38px ${FONT}`;
-  ctx.fillText('Get these subscriptions from Play Store', W / 2, 1780);
-  ctx.fillStyle = '#fbcfe8'; ctx.font = `600 32px ${FONT}`;
-  ctx.fillText('Download from Play Store & get your subscription', W / 2, 1832);
+  ctx.fillText('Get these subscriptions from Play Store', W / 2, 1772);
+  ctx.fillStyle = '#f0c6da'; ctx.font = `500 32px ${FONT}`;
+  ctx.fillText('Download from Play Store & get your subscription', W / 2, 1818);
   ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = `500 24px ${FONT}`;
-  ctx.fillText('Auto-renewing plans • Cancel anytime in Google Play • Taxes may apply', W / 2, 1884);
+  ctx.fillText('Auto-renewing plans • Cancel anytime in Google Play • Taxes may apply', W / 2, 1862);
 
   return await new Promise(resolve => cv.toBlob(b => resolve(b), 'image/png'));
 }
