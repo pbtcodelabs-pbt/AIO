@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA001</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO310SA002</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2188,7 +2188,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA001</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO310SA002</span>
     </div>
   </div>
 
@@ -21838,11 +21838,11 @@ let selectedPlanPrice = null;
    Play Console → Monetize → Subscriptions میں بنانے ہوں گے، ورنہ خریداری ناکام ہوگی۔
    ===================================================================== */
 const PLAY_BILLING_PRODUCTS = [
-  { sku: 'aio_pos_trial7',    days: 7,     label: '7 Days Free'  },
-  { sku: 'aio_pos_monthly',   days: 30,    label: '1 Month'      },
-  { sku: 'aio_pos_6month',    days: 180,   label: '6 Months'     },
-  { sku: 'aio_pos_yearly',    days: 365,   label: '1 Year'       },
-  { sku: 'aio_pos_lifetime',  days: 36500, label: 'Lifetime (100 Years)' },
+  // ---------- ہر مدت کی اپنی الگ سبسکرپشن (Play Console کا Product ID) — Digital Goods API صرف Product ID سے خریدتی ہے،
+  // بیس پلان نہیں چن سکتی، اس لیے ایک سبسکرپشن = ایک مدت۔ مفت ٹرائل ایپ کے اندر 14 دن کا خود ہے (Play کا نہیں) ----------
+  { sku: 'aio_user1plus0_3m',  days: 90,  label: '3 Months' },
+  { sku: 'aio_user1plus0_6m',  days: 180, label: '6 Months' },
+  { sku: 'aio_user1plus0_12m', days: 365, label: '1 Year'   },
 ];
 
 function isPlayBillingAvailable(){
@@ -21881,8 +21881,15 @@ async function purchaseViaPlayBilling(sku, days){
     const { purchaseToken } = response.details;
     await response.complete('success');
 
-    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-    await service.acknowledge(purchaseToken, 'repeat'); // ---------- 'repeat' = subscription، ورنہ Google 3 دن بعد خودکار رقم واپس کر دیتا ہے ----------
+    // ---------- Acknowledge: نئے Chrome/TWA میں acknowledge() فنکشن سرے سے ہے ہی نہیں (خود بخود ہو جاتا ہے) —
+    // پہلے یہاں بغیر چیک کیے بلایا جاتا تھا، تو ادائیگی ہو جانے کے باوجود ایرر آتا اور دن نہیں جڑتے تھے۔
+    // اب صرف موجود ہو تب بلائیں، اور ناکام بھی ہو تو خریداری کو ناکام نہ سمجھیں ----------
+    try{
+      const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+      if(service && typeof service.acknowledge === 'function'){
+        await service.acknowledge(purchaseToken, 'onetime');
+      }
+    }catch(ackErr){ console.warn('Acknowledge skipped:', ackErr); }
 
     // ---------- کامیاب خریداری — بالکل اسی طرح دن جوڑیں جیسے Local activation code سے جوڑے جاتے ہیں ----------
     const hasActivePaidSub = isSubscriptionActive() && !AppState.settings.isOnFreeTrial;
@@ -21984,9 +21991,15 @@ function renderPackagePlansView(){
     wrap.innerHTML = `<div style="text-align:center; padding:20px 10px; color:var(--muted);">🔍 Loading plans from Google Play…</div>`;
     return;
   }
-  wrap.innerHTML = PLAY_BILLING_PRODUCTS.map(p => {
+  // ---------- صرف وہی پیکج دکھائیں جو Play سے واقعی ملے — '—' والا بٹن کبھی نہ دکھے ----------
+  const availablePlans = PLAY_BILLING_PRODUCTS.filter(p => playBillingDetailsCache.some(d => d.itemId === p.sku));
+  if(availablePlans.length === 0){
+    wrap.innerHTML = `<div style="text-align:center; padding:20px 10px; color:var(--danger); font-weight:700;">⚠️ No plans are available right now. Please try again later.</div>`;
+    return;
+  }
+  wrap.innerHTML = availablePlans.map(p => {
     const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
-    const priceLabel = info ? `${info.price.currency} ${info.price.value}` : '—';
+    const priceLabel = `${info.price.currency} ${info.price.value}`;
     return `
     <div onclick="purchaseViaPlayBilling('${p.sku}', ${p.days})" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border-radius:10px; padding:11px 14px; margin-bottom:8px; cursor:pointer;">
       <div style="font-weight:800; font-size:14px;">${p.label}</div>
@@ -21996,7 +22009,7 @@ function renderPackagePlansView(){
   // ---------- Google Play پالیسی کی لازمی شرط: خریداری سے پہلے، بغیر کسی اضافی کلک کے،
   // قیمت/billing cycle/auto-renewal کی صاف وضاحت نظر آنی چاہیے ----------
   `<div style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;">
-    ℹ️ Subscriptions (7 Days, 1 Month, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>. The <b>Lifetime</b> plan is a one-time purchase and does not renew.
+    ℹ️ Subscriptions (3 Months, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>.
   </div>`;
 }
 
