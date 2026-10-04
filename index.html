@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO410SU018</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO019</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2190,7 +2190,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO410SU018</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO019</span>
     </div>
   </div>
 
@@ -21859,7 +21859,7 @@ const PLAY_BILLING_PRODUCTS = [
 // ---------- 🔐 سرور سے خریداری کی تصدیق — مفت مدت کا راستہ بند کرنے کے لیے ----------
 // یہاں Cloudflare Worker کا لنک پیسٹ ہوگا (سرور بننے کے بعد)۔ خالی ہو تو خودکار تجدید/توسیع مکمل بند رہتی ہے،
 // یعنی کسی کو بغیر ادائیگی ایک دن بھی نہیں ملتا؛ صرف براہِ راست خریداری پر دن جڑتے ہیں۔
-const PLAY_VERIFY_URL = '';
+const PLAY_VERIFY_URL = 'https://aio-pos-verify.pbtcodelabs.workers.dev';
 
 async function verifyPurchaseOnServer(purchaseToken, sku){
   if(!PLAY_VERIFY_URL) return null;
@@ -21963,6 +21963,9 @@ async function purchaseViaPlayBilling(sku, days){
     // سرور نہ ہو یا جواب نہ آئے تو ادائیگی چونکہ ابھی ابھی ہوئی ہے، دن جوڑ دیں ----------
     const ver = await verifyPurchaseOnServer(purchaseToken, sku);
     if(ver && ver.access && ver.expiry && ver.expiry > newExpiry){ newExpiry = ver.expiry; }
+    // ---------- سرور منظوری (acknowledge) کی تصدیق نہ کرے تو ٹوکن قطار میں رکھیں — ایپ اگلی بار کھلنے پر دوبارہ بھیجے گی،
+    // ورنہ Google 3 دن میں رقم واپس کر دیتا ہے ----------
+    if(!(ver && ver.acknowledged)) queuePendingPlayAck(purchaseToken, sku);
     AppState.settings.subscriptionExpiry = newExpiry;
     AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
     AppState.settings.isOnFreeTrial = false;
@@ -21978,6 +21981,48 @@ async function purchaseViaPlayBilling(sku, days){
     }
   }
 }
+
+// ---------- ⏳ منظوری کی قطار: جو خریداری ابھی سرور سے منظور نہیں ہوئی، اس کا ٹوکن یہاں محفوظ رہتا ہے
+// اور ہر بار ایپ کھلنے/سامنے آنے پر دوبارہ سرور کو بھیجا جاتا ہے، جب تک سرور "acknowledged" نہ کہہ دے ----------
+function queuePendingPlayAck(purchaseToken, sku){
+  try{
+    if(!purchaseToken) return;
+    const list = Array.isArray(AppState.settings.pendingPlayAcks) ? AppState.settings.pendingPlayAcks : [];
+    if(!list.some(x => x.token === purchaseToken)){
+      list.push({ token: purchaseToken, sku: sku || '', at: Date.now() });
+    }
+    AppState.settings.pendingPlayAcks = list;
+    persistAllData();
+  }catch(e){}
+}
+
+let pendingPlayAckBusy = false;
+async function retryPendingPlayAcks(){
+  if(!PLAY_VERIFY_URL || pendingPlayAckBusy) return;
+  const list = Array.isArray(AppState.settings && AppState.settings.pendingPlayAcks) ? AppState.settings.pendingPlayAcks : [];
+  if(list.length === 0) return;
+  pendingPlayAckBusy = true;
+  try{
+    const keep = [];
+    for(const item of list){
+      // ---------- 10 دن سے پرانا ٹوکن چھوڑ دیں (تب تک Google خود فیصلہ کر چکا ہوتا ہے) ----------
+      if(!item || !item.token || (Date.now() - (item.at || 0)) > 10 * 86400000) continue;
+      const ver = await verifyPurchaseOnServer(item.token, item.sku);
+      if(ver && ver.acknowledged) continue;
+      keep.push(item);
+    }
+    if(keep.length !== list.length){
+      AppState.settings.pendingPlayAcks = keep;
+      persistAllData();
+    }
+  }catch(e){
+    // ---------- خاموشی — اگلی بار دوبارہ کوشش ----------
+  }finally{
+    pendingPlayAckBusy = false;
+  }
+}
+document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ retryPendingPlayAcks(); }catch(e){} }, 2500); });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ retryPendingPlayAcks(); }catch(e){} } });
 
 // ---------- 🔄 Renewal Sync — جب مقامی سبسکرپشن ختم ہو چکی ہو یا 2 دن میں ختم ہونے والی ہو، Google Play سے
 // تازہ ترین فعال خریداری کی تصدیق لیں۔ یہ ضروری ہے کیونکہ اگر Google خودکار طور پر renew کر کے صارف سے
