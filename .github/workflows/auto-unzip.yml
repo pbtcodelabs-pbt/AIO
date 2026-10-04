@@ -2,6 +2,9 @@
 # 1) ریپو میں جو بھی .zip فائل اپ لوڈ ہو گی، یہ اسے کھولے گا
 # 2) اندر کی فائلیں (index.html, sw.js وغیرہ) پرانی فائلوں کی جگہ رکھے گا
 # 3) زپ فائل ڈیلیٹ کر کے کمٹ کرے گا، اور ویب سائٹ دوبارہ بنوائے گا
+# 🔒 حفاظت: صرف وہی زپ کھلے گی جس کا نام ZIP_PATTERN سے ملتا ہو۔
+#    AIO ریپو: نام AIO کے فوراً بعد نمبر سے شروع ہو (جیسے AIO410SU018) — اس لیے AIODR یا SM/FM والی زپ یہاں نہیں کھلے گی۔
+#    غلط زپ بغیر کھولے ڈیلیٹ ہو جائے گی اور Actions میں لال نشان ❌ آئے گا۔
 name: Auto Unzip & Deploy
 
 on:
@@ -18,6 +21,10 @@ concurrency:
   group: auto-unzip
   cancel-in-progress: false
 
+env:
+  ZIP_PATTERN: '^AIO[0-9]'
+  REPO_LABEL: 'AIO'
+
 jobs:
   unzip:
     runs-on: ubuntu-latest
@@ -27,11 +34,21 @@ jobs:
       - name: Unzip
         id: un
         run: |
-          shopt -s nullglob globstar nocaseglob
+          shopt -s nullglob globstar nocaseglob nocasematch
           zips=( **/*.zip )
           if [ ${#zips[@]} -eq 0 ]; then echo "none=1" >> "$GITHUB_OUTPUT"; echo "کوئی زپ نہیں ملی"; exit 0; fi
           names=""
+          bad=""
           for z in "${zips[@]}"; do
+            base=$(basename "$z")
+            # 🔒 نام کی جانچ — غلط ریپو کی زپ کو بغیر کھولے ہٹا دیں
+            if [[ ! "$base" =~ $ZIP_PATTERN ]]; then
+              echo "❌ غلط زپ: $base — یہ $REPO_LABEL ریپو کی زپ نہیں ہے، اس لیے نہیں کھولی گئی اور ڈیلیٹ کر دی گئی۔"
+              git rm -q --cached "$z" 2>/dev/null || true
+              rm -f "$z"
+              bad="$bad $base"
+              continue
+            fi
             echo "📦 کھول رہا ہوں: $z"
             tmp=$(mktemp -d)
             unzip -o -q "$z" -d "$tmp"
@@ -50,6 +67,7 @@ jobs:
             echo "✅ مکمل: $z"
           done
           echo "names=$names" >> "$GITHUB_OUTPUT"
+          echo "bad=$bad" >> "$GITHUB_OUTPUT"
 
       - name: Commit
         if: steps.un.outputs.none != '1'
@@ -58,12 +76,22 @@ jobs:
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then echo "کوئی تبدیلی نہیں"; exit 0; fi
-          git commit -m "Auto-unzip:${{ steps.un.outputs.names }}"
+          if [ -n "$(echo '${{ steps.un.outputs.names }}' | tr -d ' ')" ]; then
+            git commit -m "Auto-unzip:${{ steps.un.outputs.names }}"
+          else
+            git commit -m "Rejected wrong zip:${{ steps.un.outputs.bad }}"
+          fi
           git pull --rebase origin main || true
           git push
 
       - name: Rebuild GitHub Pages
-        if: steps.un.outputs.none != '1'
+        if: steps.un.outputs.none != '1' && steps.un.outputs.names != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages build trigger skipped"
+
+      - name: Wrong zip warning
+        if: steps.un.outputs.none != '1' && steps.un.outputs.bad != ''
+        run: |
+          echo "::error::❌ غلط زپ اپلوڈ ہوئی:${{ steps.un.outputs.bad }} — یہ ${{ env.REPO_LABEL }} ریپو ہے۔ صحیح زپ (نام ${{ env.REPO_LABEL }} سے شروع) دوبارہ اپلوڈ کریں۔"
+          exit 1
