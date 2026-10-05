@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO022</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO023</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2195,7 +2195,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO022</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO023</span>
     </div>
   </div>
 
@@ -6992,15 +6992,12 @@ function openDevChat(context){
 // Web Share API سپورٹ ہو تو یوزر اپنی مرضی کی ایپ (WhatsApp, SMS, Email وغیرہ) چن سکتا ہے،
 // ورنہ سیدھا WhatsApp پر کھل جائے گا۔ لنک Settings > Admin Control > App Share Link سے بدلا جا سکتا ہے۔ ----------
 async function shareAppLink(){
-  const link = AppState.settings.appShareLink;
-  if(!link){
-    alert('Share link not set yet. Go to Home → Settings → Admin Control → "App Share Link" and paste your GitHub Pages link there first.');
-    return;
-  }
+  // ---------- 📲 ہمیشہ گوگل پلے اسٹور کا اصلی لنک شیئر ہو (ہر گاہک کے فون پر، بغیر کسی سیٹنگ کے) ----------
+  const link = 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos';
   const customMsg = (AppState.settings.appShareMessage || '').trim();
-  const text = customMsg ? `${customMsg}\n${link}` : `Try our AIO POS App — free trial included:\n${link}`;
+  const text = customMsg ? `${customMsg}\n${link}` : `📲 AIO POS — shop billing, stock & udhaar (credit) app.\n✅ 14 days FREE trial.\nDownload from Google Play:\n${link}`;
   if(navigator.share){
-    try{ await navigator.share({ title: 'AIO POS App', text: text }); }
+    try{ await navigator.share({ title: 'AIO POS', text: text }); }
     catch(err){ /* یوزر نے شیئر Cancel کر دیا — کوئی ایکشن درکار نہیں */ }
   } else {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
