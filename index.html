@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO021</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO022</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2056,6 +2056,11 @@
 <div class="devChatPanel" id="devChatPanel">
   <h4 id="devChatTitle">💬 Chat with Developer</h4>
   <div class="devChatUid" id="devChatUidLine"></div>
+  <!-- ---------- 👤 بھیجنے سے پہلے مختصر تعارف — پہلے سے بھرا ہوا (My Account سے)، بدلا جائے تو محفوظ ہو جاتا ہے ---------- -->
+  <div style="font-size:11.5px; color:var(--muted,#64748b); margin:2px 0 6px;">So the developer knows who you are:</div>
+  <input type="text" id="devChatNameInput" placeholder="Your Name" autocomplete="name" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+  <input type="text" id="devChatCityInput" placeholder="Your City" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+  <input type="email" id="devChatEmailInput" placeholder="Email / Gmail (optional)" inputmode="email" autocomplete="email" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
   <button class="devChatOption" onclick="sendDevChat('whatsapp')"><span class="devChatIcon">💬</span> WhatsApp</button>
   <button class="devChatOption" onclick="sendDevChat('sms')"><span class="devChatIcon">✉️</span> SMS</button>
   <button class="devChatOption" onclick="sendDevChat('email')"><span class="devChatIcon">📧</span> Gmail</button>
@@ -2190,7 +2195,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO021</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO022</span>
     </div>
   </div>
 
@@ -6585,6 +6590,8 @@ const DEFAULT_SETTINGS = {
   businessAddress: '',
   businessPhone: '',
   businessEmail: '',   // ---------- اختیاری — Contact Developer پیغام میں خودکار شامل ہوتا ہے ----------
+  contactName: '',     // ---------- Contact Developer پینل میں لکھا گیا نام ----------
+  contactCity: '',     // ---------- Contact Developer پینل میں لکھا گیا شہر ----------
   ownerName: '',       // ---------- ہوم پیج کے بزنس کارڈ پر مالک کا نام ----------
   businessLogo: '',    // ---------- ہوم پیج کے بزنس کارڈ کا پس منظر/لوگو (base64 تصویر) ----------
   myAdsPosterOverride: '', // ---------- My Ads پوسٹر — اگر خالی نہ ہو تو یہ گیلری سے چنی گئی تصویر ڈیفالٹ پوسٹر کی جگہ دکھائی جائے گی ----------
@@ -6971,6 +6978,13 @@ function openDevChat(context){
   devChatContext = context;
   document.getElementById('devChatTitle').textContent = context === 'subscription' ? '💬 Ask About Subscription' : '💬 Chat with Developer';
   document.getElementById('devChatUidLine').textContent = '';
+  const s = AppState.settings || {};
+  const nEl = document.getElementById('devChatNameInput');
+  const cEl = document.getElementById('devChatCityInput');
+  const eEl = document.getElementById('devChatEmailInput');
+  if(nEl) nEl.value = s.contactName || s.ownerName || '';
+  if(cEl) cEl.value = s.contactCity || '';
+  if(eEl) eEl.value = s.businessEmail || '';
   document.getElementById('devChatPanel').classList.toggle('show');
 }
 
@@ -6999,11 +7013,30 @@ async function shareAppLink(){
 function buildSenderInfoBlock(){
   const s = AppState.settings || {};
   const lines = [];
-  if((s.ownerName || '').trim()) lines.push(`👤 Owner: ${s.ownerName.trim()}`);
+  const name = (s.contactName || s.ownerName || '').trim();
+  if(name) lines.push(`👤 Name: ${name}`);
   if((s.businessName || '').trim()) lines.push(`🏪 Shop: ${s.businessName.trim()}`);
+  if((s.contactCity || '').trim()) lines.push(`🏙️ City: ${s.contactCity.trim()}`);
   if((s.businessPhone || '').trim()) lines.push(`📞 Phone: ${s.businessPhone.trim()}`);
   if((s.businessEmail || '').trim()) lines.push(`📧 Email: ${s.businessEmail.trim()}`);
   if((s.businessAddress || '').trim()) lines.push(`📍 Address: ${s.businessAddress.trim()}`);
+  // ---------- 🎫 سبسکرپشن کی حالت — ڈویلپر فوراً جان لے کہ بندہ ٹرائل پر ہے، خریدار ہے یا مدت ختم ہو چکی ----------
+  try{
+    if(isSubscriptionActive()){
+      const d = daysLeftInSubscription();
+      lines.push(s.isOnFreeTrial
+        ? `🎁 Status: Free trial — ${d} day${d === 1 ? '' : 's'} left`
+        : `✅ Status: Subscribed — ${d} day${d === 1 ? '' : 's'} left (till ${formatDateDMY(s.subscriptionExpiry)})`);
+    } else {
+      lines.push(`⛔ Status: Trial/subscription ended`);
+    }
+  }catch(e){}
+  // ---------- 🌍 فون کی اپنی ترتیب سے ملک/علاقہ (کوئی اجازت یا مقام نہیں لیا جاتا) ----------
+  try{
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    const lang = navigator.language || '';
+    if(tz || lang) lines.push(`🌍 Region: ${[tz, lang].filter(Boolean).join(' · ')}`);
+  }catch(e){}
   const ver = (document.getElementById('loginVersionBadge')?.textContent || '').trim();
   if(ver) lines.push(`📱 App version: ${ver}`);
   return lines.length ? lines.join('\n') + '\n\n' : '';
@@ -7034,8 +7067,8 @@ function sendTroubleSubscribingMessage(){
   const s = AppState.settings || {};
   const info = buildSenderInfoBlock();
   const msg = info + `Hi, I'm trying to subscribe to AIO POS but I'm having trouble completing the payment through Google Play (e.g., no debit/credit card, or a Google Play Gift Card is not easily available where I live).\n\n` +
-    ((s.ownerName || '').trim() ? '' : `My Name: \n`) +
-    ((s.businessAddress || '').trim() ? '' : `My Country/City: \n`) +
+    ((s.contactName || s.ownerName || '').trim() ? '' : `My Name: \n`) +
+    ((s.contactCity || s.businessAddress || '').trim() ? '' : `My Country/City: \n`) +
     `What's the problem: \n\n` +
     `Please guide me on how I can subscribe.`;
   const contact = getDeveloperContact();
@@ -7048,7 +7081,18 @@ function buildAdInquiryMessage(){
   return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.`;
 }
 
+function saveDevChatContactFields(){
+  const nEl = document.getElementById('devChatNameInput');
+  const cEl = document.getElementById('devChatCityInput');
+  const eEl = document.getElementById('devChatEmailInput');
+  if(nEl) AppState.settings.contactName = nEl.value.trim();
+  if(cEl) AppState.settings.contactCity = cEl.value.trim();
+  if(eEl) AppState.settings.businessEmail = eEl.value.trim();
+  persistAllData();
+}
+
 function sendDevChat(channel){
+  saveDevChatContactFields();
   const msg = buildDevChatMessage();
   const contact = getDeveloperContact();
   if(channel === 'whatsapp'){
