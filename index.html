@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO019</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO020</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2014,7 +2014,7 @@
       <div class="loginPanel active" id="loginPanelAdmin">
         <div class="loginPinFieldWrap">
           <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputAdmin', this)">👁️</button>
-          <input type="password" id="pinInputAdmin" placeholder="PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+          <input type="password" id="pinInputAdmin" placeholder="Enter PIN" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
         </div>
       </div>
 
@@ -2023,7 +2023,7 @@
         <select id="loginSalesmanSelect"></select>
         <div class="loginPinFieldWrap">
           <button type="button" class="loginPinEyeBtn" onclick="toggleLoginPinVisibility('pinInputSalesman', this)">👁️</button>
-          <input type="password" id="pinInputSalesman" placeholder="اپنا PIN درج کریں" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
+          <input type="password" id="pinInputSalesman" placeholder="Enter your PIN" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter') login()">
         </div>
       </div>
 
@@ -2190,7 +2190,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO019</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO020</span>
     </div>
   </div>
 
@@ -4504,14 +4504,14 @@
           <h3>☁️ Cloud Sync (Multi-Device)</h3>
           <div id="cloudSyncStatusLine" style="font-size:12px; font-weight:700; margin-bottom:10px;"></div>
           <div class="settingsSubLabel">Your Business Code</div>
-          <div class="settingsHint" style="margin-top:0;">اپنے ملازمین کو یہی کوڈ دیں (WhatsApp پر) — وہ نیچے "Join a Business" میں یہ کوڈ درج کر کے اسی ڈیٹا سے جُڑ جائیں گے۔</div>
+          <div class="settingsHint" style="margin-top:0;">Give this code to your employees (on WhatsApp) — they enter it below in "Join a Business" to connect to the same data.</div>
           <div style="display:flex; gap:8px; margin-top:6px;">
             <input type="text" id="businessCodeDisplay" readonly style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-weight:700; text-align:center; background:#f8fafc;">
             <button class="testPrintBtn" style="width:auto; padding:0 16px; margin-top:0;" onclick="copyBusinessCode()">📋 Copy</button>
           </div>
 
-          <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">Join a Business (ملازمین کے لیے)</div>
-          <div class="settingsHint" style="margin-top:0;">مالک کا دیا ہوا کوڈ یہاں درج کریں تاکہ اس کاروبار کا ڈیٹا اس ڈیوائس پر بھی نظر آئے۔</div>
+          <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">Join a Business (for employees)</div>
+          <div class="settingsHint" style="margin-top:0;">Enter the code given by the owner here to see this business's data on this device too.</div>
           <div style="display:flex; gap:8px; margin-top:6px;">
             <input type="text" id="joinBusinessInput" placeholder="e.g. BIZ-AB12-CD34-EF56" style="flex:1; padding:11px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; text-align:center;">
             <button class="testPrintBtn" style="width:auto; padding:0 16px; margin-top:0;" onclick="joinBusinessById(document.getElementById('joinBusinessInput').value)">🔗 Join</button>
@@ -4537,7 +4537,7 @@
             <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">App Share Link</div>
             <input type="text" id="appShareLinkInput" placeholder="e.g. https://username.github.io/AIO/" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel" style="margin-top:14px; padding-top:10px; border-top:1px solid #eef2f7;">👥 Staff Limit (Testing Only)</div>
-            <div class="settingsHint" style="margin-top:0;">AIOTEST22: عارضی — Play Billing پیکج تیار ہونے تک، یہاں سے دستی طور پر Salesman کی زیادہ سے زیادہ تعداد آزمائیں۔ خالی چھوڑیں = لامحدود۔</div>
+            <div class="settingsHint" style="margin-top:0;">Temporary: set the maximum number of Salesmen here manually. Leave empty = unlimited.</div>
             <input type="number" id="staffLimitInput" placeholder="e.g. 2 (leave empty = unlimited)" min="0" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" oninput="saveAdminControl()">
             <div class="settingsSubLabel">Share Message</div>
             <textarea id="appShareMessageInput" placeholder="e.g. Try our AIO POS App — it's fast, reliable and free to try!" rows="2" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical;" oninput="saveAdminControl()"></textarea>
@@ -4748,8 +4748,8 @@
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Everyone in My Diary, who owes whom, and the net total</div>
       </button>
       <button onclick="openStockSaleProfitReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
-        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📊 روزانہ سٹاک سیل پرافٹ رپورٹ</div>
-        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">سیریل، نام، پیکنگ، پرانا/آج کا شامل/ٹوٹل/فروخت شدہ/باقی سٹاک، اور آج کا منافع — ہر آئٹم کی لائن میں</div>
+        <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📊 Daily Stock, Sale &amp; Profit Report</div>
+        <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Item &amp; packing, total stock, purchase/sale price, sold, remaining and today's profit — one line per item</div>
       </button>
     </div>
   </div>
@@ -4824,6 +4824,17 @@
             <input type="checkbox" id="rpscShowStockChk" onchange="toggleReportShowStock(this.checked)"> Show In Stock Qty
           </label>
         </div>
+        <!-- ---------- 📊 Daily Stock, Sale & Profit Report کی ترتیب — صرف اسی رپورٹ میں نظر آتی ہے ---------- -->
+        <div id="rpscStockSortRow" class="pscCompactRow" style="display:none;">
+          <span class="pscLabel">↕️ Sort</span>
+          <select id="rpscStockSortSelect" class="pscDropdown" onchange="setReportStockSort(this.value)">
+            <option value="profitHigh">Highest Profit First</option>
+            <option value="profitLow">Lowest Profit First</option>
+            <option value="soldHigh">Most Sold First</option>
+            <option value="soldLow">Least Sold First</option>
+            <option value="az">Item Name A–Z</option>
+          </select>
+        </div>
         <!-- ---------- A4 پر پرنٹ کرتے وقت Portrait/Landscape منتخب کریں — صرف Print A4 آن ہونے پر نظر آتا ہے ---------- -->
         <div id="rpscOrientRow" class="pscCompactRow" style="display:none;">
           <button type="button" id="rpscOrientPortraitBtn" onclick="setReportOrientation('portrait')" class="pscToggleBtn">📄 Portrait</button>
@@ -4891,23 +4902,23 @@
     <div class="modalOverlay" id="nearFuturePlansModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox" style="max-width:400px;">
         <h3 style="color:#4338ca;">🚀 Near Future Plans</h3>
-        <div class="settingsHint" style="margin-top:0;">یہ منصوبے پائپ لائن میں ہیں اور جلد لانچ ہونے والے ہیں:</div>
+        <div class="settingsHint" style="margin-top:0;">These plans are in the pipeline and launching soon:</div>
         <div style="text-align:left; margin-top:10px; display:flex; flex-direction:column; gap:10px;">
           <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
             <div style="font-weight:800; font-size:13px;">👑 Admin + 🧑‍💼 Salesman</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Multi-user app — ایک سے زیادہ ملازم اپنے اپنے لاگ ان سے کام کر سکیں گے۔</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Multi-user app — several employees can work with their own logins.</div>
           </div>
           <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
             <div style="font-weight:800; font-size:13px;">📱 Multi-Device App</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">ایک ہی کاروبار کا ڈیٹا ایک سے زیادہ ڈیوائسز پر سنکرونائز ہوگا۔</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">The same business data will sync across multiple devices.</div>
           </div>
           <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
             <div style="font-weight:800; font-size:13px;">💬 Online Support</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">ایپ کے اندر سے ہی براہ راست سپورٹ اور مدد۔</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Direct support and help from inside the app.</div>
           </div>
           <div style="background:#f5f3ff; border-radius:10px; padding:10px 12px;">
             <div style="font-weight:800; font-size:13px;">🔗 Online Ordering via Link</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">کسٹمر ایپ ڈاؤن لوڈ کیے بغیر صرف لنک کے ذریعے آن لائن آرڈر دے سکے گا۔</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">Customers can order online through a link, without downloading the app.</div>
           </div>
         </div>
         <div class="modalBtns">
@@ -5301,9 +5312,9 @@ function getOrCreateBusinessId(){
 // ---------- ملازم اپنے ڈیوائس پر مالک کا دیا ہوا کوڈ درج کرتا ہے تو یہاں سے جُڑتا ہے ----------
 async function joinBusinessById(newId){
   newId = String(newId || '').trim().toUpperCase();
-  if(!newId){ alert('براہ کرم Business Code درج کریں۔'); return; }
-  if(newId === AppState.settings.businessId){ alert('یہ کوڈ پہلے سے فعال ہے۔'); return; }
-  if(!confirm('یہ کوڈ جوائن ہوگا:\n\n' + newId + '\n\n⚠️ اوپر لکھا کوڈ دیکھ لیں — بالکل ویسا ہی ہے جیسا مالک نے بھیجا؟ اگر ٹھیک ہے تو OK دبائیں۔')){
+  if(!newId){ alert('Please enter a Business Code.'); return; }
+  if(newId === AppState.settings.businessId){ alert('This code is already active.'); return; }
+  if(!confirm('You are about to join this code:\n\n' + newId + '\n\n⚠️ Please check the code above — is it exactly the same as the owner sent? If yes, press OK.')){
     return;
   }
   stopCloudPolling();
@@ -5314,7 +5325,7 @@ async function joinBusinessById(newId){
   for(const docType of CLOUD_DOC_TYPES){ await fetchDocTypeFromCloud(docType, false); }
   startCloudPolling();
   try{ renderCloudSyncCard(); }catch(e){}
-  alert('✅ اب اس کاروبار سے جُڑ گئے — ڈیٹا لوڈ ہو گیا۔');
+  alert('✅ Connected to this business — data loaded.');
 }
 
 // ---------- ہر docType کا اپنا مقامی array + seed ڈیٹا حوالہ — تاکہ نیچے عمومی (generic) push/fetch فنکشنز
@@ -5660,7 +5671,7 @@ function addCustomerOrderToCart(orderId){
 async function shareCatalogLink(){
   const base = (AppState.settings.appShareLink || '').trim();
   if(!base){
-    alert('پہلے Settings → Admin Control میں "App Share Link" درج کریں (وہی GitHub Pages لنک جو AIO POS ایپ کے لیے استعمال ہوتا ہے)۔');
+    alert('Please first enter the "App Share Link" in Settings → Admin Control.');
     return;
   }
   const bizId = getOrCreateBusinessId();
@@ -5688,7 +5699,7 @@ async function hashPin(pin){
       return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
     }
   }catch(e){
-    console.warn('crypto.subtle ناکام، fallback ہیش استعمال ہو رہا ہے:', e);
+    console.warn('crypto.subtle failed, using fallback hash:', e);
   }
   // ---------- Fallback: سادہ deterministic ہیش (crypto.subtle نہ ہونے کی صورت میں) ----------
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -5845,7 +5856,7 @@ function loadFromStorage(key, fallback){
     if(raw === null || raw === undefined) return fallback;
     return JSON.parse(raw);
   }catch(e){
-    console.warn('محفوظ شدہ ڈیٹا پڑھنے میں مسئلہ:', key, e);
+    console.warn('Problem reading saved data:', key, e);
     return fallback;
   }
 }
@@ -5855,7 +5866,7 @@ function saveToStorage(key, value){
     localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
     return true;
   }catch(e){
-    console.warn('ڈیٹا محفوظ کرنے میں مسئلہ:', key, e);
+    console.warn('Problem saving data:', key, e);
     if(!storageQuotaWarned){
       storageQuotaWarned = true;
       alert(
@@ -7058,7 +7069,7 @@ async function setupLoginScreen(){
     refreshLoginLockoutUI();
     refreshTouchIdUI(); // ---------- 👆 اگر اس ڈیوائس پر Touch ID پہلے سے فعال ہے تو بٹن دکھائیں ----------
   }catch(err){
-    console.error('setupLoginScreen ناکام ہو گیا:', err);
+    console.error('setupLoginScreen failed:', err);
   }
 }
 
@@ -7693,7 +7704,7 @@ function goTo(screenName, _isHistoryNav){
       // ---------- خالی screens[] کا مطلب ہے ایڈمن نے ابھی تک کچھ بھی Assign نہیں کیا — ایسے ملازم کو
       // خالی/ٹوٹی ہوئی اسکرین پر مت چھوڑیں، صاف پیغام کے ساتھ لاگ آؤٹ کر دیں ----------
       if(allowedScreens.length === 0){
-        alert('کوئی اسکرین ابھی آپ کے لیے مقرر نہیں ہوئی۔ ایڈمن سے رابطہ کریں (Users > Screens)۔');
+        alert('No screens have been assigned to you yet. Please contact the Admin (Users > Screens).');
         logout();
         return;
       }
@@ -8222,22 +8233,22 @@ function fileToCsvText(file){
     if(ext === 'csv' || ext === 'txt'){
       const reader = new FileReader();
       reader.onload = e => resolve(e.target.result);
-      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
+      reader.onerror = () => reject(new Error('Could not read the file — it may be damaged.'));
       reader.readAsText(file);
     } else if(ext === 'xlsx' || ext === 'xls'){
-      if(typeof XLSX === 'undefined'){ reject(new Error('Excel سپورٹ لوڈ نہیں ہو سکا — انٹرنیٹ آن کر کے دوبارہ کوشش کریں۔')); return; }
+      if(typeof XLSX === 'undefined'){ reject(new Error('Excel support could not load — please turn on the internet and try again.')); return; }
       const reader = new FileReader();
       reader.onload = e => {
         try{
           const wb = XLSX.read(e.target.result, {type:'array'});
           const sheet = wb.Sheets[wb.SheetNames[0]];
           resolve(XLSX.utils.sheet_to_csv(sheet));
-        } catch(err){ reject(new Error('یہ Excel فائل نہیں پڑھی جا سکی — دوبارہ محفوظ کر کے آزمائیں۔')); }
+        } catch(err){ reject(new Error('This Excel file could not be read — please save it again and retry.')); }
       };
-      reader.onerror = () => reject(new Error('پڑھنے میں ناکامی — فائل خراب ہو سکتی ہے۔'));
+      reader.onerror = () => reject(new Error('Could not read the file — it may be damaged.'));
       reader.readAsArrayBuffer(file);
     } else {
-      reject(new Error('صرف CSV یا Excel (.xlsx/.xls) فائلیں امپورٹ ہو سکتی ہیں۔ اگر ڈیٹا Word/PDF/تصویر میں ہے تو پہلے اسے Excel میں کاپی کر لیں۔'));
+      reject(new Error('Only CSV or Excel (.xlsx/.xls) files can be imported. If your data is in Word/PDF/a photo, copy it into Excel first.'));
     }
   });
 }
@@ -21289,7 +21300,7 @@ function renderLastBackupStatus(){
 function renderCloudSyncCard(){
   const codeEl = document.getElementById('businessCodeDisplay');
   const statusEl = document.getElementById('cloudSyncStatusLine');
-  if(codeEl) codeEl.value = AppState.settings.businessId || '(بن رہا ہے...)';
+  if(codeEl) codeEl.value = AppState.settings.businessId || '(creating...)';
   if(statusEl){
     const map = {
       connecting: '🔄 Connecting…',
@@ -21303,33 +21314,33 @@ function renderCloudSyncCard(){
 }
 function copyBusinessCode(){
   const code = AppState.settings.businessId || '';
-  if(!code){ alert('کوڈ ابھی تیار نہیں ہوا — ذرا انتظار کریں اور دوبارہ کوشش کریں۔'); return; }
+  if(!code){ alert('The code is not ready yet — please wait a moment and try again.'); return; }
   const el = document.getElementById('businessCodeDisplay');
   if(el){ el.select(); el.setSelectionRange(0, 99999); }
   try{
     navigator.clipboard.writeText(code);
-    alert('✅ Business Code کاپی ہو گیا:\n' + code);
+    alert('✅ Business Code copied:\n' + code);
   }catch(e){
-    alert('کوڈ: ' + code + '\n(دستی طور پر کاپی کر لیں)');
+    alert('Code: ' + code + '\n(please copy it manually)');
   }
 }
 
 // ---------- AIOTEST18: 🔗 Connect Hub — Home سے ایک ہی جگہ Business Code، Join، کیٹلاگ شیئر، ڈویلپر رابطہ ----------
 function openConnectHub(){
   const el = document.getElementById('hubBusinessCodeDisplay');
-  if(el) el.value = AppState.settings.businessId || '(بن رہا ہے...)';
+  if(el) el.value = AppState.settings.businessId || '(creating...)';
   document.getElementById('connectHubModal').classList.add('show');
 }
 function hubCopyBusinessCode(){
   const code = AppState.settings.businessId || '';
-  if(!code){ alert('کوڈ ابھی تیار نہیں ہوا — ذرا انتظار کریں اور دوبارہ کوشش کریں۔'); return; }
+  if(!code){ alert('The code is not ready yet — please wait a moment and try again.'); return; }
   const el = document.getElementById('hubBusinessCodeDisplay');
   if(el){ el.select(); el.setSelectionRange(0, 99999); }
   try{
     navigator.clipboard.writeText(code);
-    alert('✅ Business Code کاپی ہو گیا:\n' + code);
+    alert('✅ Business Code copied:\n' + code);
   }catch(e){
-    alert('کوڈ: ' + code + '\n(دستی طور پر کاپی کر لیں)');
+    alert('Code: ' + code + '\n(please copy it manually)');
   }
 }
 
@@ -22151,7 +22162,7 @@ function sharePackagePlansTextWhatsApp(){
     alert('Plans are still loading. Please wait a moment and try again.');
     return;
   }
-  const names = { 90:'🟢 3 ماہ (90 دن)', 180:'🔵 6 ماہ (180 دن)', 365:'🟡 1 سال (365 دن)' };
+  const names = { 90:'🟢 3 Months (90 days)', 180:'🔵 6 Months (180 days)', 365:'🟡 1 Year (365 days)' };
   const lines = [];
   PLAY_BILLING_PRODUCTS.forEach(p => {
     const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
@@ -22163,12 +22174,12 @@ function sharePackagePlansTextWhatsApp(){
     return;
   }
   const msg =
-    `📦 *AIO POS — سبسکرپشن پیکج*\n\n` +
+    `📦 *AIO POS — Subscription Plans*\n\n` +
     lines.join('\n') + `\n\n` +
-    `✅ پہلے 14 دن مفت ٹرائل۔\n` +
-    `🔄 ہر پیکج خودکار تجدید ہوتا ہے، آپ جب چاہیں گوگل پلے سے منسوخ کر سکتے ہیں۔\n` +
-    `💳 ادائیگی گوگل پلے کے ذریعے ہوتی ہے۔ ٹیکس گوگل کے حساب سے الگ لگ سکتا ہے۔\n\n` +
-    `📲 ایپ یہاں سے لیں:\nhttps://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos`;
+    `✅ First 14 days free trial.\n` +
+    `🔄 Every plan renews automatically; you can cancel anytime from Google Play.\n` +
+    `💳 Payment is made through Google Play. Tax may be added separately by Google.\n\n` +
+    `📲 Get the app here:\nhttps://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -23593,7 +23604,7 @@ function openDiarySummaryReport(){
 function openStockSaleProfitReport(){
   currentReportType = 'stockprofit';
   currentReportCategories = [];
-  document.getElementById('reportPreviewTitle').textContent = "📊 روزانہ سٹاک سیل پرافٹ رپورٹ";
+  document.getElementById('reportPreviewTitle').textContent = "📊 Daily Stock, Sale & Profit Report";
   const showStockWrap = document.getElementById('rpscShowStockWrap');
   if(showStockWrap) showStockWrap.style.display = 'none';
   syncReportStyleControls();
@@ -23626,6 +23637,11 @@ function syncReportStyleControls(){
   const shareRow = document.getElementById('rpA4ShareRow');
   if(shareRow) shareRow.style.display = AppState.settings.reportPrintStyle === 'a4' ? 'flex' : 'none';
   setReportOrientation(AppState.settings.reportOrientation || 'portrait');
+
+  const stockSortRow = document.getElementById('rpscStockSortRow');
+  if(stockSortRow) stockSortRow.style.display = currentReportType === 'stockprofit' ? 'flex' : 'none';
+  const stockSortSel = document.getElementById('rpscStockSortSelect');
+  if(stockSortSel) stockSortSel.value = AppState.settings.reportStockSort || 'profitHigh';
 
   const fontSelect = document.getElementById('rpscFontFamilySelect');
   if(fontSelect){
@@ -24880,11 +24896,11 @@ async function renderDiarySummaryReportToCanvas(){
   }
 }
 
-// ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ — نام، پیکنگ، پرانا سٹاک، آج شامل کیا گیا، ٹوٹل، آج فروخت شدہ،
-// باقی سٹاک، اور آج کا منافع (آج کے تمام مکمل شدہ بلوں سے اکٹھا)۔ نوٹ: "پرانا سٹاک"/"آج شامل کیا گیا" کا
-// حساب آج سے شروع ہونے والی روزانہ تصویر (snapshot) پر مبنی ہے — گزرے دنوں کا ڈیٹا دوبارہ نہیں بن سکتا
-// کیونکہ وہ پہلے کبھی محفوظ نہیں ہوا تھا۔ منسوخ شدہ (voided) بل اس حساب میں شامل نہیں کیے جاتے، تاکہ
-// فروخت/منافع کبھی غلط زیادہ نہ دکھائے ---------- -->
+// ---------- 📊 Daily Stock, Sale & Profit Report (English, Left-to-Right) ----------
+// کالم: # | Item / Packing | Total Stock | Purchase Price | Sale Price | Sold | Remaining | Profit
+// نام والا کالم سب سے لمبے نام کے برابر (بائیں سے لکھا ہوا)، باقی 6 خانے بالکل برابر چوڑائی کے، کم از کم 6 ہندسوں جتنے۔
+// ہندسوں کی ترتیب (بائیں/درمیان/دائیں)، فونٹ، رنگ، سائز، اعشاریہ — سب Advanced Formatting Options سے۔
+// ترتیب (Sort): زیادہ منافع / کم منافع / زیادہ فروخت / کم فروخت / A–Z — منسوخ شدہ (voided) بل شامل نہیں ----------
 async function renderStockSaleProfitReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
@@ -24894,10 +24910,8 @@ async function renderStockSaleProfitReportToCanvas(){
   const ctx = canvas.getContext('2d');
 
   const todayStr = toLocalDateStr(new Date());
-  // ---------- صرف آج کے مکمل شدہ بل — منسوخ شدہ (voided) بل شامل نہیں، ورنہ فروخت/منافع غلط زیادہ دکھے گا ---------- -->
   const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr && inv.status !== 'voided');
 
-  // ---------- ہر ویرینٹ کے لیے آج فروخت شدہ مقدار اکٹھا کریں ---------- -->
   const soldQtyMap = {};
   todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
     if(!it.variant_id) return;
@@ -24912,33 +24926,46 @@ async function renderStockSaleProfitReportToCanvas(){
       const sold = soldQtyMap[v.variant_id] || 0;
       const remaining = v.stock || 0;
       const cost = v.purchase || 0;
-      // ---------- زیادہ درست منافع: ہر بل کی اپنی unitPrice سے (بجائے صرف موجودہ ریٹ کے) ---------- -->
+      const salePrice = v.retail || 0;
       let realProfit = 0;
       todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
         if(it.variant_id === v.variant_id) realProfit += (it.qty || 0) * ((it.unitPrice || 0) - cost);
       }));
-      rows.push({name: p.name, label: v.label || '', opening, added, total, sold, remaining, profit: realProfit});
+      rows.push({name: p.name || '', label: v.label || '', total, purchase: cost, sale: salePrice, sold, remaining, profit: realProfit});
     });
   });
-  // ---------- سب سے زیادہ منافع والا آئٹم سب سے اوپر، سب سے کم (یا نقصان والا) سب سے آخر میں ---------- -->
-  rows.sort((a,b) => b.profit - a.profit);
+
+  const sortMode = AppState.settings.reportStockSort || 'profitHigh';
+  if(sortMode === 'profitLow') rows.sort((a,b) => a.profit - b.profit);
+  else if(sortMode === 'soldHigh') rows.sort((a,b) => b.sold - a.sold || b.profit - a.profit);
+  else if(sortMode === 'soldLow') rows.sort((a,b) => a.sold - b.sold || a.profit - b.profit);
+  else if(sortMode === 'az') rows.sort((a,b) => (a.name + ' ' + a.label).localeCompare(b.name + ' ' + b.label));
+  else rows.sort((a,b) => b.profit - a.profit);
   rows.forEach((r, idx) => r.serial = idx + 1);
+
+  const decimals = AppState.settings.reportPriceDecimals ?? 0;
+  const fmtMoney = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+  const fmtQty = n => {
+    const x = Number(n || 0);
+    return Number.isInteger(x) ? x.toLocaleString('en-US') : x.toLocaleString('en-US', {maximumFractionDigits: 3});
+  };
+  const cellText = (r, key) => {
+    if(key === 'purchase' || key === 'sale' || key === 'profit') return fmtMoney(r[key]);
+    return fmtQty(r[key]);
+  };
 
   const fontScale = (AppState.settings.reportFontScale || 100) / 100;
   const rowScaleSetting = (AppState.settings.reportRowScale || 100) / 100;
   const bold = AppState.settings.reportBoldItems !== false;
-  const selectedFontPreset = FONT_PRESETS.find(f => f.id === (AppState.settings.reportFontId || 'jameelnastaleeqkasheeda')) || FONT_PRESETS[0];
+  const selectedFontPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportFontId) || FONT_PRESETS[0];
   const fontFam = selectedFontPreset.family;
-  // ---------- نام/پیکنگ اور ہیڈر لیبل منتخب شدہ اردو فونٹ میں، مگر خالص ہندسوں والے خانے صاف انگریزی/لاطینی
-  // فونٹ میں دکھائے جائیں گے — نستعلیق فونٹس میں ہندسے اکثر ٹوٹے پھوٹے یا غلط شکل میں نظر آتے ہیں ---------- -->
-  const numberPreset = FONT_PRESETS.find(f => f.id === AppState.settings.reportNumberFontId) || FONT_PRESETS.find(f => f.id === 'tahoma');
-  const numFontFam = numberPreset.family;
-  try{ await document.fonts.load(`13px ${numFontFam}`); }catch(e){}
+  const numFontFam = fontFam;
   try{ await document.fonts.load(`bold 20px ${fontFam}`); await document.fonts.load(`13px ${fontFam}`); await document.fonts.ready; }catch(e){}
   const digitAlign = AppState.settings.reportAlign || 'left';
-  const alignForCol = (key) => key === 'name' ? 'right' : digitAlign;
+  const alignForCol = (key) => key === 'name' ? 'left' : (key === 'serial' ? 'center' : digitAlign);
+  const padFor = (c) => Math.max(4, Math.round(c.width * 0.06));
   const xForCol = (c, align) => {
-    const pad = Math.max(3, Math.round(c.width * 0.04));
+    const pad = padFor(c);
     if(align === 'right') return c.x + c.width - pad;
     if(align === 'left') return c.x + pad;
     return c.x + c.width/2;
@@ -24948,42 +24975,70 @@ async function renderStockSaleProfitReportToCanvas(){
   const fsTitle = Math.round(15 * base * fontScale);
   const fsSubtitle = Math.round(12 * base * fontScale);
   const fsSmall = Math.round(9 * base * fontScale);
-  const fsHeader = Math.round(8.5 * base * fontScale);
+  const fsHeader = Math.round(8 * base * fontScale);
   const fsItem = Math.round(9 * base * fontScale);
 
   const margin = useA4 ? 40 : 6;
   const tableLeft = margin, tableRight = pxWidth - margin;
   const totalW = tableRight - tableLeft;
-  const baseRowH = Math.round(fsItem * 2.6 * rowScaleSetting);
-  const headerRowH = Math.round(fsHeader * 2.8 * rowScaleSetting);
+  const baseRowH = Math.round(fsItem * 2.7 * rowScaleSetting);
+  const headerRowH = Math.round(fsHeader * 3.4 * rowScaleSetting);
 
-  // ---------- کالمز: # | نام(+پیکنگ) | پرانا | +آج | ٹوٹل | فروخت | باقی | منافع ---------- -->
-  const wSerial = Math.round(totalW * 0.06);
-  ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
+  // ---------- چوڑائیاں: # (چھوٹا)، نام (سب سے لمبے نام کے مطابق)، باقی 6 برابر (کم از کم 6 ہندسے) ----------
+  ctx.font = `${fsItem}px ${numFontFam}`;
+  const wSerial = Math.max(Math.round(totalW * 0.05), Math.round(ctx.measureText(String(Math.max(rows.length, 9))).width + 10));
   let maxNameTextW = 0;
   rows.forEach(r => {
-    const w = ctx.measureText(r.name).width;
-    if(w > maxNameTextW) maxNameTextW = w;
+    ctx.font = `${bold ? 'bold ' : ''}${fsItem}px ${fontFam}`;
+    const w1 = ctx.measureText(r.name).width;
+    ctx.font = `${Math.round(fsItem * 0.8)}px ${fontFam}`;
+    const w2 = ctx.measureText(r.label).width;
+    maxNameTextW = Math.max(maxNameTextW, w1, w2);
   });
-  const namePad = Math.max(10, Math.round(fsItem * 0.9));
-  const minNameW = Math.round(totalW * 0.15);
-  const maxNameW = Math.round(totalW * 0.44);
+  ctx.font = `${fsItem}px ${numFontFam}`;
+  const minNumW = Math.round(ctx.measureText('888888').width + 12);
+  const namePad = Math.max(12, Math.round(fsItem * 0.9));
+  const minNameW = Math.round(totalW * 0.18);
+  const maxNameW = Math.round(totalW * 0.40);
   let wName = Math.min(maxNameW, Math.max(minNameW, Math.round(maxNameTextW + namePad)));
-  const wNum = Math.round((totalW - wSerial - wName) / 6);
+  let wNum = Math.floor((totalW - wSerial - wName) / 6);
+  if(wNum < minNumW){
+    wName = Math.max(minNameW, totalW - wSerial - minNumW * 6);
+    wNum = Math.floor((totalW - wSerial - wName) / 6);
+  }
   wName = totalW - wSerial - wNum * 6;
 
   const cols = [
-    {key:'serial', label:'#', width:wSerial},
-    {key:'name', label:'نام/پیکنگ', width:wName},
-    {key:'opening', label:'پرانا', width:wNum},
-    {key:'added', label:'+آج', width:wNum},
-    {key:'total', label:'ٹوٹل', width:wNum},
-    {key:'sold', label:'فروخت', width:wNum},
-    {key:'remaining', label:'باقی', width:wNum},
-    {key:'profit', label:'منافع', width:wNum},
+    {key:'serial',    label:'#',              width:wSerial},
+    {key:'name',      label:'Item / Packing', width:wName},
+    {key:'total',     label:'Total Stock',    width:wNum},
+    {key:'purchase',  label:'Purchase Price', short:'Cost', width:wNum},
+    {key:'sale',      label:'Sale Price',     width:wNum},
+    {key:'sold',      label:'Sold',           width:wNum},
+    {key:'remaining', label:'In Stock',       width:wNum},
+    {key:'profit',    label:'Profit',         width:wNum},
   ];
-  let cxPos = tableRight;
-  cols.forEach(c => { cxPos -= c.width; c.x = cxPos; });
+  let cxPos = tableLeft;
+  cols.forEach(c => { c.x = cxPos; cxPos += c.width; });
+
+  // ---------- لمبا نام: چھوٹا کرنے کی بجائے دو لائنوں میں — اور اس قطار کی اونچائی خودکار بڑھ جائے ----------
+  const nameColW = wName - Math.max(4, Math.round(wName * 0.06)) * 2;
+  const nameWeight = bold ? 'bold ' : '';
+  rows.forEach(r => {
+    ctx.font = `${nameWeight}${fsItem}px ${fontFam}`;
+    r.nameLines = [r.name];
+    if(ctx.measureText(r.name).width > nameColW){
+      const words = r.name.split(/\s+|(?<=\+)/).filter(Boolean);
+      let l1 = '', i = 0;
+      while(i < words.length){
+        const test = l1 ? l1 + ' ' + words[i] : words[i];
+        if(ctx.measureText(test).width <= nameColW || !l1){ l1 = test; i++; } else break;
+      }
+      const l2 = words.slice(i).join(' ');
+      r.nameLines = l2 ? [l1, l2] : [l1];
+    }
+    r.rowH = r.nameLines.length > 1 ? Math.round(baseRowH * 1.45) : baseRowH;
+  });
 
   const fitCenteredLines = (text, maxWidth, basePx, weight) => {
     const w = weight ? weight + ' ' : '';
@@ -24993,29 +25048,34 @@ async function renderStockSaleProfitReportToCanvas(){
     while(ctx.measureText(text).width > maxWidth && px > minPx){ px -= 1; ctx.font = `${w}${px}px ${fontFam}`; }
     return {text, px, weight:w};
   };
+  const fitCellFont = (text, maxWidth, basePx, ff, weight) => {
+    const fam = ff || fontFam;
+    const wt = weight ? weight + ' ' : '';
+    let px = basePx;
+    ctx.font = `${wt}${px}px ${fam}`;
+    let w = ctx.measureText(text).width;
+    if(w > maxWidth && w > 0){
+      px = Math.max(3, px * (maxWidth / w) * 0.94);
+      ctx.font = `${wt}${px}px ${fam}`;
+      w = ctx.measureText(text).width;
+    }
+    let guard = 0;
+    while(w > maxWidth && px > 3 && guard < 40){ px -= 0.5; ctx.font = `${wt}${px}px ${fam}`; w = ctx.measureText(text).width; guard++; }
+    return px;
+  };
+
   const nameFit = fitCenteredLines(AppState.settings.businessName || 'AIO POS', totalW, fsTitle, 'bold');
   const phoneFit = AppState.settings.businessPhone ? fitCenteredLines(AppState.settings.businessPhone, totalW, fsSmall) : null;
-  const titleFit = fitCenteredLines('روزانہ سٹاک سیل پرافٹ رپورٹ', totalW, fsSubtitle, 'bold');
+  const titleFit = fitCenteredLines('Daily Stock, Sale & Profit Report', totalW, fsSubtitle, 'bold');
 
-  let headerBandH = useA4 ? 90 : 56;
-  let bodyTop = headerBandH + headerRowH;
+  const headerBandH = useA4 ? 100 : 66;
   const totalsRowH = Math.round(baseRowH * 1.05);
-  const estimatedHeight = bodyTop + (rows.length * baseRowH) + totalsRowH + Math.round(fsSubtitle * 4) + 40;
+  const estimatedHeight = headerBandH + headerRowH + rows.reduce((s, r) => s + r.rowH, 0) + baseRowH + totalsRowH + Math.round(fsSubtitle * 5) + 60;
 
   canvas.width = pxWidth;
   canvas.height = Math.max(estimatedHeight, 300);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, pxWidth, canvas.height);
-
-  const rr = useA4 ? 14 : 8;
-  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(margin/2 + rr, margin/2);
-  ctx.arcTo(pxWidth - margin/2, margin/2, pxWidth - margin/2, canvas.height - margin/2, rr);
-  ctx.arcTo(pxWidth - margin/2, canvas.height - margin/2, margin/2, canvas.height - margin/2, rr);
-  ctx.arcTo(margin/2, canvas.height - margin/2, margin/2, margin/2, rr);
-  ctx.arcTo(margin/2, margin/2, pxWidth - margin/2, margin/2, rr);
-  ctx.closePath(); ctx.stroke();
 
   let y = useA4 ? 24 : 14;
   ctx.textAlign = 'center'; ctx.fillStyle = '#1a1a1a';
@@ -25029,120 +25089,153 @@ async function renderStockSaleProfitReportToCanvas(){
   y += Math.round(fsSmall * 1.8);
   ctx.font = `${fsSmall}px ${fontFam}`;
   const now = new Date();
-  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getFullYear()).slice(-2)}`;
+  const dstr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
   ctx.fillText(dstr, pxWidth/2, y);
-  y += 8;
+  y += 10;
 
   const rc = getReceiptColor();
+  const drawVLines = (top, h) => {
+    cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, top); ctx.lineTo(c.x+0.5, top+h); ctx.stroke(); });
+    ctx.beginPath(); ctx.moveTo(tableRight+0.5, top); ctx.lineTo(tableRight+0.5, top+h); ctx.stroke();
+  };
+
+  // ---------- ہیڈر: لمبا نام فٹ نہ ہو تو دو لائنوں میں ----------
   const headerTop = y;
   ctx.fillStyle = rc.bg;
   ctx.fillRect(tableLeft, headerTop, totalW, headerRowH);
   ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.3;
   ctx.strokeRect(tableLeft+0.5, headerTop+0.5, totalW, headerRowH);
+  drawVLines(headerTop, headerRowH);
   ctx.fillStyle = '#0f172a';
   cols.forEach(c => {
-    const align = alignForCol(c.key);
+    const align = c.key === 'name' ? 'left' : 'center';
     ctx.textAlign = align;
+    const tx = xForCol(c, align);
+    const avail = c.width - padFor(c) * 2;
     ctx.font = `bold ${fsHeader}px ${fontFam}`;
     ctx.save(); ctx.beginPath(); ctx.rect(c.x, headerTop, c.width, headerRowH); ctx.clip();
-    ctx.fillText(c.label, xForCol(c, align), headerTop + headerRowH/2 + fsHeader*0.32);
-    ctx.restore();
-    ctx.beginPath(); ctx.moveTo(c.x+0.5, headerTop); ctx.lineTo(c.x+0.5, headerTop+headerRowH); ctx.stroke();
-  });
-  ctx.beginPath(); ctx.moveTo(tableRight+0.5, headerTop); ctx.lineTo(tableRight+0.5, headerTop+headerRowH); ctx.stroke();
-  y = headerTop + headerRowH;
-
-  const fitCellFont = (text, maxWidth, basePx, ff) => {
-    const fam = ff || fontFam;
-    let px = basePx;
-    ctx.font = `${px}px ${fam}`;
-    let w = ctx.measureText(text).width;
-    if(w > maxWidth && w > 0){
-      px = Math.max(3, px * (maxWidth / w) * 0.94);
-      ctx.font = `${px}px ${fam}`;
-      w = ctx.measureText(text).width;
+    // ---------- تنگ کاغذ پر لمبا عنوان بہت چھوٹا ہو جائے تو اس کا مختصر نام استعمال کریں ----------
+    let label = c.label;
+    if(c.short){
+      const longest = Math.max(...c.label.split(' ').map(w => ctx.measureText(w).width));
+      if(longest > avail * 1.15) label = c.short;
     }
-    let guard = 0;
-    while(w > maxWidth && px > 3 && guard < 40){ px -= 0.5; ctx.font = `${px}px ${fam}`; w = ctx.measureText(text).width; guard++; }
-    return px;
-  };
+    const parts = label.split(' ');
+    if(ctx.measureText(label).width <= avail || parts.length < 2){
+      const px = fitCellFont(label, avail, fsHeader, fontFam, 'bold');
+      ctx.font = `bold ${px}px ${fontFam}`;
+      ctx.fillText(label, tx, headerTop + headerRowH/2 + px*0.35);
+    } else {
+      const mid = Math.ceil(parts.length / 2);
+      const l1 = parts.slice(0, mid).join(' '), l2 = parts.slice(mid).join(' ');
+      const px = Math.min(fitCellFont(l1, avail, fsHeader, fontFam, 'bold'), fitCellFont(l2, avail, fsHeader, fontFam, 'bold'));
+      ctx.font = `bold ${px}px ${fontFam}`;
+      ctx.fillText(l1, tx, headerTop + headerRowH/2 - px*0.25);
+      ctx.fillText(l2, tx, headerTop + headerRowH/2 + px*0.95);
+    }
+    ctx.restore();
+  });
+  y = headerTop + headerRowH;
 
   if(rows.length === 0){
     ctx.strokeStyle = '#475569'; ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, baseRowH);
     ctx.fillStyle = '#64748b'; ctx.font = `${fsItem}px ${fontFam}`; ctx.textAlign = 'center';
-    ctx.fillText('کوئی آئٹم نہیں ملا', pxWidth/2, y + baseRowH/2 + fsItem*0.32);
+    ctx.fillText('No items found', pxWidth/2, y + baseRowH/2 + fsItem*0.32);
     y += baseRowH;
   } else {
     rows.forEach((r, idx) => {
-      const rh = baseRowH;
+      const rh = r.rowH;
       ctx.fillStyle = idx % 2 === 0 ? '#ffffff' : '#f1f5f9';
       ctx.fillRect(tableLeft, y, totalW, rh);
       ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
       ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, rh);
-      cols.forEach(c => { ctx.beginPath(); ctx.moveTo(c.x+0.5, y); ctx.lineTo(c.x+0.5, y+rh); ctx.stroke(); });
-      ctx.beginPath(); ctx.moveTo(tableRight+0.5, y); ctx.lineTo(tableRight+0.5, y+rh); ctx.stroke();
-      ctx.fillStyle = '#1a1a1a';
+      drawVLines(y, rh);
       cols.forEach(c => {
         const align = alignForCol(c.key);
         ctx.textAlign = align;
         const tx = xForCol(c, align);
-        let txt;
-        if(c.key === 'serial') txt = String(r.serial);
-        else if(c.key === 'name') txt = null;
-        else txt = String(r[c.key]);
+        const avail = c.width - padFor(c) * 2;
+        ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
         if(c.key === 'name'){
-          const px1 = fitCellFont(r.name, c.width-6, fsItem, fontFam);
+          const lines = r.nameLines || [r.name];
+          const px1 = Math.min(...lines.map(l => fitCellFont(l, avail, fsItem, fontFam, bold ? 'bold' : '')));
+          const lineH = Math.round(px1 * 1.15);
+          const labelPx = r.label ? fitCellFont(r.label, avail, Math.round(px1 * 0.8), fontFam) : 0;
+          const blockH = lines.length * lineH + (r.label ? Math.round(labelPx * 1.15) : 0);
+          let ly = y + (rh - blockH)/2 + px1*0.9;
           ctx.font = `${bold ? 'bold ' : ''}${px1}px ${fontFam}`;
-          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
-          ctx.fillText(r.name, tx, y + rh/2 - 3);
-          ctx.font = `${Math.round(px1*0.8)}px ${fontFam}`;
-          ctx.fillStyle = '#64748b';
-          ctx.fillText(r.label, tx, y + rh/2 + Math.round(px1*0.85));
-          ctx.restore();
           ctx.fillStyle = '#1a1a1a';
+          lines.forEach(l => { ctx.fillText(l, tx, ly); ly += lineH; });
+          if(r.label){
+            ctx.font = `${labelPx}px ${fontFam}`;
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(r.label, tx, ly - lineH + Math.round(labelPx * 1.2));
+          }
         } else {
-          if(c.key === 'profit') ctx.fillStyle = r.profit >= 0 ? '#065f2b' : '#991b1b';
-          const px2 = fitCellFont(txt, c.width-4, fsItem, numFontFam);
-          ctx.font = `${px2}px ${numFontFam}`;
-          ctx.save(); ctx.beginPath(); ctx.rect(c.x, y, c.width, rh); ctx.clip();
-          ctx.fillText(txt, tx, y + rh/2 + fsItem*0.32);
-          ctx.restore();
-          ctx.fillStyle = '#1a1a1a';
+          const txt = c.key === 'serial' ? String(r.serial) : cellText(r, c.key);
+          ctx.fillStyle = c.key === 'profit' ? (r.profit >= 0 ? '#065f2b' : '#991b1b') : '#1a1a1a';
+          const px2 = fitCellFont(txt, avail, fsItem, numFontFam, bold && c.key === 'profit' ? 'bold' : '');
+          ctx.font = `${bold && c.key === 'profit' ? 'bold ' : ''}${px2}px ${numFontFam}`;
+          ctx.fillText(txt, tx, y + rh/2 + px2*0.35);
         }
+        ctx.restore();
       });
       y += rh;
     });
   }
 
+  // ---------- آخر میں: Total Profit ----------
   if(rows.length > 0){
     let totalProfitSum = 0;
     rows.forEach(r => { totalProfitSum += r.profit; });
-    const trh = Math.round(baseRowH * 1.05);
+    const trh = totalsRowH;
     ctx.fillStyle = rc.bg;
     ctx.fillRect(tableLeft, y, totalW, trh);
     ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
     ctx.strokeRect(tableLeft+0.5, y+0.5, totalW, trh);
+    const valTxt = fmtMoney(totalProfitSum);
+    const labelTxt = 'Total Profit';
+    ctx.fillStyle = '#0f172a';
+    ctx.textAlign = 'left';
+    const lblAvail = totalW - wNum * 2 - 12;
+    const pxL = fitCellFont(labelTxt, lblAvail, fsItem, fontFam, 'bold');
+    ctx.font = `bold ${pxL}px ${fontFam}`;
+    ctx.fillText(labelTxt, tableLeft + 8, y + trh/2 + pxL*0.35);
     const profitCol = cols.find(c => c.key === 'profit');
-    const align = alignForCol('profit');
-    ctx.textAlign = align;
-    const tx = xForCol(profitCol, align);
-    const txt = `ٹوٹل منافع: ${Math.round(totalProfitSum).toLocaleString()}`;
+    const valAvail = wNum * 2 - padFor(profitCol) * 2;
+    ctx.textAlign = 'right';
     ctx.fillStyle = totalProfitSum >= 0 ? '#065f2b' : '#991b1b';
-    const px3 = fitCellFont(txt, totalW - 8, fsItem, fontFam);
-    ctx.font = `bold ${px3}px ${fontFam}`;
-    ctx.save(); ctx.beginPath(); ctx.rect(tableLeft, y, totalW, trh); ctx.clip();
-    ctx.fillText(txt, tx, y + trh/2 + fsItem*0.32);
-    ctx.restore();
+    const pxV = fitCellFont(valTxt, valAvail, fsItem, numFontFam, 'bold');
+    ctx.font = `bold ${pxV}px ${numFontFam}`;
+    ctx.fillText(valTxt, tableRight - padFor(profitCol), y + trh/2 + pxV*0.35);
     y += trh;
   }
 
-  y += useA4 ? 14 : 8;
-  if(Math.abs(y - canvas.height) > 4){
-    const finalH = Math.max(Math.round(y), 300);
+  y += useA4 ? 16 : 10;
+  // ---------- گول کونوں والا فریم آخر میں، اصل اونچائی کے مطابق ----------
+  const finalH = Math.max(Math.round(y + (useA4 ? 14 : 6)), 300);
+  if(Math.abs(finalH - canvas.height) > 2){
     const imgData = ctx.getImageData(0, 0, pxWidth, Math.min(finalH, canvas.height));
     canvas.height = finalH;
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, pxWidth, finalH);
     ctx.putImageData(imgData, 0, 0);
   }
+  const rr = useA4 ? 14 : 8;
+  const fm = margin / 2;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(fm + rr, fm);
+  ctx.arcTo(pxWidth - fm, fm, pxWidth - fm, canvas.height - fm, rr);
+  ctx.arcTo(pxWidth - fm, canvas.height - fm, fm, canvas.height - fm, rr);
+  ctx.arcTo(fm, canvas.height - fm, fm, fm, rr);
+  ctx.arcTo(fm, fm, pxWidth - fm, fm, rr);
+  ctx.closePath(); ctx.stroke();
+}
+
+function setReportStockSort(mode){
+  AppState.settings.reportStockSort = mode;
+  persistAllData();
+  renderReportToCanvas();
 }
 
 // ---------- 🖨️ روزانہ سٹاک سیل پرافٹ رپورٹ کا A4 PDF — اردو نام درست دکھانے کے لیے (jsPDF کا Helvetica
