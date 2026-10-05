@@ -1969,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO020</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO021</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2190,7 +2190,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO020</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO021</span>
     </div>
   </div>
 
@@ -4667,7 +4667,9 @@
         <input type="text" id="bizNameInput" placeholder="Business Name" onchange="updateBusinessInfo('businessName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <input type="text" id="bizOwnerInput" placeholder="Owner Name" onchange="updateBusinessInfo('ownerName', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
         <input type="text" id="bizAddressInput" placeholder="Address" onchange="updateBusinessInfo('businessAddress', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="text" id="bizPhoneInput" placeholder="Phone Number" onchange="updateBusinessInfo('businessPhone', this.value)" style="width:100%; padding:9px; margin-bottom:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <input type="email" id="bizEmailInput" placeholder="Email / Gmail (optional)" inputmode="email" autocomplete="email" onchange="updateBusinessInfo('businessEmail', this.value)" style="width:100%; padding:9px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
+        <div class="settingsHint" style="margin-top:6px;">These details are added automatically when you message the developer, so we can reply to you easily.</div>
       </div>
 
       <!-- --- AIOTEST17: 🛍️ آن لائن کیٹلاگ — کسٹمر ایپ انسٹال کیے بغیر یہ لنک کھول کر آرڈر دے سکتا ہے --- -->
@@ -6582,6 +6584,7 @@ const DEFAULT_SETTINGS = {
   businessName: '',
   businessAddress: '',
   businessPhone: '',
+  businessEmail: '',   // ---------- اختیاری — Contact Developer پیغام میں خودکار شامل ہوتا ہے ----------
   ownerName: '',       // ---------- ہوم پیج کے بزنس کارڈ پر مالک کا نام ----------
   businessLogo: '',    // ---------- ہوم پیج کے بزنس کارڈ کا پس منظر/لوگو (base64 تصویر) ----------
   myAdsPosterOverride: '', // ---------- My Ads پوسٹر — اگر خالی نہ ہو تو یہ گیلری سے چنی گئی تصویر ڈیفالٹ پوسٹر کی جگہ دکھائی جائے گی ----------
@@ -6991,7 +6994,26 @@ async function shareAppLink(){
 }
 
 
+// ---------- 👤 بھیجنے والے کی معلومات — My Account میں جو گاہک نے خود لکھا (مالک، دکان، فون، ای میل، پتہ) وہی
+// پیغام کے شروع میں خودکار۔ جو خانہ خالی ہو اس کی لائن نہیں آتی۔ ایپ خود سے کوئی نمبر/Gmail نہیں پڑھتی ----------
+function buildSenderInfoBlock(){
+  const s = AppState.settings || {};
+  const lines = [];
+  if((s.ownerName || '').trim()) lines.push(`👤 Owner: ${s.ownerName.trim()}`);
+  if((s.businessName || '').trim()) lines.push(`🏪 Shop: ${s.businessName.trim()}`);
+  if((s.businessPhone || '').trim()) lines.push(`📞 Phone: ${s.businessPhone.trim()}`);
+  if((s.businessEmail || '').trim()) lines.push(`📧 Email: ${s.businessEmail.trim()}`);
+  if((s.businessAddress || '').trim()) lines.push(`📍 Address: ${s.businessAddress.trim()}`);
+  const ver = (document.getElementById('loginVersionBadge')?.textContent || '').trim();
+  if(ver) lines.push(`📱 App version: ${ver}`);
+  return lines.length ? lines.join('\n') + '\n\n' : '';
+}
+
 function buildDevChatMessage(){
+  return buildSenderInfoBlock() + buildDevChatMessageBody();
+}
+
+function buildDevChatMessageBody(){
   if(devChatContext === 'subscription'){
     // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ عام دلچسپی کا پیغام بھیجیں ----------
     if(selectedPlanDays && selectedPlanPrice){
@@ -7000,7 +7022,7 @@ function buildDevChatMessage(){
     return buildAdInquiryMessage();
   }
   // ---------- مسئلہ رپورٹ کرنے کا پیغام — خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
-  return `Dear Developer,\nI am using your beta version of AIO POS. I noticed the following issue and my suggestion is:\n\n\n`;
+  return `Dear Developer,\nI am using AIO POS. I noticed the following issue and my suggestion is:\n\n\n`;
 }
 
 // ---------- 🆘 "Trouble Subscribing?" — Trial ختم ہونے کے قریب، یا Package Plans میں، ان لوگوں کے لیے
@@ -7009,9 +7031,11 @@ function buildDevChatMessage(){
 // ⚠️ یہاں Device ID جان بوجھ کر شامل نہیں کیا: اس Play Store ورژن میں کوئی مقامی کوڈ ریڈیم نہیں ہوتا،
 // اس لیے Device ID بھیجنے کا کوئی عملی فائدہ نہیں — بلاوجہ Data Safety اعلان کی ضرورت پڑ سکتی تھی ----------
 function sendTroubleSubscribingMessage(){
-  const msg = `Hi, I'm trying to subscribe to AIO POS but I'm having trouble completing the payment through Google Play (e.g., no debit/credit card, or a Google Play Gift Card is not easily available where I live).\n\n` +
-    `My Name: \n` +
-    `My Country/City: \n` +
+  const s = AppState.settings || {};
+  const info = buildSenderInfoBlock();
+  const msg = info + `Hi, I'm trying to subscribe to AIO POS but I'm having trouble completing the payment through Google Play (e.g., no debit/credit card, or a Google Play Gift Card is not easily available where I live).\n\n` +
+    ((s.ownerName || '').trim() ? '' : `My Name: \n`) +
+    ((s.businessAddress || '').trim() ? '' : `My Country/City: \n`) +
     `What's the problem: \n\n` +
     `Please guide me on how I can subscribe.`;
   const contact = getDeveloperContact();
@@ -7032,7 +7056,7 @@ function sendDevChat(channel){
   } else if(channel === 'sms'){
     window.open(`sms:${contact.sms}?body=${encodeURIComponent(msg)}`, '_blank');
   } else if(channel === 'email'){
-    window.open(`mailto:${contact.email}?subject=${encodeURIComponent('AIO POS - Subscription Query')}&body=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`mailto:${contact.email}?subject=${encodeURIComponent(devChatContext === 'subscription' ? 'AIO POS - Subscription Query' : 'AIO POS - Support')}&body=${encodeURIComponent(msg)}`, '_blank');
   }
   document.getElementById('devChatPanel').classList.remove('show');
 }
@@ -21533,6 +21557,8 @@ function renderMyAccountScreen(){
   document.getElementById('bizOwnerInput').value = AppState.settings.ownerName || '';
   document.getElementById('bizAddressInput').value = AppState.settings.businessAddress || '';
   document.getElementById('bizPhoneInput').value = AppState.settings.businessPhone || '';
+  const emailEl = document.getElementById('bizEmailInput');
+  if(emailEl) emailEl.value = AppState.settings.businessEmail || '';
   renderMyPaymentAccounts();
 }
 
