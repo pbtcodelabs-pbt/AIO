@@ -440,25 +440,6 @@
     50%{ box-shadow:0 0 10px 2px rgba(220,38,38,.35); }
   }
   .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
-  /* ---------- AIO510MO026: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
-  #loginScreen.loginQuick .loginPanel, #loginScreen.loginQuick #loginTouchIdWrap, #loginScreen.loginQuick #touchIdDivider,
-  #loginScreen.loginQuick #enableTouchIdLabel, #loginScreen.loginQuick #turnOffTouchIdHint, #loginScreen.loginQuick .loginRememberRow,
-  #loginScreen.loginQuick .loginForgotHint, #loginScreen.loginQuick #loginLockoutBox,
-  #loginScreen.loginExpired .loginPanel, #loginScreen.loginExpired #loginTouchIdWrap, #loginScreen.loginExpired #touchIdDivider,
-  #loginScreen.loginExpired #enableTouchIdLabel, #loginScreen.loginExpired #turnOffTouchIdHint, #loginScreen.loginExpired .loginRememberRow,
-  #loginScreen.loginExpired .loginForgotHint, #loginScreen.loginExpired #loginEnterBtn, #loginScreen.loginExpired #loginLockoutBox{ display:none !important; }
-
-  /* ---------- AIO510MO026: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
-  #trialCountdownStrip{display:none; align-items:center; justify-content:space-between; gap:10px; margin:6px 0 10px; padding:10px 12px; border-radius:12px; background:#ecfdf5; border:1.5px solid #86efac; color:#166534;}
-  #trialCountdownStrip .tcsMain{display:flex; align-items:center; gap:9px; min-width:0;}
-  #trialCountdownStrip #tcsIcon{font-size:22px; flex:0 0 auto;}
-  #trialCountdownStrip #tcsTitle{font-size:13.5px; font-weight:800; line-height:1.3;}
-  #trialCountdownStrip #tcsSub{font-size:11.5px; font-weight:600; opacity:.85; line-height:1.3; margin-top:2px;}
-  #trialCountdownStrip button{flex:0 0 auto; border:none; border-radius:10px; padding:9px 13px; font-size:12.5px; font-weight:800; cursor:pointer; background:#16a34a; color:#fff; width:auto; margin:0;}
-  #trialCountdownStrip.tcsUrgent{background:#fee2e2; border-color:#f87171; color:#991b1b; animation:subBoxDaysGlow 1.6s ease-in-out infinite;}
-  #trialCountdownStrip.tcsUrgent #tcsTitle{font-size:15px; font-weight:900; font-variant-numeric:tabular-nums;}
-  #trialCountdownStrip.tcsUrgent button{background:#dc2626;}
-
 
   .pageTitle{font-size:20px; font-weight:800; margin-bottom:18px; padding-bottom:10px; color:var(--primary-dark); position:relative; border-bottom:2.5px solid var(--primary);}
   /* --- Billing (ہوم) کا عنوان خاص طور پر باریک — تاکہ نیچے پراڈکٹس کے لیے زیادہ جگہ بچے --- */
@@ -1988,7 +1969,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO510MO026</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO610TU025</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2046,7 +2027,7 @@
         </div>
       </div>
 
-      <label class="loginRememberRow" style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
+      <label style="display:flex; align-items:center; gap:8px; margin:10px 2px; font-size:13px; color:var(--muted); justify-content:center; cursor:pointer;">
         <input type="checkbox" id="rememberPinChk" checked style="width:16px; height:16px; margin:0; cursor:pointer;">
         🔒 Remember me on this device
       </label>
@@ -2059,13 +2040,11 @@
 
       <!-- ---------- 🎁 ٹرائل ختم ہونے پر یہاں سے سیدھا سبسکرائب کریں ---------- -->
       <button id="loginTrialBtn" onclick="goTo('billing'); openPackagePlansModal();" style="display:none; background:#fff7ed; color:#c2410c; border:1.5px solid #fdba74; margin-top:10px;">🎟️ 14-Day Free Trial / Subscribe</button>
-      <!-- ---------- 🔄 فون بدلنے کے بعد پرانی خریداری واپس ---------- -->
-      <button id="loginRestoreBtn" type="button" onclick="restorePurchaseNow(this)" style="background:#fff; color:var(--primary-dark); border:1.5px solid #c7d2fe; margin-top:10px; font-size:13.5px; font-weight:800;">🔄 Restore Purchase</button>
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
 
-    <div class="loginHint loginForgotHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
+    <div class="loginHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
     <div id="turnOffTouchIdHint" class="loginHint" style="display:none;"><a href="javascript:void(0)" onclick="turnOffTouchId()" style="color:var(--muted); font-weight:700; text-decoration:none;">👆 Turn off Touch ID on this device</a></div>
     <!-- ---------- 📦 پیکج دیکھنے کا چھوٹا سا لنک — سب سے آخر میں، جو دیکھنا چاہے وہ دیکھ لے ---------- -->
     <div class="loginHint" style="margin-top:6px;"><a href="javascript:void(0)" onclick="openPackagePlansModal()" style="color:var(--muted); font-weight:700; font-size:12px; text-decoration:underline;">📦 View Subscription Plans</a></div>
@@ -2216,7 +2195,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO510MO026</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO610TU025</span>
     </div>
   </div>
 
@@ -2329,16 +2308,13 @@
       <input type="file" id="businessLogoInput" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
 
       <!-- ---------- 📅 SUBSCRIPTION BOXES — تین الگ خوبصورت ڈبے، ایک ہی لائن میں ---------- -->
-      <!-- ---------- ⏳ Trial کاؤنٹ ڈاؤن پٹی — 3 دن سے کم رہ جائیں تو سرخ اور گھنٹے/منٹ/سیکنڈ کا لائیو ٹائمر ---------- -->
-      <div id="trialCountdownStrip">
-        <div class="tcsMain"><span id="tcsIcon">🎁</span><div><div id="tcsTitle"></div><div id="tcsSub"></div></div></div>
-        <button type="button" onclick="openPackagePlansModal()">Subscribe</button>
-      </div>
       <div class="subBoxRow" id="subBoxRow" style="display:none;">
         <div class="subBox" id="subBoxStart"><div class="subBoxLabel" id="subBoxStartLabel">Subscribed</div><div class="subBoxVal" id="subBoxStartVal">—</div></div>
         <div class="subBox" id="subBoxEnd"><div class="subBoxLabel">Expires</div><div class="subBoxVal" id="subBoxEndVal">—</div></div>
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
       </div>
+      <!-- ---------- 🎟️ ٹرائل کے دوران بھی پلانز تک سیدھا راستہ — خریدنے پر ٹرائل کے بچے دن ساتھ جڑ جاتے ہیں ---------- -->
+      <button id="homePlansBtn" onclick="openPackagePlansModal()" style="display:none; width:100%; margin:-4px 0 12px; padding:11px; border:none; border-radius:12px; background:linear-gradient(135deg,#0f766e,#14b8a6); color:#fff; font-weight:800; font-size:13.5px; cursor:pointer; box-shadow:0 3px 8px rgba(15,118,110,.25);">🎟️ View Subscription Plans</button>
 
       <!-- ---------- 🚀 NEAR FUTURE PLANS — ہوم پیج صاف رکھنے کے لیے ایک ہی بٹن، تفصیل موڈل میں ---------- -->
       <button type="button" onclick="openNearFuturePlansModal()" style="width:100%; margin:6px 0 12px; padding:12px; border:none; border-radius:12px; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; font-weight:800; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
@@ -5030,8 +5006,9 @@
     <p style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:12px; text-align:center;">
       💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
     </p>
-    <button class="checkoutBtn" style="margin-top:8px; background:#fff; color:var(--primary-dark); border:1.5px solid #c7d2fe;" onclick="restorePurchaseNow(this)">🔄 Restore Purchase (new phone / reinstall)</button>
     <button class="checkoutBtn" style="margin-top:8px; background:#c2410c;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
+    <!-- ---------- 🔄 فون بدلا / ایپ دوبارہ انسٹال کی؟ Google Play سے اپنی خریداری واپس لائیں ---------- -->
+    <button id="restorePurchaseBtn" class="testPrintBtn" style="width:100%; margin-top:10px; background:#eef2ff; color:var(--primary-dark); font-weight:800;" onclick="restorePurchasesManually()">🔄 Already subscribed? Restore Purchase</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
 </div>
@@ -5194,13 +5171,13 @@
 <!-- ⚠️ Trial Urgent — صرف آخری 1-2 دن میں، روزانہ ایک بار، چمکتی سرخ بارڈر، Subscribe Now / Remind Me Later -->
 <div class="modalOverlay" id="trialUrgentModal" onclick="if(event.target===this) dismissTrialUrgentModal()">
   <div class="backupConfirmBox">
-    <div class="backupConfirmIconWrap" id="trialUrgentIconWrap" style="background:#fee2e2; color:var(--danger);"><span id="trialUrgentIcon">⚠️</span></div>
+    <div class="backupConfirmIconWrap" style="background:#fee2e2; color:var(--danger);"><span>⚠️</span></div>
     <h3 id="trialUrgentTitle">Trial ending soon</h3>
     <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:2px;" id="trialUrgentBody">
       Subscribe to keep using the same reports and features and to continue your business without interruption.
     </p>
-    <button class="backupConfirmCloseBtn" id="trialUrgentSubBtn" style="background:linear-gradient(155deg,#dc2626,#991b1b); margin-top:14px;" onclick="dismissTrialUrgentModal(); openPackagePlansModal();">🎟️ View Subscription Plans</button>
-    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissTrialUrgentModal()">Close</button>
+    <button class="backupConfirmCloseBtn" style="background:linear-gradient(155deg,#dc2626,#991b1b); margin-top:14px;" onclick="dismissTrialUrgentModal(); goTo('billing'); openPackagePlansModal();">🎟️ Subscribe Now</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissTrialUrgentModal()">Remind Me Later</button>
     <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #dbe1ea; text-align:left;">
       <p style="font-size:11.5px; color:var(--muted); line-height:1.6; margin-bottom:8px;">
         💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
@@ -6754,13 +6731,10 @@ function getOrCreateDeviceUID(){
   if(!AppState.settings.subscriptionExpiry && !AppState.settings.freeTrialGranted){
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate() + 14); // ---------- AIOTEST28: پہلے 30 دن تھا، اب 14 دن ----------
-    AppState.settings.subscriptionExpiry = trialEnd.toISOString().slice(0,10);
-    AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+    AppState.settings.subscriptionExpiry = toLocalDateStr(trialEnd);
+    AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.freeTrialGranted = true;
     AppState.settings.isOnFreeTrial = true;
-    // ---------- AIO510MO026: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
-    AppState.settings.pinLockEnabled = false;
-    AppState.settings.needsFirstEnter = true;
   }
   persistAllData();
   return uid;
@@ -6789,7 +6763,14 @@ function renderSubscriptionBanner(){
   // ---------- صرف Home صفحے پر نظر آئے — باقی تمام صفحات (بشمول Billing) پر چھپی رہے ----------
   const activeScreen = document.querySelector('.screen.active');
   const isHomePage = activeScreen && activeScreen.id === 'screen-home';
-  if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; updateTrialStrip(); return; }
+  const plansBtn = document.getElementById('homePlansBtn');
+  if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; if(plansBtn) plansBtn.style.display = 'none'; return; }
+  if(plansBtn){
+    plansBtn.style.display = 'block';
+    plansBtn.textContent = AppState.settings.isOnFreeTrial
+      ? '🎟️ Subscribe Now — your remaining trial days are added free'
+      : '🎟️ View Subscription Plans';
+  }
 
   const daysLeft = daysLeftInSubscription();
   document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
@@ -6805,7 +6786,6 @@ function renderSubscriptionBanner(){
   else { daysBox.style.background = '#dcfce7'; daysBox.style.color = 'var(--success)'; }
 
   row.style.display = 'flex';
-  updateTrialStrip();
 
   // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
   if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
@@ -6814,34 +6794,25 @@ function renderSubscriptionBanner(){
 // ---------- 🎁 روزانہ ایک بار Trial یاد دہانی — 2 دن یا کم بچے ہوں تو زیادہ نمایاں (بٹن والا) پاپ اپ،
 // ورنہ صرف ہلکا سا خود بخود غائب ہونے والا Toast (بغیر کسی بٹن کے، تنگ نہیں کرتا) ----------
 function maybeShowTrialReminder(daysLeft){
-  // ---------- پہلی بار ایپ کھلنے پر Google Drive والی دعوت آتی ہے — اس دن یہ پیغام نہ دکھائیں تاکہ دو پاپ اپ نہ ٹکرائیں ----------
-  if(!AppState.settings.gdrivePromptShown) return;
   const todayStr = new Date().toISOString().slice(0,10);
   if(AppState.settings.trialReminderShownOn === todayStr) return; // آج ایک بار دکھا چکے
   AppState.settings.trialReminderShownOn = todayStr;
   persistAllData();
 
-  const ms = getSubscriptionMsLeft();
-  const serious = ms < TRIAL_SERIOUS_MS;
-  const icon = document.getElementById('trialUrgentIcon');
-  const iconWrap = document.getElementById('trialUrgentIconWrap');
-  const subBtn = document.getElementById('trialUrgentSubBtn');
-  if(serious){
-    document.getElementById('trialUrgentTitle').textContent = `Only ${fmtCountdown(ms).split(' ').slice(0,2).join(' ')} left in your trial`;
+  if(daysLeft <= 2){
+    document.getElementById('trialUrgentTitle').textContent =
+      daysLeft <= 0 ? 'Your free trial has ended' : `Only ${daysLeft} day${daysLeft===1?'':'s'} left in your trial`;
     document.getElementById('trialUrgentBody').textContent =
-      'Subscribe now to continue your business without interruption. Your remaining trial time is added to your subscription as a gift.';
-    if(icon) icon.textContent = '⏳';
-    if(iconWrap){ iconWrap.style.background = '#fee2e2'; iconWrap.style.color = 'var(--danger)'; }
-    if(subBtn) subBtn.style.background = 'linear-gradient(155deg,#dc2626,#991b1b)';
+      'Subscribe now to keep using the same reports and features, and to continue your business without any interruption.';
+    document.getElementById('trialUrgentModal').classList.add('show');
   } else {
-    document.getElementById('trialUrgentTitle').textContent = `You're on a Free Trial — ${daysLeft} day${daysLeft===1?'':'s'} left`;
-    document.getElementById('trialUrgentBody').textContent =
-      'If you subscribe, your remaining trial days are added to your subscription as a free gift.';
-    if(icon) icon.textContent = '🎁';
-    if(iconWrap){ iconWrap.style.background = '#dcfce7'; iconWrap.style.color = 'var(--success)'; }
-    if(subBtn) subBtn.style.background = 'linear-gradient(155deg,#16a34a,#166534)';
+    const toast = document.getElementById('trialReminderToast');
+    document.getElementById('trialReminderToastText').textContent =
+      `You are in your Free Trial period. ${daysLeft} day${daysLeft===1?'':'s'} remaining — subscribe anytime to keep using the same reports & features and continue your business smoothly.`;
+    toast.style.display = 'flex';
+    toast.style.animation = 'none'; toast.offsetHeight; toast.style.animation = ''; // ---------- ری سٹارٹ اینیمیشن ----------
+    setTimeout(() => { toast.style.display = 'none'; }, 4600);
   }
-  document.getElementById('trialUrgentModal').classList.add('show');
 }
 // ---------- 🚀 Near Future Plans — ہوم پیج پر ایک ہی صاف ستھرا بٹن، تفصیل موڈل میں ----------
 function openNearFuturePlansModal(){
@@ -7148,114 +7119,6 @@ function sendDevChat(channel){
 // ٹرائل ختم ہونے کے بعد (یا پیڈ سبسکرپشن پر) ہی اصل PIN لاگ ان واپس آئے گا ----------
 // ---------- AIOTEST12: اب Trial کے دوران بھی PIN چھوڑ کر اندر جانے والا شارٹ کٹ ختم — ہمیشہ اصل
 // Admin/Salesman ٹیب اور PIN درج کر کے ہی لاگ ان ہوگا، تاکہ نیچے والا Lockout نظام حقیقی معنوں میں کام کرے ---------- */
-
-// ---------- AIO510MO026: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
-// ڈیفالٹ 1234 والا اَن چھوا PIN گاہک کو معلوم ہی نہیں ہوتا، اس لیے اس پر PIN اسکرین نہیں آنی چاہیے ----------
-const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
-function isPinGateNeeded(){
-  if(AppState.settings.pinLockEnabled === false) return false;
-  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
-  if(!admin) return false;
-  if(admin.pin === DEFAULT_ADMIN_PIN_HASH && AppState.settings.pinLockUserSet !== true) return false;
-  return true;
-}
-
-// ---------- لاگ ان صفحے کی تین حالتیں: Quick (Enter بٹن، PIN نہیں) / Expired (Subscription Required) / عام PIN ----------
-function applyLoginMode(){
-  const ls = document.getElementById('loginScreen');
-  if(!ls) return;
-  ls.classList.remove('loginQuick','loginExpired');
-  const heading = document.getElementById('loginHeading');
-  const trialBtn = document.getElementById('loginTrialBtn');
-  if(!isSubscriptionActive()){
-    ls.classList.add('loginExpired');
-    if(heading) heading.textContent = 'AIO POS';
-    if(trialBtn){
-      trialBtn.style.display = 'block';
-      trialBtn.textContent = '🎟️ Select Activation';
-      trialBtn.setAttribute('onclick', 'openPackagePlansModal();');
-      trialBtn.style.cssText = 'display:block; background:linear-gradient(155deg,#dc2626,#991b1b); color:#fff; border:none; margin-top:10px; font-size:15px; font-weight:800;';
-    }
-  } else if(!isPinGateNeeded()){
-    ls.classList.add('loginQuick');
-    if(heading) heading.textContent = 'Welcome to AIO POS';
-    if(trialBtn) trialBtn.style.display = 'none';
-  } else {
-    if(heading) heading.textContent = 'AIO POS Login';
-    if(trialBtn) trialBtn.style.display = 'none';
-  }
-  // ---------- نئی انسٹالیشن پر خریداری چیک جاری ہو تو Enter رکا رہے ----------
-  const pending = window._launchCheckPending === true;
-  const enterBtn = document.getElementById('loginEnterBtn');
-  if(enterBtn){
-    enterBtn.disabled = pending;
-    enterBtn.textContent = pending ? '⏳ Checking your Google Play account…' : 'Enter';
-  }
-  if(pending){
-    const st = document.getElementById('loginSubStatus');
-    if(st){ st.className = 'subscribedBadge'; st.textContent = '⏳ Checking your Google Play account…'; st.style.display = 'block'; }
-  }
-}
-
-// ---------- Enter دبانے پر بغیر PIN کے اندر (صرف Quick حالت میں) ----------
-function quickEnterApp(){
-  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
-  if(!admin){ alert('No active account found.'); return; }
-  AppState.settings.needsFirstEnter = false;
-  persistAllData();
-  finishLogin(admin, true); // ---------- سیشن یاد رکھیں — اگلی بار ایپ سیدھی کھلے ----------
-}
-
-// ---------- خریداری کے بعد لاگ ان صفحہ فوراً تازہ کریں، اور اگر ابھی لاگ ان صفحے پر ہی ہیں تو اندر لے جائیں ----------
-function afterSubscriptionChanged(){
-  try{
-    setupLoginScreen();
-    const ls = document.getElementById('loginScreen');
-    if(ls && ls.style.display !== 'none' && !AppState.currentUser) tryAutoLogin();
-  }catch(e){ console.warn('afterSubscriptionChanged:', e); }
-}
-
-// ---------- ٹرائل/سبسکرپشن ختم ہونے میں کتنا وقت باقی (ختم ہونے کی تاریخ کے آخری لمحے تک) ----------
-function getSubscriptionMsLeft(){
-  const exp = AppState.settings.subscriptionExpiry;
-  if(!exp) return 0;
-  const [y,m,d] = String(exp).slice(0,10).split('-').map(Number);
-  return new Date(y, m-1, d, 23, 59, 59).getTime() - Date.now();
-}
-function fmtCountdown(ms){
-  if(ms < 0) ms = 0;
-  const t = Math.floor(ms/1000);
-  const d = Math.floor(t/86400), h = Math.floor((t%86400)/3600), mi = Math.floor((t%3600)/60), se = t%60;
-  const z = n => String(n).padStart(2,'0');
-  return d > 0 ? `${d}d ${z(h)}h ${z(mi)}m ${z(se)}s` : `${z(h)}h ${z(mi)}m ${z(se)}s`;
-}
-const TRIAL_SERIOUS_MS = 3*24*60*60*1000; // ---------- تین دن سے کم = سنجیدہ حالت ----------
-let _trialStripTimer = null;
-function updateTrialStrip(){
-  const strip = document.getElementById('trialCountdownStrip');
-  if(!strip) return;
-  const activeScreen = document.querySelector('.screen.active');
-  const onHome = activeScreen && activeScreen.id === 'screen-home';
-  if(!onHome || !isSubscriptionActive() || !AppState.settings.isOnFreeTrial){
-    strip.style.display = 'none';
-    if(_trialStripTimer){ clearInterval(_trialStripTimer); _trialStripTimer = null; }
-    return;
-  }
-  const ms = getSubscriptionMsLeft();
-  const days = daysLeftInSubscription();
-  const urgent = ms < TRIAL_SERIOUS_MS;
-  strip.classList.toggle('tcsUrgent', urgent);
-  document.getElementById('tcsIcon').textContent = urgent ? '⏳' : '🎁';
-  document.getElementById('tcsTitle').textContent = urgent
-    ? `Trial ends in ${fmtCountdown(ms)}`
-    : `Free Trial — ${days} day${days===1?'':'s'} left`;
-  document.getElementById('tcsSub').textContent = urgent
-    ? 'Subscribe now to continue without interruption.'
-    : 'Subscribe anytime — your remaining trial days are added free.';
-  strip.style.display = 'flex';
-  if(!_trialStripTimer) _trialStripTimer = setInterval(updateTrialStrip, 1000);
-}
-
 async function setupLoginScreen(){
   try{
     getOrCreateDeviceUID(); // ---------- پہلی بار کھلنے پر یہیں سے 30 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے ----------
@@ -7265,22 +7128,22 @@ async function setupLoginScreen(){
       const days = daysLeftInSubscription();
       statusEl.className = AppState.settings.isOnFreeTrial ? 'subscribedBadge' : 'subscribedBadge';
       statusEl.textContent = AppState.settings.isOnFreeTrial
-        ? `🎁 14-Day Free Trial — ${days} day${days===1?'':'s'} remaining`
+        ? `🎁 Free Trial — ${days} day${days===1?'':'s'} remaining`
         : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
     } else {
       statusEl.className = 'trialEndedBadge';
-      statusEl.innerHTML = `<div style="font-size:20px; font-weight:900;">🔒 Subscription Required</div><div style="font-size:12.5px; font-weight:700; margin-top:5px;">${AppState.settings.isOnFreeTrial ? 'Your free trial has ended.' : 'Your subscription has ended.'} Select a plan to continue.</div>`;
+      statusEl.textContent = `⏰ Your Free Trial Has Ended — Please Subscribe to Continue`;
     }
     statusEl.style.display = 'block';
 
     // ---------- 🎁 ٹرائل بٹن: صرف اسی وقت نظر آئے جب ٹرائل ختم ہو چکا ہو، تاکہ ہوم پیج صاف رہے ----------
-    applyLoginMode();
+    const trialBtn = document.getElementById('loginTrialBtn');
+    if(trialBtn) trialBtn.style.display = isSubscriptionActive() ? 'none' : 'block';
 
     switchLoginRole('admin');
     populateLoginSalesmanList();
     refreshLoginLockoutUI();
     refreshTouchIdUI(); // ---------- 👆 اگر اس ڈیوائس پر Touch ID پہلے سے فعال ہے تو بٹن دکھائیں ----------
-    applyLoginMode();
   }catch(err){
     console.error('setupLoginScreen failed:', err);
   }
@@ -7390,9 +7253,6 @@ function refreshLoginLockoutUI(){
 }
 
 async function login(){
-  if(window._launchCheckPending === true) return;
-  // ---------- AIO510MO026: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
-  if(document.getElementById('loginScreen').classList.contains('loginQuick')){ quickEnterApp(); return; }
   if(isLoginLockedOut()) return;
 
   const role = AppState._loginActiveRole || 'admin';
@@ -7754,13 +7614,27 @@ function tryAutoLogin(){
   if(AppState.settings.forceLoginScreen === true){
     return false;
   }
-  // ---------- AIO510MO026: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
-  if(AppState.settings.needsFirstEnter === true) return false;
-  // ---------- AIO510MO026: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
-  if(!isSubscriptionActive()) return false;
+  // ---------- 🎁 مفت ٹرائل کے دوران PIN سکرین نہیں — نیا گاہک ایپ کھولتے ہی سیدھا اندر جائے۔
+  // صرف تب جب Admin کا PIN ابھی تک پہلے سے رکھا ہوا (1234) ہی ہو۔ اگر گاہک نے اپنا PIN خود بدل لیا ہے
+  // تو اس کی حفاظت کا احترام — پھر PIN سکرین ہی آئے گی ----------
+  try{
+    getOrCreateDeviceUID();
+    if(AppState.settings.isOnFreeTrial === true && isSubscriptionActive()){
+      const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'; // 1234
+      const trialAdmin = usersData.find(u => u.role === 'admin' && u.is_active);
+      if(trialAdmin && trialAdmin.pin === DEFAULT_ADMIN_PIN_HASH){
+        applyRole(trialAdmin.role, trialAdmin.name);
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'grid';
+        goTo('home');
+        setTimeout(checkBackupReminder, 1800);
+        return true;
+      }
+    }
+  }catch(e){ console.warn('Trial auto-enter skipped:', e); }
   // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
   // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
-  if(!isPinGateNeeded()){
+  if(AppState.settings.pinLockEnabled === false){
     const adminUser = usersData.find(u => u.role === 'admin' && u.is_active);
     if(adminUser){
       applyRole(adminUser.role, adminUser.name);
@@ -7859,7 +7733,6 @@ function logout(){
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   refreshTouchIdUI(); // ---------- 🛠️ فکس: لاگ ان اسکرین دوبارہ نظر آتے ہی Touch ID بٹن اور _tidBusy کو تازہ/ری سیٹ کریں ----------
-  setupLoginScreen();
 }
 
 // ---------- 🔒 Log Out From All Accounts — آپ کی اپنی ڈیوائس پر PIN Lock بند ہونے کی وجہ سے عام Logout بھی
@@ -7875,7 +7748,6 @@ function fullLogoutAllAccounts(){
   document.getElementById('loginScreen').style.display = 'flex';
   clearLoginPinFields();
   refreshTouchIdUI(); // ---------- 🛠️ فکس: یہاں بھی Touch ID بٹن اور _tidBusy کو تازہ/ری سیٹ کریں ----------
-  setupLoginScreen();
 }
 
 // ---------- NAVIGATION LOGIC ----------
@@ -21818,7 +21690,6 @@ function onPinLockToggleClick(){
   if(AppState.settings.pinLockEnabled === false){
     // ---------- دوبارہ آن کرنا — کوئی رکاوٹ نہیں، فوری ----------
     AppState.settings.pinLockEnabled = true;
-    AppState.settings.pinLockUserSet = true;
     persistAllData();
     syncPinLockUI();
   } else {
@@ -21845,8 +21716,7 @@ function syncPinLockUI(){
   }
   // ---------- ہوم سکرین پر یاد دہانی — صرف اسی وقت جب واقعی بند ہو ----------
   const banner = document.getElementById('homePinLockOffBanner');
-  const inTrial = AppState.settings.isOnFreeTrial && isSubscriptionActive(); // ---------- ٹرائل میں PIN کا ذکر ہی نہ ہو ----------
-  if(banner) banner.style.display = (on || inTrial) ? 'none' : 'flex';
+  if(banner) banner.style.display = on ? 'none' : 'flex';
 }
 
 /* =====================================================================
@@ -21981,7 +21851,6 @@ async function verifyDobForPinActivation(){
 
 function keepExistingPinAndActivate(){
   AppState.settings.pinLockEnabled = true;
-  AppState.settings.pinLockUserSet = true;
   persistAllData();
   syncPinLockUI();
   document.getElementById('activatePinLockModal').classList.remove('show');
@@ -22017,7 +21886,6 @@ async function saveNewPinAndActivate(){
 
   admin.pin = await hashPin(pin1);
   AppState.settings.pinLockEnabled = true;
-  AppState.settings.pinLockUserSet = true;
   persistAllData();
   syncPinLockUI();
   document.getElementById('activatePinLockModal').classList.remove('show');
@@ -22194,11 +22062,15 @@ async function purchaseViaPlayBilling(sku, days){
     }catch(ackErr){ console.warn('Acknowledge skipped:', ackErr); }
 
     // ---------- کامیاب خریداری — خریدے گئے پیکج کے دن جوڑیں ----------
-    // ---------- AIO510MO026: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
-    const hasActivePaidSub = isSubscriptionActive();
-    const base = hasActivePaidSub ? new Date(AppState.settings.subscriptionExpiry) : new Date();
+    // ---------- 📅 دنوں کا حساب (مقامی تاریخ میں — UTC کی وجہ سے رات 12 سے صبح 5 بجے تک ایک دن کم نہ ہو):
+    //  • آج کا دن شامل نہیں — پورے دن کل سے گنے جاتے ہیں (90 خریدے تو کل سے پورے 90 دن)
+    //  • ٹرائل یا پہلے سے فعال خریداری چل رہی ہو تو اس کے بچے ہوئے دن ضائع نہیں ہوتے — نئے دن اس کے بعد جڑتے ہیں ----------
+    const ymdToLocal = (s) => { const [yy, mm, dd] = String(s).split('-').map(Number); return new Date(yy, (mm || 1) - 1, dd || 1); };
+    const base = isSubscriptionActive() && AppState.settings.subscriptionExpiry
+      ? ymdToLocal(AppState.settings.subscriptionExpiry)
+      : (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
     base.setDate(base.getDate() + days);
-    let newExpiry = base.toISOString().slice(0,10);
+    let newExpiry = toLocalDateStr(base);
     // ---------- سرور ہو تو اس کی دی ہوئی اصل تاریخ ہی استعمال کریں (Google کا اپنا حساب)؛
     // سرور نہ ہو یا جواب نہ آئے تو ادائیگی چونکہ ابھی ابھی ہوئی ہے، دن جوڑ دیں ----------
     const ver = await verifyPurchaseOnServer(purchaseToken, sku);
@@ -22207,14 +22079,13 @@ async function purchaseViaPlayBilling(sku, days){
     // ورنہ Google 3 دن میں رقم واپس کر دیتا ہے ----------
     if(!(ver && ver.acknowledged)) queuePendingPlayAck(purchaseToken, sku);
     AppState.settings.subscriptionExpiry = newExpiry;
-    AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+    AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.isOnFreeTrial = false;
     AppState.settings.subscriptionViaPlayBilling = true;
     persistAllData();
     document.getElementById('packagePlansModal')?.classList.remove('show');
     refreshAllScreens();
     alert('✅ Subscription activated successfully via Google Play!');
-    afterSubscriptionChanged();
   } catch(err){
     console.error('Play Billing purchase failed:', err);
     if(err && err.name !== 'AbortError'){ // ---------- صارف نے خود منسوخ کیا ہو تو خاموشی سے واپس، ورنہ پیغام دکھائیں ----------
@@ -22265,134 +22136,100 @@ async function retryPendingPlayAcks(){
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ retryPendingPlayAcks(); }catch(e){} }, 2500); });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ retryPendingPlayAcks(); }catch(e){} } });
 
-// ---------- 🔄 Renewal Sync — جب مقامی سبسکرپشن ختم ہو چکی ہو یا 2 دن میں ختم ہونے والی ہو، Google Play سے
-// تازہ ترین فعال خریداری کی تصدیق لیں۔ یہ ضروری ہے کیونکہ اگر Google خودکار طور پر renew کر کے صارف سے
-// پیسے کاٹ لے، تو ایپ کو خود بخود اس کی خبر نہیں ہوتی (Play کوئی پیغام یہاں براہِ راست نہیں بھیجتا) —
-// اس لیے ہر بار ایپ کھلنے/دوبارہ نظر آنے پر یہ فنکشن Play کی فہرست چیک کر کے مقامی تاریخ درست کر دیتا ہے،
-// تاکہ ادائیگی کرنے والے صارف کو کبھی غلطی سے "Subscription Expired" نہ دکھے ----------
-async function syncPlayBillingRenewal(){
-  if(!isPlayBillingAvailable()) return;
-  // ---------- سرور کے بغیر خودکار توسیع بند: پہلے منسوخ کرنے والا گاہک ایک مدت مفت لے سکتا تھا ----------
-  if(!PLAY_VERIFY_URL) return;
+// ---------- 🔄 خریداری کی بحالی / تجدید (Restore + Renewal Sync) — Google Play سے اسی گوگل اکاؤنٹ کی خریداریاں
+// لے کر سرور سے تصدیق کرواتا ہے، اور صرف Google کی بتائی ہوئی اصل تاریخ مانتا ہے (منسوخ شدہ کو مفت دن نہیں ملتے)۔
+// کب چلتا ہے:
+//  • ایپ کھلتے/سامنے آتے ہی — اگر گاہک ٹرائل پر ہو یا مدت ختم ہو چکی ہو (یعنی ایپ دوبارہ انسٹال کی، یا نیا فون)
+//    تو فوراً اس کی پرانی خریداری واپس آ جائے، 11 دن انتظار نہیں
+//  • خریدار کی مدت ختم ہونے میں 3 دن یا کم ہوں (خودکار تجدید کی خبر کے لیے)
+//  • "Restore Purchase" بٹن دبانے پر (force) ----------
+let playSyncBusy = false;
+async function syncPlayBillingRenewal(force){
+  if(!isPlayBillingAvailable()) return { ok:false, reason:'nobilling' };
+  if(!PLAY_VERIFY_URL) return { ok:false, reason:'noserver' };
+  const onTrial = AppState.settings.isOnFreeTrial === true;
   const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
-  // ---------- AIO510MO026: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
-  if(daysLeft > 3 && !AppState.settings.isOnFreeTrial) return; // ---------- پیڈ سبسکرپشن کے فعال دورانیے میں بار بار نہ پوچھیں ----------
+  if(!force && !onTrial && daysLeft > 3) return { ok:true, skipped:true }; // ---------- فعال خریدار سے بار بار نہ پوچھیں ----------
+  if(playSyncBusy) return { ok:false, reason:'busy' };
+  playSyncBusy = true;
   try{
-    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
-    const purchases = await service.listPurchases();
-    if(!purchases || purchases.length === 0) return;
+    // ---------- ایپ کھلتے وقت Google Play سے رابطہ دیر سے جڑتا ہے — 3 بار کوشش ----------
+    let purchases = null;
+    const waits = [0, 1500, 3000];
+    for(let i = 0; i < waits.length && purchases === null; i++){
+      if(waits[i]) await new Promise(r => setTimeout(r, waits[i]));
+      try{
+        const service = await pbWithTimeout(window.getDigitalGoodsService('https://play.google.com/billing'), 5000);
+        purchases = await pbWithTimeout(service.listPurchases(), 6000);
+      }catch(e){ purchases = null; }
+    }
+    if(purchases === null) return { ok:false, reason:'google' };
 
-    // ---------- ہر خریداری کی تصدیق سرور سے، اور صرف Google کی بتائی ہوئی اصل تاریخ مانیں۔
-    // منسوخ شدہ سبسکرپشن کی تاریخ وہی رہتی ہے جو اس نے ادا کی تھی، اس لیے کوئی مفت دن نہیں جڑتا ----------
     let bestExpiry = '';
-    const mineP = purchases.filter(p => PLAY_BILLING_PRODUCTS.some(x => x.sku === p.itemId));
-    const versP = await Promise.all(mineP.map(p => verifyPurchaseOnServer(p.purchaseToken, p.itemId)));
-    for(const ver of versP){
+    let foundAny = false;
+    for(const p of (purchases || [])){
+      if(!PLAY_BILLING_PRODUCTS.some(x => x.sku === p.itemId)) continue;
+      foundAny = true;
+      const ver = await verifyPurchaseOnServer(p.purchaseToken, p.itemId);
       if(ver && ver.access && ver.expiry && ver.expiry > bestExpiry) bestExpiry = ver.expiry;
     }
-    if(!bestExpiry) return;
+    if(!bestExpiry) return { ok:true, found:false, hadPurchases:foundAny };
 
     const current = AppState.settings.subscriptionExpiry || '';
-    if(bestExpiry > current || AppState.settings.isOnFreeTrial){
+    // ---------- ٹرائل پر ہو تو Google والی اصل تاریخ ہی لگے (ٹرائل کی جگہ)، ورنہ صرف تب جب نئی تاریخ آگے ہو ----------
+    if(bestExpiry > current || onTrial){
       AppState.settings.subscriptionExpiry = bestExpiry;
-      AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
+      AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
       AppState.settings.isOnFreeTrial = false;
       AppState.settings.subscriptionViaPlayBilling = true;
       persistAllData();
-      renderSubscriptionBanner();
-      afterSubscriptionChanged();
+      afterPlayAccessRestored();
+      return { ok:true, found:true, applied:true, expiry:bestExpiry };
     }
+    return { ok:true, found:true, applied:false, expiry:bestExpiry };
   }catch(err){
-    // ---------- خاموشی سے ناکام ہو جائے — انٹرنیٹ نہ ہو تو اگلی بار دوبارہ کوشش ہوگی ----------
-  }
-}
-
-// ---------- 🔄 Restore Purchase (AIO510MO026) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
-// شناخت گوگل پلے اکاؤنٹ سے ہوتی ہے (فون کے Play Store میں جو Gmail لاگ ان ہے)؛ ٹوکن کی تصدیق ہمارا سرور گوگل سے کرتا ہے۔ ----------
-async function restorePurchaseCore(){
-  let purchases = null;
-  for(let i = 0; i < 3 && purchases === null; i++){
-    try{
-      const service = await pbWithTimeout(window.getDigitalGoodsService('https://play.google.com/billing'), 8000);
-      purchases = await pbWithTimeout(service.listPurchases(), 10000);
-    }catch(e){
-      await new Promise(r => setTimeout(r, 1500)); // ---------- ہر بار نیا رابطہ، clientAppUnavailable جیسی عارضی خرابی کے لیے ----------
-    }
-  }
-  if(purchases === null) return { status: 'unavailable' };
-  const mine = purchases.filter(p => PLAY_BILLING_PRODUCTS.some(x => x.sku === p.itemId));
-  if(mine.length === 0) return { status: 'none' };
-
-  let best = '', anyReply = false;
-  // ---------- رفتار: سب ٹوکن ایک ساتھ سرور کو بھیجیں ----------
-  const vers = await Promise.all(mine.map(p => verifyPurchaseOnServer(p.purchaseToken, p.itemId)));
-  for(const ver of vers){
-    if(ver){
-      anyReply = true;
-      if(ver.access && ver.expiry && ver.expiry > best) best = ver.expiry;
-    }
-  }
-  if(!anyReply) return { status: 'noserver' };
-  if(!best) return { status: 'expired' };
-
-  const current = AppState.settings.subscriptionExpiry || '';
-  // ---------- AIO510MO026: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
-  if(best > current || AppState.settings.isOnFreeTrial){
-    AppState.settings.subscriptionExpiry = best;
-    AppState.settings.subscriptionActivatedOn = new Date().toISOString().slice(0,10);
-    AppState.settings.isOnFreeTrial = false;
-    AppState.settings.subscriptionViaPlayBilling = true;
-    persistAllData();
-    try{ renderSubscriptionBanner(); }catch(e){}
-    afterSubscriptionChanged();
-    return { status: 'restored', expiry: best };
-  }
-  return { status: 'already', expiry: current };
-}
-
-
-// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO510MO026) —
-// جب تک یہ چیک مکمل نہ ہو (زیادہ سے زیادہ 12 سیکنڈ) Enter بٹن رکا رہتا ہے، تاکہ پرانے خریدار کو نیا 14 دن ٹرائل نظر ہی نہ آئے۔
-// انٹرنیٹ/گوگل نہ چلے تو ایپ کو روکتے نہیں؛ ٹرائل کے دوران ہر بار کھلنے پر خودکار چیک چلتا رہتا ہے ----------
-async function launchRestoreCheck(){
-  try{
-    if(AppState.settings.needsFirstEnter !== true) return;
-    if(!isPlayBillingAvailable() || !PLAY_VERIFY_URL) return;
-    window._launchCheckPending = true;
-    applyLoginMode();
-    const work = restorePurchaseCore().catch(() => ({ status: 'unavailable' }));
-    await Promise.race([work, new Promise(r => setTimeout(r, 12000))]);
-  }catch(e){
+    return { ok:false, reason:'error' };
   }finally{
-    window._launchCheckPending = false;
-    try{ setupLoginScreen(); }catch(e){}
+    playSyncBusy = false;
   }
 }
 
-let restorePurchaseBusy = false;
-async function restorePurchaseNow(btn){
-  if(restorePurchaseBusy) return;
+// ---------- خریداری واپس آتے ہی: "Subscription Required" والا صفحہ بند کر کے سیدھا ایپ کھولیں، بینر تازہ کریں ----------
+function afterPlayAccessRestored(){
+  try{
+    const gate = document.getElementById('subscriptionGateScreen');
+    if(gate && gate.style.display !== 'none' && AppState.currentRole && isSubscriptionActive()){
+      gate.style.display = 'none';
+      document.getElementById('packagePlansModal')?.classList.remove('show');
+      document.getElementById('app').style.display = 'grid';
+      goTo('home');
+    }
+    if(typeof renderSubscriptionBanner === 'function') renderSubscriptionBanner();
+    if(typeof refreshAllScreens === 'function' && AppState.currentRole) refreshAllScreens();
+  }catch(e){}
+}
+
+// ---------- 🔄 "Restore Purchase" بٹن — فون بدلا یا ایپ دوبارہ انسٹال کی، تو گاہک خود اپنی خریداری واپس لا سکے ----------
+async function restorePurchasesManually(){
+  const btn = document.getElementById('restorePurchaseBtn');
   if(!isPlayBillingAvailable()){
-    alert('Restore works only in the app installed from the Google Play Store. Please open that version of the app.');
+    alert('Restore works only inside the AIO POS app installed from Google Play.');
     return;
   }
-  restorePurchaseBusy = true;
-  const oldText = btn ? btn.textContent : '';
-  if(btn){ btn.disabled = true; btn.textContent = '⏳ Checking your Google Play account…'; }
-  let r;
-  try{ r = await restorePurchaseCore(); }catch(e){ r = { status: 'unavailable' }; }
-  restorePurchaseBusy = false;
-  if(btn){ btn.disabled = false; btn.textContent = oldText; }
-
-  const msgs = {
-    restored:    `✅ Subscription restored — valid until ${r.expiry ? formatDateDMY(r.expiry) : ''}.`,
-    already:     `✅ Your access is already active until ${r.expiry ? formatDateDMY(r.expiry) : ''}.`,
-    none:        'No active purchase was found on this Google account.\n\nPlease make sure the Play Store on this phone is signed in to the same Google account you used to buy, then try again. Still stuck? Tap "Contact Us".',
-    expired:     'Your earlier purchase has ended or was cancelled. Please choose a plan to continue.',
-    noserver:    'Could not verify your purchase right now. Please check your internet and try again.',
-    unavailable: 'Could not reach Google Play right now. Please wait a moment and try again.'
-  };
-  alert(msgs[r.status] || msgs.unavailable);
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Checking Google Play…'; }
+  const res = await syncPlayBillingRenewal(true);
+  if(btn){ btn.disabled = false; btn.textContent = '🔄 Already subscribed? Restore Purchase'; }
+  if(res.ok && res.applied){
+    alert(`✅ Your subscription has been restored.\nValid till: ${formatDateDMY(res.expiry)}`);
+  } else if(res.ok && res.found){
+    alert(`✅ Your subscription is already active.\nValid till: ${formatDateDMY(res.expiry)}`);
+  } else if(res.ok){
+    alert('No active subscription was found on this Google account.\n\nIf you subscribed with a different Google account, open the Play Store, switch to that account, then open AIO POS from the Play Store and try again.');
+  } else if(res.reason === 'busy'){
+    alert('Already checking — please wait a moment and try again.');
+  } else {
+    alert('Google Play is not responding right now. Please check your internet, close the app fully, open it again and tap Restore Purchase.');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ syncPlayBillingRenewal(); }catch(e){} }, 1500); });
@@ -26194,7 +26031,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- اگر اس ڈیوائس پر پن پہلے سے یاد رکھا ہوا ہے تو لاگ ان اسکرین چھوڑ کر سیدھا ایپ میں لے جائیں ----------
   tryAutoLogin();
-  launchRestoreCheck(); // ---------- نئی انسٹالیشن: پہلے گوگل پلے کی پرانی خریداری چیک ----------
 
   renderProductList();
   populateCustomerDropdown();
