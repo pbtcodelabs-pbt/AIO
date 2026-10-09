@@ -958,11 +958,19 @@
   /* --- ڈریگ کے دوران کارڈ کی حالت: اٹھا ہوا، سایہ گہرا، فوری حرکت (کوئی transition تاخیر نہیں) --- */
   /* ---------- AIO1010SA010: بلنگ پراڈکٹس — بڑے کارڈز کی جگہ ایک لائن والی فہرست (Fruit Mandi طرز، انگلش LTR) ---------- */
   .billingMainArea .productGrid.pgListMode, .productGrid.pgListMode{display:block !important; padding:0 2px 8px; gap:0 !important;}
-  .pgListHead, .pgRowMain{display:grid; grid-template-columns:26px minmax(0,1fr) 46px 108px; gap:5px; align-items:center;}
+  .pgListHead, .pgRowMain{display:grid; grid-template-columns:44px minmax(0,1fr) 46px 108px; gap:5px; align-items:center;}
+  /* AIO1010SA015: سرخ نمبر کی جگہ ابھری ہوئی 3D تصویر — لائن کی اونچائی نہیں بڑھتی */
+  .pgRowThumb{width:44px; height:44px; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; justify-self:center;
+    background:#fff; border:2px solid #fff; cursor:pointer;
+    box-shadow:0 3px 0 rgba(15,23,42,.28), 0 5px 9px rgba(15,23,42,.22), inset 0 0 0 1px rgba(15,23,42,.08);
+    transform:translateY(-1px);}
+  .pgRowThumb img{width:100%; height:100%; object-fit:cover; display:block; border-radius:9px;}
+  .pgRowInitial{background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), rgba(255,255,255,0) 45%), var(--ti,#16a34a);
+    color:#fff; font-weight:900; font-size:20px; text-shadow:0 2px 2px rgba(0,0,0,.3); cursor:default;}
   .pgListHead{position:sticky; top:0; z-index:3; background:linear-gradient(180deg,#14532d,#166534); color:#fff; padding:8px 8px;
     border-radius:14px 14px 0 0; border-bottom:3px solid #facc15; font-size:12px; font-weight:800; text-align:center; margin-bottom:5px;}
   .pgListHead span:nth-child(2){text-align:left; padding-left:4px;}
-  .pgRow{margin:0 0 6px; padding:5px 6px; border:1.5px solid #a7d7bd; border-radius:14px; touch-action:pan-y;
+  .pgRow{margin:0 0 6px; padding:3px 6px; border:1.5px solid #a7d7bd; border-radius:14px; touch-action:pan-y;
     background:linear-gradient(180deg,#ffffff 0%,#f0fbf4 45%,#d9f2e3 100%);
     box-shadow:0 3px 0 #9fd1b5, 0 4px 8px rgba(20,83,45,.12), inset 0 1px 0 #ffffff;}
   .pgRow.alt{background:linear-gradient(180deg,#ffffff 0%,#eff6ff 45%,#dbe8fb 100%); border-color:#b6cdf0;
@@ -2165,7 +2173,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA014</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA015</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2393,7 +2401,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA014</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA015</span>
     </div>
   </div>
 
@@ -2559,6 +2567,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
           <!-- ---------- 🏷️ Product Card Style بٹن — الگ سے، تاکہ تبدیلی کرتے وقت نیچے موجود اصل پراڈکٹ کارڈز لائیو نظر آتے رہیں ---------- -->
           <button class="fontsFabMain" id="cardStyleBtnBilling" onclick="switchHomeSettingsTab('card'); toggleHomeSettingsPanel(event, 'cardStyleBtnBilling');" title="Product Card Style" style="flex:0 0 auto;">🏷️</button>
+
+          <!-- ---------- AIO1010SA015: ☰ List / ▦ Cards — بلنگ پر پراڈکٹس دکھانے کا انداز ---------- -->
+          <button class="fontsFabMain" id="billViewToggleBtn" onclick="toggleBillingViewMode()" title="List / Cards view" style="flex:0 0 auto; font-size:12px; font-weight:900; min-width:64px;">▦ Cards</button>
 
           <!-- ---------- FONTS بٹن — کاؤنٹر سیل کے دائیں طرف، مستقل جگہ پر (پراڈکٹس پر کبھی نہیں چڑھتا) ---------- -->
           <div id="fontsFab" class="fontsFab">
@@ -9256,6 +9267,12 @@ document.addEventListener('click', (e) => {
   if(!wrap.contains(e.target) && e.target !== input) wrap.classList.remove('open');
 });
 
+const PG_THUMB_TINTS = ['#16a34a','#2563eb','#db2777','#ea580c','#7c3aed','#0d9488','#ca8a04','#dc2626'];
+function toggleBillingViewMode(){
+  AppState.settings.billingViewMode = AppState.settings.billingViewMode === 'cards' ? 'list' : 'cards';
+  persistAllData();
+  renderBillingProductGrid();
+}
 function renderBillingProductGrid(){
   const grid = document.getElementById('billingProductGrid');
   if(!grid) return;
@@ -9329,10 +9346,104 @@ function renderBillingProductGrid(){
 
   const displayList = [...hotItems, ...restItems];
 
+  // ---------- AIO1010SA015: Cards انداز منتخب ہو تو پرانے بڑے تصویر والے کارڈز ----------
+  const _viewCards = AppState.settings.billingViewMode === 'cards';
+  grid.classList.toggle('pgListMode', !_viewCards);
+  const _vb = document.getElementById('billViewToggleBtn');
+  if(_vb) _vb.textContent = _viewCards ? '☰ List' : '▦ Cards';
+  if(_viewCards){
+  grid.innerHTML = displayList.map(p => {
+    const isHot = hotIds.has(p.product_id);
+    const isSingleVariant = p.variants.length === 1;
+    // ---------- نام لمبا ہو تو باریک، چھوٹا ہو تو اچھا موٹا سائز ----------
+    const nameFontSize = p.name.length > 18 ? '8.5px' : p.name.length > 13 ? '9.5px' : '10.5px';
+
+    let priceLabel, qtyBadgeHtml, actionAreaHtml, outOfStockClass = '', lowStockClass = '', stockBadgeHtml = '', cardOnClick = '';
+
+    // ---------- کیا اس پراڈکٹ میں کوئی وزن والا (kg/g) ویریئنٹ ہے؟ اگر ہاں تو ⚖️ ریورس کیلکولیٹر بیج دکھائیں ----------
+    const hasWeightVariant = p.variants.some(v => parseWeightGrams(v.label) !== null);
+    const scaleBadgeHtml = hasWeightVariant
+      ? `<div class="pgScaleBadge ${isHot ? 'stacked' : ''}" title="Rs to grams calculator" onclick="event.stopPropagation(); openReverseCalc(${p.product_id})">⚖️</div>`
+      : '';
+
+    if(isSingleVariant){
+      // ---------- صرف ایک ویریئنٹ ہو تو پہلے کی طرح براہ راست +/- سے کام چلے ----------
+      const v = p.variants[0];
+      const price = getModePrice(v);
+      const isNegative = v.stock < 0;
+      const outOfStock = v.stock <= 0;
+      const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
+      outOfStockClass = isNegative ? 'negativeStock' : outOfStock ? 'outOfStock' : '';
+      lowStockClass = isLow ? 'lowStockCard' : '';
+      const cartItem = Billing.cart.find(c => c.variant_id === v.variant_id);
+      const qtyInCart = cartItem ? cartItem.qty : 0;
+      const stackedCls = qtyInCart > 0 ? ' stacked' : '';
+      stockBadgeHtml = isNegative ? `<div class="pgStockBadge negBadge${stackedCls}">Stock: ${v.stock}</div>`
+        : outOfStock ? `<div class="pgStockBadge outBadge${stackedCls}">Out of Stock</div>`
+        : isLow ? `<div class="pgStockBadge lowBadge${stackedCls}">Low: ${v.stock}</div>`
+        : `<div class="pgStockBadge normalBadge${stackedCls}">Qty: ${v.stock}</div>`;
+      priceLabel = `Rs. ${price}`;
+      qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
+      actionAreaHtml = `
+        <button class="pgMinusBtn" onclick="changeQty(${v.variant_id}, -1)">−</button>
+        <button class="pgPlusBtn" onclick="addToCart(${v.variant_id})">+</button>
+      `;
+    } else {
+      // ---------- کئی ویریئنٹس ہوں تو کارڈ پر صرف "N sizes" دکھائیں — دبانے پر انتخاب کھلے ----------
+      const totalQtyInCart = p.variants.reduce((sum, v) => {
+        const ci = Billing.cart.find(c => c.variant_id === v.variant_id);
+        return sum + (ci ? ci.qty : 0);
+      }, 0);
+      const allOutOfStock = p.variants.every(v => v.stock <= 0);
+      const anyNegative = p.variants.some(v => v.stock < 0);
+      const anyLow = !allOutOfStock && p.variants.some(v => v.stock > 0 && v.stock <= (v.lowStockAt ?? 0));
+      const totalStockAllVariants = p.variants.reduce((sum, v) => sum + v.stock, 0);
+      outOfStockClass = anyNegative ? 'negativeStock' : allOutOfStock ? 'outOfStock' : '';
+      lowStockClass = anyLow ? 'lowStockCard' : '';
+      const stackedCls2 = totalQtyInCart > 0 ? ' stacked' : '';
+      stockBadgeHtml = anyNegative ? `<div class="pgStockBadge negBadge${stackedCls2}">Stock: ${totalStockAllVariants}</div>`
+        : allOutOfStock ? `<div class="pgStockBadge outBadge${stackedCls2}">Out of Stock</div>`
+        : anyLow ? `<div class="pgStockBadge lowBadge${stackedCls2}">Low Stock</div>`
+        : `<div class="pgStockBadge normalBadge${stackedCls2}">Qty: ${totalStockAllVariants}</div>`;
+      priceLabel = `${p.variants.length} variants`;
+      qtyBadgeHtml = totalQtyInCart > 0 ? `<div class="pgQtyBadge">${totalQtyInCart}</div>` : '';
+      actionAreaHtml = `<button class="pgChooseBtn" onclick="openVariantChooser(${p.product_id})">Choose ▾</button>`;
+      cardOnClick = `onclick="openVariantChooser(${p.product_id})"`;
+    }
+
+    return `
+      <div class="productGridCard ${outOfStockClass} ${lowStockClass} ${isHot ? 'pgLocked' : ''}" data-product-id="${p.product_id}" ${cardOnClick}>
+        <div class="pgImageArea">
+          ${isHot ? `<div class="pgHotBadge">🔥</div>` : ''}
+          ${qtyBadgeHtml}
+          ${scaleBadgeHtml}
+          ${stockBadgeHtml}
+          ${(p.image && String(p.image).trim()) ? `
+          <img src="${p.image}">
+          <div class="pgCaption" style="background:${getProductCardCaptionBgFinal()};">
+            <div class="pgName" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 700}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'}; color:${getProductCardTextColorFinal(true)};">${p.name}</div>
+            <div class="pgPrice" style="color:${getProductCardTextColorFinal(true)};">${priceLabel}</div>
+          </div>
+          ` : `
+          <div class="pgPlaceholder pgNamePlaceholder" style="background:${getProductCardBgFinal()}; color:${getProductCardTextColorFinal()};">
+            <div class="pgphTitle" style="font-size:${AppState.settings.productCardNameSize || 13}px; font-weight:${AppState.settings.productCardNameWeight || 800}; font-family:${(FONT_PRESETS.find(f => f.id === AppState.settings.productCardNameFont) || {}).family || 'inherit'};">${p.name}</div>
+            <div class="pgphSub">${priceLabel}</div>
+          </div>
+          `}
+        </div>
+        <div class="pgButtonStrip">
+          ${actionAreaHtml}
+        </div>
+      </div>`;
+  }).join('');
+    return;
+  }
   applyProductRowStyleVars(grid); // AIO1010SA012
+  // ---------- AIO1010SA015: تصویر نہ ہو تو نام کا پہلا حرف — ہر پراڈکٹ کا اپنا رنگ ----------
+  // (PG_THUMB_TINTS نیچے عالمی طور پر بیان ہے)
   // ---------- AIO1010SA010: ایک لائن والی فہرست — # | Item (+قیمت) | Stock | − Qty + / Variants ▾ ----------
   const fmtP = n => 'Rs. ' + (Math.round((Number(n)||0)*100)/100).toLocaleString();
-  grid.innerHTML = `<div class="pgListHead"><span>#</span><span>Item</span><span>Stock</span><span>Qty</span></div>` + displayList.map((p, idx) => {
+  grid.innerHTML = `<div class="pgListHead"><span>📷</span><span>Item</span><span>Stock</span><span>Qty</span></div>` + displayList.map((p, idx) => {
     const isHot = hotIds.has(p.product_id);
     const isSingle = p.variants.length === 1;
     const hasWeightVariant = p.variants.some(v => parseWeightGrams(v.label) !== null);
@@ -9365,7 +9476,9 @@ function renderBillingProductGrid(){
     return `
       <div class="pgRow ${idx % 2 ? 'alt' : ''} ${qtyInCart ? 'inCart' : ''} ${isHot ? 'pgLocked' : ''}" data-product-id="${p.product_id}">
         <div class="pgRowMain">
-          <span class="pgRowSerial">${idx+1}</span>
+          ${(p.image && String(p.image).trim())
+            ? `<span class="pgRowThumb" ${isSingle ? '' : `onclick="openVariantChooser(${p.product_id})"`}><img src="${p.image}" alt="" loading="lazy"></span>`
+            : `<span class="pgRowThumb pgRowInitial" style="--ti:${PG_THUMB_TINTS[p.product_id % PG_THUMB_TINTS.length]};">${scanEscAttr(String(p.name).trim().charAt(0).toUpperCase() || "?")}</span>`}
           <div class="pgRowName" ${isSingle ? '' : `onclick="openVariantChooser(${p.product_id})"`}><b>${hotTag}${p.name}${scaleBtn}</b><small>${priceTxt}</small></div>
           <div class="pgRowStock ${stockCls}">${Math.round(stockVal*100)/100}</div>
           ${actionHtml}
@@ -26704,7 +26817,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1010SA014';
+  const APP_VERSION = 'AIO1010SA015';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
