@@ -244,26 +244,22 @@
   .roleToast.show{opacity:1; transform:translateY(0);}
 
   /* --- 🔄 Update Toast — نیا اپڈیٹ آنے پر نیچے نظر آئے، صارف ٹیپ کر کے فوراً اپڈیٹ کر سکے --- */
-  /* ---------- AIO910FR005: اپڈیٹ بینر — سکرین کے بالکل اوپر ---------- */
-  #appUpdateBanner{position:fixed; left:0; right:0; top:0; z-index:9000; transform:translateY(-110%); transition:transform .35s ease;
-    background:linear-gradient(135deg,#1d4ed8,#0f766e); color:#fff; box-shadow:0 6px 20px rgba(0,0,0,.3);
-    padding:calc(env(safe-area-inset-top, 0px) + 10px) 14px 0;}
+  /* ---------- AIO910FR007: اپڈیٹ پٹی — ایک باریک لائن، ایپ کے رنگ سے الگ (امبر)، گول گھومتے تیر ---------- */
+  #appUpdateBanner{position:fixed; left:0; right:0; top:0; z-index:9000; transform:translateY(-110%); transition:transform .3s ease;
+    background:linear-gradient(90deg,#fbbf24,#f59e0b); color:#3b2300; box-shadow:0 2px 8px rgba(0,0,0,.25);
+    padding:calc(env(safe-area-inset-top, 0px) + 5px) 10px 5px; pointer-events:none;}
   #appUpdateBanner.show{transform:translateY(0);}
-  #appUpdateBanner.done{background:linear-gradient(135deg,#15803d,#0f766e);}
-  .aubRow{display:flex; align-items:center; gap:10px; padding-bottom:10px;}
-  .aubIcon{font-size:22px; flex:0 0 auto; display:inline-block;}
-  #appUpdateBanner:not(.done) .aubIcon{animation:aubSpin 1.2s linear infinite;}
+  #appUpdateBanner.done{background:#1e293b; color:#fff; pointer-events:auto;}
+  .aubRow{display:flex; align-items:center; justify-content:center; gap:8px; min-height:22px;}
+  .aubSpin{flex:0 0 auto; width:18px; height:18px; display:block; animation:aubSpin .9s linear infinite;}
+  #appUpdateBanner.done .aubSpin{display:none;}
   @keyframes aubSpin{to{transform:rotate(360deg);}}
-  .aubText{flex:1; min-width:0;}
-  .aubTitle{font-size:14.5px; font-weight:800; line-height:1.25;}
-  .aubSub{font-size:12px; font-weight:600; opacity:.95; margin-top:2px; line-height:1.35;}
-  .aubSub b{background:rgba(255,255,255,.2); padding:1px 6px; border-radius:6px; white-space:nowrap;}
-  #aubOk{display:none; flex:0 0 auto; border:none; border-radius:10px; background:#fff; color:#15803d; font-weight:800; font-size:13px; padding:8px 14px; cursor:pointer;}
+  .aubCheck{display:none; flex:0 0 auto; width:18px; height:18px; border-radius:50%; background:#22c55e; color:#fff; font-size:11px; font-weight:900; align-items:center; justify-content:center;}
+  #appUpdateBanner.done .aubCheck{display:inline-flex;}
+  .aubTitle{font-size:12.5px; font-weight:800; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;}
+  .aubTitle b{background:rgba(255,255,255,.16); padding:1px 5px; border-radius:5px;}
+  #aubOk{display:none; flex:0 0 auto; border:none; border-radius:50%; width:22px; height:22px; background:rgba(255,255,255,.18); color:#fff; font-weight:900; font-size:11px; cursor:pointer; padding:0; line-height:1;}
   #appUpdateBanner.done #aubOk{display:block;}
-  .aubBar{height:4px; margin:0 -14px; background:rgba(255,255,255,.25); overflow:hidden;}
-  .aubBar i{display:block; height:100%; width:35%; background:#fff; animation:aubSlide 1.1s ease-in-out infinite;}
-  #appUpdateBanner.done .aubBar{display:none;}
-  @keyframes aubSlide{0%{transform:translateX(-100%);}100%{transform:translateX(300%);}}
 
   #updateToast{
     position:fixed; left:50%; bottom:18px; transform:translateX(-50%) translateY(80px); z-index:6000;
@@ -2020,14 +2016,15 @@
 <!-- ---------- AIO910FR005: اپڈیٹ کے دوران اوپر پٹی — "Please wait…"، پھر پرانا اور نیا ورژن ---------- -->
 <div id="appUpdateBanner" role="status" aria-live="polite">
   <div class="aubRow">
-    <span class="aubIcon" id="aubIcon">🔄</span>
-    <div class="aubText">
-      <div class="aubTitle" id="aubTitle">Please wait, the app is updating now…</div>
-      <div class="aubSub" id="aubSub">Please don't close the app. This takes only a few seconds.</div>
-    </div>
-    <button type="button" id="aubOk" onclick="closeAppUpdateBanner()">OK</button>
+    <svg class="aubSpin" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="18 7.13"/>
+      <polygon points="4.95,16.58 5.46,20.08 8.48,16.36" fill="currentColor"/>
+      <polygon points="19.05,7.42 18.54,3.92 15.52,7.64" fill="currentColor"/>
+    </svg>
+    <span class="aubCheck">✓</span>
+    <span class="aubTitle" id="aubTitle">Please wait, app is updating now…</span>
+    <button type="button" id="aubOk" onclick="closeAppUpdateBanner()" aria-label="Close">✕</button>
   </div>
-  <div class="aubBar"><i></i></div>
 </div>
 
 <div id="updateToast">
@@ -2048,7 +2045,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR006</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR007</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2276,7 +2273,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR006</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR007</span>
     </div>
   </div>
 
@@ -26442,7 +26439,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO910FR006';
+  const APP_VERSION = 'AIO910FR007';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -26456,9 +26453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const b = document.getElementById('appUpdateBanner');
     if(!b) return;
     b.classList.remove('done');
-    document.getElementById('aubIcon').textContent = '🔄';
-    document.getElementById('aubTitle').textContent = 'Please wait, the app is updating now…';
-    document.getElementById('aubSub').textContent = "Please don't close the app. This takes only a few seconds.";
+    document.getElementById('aubTitle').textContent = 'Please wait, app is updating now…';
     b.classList.add('show');
     // ---------- حفاظت: اگر کسی وجہ سے نیا ورژن خود کنٹرول نہ سنبھالے تو 25 سیکنڈ بعد خود ری لوڈ ----------
     setTimeout(() => { if(!refreshing){ refreshing = true; window.location.reload(); } }, 25000);
@@ -26476,11 +26471,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const b = document.getElementById('appUpdateBanner');
       if(!b) return;
       b.classList.add('done');
-      document.getElementById('aubIcon').textContent = '✅';
-      document.getElementById('aubTitle').textContent = 'The app has been updated successfully!';
-      document.getElementById('aubSub').innerHTML = `Old version: <b>${from}</b><br>New version: <b>${APP_VERSION}</b>`;
+      document.getElementById('aubTitle').innerHTML = `App updated: <b>${from}</b> → <b>${APP_VERSION}</b>`;
       b.classList.add('show');
-      setTimeout(() => b.classList.remove('show'), 12000);
+      setTimeout(() => b.classList.remove('show'), 8000);
     };
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show); else show();
   })();
