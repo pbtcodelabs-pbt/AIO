@@ -974,7 +974,10 @@
     box-shadow:0 2px 0 #7f1d1d, 0 3px 5px rgba(0,0,0,.25);}
   .pgRowName{min-width:0; background:#fff; border:1.5px solid #e2e8f0; border-radius:10px; padding:4px 7px; min-height:38px;
     display:flex; flex-direction:column; justify-content:center;}
-  .pgRowName b{font-size:13.5px; font-weight:800; color:#0f172a; line-height:1.2; word-break:break-word;}
+  .pgRowName b{font-size:var(--pr-size,13.5px); font-weight:var(--pr-weight,800); color:var(--pr-tx,#0f172a); font-family:var(--pr-font,inherit); line-height:1.2; word-break:break-word;}
+  /* AIO1010SA012: صارف کا چنا ہوا پس منظر/بارڈر رنگ — سب لائنوں پر */
+  .pgListMode.prCustomBg .pgRow, .pgListMode.prCustomBg .pgRow.alt{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 70%), var(--pr-bg);}
+  .pgListMode.prCustomBd .pgRow, .pgListMode.prCustomBd .pgRow.alt{border:2px solid var(--pr-bd); box-shadow:0 3px 0 var(--pr-bd), 0 4px 8px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.7);}
   .pgRowName small{font-size:11.5px; font-weight:800; color:#b45309; line-height:1.25;}
   .pgRowName .pgRowTag{display:inline-block; font-size:11px; margin-right:3px;}
   .pgRowScale{display:inline-block; border:none; background:#fef3c7; border-radius:6px; font-size:11px; padding:0 4px; margin-left:4px; cursor:pointer; line-height:1.5;}
@@ -1101,6 +1104,28 @@
   }
   .homeQuickPanel.open{ opacity:1; pointer-events:auto; transform:scaleY(1); visibility:visible; }
   .homeQuickPanel.wide{ width:262px; }
+  /* ---------- AIO1010SA012: کارڈ اسٹائل پینل — نیچے چھوٹی پٹی کی صورت، اوپر کی لائنیں نظر آتی رہیں ---------- */
+  .homeQuickPanel.pcDock{ top:auto !important; bottom:92px; left:8px !important; right:8px; width:auto; max-height:none; overflow:visible; transform-origin:bottom center; padding:0 0 6px; }
+  .homeQuickPanel.pcDock .hsBackupRow{ display:none; }
+  .homeQuickPanel.pcDock .hsTabBar{ padding:6px 8px 5px; margin-bottom:4px; }
+  .homeQuickPanel.pcDock .hsTabBtn{ padding:4px; font-size:10px; line-height:1.15; }
+  .pcsRow{ display:flex; gap:4px; padding:0 8px 6px; align-items:center; }
+  .pcsTgt{ flex:1; border:1.5px solid #cbd5e1; background:#fff; color:#334155; border-radius:16px; padding:6px 2px; font-size:11.5px; font-weight:800; cursor:pointer; }
+  .pcsTgt.active{ background:var(--primary,#0f766e); border-color:var(--primary,#0f766e); color:#fff; }
+  .pcsMini{ flex:0 0 30px; height:30px; border:1.5px solid #cbd5e1; background:#fff; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer; padding:0; }
+  .pcsMini.on{ background:#e0e7ff; border-color:#6366f1; }
+  .pcsSwatches{ display:flex; gap:7px; padding:2px 8px 6px; overflow-x:auto; align-items:center; scrollbar-width:none; }
+  .pcsSwatches::-webkit-scrollbar{ display:none; }
+  .pcsSw{ flex:0 0 28px; width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1.5px #cbd5e1; cursor:pointer; padding:0; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:13px; background:#f8fafc; }
+  .pcsSw.active{ box-shadow:0 0 0 3px #0f172a; }
+  .pcsCustom input{ position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
+  .pcsAuto{ flex:0 0 auto; border:1.5px solid #cbd5e1; background:#fff; border-radius:14px; padding:5px 9px; font-size:11px; font-weight:800; cursor:pointer; }
+  .pcsAuto.active{ background:#0f172a; color:#fff; border-color:#0f172a; }
+  .pcsShade{ display:flex; align-items:center; gap:8px; padding:0 10px 6px; font-size:10.5px; font-weight:800; color:#64748b; }
+  .pcsShade input{ flex:1; }
+  .pcsFonts{ display:flex; gap:6px; padding:0 8px 2px; overflow-x:auto; scrollbar-width:none; }
+  .pcsFonts::-webkit-scrollbar{ display:none; }
+  .pcsFonts .hsChip{ flex:0 0 auto; white-space:nowrap; padding:5px 10px; }
   .homeQuickPanelLabel{ font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; padding:6px 12px 6px; }
   .homeIntensityRow{ display:flex; align-items:center; gap:8px; padding:2px 12px 10px; }
   /* ---------- ⚙️ نیا مربوط Settings پینل — Backup/Restore دو برابر بڑے بٹن، اوپر ---------- */
@@ -2134,7 +2159,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA011</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA012</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2362,7 +2387,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA011</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA012</span>
     </div>
   </div>
 
@@ -9298,6 +9323,7 @@ function renderBillingProductGrid(){
 
   const displayList = [...hotItems, ...restItems];
 
+  applyProductRowStyleVars(grid); // AIO1010SA012
   // ---------- AIO1010SA010: ایک لائن والی فہرست — # | Item (+قیمت) | Stock | − Qty + / Variants ▾ ----------
   const fmtP = n => 'Rs. ' + (Math.round((Number(n)||0)*100)/100).toLocaleString();
   grid.innerHTML = `<div class="pgListHead"><span>#</span><span>Item</span><span>Stock</span><span>Qty</span></div>` + displayList.map((p, idx) => {
@@ -21644,6 +21670,55 @@ function switchHomeSettingsTab(tab){
   renderHomeSettingsPanel();
 }
 
+// ---------- AIO1010SA012: پراڈکٹ لائن اسٹائل — کس چیز کا رنگ بدلنا ہے (Text / Background / Border) ----------
+let pcStyleTarget = 'bg';
+const PC_STYLE_COLORS = ['#16a34a','#0d9488','#2563eb','#7c3aed','#db2777','#dc2626','#ea580c','#ca8a04','#0f172a','#64748b','#ffffff'];
+function pcRefreshAll(){
+  persistAllData();
+  try{ renderBillingProductGrid(); }catch(e){}
+  try{ if(typeof renderPoBrowseList === 'function') renderPoBrowseList(); }catch(e){}
+  try{ if(typeof renderAdvOrderProductGrid === 'function') renderAdvOrderProductGrid(); }catch(e){}
+}
+function pcSetTarget(t){ pcStyleTarget = t; renderHomeSettingsPanel(); }
+function pcPickColor(hex){
+  const st = AppState.settings;
+  if(pcStyleTarget === 'text') st.productCardNameColor = hex;
+  else if(pcStyleTarget === 'bg') st.productCardNameBg = hex;
+  else st.productCardBorder = hex;
+  pcRefreshAll(); renderHomeSettingsPanel();
+}
+function pcSetShade(v){
+  const st = AppState.settings, n = Math.max(-40, Math.min(40, Number(v) || 0));
+  if(pcStyleTarget === 'text') st.productCardTextShade = n;
+  else if(pcStyleTarget === 'bg') st.productCardNameBgIntensity = n;
+  else st.productCardBorderShade = n;
+  pcRefreshAll();
+}
+function pcResetTarget(){
+  const st = AppState.settings;
+  if(pcStyleTarget === 'text'){ st.productCardNameColor = null; st.productCardTextShade = 0; }
+  else if(pcStyleTarget === 'bg'){ st.productCardNameBg = null; st.productCardNameBgIntensity = 0; }
+  else { st.productCardBorder = null; st.productCardBorderShade = 0; }
+  pcRefreshAll(); renderHomeSettingsPanel();
+}
+// ---------- فہرست (لائنوں) پر لگنے والے اصل رنگ/فونٹ — CSS متغیرات کی صورت میں ----------
+function applyProductRowStyleVars(grid){
+  const st = AppState.settings;
+  const sh = (hex, d) => (hex && d) ? shiftColorLightness(hex, d) : hex;
+  const bg = sh(st.productCardNameBg, st.productCardNameBgIntensity || 0);
+  const bd = sh(st.productCardBorder, st.productCardBorderShade || 0);
+  const tx = sh(st.productCardNameColor, st.productCardTextShade || 0);
+  const font = (FONT_PRESETS.find(f => f.id === st.productCardNameFont) || {}).family || '';
+  grid.classList.toggle('prCustomBg', !!bg);
+  grid.classList.toggle('prCustomBd', !!bd);
+  grid.style.setProperty('--pr-bg', bg || 'transparent');
+  grid.style.setProperty('--pr-bd', bd || 'transparent');
+  grid.style.setProperty('--pr-tx', tx || '#0f172a');
+  grid.style.setProperty('--pr-font', font || 'inherit');
+  grid.style.setProperty('--pr-size', (st.productCardNameSize || 13) + 'px');
+  grid.style.setProperty('--pr-weight', String(st.productCardNameWeight || 800));
+}
+
 function renderHomeSettingsPanel(){
   const panel = document.getElementById('homeSettingsPanel');
   if(!panel) return;
@@ -21695,46 +21770,40 @@ function renderHomeSettingsPanel(){
   }
 
   else if(homeSettingsActiveTab === 'card'){
-    const pcnSize = AppState.settings.productCardNameSize || 13;
-    const pcnWeight = AppState.settings.productCardNameWeight || 800;
-    const pcnBg = AppState.settings.productCardNameBg || '#eef2ff';
-    const pcnBgIntensity = AppState.settings.productCardNameBgIntensity || 0;
-    const pcnColor = AppState.settings.productCardNameColor || '#166534';
-    const pcnFontId = AppState.settings.productCardNameFont || '';
+    // ---------- AIO1010SA012: کمپیکٹ اسٹائل — Text / Background / Border چنیں، ایک لائن میں رنگ، ایک سلائیڈر، ایک لائن فونٹ ----------
+    const st = AppState.settings;
+    const t = pcStyleTarget;
+    const cur = t === 'text' ? st.productCardNameColor : t === 'bg' ? st.productCardNameBg : st.productCardBorder;
+    const shade = t === 'text' ? (st.productCardTextShade || 0) : t === 'bg' ? (st.productCardNameBgIntensity || 0) : (st.productCardBorderShade || 0);
+    const pcnSize = st.productCardNameSize || 13;
+    const pcnWeight = st.productCardNameWeight || 800;
+    const pcnFontId = st.productCardNameFont || '';
     tabContentHtml = `
-    <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Text size — ${pcnSize}px</div>
-    <div style="padding:0 12px 6px;">
-      <input type="range" min="8" max="22" step="1" value="${pcnSize}" oninput="adjustProductCardNameSize(this.value); this.previousElementSibling.textContent='Text size — '+this.value+'px';" style="width:100%;">
+    <div class="pcsRow">
+      <button class="pcsTgt ${t==='text'?'active':''}" onclick="pcSetTarget('text')">Text</button>
+      <button class="pcsTgt ${t==='bg'?'active':''}" onclick="pcSetTarget('bg')">Background</button>
+      <button class="pcsTgt ${t==='border'?'active':''}" onclick="pcSetTarget('border')">Border</button>
+      <button class="pcsMini" onclick="adjustProductCardNameSize(${pcnSize-1}); renderHomeSettingsPanel();" title="Smaller text">A−</button>
+      <button class="pcsMini" onclick="adjustProductCardNameSize(${pcnSize+1}); renderHomeSettingsPanel();" title="Bigger text">A+</button>
+      <button class="pcsMini ${pcnWeight>=700?'on':''}" style="font-weight:900;" onclick="adjustProductCardNameWeight(${pcnWeight>=700?500:800}); renderHomeSettingsPanel();" title="Bold">B</button>
     </div>
-    <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Boldness — ${pcnWeight}</div>
-    <div style="padding:0 12px 6px;">
-      <input type="range" min="400" max="900" step="100" value="${pcnWeight}" oninput="adjustProductCardNameWeight(this.value); this.previousElementSibling.textContent='Boldness — '+this.value;" style="width:100%;">
+    <div class="pcsSwatches">
+      <button class="pcsAuto ${!cur?'active':''}" onclick="pcResetTarget()">Auto</button>
+      ${PC_STYLE_COLORS.map(c => `<button class="pcsSw ${cur && cur.toLowerCase()===c?'active':''}" style="background:${c};" onclick="pcPickColor('${c}')"></button>`).join('')}
+      <label class="pcsSw pcsCustom" title="Any colour">🎨<input type="color" value="${cur || '#16a34a'}" oninput="pcPickColor(this.value)"></label>
     </div>
-    <div class="homeQuickPanelLabel" style="padding-bottom:2px;">Writing Style</div>
-    <div class="hsChipRow" style="padding-top:0;">
+    <div class="pcsShade">
+      <span>Dark</span>
+      <input type="range" min="-40" max="40" step="2" value="${shade}" oninput="pcSetShade(this.value)">
+      <span>Light</span>
+    </div>
+    <div class="pcsFonts">
       <button class="hsChip ${!pcnFontId ? 'active' : ''}" onclick="adjustProductCardNameFont(''); renderHomeSettingsPanel();">Default</button>
-      ${FONT_PRESETS.map(f => `
-        <button class="hsChip ${pcnFontId === f.id ? 'active' : ''}" style="font-family:${f.family};" onclick="adjustProductCardNameFont('${f.id}'); renderHomeSettingsPanel();">${f.label}</button>
-      `).join('')}
-    </div>
-    <div style="padding:4px 12px 2px; font-size:11px; color:var(--muted);">Background colour</div>
-    <div style="display:flex; align-items:center; gap:8px; padding:0 12px 6px;">
-      <input id="productCardNameBgPicker" type="color" value="${pcnBg}" oninput="adjustProductCardNameBg(this.value)" style="width:36px; height:32px; border:none; border-radius:7px; padding:0; cursor:pointer;">
-      <button class="hsBackupBtn" style="flex:1; flex-direction:row; gap:6px; padding:8px;" onclick="resetProductCardNameBg(); renderHomeSettingsPanel();">↺ Reset</button>
-    </div>
-    <div style="padding:2px 12px 2px; font-size:11px; color:var(--muted);">Background Shade — Light ↔ Dark</div>
-    <div class="homeIntensityRow">
-      <span style="font-size:15px;">🔅</span>
-      <input type="range" min="-40" max="40" step="2" value="${pcnBgIntensity}" oninput="adjustProductCardNameBgIntensity(this.value)" style="flex:1;">
-      <span style="font-size:15px;">🔆</span>
-    </div>
-    <div style="padding:4px 12px 2px; font-size:11px; color:var(--muted);">Text (Writing) Colour</div>
-    <div style="display:flex; align-items:center; gap:8px; padding:0 12px 8px;">
-      <input type="color" value="${pcnColor}" oninput="adjustProductCardNameColor(this.value)" style="width:36px; height:32px; border:none; border-radius:7px; padding:0; cursor:pointer;">
-      <button class="hsBackupBtn" style="flex:1; flex-direction:row; gap:6px; padding:8px;" onclick="resetProductCardNameColor(); renderHomeSettingsPanel();">↺ Auto</button>
+      ${FONT_PRESETS.map(f => `<button class="hsChip ${pcnFontId === f.id ? 'active' : ''}" style="font-family:${f.family};" onclick="adjustProductCardNameFont('${f.id}'); renderHomeSettingsPanel();">${f.label}</button>`).join('')}
     </div>`;
   }
 
+  panel.classList.toggle('pcDock', homeSettingsActiveTab === 'card');
   panel.innerHTML = backupRowHtml + tabBarHtml + tabContentHtml;
 }
 
@@ -26550,7 +26619,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1010SA011';
+  const APP_VERSION = 'AIO1010SA012';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
