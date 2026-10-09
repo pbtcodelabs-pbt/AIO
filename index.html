@@ -967,7 +967,7 @@
     box-shadow:0 3px 0 #9fd1b5, 0 4px 8px rgba(20,83,45,.12), inset 0 1px 0 #ffffff;}
   .pgRow.alt{background:linear-gradient(180deg,#ffffff 0%,#eff6ff 45%,#dbe8fb 100%); border-color:#b6cdf0;
     box-shadow:0 3px 0 #a9c1e8, 0 4px 8px rgba(30,58,138,.12), inset 0 1px 0 #ffffff;}
-  .pgRow.inCart{border-color:#f59e0b; box-shadow:0 3px 0 #d97706, 0 4px 8px rgba(217,119,6,.18), inset 0 1px 0 #fff;}
+  .pgRow.inCart{border:2px solid #2563eb; box-shadow:0 3px 0 #1d4ed8, 0 4px 10px rgba(37,99,235,.25), inset 0 1px 0 #fff;} /* AIO1010SA011: نیلا بارڈر */
   .pgRow.dragging{opacity:.92; box-shadow:0 10px 24px rgba(0,0,0,.3);}
   .pgRowSerial{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; justify-self:center;
     background:radial-gradient(circle at 35% 30%,#f87171,#dc2626 60%,#991b1b); color:#fff; font-weight:900; font-size:11.5px;
@@ -2134,7 +2134,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA010</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA011</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2362,7 +2362,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA010</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA011</span>
     </div>
   </div>
 
@@ -26550,7 +26550,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1010SA010';
+  const APP_VERSION = 'AIO1010SA011';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
