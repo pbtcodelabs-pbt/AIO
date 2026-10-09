@@ -440,7 +440,7 @@
     50%{ box-shadow:0 0 10px 2px rgba(220,38,38,.35); }
   }
   .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
-  /* ---------- AIO910FR001: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
+  /* ---------- AIO910FR002: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
   #loginScreen.loginQuick .loginPanel, #loginScreen.loginQuick #loginTouchIdWrap, #loginScreen.loginQuick #touchIdDivider,
   #loginScreen.loginQuick #enableTouchIdLabel, #loginScreen.loginQuick #turnOffTouchIdHint, #loginScreen.loginQuick .loginRememberRow,
   #loginScreen.loginQuick .loginForgotHint, #loginScreen.loginQuick #loginLockoutBox,
@@ -448,7 +448,7 @@
   #loginScreen.loginExpired #enableTouchIdLabel, #loginScreen.loginExpired #turnOffTouchIdHint, #loginScreen.loginExpired .loginRememberRow,
   #loginScreen.loginExpired .loginForgotHint, #loginScreen.loginExpired #loginEnterBtn, #loginScreen.loginExpired #loginLockoutBox{ display:none !important; }
 
-  /* ---------- AIO910FR001: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
+  /* ---------- AIO910FR002: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
   #trialCountdownStrip{display:none; align-items:center; justify-content:space-between; gap:10px; margin:6px 0 10px; padding:10px 12px; border-radius:12px; background:#ecfdf5; border:1.5px solid #86efac; color:#166534;}
   #trialCountdownStrip .tcsMain{display:flex; align-items:center; gap:9px; min-width:0;}
   #trialCountdownStrip #tcsIcon{font-size:22px; flex:0 0 auto;}
@@ -550,7 +550,7 @@
   .resultItem .rName{font-weight:600; font-size:14px;}
   .resultItem .rMeta{font-size:12px; color:var(--muted);}
 
-  .cartWrap{background:var(--card); border-radius:var(--radius); max-height:46vh; overflow-y:auto; box-shadow:0 2px 10px rgba(41,29,10,.07);}
+  .cartWrap{background:var(--card); border-radius:var(--radius); max-height:58vh; overflow-y:auto; box-shadow:0 2px 10px rgba(41,29,10,.07);}
   table.cartTable{width:100%; border-collapse:collapse; font-size:var(--cart-font-size, 14px); font-weight:var(--cart-font-weight, 400);}
   table.cartTable th{text-align:left; padding:5px 8px; background:#f1f5fb; color:var(--muted); font-size:11px; text-transform:uppercase; position:sticky; top:0;}
   table.cartTable td{padding:var(--cart-row-pad, 7px) 8px; border-bottom:1px solid #eef1f6; vertical-align:top;}
@@ -567,6 +567,25 @@
   .removeBtn{color:var(--danger); cursor:pointer; font-size:13px; border:none; background:none;}
   .saleRecordBtn{color:var(--primary-dark); cursor:pointer; font-size:12px; border:none; background:none; white-space:nowrap; font-weight:600;}
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
+  /* ---------- AIO910FR002: کارٹ آئٹم کیپسول — ہر لائن الگ، ابھری ہوئی، سب کنٹرول اسی کے پس منظر پر ---------- */
+  .cartCapsuleList{display:flex; flex-direction:column; gap:8px; padding:8px;}
+  .cartCapsule{position:relative; display:flex; flex-direction:column; gap:7px; padding:9px 10px 9px 12px; border-radius:16px;
+    background:linear-gradient(180deg,#ffffff 0%,#f3f7fb 100%); border:1px solid #e3e9f2;
+    box-shadow:0 3px 8px rgba(15,23,42,.08), 0 1px 0 rgba(255,255,255,.9) inset; overflow:hidden;}
+  .cartCapsule::before{content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--primary);}
+  .ccTop{display:flex; align-items:flex-start; gap:8px;}
+  .ccNum{flex:0 0 auto; min-width:22px; height:22px; padding:0 5px; border-radius:11px; background:var(--primary); color:#fff;
+    font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+  .ccName{flex:1; min-width:0; font-size:var(--cart-font-size, 14px); font-weight:var(--cart-font-weight, 700); color:var(--text); line-height:1.3; word-break:break-word;}
+  .ccTotal{flex:0 0 auto; font-size:15px; font-weight:800; color:var(--primary-dark); white-space:nowrap; margin-top:1px;}
+  .ccDel{flex:0 0 auto; width:26px; height:26px; border:none; border-radius:50%; background:#fee2e2; color:#dc2626; font-size:13px; font-weight:900; cursor:pointer; line-height:1;}
+  .ccBottom{display:flex; align-items:center; gap:8px;}
+  .ccQty{display:flex; align-items:center; background:#e9eef6; border-radius:999px; padding:3px; box-shadow:inset 0 1px 2px rgba(15,23,42,.08);}
+  .ccQty button{width:30px; height:30px; border:none; border-radius:50%; background:#fff; color:var(--primary-dark); font-size:17px; font-weight:900; cursor:pointer; box-shadow:0 1px 3px rgba(15,23,42,.15); line-height:1;}
+  .ccQty span{min-width:30px; text-align:center; font-weight:800; font-size:14px; color:var(--text);}
+  .ccX{color:var(--muted); font-weight:800; font-size:13px;}
+  .ccRate{width:82px; padding:7px 8px; border:1.5px solid #f2d98a; border-radius:999px; background:#fffbea; font-size:14px; font-weight:700; text-align:center; color:var(--text);}
+  .ccRec{margin-left:auto; flex:0 0 auto; border:none; border-radius:999px; background:#eef2ff; color:var(--primary-dark); font-size:12px; font-weight:700; padding:7px 10px; cursor:pointer; white-space:nowrap;}
 
   /* --- Right: Checkout Panel --- */
   .checkoutPanel{background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:0 2px 10px rgba(41,29,10,.07); display:flex; flex-direction:column;}
@@ -1861,7 +1880,7 @@
     .productGridFull{height:calc(100vh - 275px); margin-bottom:80px;}
     .floatingCartBar{left:10px; right:10px; bottom:12px; padding:12px 16px; font-size:13px;}
     .cartSheetBox{max-width:100%;}
-    .cartWrap{max-height:44vh;}
+    .cartWrap{max-height:58vh;}
     .advOrderBanner{margin:-14px -14px 10px; font-size:12.5px; padding:10px 12px;}
     #advOrderProductGrid.productGridFull{height:calc(100vh - 255px); margin-bottom:88px;}
 
@@ -1988,7 +2007,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR001</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR002</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2216,7 +2235,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR001</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR002</span>
     </div>
   </div>
 
@@ -2498,14 +2517,10 @@
 
         <div class="cartSheetBody">
           <div class="cartWrap">
-            <table class="cartTable">
-              <thead>
-                <tr><th>#</th><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th><th>Sale Record</th></tr>
-              </thead>
-              <tbody id="cartBody">
-                <!-- JS سے cart rows یہاں بنیں گی -->
-              </tbody>
-            </table>
+            <!-- ---------- AIO910FR002: ہر آئٹم ایک الگ ابھرا ہوا کیپسول — نام، تعداد، ریٹ، کل رقم سب اسی کے اندر ---------- -->
+            <div id="cartBody" class="cartCapsuleList">
+              <!-- JS سے cart کیپسول یہاں بنیں گے -->
+            </div>
             <div class="emptyCart" id="emptyCartMsg">Cart is empty — search above to add items</div>
             <div id="cartItemCountSummary" style="text-align:right; font-size:11.5px; font-weight:700; color:var(--muted); padding:6px 4px 0;"></div>
           </div>
@@ -6766,7 +6781,7 @@ function getOrCreateDeviceUID(){
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.freeTrialGranted = true;
     AppState.settings.isOnFreeTrial = true;
-    // ---------- AIO910FR001: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
+    // ---------- AIO910FR002: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
     AppState.settings.pinLockEnabled = false;
     AppState.settings.needsFirstEnter = true;
   }
@@ -7157,7 +7172,7 @@ function sendDevChat(channel){
 // ---------- AIOTEST12: اب Trial کے دوران بھی PIN چھوڑ کر اندر جانے والا شارٹ کٹ ختم — ہمیشہ اصل
 // Admin/Salesman ٹیب اور PIN درج کر کے ہی لاگ ان ہوگا، تاکہ نیچے والا Lockout نظام حقیقی معنوں میں کام کرے ---------- */
 
-// ---------- AIO910FR001: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
+// ---------- AIO910FR002: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
 // ڈیفالٹ 1234 والا اَن چھوا PIN گاہک کو معلوم ہی نہیں ہوتا، اس لیے اس پر PIN اسکرین نہیں آنی چاہیے ----------
 const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 function isPinGateNeeded(){
@@ -7399,7 +7414,7 @@ function refreshLoginLockoutUI(){
 
 async function login(){
   if(window._launchCheckPending === true) return;
-  // ---------- AIO910FR001: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
+  // ---------- AIO910FR002: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
   if(document.getElementById('loginScreen').classList.contains('loginQuick')){ quickEnterApp(); return; }
   if(isLoginLockedOut()) return;
 
@@ -7762,9 +7777,9 @@ function tryAutoLogin(){
   if(AppState.settings.forceLoginScreen === true){
     return false;
   }
-  // ---------- AIO910FR001: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
+  // ---------- AIO910FR002: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
   if(AppState.settings.needsFirstEnter === true) return false;
-  // ---------- AIO910FR001: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
+  // ---------- AIO910FR002: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
   if(!isSubscriptionActive()) return false;
   // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
   // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
@@ -9549,24 +9564,25 @@ function renderCart(){
   } else {
     emptyMsg.style.display = 'none';
     body.innerHTML = Billing.cart.map((item, idx) => `
-      <tr>
-        <td style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
-        <td>${item.name}</td>
-        <td>
-          <div class="qtyBtns">
-            <button onclick="changeQty(${item.variant_id}, -1)">−</button>
+      <div class="cartCapsule">
+        <div class="ccTop">
+          <span class="ccNum">${idx+1}</span>
+          <div class="ccName">${item.name}</div>
+          <div class="ccTotal">Rs. ${(item.qty * item.unitPrice).toLocaleString(undefined, {maximumFractionDigits:0})}</div>
+          <button type="button" class="ccDel" title="Remove" onclick="removeFromCart(${item.variant_id})">✕</button>
+        </div>
+        <div class="ccBottom">
+          <div class="ccQty">
+            <button type="button" onclick="changeQty(${item.variant_id}, -1)">−</button>
             <span>${item.qty}</span>
-            <button onclick="changeQty(${item.variant_id}, 1)">+</button>
+            <button type="button" onclick="changeQty(${item.variant_id}, 1)">+</button>
           </div>
-        </td>
-        <td>
-          <input type="number" class="rateEditInput" value="${item.unitPrice}" min="0" onfocus="this.select()"
+          <span class="ccX">×</span>
+          <input type="number" class="ccRate" value="${item.unitPrice}" min="0" onfocus="this.select()"
                  onchange="updateCartRate(${item.variant_id}, this.value)">
-        </td>
-        <td>Rs. ${(item.qty * item.unitPrice).toFixed(0)}</td>
-        <td><button class="removeBtn" onclick="removeFromCart(${item.variant_id})">Remove</button></td>
-        <td><button class="saleRecordBtn" onclick="showItemSaleRecord(${item.variant_id})" title="See this customer's past sale record for this item">🔁 Record</button></td>
-      </tr>
+          <button type="button" class="ccRec" onclick="showItemSaleRecord(${item.variant_id})" title="See this customer's past sale record for this item">🔁 Record</button>
+        </div>
+      </div>
     `).join('');
 
     // ---------- کل اقسام (varieties) اور کل کیٹگریز کا خلاصہ — تاکہ چیک آؤٹ سے پہلے صاف پتہ چلے کتنی چیزیں بل میں شامل ہیں ----------
@@ -22314,8 +22330,8 @@ async function purchaseViaPlayBilling(sku, days){
     }catch(ackErr){ console.warn('Acknowledge skipped:', ackErr); }
 
     // ---------- کامیاب خریداری — خریدے گئے پیکج کے دن جوڑیں ----------
-    // ---------- AIO910FR001: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
-    // ---------- 📅 AIO910FR001: دن مقامی (پاکستانی) تاریخ میں — رات 12 سے صبح 5 بجے تک UTC کی وجہ سے ایک دن کم نہ ہو۔
+    // ---------- AIO910FR002: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
+    // ---------- 📅 AIO910FR002: دن مقامی (پاکستانی) تاریخ میں — رات 12 سے صبح 5 بجے تک UTC کی وجہ سے ایک دن کم نہ ہو۔
     // آج کا دن شامل نہیں: 90 خریدے تو کل سے پورے 90 دن؛ ٹرائل/پرانی مدت چل رہی ہو تو اس کے بعد سے ----------
     const hasActivePaidSub = isSubscriptionActive();
     const ymdToLocal = (s) => { const [yy, mm, dd] = String(s).slice(0,10).split('-').map(Number); return new Date(yy, (mm || 1) - 1, dd || 1); };
@@ -22400,7 +22416,7 @@ async function syncPlayBillingRenewal(){
   // ---------- سرور کے بغیر خودکار توسیع بند: پہلے منسوخ کرنے والا گاہک ایک مدت مفت لے سکتا تھا ----------
   if(!PLAY_VERIFY_URL) return;
   const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
-  // ---------- AIO910FR001: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
+  // ---------- AIO910FR002: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
   if(daysLeft > 3 && !AppState.settings.isOnFreeTrial) return; // ---------- پیڈ سبسکرپشن کے فعال دورانیے میں بار بار نہ پوچھیں ----------
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
@@ -22432,7 +22448,7 @@ async function syncPlayBillingRenewal(){
   }
 }
 
-// ---------- 🔄 Restore Purchase (AIO910FR001) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
+// ---------- 🔄 Restore Purchase (AIO910FR002) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
 // شناخت گوگل پلے اکاؤنٹ سے ہوتی ہے (فون کے Play Store میں جو Gmail لاگ ان ہے)؛ ٹوکن کی تصدیق ہمارا سرور گوگل سے کرتا ہے۔ ----------
 async function restorePurchaseCore(){
   let purchases = null;
@@ -22461,7 +22477,7 @@ async function restorePurchaseCore(){
   if(!best) return { status: 'expired' };
 
   const current = AppState.settings.subscriptionExpiry || '';
-  // ---------- AIO910FR001: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
+  // ---------- AIO910FR002: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
   if(best > current || AppState.settings.isOnFreeTrial){
     AppState.settings.subscriptionExpiry = best;
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
@@ -22476,7 +22492,7 @@ async function restorePurchaseCore(){
 }
 
 
-// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO910FR001) —
+// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO910FR002) —
 // جب تک یہ چیک مکمل نہ ہو (زیادہ سے زیادہ 12 سیکنڈ) Enter بٹن رکا رہتا ہے، تاکہ پرانے خریدار کو نیا 14 دن ٹرائل نظر ہی نہ آئے۔
 // انٹرنیٹ/گوگل نہ چلے تو ایپ کو روکتے نہیں؛ ٹرائل کے دوران ہر بار کھلنے پر خودکار چیک چلتا رہتا ہے ----------
 async function launchRestoreCheck(){
