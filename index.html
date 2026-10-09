@@ -590,6 +590,8 @@
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
   /* ---------- AIO910FR003: Wholesale بند ہو تو اس سے متعلق ہر بٹن/خانہ چھپا رہے ---------- */
   body.wsOff .wsOnly{display:none !important;}
+  /* ---------- AIO910FR006: سنگل یوزر پیکج — ملٹی یوزر/کلاؤڈ سے متعلق ہر چیز چھپی رہے ---------- */
+  body.muOff .muOnly{display:none !important;}
   .cartCustChip{flex:0 0 auto; max-width:40%; display:inline-flex; align-items:center; gap:4px; padding:7px 10px; border-radius:999px;
     background:#dcfce7; color:#166534; font-weight:800; font-size:12.5px; white-space:nowrap; overflow:hidden; border:1px solid #bbf7d0;}
   .cartCustChip > span{overflow:hidden; text-overflow:ellipsis;}
@@ -2046,7 +2048,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR005</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR006</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2056,7 +2058,7 @@
       <button type="button" class="loginRoleTab active" id="loginTabAdmin" onclick="switchLoginRole('admin')">
         <span class="lrtIcon">👑</span><span>Admin</span>
       </button>
-      <button type="button" class="loginRoleTab" id="loginTabSalesman" onclick="switchLoginRole('salesman')" style="display:none;">
+      <button type="button" class="loginRoleTab muOnly" id="loginTabSalesman" onclick="switchLoginRole('salesman')" style="display:none;">
         <span class="lrtIcon">🧑‍💼</span><span>Salesman</span>
       </button>
     </div>
@@ -2274,7 +2276,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR005</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR006</span>
     </div>
   </div>
 
@@ -2319,7 +2321,7 @@
     <div class="navItem admin-only" data-screen="customers" onclick="goTo('customers')">🧑‍🤝‍🧑 Customers</div>
     <div class="navItem admin-only" data-screen="suppliers" onclick="goTo('suppliers')">🚚 Suppliers</div>
     <div class="navItem admin-only" data-screen="purchaseorders" onclick="goTo('purchaseorders')">📦 Purchase Orders</div>
-    <div class="navItem admin-only" data-screen="users" onclick="goTo('users')">🔑 Users</div>
+    <div class="navItem admin-only muOnly" data-screen="users" onclick="goTo('users')">🔑 Users</div>
     <div class="navItem admin-only" data-screen="myaccount" onclick="goTo('myaccount')">🏦 My Account</div>
     <div class="navItem admin-only" data-screen="settings" onclick="goTo('settings')">⚙️ Settings</div>
 
@@ -2379,7 +2381,7 @@
           <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
           <button class="hbcChatBtn" onclick="logout()" title="Logout" style="background:rgba(239,68,68,.85); color:#fff;">🚪</button>
-          <button class="hbcChatBtn admin-only" onclick="openConnectHub()" title="Connect / Join / Contact" style="background:rgba(59,130,246,.85); color:#fff;">🔗</button>
+          <button class="hbcChatBtn admin-only muOnly" onclick="openConnectHub()" title="Connect / Join / Contact" style="background:rgba(59,130,246,.85); color:#fff;">🔗</button>
         </div>
         <!-- ---------- ☁️/📥 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
         <div class="hbcLastBackupLine admin-only" id="hbcLastBackupLine"></div>
@@ -4590,7 +4592,7 @@
         </div>
 
         <!-- --- ☁️ Cloud Sync — Business Code، ملازمین اسی سے جُڑتے ہیں (Multi-Device) --- -->
-        <div class="settingsCard" id="settingsCardCloudSync">
+        <div class="settingsCard muOnly" id="settingsCardCloudSync">
           <h3>☁️ Cloud Sync (Multi-Device)</h3>
           <div id="cloudSyncStatusLine" style="font-size:12px; font-weight:700; margin-bottom:10px;"></div>
           <div class="settingsSubLabel">Your Business Code</div>
@@ -4763,7 +4765,7 @@
       </div>
 
       <!-- --- AIOTEST17: 🛍️ آن لائن کیٹلاگ — کسٹمر ایپ انسٹال کیے بغیر یہ لنک کھول کر آرڈر دے سکتا ہے --- -->
-      <div class="settingsCard">
+      <div class="settingsCard muOnly">
         <h3>🛍️ Online Catalog for Customers</h3>
         <div class="settingsHint">Share this link on WhatsApp — customers can view your products and place an order without installing the app. New orders appear right here on your Home screen.</div>
         <button class="testPrintBtn" style="margin-top:10px;" onclick="shareCatalogLink()">🔗 Share Catalog Link</button>
@@ -5322,6 +5324,7 @@ window.__cloudSyncError = null; // ---------- 🩺 تشخیصی: آخری Cloud 
 
 // ---------- موجودہ ID Token واپس کریں (میعاد ختم ہو تو خاموشی سے refresh، بالکل نیا ڈیوائس ہو تو نئی anonymous شناخت) ----------
 async function aioEnsureAuth(){
+  if(typeof AIO_MULTIUSER_ENABLED !== 'undefined' && !AIO_MULTIUSER_ENABLED) return null; // ---------- AIO910FR006: سنگل یوزر — کوئی کلاؤڈ لاگ اِن نہیں ----------
   const auth = AppState.settings.aioFbAuth;
   if(auth && auth.idToken && auth.expiresAt && auth.expiresAt > Date.now() + 60000){
     window.__cloudSyncError = null;
@@ -5375,17 +5378,24 @@ async function aioEnsureAuth(){
 }
 // ---------- Firestore کو authenticated (Bearer token) درخواست ----------
 async function aioAuthFetch(path, options = {}){
+  if(!AIO_MULTIUSER_ENABLED) throw new Error('Cloud sync disabled (single-user)'); // ---------- AIO910FR006 ----------
   const token = await aioEnsureAuth();
   if(!token) throw new Error('offline-or-auth-failed');
   const headers = Object.assign({}, options.headers, { 'Authorization': `Bearer ${token}` });
   return fetch(`${AIO_FIRESTORE_BASE}/${path}`, Object.assign({}, options, { headers }));
 }
 
+// ---------- AIO910FR006: ملٹی یوزر نظام (Cloud Sync / Business Code / ملازمین / Salesman / آن لائن کیٹلاگ) فی الحال بند —
+// یہ ایپ ابھی سنگل یوزر پیکج ہے۔ کوڈ مکمل موجود ہے؛ الگ پیکج کے طور پر دینا ہو تو صرف یہ true کر دیں ----------
+const AIO_MULTIUSER_ENABLED = false;
+try{ if(!AIO_MULTIUSER_ENABLED) document.body.classList.add('muOff'); }catch(e){}
+
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
 const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses']; // ---------- AIOTEST27: Advance Orders/Recovery/Finance بھی شامل ----------
 const cloudPollTimers = {};
 
 function initCloudSync(){
+  if(!AIO_MULTIUSER_ENABLED){ cloudSyncStatus = 'offline'; return; } // ---------- AIO910FR006: سنگل یوزر — کلاؤڈ سے کوئی رابطہ نہیں ----------
   getOrCreateBusinessId();
   aioEnsureAuth().then((token) => {
     if(token){ startCloudPolling(); }
@@ -5460,6 +5470,7 @@ async function pushDocTypeToCloud(docType, items){
   const meta = aioGetDocTypeMeta(docType);
   if(!meta) return false;
   saveToStorage(docType, items); // ---------- آف لائن فال بیک ہمیشہ پہلے مقامی طور پر (مکمل ڈیٹا سمیت) محفوظ کریں ----------
+  if(!AIO_MULTIUSER_ENABLED) return true; // ---------- AIO910FR006: سنگل یوزر — صرف اسی فون پر محفوظ ----------
   const cloudItems = meta.stripForCloud ? items.map(meta.stripForCloud) : items;
   const itemsJSON = JSON.stringify(cloudItems);
   // ---------- اگر ڈیٹا آخری کامیاب push جیسا ہی ہے اور کوئی pending retry بھی نہیں تو Firestore write سکِپ کریں ----------
@@ -5525,6 +5536,7 @@ function notifySyncConflict(docType){
 // ---------- کلاؤڈ سے تازہ ترین ڈیٹا لائیں — Fruit Mandi کا حفاظتی اصول شامل: اگر مقامی ڈیٹا ابھی تک صرف
 // اَن چھوا seed ڈیٹا ہے تو کبھی push نہ کریں (خالی/ڈیفالٹ ڈیٹا کلاؤڈ پر بھیج کر اصل محفوظ شدہ ڈیٹا مٹا سکتا تھا) ----------
 async function fetchDocTypeFromCloud(docType, silent){
+  if(!AIO_MULTIUSER_ENABLED) return false;
   const meta = aioGetDocTypeMeta(docType);
   if(!meta) return false;
   const looksLikeUntouchedSeed = meta.data.length <= meta.seed.length &&
@@ -5599,6 +5611,7 @@ function applyCloudDocTypeUI(docType){
 const CLOUD_POLL_INTERVALS = { pendingbills: 15000, approvalrequests: 15000, default: 45000 };
 function startCloudPolling(){
   stopCloudPolling();
+  if(!AIO_MULTIUSER_ENABLED) return;
   CLOUD_DOC_TYPES.forEach(docType => {
     const interval = CLOUD_POLL_INTERVALS[docType] || CLOUD_POLL_INTERVALS.default;
     cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, interval);
@@ -5655,6 +5668,7 @@ async function pushStoreInfoToCloud(){
 
 // ---------- کسٹمر کیٹلاگ پیج سے آئے تمام نئے آرڈرز کی فہرست لائیں (پوری subcollection پڑھیں) ----------
 async function fetchCustomerOrdersFromCloud(){
+  if(!AIO_MULTIUSER_ENABLED) return;
   try{
     const bizId = getOrCreateBusinessId();
     const res = await aioAuthFetch(`businesses/${bizId}/customerOrders?key=${AIO_FIREBASE_API_KEY}`);
@@ -6941,7 +6955,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   ]},
   { section: '⚙️ Management', tiles: [
     {icon:'🏦', label:'My Account', screen:'myaccount'},
-    {icon:'🔑', label:'Users', screen:'users'},
+    ...(AIO_MULTIUSER_ENABLED ? [{icon:'🔑', label:'Users', screen:'users'}] : []),
     {icon:'⚙️', label:'Settings', screen:'settings'},
   ]},
   { section: '🛠️ Tools', tiles: [
@@ -8135,8 +8149,8 @@ const APP_SEARCH_INDEX = [
   {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking pending fulfilled print list'},
   {label:'My Ads — Promote App', path:'My Ads', action:'openMyAdsModal', keywords:'my ads poster promote advertisement share whatsapp flex'},
   {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast todays sale'},
-  {label:'Users (Admin/Salesman)', path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission active inactive pin'},
-  {label:'Approval Requests', path:'Users → Approval Requests', screen:'users', keywords:'approval requests pending bills salesman approve reject'},
+  {label:'Users (Admin/Salesman)', muOnly:true, path:'Users', screen:'users', keywords:'users admin salesman staff role add user permission active inactive pin'},
+  {label:'Approval Requests', muOnly:true, path:'Users → Approval Requests', screen:'users', keywords:'approval requests pending bills salesman approve reject'},
   {label:'My Account', path:'My Account', screen:'myaccount', keywords:'my account business payment diary owner mobile number shop hub'},
   {label:'My Account — Business Info', path:'My Account', screen:'myaccount', keywords:'my account business info name logo owner address phone shop details'},
   {label:'My Account — Payment Accounts', path:'My Account', screen:'myaccount', anchor:'settingsCardPaymentAccounts', keywords:'my payment accounts bank iban qr easypaisa jazzcash whatsapp receive card poster receipt'},
@@ -8190,6 +8204,7 @@ function renderAppSearchResults(query){
   // اور جو چیز واقعی موجود نہیں اس کے غلط نتائج بھی سامنے نہیں آتے ----------
   const qWords = q.split(/\s+/).filter(Boolean);
   const scored = APP_SEARCH_INDEX
+    .filter(item => AIO_MULTIUSER_ENABLED || !item.muOnly) // ---------- AIO910FR006 ----------
     .map(item => {
       const label = item.label.toLowerCase();
       const path = item.path.toLowerCase();
@@ -26427,7 +26442,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO910FR005';
+  const APP_VERSION = 'AIO910FR006';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
