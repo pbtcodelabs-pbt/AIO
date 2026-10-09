@@ -440,7 +440,7 @@
     50%{ box-shadow:0 0 10px 2px rgba(220,38,38,.35); }
   }
   .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
-  /* ---------- AIO610TU027: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
+  /* ---------- AIO910FR001: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
   #loginScreen.loginQuick .loginPanel, #loginScreen.loginQuick #loginTouchIdWrap, #loginScreen.loginQuick #touchIdDivider,
   #loginScreen.loginQuick #enableTouchIdLabel, #loginScreen.loginQuick #turnOffTouchIdHint, #loginScreen.loginQuick .loginRememberRow,
   #loginScreen.loginQuick .loginForgotHint, #loginScreen.loginQuick #loginLockoutBox,
@@ -448,7 +448,7 @@
   #loginScreen.loginExpired #enableTouchIdLabel, #loginScreen.loginExpired #turnOffTouchIdHint, #loginScreen.loginExpired .loginRememberRow,
   #loginScreen.loginExpired .loginForgotHint, #loginScreen.loginExpired #loginEnterBtn, #loginScreen.loginExpired #loginLockoutBox{ display:none !important; }
 
-  /* ---------- AIO610TU027: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
+  /* ---------- AIO910FR001: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
   #trialCountdownStrip{display:none; align-items:center; justify-content:space-between; gap:10px; margin:6px 0 10px; padding:10px 12px; border-radius:12px; background:#ecfdf5; border:1.5px solid #86efac; color:#166534;}
   #trialCountdownStrip .tcsMain{display:flex; align-items:center; gap:9px; min-width:0;}
   #trialCountdownStrip #tcsIcon{font-size:22px; flex:0 0 auto;}
@@ -1988,7 +1988,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO610TU027</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR001</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2216,7 +2216,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO610TU027</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR001</span>
     </div>
   </div>
 
@@ -3622,6 +3622,14 @@
         <button class="billTabBtn active" id="trendGroupTab-item" onclick="setTrendGroupBy('item')">📦 Items</button>
         <button class="billTabBtn" id="trendGroupTab-customer" onclick="setTrendGroupBy('customer')">👥 Customers</button>
         <button class="billTabBtn" id="trendGroupTab-area" onclick="setTrendGroupBy('area')">🗺️ Areas</button>
+        <button class="billTabBtn" id="trendGroupTab-profit" onclick="setTrendGroupBy('profit')">💹 Profit</button>
+      </div>
+
+      <!-- ---------- ترتیب (Sort) — ہر ٹیب کا اپنا فلٹر، اوپر/نیچے (Ascending/Descending) بٹن کے ساتھ ---------- -->
+      <div id="trendSortRow" style="display:flex; align-items:center; gap:8px; margin:4px 0 12px;">
+        <span style="font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;">↕️ Sort by</span>
+        <select id="trendSortSel" onchange="setTrendSortField(this.value)" style="flex:1; min-width:0; padding:9px 10px; border-radius:10px; border:1.5px solid #dbe1ea; background:#fff; font-size:13px; font-weight:700; color:var(--text);"></select>
+        <button type="button" id="trendSortDirBtn" onclick="toggleTrendSortDir()" style="flex:0 0 auto; padding:9px 12px; border-radius:10px; border:1.5px solid var(--primary); background:var(--primary); color:#fff; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;">⬇️ High → Low</button>
       </div>
 
       <div id="trendSummaryBar"></div>
@@ -6758,7 +6766,7 @@ function getOrCreateDeviceUID(){
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.freeTrialGranted = true;
     AppState.settings.isOnFreeTrial = true;
-    // ---------- AIO610TU027: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
+    // ---------- AIO910FR001: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
     AppState.settings.pinLockEnabled = false;
     AppState.settings.needsFirstEnter = true;
   }
@@ -7149,7 +7157,7 @@ function sendDevChat(channel){
 // ---------- AIOTEST12: اب Trial کے دوران بھی PIN چھوڑ کر اندر جانے والا شارٹ کٹ ختم — ہمیشہ اصل
 // Admin/Salesman ٹیب اور PIN درج کر کے ہی لاگ ان ہوگا، تاکہ نیچے والا Lockout نظام حقیقی معنوں میں کام کرے ---------- */
 
-// ---------- AIO610TU027: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
+// ---------- AIO910FR001: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
 // ڈیفالٹ 1234 والا اَن چھوا PIN گاہک کو معلوم ہی نہیں ہوتا، اس لیے اس پر PIN اسکرین نہیں آنی چاہیے ----------
 const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 function isPinGateNeeded(){
@@ -7391,7 +7399,7 @@ function refreshLoginLockoutUI(){
 
 async function login(){
   if(window._launchCheckPending === true) return;
-  // ---------- AIO610TU027: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
+  // ---------- AIO910FR001: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
   if(document.getElementById('loginScreen').classList.contains('loginQuick')){ quickEnterApp(); return; }
   if(isLoginLockedOut()) return;
 
@@ -7754,9 +7762,9 @@ function tryAutoLogin(){
   if(AppState.settings.forceLoginScreen === true){
     return false;
   }
-  // ---------- AIO610TU027: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
+  // ---------- AIO910FR001: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
   if(AppState.settings.needsFirstEnter === true) return false;
-  // ---------- AIO610TU027: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
+  // ---------- AIO910FR001: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
   if(!isSubscriptionActive()) return false;
   // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
   // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
@@ -18558,7 +18566,21 @@ async function sharePaymentReceiptImage(paymentId){
    📈 TREND ANALYSIS — سیل/ریونیو ٹرینڈز (آئٹم وائز / کسٹمر وائز / ایریا وائز)
    ===================================================================== */
 let trendDateKey = 'today';
-let trendGroupBy = 'item'; // 'item' | 'customer' | 'area'
+let trendGroupBy = 'item'; // 'item' | 'customer' | 'area' | 'profit'
+
+// ---------- ہر ٹیب کے لیے ترتیب (Sort) کے اختیارات — ہر ٹیب اپنی آخری منتخب ترتیب یاد رکھتا ہے ----------
+const TREND_SORT_OPTIONS = {
+  item:     [ {key:'qty', label:'📦 Qty Sold'}, {key:'revenue', label:'💰 Revenue'}, {key:'name', label:'🔤 Name (A–Z)'} ],
+  customer: [ {key:'revenue', label:'💰 Revenue'}, {key:'billCount', label:'🧾 Bills'}, {key:'qty', label:'📦 Items Bought'}, {key:'name', label:'🔤 Name (A–Z)'} ],
+  area:     [ {key:'revenue', label:'💰 Revenue'}, {key:'custCount', label:'👥 Customers'}, {key:'billCount', label:'🧾 Bills'}, {key:'qty', label:'📦 Items Sold'}, {key:'name', label:'🔤 Name (A–Z)'} ],
+  profit:   [ {key:'profit', label:'💹 Profit (Rs.)'}, {key:'margin', label:'📊 Profit Margin %'}, {key:'qty', label:'📦 Qty Sold'}, {key:'revenue', label:'💰 Revenue'}, {key:'name', label:'🔤 Name (A–Z)'} ],
+};
+const trendSortState = {
+  item:     {field:'qty',     dir:'desc'},
+  customer: {field:'revenue', dir:'desc'},
+  area:     {field:'revenue', dir:'desc'},
+  profit:   {field:'profit',  dir:'desc'},
+};
 
 function setTrendDateKey(key){
   trendDateKey = key;
@@ -18573,13 +18595,54 @@ function setTrendGroupBy(key){
   document.getElementById('trendGroupTab-' + key).classList.add('active');
   renderTrendsScreen();
 }
+function setTrendSortField(field){
+  const st = trendSortState[trendGroupBy];
+  st.field = field;
+  // ---------- نام پر ترتیب ہو تو فطری طور پر A→Z، باقی سب میں زیادہ والے پہلے ----------
+  st.dir = field === 'name' ? 'asc' : 'desc';
+  renderTrendsScreen();
+}
+function toggleTrendSortDir(){
+  const st = trendSortState[trendGroupBy];
+  st.dir = st.dir === 'desc' ? 'asc' : 'desc';
+  renderTrendsScreen();
+}
+// ---------- Sort ڈراپ ڈاؤن اور سمت والا بٹن موجودہ ٹیب کے مطابق بھریں ----------
+function syncTrendSortControls(){
+  const sel = document.getElementById('trendSortSel');
+  const btn = document.getElementById('trendSortDirBtn');
+  if(!sel || !btn) return;
+  const st = trendSortState[trendGroupBy];
+  sel.innerHTML = TREND_SORT_OPTIONS[trendGroupBy].map(o => `<option value="${o.key}" ${o.key === st.field ? 'selected' : ''}>${o.label}</option>`).join('');
+  if(st.field === 'name') btn.textContent = st.dir === 'asc' ? '⬆️ A → Z' : '⬇️ Z → A';
+  else btn.textContent = st.dir === 'desc' ? '⬇️ High → Low' : '⬆️ Low → High';
+}
+// ---------- عمومی ترتیب — برابری کی صورت میں نام سے ترتیب تاکہ فہرست ہر بار ایک جیسی رہے ----------
+function sortTrendRows(rows){
+  const st = trendSortState[trendGroupBy];
+  const mul = st.dir === 'asc' ? 1 : -1;
+  return rows.sort((a,b) => {
+    if(st.field === 'name') return mul * String(a.name).localeCompare(String(b.name));
+    const diff = (a[st.field] || 0) - (b[st.field] || 0);
+    return diff !== 0 ? mul * diff : String(a.name).localeCompare(String(b.name));
+  });
+}
 
-// ---------- منتخب تاریخ کی حد میں موجود (اور Void نہ ہونے والے) بلوں سے آئٹم/کسٹمر/ایریا کا خلاصہ نکالیں ----------
+// ---------- ایک بل لائن کی فی یونٹ خرید قیمت — بالکل وہی اصول جو Billing کے منافع اشارے میں ہے:
+// پہلے اصل ویریئنٹ کی Purchase Price، نہ ملے تو (Loose/گرام آئٹم) بل میں محفوظ costPerUnit ----------
+function getTrendItemUnitCost(it){
+  const v = findVariantById(it.variant_id);
+  if(v) return { cost: Number(v.purchase) || 0, known: true };
+  if(it.costPerUnit != null) return { cost: Number(it.costPerUnit) || 0, known: true };
+  return { cost: 0, known: false };
+}
+
+// ---------- منتخب تاریخ کی حد میں موجود (اور Void نہ ہونے والے) بلوں سے آئٹم/کسٹمر/ایریا/منافع کا خلاصہ نکالیں ----------
 function computeTrendData(range){
-  const items = new Map();      // name -> {qty, revenue}
+  const items = new Map();      // name -> {qty, revenue, cost, costUnknown}
   const customers = new Map();  // key -> {name, qty, revenue, billCount}
   const areas = new Map();      // area -> {revenue, qty, billCount, customerIds:Set}
-  let totalRevenue = 0, totalBills = 0, totalQty = 0;
+  let totalRevenue = 0, totalBills = 0, totalQty = 0, totalItemRevenue = 0, totalCost = 0;
 
   invoicesData.forEach(inv => {
     if(inv.status === 'voided') return;
@@ -18588,12 +18651,17 @@ function computeTrendData(range){
     totalBills++;
     totalRevenue += inv.grand_total || 0;
 
-    // ---------- آئٹم وائز ----------
+    // ---------- آئٹم وائز (اور منافع کے لیے خرید قیمت) ----------
     (inv.items || []).forEach(it => {
       const rev = it.qty * it.unitPrice;
+      const uc = getTrendItemUnitCost(it);
+      const cost = it.qty * uc.cost;
       totalQty += it.qty;
-      const cur = items.get(it.name) || {qty:0, revenue:0};
-      cur.qty += it.qty; cur.revenue += rev;
+      totalItemRevenue += rev;
+      totalCost += cost;
+      const cur = items.get(it.name) || {qty:0, revenue:0, cost:0, costUnknown:false};
+      cur.qty += it.qty; cur.revenue += rev; cur.cost += cost;
+      if(!uc.known) cur.costUnknown = true;
       items.set(it.name, cur);
     });
 
@@ -18621,10 +18689,16 @@ function computeTrendData(range){
     }
   });
 
-  return { items, customers, areas, totalRevenue, totalBills, totalQty };
+  return { items, customers, areas, totalRevenue, totalBills, totalQty, totalItemRevenue, totalCost };
+}
+
+function fmtTrendMoney(n){
+  const r = Math.round((n || 0) * 100) / 100;
+  return 'Rs. ' + r.toLocaleString();
 }
 
 function renderTrendsScreen(){
+  syncTrendSortControls();
   const customFrom = document.getElementById('trendCustomFrom')?.value;
   const customTo = document.getElementById('trendCustomTo')?.value;
   const range = getDateRangeForKey(trendDateKey, customFrom, customTo);
@@ -18645,7 +18719,30 @@ function renderTrendsScreen(){
 
   const data = computeTrendData(range);
 
-  document.getElementById('trendSummaryBar').innerHTML = `
+  if(trendGroupBy === 'profit'){
+    // ---------- Profit ٹیب کا اپنا خلاصہ: کل منافع + مارجن % + بیچی گئی مقدار ----------
+    const totalProfit = data.totalItemRevenue - data.totalCost;
+    const totalMargin = data.totalItemRevenue > 0 ? (totalProfit / data.totalItemRevenue * 100) : 0;
+    const pColor = totalProfit < 0 ? '#b91c1c' : '#166534';
+    const pBg = totalProfit < 0 ? '#fef2f2' : '#f0fdf4';
+    document.getElementById('trendSummaryBar').innerHTML = `
+      <div style="display:flex; gap:8px; margin-bottom:6px;">
+        <div style="flex:1; background:${pBg}; border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:10.5px; color:${pColor}; font-weight:700;">💹 Profit</div>
+          <div style="font-size:16px; font-weight:800; color:${pColor};">${fmtTrendMoney(totalProfit)}</div>
+        </div>
+        <div style="flex:1; background:#eef2ff; border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:10.5px; color:var(--primary-dark); font-weight:700;">📊 Margin</div>
+          <div style="font-size:16px; font-weight:800; color:var(--primary-dark);">${totalMargin.toFixed(1)}%</div>
+        </div>
+        <div style="flex:1; background:#fff7ed; border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:10.5px; color:#9a3412; font-weight:700;">📦 Qty Sold</div>
+          <div style="font-size:16px; font-weight:800; color:#9a3412;">${data.totalQty}</div>
+        </div>
+      </div>
+      <div style="font-size:10.5px; color:var(--muted); text-align:center; margin-bottom:12px;">Gross profit = Sale − Purchase price (before bill discount)</div>`;
+  } else {
+    document.getElementById('trendSummaryBar').innerHTML = `
     <div style="display:flex; gap:8px; margin-bottom:14px;">
       <div style="flex:1; background:#eef2ff; border-radius:10px; padding:10px; text-align:center;">
         <div style="font-size:10.5px; color:var(--primary-dark); font-weight:700;">🧾 Bills</div>
@@ -18660,11 +18757,12 @@ function renderTrendsScreen(){
         <div style="font-size:16px; font-weight:800; color:#9a3412;">${data.totalQty}</div>
       </div>
     </div>`;
+  }
 
   const wrap = document.getElementById('trendListWrap');
 
   if(trendGroupBy === 'item'){
-    const rows = Array.from(data.items.entries()).map(([name, v]) => ({name, ...v})).sort((a,b) => b.qty - a.qty);
+    const rows = sortTrendRows(Array.from(data.items.entries()).map(([name, v]) => ({name, ...v})));
     if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales in this period</div>'; return; }
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
@@ -18675,7 +18773,7 @@ function renderTrendsScreen(){
       </div>
     `).join('');
   } else if(trendGroupBy === 'customer'){
-    const rows = Array.from(data.customers.values()).sort((a,b) => b.revenue - a.revenue);
+    const rows = sortTrendRows(Array.from(data.customers.values()));
     if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales in this period</div>'; return; }
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
@@ -18685,8 +18783,8 @@ function renderTrendsScreen(){
         </div>
       </div>
     `).join('');
-  } else { // area
-    const rows = Array.from(data.areas.entries()).map(([area, v]) => ({area, ...v})).sort((a,b) => b.revenue - a.revenue);
+  } else if(trendGroupBy === 'area'){
+    const rows = sortTrendRows(Array.from(data.areas.entries()).map(([area, v]) => ({name: area, area, custCount: v.customerIds.size, ...v})));
     if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales with an Area set on the customer profile in this period — add "Area / City / Route" when saving a customer</div>'; return; }
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
@@ -18696,6 +18794,28 @@ function renderTrendsScreen(){
         </div>
       </div>
     `).join('');
+  } else { // profit — کون سا آئٹم زیادہ اور کون سا کم منافع دے رہا ہے
+    const rows = sortTrendRows(Array.from(data.items.entries()).map(([name, v]) => {
+      const profit = v.revenue - v.cost;
+      const margin = v.revenue > 0 ? (profit / v.revenue * 100) : 0;
+      return {name, ...v, profit, margin};
+    }));
+    if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales in this period</div>'; return; }
+    wrap.innerHTML = rows.map((r, i) => {
+      const loss = r.profit < 0;
+      const color = loss ? '#b91c1c' : '#166534';
+      const warn = r.costUnknown ? ' • <span style="color:#b45309;">⚠️ purchase price missing</span>' : '';
+      return `
+      <div class="bankAccCard">
+        <div class="bankAccCardTop">
+          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.qty} sold • Sale ${fmtTrendMoney(r.revenue)} • Cost ${fmtTrendMoney(r.cost)}${warn}</div></div>
+          <div style="text-align:end; flex:0 0 auto;">
+            <div style="font-weight:800; font-size:15px; color:${color};">${loss ? '🔻 ' : ''}${fmtTrendMoney(r.profit)}</div>
+            <div style="font-size:11.5px; font-weight:700; color:${color};">${r.margin.toFixed(1)}%</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
   }
 }
 
@@ -22194,8 +22314,8 @@ async function purchaseViaPlayBilling(sku, days){
     }catch(ackErr){ console.warn('Acknowledge skipped:', ackErr); }
 
     // ---------- کامیاب خریداری — خریدے گئے پیکج کے دن جوڑیں ----------
-    // ---------- AIO610TU027: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
-    // ---------- 📅 AIO610TU027: دن مقامی (پاکستانی) تاریخ میں — رات 12 سے صبح 5 بجے تک UTC کی وجہ سے ایک دن کم نہ ہو۔
+    // ---------- AIO910FR001: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
+    // ---------- 📅 AIO910FR001: دن مقامی (پاکستانی) تاریخ میں — رات 12 سے صبح 5 بجے تک UTC کی وجہ سے ایک دن کم نہ ہو۔
     // آج کا دن شامل نہیں: 90 خریدے تو کل سے پورے 90 دن؛ ٹرائل/پرانی مدت چل رہی ہو تو اس کے بعد سے ----------
     const hasActivePaidSub = isSubscriptionActive();
     const ymdToLocal = (s) => { const [yy, mm, dd] = String(s).slice(0,10).split('-').map(Number); return new Date(yy, (mm || 1) - 1, dd || 1); };
@@ -22280,7 +22400,7 @@ async function syncPlayBillingRenewal(){
   // ---------- سرور کے بغیر خودکار توسیع بند: پہلے منسوخ کرنے والا گاہک ایک مدت مفت لے سکتا تھا ----------
   if(!PLAY_VERIFY_URL) return;
   const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
-  // ---------- AIO610TU027: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
+  // ---------- AIO910FR001: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
   if(daysLeft > 3 && !AppState.settings.isOnFreeTrial) return; // ---------- پیڈ سبسکرپشن کے فعال دورانیے میں بار بار نہ پوچھیں ----------
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
@@ -22312,7 +22432,7 @@ async function syncPlayBillingRenewal(){
   }
 }
 
-// ---------- 🔄 Restore Purchase (AIO610TU027) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
+// ---------- 🔄 Restore Purchase (AIO910FR001) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
 // شناخت گوگل پلے اکاؤنٹ سے ہوتی ہے (فون کے Play Store میں جو Gmail لاگ ان ہے)؛ ٹوکن کی تصدیق ہمارا سرور گوگل سے کرتا ہے۔ ----------
 async function restorePurchaseCore(){
   let purchases = null;
@@ -22341,7 +22461,7 @@ async function restorePurchaseCore(){
   if(!best) return { status: 'expired' };
 
   const current = AppState.settings.subscriptionExpiry || '';
-  // ---------- AIO610TU027: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
+  // ---------- AIO910FR001: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
   if(best > current || AppState.settings.isOnFreeTrial){
     AppState.settings.subscriptionExpiry = best;
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
@@ -22356,7 +22476,7 @@ async function restorePurchaseCore(){
 }
 
 
-// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO610TU027) —
+// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO910FR001) —
 // جب تک یہ چیک مکمل نہ ہو (زیادہ سے زیادہ 12 سیکنڈ) Enter بٹن رکا رہتا ہے، تاکہ پرانے خریدار کو نیا 14 دن ٹرائل نظر ہی نہ آئے۔
 // انٹرنیٹ/گوگل نہ چلے تو ایپ کو روکتے نہیں؛ ٹرائل کے دوران ہر بار کھلنے پر خودکار چیک چلتا رہتا ہے ----------
 async function launchRestoreCheck(){
