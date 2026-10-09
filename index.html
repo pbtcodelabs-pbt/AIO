@@ -2159,7 +2159,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA012</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA013</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2387,7 +2387,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA012</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA013</span>
     </div>
   </div>
 
@@ -19884,7 +19884,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   }
   if(receiptAccounts.length){
     accountBlockH = receiptAccounts.reduce((s,a) => s + 32 + (a.name ? 16 : 0), 0);
-    if(receiptQrImg) accountBlockH += 10 + 92 + 12 + 14 + 8;
+    if(receiptQrImg) accountBlockH += 10 + Math.min(130, (colX[2] - tableLeft) - 16) + 12 + 14 + 8; // AIO1010SA013: اصل QR سائز سے حساب — نیچے سے کٹے نہیں
   }
   estimatedHeight += Math.max(summaryBlockH, accountBlockH) + 24; // ---------- اب دونوں ساتھ ساتھ ہیں، جمع نہیں کرنے، جو بھی اونچا ہو وہی حساب میں شمار ----------
   const totalReturnedAmt = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
@@ -20131,17 +20131,19 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
 
   // ---------- رعایت ہو تو Subtotal اور Discount الگ سے دکھائیں — لیکن صرف اسی وقت جب کسٹمر بیلنس باکس نہیں بننا (ورنہ یہ اسی باکس کے اندر نظر آئیں گے) ----------
   // ---------- یہ چھوٹے ٹائٹل (Subtotal/Discount/Tax/Grand Total) ہمیشہ بائیں طرف ہی رہیں گے — Item الائنمنٹ سیٹنگ سے بے اثر ----------
-  ctx.textAlign = 'left';
+  // ---------- AIO1010SA013: ٹوٹلز اب دائیں طرف — ٹیبل کے Total کالم کے بالکل نیچے ----------
+  ctx.textAlign = 'right';
+  const totX = tableRight - 4;
   if(!invoice.customer_id){
     if(invoice.discount && invoice.discount > 0){
       const subtotalAmt = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(decimals), 10, y); y += 20;
-      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(decimals), 10, y); y += 24;
+      ctx.fillText('Subtotal: Rs. ' + subtotalAmt.toFixed(decimals), totX, y); y += 20;
+      ctx.fillText('Discount: Rs. ' + invoice.discount.toFixed(decimals), totX, y); y += 24;
     }
     if(invoice.tax_amount && invoice.tax_amount > 0){
       ctx.font = F('14px');
-      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), 10, y); y += 20;
+      ctx.fillText(`Tax (${invoice.tax_percent}%): Rs. ` + invoice.tax_amount.toFixed(decimals), totX, y); y += 20;
     }
   }
 
@@ -20151,15 +20153,19 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     if(!alreadyShowedSubtotal){
       const originalSubtotal = invoice.items.reduce((s,i) => s + i.qty*i.unitPrice, 0);
       ctx.font = F('14px');
-      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(decimals), 10, y); y += 20;
+      ctx.fillText('Subtotal: Rs. ' + originalSubtotal.toFixed(decimals), totX, y); y += 20;
     }
     ctx.fillStyle = '#dc2626';
-    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(decimals), 10, y); y += 24;
+    ctx.fillText('↩ Return Items: −Rs. ' + totalReturnedAmt.toFixed(decimals), totX, y); y += 24;
     ctx.fillStyle = '#000';
   }
 
   ctx.font = F('bold 20px');
-  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), 10, y);
+  ctx.fillText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals), totX, y);
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+  const gtW = ctx.measureText('Grand Total: Rs. ' + invoice.grand_total.toFixed(decimals)).width;
+  ctx.beginPath(); ctx.moveTo(totX - gtW, y + 6); ctx.lineTo(totX, y + 6); ctx.stroke();
+  ctx.textAlign = 'left';
   y += 34;
 
   // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
@@ -26619,7 +26625,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1010SA012';
+  const APP_VERSION = 'AIO1010SA013';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
