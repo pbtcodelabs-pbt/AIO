@@ -2013,6 +2013,27 @@
   <div id="thinProgressTrack"><div id="thinProgressFill"></div></div>
 </div>
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
+<!-- ---------- AIO910FR008: 🛠️ Developer Console — لاگ ان صفحے پر ورژن بیج پر 7 ٹیپ سے کھلتا ہے، صرف ڈویلپر کے لیے ---------- -->
+<div class="modalOverlay" id="devConsoleModal" style="z-index:9500;" onclick="if(event.target===this) closeDevConsole()">
+  <div class="modalBox" style="max-width:340px;">
+    <div class="modalHeader" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <h3 style="margin:0;">🛠️ Developer Console</h3>
+      <span class="closeBtn" onclick="closeDevConsole()" style="cursor:pointer;">✖</span>
+    </div>
+    <div id="devConsoleLocked">
+      <input type="password" id="devConsolePass" inputmode="numeric" autocomplete="off" placeholder="Developer password"
+             onkeydown="if(event.key==='Enter') submitDevConsolePass()"
+             style="width:100%; padding:11px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:15px; text-align:center; letter-spacing:3px; margin-bottom:8px;">
+      <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
+      <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
+    </div>
+    <div id="devConsoleOpen" style="display:none;">
+      <div style="background:#dcfce7; color:#166534; border-radius:10px; padding:10px; font-weight:800; font-size:13px; text-align:center; margin-bottom:10px;">✅ Developer Unlock is active on this phone<br><span style="font-weight:600; font-size:11.5px;">The app will never expire here.</span></div>
+      <button type="button" onclick="disableDeveloperUnlock()" style="width:100%; padding:10px; border:1.5px solid #fca5a5; border-radius:10px; background:#fff; color:#b91c1c; font-weight:800; font-size:13px; cursor:pointer;">Turn off Developer Unlock</button>
+    </div>
+  </div>
+</div>
+
 <!-- ---------- AIO910FR005: اپڈیٹ کے دوران اوپر پٹی — "Please wait…"، پھر پرانا اور نیا ورژن ---------- -->
 <div id="appUpdateBanner" role="status" aria-live="polite">
   <div class="aubRow">
@@ -2045,7 +2066,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR007</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR008</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2273,7 +2294,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR007</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR008</span>
     </div>
   </div>
 
@@ -6837,7 +6858,63 @@ function getOrCreateDeviceUID(){
   return uid;
 }
 
+// ---------- AIO910FR008: 🛠️ Developer Console — پاس ورڈ کوڈ میں نہیں لکھا، صرف PBKDF2 (200,000 بار) ہیش ----------
+const DEV_UNLOCK_SALT = 'AIO-DEV-UNLOCK-v1';
+const DEV_UNLOCK_HASH = 'ec6bf74a5d10d1524fbae3dd818a3be18c04bd13a6bc3242dd0e5d9fe6532a85';
+let _devTapCount = 0, _devTapTimer = null;
+function devConsoleBadgeTap(){
+  _devTapCount++;
+  clearTimeout(_devTapTimer);
+  _devTapTimer = setTimeout(() => { _devTapCount = 0; }, 2500);
+  if(_devTapCount >= 7){ _devTapCount = 0; openDevConsole(); }
+}
+function openDevConsole(){
+  const unlocked = !!AppState.settings.developerUnlock;
+  document.getElementById('devConsoleLocked').style.display = unlocked ? 'none' : 'block';
+  document.getElementById('devConsoleOpen').style.display = unlocked ? 'block' : 'none';
+  document.getElementById('devConsoleErr').style.display = 'none';
+  const inp = document.getElementById('devConsolePass'); inp.value = '';
+  document.getElementById('devConsoleModal').classList.add('show');
+  if(!unlocked) setTimeout(() => inp.focus(), 150);
+}
+function closeDevConsole(){ document.getElementById('devConsoleModal').classList.remove('show'); }
+async function devPassMatches(pass){
+  try{
+    if(!(window.crypto && crypto.subtle)) return false;
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt: enc.encode(DEV_UNLOCK_SALT), iterations:200000}, key, 256);
+    const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,'0')).join('');
+    return hex === DEV_UNLOCK_HASH;
+  }catch(e){ return false; }
+}
+async function submitDevConsolePass(){
+  const btn = document.getElementById('devConsoleBtn');
+  const pass = document.getElementById('devConsolePass').value.trim();
+  if(!pass) return;
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const ok = await devPassMatches(pass);
+  btn.disabled = false; btn.textContent = 'Unlock';
+  if(!ok){ document.getElementById('devConsoleErr').style.display = 'block'; return; }
+  AppState.settings.developerUnlock = true;
+  AppState.settings.isOnFreeTrial = false;
+  persistAllData();
+  closeDevConsole();
+  try{ setupLoginScreen(); }catch(e){}
+  try{ renderSubscriptionBanner(); }catch(e){}
+  alert('✅ Developer Unlock is now active on this phone.');
+}
+function disableDeveloperUnlock(){
+  if(!confirm('Turn off Developer Unlock on this phone?')) return;
+  AppState.settings.developerUnlock = false;
+  persistAllData();
+  closeDevConsole();
+  try{ setupLoginScreen(); }catch(e){}
+  try{ renderSubscriptionBanner(); }catch(e){}
+}
+
 function isSubscriptionActive(){
+  if(AppState.settings.developerUnlock) return true; // ---------- AIO910FR008: Developer Console سے کھلا فون — کبھی ختم نہیں ----------
   const exp = AppState.settings.subscriptionExpiry;
   if(!exp) return false;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -6860,7 +6937,7 @@ function renderSubscriptionBanner(){
   // ---------- صرف Home صفحے پر نظر آئے — باقی تمام صفحات (بشمول Billing) پر چھپی رہے ----------
   const activeScreen = document.querySelector('.screen.active');
   const isHomePage = activeScreen && activeScreen.id === 'screen-home';
-  if(!isHomePage || !isSubscriptionActive()){ row.style.display = 'none'; updateTrialStrip(); return; }
+  if(!isHomePage || !isSubscriptionActive() || AppState.settings.developerUnlock){ row.style.display = 'none'; updateTrialStrip(); return; }
 
   const daysLeft = daysLeftInSubscription();
   document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
@@ -7307,7 +7384,7 @@ function updateTrialStrip(){
   if(!strip) return;
   const activeScreen = document.querySelector('.screen.active');
   const onHome = activeScreen && activeScreen.id === 'screen-home';
-  if(!onHome || !isSubscriptionActive() || !AppState.settings.isOnFreeTrial){
+  if(!onHome || !isSubscriptionActive() || !AppState.settings.isOnFreeTrial || AppState.settings.developerUnlock){
     strip.style.display = 'none';
     if(_trialStripTimer){ clearInterval(_trialStripTimer); _trialStripTimer = null; }
     return;
@@ -7332,7 +7409,10 @@ async function setupLoginScreen(){
     getOrCreateDeviceUID(); // ---------- پہلی بار کھلنے پر یہیں سے 30 دن کا مفت ٹرائل بھی شروع ہو جاتا ہے ----------
 
     const statusEl = document.getElementById('loginSubStatus');
-    if(isSubscriptionActive()){
+    if(AppState.settings.developerUnlock){
+      statusEl.className = 'subscribedBadge';
+      statusEl.textContent = '🛠️ Developer Unlock — never expires';
+    } else if(isSubscriptionActive()){
       const days = daysLeftInSubscription();
       statusEl.className = AppState.settings.isOnFreeTrial ? 'subscribedBadge' : 'subscribedBadge';
       statusEl.textContent = AppState.settings.isOnFreeTrial
@@ -26439,7 +26519,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO910FR007';
+  const APP_VERSION = 'AIO910FR008';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
