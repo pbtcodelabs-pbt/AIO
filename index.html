@@ -440,7 +440,7 @@
     50%{ box-shadow:0 0 10px 2px rgba(220,38,38,.35); }
   }
   .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
-  /* ---------- AIO910FR002: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
+  /* ---------- AIO910FR003: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
   #loginScreen.loginQuick .loginPanel, #loginScreen.loginQuick #loginTouchIdWrap, #loginScreen.loginQuick #touchIdDivider,
   #loginScreen.loginQuick #enableTouchIdLabel, #loginScreen.loginQuick #turnOffTouchIdHint, #loginScreen.loginQuick .loginRememberRow,
   #loginScreen.loginQuick .loginForgotHint, #loginScreen.loginQuick #loginLockoutBox,
@@ -448,7 +448,7 @@
   #loginScreen.loginExpired #enableTouchIdLabel, #loginScreen.loginExpired #turnOffTouchIdHint, #loginScreen.loginExpired .loginRememberRow,
   #loginScreen.loginExpired .loginForgotHint, #loginScreen.loginExpired #loginEnterBtn, #loginScreen.loginExpired #loginLockoutBox{ display:none !important; }
 
-  /* ---------- AIO910FR002: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
+  /* ---------- AIO910FR003: ہوم پر Trial کاؤنٹ ڈاؤن پٹی ---------- */
   #trialCountdownStrip{display:none; align-items:center; justify-content:space-between; gap:10px; margin:6px 0 10px; padding:10px 12px; border-radius:12px; background:#ecfdf5; border:1.5px solid #86efac; color:#166534;}
   #trialCountdownStrip .tcsMain{display:flex; align-items:center; gap:9px; min-width:0;}
   #trialCountdownStrip #tcsIcon{font-size:22px; flex:0 0 auto;}
@@ -567,25 +567,28 @@
   .removeBtn{color:var(--danger); cursor:pointer; font-size:13px; border:none; background:none;}
   .saleRecordBtn{color:var(--primary-dark); cursor:pointer; font-size:12px; border:none; background:none; white-space:nowrap; font-weight:600;}
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
-  /* ---------- AIO910FR002: کارٹ آئٹم کیپسول — ہر لائن الگ، ابھری ہوئی، سب کنٹرول اسی کے پس منظر پر ---------- */
-  .cartCapsuleList{display:flex; flex-direction:column; gap:8px; padding:8px;}
-  .cartCapsule{position:relative; display:flex; flex-direction:column; gap:7px; padding:9px 10px 9px 12px; border-radius:16px;
-    background:linear-gradient(180deg,#ffffff 0%,#f3f7fb 100%); border:1px solid #e3e9f2;
-    box-shadow:0 3px 8px rgba(15,23,42,.08), 0 1px 0 rgba(255,255,255,.9) inset; overflow:hidden;}
-  .cartCapsule::before{content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--primary);}
-  .ccTop{display:flex; align-items:flex-start; gap:8px;}
-  .ccNum{flex:0 0 auto; min-width:22px; height:22px; padding:0 5px; border-radius:11px; background:var(--primary); color:#fff;
-    font-size:11.5px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;}
-  .ccName{flex:1; min-width:0; font-size:var(--cart-font-size, 14px); font-weight:var(--cart-font-weight, 700); color:var(--text); line-height:1.3; word-break:break-word;}
-  .ccTotal{flex:0 0 auto; font-size:15px; font-weight:800; color:var(--primary-dark); white-space:nowrap; margin-top:1px;}
-  .ccDel{flex:0 0 auto; width:26px; height:26px; border:none; border-radius:50%; background:#fee2e2; color:#dc2626; font-size:13px; font-weight:900; cursor:pointer; line-height:1;}
-  .ccBottom{display:flex; align-items:center; gap:8px;}
-  .ccQty{display:flex; align-items:center; background:#e9eef6; border-radius:999px; padding:3px; box-shadow:inset 0 1px 2px rgba(15,23,42,.08);}
-  .ccQty button{width:30px; height:30px; border:none; border-radius:50%; background:#fff; color:var(--primary-dark); font-size:17px; font-weight:900; cursor:pointer; box-shadow:0 1px 3px rgba(15,23,42,.15); line-height:1;}
-  .ccQty span{min-width:30px; text-align:center; font-weight:800; font-size:14px; color:var(--text);}
-  .ccX{color:var(--muted); font-weight:800; font-size:13px;}
-  .ccRate{width:82px; padding:7px 8px; border:1.5px solid #f2d98a; border-radius:999px; background:#fffbea; font-size:14px; font-weight:700; text-align:center; color:var(--text);}
-  .ccRec{margin-left:auto; flex:0 0 auto; border:none; border-radius:999px; background:#eef2ff; color:var(--primary-dark); font-size:12px; font-weight:700; padding:7px 10px; cursor:pointer; white-space:nowrap;}
+  /* ---------- AIO910FR003: Wholesale بند ہو تو اس سے متعلق ہر بٹن/خانہ چھپا رہے ---------- */
+  body.wsOff .wsOnly{display:none !important;}
+  .cartCustChip{flex:0 0 auto; max-width:40%; display:inline-flex; align-items:center; gap:4px; padding:7px 10px; border-radius:999px;
+    background:#dcfce7; color:#166534; font-weight:800; font-size:12.5px; white-space:nowrap; overflow:hidden; border:1px solid #bbf7d0;}
+  .cartCustChip > span{overflow:hidden; text-overflow:ellipsis;}
+  .cartCustChip.hasCust{background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;}
+  .cartCustChip button{flex:0 0 auto; border:none; background:rgba(0,0,0,.08); color:inherit; width:20px; height:20px; border-radius:50%;
+    font-size:10px; font-weight:900; cursor:pointer; align-items:center; justify-content:center; padding:0;}
+
+  /* ---------- AIO910FR003: کارٹ آئٹم — ایک ہی لائن کا پتلا، ابھرا ہوا کیپسول؛ ہر آئٹم کا ہلکا الگ رنگ ---------- */
+  .cartCapsuleList{display:flex; flex-direction:column; gap:6px; padding:6px;}
+  .cartCapsule{display:flex; align-items:center; gap:6px; padding:5px 6px 5px 10px; border-radius:999px;
+    background:var(--cc-bg,#eef6f3); border:1px solid var(--cc-bd,#cfe6de);
+    box-shadow:0 2px 5px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.75);}
+  .ccName{flex:1 1 auto; min-width:0; font-size:var(--cart-font-size, 13.5px); font-weight:var(--cart-font-weight, 700); color:#1e293b; line-height:1.2; word-break:break-word;}
+  .ccName small{display:block; font-size:11px; font-weight:800; color:var(--cc-tx,#0f5f4a); margin-top:1px;}
+  .ccQty{flex:0 0 auto; display:flex; align-items:center; gap:4px; background:rgba(255,255,255,.7); border-radius:999px; padding:2px;}
+  .ccQty button{width:28px; height:28px; border:none; border-radius:50%; background:#fff; color:var(--cc-tx,#0f5f4a); font-size:17px; font-weight:900;
+    cursor:pointer; box-shadow:0 1px 3px rgba(15,23,42,.18); line-height:1; padding:0;}
+  .ccQty span{min-width:34px; text-align:center; font-weight:800; font-size:13.5px; color:#1e293b;}
+  .ccRate{flex:0 0 auto; width:62px; padding:6px 4px; border:1.5px solid #f2d98a; border-radius:999px; background:#fffbea; font-size:13.5px; font-weight:800; text-align:center; color:#1e293b;}
+  .ccRec{flex:0 0 auto; width:28px; height:28px; border:none; border-radius:50%; background:rgba(255,255,255,.75); font-size:13px; cursor:pointer; padding:0; line-height:1;}
 
   /* --- Right: Checkout Panel --- */
   .checkoutPanel{background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:0 2px 10px rgba(41,29,10,.07); display:flex; flex-direction:column;}
@@ -2007,7 +2010,7 @@
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR002</div>
+    <div id="loginVersionBadge" style="font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO910FR003</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2235,7 +2238,7 @@
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR002</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO910FR003</span>
     </div>
   </div>
 
@@ -2390,12 +2393,8 @@
 
       <div class="billingTopBar">
         <div class="modeToggleRow">
-          <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer">
-            <span class="switchTrack active" id="modeCounterSale" onclick="toggleCounterSale()">🚶</span>
-            <span class="switchLabel">Walk-in</span>
-          </label>
-
-          <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
+          <!-- ---------- AIO910FR003: Walk-in سوئچ ختم — کسٹمر نہ چنیں تو خودکار نقد (Cash) بل ---------- -->
+          <div class="billModeToggle wsOnly" style="flex:1 1 auto; min-width:0;">
             <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
             <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
           </div>
@@ -2469,37 +2468,31 @@
           <button type="button" onclick="adjustCartTextSetting('rowPad',1)" style="width:20px; height:20px; border-radius:5px; border:1px solid #dbe1ea; background:#fff; font-size:10px; padding:0;">↕+</button>
         </div>
 
-        <!-- ---------- کارٹ کے اندر ہی Walk-in/Retail/Wholesale — تاکہ بل بناتے وقت اگر موڈ تبدیل کرنا بھول جائیں تو دوبارہ باہر جانے کی ضرورت نہ پڑے ---------- -->
-        <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f8fafc; border-bottom:1px solid #eef1f6; flex-wrap:wrap;">
-          <label class="counterSwitchWrap" title="Red = Walk-in customer (no name on bill), Gray = select a registered customer">
-            <span class="switchTrack active" id="cartModeCounterSale" onclick="toggleCounterSale()">🚶</span>
-            <span class="switchLabel">Walk-in</span>
-          </label>
+        <!-- ---------- AIO910FR003: Retail/Wholesale صرف تب جب Settings میں Wholesale آن ہو ---------- -->
+        <div class="wsOnly" style="display:flex; align-items:center; gap:8px; padding:6px 10px; background:#f8fafc; border-bottom:1px solid #eef1f6;">
           <div class="billModeToggle" style="flex:1 1 auto; min-width:0;">
             <button id="cartModeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
             <button id="cartModeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
           </div>
         </div>
 
-        <!-- ---------- بل کے سب سے اوپر — کس کسٹمر کا بل بن رہا ہے، صاف نظر آئے اور یہیں سے تبدیل بھی ہو سکے۔ Walk-in ہمیشہ ڈیفالٹ منتخب رہتا ہے، جب تک "✖ End" نہ دبائیں یا نیچے سے کوئی کسٹمر منتخب نہ کریں ---------- -->
-        <div id="cartWalkinBanner" style="display:flex; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8; font-weight:700; font-size:13.5px; align-items:center; justify-content:space-between; gap:6px;">
-          <span id="cartCustomerStatusText">🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span></span>
-          <button type="button" id="cartEndCustomerBtn" onclick="endCustomerSelection()" title="Clear selected customer and go back to Walk-in"
-                  style="display:none; flex:0 0 auto; border:1px solid #f3b985; background:#fff; color:#b45309; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">✖ End</button>
-        </div>
-
         <!-- ---------- کسٹمر لسٹ — اب ایک عام ڈراپ ڈاؤن کی طرح: بند حالت میں صرف ایک لائن جگہ لیتی ہے، ٹیپ کرنے پر ہی نیچے کھلتی ہے۔
              Walk-in منتخب ہو تب بھی یہیں سے فوراً کسٹمر پکڑ سکتے ہیں۔ سرچ بار اور سٹی/ایریا فلٹر — ہزاروں کسٹمرز میں سے جلدی تلاش کے لیے ---------- -->
-        <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:10px 12px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
-          <div style="display:flex; gap:6px;">
-            <input type="text" id="custSearchInput" placeholder="🔍 Search customer by name/phone..." onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
+        <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:7px 10px; background:#fff7ed; border-bottom:1px solid #fde8c8;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <!-- ---------- AIO910FR003: موجودہ کسٹمر کا چھوٹا سا نشان — 💵 Cash (کوئی کسٹمر نہیں) یا 👤 نام + ✖ ---------- -->
+            <span id="cartCustomerChip" class="cartCustChip"><span id="cartCustomerStatusText">💵 Cash</span><button type="button" id="cartEndCustomerBtn" onclick="endCustomerSelection()" title="Clear customer — back to Cash sale" style="display:none;">✖</button></span>
+            <input type="text" id="custSearchInput" placeholder="🔍 Customer name/phone" onfocus="openCustomerList()" oninput="openCustomerList(); filterCustomerSelectOptions();"
                    style="flex:1 1 auto; min-width:0; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
             <select id="custAreaFilter" onchange="filterCustomerSelectOptions()" title="Filter by City/Area"
-                    style="flex:0 0 120px; padding:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;">
-              <option value="">🗺️ All Areas</option>
+                    style="flex:0 0 92px; min-width:0; padding:8px 4px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;">
+              <option value="">🗺️ Areas</option>
             </select>
+            <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
+                    style="flex:0 0 38px; height:36px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
           </div>
-          <div style="display:flex; gap:8px;">
+          <!-- ---------- AIO910FR003: پرانا "Select Customer" ڈبہ چھپا دیا — سرچ خانہ ہی فہرست کھولتا ہے ---------- -->
+          <div style="display:none;">
             <select class="custSelect" id="customerSelect" style="display:none;" onchange="onCustomerChange()">
               <option value="">— Select Customer —</option>
               <!-- یہ اب پوشیدہ ہے — صرف موجودہ منتخب کسٹمر کی ID رکھنے کے لیے، باقی سب کوڈ اسی سے پڑھتا ہے -->
@@ -2508,8 +2501,6 @@
               <span class="custTriggerText">— Select Customer —</span>
               <span class="custTriggerChevron">▾</span>
             </div>
-            <button type="button" title="Add new customer" onclick="openQuickAddCustomer()"
-                    style="flex:0 0 44px; border:1px solid #dbe1ea; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer;">+</button>
           </div>
           <div id="customerSelectListWrap" class="custPickList"></div>
         </div>
@@ -2517,7 +2508,7 @@
 
         <div class="cartSheetBody">
           <div class="cartWrap">
-            <!-- ---------- AIO910FR002: ہر آئٹم ایک الگ ابھرا ہوا کیپسول — نام، تعداد، ریٹ، کل رقم سب اسی کے اندر ---------- -->
+            <!-- ---------- AIO910FR003: ہر آئٹم ایک الگ ابھرا ہوا کیپسول — نام، تعداد، ریٹ، کل رقم سب اسی کے اندر ---------- -->
             <div id="cartBody" class="cartCapsuleList">
               <!-- JS سے cart کیپسول یہاں بنیں گے -->
             </div>
@@ -2676,7 +2667,7 @@
             <span class="vcFieldLabel">Sale Price</span>
             <input type="number" id="npRetail" value="0" onfocus="this.select()" oninput="npLiveMarkupSync('retail',this.value)">
           </div>
-          <div class="vcFieldWrap npExtra">
+          <div class="vcFieldWrap npExtra wsOnly">
             <span class="vcFieldLabel">Wholesale Price</span>
             <input type="number" id="npWholesale" value="0" onfocus="this.select()">
           </div>
@@ -4540,6 +4531,15 @@
           <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
             <input type="checkbox" id="trackInventoryChk" onchange="toggleTrackInventory(this.checked)" style="width:18px; height:18px; margin:0;">
             Track Inventory (block sales when out of stock)
+          </label>
+        </div>
+
+        <!-- --- AIO910FR003: 📦 Wholesale Pricing — ڈیفالٹ بند۔ بند ہو تو پوری ایپ میں صرف خرید اور فروخت قیمت --- -->
+        <div class="settingsCard">
+          <h3>📦 Wholesale Pricing</h3>
+          <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-size:13px; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="wholesaleEnabledChk" onchange="toggleWholesaleEnabled(this.checked)" style="width:18px; height:18px; margin:0;">
+            Use a separate Wholesale price (Retail / Wholesale buttons in Billing)
           </label>
         </div>
 
@@ -6632,6 +6632,7 @@ const DEFAULT_SETTINGS = {
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
   taxEnabled: false,
+  wholesaleEnabled: false, // ---------- AIO910FR003: Wholesale ریٹ ڈیفالٹ بند — صرف خرید اور فروخت قیمت، سادہ ایپ ----------
   trackInventory: false, // ---------- ڈیفالٹ آف — سٹاک ختم ہونے پر بھی بل بنتا رہے، مائنس میں جائے (موجودہ رویہ) ----------
   taxPercent: 0,
   invoiceStyle: 'thermal', // 'thermal' | 'a4' — تھرمل رسید یا رنگین A4 بزنس انوائس
@@ -6781,7 +6782,7 @@ function getOrCreateDeviceUID(){
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.freeTrialGranted = true;
     AppState.settings.isOnFreeTrial = true;
-    // ---------- AIO910FR002: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
+    // ---------- AIO910FR003: بالکل نئی انسٹالیشن — PIN نہیں، صرف Enter بٹن (پہلی بار)، اس کے بعد ایپ سیدھی کھلے ----------
     AppState.settings.pinLockEnabled = false;
     AppState.settings.needsFirstEnter = true;
   }
@@ -7172,7 +7173,7 @@ function sendDevChat(channel){
 // ---------- AIOTEST12: اب Trial کے دوران بھی PIN چھوڑ کر اندر جانے والا شارٹ کٹ ختم — ہمیشہ اصل
 // Admin/Salesman ٹیب اور PIN درج کر کے ہی لاگ ان ہوگا، تاکہ نیچے والا Lockout نظام حقیقی معنوں میں کام کرے ---------- */
 
-// ---------- AIO910FR002: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
+// ---------- AIO910FR003: PIN اسکرین کب درکار ہے؟ صرف تب جب صارف نے خود PIN Lock آن کیا ہو یا اپنا PIN بنایا ہو۔
 // ڈیفالٹ 1234 والا اَن چھوا PIN گاہک کو معلوم ہی نہیں ہوتا، اس لیے اس پر PIN اسکرین نہیں آنی چاہیے ----------
 const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 function isPinGateNeeded(){
@@ -7414,7 +7415,7 @@ function refreshLoginLockoutUI(){
 
 async function login(){
   if(window._launchCheckPending === true) return;
-  // ---------- AIO910FR002: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
+  // ---------- AIO910FR003: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
   if(document.getElementById('loginScreen').classList.contains('loginQuick')){ quickEnterApp(); return; }
   if(isLoginLockedOut()) return;
 
@@ -7777,9 +7778,9 @@ function tryAutoLogin(){
   if(AppState.settings.forceLoginScreen === true){
     return false;
   }
-  // ---------- AIO910FR002: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
+  // ---------- AIO910FR003: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
   if(AppState.settings.needsFirstEnter === true) return false;
-  // ---------- AIO910FR002: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
+  // ---------- AIO910FR003: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
   if(!isSubscriptionActive()) return false;
   // ---------- PIN Lock بند ہو تو سیدھا واحد Admin یوزر کے طور پر داخل کریں — کوئی PIN نہیں مانگا جائے گا۔
   // یہ صرف سنگل یوزر (بغیر Salesman/staff) کے لیے محفوظ ہے — Settings میں واضح انتباہ کے بعد ہی بند ہوتا ہے ----------
@@ -8906,7 +8907,7 @@ function renderVariantChooserList(productId){
   const list = document.getElementById('chooseVariantList');
 
   list.innerHTML = flat.map(v => {
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = getModePrice(v);
     const isNegative = v.stock < 0;
     const outOfStock = v.stock <= 0; // ---------- صرف بصری وارننگ کے لیے، بل بنانے میں رکاوٹ نہیں ----------
     const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
@@ -8996,7 +8997,7 @@ function renderBillingSearchSuggestions(query){
     if(v.label && baseName.endsWith(v.label)){
       baseName = baseName.slice(0, baseName.length - v.label.length).trim();
     }
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = getModePrice(v);
     return `
       <div class="bssRow" onclick="selectBillingSuggestion(${v.variant_id})">
         <span class="bssName">${baseName}</span>
@@ -9112,7 +9113,7 @@ function renderBillingProductGrid(){
     if(isSingleVariant){
       // ---------- صرف ایک ویریئنٹ ہو تو پہلے کی طرح براہ راست +/- سے کام چلے ----------
       const v = p.variants[0];
-      const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+      const price = getModePrice(v);
       const isNegative = v.stock < 0;
       const outOfStock = v.stock <= 0;
       const isLow = !outOfStock && v.stock <= (v.lowStockAt ?? 0);
@@ -9208,7 +9209,7 @@ function addToCart(variantId){
     return;
   }
 
-  const price = Billing.saleMode === 'retail' ? product.retail : product.wholesale;
+  const price = getModePrice(product);
 
   if(existing){
     existing.qty += 1;
@@ -9247,7 +9248,7 @@ function openReverseCalc(productId){
 
   const sel = document.getElementById('reverseCalcVariantSelect');
   sel.innerHTML = weightVariants.map(v => {
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = getModePrice(v);
     return `<option value="${v.variant_id}">${v.label} — Rs. ${price}</option>`;
   }).join('');
   sel.value = ReverseCalc.variantId;
@@ -9284,7 +9285,7 @@ function updateReverseCalc(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
   if(!v) return;
   const grams = parseWeightGrams(v.label);
-  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  const price = getModePrice(v);
   const pricePerGram = price / grams;
 
   document.getElementById('reverseCalcRateLine').textContent =
@@ -9311,7 +9312,7 @@ function addReverseCalcToCart(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
   if(!v) return;
   const grams = parseWeightGrams(v.label);
-  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  const price = getModePrice(v);
   const pricePerGram = price / grams;
 
   // ---------- موڈ کے مطابق حتمی گرام معلوم کریں — By Amount میں روپے سے، By Weight میں براہ راست کسٹمر کے بتائے گرام سے ----------
@@ -9479,6 +9480,14 @@ function removeFromCart(variantId){
   renderCart();
 }
 
+// ---------- AIO910FR003: موجودہ موڈ کی قیمت — Wholesale بند ہو، یا اس آئٹم کا Wholesale ریٹ خالی/صفر ہو، تو ہمیشہ Sale Price ----------
+function getModePrice(v, mode){
+  if(!v) return 0;
+  const m = mode || (typeof Billing !== 'undefined' ? Billing.saleMode : 'retail');
+  if(m === 'wholesale' && AppState.settings.wholesaleEnabled && Number(v.wholesale) > 0) return v.wholesale;
+  return v.retail;
+}
+
 // ---------- Retail / Wholesale Toggle (فوری تمام cart Priceیں تبدیل کرے) ----------
 function setSaleMode(mode){
   Billing.saleMode = mode;
@@ -9490,7 +9499,7 @@ function setSaleMode(mode){
   // موجودہ cart میں موجود Itemز کی Priceیں بھی نئے mode کے مطابق اپڈیٹ کریں
   Billing.cart.forEach(item => {
     const product = getFlatVariants().find(p => p.variant_id === item.variant_id);
-    if(product) item.unitPrice = mode === 'retail' ? product.retail : product.wholesale;
+    if(product) item.unitPrice = getModePrice(product, mode);
   });
 
   renderCart();
@@ -9501,7 +9510,7 @@ function setSaleMode(mode){
 // ---------- نوٹ: کسٹمر لسٹ اب ہمیشہ ایکٹو رہتی ہے (Walk-in کے دوران بھی) — صرف اوپر والا status بینر بدلتا ہے ----------
 function syncCartModeControls(){
   document.getElementById('modeCounterSale')?.classList.toggle('active', Billing.counterSale);
-  document.getElementById('cartModeCounterSale').classList.toggle('active', Billing.counterSale);
+  document.getElementById('cartModeCounterSale')?.classList.toggle('active', Billing.counterSale);
   document.getElementById('cartModeRetail').classList.toggle('active', Billing.saleMode === 'retail');
   document.getElementById('cartModeWholesale').classList.toggle('active', Billing.saleMode === 'wholesale');
   renderCartCustomerStatus();
@@ -9517,11 +9526,13 @@ function renderCartCustomerStatus(){
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
   if(customer){
-    statusText.innerHTML = `👤 ${customer.name} <span style="font-weight:500; color:var(--muted); font-size:11.5px;">${customer.area ? '(' + customer.area + ')' : ''}</span>`;
-    endBtn.style.display = 'inline-block';
+    statusText.textContent = `👤 ${customer.name}`;
+    endBtn.style.display = 'inline-flex';
+    document.getElementById('cartCustomerChip')?.classList.add('hasCust');
   } else {
-    statusText.innerHTML = '🚶 Walk-in Customer <span style="font-weight:500; color:var(--muted); font-size:11.5px;">(no name on bill)</span>';
+    statusText.textContent = '💵 Cash';
     endBtn.style.display = 'none';
+    document.getElementById('cartCustomerChip')?.classList.remove('hasCust');
   }
 }
 
@@ -9563,27 +9574,27 @@ function renderCart(){
     document.getElementById('cartItemCountSummary').textContent = '';
   } else {
     emptyMsg.style.display = 'none';
-    body.innerHTML = Billing.cart.map((item, idx) => `
-      <div class="cartCapsule">
-        <div class="ccTop">
-          <span class="ccNum">${idx+1}</span>
-          <div class="ccName">${item.name}</div>
-          <div class="ccTotal">Rs. ${(item.qty * item.unitPrice).toLocaleString(undefined, {maximumFractionDigits:0})}</div>
-          <button type="button" class="ccDel" title="Remove" onclick="removeFromCart(${item.variant_id})">✕</button>
+    // ---------- ہر آئٹم کا اپنا ہلکا رنگ — باری باری مختلف رنگ تاکہ ہر لائن دوسری سے الگ نظر آئے ----------
+    const CC_TINTS = [
+      ['#e7f6f0','#c6e9db','#0f5f4a'], ['#e8f0fe','#c9daf8','#1d4ed8'], ['#fdf2e4','#f6dcb4','#9a3412'],
+      ['#f3eafd','#ddccf6','#6b21a8'], ['#e6f6fb','#c3e7f2','#0e7490'], ['#fdeaf1','#f6cddc','#9d174d'],
+    ];
+    body.innerHTML = Billing.cart.map((item, idx) => {
+      const t = CC_TINTS[idx % CC_TINTS.length];
+      const lineTotal = (item.qty * item.unitPrice).toLocaleString(undefined, {maximumFractionDigits:0});
+      return `
+      <div class="cartCapsule" style="--cc-bg:${t[0]}; --cc-bd:${t[1]}; --cc-tx:${t[2]};">
+        <div class="ccName">${item.name}<small>Rs. ${lineTotal}</small></div>
+        <div class="ccQty">
+          <button type="button" onclick="changeQty(${item.variant_id}, -1)">−</button>
+          <span>${item.qty}</span>
+          <button type="button" onclick="changeQty(${item.variant_id}, 1)">+</button>
         </div>
-        <div class="ccBottom">
-          <div class="ccQty">
-            <button type="button" onclick="changeQty(${item.variant_id}, -1)">−</button>
-            <span>${item.qty}</span>
-            <button type="button" onclick="changeQty(${item.variant_id}, 1)">+</button>
-          </div>
-          <span class="ccX">×</span>
-          <input type="number" class="ccRate" value="${item.unitPrice}" min="0" onfocus="this.select()"
-                 onchange="updateCartRate(${item.variant_id}, this.value)">
-          <button type="button" class="ccRec" onclick="showItemSaleRecord(${item.variant_id})" title="See this customer's past sale record for this item">🔁 Record</button>
-        </div>
-      </div>
-    `).join('');
+        <input type="number" class="ccRate" value="${item.unitPrice}" min="0" onfocus="this.select()"
+               onchange="updateCartRate(${item.variant_id}, this.value)">
+        <button type="button" class="ccRec" onclick="showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button>
+      </div>`;
+    }).join('');
 
     // ---------- کل اقسام (varieties) اور کل کیٹگریز کا خلاصہ — تاکہ چیک آؤٹ سے پہلے صاف پتہ چلے کتنی چیزیں بل میں شامل ہیں ----------
     const distinctCategories = new Set(flat
@@ -10145,7 +10156,7 @@ function addReviewItem(variantId){
   if(!v) return;
   const existing = p.items.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else p.items.push({variant_id: variantId, name: v.name, qty:1, unitPrice: p.sale_mode === 'wholesale' ? v.wholesale : v.retail});
+  else p.items.push({variant_id: variantId, name: v.name, qty:1, unitPrice: getModePrice(v, p.sale_mode)});
   document.getElementById('reviewAddItemInput').value = '';
   document.getElementById('reviewSearchResults').classList.remove('show');
   renderPendingReview();
@@ -11489,10 +11500,10 @@ function renderVariantCardSection(productId){
             <input type="number" id="markupInput-${v.variant_id}" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'markupPercent',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)">
           </div>` : ''}
           <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Retail Price</span>
+            <span class="vcFieldLabel">Sale Price</span>
             <input type="number" id="retailInput-${v.variant_id}" value="${v.retail}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'retail',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
           </div>
-          <div class="vcFieldWrap">
+          <div class="vcFieldWrap wsOnly">
             <span class="vcFieldLabel">Wholesale Price</span>
             <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)">
           </div>
@@ -15612,7 +15623,7 @@ function renderAdvOrderProductGrid(){
 
     if(isSingleVariant){
       const v = p.variants[0];
-      const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+      const price = getModePrice(v);
       const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
       const qtyInCart = cartItem ? cartItem.qty : 0;
       priceLabel = `Rs. ${price}`;
@@ -15660,7 +15671,7 @@ function renderAdvOrderProductGrid(){
 function addToAdvOrderCartGrid(variantId){
   const v = getFlatVariants().find(f => f.variant_id === variantId);
   if(!v) return;
-  const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+  const price = getModePrice(v);
   const existing = advOrderCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
   else advOrderCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, unitPrice: price});
@@ -15699,7 +15710,7 @@ function renderAdvOrderVariantChooserList(productId){
   const productName = productsData.find(p=>p.product_id===productId)?.name || '';
 
   list.innerHTML = flat.map(v => {
-    const price = Billing.saleMode === 'retail' ? v.retail : v.wholesale;
+    const price = getModePrice(v);
     const cartItem = advOrderCart.find(c => c.variant_id === v.variant_id);
     const qty = cartItem ? cartItem.qty : 0;
     const label = v.name.replace(new RegExp('^' + productName + '\\s*', 'i'), '') || v.name;
@@ -18010,7 +18021,7 @@ function populateCustomerDropdown(){
       customersData.filter(c => !c.name.includes('Walk-in') && c.area && c.area.trim())
                    .map(c => c.area.trim())
     )].sort((a,b) => a.localeCompare(b));
-    areaSel.innerHTML = '<option value="">🗺️ All Areas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+    areaSel.innerHTML = '<option value="">🗺️ Areas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
     areaSel.value = areas.includes(prevArea) ? prevArea : '';
   }
   filterCustomerSelectOptions();
@@ -21738,6 +21749,7 @@ function renderSettingsScreen(){
   document.getElementById('taxPercentInput').value = AppState.settings.taxPercent || '';
 
   document.getElementById('trackInventoryChk').checked = !!AppState.settings.trackInventory;
+  document.getElementById('wholesaleEnabledChk').checked = !!AppState.settings.wholesaleEnabled;
 
   document.getElementById('markupPricingChk').checked = !!AppState.settings.markupPricingEnabled;
   document.getElementById('defaultMarkupPercentInput').value = AppState.settings.defaultMarkupPercent || '';
@@ -22330,8 +22342,8 @@ async function purchaseViaPlayBilling(sku, days){
     }catch(ackErr){ console.warn('Acknowledge skipped:', ackErr); }
 
     // ---------- کامیاب خریداری — خریدے گئے پیکج کے دن جوڑیں ----------
-    // ---------- AIO910FR002: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
-    // ---------- 📅 AIO910FR002: دن مقامی (پاکستانی) تاریخ میں — رات 12 سے صبح 5 بجے تک UTC کی وجہ سے ایک دن کم نہ ہو۔
+    // ---------- AIO910FR003: ٹرائل کے باقی دن بھی نئی سبسکرپشن میں جمع ہوں (تحفہ) — فعال ہو تو اسی کی آخری تاریخ سے آگے گنیں ----------
+    // ---------- 📅 AIO910FR003: دن مقامی (پاکستانی) تاریخ میں — رات 12 سے صبح 5 بجے تک UTC کی وجہ سے ایک دن کم نہ ہو۔
     // آج کا دن شامل نہیں: 90 خریدے تو کل سے پورے 90 دن؛ ٹرائل/پرانی مدت چل رہی ہو تو اس کے بعد سے ----------
     const hasActivePaidSub = isSubscriptionActive();
     const ymdToLocal = (s) => { const [yy, mm, dd] = String(s).slice(0,10).split('-').map(Number); return new Date(yy, (mm || 1) - 1, dd || 1); };
@@ -22416,7 +22428,7 @@ async function syncPlayBillingRenewal(){
   // ---------- سرور کے بغیر خودکار توسیع بند: پہلے منسوخ کرنے والا گاہک ایک مدت مفت لے سکتا تھا ----------
   if(!PLAY_VERIFY_URL) return;
   const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
-  // ---------- AIO910FR002: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
+  // ---------- AIO910FR003: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
   if(daysLeft > 3 && !AppState.settings.isOnFreeTrial) return; // ---------- پیڈ سبسکرپشن کے فعال دورانیے میں بار بار نہ پوچھیں ----------
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
@@ -22448,7 +22460,7 @@ async function syncPlayBillingRenewal(){
   }
 }
 
-// ---------- 🔄 Restore Purchase (AIO910FR002) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
+// ---------- 🔄 Restore Purchase (AIO910FR003) — فون بدلنے/ایپ دوبارہ انسٹال کرنے پر پرانی خریداری واپس۔
 // شناخت گوگل پلے اکاؤنٹ سے ہوتی ہے (فون کے Play Store میں جو Gmail لاگ ان ہے)؛ ٹوکن کی تصدیق ہمارا سرور گوگل سے کرتا ہے۔ ----------
 async function restorePurchaseCore(){
   let purchases = null;
@@ -22477,7 +22489,7 @@ async function restorePurchaseCore(){
   if(!best) return { status: 'expired' };
 
   const current = AppState.settings.subscriptionExpiry || '';
-  // ---------- AIO910FR002: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
+  // ---------- AIO910FR003: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
   if(best > current || AppState.settings.isOnFreeTrial){
     AppState.settings.subscriptionExpiry = best;
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
@@ -22492,7 +22504,7 @@ async function restorePurchaseCore(){
 }
 
 
-// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO910FR002) —
+// ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO910FR003) —
 // جب تک یہ چیک مکمل نہ ہو (زیادہ سے زیادہ 12 سیکنڈ) Enter بٹن رکا رہتا ہے، تاکہ پرانے خریدار کو نیا 14 دن ٹرائل نظر ہی نہ آئے۔
 // انٹرنیٹ/گوگل نہ چلے تو ایپ کو روکتے نہیں؛ ٹرائل کے دوران ہر بار کھلنے پر خودکار چیک چلتا رہتا ہے ----------
 async function launchRestoreCheck(){
@@ -26241,6 +26253,21 @@ function setTaxPercent(val){
 }
 
 // ---------- Track Inventory آن/آف — آن ہو تو بلنگ سٹاک ختم ہونے پر رک جائے گی، آف ہو تو مائنس میں جاتی رہے گی ----------
+// ---------- AIO910FR003: Wholesale آن/آف — بند ہو تو تمام Wholesale بٹن/خانے چھپ جائیں اور بلنگ ہمیشہ Sale Price پر ----------
+function applyWholesaleVisibility(){
+  const on = !!AppState.settings.wholesaleEnabled;
+  document.body.classList.toggle('wsOff', !on);
+  if(!on && typeof Billing !== 'undefined' && Billing.saleMode !== 'retail'){
+    setSaleMode('retail');
+  }
+}
+function toggleWholesaleEnabled(checked){
+  AppState.settings.wholesaleEnabled = checked;
+  persistAllData();
+  applyWholesaleVisibility();
+}
+try{ applyWholesaleVisibility(); }catch(e){ console.warn('wholesale visibility', e); }
+
 function toggleTrackInventory(checked){
   AppState.settings.trackInventory = checked;
   persistAllData();
