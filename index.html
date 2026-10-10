@@ -412,6 +412,18 @@
   #sidebarOverlay{display:none;}
   .screen{display:none; animation:fadeIn .25s ease;}
   .screen.active{display:block;}
+
+  /* ---------- AIO1010SA016: کروم بک / لیپ ٹاپ / بڑی اسکرین کا layout ----------
+     مسئلہ: بڑی اسکرین پر App Size زوم بار grid کے پہلے (220px) خانے میں بیٹھ جاتی تھی، اس لیے sidebar
+     دوسرے (چوڑے) خانے میں پوری اسکرین پر پھیل جاتا تھا اور اصل صفحہ (mainArea) نیچے 220px کی پتلی
+     پٹی میں دب جاتا تھا — کروم بک پر یہی "مینیو پوری اسکرین پر، آئٹمز غائب" والا بگ تھا۔
+     حل: ہر حصے کی جگہ grid میں واضح طور پر مقرر — sidebar ہمیشہ بائیں، زوم بار اور صفحہ دائیں۔ */
+  @media (min-width: 861px){
+    #app{grid-template-columns:220px minmax(0,1fr); grid-template-rows:auto minmax(0,1fr);}
+    #sidebar{grid-column:1; grid-row:1 / span 2; overflow-y:auto; min-height:0;}
+    #globalUiZoomBar{grid-column:2; grid-row:1;}
+    #mainArea{grid-column:2; grid-row:2; min-width:0;}
+  }
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
 
   /* ---------- 🎁 Trial Reminder — روزانہ ایک بار، چمکتا ہوا، حرکت کرتا ہوا Toast (بغیر بٹن، خود بخود غائب) ---------- */
@@ -1058,6 +1070,11 @@
     box-shadow:0 4px 14px rgba(15,23,42,.18);
   }
   body.billing-active .navArrowBar{ bottom:80px; } /* بلنگ اسکرین پر فلوٹنگ کارٹ بار سے اوپر رہے */
+  /* AIO1010SA016: بڑی اسکرین پر نیچے والی فلوٹنگ پٹیاں sidebar کے اوپر نہ آئیں — صرف صفحے والے حصے میں رہیں */
+  @media (min-width: 861px){
+    .floatingCartBar{left:236px;}
+    .navArrowBar{left:calc(50% + 110px);}
+  }
   .navArrowBar button{
     width:30px; height:30px; border-radius:50%; border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff;
@@ -2401,7 +2418,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA015</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA016</span>
     </div>
   </div>
 
@@ -26817,7 +26834,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1010SA015';
+  const APP_VERSION = 'AIO1010SA016';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
