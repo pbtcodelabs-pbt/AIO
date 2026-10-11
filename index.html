@@ -2190,7 +2190,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1110SU017</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1110SU018</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2418,7 +2418,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1110SU017</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1110SU018</span>
     </div>
   </div>
 
@@ -22690,7 +22690,7 @@ const PLAY_BILLING_PRODUCTS = [
   { sku: 'aio_user1plus0_12m', days: 365, label: '1 Year'   },
   // ---------- AIO1110SU017: ♾️ لائف ٹائم — ایک بار ادائیگی (Rs 25,000)، کبھی ختم نہیں۔ یہ سبسکرپشن نہیں بلکہ
   // Play Console → Monetize → Products → In-app products میں اسی Product ID سے "One-time product" بنانا ہے ----------
-  { sku: 'aio_user1plus0_lifetime', days: 0, label: 'Lifetime', lifetime: true },
+  { sku: 'aio_lifetime_onetime', days: 0, label: 'Lifetime', lifetime: true },
 ];
 // ---------- ♾️ لائف ٹائم والے کی میعاد اتنی دور رکھی گئی ہے کہ کبھی ختم نہ ہو؛ باقی سارا نظام (تاریخ پر مبنی) ویسے ہی چلتا رہے ----------
 const LIFETIME_EXPIRY = '2099-12-31';
@@ -26872,7 +26872,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1110SU017';
+  const APP_VERSION = 'AIO1110SU018';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
