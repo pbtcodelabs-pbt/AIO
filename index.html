@@ -2190,7 +2190,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1010SA015</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1110SU017</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2418,7 +2418,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1010SA016</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1110SU017</span>
     </div>
   </div>
 
@@ -7073,6 +7073,18 @@ function renderSubscriptionBanner(){
   if(!isHomePage || !isSubscriptionActive() || AppState.settings.developerUnlock){ row.style.display = 'none'; updateTrialStrip(); return; }
 
   const daysLeft = daysLeftInSubscription();
+  if(isLifetimeLicense()){
+    // ---------- AIO1110SU017: لائف ٹائم — نہ تاریخ ختم، نہ دن گنتی ----------
+    document.getElementById('subBoxStartLabel').textContent = '♾️ Lifetime';
+    document.getElementById('subBoxStartVal').textContent = formatDateDMY(AppState.settings.subscriptionActivatedOn);
+    document.getElementById('subBoxEndVal').textContent = 'Never';
+    document.getElementById('subBoxDaysVal').textContent = '♾️ Lifetime';
+    const db = document.getElementById('subBoxDays');
+    db.classList.remove('subBoxUrgentGlow'); db.style.background = '#ede9fe'; db.style.color = '#6d28d9';
+    row.style.display = 'flex';
+    updateTrialStrip();
+    return;
+  }
   document.getElementById('subBoxStartLabel').textContent = AppState.settings.isOnFreeTrial ? '🎁 Free Trial' : 'Subscribed';
   document.getElementById('subBoxStartVal').textContent = formatDateDMY(AppState.settings.subscriptionActivatedOn);
   document.getElementById('subBoxEndVal').textContent = formatDateDMY(AppState.settings.subscriptionExpiry);
@@ -7342,7 +7354,7 @@ function buildSenderInfoBlock(){
   try{
     if(isSubscriptionActive()){
       const d = daysLeftInSubscription();
-      lines.push(s.isOnFreeTrial
+      lines.push(isLifetimeLicense() ? `♾️ Status: Lifetime License` : s.isOnFreeTrial
         ? `🎁 Status: Free trial — ${d} day${d === 1 ? '' : 's'} left`
         : `✅ Status: Subscribed — ${d} day${d === 1 ? '' : 's'} left (till ${formatDateDMY(s.subscriptionExpiry)})`);
     } else {
@@ -7548,7 +7560,7 @@ async function setupLoginScreen(){
     } else if(isSubscriptionActive()){
       const days = daysLeftInSubscription();
       statusEl.className = AppState.settings.isOnFreeTrial ? 'subscribedBadge' : 'subscribedBadge';
-      statusEl.textContent = AppState.settings.isOnFreeTrial
+      statusEl.textContent = isLifetimeLicense() ? '♾️ Lifetime License — never expires' : AppState.settings.isOnFreeTrial
         ? `🎁 14-Day Free Trial — ${days} day${days===1?'':'s'} remaining`
         : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
     } else {
@@ -22676,7 +22688,22 @@ const PLAY_BILLING_PRODUCTS = [
   { sku: 'aio_user1plus0_3m',  days: 90,  label: '3 Months' },
   { sku: 'aio_user1plus0_6m',  days: 180, label: '6 Months' },
   { sku: 'aio_user1plus0_12m', days: 365, label: '1 Year'   },
+  // ---------- AIO1110SU017: ♾️ لائف ٹائم — ایک بار ادائیگی (Rs 25,000)، کبھی ختم نہیں۔ یہ سبسکرپشن نہیں بلکہ
+  // Play Console → Monetize → Products → In-app products میں اسی Product ID سے "One-time product" بنانا ہے ----------
+  { sku: 'aio_user1plus0_lifetime', days: 0, label: 'Lifetime', lifetime: true },
 ];
+// ---------- ♾️ لائف ٹائم والے کی میعاد اتنی دور رکھی گئی ہے کہ کبھی ختم نہ ہو؛ باقی سارا نظام (تاریخ پر مبنی) ویسے ہی چلتا رہے ----------
+const LIFETIME_EXPIRY = '2099-12-31';
+function isLifetimeSku(sku){ return PLAY_BILLING_PRODUCTS.some(p => p.sku === sku && p.lifetime); }
+function isLifetimeLicense(){
+  return AppState.settings.lifetimeLicense === true || String(AppState.settings.subscriptionExpiry || '') >= '2099-01-01';
+}
+// ---------- کسی خریداری کی میعاد: لائف ٹائم ہو تو سرور صرف "نامنظور" کہے تب رد، ورنہ Play کی ملکیت ہی کافی؛
+// سبسکرپشن کی میعاد صرف سرور (Google) کی بتائی تاریخ ----------
+function playPurchaseExpiry(sku, ver){
+  if(isLifetimeSku(sku)) return (ver && ver.access === false) ? '' : LIFETIME_EXPIRY;
+  return (ver && ver.access && ver.expiry) ? ver.expiry : '';
+}
 
 // ---------- 🔐 سرور سے خریداری کی تصدیق — مفت مدت کا راستہ بند کرنے کے لیے ----------
 // یہاں Cloudflare Worker کا لنک پیسٹ ہوگا (سرور بننے کے بعد)۔ خالی ہو تو خودکار تجدید/توسیع مکمل بند رہتی ہے،
@@ -22759,6 +22786,11 @@ async function purchaseViaPlayBilling(sku, days){
     alert('❌ This purchase only works inside the app when installed from the Play Store.');
     return;
   }
+  const lifetime = isLifetimeSku(sku);
+  if(isLifetimeLicense()){
+    alert('♾️ You already have a Lifetime License — no further purchase is needed.');
+    return;
+  }
   try{
     const paymentMethod = { supportedMethods: 'https://play.google.com/billing', data: { sku } };
     const request = new PaymentRequest([paymentMethod]);
@@ -22790,7 +22822,8 @@ async function purchaseViaPlayBilling(sku, days){
     // ---------- سرور ہو تو اس کی دی ہوئی اصل تاریخ ہی استعمال کریں (Google کا اپنا حساب)؛
     // سرور نہ ہو یا جواب نہ آئے تو ادائیگی چونکہ ابھی ابھی ہوئی ہے، دن جوڑ دیں ----------
     const ver = await verifyPurchaseOnServer(purchaseToken, sku);
-    if(ver && ver.access && ver.expiry && ver.expiry > newExpiry){ newExpiry = ver.expiry; }
+    if(lifetime){ newExpiry = LIFETIME_EXPIRY; AppState.settings.lifetimeLicense = true; }
+    else if(ver && ver.access && ver.expiry && ver.expiry > newExpiry){ newExpiry = ver.expiry; }
     // ---------- سرور منظوری (acknowledge) کی تصدیق نہ کرے تو ٹوکن قطار میں رکھیں — ایپ اگلی بار کھلنے پر دوبارہ بھیجے گی،
     // ورنہ Google 3 دن میں رقم واپس کر دیتا ہے ----------
     if(!(ver && ver.acknowledged)) queuePendingPlayAck(purchaseToken, sku);
@@ -22801,7 +22834,7 @@ async function purchaseViaPlayBilling(sku, days){
     persistAllData();
     document.getElementById('packagePlansModal')?.classList.remove('show');
     refreshAllScreens();
-    alert('✅ Subscription activated successfully via Google Play!');
+    alert(lifetime ? '♾️ Lifetime License activated via Google Play — it never expires. Thank you!' : '✅ Subscription activated successfully via Google Play!');
     afterSubscriptionChanged();
   } catch(err){
     console.error('Play Billing purchase failed:', err);
@@ -22875,14 +22908,16 @@ async function syncPlayBillingRenewal(){
     let bestExpiry = '';
     const mineP = purchases.filter(p => PLAY_BILLING_PRODUCTS.some(x => x.sku === p.itemId));
     const versP = await Promise.all(mineP.map(p => verifyPurchaseOnServer(p.purchaseToken, p.itemId)));
-    for(const ver of versP){
-      if(ver && ver.access && ver.expiry && ver.expiry > bestExpiry) bestExpiry = ver.expiry;
-    }
+    versP.forEach((ver, i) => {
+      const exp = playPurchaseExpiry(mineP[i].itemId, ver);
+      if(exp > bestExpiry) bestExpiry = exp;
+    });
     if(!bestExpiry) return;
 
     const current = AppState.settings.subscriptionExpiry || '';
     if(bestExpiry > current || AppState.settings.isOnFreeTrial){
       AppState.settings.subscriptionExpiry = bestExpiry;
+      if(bestExpiry === LIFETIME_EXPIRY) AppState.settings.lifetimeLicense = true;
       AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
       AppState.settings.isOnFreeTrial = false;
       AppState.settings.subscriptionViaPlayBilling = true;
@@ -22914,12 +22949,11 @@ async function restorePurchaseCore(){
   let best = '', anyReply = false;
   // ---------- رفتار: سب ٹوکن ایک ساتھ سرور کو بھیجیں ----------
   const vers = await Promise.all(mine.map(p => verifyPurchaseOnServer(p.purchaseToken, p.itemId)));
-  for(const ver of vers){
-    if(ver){
-      anyReply = true;
-      if(ver.access && ver.expiry && ver.expiry > best) best = ver.expiry;
-    }
-  }
+  vers.forEach((ver, i) => {
+    if(ver || isLifetimeSku(mine[i].itemId)) anyReply = true;
+    const exp = playPurchaseExpiry(mine[i].itemId, ver);
+    if(exp > best) best = exp;
+  });
   if(!anyReply) return { status: 'noserver' };
   if(!best) return { status: 'expired' };
 
@@ -22927,6 +22961,7 @@ async function restorePurchaseCore(){
   // ---------- AIO610TU027: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
   if(best > current || AppState.settings.isOnFreeTrial){
     AppState.settings.subscriptionExpiry = best;
+    if(best === LIFETIME_EXPIRY) AppState.settings.lifetimeLicense = true;
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.isOnFreeTrial = false;
     AppState.settings.subscriptionViaPlayBilling = true;
@@ -22973,8 +23008,8 @@ async function restorePurchaseNow(btn){
   if(btn){ btn.disabled = false; btn.textContent = oldText; }
 
   const msgs = {
-    restored:    `✅ Subscription restored — valid until ${r.expiry ? formatDateDMY(r.expiry) : ''}.`,
-    already:     `✅ Your access is already active until ${r.expiry ? formatDateDMY(r.expiry) : ''}.`,
+    restored:    r.expiry === LIFETIME_EXPIRY ? '♾️ Lifetime License restored — it never expires.' : `✅ Subscription restored — valid until ${r.expiry ? formatDateDMY(r.expiry) : ''}.`,
+    already:     isLifetimeLicense() ? '♾️ You already have a Lifetime License — it never expires.' : `✅ Your access is already active until ${r.expiry ? formatDateDMY(r.expiry) : ''}.`,
     none:        'No active purchase was found on this Google account.\n\nPlease make sure the Play Store on this phone is signed in to the same Google account you used to buy, then try again. Still stuck? Tap "Contact Us".',
     expired:     'Your earlier purchase has ended or was cancelled. Please choose a plan to continue.',
     noserver:    'Could not verify your purchase right now. Please check your internet and try again.',
@@ -23044,15 +23079,15 @@ function renderPackagePlansView(){
   };
   wrap.innerHTML = availablePlans.map(p => {
     const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
-    const priceLabel = `${info.price.currency} ${Number(info.price.value).toFixed(2)}`;
-    const look = planLook[p.days] || planLook[90];
+    const priceLabel = `${info.price.currency} ${Number(info.price.value).toLocaleString('en-US', {maximumFractionDigits:2})}`;
+    const look = p.lifetime ? {bg:'linear-gradient(135deg,#6d28d9,#a21caf 55%,#f59e0b)', tag:'♾️ One-time payment • never expires'} : (planLook[p.days] || planLook[90]);
     return `
-    <div onclick="purchaseViaPlayBilling('${p.sku}', ${p.days})" style="display:flex; justify-content:space-between; align-items:center; background:${look.bg}; border-radius:18px; padding:16px 18px; margin-bottom:12px; cursor:pointer; box-shadow:0 6px 14px rgba(15,23,42,.22), inset 0 1px 0 rgba(255,255,255,.35);">
+    <div onclick="purchaseViaPlayBilling('${p.sku}', ${p.days})" style="${p.lifetime ? 'border:2.5px solid #fde68a; ' : ''}display:flex; justify-content:space-between; align-items:center; background:${look.bg}; border-radius:18px; padding:16px 18px; margin-bottom:12px; cursor:pointer; box-shadow:0 6px 14px rgba(15,23,42,.22), inset 0 1px 0 rgba(255,255,255,.35);">
       <div>
-        <div style="font-weight:900; font-size:18px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3);">${p.label}</div>
+        <div style="font-weight:900; font-size:18px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3);">${p.lifetime ? '♾️ ' : ''}${p.label}</div>${p.lifetime ? '<div style="display:inline-block; margin-top:4px; font-size:10.5px; font-weight:900; background:#fde68a; color:#78350f; padding:2px 10px; border-radius:999px; white-space:nowrap;">⭐ BEST VALUE</div>' : ''}
         <div style="display:inline-block; margin-top:6px; padding:3px 12px; border-radius:999px; background:rgba(255,255,255,.25); color:#fff; font-size:11.5px; font-weight:800;">${look.tag}</div>
       </div>
-      <div style="padding:9px 14px; border-radius:999px; background:#fff; color:#0f172a; font-weight:900; font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,.2);">${priceLabel}</div>
+      <div style="flex:0 0 auto; white-space:nowrap; padding:9px 14px; border-radius:999px; background:#fff; color:#0f172a; font-weight:900; font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,.2);">${priceLabel}</div>
     </div>`;
   }).join('') +
   // ---------- واٹس ایپ پر پیکج کی قیمتیں بھیجنے کا بٹن — کوئی گاہک قیمت پوچھے تو ایک ٹیپ میں بھیج دیں ----------
@@ -23060,7 +23095,7 @@ function renderPackagePlansView(){
   // ---------- Google Play پالیسی کی لازمی شرط: خریداری سے پہلے، بغیر کسی اضافی کلک کے،
   // قیمت/billing cycle/auto-renewal کی صاف وضاحت نظر آنی چاہیے ----------
   `<div style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;">
-    ℹ️ Subscriptions (3 Months, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>.
+    ℹ️ Subscriptions (3 Months, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>.<br>♾️ <b>Lifetime</b> is a one-time payment — it never renews and never expires.
   </div>`;
 }
 
@@ -23071,7 +23106,7 @@ function sharePackagePlansTextWhatsApp(){
     alert('Plans are still loading. Please wait a moment and try again.');
     return;
   }
-  const names = { 90:'🟢 3 Months (90 days)', 180:'🔵 6 Months (180 days)', 365:'🟡 1 Year (365 days)' };
+  const names = { 90:'🟢 3 Months (90 days)', 180:'🔵 6 Months (180 days)', 365:'🟡 1 Year (365 days)', 0:'♾️ Lifetime (one-time payment, never expires)' };
   const lines = [];
   PLAY_BILLING_PRODUCTS.forEach(p => {
     const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
@@ -23086,7 +23121,8 @@ function sharePackagePlansTextWhatsApp(){
     `📦 *AIO POS — Subscription Plans*\n\n` +
     lines.join('\n') + `\n\n` +
     `✅ First 14 days free trial.\n` +
-    `🔄 Every plan renews automatically; you can cancel anytime from Google Play.\n` +
+    `🔄 3/6/12-month plans renew automatically; you can cancel anytime from Google Play.\n` +
+    `♾️ Lifetime is a one-time payment — no renewal.\n` +
     `💳 Payment is made through Google Play. Tax may be added separately by Google.\n\n` +
     `📲 Get the app here:\nhttps://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -23283,9 +23319,11 @@ async function buildPlansPosterBlob(){
   ctx.fillStyle = gold; ctx.fillRect(W / 2 - 90, 1036, 180, 3);
   ctx.fillStyle = '#fdeaf3'; ctx.font = `700 52px ${FONT}`; ctx.textAlign = 'center';
   ctx.fillText('Subscription Plans', W / 2, 1100);
-  const colors = { 90: ['#2a9d8f', '#0f5a53'], 180: ['#5b86dd', '#2c4a9e'], 365: ['#d7a64a', '#8f5f1c'] };
+  const colors = { 90: ['#2a9d8f', '#0f5a53'], 180: ['#5b86dd', '#2c4a9e'], 365: ['#d7a64a', '#8f5f1c'], 0: ['#9333ea', '#6b21a8'] };
+  // ---------- AIO1110SU017: لائف ٹائم کے ساتھ 4 کارڈ — جگہ کے حساب سے کارڈ اور لکھائی چھوٹی ہو جائے ----------
+  const step = Math.min(194, Math.floor(570 / plans.length)), ks = (step - 24) / 170;
   plans.forEach((it, i) => {
-    const x = 70, y = 1140 + i * 194, w = 940, h = 170;
+    const x = 70, y = 1140 + i * step, w = 940, h = step - 24;
     const c = colors[it.p.days] || colors[90];
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 12;
@@ -23311,27 +23349,27 @@ async function buildPlansPosterBlob(){
     ctx.textAlign = 'left';
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
-    ctx.fillStyle = '#ffffff'; ctx.font = `700 56px ${FONT}`;
-    ctx.fillText(it.p.label, x + 48, y + 82);
+    ctx.fillStyle = '#ffffff'; ctx.font = `700 ${Math.round(56 * ks)}px ${FONT}`;
+    ctx.fillText(it.p.label, x + 48, y + 82 * ks);
     ctx.restore();
-    const tag = `${it.p.days} days`;
-    ctx.font = `700 28px ${FONT}`;
-    const tw = ctx.measureText(tag).width + 44;
-    posterRR(ctx, x + 48, y + 104, tw, 40, 20);
+    const tag = it.p.lifetime ? 'One-time • never expires' : `${it.p.days} days`;
+    ctx.font = `700 ${Math.round(28 * ks)}px ${FONT}`;
+    const tw = ctx.measureText(tag).width + 44 * ks;
+    posterRR(ctx, x + 48, y + 104 * ks, tw, 40 * ks, 20 * ks);
     ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill();
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(tag, x + 70, y + 133);
+    ctx.fillText(tag, x + 48 + 22 * ks, y + 133 * ks);
 
-    ctx.font = `700 46px ${FONT}`;
-    const pw = ctx.measureText(it.price).width + 72;
+    ctx.font = `700 ${Math.round(46 * ks)}px ${FONT}`;
+    const pw = ctx.measureText(it.price).width + 72 * ks;
     const ppx = x + w - 40 - pw;
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
-    posterRR(ctx, ppx, y + 35, pw, 100, 50);
+    posterRR(ctx, ppx, y + 35 * ks, pw, 100 * ks, 50 * ks);
     ctx.fillStyle = '#ffffff'; ctx.fill();
     ctx.restore();
     ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center';
-    ctx.fillText(it.price, ppx + pw / 2, y + 101);
+    ctx.fillText(it.price, ppx + pw / 2, y + 101 * ks);
   });
 
   // ---------- آخری سطریں ----------
@@ -26834,7 +26872,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1010SA016';
+  const APP_VERSION = 'AIO1110SU017';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
