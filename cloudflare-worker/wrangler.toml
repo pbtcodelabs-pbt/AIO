@@ -1,0 +1,9 @@
+# Cloudflare Worker: aio-pos-verify — Google Play خریداری کی تصدیق (AIO POS + FFPOS)
+# یہ فولڈر main میں بدلے تو GitHub Actions اسے خود Cloudflare پر Deploy کر دیتا ہے
+# (.github/workflows/deploy-worker.yml)۔ Cloudflare میں ہاتھ سے کوڈ نہ بدلیں، ورنہ اگلی Deploy اسے مٹا دے گی۔
+name = "aio-pos-verify"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+workers_dev = true
+# Cloudflare ڈیش بورڈ میں رکھے متغیر/خفیہ چابیاں (SERVICE_ACCOUNT_JSON وغیرہ) ویسے ہی رہیں
+keep_vars = true
