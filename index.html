@@ -378,7 +378,7 @@
     filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));}
   .navTile .ntNum{height:17px; background:#fff; color:#0f172a; font-size:11.5px; font-weight:900; text-align:center; line-height:17px;
     font-variant-numeric:tabular-nums; box-shadow:0 -1px 3px rgba(0,0,0,.18);}
-  .navTile .ntLabel{font-size:11.5px; font-weight:800; color:var(--text); text-align:center; line-height:1.2; max-width:88px;
+  .navTile .ntLabel{font-size:11.5px; font-weight:800; color:var(--tileLabelColor, var(--text)); font-family:var(--tileLabelFont, inherit); text-align:center; line-height:1.2; max-width:88px;
     text-shadow:0 1px 0 rgba(255,255,255,.8);}
   .navTile:active .ntBox{transform:scale(.93) translateY(1px); box-shadow:0 3px 6px -2px rgba(15,23,42,.35), 0 -2px 5px rgba(0,0,0,.2) inset;}
   .navTile .ntRemove{display:none; position:absolute; top:-8px; left:calc(50% - 44px); width:24px; height:24px; border-radius:50%;
@@ -406,34 +406,45 @@
   #sidebar .sbHeadTop{display:flex; align-items:center; justify-content:space-between; gap:8px;}
   #sidebar .sbBrand{font-size:17px; font-weight:800;}
   #sidebar .sbClose{background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:10px; width:34px; height:34px; font-size:16px; cursor:pointer; padding:0; margin:0;}
-  #sidebar .sbSortRow{display:flex; gap:8px; margin-top:10px;}
-  #sidebar .sbSortBtn{flex:1; background:rgba(255,255,255,.1); color:#fff; border:1.5px solid rgba(255,255,255,.25); border-radius:12px;
+  #sidebar .sbSortRow{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; width:0; min-width:100%;}
+  #sidebar .sbHint, #sidebar .sbStylePanel{width:0; min-width:100%; box-sizing:border-box;}
+  #sidebar .sbStyleBtn{background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:10px; width:34px; height:34px; font-size:16px; cursor:pointer; padding:0; margin:0;}
+  #sidebar .sbStylePanel{display:none; margin-top:10px; background:rgba(255,255,255,.1); border-radius:12px; padding:8px; font-size:11.5px;}
+  #sidebar .sbStylePanel.open{display:block;}
+  #sidebar .sbStylePanel .sspTitle{font-weight:900; margin:4px 0 5px; opacity:.95;}
+  #sidebar .sbStylePanel .sspRow{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
+  #sidebar .sbStylePanel input[type=color]{width:34px; height:28px; border:none; border-radius:7px; padding:0; background:none; flex:0 0 auto;}
+  #sidebar .sbStylePanel select{flex:1; min-width:0; border-radius:8px; border:none; padding:6px; font-size:12px; color:#0f172a;}
+  #sidebar .sbStylePanel .sspReset{background:rgba(255,255,255,.2); color:#fff; border:none; border-radius:8px; padding:6px 8px; font-size:11px; font-weight:800; cursor:pointer; margin:0; width:auto; flex:0 0 auto;}
+  #sidebar .sbSortBtn{background:rgba(255,255,255,.1); color:#fff; border:1.5px solid rgba(255,255,255,.25); border-radius:12px;
     padding:7px 6px; font-size:12px; font-weight:800; cursor:pointer; margin:0; width:auto;}
   #sidebar .sbSortBtn.active{background:#fff; color:var(--primary-dark); border-color:#fff;}
   #sidebar .sbHomeBtn{display:flex; align-items:center; gap:10px; margin-top:10px; width:100%; background:rgba(255,255,255,.12); color:#fff;
     border:none; border-radius:12px; padding:9px 12px; font-size:14px; font-weight:800; cursor:pointer;}
   #sidebar .sbHint{font-size:10.5px; opacity:.8; margin-top:8px; line-height:1.4;}
-  #sidebarNavList{display:flex; flex-direction:column; gap:7px; padding:10px 10px 4px;}
-  #sidebar #sidebarNavList .navItem.navCard{display:flex; align-items:center; gap:10px; padding:9px 10px; margin:0; border-radius:14px; opacity:1;
+  #sidebarNavList{display:flex; flex-direction:column; gap:5px; padding:10px 10px 4px;}
+  /* ---------- AIO1210MO020: ہلکے، خوبصورت، الگ الگ کارڈ — ہر کارڈ کا اپنا گول کونوں والا ڈبہ ---------- */
+  #sidebar #sidebarNavList .navItem.navCard{display:flex; align-items:center; gap:9px; padding:7px 10px 7px 7px; margin:0; border-radius:16px; opacity:1;
     background:var(--navColor);
-    background:linear-gradient(135deg, var(--navColor), color-mix(in srgb, var(--navColor) 72%, #000));
-    color:#fff; font-size:14.5px; font-weight:800; border:none; border-right:none;
-    box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 -3px 6px rgba(0,0,0,.18) inset, 0 4px 10px -4px rgba(0,0,0,.45);
+    background:linear-gradient(145deg, color-mix(in srgb, var(--navColor) 22%, #fff) 0%, color-mix(in srgb, var(--navColor) 42%, #fff) 100%);
+    color:var(--menuTextColor, #1e293b); font-family:var(--menuFont, inherit); font-size:14px; font-weight:800; border:1px solid rgba(255,255,255,.7); border-right:1px solid rgba(255,255,255,.7);
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -2px 5px rgba(0,0,0,.08) inset, 0 3px 8px -3px rgba(0,0,0,.45);
     touch-action:pan-y; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; transition:transform .12s ease;}
   #sidebar #sidebarNavList .navItem.navCard:active{transform:scale(.97);}
   #sidebar #sidebarNavList .navItem.navCard:hover, #sidebar #sidebarNavList .navItem.navCard.active{
-    opacity:1; border-right:none;
+    opacity:1; border-right:1px solid rgba(255,255,255,.7);
     background:var(--navColor);
-    background:linear-gradient(135deg, var(--navColor), color-mix(in srgb, var(--navColor) 72%, #000));}
+    background:linear-gradient(145deg, color-mix(in srgb, var(--navColor) 22%, #fff) 0%, color-mix(in srgb, var(--navColor) 42%, #fff) 100%);}
   #sidebar #sidebarNavList .navItem.navCard.active{outline:3px solid #fff; outline-offset:1px;}
   #sidebar .sbHead .navItem.sbHomeBtn{padding:9px 12px; opacity:1; border-right:none; font-size:14px;}
   #sidebar .sbHead .navItem.sbHomeBtn.active{background:#fff; color:var(--primary-dark);}
-  #sidebar .navCard .ncNum{flex:0 0 auto; min-width:34px; height:34px; border-radius:10px; background:#fff; color:#0f172a;
-    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; box-shadow:0 2px 4px rgba(0,0,0,.25);}
+  #sidebar .navCard .ncNum{flex:0 0 auto; min-width:32px; height:32px; border-radius:10px; background:var(--navColor); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; font-family:inherit;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 2px 4px rgba(0,0,0,.25);}
   #sidebar .navCard .ncIcon{flex:0 0 auto; font-size:20px; filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));}
-  #sidebar .navCard .ncLabel{flex:1; min-width:0; line-height:1.2; text-shadow:0 1px 1px rgba(0,0,0,.25);}
-  #sidebar .navCard .ncGrip{flex:0 0 auto; font-size:18px; opacity:.85; padding:4px 2px 4px 6px; letter-spacing:-2px; touch-action:none; cursor:grab;}
-  #sidebar .navCard .ncOnHome{flex:0 0 auto; font-size:10px; font-weight:900; background:rgba(255,255,255,.25); border-radius:8px; padding:2px 6px;}
+  #sidebar .navCard .ncLabel{flex:1 1 auto; line-height:1.2; white-space:nowrap;}
+  #sidebar .navCard .ncGrip{flex:0 0 auto; font-size:18px; opacity:.55; color:#0f172a; padding:4px 2px 4px 6px; letter-spacing:-2px; touch-action:none; cursor:grab;}
+  #sidebar .navCard .ncOnHome{flex:0 0 auto; font-size:10px; font-weight:900; background:rgba(255,255,255,.75); color:#0f172a; border-radius:8px; padding:2px 6px; white-space:nowrap;}
   #sidebar .navCard.ncDragSrc{opacity:.45;}
   #sidebar .sbFoot{padding:6px 10px 0;}
   #sidebar .sbFoot .userTag{margin-top:6px; padding:10px 6px; border-top:1px solid rgba(255,255,255,.15);}
@@ -2098,12 +2109,13 @@
     body.billing-active #globalUiZoomBar{ padding:3px 12px; }
 
     /* ---------- AIO1210MO019: انگلش ایپ — مینیو بائیں طرف سے، اوپر سے نیچے تک ---------- */
+    /* ---------- AIO1210MO020: چوڑائی صرف سب سے لمبے نام جتنی ---------- */
     #sidebar{
-      position:fixed; top:0; left:calc(-1 * min(82vw, 320px) - 20px); bottom:0; width:min(82vw, 320px); z-index:800;
-      transition:left .25s ease; box-shadow:4px 0 20px rgba(0,0,0,.25);
-      overflow-y:auto; overscroll-behavior:contain;
+      position:fixed; top:0; left:0; bottom:0; width:max-content; min-width:210px; max-width:88vw; z-index:800;
+      transform:translateX(calc(-100% - 24px)); transition:transform .25s ease; box-shadow:4px 0 20px rgba(0,0,0,.25);
+      overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain;
     }
-    #sidebar.open{left:0;}
+    #sidebar.open{transform:translateX(0);}
 
     #sidebarOverlay{
       position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:700;
@@ -2284,7 +2296,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO019</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO020</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2512,7 +2524,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1210MO019</span>
+      <span style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px;">AIO1210MO020</span>
     </div>
   </div>
 
@@ -2547,12 +2559,19 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="sbHead">
       <div class="sbHeadTop">
         <div class="sbBrand">🧾 AIO POS</div>
-        <button type="button" class="sbClose" onclick="closeSidebar()" aria-label="Close menu">✖</button>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="sbStyleBtn" onclick="toggleNavStylePanel()" title="Text colour & font" aria-label="Style">🎨</button>
+          <button type="button" class="sbClose" onclick="closeSidebar()" aria-label="Close menu">✖</button>
+        </div>
       </div>
       <div class="sbSortRow">
-        <button type="button" class="sbSortBtn" id="sbSortAsc" onclick="setSidebarSort(false)">1 →</button>
-        <button type="button" class="sbSortBtn" id="sbSortDesc" onclick="setSidebarSort(true)">→ 1</button>
+        <button type="button" class="sbSortBtn" id="sbSortAsc" onclick="setSidebarSort('num')">1 →</button>
+        <button type="button" class="sbSortBtn" id="sbSortDesc" onclick="setSidebarSort('numdesc')">→ 1</button>
+        <button type="button" class="sbSortBtn" id="sbSortAz" onclick="setSidebarSort('az')">A → Z</button>
+        <button type="button" class="sbSortBtn" id="sbSortZa" onclick="setSidebarSort('za')">Z → A</button>
       </div>
+      <!-- ---------- 🎨 مینیو اور ہوم آئیکن کی لکھائی — رنگ اور فونٹ الگ الگ ---------- -->
+      <div class="sbStylePanel" id="sbStylePanel"></div>
       <button type="button" class="navItem sbHomeBtn" id="sbHomeBtn" data-screen="home" onclick="goTo('home'); closeSidebar();">🏠 Home</button>
       <div class="sbHint">Hold an item (or ⠿) and drag it onto Home to add it there.</div>
     </div>
@@ -7316,7 +7335,7 @@ function renderHomeUnfinishedCartCard(){
      باقی آئیکن جگہ چھوڑتے ہوئے سرکتے ہیں، چھوڑنے پر اپنی نئی جگہ پر بیٹھ جاتا ہے
    • سائیڈ مینیو سے کسی بھی کارڈ کو دبا کر (یا ⠿ سے) ہوم پر لا کر چھوڑیں → ہوم پر شامل
    • ✏️ Edit: ہر آئیکن پر ✖ — ہوم سے ہٹائیں (اسکرین ختم نہیں ہوتی، سائیڈ مینیو میں رہتی ہے) ===================== */
-const NAV_PALETTE = ['#4f46e5','#059669','#dc2626','#ea580c','#0d9488','#7c3aed','#0284c7','#c026d3','#0e7490','#ca8a04','#be123c','#9a3412','#2563eb','#16a34a','#db2777','#7c2d12'];
+const NAV_PALETTE = ['#6366f1','#10b981','#f43f5e','#f97316','#14b8a6','#8b5cf6','#0ea5e9','#d946ef','#06b6d4','#eab308','#ec4899','#84cc16','#3b82f6','#22c55e','#f59e0b','#a855f7'];
 const NAV_ITEMS = [
   {id:1,  icon:'🛒', label:'Billing',               screen:'billing'},
   {id:2,  icon:'🧾', label:'Bill History',          screen:'billhistory'},
@@ -7400,7 +7419,7 @@ function renderHomeIconGrid(){
   grid.innerHTML = `
     <div class="homeTilesHeader">
       <div class="homeSectionLabel">🧭 Shortcuts</div>
-      ${homeEditMode ? `<button type="button" class="homeTilesBtn ghostBtn" onclick="resetHomeTiles()">↺ Reset</button>` : ''}
+      ${homeEditMode ? `<button type="button" class="homeTilesBtn ghostBtn" onclick="openNavStyleFromHome()">🎨 Style</button><button type="button" class="homeTilesBtn ghostBtn" onclick="resetHomeTiles()">↺ Reset</button>` : ''}
       <button type="button" class="homeTilesBtn${homeEditMode ? ' done' : ''}" onclick="toggleHomeEditMode()">${homeEditMode ? '✅ Done' : '✏️ Edit'}</button>
     </div>
     <div class="homeEditHint">✋ Hold an icon and drag it to a new place • ✖ removes it from Home • Drag any item from the ☰ menu (or tap it there) to add it to Home</div>
@@ -7463,13 +7482,19 @@ function bindHomeGridEvents(){
 function renderSidebarNav(){
   const list = document.getElementById('sidebarNavList');
   if(!list) return;
-  const desc = AppState.settings.sidebarSortDesc === true;
-  const items = getAllowedNavItems().slice().sort((a,b) => desc ? b.id - a.id : a.id - b.id);
+  applyNavTextStyles();
+  const mode = navSortMode();
+  const items = getAllowedNavItems().slice().sort((a,b) =>
+    mode === 'numdesc' ? b.id - a.id :
+    mode === 'az' ? a.label.localeCompare(b.label) :
+    mode === 'za' ? b.label.localeCompare(a.label) : a.id - b.id);
   const onHome = new Set(AppState.currentRole ? getHomeTileIds() : []);
   const maxId = items.length ? Math.max(...items.map(x => x.id)) : 0;
   const a1 = document.getElementById('sbSortAsc'), a2 = document.getElementById('sbSortDesc');
-  if(a1){ a1.classList.toggle('active', !desc); a1.textContent = `1 → ${maxId || ''}`; }
-  if(a2){ a2.classList.toggle('active', desc); a2.textContent = `${maxId || ''} → 1`; }
+  if(a1){ a1.classList.toggle('active', mode === 'num'); a1.textContent = `1 → ${maxId || ''}`; }
+  if(a2){ a2.classList.toggle('active', mode === 'numdesc'); a2.textContent = `${maxId || ''} → 1`; }
+  document.getElementById('sbSortAz')?.classList.toggle('active', mode === 'az');
+  document.getElementById('sbSortZa')?.classList.toggle('active', mode === 'za');
   const homeBtn = document.getElementById('sbHomeBtn');
   if(homeBtn){
     const showHome = AppState.currentRole === 'admin' || navSalesmanAllowed().includes('home');
@@ -7510,10 +7535,70 @@ function renderSidebarNav(){
     });
   }
 }
-function setSidebarSort(desc){
-  AppState.settings.sidebarSortDesc = !!desc;
+function navSortMode(){
+  const m = AppState.settings.sidebarSortMode;
+  if(['num','numdesc','az','za'].includes(m)) return m;
+  return AppState.settings.sidebarSortDesc === true ? 'numdesc' : 'num';
+}
+function setSidebarSort(mode){
+  AppState.settings.sidebarSortMode = mode;
   persistAllData();
   renderSidebarNav();
+}
+
+// ---------- 🎨 مینیو اور ہوم آئیکن کی لکھائی کا رنگ اور فونٹ — دونوں کے الگ الگ ----------
+function navFontFamily(id){
+  const f = (typeof FONT_PRESETS !== 'undefined') ? FONT_PRESETS.find(x => x.id === id) : null;
+  return f ? f.family : '';
+}
+function applyNavTextStyles(){
+  const s = AppState.settings || {};
+  const root = document.documentElement.style;
+  const set = (k, v) => v ? root.setProperty(k, v) : root.removeProperty(k);
+  set('--menuTextColor', s.menuTextColor || '');
+  set('--menuFont', navFontFamily(s.menuFontId));
+  set('--tileLabelColor', s.tileLabelColor || '');
+  set('--tileLabelFont', navFontFamily(s.tileLabelFontId));
+}
+function setNavStyle(key, value){
+  if(value) AppState.settings[key] = value; else delete AppState.settings[key];
+  persistAllData();
+  applyNavTextStyles();
+  renderNavStylePanel();
+}
+function renderNavStylePanel(){
+  const p = document.getElementById('sbStylePanel');
+  if(!p) return;
+  const s = AppState.settings || {};
+  const fonts = (typeof FONT_PRESETS !== 'undefined') ? FONT_PRESETS : [];
+  const fontSelect = (key) => `<select onchange="setNavStyle('${key}', this.value)">
+      <option value="">Default font</option>
+      ${fonts.map(f => `<option value="${f.id}" ${s[key] === f.id ? 'selected' : ''} style="font-family:${f.family}">${f.label}</option>`).join('')}
+    </select>`;
+  p.innerHTML = `
+    <div class="sspTitle">☰ Menu text</div>
+    <div class="sspRow">
+      <input type="color" value="${s.menuTextColor || '#1e293b'}" oninput="setNavStyle('menuTextColor', this.value)" title="Menu text colour">
+      ${fontSelect('menuFontId')}
+      <button type="button" class="sspReset" onclick="setNavStyle('menuTextColor',''); setNavStyle('menuFontId','');">↺</button>
+    </div>
+    <div class="sspTitle">🧭 Home icon text</div>
+    <div class="sspRow">
+      <input type="color" value="${s.tileLabelColor || '#292524'}" oninput="setNavStyle('tileLabelColor', this.value)" title="Home icon text colour">
+      ${fontSelect('tileLabelFontId')}
+      <button type="button" class="sspReset" onclick="setNavStyle('tileLabelColor',''); setNavStyle('tileLabelFontId','');">↺</button>
+    </div>`;
+}
+function toggleNavStylePanel(forceOpen){
+  const p = document.getElementById('sbStylePanel');
+  if(!p) return;
+  const open = forceOpen === true ? true : !p.classList.contains('open');
+  if(open) renderNavStylePanel();
+  p.classList.toggle('open', open);
+}
+function openNavStyleFromHome(){
+  if(!document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+  toggleNavStylePanel(true);
 }
 function showNavToast(msg){
   let t = document.getElementById('navToast');
@@ -27357,7 +27442,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1210MO019';
+  const APP_VERSION = 'AIO1210MO020';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
