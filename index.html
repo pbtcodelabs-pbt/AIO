@@ -469,7 +469,7 @@
   #sidebar .sbFoot{padding:6px 10px 0;}
   #sidebar .sbFoot .userTag{margin-top:6px; padding:10px 6px; border-top:1px solid rgba(255,255,255,.15);}
   #sidebar .sbFoot .logoutBtn{width:calc(100% - 0px); margin:6px 0 0;}
-  /* ===================== AIO1210MO022: تنگ، کمپیکٹ مینیو (صفحے کا تقریباً تیسرا حصہ) ===================== */
+  /* ===================== AIO1210MO023: تنگ، کمپیکٹ مینیو (صفحے کا تقریباً تیسرا حصہ) ===================== */
   html body #sidebar .sbHead{padding:8px 7px 7px;}
   html body #sidebar .sbBrand{font-size:13.5px;}
   html body #sidebar .sbClose, html body #sidebar .sbStyleBtn{width:28px; height:28px; font-size:13px; border-radius:8px;}
@@ -2336,7 +2336,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO022</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO023</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2534,14 +2534,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <!-- ===================== APP SHELL ===================== -->
 <div id="app">
 
-  <!-- ---------- QUICK ACCESS DOCK (ہر صفحے پر موجود — کہیں سے بھی کہیں جائیں، ہوم پیج پر واپس آئے بغیر) ---------- -->
-  <div id="quickDock" class="quickDock">
-    <div class="quickDockHandle" onclick="toggleQuickDock()">⋮⋮</div>
-    <div class="quickDockPanel">
-      <div id="quickDockItems"></div>
-      <button class="quickDockEditBtn" onclick="toggleQuickDockEdit()">✏️ Edit</button>
-    </div>
-  </div>
+  <!-- AIO1210MO023: دائیں طرف والا Quick Access Dock ختم کر دیا (☰ مینیو اور ہوم شارٹ کٹس کافی ہیں) -->
 
   <!-- ---------- ◀ Back / 🏠 Home / ▶ Forward — ہر صفحے پر (Home کے علاوہ)، نیچے وسط میں کمپیکٹ بار ---------- -->
   <div class="navArrowBar" id="navArrowBar">
@@ -2564,7 +2557,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO022</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO023</span>
     </div>
   </div>
 
@@ -7376,7 +7369,7 @@ function renderHomeUnfinishedCartCard(){
    • سائیڈ مینیو سے کسی بھی کارڈ کو دبا کر (یا ⠿ سے) ہوم پر لا کر چھوڑیں → ہوم پر شامل
    • ✏️ Edit: ہر آئیکن پر ✖ — ہوم سے ہٹائیں (اسکرین ختم نہیں ہوتی، سائیڈ مینیو میں رہتی ہے) ===================== */
 const NAV_PALETTE = ['#6366f1','#10b981','#f43f5e','#f97316','#14b8a6','#8b5cf6','#0ea5e9','#d946ef','#06b6d4','#eab308','#ec4899','#84cc16','#3b82f6','#22c55e','#f59e0b','#a855f7'];
-// ---------- AIO1210MO022: نمبر A سے Z کی ترتیب میں — Advance Orders = 1، Bill & Print Settings = 2 ... ----------
+// ---------- AIO1210MO023: نمبر A سے Z کی ترتیب میں — Advance Orders = 1، Bill & Print Settings = 2 ... ----------
 const NAV_ITEMS = [
   {id:1,  icon:'📝', label:'Advance Orders',        screen:'advanceorders'},
   {id:2,  icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
@@ -27498,7 +27491,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1210MO022';
+  const APP_VERSION = 'AIO1210MO023';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
