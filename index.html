@@ -469,6 +469,26 @@
   #sidebar .sbFoot{padding:6px 10px 0;}
   #sidebar .sbFoot .userTag{margin-top:6px; padding:10px 6px; border-top:1px solid rgba(255,255,255,.15);}
   #sidebar .sbFoot .logoutBtn{width:calc(100% - 0px); margin:6px 0 0;}
+  /* ===================== AIO1210MO022: تنگ، کمپیکٹ مینیو (صفحے کا تقریباً تیسرا حصہ) ===================== */
+  html body #sidebar .sbHead{padding:8px 7px 7px;}
+  html body #sidebar .sbBrand{font-size:13.5px;}
+  html body #sidebar .sbClose, html body #sidebar .sbStyleBtn{width:28px; height:28px; font-size:13px; border-radius:8px;}
+  html body #sidebar .sbSortRow{gap:4px; margin-top:7px;}
+  html body #sidebar .sbSortBtn{padding:4px 2px; font-size:10.5px; border-radius:8px; border-width:1px;}
+  html body #sidebar .sbHead .navItem.sbHomeBtn{margin-top:7px; padding:5px 8px; font-size:12px; border-radius:9px; gap:6px;}
+  html body #sidebar .sbHint{font-size:9.5px; margin-top:5px;}
+  html body #sidebar #sidebarNavList{gap:4px; padding:7px 6px 4px;}
+  html body #sidebar #sidebarNavList .navItem.navCard{gap:5px; padding:4px 5px 4px 4px; border-radius:11px; font-size:10px; line-height:1.1; min-height:0;}
+  html body #sidebar #sidebarNavList .navCard .ncNum{min-width:19px; height:19px; border-radius:6px; font-size:10px;}
+  html body #sidebar #sidebarNavList .navCard .ncIcon{font-size:12px;}
+  html body #sidebar #sidebarNavList .navCard .ncLabel{white-space:normal; max-width:none; min-width:0; overflow-wrap:normal; word-break:normal; font-size:10.5px; line-height:1.12;}
+  html body #sidebar #sidebarNavList .navCard .ncGrip{font-size:11px; padding:0; letter-spacing:-3px; margin-right:-2px;}
+  html body #sidebar #sidebarNavList .navCard .ncOnHome{font-size:8.5px; padding:1px 4px;}
+  html body #sidebar .sbStylePanel{padding:6px; font-size:10.5px;}
+  html body #sidebar .sbStylePanel select{font-size:11px; padding:4px;}
+  html body #sidebar .sbStylePanel input[type=color]{width:26px; height:24px;}
+  html body #sidebar .sbFoot .userTag{font-size:11px;}
+  @media (max-width:860px){ html body #sidebar{min-width:0 !important; max-width:32vw !important;} html body #sidebar .sbBrand{font-size:12px;} html body #sidebar .sbHint{font-size:9px; line-height:1.2;} }
 
 
   /* --- 💬 Chat with Developer بلبلہ — Login/Subscription دونوں جگہ (Home پر اب Business Card کے اندر ہے) --- */
@@ -2131,7 +2151,7 @@
     /* ---------- AIO1210MO019: انگلش ایپ — مینیو بائیں طرف سے، اوپر سے نیچے تک ---------- */
     /* ---------- AIO1210MO020: چوڑائی صرف سب سے لمبے نام جتنی ---------- */
     #sidebar{
-      position:fixed; top:0; left:0; bottom:0; width:max-content; min-width:210px; max-width:88vw; z-index:800;
+      position:fixed; top:0; left:0; bottom:0; width:max-content; min-width:130px; max-width:46vw; z-index:800;
       transform:translateX(calc(-100% - 24px)); transition:transform .25s ease; box-shadow:4px 0 20px rgba(0,0,0,.25);
       overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain;
     }
@@ -2316,7 +2336,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO021</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO022</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2544,7 +2564,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO021</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO022</span>
     </div>
   </div>
 
@@ -7356,30 +7376,42 @@ function renderHomeUnfinishedCartCard(){
    • سائیڈ مینیو سے کسی بھی کارڈ کو دبا کر (یا ⠿ سے) ہوم پر لا کر چھوڑیں → ہوم پر شامل
    • ✏️ Edit: ہر آئیکن پر ✖ — ہوم سے ہٹائیں (اسکرین ختم نہیں ہوتی، سائیڈ مینیو میں رہتی ہے) ===================== */
 const NAV_PALETTE = ['#6366f1','#10b981','#f43f5e','#f97316','#14b8a6','#8b5cf6','#0ea5e9','#d946ef','#06b6d4','#eab308','#ec4899','#84cc16','#3b82f6','#22c55e','#f59e0b','#a855f7'];
+// ---------- AIO1210MO022: نمبر A سے Z کی ترتیب میں — Advance Orders = 1، Bill & Print Settings = 2 ... ----------
 const NAV_ITEMS = [
-  {id:1,  icon:'🛒', label:'Billing',               screen:'billing'},
-  {id:2,  icon:'🧾', label:'Bill History',          screen:'billhistory'},
-  {id:3,  icon:'📝', label:'Advance Orders',        screen:'advanceorders'},
-  {id:4,  icon:'📦', label:'Products',              screen:'products'},
+  {id:1,  icon:'📝', label:'Advance Orders',        screen:'advanceorders'},
+  {id:2,  icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
+  {id:3,  icon:'🧾', label:'Bill History',          screen:'billhistory'},
+  {id:4,  icon:'🛒', label:'Billing',               screen:'billing'},
   {id:5,  icon:'🏷️', label:'Categories',            screen:'categories'},
-  {id:6,  icon:'🧮', label:'Stock Adjustment',      screen:'stockadjustment'},
-  {id:7,  icon:'👥', label:'Customers',             screen:'customers'},
-  {id:8,  icon:'🚚', label:'Suppliers',             screen:'suppliers'},
-  {id:9,  icon:'💳', label:'Payments Record',       screen:'payments'},
-  {id:10, icon:'📊', label:'Dashboard',             screen:'dashboard'},
-  {id:11, icon:'📈', label:'Trend Analysis',        screen:'trends'},
-  {id:12, icon:'🖨️', label:'Reports',               action:'openReportCenterModal'},
-  {id:13, icon:'🏦', label:'My Account',            screen:'myaccount'},
-  {id:14, icon:'🔑', label:'Users',                 screen:'users', mu:true},
-  {id:15, icon:'⚙️', label:'Settings',              screen:'settings'},
-  {id:16, icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
-  {id:17, icon:'📋', label:'Reply Templates',       action:'openReplyTemplatesModal'},
-  {id:18, icon:'🗂️', label:'Package Plans',         action:'openPackagePlansModal'},
-  {id:19, icon:'📔', label:'My Diary',              screen:'mydiary'},
-  {id:20, icon:'💸', label:'Expenditure',           screen:'expenditure'},
-  {id:21, icon:'🛍️', label:'Purchase Orders',       screen:'purchaseorders'},
+  {id:6,  icon:'👥', label:'Customers',             screen:'customers'},
+  {id:7,  icon:'📊', label:'Dashboard',             screen:'dashboard'},
+  {id:8,  icon:'💸', label:'Expenditure',           screen:'expenditure'},
+  {id:9,  icon:'🏦', label:'My Account',            screen:'myaccount'},
+  {id:10, icon:'📔', label:'My Diary',              screen:'mydiary'},
+  {id:11, icon:'🗂️', label:'Package Plans',         action:'openPackagePlansModal'},
+  {id:12, icon:'💳', label:'Payments Record',       screen:'payments'},
+  {id:13, icon:'📦', label:'Products',              screen:'products'},
+  {id:14, icon:'🛍️', label:'Purchase Orders',       screen:'purchaseorders'},
+  {id:15, icon:'📋', label:'Reply Templates',       action:'openReplyTemplatesModal'},
+  {id:16, icon:'🖨️', label:'Reports',               action:'openReportCenterModal'},
+  {id:17, icon:'⚙️', label:'Settings',              screen:'settings'},
+  {id:18, icon:'🧮', label:'Stock Adjustment',      screen:'stockadjustment'},
+  {id:19, icon:'🚚', label:'Suppliers',             screen:'suppliers'},
+  {id:20, icon:'📈', label:'Trend Analysis',        screen:'trends'},
+  {id:21, icon:'🔑', label:'Users',                 screen:'users', mu:true},
 ];
-const NAV_DEFAULT_HOME_ADMIN = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+const NAV_DEFAULT_HOME_ADMIN = [1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21];
+// ---------- پرانے نمبر (AIO1210MO019–021) → نئے A–Z نمبر، تاکہ کسی کی بنائی ہوئی ترتیب ضائع نہ ہو ----------
+const NAV_OLD_TO_NEW = {1:4, 2:3, 3:1, 4:13, 5:5, 6:18, 7:6, 8:19, 9:12, 10:7, 11:20, 12:16, 13:9, 14:21, 15:17, 16:2, 17:15, 18:11, 19:10, 20:8, 21:14};
+function migrateNavNumbering(){
+  const s = AppState.settings;
+  if(!s || s.navNumberingAZ === true) return;
+  ['homeTilesAdmin','homeTilesSalesman'].forEach(k => {
+    if(Array.isArray(s[k])) s[k] = s[k].map(id => NAV_OLD_TO_NEW[Number(id)] || Number(id));
+  });
+  s.navNumberingAZ = true;
+  persistAllData();
+}
 function navColor(id){ return NAV_PALETTE[(id - 1) % NAV_PALETTE.length]; }
 function navItemById(id){ return NAV_ITEMS.find(x => x.id === Number(id)); }
 
@@ -7400,6 +7432,7 @@ function getAllowedNavItems(){
 }
 function homeTilesKey(){ return AppState.currentRole === 'admin' ? 'homeTilesAdmin' : 'homeTilesSalesman'; }
 function getHomeTileIds(){
+  migrateNavNumbering();
   const allowedIds = getAllowedNavItems().map(x => x.id);
   const saved = AppState.settings[homeTilesKey()];
   const base = Array.isArray(saved) ? saved
@@ -27465,7 +27498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1210MO021';
+  const APP_VERSION = 'AIO1210MO022';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
