@@ -469,7 +469,7 @@
   #sidebar .sbFoot{padding:6px 10px 0;}
   #sidebar .sbFoot .userTag{margin-top:6px; padding:10px 6px; border-top:1px solid rgba(255,255,255,.15);}
   #sidebar .sbFoot .logoutBtn{width:calc(100% - 0px); margin:6px 0 0;}
-  /* ===================== AIO1210MO023: تنگ، کمپیکٹ مینیو (صفحے کا تقریباً تیسرا حصہ) ===================== */
+  /* ===================== AIO1210MO024: تنگ، کمپیکٹ مینیو (صفحے کا تقریباً تیسرا حصہ) ===================== */
   html body #sidebar .sbHead{padding:8px 7px 7px;}
   html body #sidebar .sbBrand{font-size:13.5px;}
   html body #sidebar .sbClose, html body #sidebar .sbStyleBtn{width:28px; height:28px; font-size:13px; border-radius:8px;}
@@ -1161,6 +1161,66 @@
     background:linear-gradient(180deg,#14b8a6,#0f766e); box-shadow:0 3px 0 #134e4a, 0 4px 6px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.35);
     display:flex; align-items:center; justify-content:center; gap:4px; padding:0 4px; white-space:nowrap;}
   .pgRowVar em{font-style:normal; background:#facc15; color:#422006; border-radius:8px; padding:0 5px; font-size:11px;}
+
+  /* ===================== AIO1210MO024: بلنگ والا رنگین "کیپسول" ڈیزائن — Stock Adjustment / Products / Bill History ===================== */
+  .capRow{margin:0 0 7px; padding:4px 6px; border:1.5px solid #a7d7bd; border-radius:14px;
+    background:linear-gradient(180deg,#ffffff 0%,#f0fbf4 45%,#d9f2e3 100%);
+    box-shadow:0 3px 0 #9fd1b5, 0 4px 8px rgba(20,83,45,.12), inset 0 1px 0 #ffffff;}
+  .capRow.alt{background:linear-gradient(180deg,#ffffff 0%,#eff6ff 45%,#dbe8fb 100%); border-color:#b6cdf0;
+    box-shadow:0 3px 0 #a9c1e8, 0 4px 8px rgba(30,58,138,.12), inset 0 1px 0 #ffffff;}
+  .prCustomBg .capRow, .prCustomBg .capRow.alt{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 70%), var(--pr-bg);}
+  .prCustomBd .capRow, .prCustomBd .capRow.alt{border:2px solid var(--pr-bd); box-shadow:0 3px 0 var(--pr-bd), 0 4px 8px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.7);}
+  .capRow.capNeg, .prCustomBd .capRow.capNeg{border:2px solid #dc2626; box-shadow:0 3px 0 #991b1b, 0 4px 8px rgba(220,38,38,.2), inset 0 1px 0 #fff;}
+  .capRow .pgRowThumb{width:40px; height:40px;}
+  .capBox{min-width:0; background:#fff; border:1.5px solid #e2e8f0; border-radius:10px; padding:4px 7px; min-height:38px;
+    display:flex; flex-direction:column; justify-content:center; overflow:hidden;}
+  .capName b{font-size:var(--pr-size,13.5px); font-weight:var(--pr-weight,800); color:var(--pr-tx,#0f172a); font-family:var(--pr-font,inherit); line-height:1.2; word-break:break-word;}
+  .capName small{font-size:11px; font-weight:800; color:#b45309; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .capHead{position:sticky; top:0; z-index:3; background:linear-gradient(180deg,#14532d,#166534); color:#fff; padding:8px 8px;
+    border-radius:14px 14px 0 0; border-bottom:3px solid #facc15; font-size:11.5px; font-weight:800; text-align:center; margin-bottom:6px;}
+  .capHead span:nth-child(2){text-align:left; padding-left:4px;}
+  /* Stock Adjustment */
+  .saGrid{display:grid; grid-template-columns:40px minmax(0,1fr) 50px 58px 44px; gap:5px; align-items:center;}
+  .capIn{width:100%; min-width:0; height:38px; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:10px; background:#fff; text-align:center;
+    font-weight:900; font-size:13px; color:#166534; padding:0 2px; -moz-appearance:textfield;}
+  .capIn::-webkit-outer-spin-button, .capIn::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .capIn:focus{outline:none; border-color:#2563eb; box-shadow:0 0 0 2px rgba(37,99,235,.2);}
+  .capIn.neg{color:#b91c1c; border-color:#fca5a5; background:#fef2f2;}
+  .capIn.low{color:#c2410c; border-color:#fdba74; background:#fff7ed;}
+  .capIn.price{color:#b45309;}
+  /* Products */
+  .productCard.capCard{background:transparent; box-shadow:none; overflow:visible; border-radius:14px; margin-bottom:0;}
+  .productHead.capRow{display:grid; grid-template-columns:40px minmax(0,1fr) 54px auto 14px; gap:5px; align-items:center; padding:4px 6px; cursor:pointer;}
+  .productHead.capRow:hover{background:linear-gradient(180deg,#ffffff 0%,#f0fbf4 45%,#d9f2e3 100%);}
+  .productHead.capRow.alt:hover{background:linear-gradient(180deg,#ffffff 0%,#eff6ff 45%,#dbe8fb 100%);}
+  .capMid{align-items:center; text-align:center; padding:2px 3px;}
+  .capMid b{font-size:15px; font-weight:900; color:#0f766e; line-height:1.1;}
+  .capMid small{font-size:9.5px; font-weight:800; color:#64748b;}
+  .capMid.low b{color:#c2410c;} .capMid.neg b{color:#b91c1c;}
+  .capBtns{display:flex; gap:4px;}
+  .capBtn{width:32px; height:34px; border:none; border-radius:10px; font-size:14px; cursor:pointer; padding:0;
+    background:linear-gradient(180deg,#ffffff,#e2e8f0); box-shadow:0 3px 0 #94a3b8, 0 4px 5px rgba(0,0,0,.15), inset 0 1px 0 #fff;}
+  .capBtn.danger{background:linear-gradient(180deg,#fff1f2,#fecdd3); box-shadow:0 3px 0 #e11d48, 0 4px 5px rgba(0,0,0,.15), inset 0 1px 0 #fff;}
+  .capBtn:active{transform:translateY(2px);}
+  .productHead.capRow .chevron{font-size:11px; color:#0f172a; justify-self:center;}
+  .productCard.capCard .variantCardWrap{margin:-4px 4px 8px;}
+  .productList.capList{gap:0 !important;}
+  /* Bill History */
+  .billCard.capBill{display:block; padding:5px 6px; margin:0 0 8px;}
+  .cbTop{display:grid; grid-template-columns:40px minmax(0,1fr) auto; gap:5px; align-items:center;}
+  .cbTop.hasChk{grid-template-columns:auto 40px minmax(0,1fr) auto;}
+  .cbTop .capName b{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; word-break:normal;}
+  .cbTop .billCheckbox{margin:0 2px;}
+  .cbTags{display:flex; flex-wrap:wrap; gap:3px; margin-top:2px;}
+  .cbTags .billStatusTag, .cbTags .creatorBadge, .cbTags .pendingStatusTag{font-size:9.5px; padding:1px 6px; margin:0; line-height:1.4;}
+  .cbAmt{align-items:flex-end; text-align:right; padding:3px 7px;}
+  .cbAmt b{font-size:13.5px; font-weight:900; color:#166534; white-space:nowrap;}
+  .cbAmt small{font-size:10px; font-weight:800; color:#16a34a; white-space:nowrap;}
+  .cbAmt.due b{color:#0f172a;} .cbAmt.due small{color:#dc2626;}
+  .billActions.cbActs{display:flex; gap:5px; margin-top:6px;}
+  .billActions.cbActs button{flex:1 1 0; min-width:0; padding:6px 2px; border-radius:10px; font-size:11px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    box-shadow:0 2px 0 rgba(15,23,42,.18), 0 3px 5px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.7);}
+  .billActions.cbActs button:active{transform:translateY(2px);}
 
   .productGridCard.dragging{
     box-shadow:6px 10px 18px rgba(41,29,10,.35), -2px -2px 6px rgba(255,255,255,.8);
@@ -2336,7 +2396,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO023</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO024</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2557,7 +2617,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO023</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO024</span>
     </div>
   </div>
 
@@ -3132,12 +3192,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </select>
       </div>
 
-      <div class="stockAdjHeaderRow">
-        <div class="stockAdjColName">Item</div>
-        <div class="stockAdjColSmall">Stock</div>
-        <div class="stockAdjColSmall">Price</div>
-        <div class="stockAdjColSmall">Low Stock</div>
-      </div>
       <div id="stockAdjustmentListWrap"></div>
 
       <button id="stockAdjResetAllBtn" onclick="resetAllNegativeStockToZero()" style="display:none; width:100%; margin-top:14px; background:linear-gradient(180deg, var(--danger), #991b1b); color:#fff; border:none; border-radius:12px; padding:14px; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.12);">🔄 Reset ALL Negative Stock to 0</button>
@@ -7369,7 +7423,7 @@ function renderHomeUnfinishedCartCard(){
    • سائیڈ مینیو سے کسی بھی کارڈ کو دبا کر (یا ⠿ سے) ہوم پر لا کر چھوڑیں → ہوم پر شامل
    • ✏️ Edit: ہر آئیکن پر ✖ — ہوم سے ہٹائیں (اسکرین ختم نہیں ہوتی، سائیڈ مینیو میں رہتی ہے) ===================== */
 const NAV_PALETTE = ['#6366f1','#10b981','#f43f5e','#f97316','#14b8a6','#8b5cf6','#0ea5e9','#d946ef','#06b6d4','#eab308','#ec4899','#84cc16','#3b82f6','#22c55e','#f59e0b','#a855f7'];
-// ---------- AIO1210MO023: نمبر A سے Z کی ترتیب میں — Advance Orders = 1، Bill & Print Settings = 2 ... ----------
+// ---------- AIO1210MO024: نمبر A سے Z کی ترتیب میں — Advance Orders = 1، Bill & Print Settings = 2 ... ----------
 const NAV_ITEMS = [
   {id:1,  icon:'📝', label:'Advance Orders',        screen:'advanceorders'},
   {id:2,  icon:'🧾', label:'Bill & Print Settings', screen:'billsettings'},
@@ -9916,6 +9970,13 @@ document.addEventListener('click', (e) => {
 });
 
 const PG_THUMB_TINTS = ['#16a34a','#2563eb','#db2777','#ea580c','#7c3aed','#0d9488','#ca8a04','#dc2626'];
+
+// ---------- AIO1210MO024: کیپسول کی تصویر/پہلا حرف (بلنگ جیسا) ----------
+function capThumbHtml(name, image, seed){
+  if(image && String(image).trim()) return `<span class="pgRowThumb"><img src="${image}" alt="" loading="lazy"></span>`;
+  const ch = scanEscAttr(String(name || '').trim().charAt(0).toUpperCase() || '?');
+  return `<span class="pgRowThumb pgRowInitial" style="--ti:${PG_THUMB_TINTS[Math.abs(Number(seed)||0) % PG_THUMB_TINTS.length]};">${ch}</span>`;
+}
 function toggleBillingViewMode(){
   AppState.settings.billingViewMode = AppState.settings.billingViewMode === 'cards' ? 'list' : 'cards';
   persistAllData();
@@ -12377,25 +12438,35 @@ function renderProductList(query = ''){
     return;
   }
 
-  wrap.innerHTML = filtered.map(p => `
-    <div class="productCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
-      <div class="productHead" onclick="toggleProductCard(${p.product_id})">
-        <div>
-          <div class="pName">${p.name}</div>
-          <div class="pMeta">${p.category || 'No category'}</div>
+  applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والا کیپسول
+  wrap.classList.add('capList');
+  const fmtR = n => (Math.round((Number(n)||0)*100)/100).toLocaleString();
+  wrap.innerHTML = filtered.map((p, idx) => {
+    const prices = p.variants.map(v => Number(v.retail) || 0);
+    const lo = prices.length ? Math.min(...prices) : 0, hi = prices.length ? Math.max(...prices) : 0;
+    const priceTxt = lo === hi ? `Rs. ${fmtR(lo)}` : `Rs. ${fmtR(lo)} – ${fmtR(hi)}`;
+    const stockTot = p.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+    const anyNeg = p.variants.some(v => v.stock < 0);
+    const anyLow = p.variants.some(v => v.stock >= 0 && v.stock <= (v.lowStockAt ?? 0));
+    const img = p.image || (p.variants.find(v => v.image) || {}).image || '';
+    const cat = p.category || 'No category';
+    return `
+    <div class="productCard capCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
+      <div class="productHead capRow ${idx % 2 ? 'alt' : ''} ${anyNeg ? 'capNeg' : ''}" onclick="toggleProductCard(${p.product_id})">
+        ${capThumbHtml(p.name, img, p.product_id)}
+        <div class="capBox capName"><b>${p.name}</b><small>${cat} • ${priceTxt}</small></div>
+        <div class="capBox capMid ${anyNeg ? 'neg' : (anyLow ? 'low' : '')}" title="Total stock"><b>${Math.round(stockTot*100)/100}</b><small>${p.variants.length} var.</small></div>
+        <div class="capBtns">
+          <button class="capBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
+          <button class="capBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
         </div>
-        <div class="pActions">
-          <span class="variantCount">${p.variants.length} variants</span>
-          <button class="productActionBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
-          <button class="productActionBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
-          <span class="chevron">▶</span>
-        </div>
+        <span class="chevron">▶</span>
       </div>
       <div class="variantCardWrap" id="vcWrap-${p.product_id}">
         ${renderVariantCardSection(p.product_id)}
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 
 // ---------- ہر پراڈکٹ کے لیے فی الوقت کون سا ویریئنٹ کارڈ کھلا ہوا ہے، یاد رکھا جاتا ہے ----------
@@ -14862,15 +14933,20 @@ function renderStockAdjustmentScreen(){
     return;
   }
 
-  wrap.innerHTML = list.map(item => {
+  applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والے رنگ
+  wrap.innerHTML = `<div class="capHead saGrid"><span>📷</span><span>Item</span><span>Stock</span><span>Price</span><span>Low</span></div>` + list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
+    const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
+    const cat = (item.product.category && item.product.category.trim()) ? item.product.category.trim() : 'Uncategorized';
+    const img = v.image || item.product.image || '';
     return `
-      <div class="stockAdjRow ${isNegative ? 'negativeRow' : ''}">
-        <div class="stockAdjName">${item.displayName.replace(/</g,'&lt;')}</div>
-        <input type="number" class="stockAdjInput" value="${v.stock}" onchange="updateStockAdjField(${v.variant_id}, 'stock', this.value)" onfocus="this.select()">
-        <input type="number" class="stockAdjInput" value="${v.retail}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()">
-        <input type="number" class="stockAdjInput" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()">
+      <div class="capRow saGrid ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}">
+        ${capThumbHtml(item.product.name, img, item.product.product_id)}
+        <div class="capBox capName"><b>${item.displayName.replace(/</g,'&lt;')}</b><small>${cat.replace(/</g,'&lt;')}</small></div>
+        <input type="number" class="capIn ${isNegative ? 'neg' : (isLow ? 'low' : '')}" value="${v.stock}" onchange="updateStockAdjField(${v.variant_id}, 'stock', this.value)" onfocus="this.select()" title="Stock">
+        <input type="number" class="capIn price" value="${v.retail}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()" title="Price">
+        <input type="number" class="capIn" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()" title="Low stock alert at">
       </div>`;
   }).join('');
 }
@@ -20415,27 +20491,32 @@ function renderBillHistory(){
     return;
   }
 
-  wrap.innerHTML = filtered.map(inv => {
+  applyProductRowStyleVars(wrap); // AIO1210MO024
+  wrap.innerHTML = filtered.map((inv, billIdx) => {
     // ---------- کس نے بل بنایا — Admin نے خود، یا کسی سیلزمین نے — واضح رنگین بیج کی صورت میں ----------
     const isAdminGenerated = inv.sold_by === 'Admin User';
     const creatorBadge = isAdminGenerated
-      ? `<span class="creatorBadge admin">🛡️ Admin Generated</span>`
+      ? `<span class="creatorBadge admin">🛡️ Admin</span>`
       : `<span class="creatorBadge salesman">👤 ${inv.sold_by}</span>`;
     const payTag = (inv.amount_due || 0) > 0
       ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending (Rs. ${inv.amount_due.toLocaleString()})</span>`
       : `<span class="billStatusTag completed">✅ Clear</span>`;
+    const statusTxt = inv.status==='completed' ? 'Completed' : inv.status==='edited' ? 'Edited' : 'Voided';
+    const d = new Date(inv.created_at || '');
+    const dateTxt = isNaN(d) ? '' : d.toLocaleDateString('en-GB',{day:'2-digit', month:'short'}) + ' ' + d.toLocaleTimeString('en-GB',{hour:'2-digit', minute:'2-digit'});
+    const due = inv.amount_due || 0;
+    const custName = String(inv.customer_name || '').replace(/</g,'&lt;');
     return `
-    <div class="billCard">
-      <div class="billCardRow">
+    <div class="billCard capRow capBill ${billIdx % 2 ? 'alt' : ''} ${inv.status === 'voided' ? 'capNeg' : ''}">
+      <div class="cbTop ${isAdmin && bulkDeleteMode ? 'hasChk' : ''}">
         ${isAdmin && bulkDeleteMode ? `<input type="checkbox" class="billCheckbox" data-invoice-id="${inv.invoice_id}" ${selectedBillIds.has(inv.invoice_id) ? 'checked' : ''} onchange="toggleBillSelection(${inv.invoice_id}, this.checked)">` : ''}
-        <div>
-          <div class="bNo">${inv.invoice_no} <span class="billStatusTag ${inv.status}">${
-            inv.status==='completed' ? 'Completed' : inv.status==='edited' ? 'Edited' : 'Voided'
-          }</span> ${payTag}${inv.reviewed_by_admin ? ' <span class="pendingStatusTag approved">✔ ADMIN REVIEWED</span>' : ''}</div>
-          <div class="bMeta">${creatorBadge} ${inv.customer_name} | Rs. ${inv.grand_total.toLocaleString()}</div>
+        ${capThumbHtml(inv.customer_name, '', String(inv.customer_name || '').length + (inv.invoice_id || 0))}
+        <div class="capBox capName"><b>${inv.invoice_no}</b><small><bdi>${custName}</bdi>${dateTxt ? ' • ' + dateTxt : ''}</small>
+          <div class="cbTags"><span class="billStatusTag ${inv.status}">${statusTxt}</span>${creatorBadge}${inv.reviewed_by_admin ? '<span class="pendingStatusTag approved">✔ REVIEWED</span>' : ''}</div>
         </div>
+        <div class="capBox cbAmt ${due > 0 ? 'due' : ''}"><b>Rs. ${inv.grand_total.toLocaleString()}</b><small>${due > 0 ? `⏳ Due ${due.toLocaleString()}` : '✅ Clear'}</small></div>
       </div>
-      <div class="billActions">
+      <div class="billActions cbActs">
         <button class="btnPrint" onclick="openInvoicePreview(${inv.invoice_id})">🖨️ Print</button>
         <button class="btnWhatsapp" onclick="openInvoicePreview(${inv.invoice_id})">📱 Share</button>
         ${isAdmin ? (inv.status === 'voided' ? `
@@ -27491,7 +27572,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1210MO023';
+  const APP_VERSION = 'AIO1210MO024';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
