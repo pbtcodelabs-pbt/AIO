@@ -242,9 +242,12 @@
   .homeBusinessCard .hbcLastBackupLine{order:4; flex:1 1 100%; margin-top:0; padding:3px 8px; font-size:10px;}
   /* AIO1310TU030: PIN اور Near Future — ایک پتلی قطار میں چھوٹے بٹن */
   .homeTopChips{display:flex; gap:6px; align-items:center; margin:0 0 6px;}
-  .homeTopChips button{border:none; border-radius:999px; padding:5px 11px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; align-items:center; gap:4px;}
+  .homeTopChips button{flex:0 0 auto; border:none; border-radius:999px; padding:5px 9px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; align-items:center; gap:4px;}
   #homePinLockOffBanner{background:#fef3c7; color:#92400e; border:1px solid #fcd34d;}
-  #nearFuturePlansBtn{display:inline-flex; flex:1 1 auto; justify-content:center; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff;}
+  #nearFuturePlansBtn{display:inline-flex; flex:1 1 auto; min-width:0; justify-content:center; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; overflow:hidden; text-overflow:ellipsis;}
+  /* AIO1310TU032: 💾 بیک اپ کا چھوٹا بٹن — 7 دن سے پرانا یا کبھی نہ لیا ہو تو نارنجی، ورنہ سبز */
+  #homeBackupChip{display:inline-flex; background:#dcfce7; color:#166534; border:1px solid #86efac;}
+  #homeBackupChip.due{background:#ffedd5; color:#c2410c; border-color:#fdba74;}
 
 
   /* --- 📅 Subscription Boxes — تین الگ خوبصورت ڈبے، ایک ہی لائن میں، صرف Billing پیج پر --- */
@@ -2433,7 +2436,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU031</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU032</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2654,7 +2657,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU031</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU032</span>
     </div>
   </div>
 
@@ -2758,8 +2761,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
       <!-- ---------- AIO1310TU030: 🔓 PIN Lock (چھوٹا بٹن) اور 🚀 Near Future Plans — ایک ہی پتلی قطار، سب سے اوپر ---------- -->
       <div class="homeTopChips">
-        <button type="button" id="homePinLockOffBanner" class="admin-only" style="display:none;" onclick="openActivatePinLockModal()">🔓 PIN Lock: OFF</button>
-        <button type="button" id="nearFuturePlansBtn" onclick="openNearFuturePlansModal()">🚀 Near Future Plans</button>
+        <button type="button" id="homePinLockOffBanner" class="admin-only" style="display:none;" onclick="openActivatePinLockModal()" title="PIN Lock is OFF — tap to turn on">🔓 PIN: OFF</button>
+        <button type="button" id="homeBackupChip" class="admin-only" onclick="backupToGoogleDrive()" title="Backup now">💾 Backup</button>
+        <button type="button" id="nearFuturePlansBtn" onclick="openNearFuturePlansModal()" title="Near Future Plans">🚀 Future Plans</button>
       </div>
 
       <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
@@ -7983,9 +7987,18 @@ function renderHomeBusinessCard(){
 // ---------- 💾/🔄 بٹنوں کے نیچے ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا پورا نام، پاپ اپ کی طرح غائب نہیں ہوتی ----------
 function renderHomeLastBackupLine(){
   const el = document.getElementById('hbcLastBackupLine');
-  if(!el) return;
   const fileName = AppState.settings.lastBackupFileName;
   const at = AppState.settings.lastBackupAt;
+  // ---------- AIO1310TU032: ہوم پر چھوٹا 💾 Backup بٹن — آخری بیک اپ کی حالت کے مطابق رنگ ----------
+  const chip = document.getElementById('homeBackupChip');
+  if(chip){
+    const ageDays = at ? (Date.now() - new Date(at).getTime()) / 86400000 : Infinity;
+    const due = !fileName || !(ageDays < 7);
+    chip.classList.toggle('due', due);
+    chip.textContent = due ? '⚠️ Backup' : '💾 Backup';
+    chip.title = fileName ? ('Last backup: ' + fileName) : 'No backup taken yet — tap to back up now';
+  }
+  if(!el) return;
   if(!fileName){
     el.innerHTML = '⚠️ No backup taken yet — tap 💾 above';
     return;
@@ -27707,7 +27720,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU031';
+  const APP_VERSION = 'AIO1310TU032';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
