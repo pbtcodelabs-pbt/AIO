@@ -2415,7 +2415,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU026</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU027</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2636,7 +2636,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU026</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU027</span>
     </div>
   </div>
 
@@ -9433,6 +9433,25 @@ function parseWeightGrams(label){
   return unit.startsWith('k') ? num * 1000 : num;
 }
 
+// ===================== AIO1310TU027: ⚖️ صرف لیبل (1kg/500g) سے نہیں، پراڈکٹ کی یونٹ سے بھی وزن/ناپ پہچانیں =====================
+// پہلے صرف "1kg" جیسے لیبل والے ویرینٹ پر ترازو آتا تھا؛ نئے نظام میں یونٹ (kg, g, pao, L, ml وغیرہ) چنی جاتی ہے،
+// اس لیے ایک (1) یونٹ کو بنیادی مقدار (گرام یا ملی لیٹر) میں بدلتے ہیں۔ base: 'g' وزن کے لیے، 'ml' مائع کے لیے
+const UNIT_TO_BASE = {
+  mg:{q:0.001,b:'g'}, g:{q:1,b:'g'}, kg:{q:1000,b:'g'}, pao:{q:250,b:'g'}, seer:{q:933.1,b:'g'},
+  maund:{q:37324,b:'g'}, quintal:{q:100000,b:'g'}, ton:{q:1000000,b:'g'}, tola:{q:11.664,b:'g'},
+  masha:{q:0.972,b:'g'}, ratti:{q:0.1215,b:'g'}, oz:{q:28.35,b:'g'}, lb:{q:453.6,b:'g'},
+  ml:{q:1,b:'ml'}, l:{q:1000,b:'ml'}, gallon:{q:3785,b:'ml'}, 'fl oz':{q:29.57,b:'ml'}
+};
+// ویرینٹ کی پیمائش: {qty: بنیادی مقدار, base: 'g'|'ml', text: دکھانے کا لیبل} — وزن/ناپ والا نہ ہو تو null
+function variantMeasure(v){
+  if(!v) return null;
+  const g = parseWeightGrams(v.label);
+  if(g !== null) return {qty:g, base:'g', text:v.label, fromUnit:false};
+  const u = UNIT_TO_BASE[String(v.unit || '').trim().toLowerCase()];
+  if(!u) return null;
+  return {qty:u.q, base:u.b, text:'1 ' + v.unit, fromUnit:true};
+}
+
 // ---------- productsData (parent+variants) کو Billing کے لیے ایک "فلیٹ" لسٹ میں بدلنا ----------
 // نوٹ: یہ فنکشن ہر بار تازہ کال ہوتا ہے، اس لیے اسٹاک/Price میں کوئی بھی تبدیلی فوری نظر آئے گی
 
@@ -10096,7 +10115,7 @@ function renderBillingProductGrid(){
     let priceLabel, qtyBadgeHtml, actionAreaHtml, outOfStockClass = '', lowStockClass = '', stockBadgeHtml = '', cardOnClick = '';
 
     // ---------- کیا اس پراڈکٹ میں کوئی وزن والا (kg/g) ویریئنٹ ہے؟ اگر ہاں تو ⚖️ ریورس کیلکولیٹر بیج دکھائیں ----------
-    const hasWeightVariant = p.variants.some(v => parseWeightGrams(v.label) !== null);
+    const hasWeightVariant = p.variants.some(v => variantMeasure(v) !== null);
     const scaleBadgeHtml = hasWeightVariant
       ? `<div class="pgScaleBadge ${isHot ? 'stacked' : ''}" title="Rs to grams calculator" onclick="event.stopPropagation(); openReverseCalc(${p.product_id})">⚖️</div>`
       : '';
@@ -10181,7 +10200,7 @@ function renderBillingProductGrid(){
   grid.innerHTML = `<div class="pgListHead"><span>📷</span><span>Item</span><span>Stock</span><span>Qty</span></div>` + displayList.map((p, idx) => {
     const isHot = hotIds.has(p.product_id);
     const isSingle = p.variants.length === 1;
-    const hasWeightVariant = p.variants.some(v => parseWeightGrams(v.label) !== null);
+    const hasWeightVariant = p.variants.some(v => variantMeasure(v) !== null);
     const scaleBtn = hasWeightVariant ? `<button type="button" class="pgRowScale" title="Rs to grams calculator" onclick="event.stopPropagation(); openReverseCalc(${p.product_id})">⚖️</button>` : '';
     const hotTag = isHot ? '<span class="pgRowTag">🔥</span>' : '';
     let priceTxt, stockVal, stockCls, actionHtml, qtyInCart;
@@ -10274,9 +10293,9 @@ function openReverseCalc(productId){
   const flat = getFlatVariants();
   const weightVariants = flat
     .filter(v => v.product_id === productId)
-    .map(v => ({...v, grams: parseWeightGrams(v.label)}))
-    .filter(v => v.grams !== null)
-    .sort((a,b) => b.grams - a.grams); // سب سے بڑا پیک پہلے (ڈیفالٹ حوالہ ریٹ)
+    .map(v => ({...v, m: variantMeasure(v)}))
+    .filter(v => v.m !== null)
+    .sort((a,b) => b.m.qty - a.m.qty); // سب سے بڑا پیک پہلے (ڈیفالٹ حوالہ ریٹ)
 
   if(weightVariants.length === 0) return;
 
@@ -10289,7 +10308,7 @@ function openReverseCalc(productId){
   const sel = document.getElementById('reverseCalcVariantSelect');
   sel.innerHTML = weightVariants.map(v => {
     const price = getModePrice(v);
-    return `<option value="${v.variant_id}">${v.label} — Rs. ${price}</option>`;
+    return `<option value="${v.variant_id}">${v.m.text} — Rs. ${price}</option>`;
   }).join('');
   sel.value = ReverseCalc.variantId;
 
@@ -10323,18 +10342,21 @@ function setReverseCalcMode(mode){
 // ---------- منتخب ویریئنٹ کے ریٹ کی بنیاد پر لائیو گرام/رقم کیلکولیٹ کریں — دونوں طرف سے ----------
 function updateReverseCalc(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
-  if(!v) return;
-  const grams = parseWeightGrams(v.label);
+  const m = variantMeasure(v);
+  if(!v || !m) return;
+  const grams = m.qty, base = m.base;
   const price = getModePrice(v);
   const pricePerGram = price / grams;
+  const rcG = document.getElementById('reverseCalcGrams');
+  if(rcG) rcG.placeholder = base === 'ml' ? 'Millilitres (ml)' : 'Grams (g)';
 
   document.getElementById('reverseCalcRateLine').textContent =
-    `Rate: Rs. ${price} / ${v.label}  (Rs. ${pricePerGram.toFixed(2)} per gram)`;
+    `Rate: Rs. ${price} / ${m.text}  (Rs. ${pricePerGram.toFixed(2)} per ${base === 'ml' ? 'ml' : 'gram'})`;
 
   if(ReverseCalc.mode === 'amount'){
     const amount = parseFloat(document.getElementById('reverseCalcAmount').value) || 0;
     const resultGrams = amount > 0 ? Math.round(amount / pricePerGram) : 0;
-    document.getElementById('reverseCalcResultGrams').textContent = resultGrams > 0 ? `≈ ${resultGrams} g` : '—';
+    document.getElementById('reverseCalcResultGrams').textContent = resultGrams > 0 ? `≈ ${resultGrams} ${base}` : '—';
     document.getElementById('reverseCalcResultSub').textContent = 'Approximate weight — weigh on scale and adjust with +/−';
     document.getElementById('reverseCalcAddBtn').disabled = resultGrams <= 0;
   } else {
@@ -10350,8 +10372,9 @@ function updateReverseCalc(){
 // ---------- کیلکولیٹ شدہ وزن کو بل میں شامل کریں — الگ (synthetic) variant_id تاکہ اصل پیک والے آئٹم سے نہ ملے ----------
 function addReverseCalcToCart(){
   const v = getFlatVariants().find(f => f.variant_id === ReverseCalc.variantId);
-  if(!v) return;
-  const grams = parseWeightGrams(v.label);
+  const m = variantMeasure(v);
+  if(!v || !m) return;
+  const grams = m.qty, base = m.base;
   const price = getModePrice(v);
   const pricePerGram = price / grams;
 
@@ -10366,8 +10389,10 @@ function addReverseCalcToCart(){
   if(resultGrams <= 0) return;
 
   // ---------- Track Inventory آن ہو تو یہاں بھی دستیاب سٹاک سے زیادہ شامل نہ ہو ----------
-  if(AppState.settings.trackInventory && resultGrams > v.stock){
-    alert(`❌ Only ${Math.max(v.stock, 0)}g in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
+  // یونٹ والے ویرینٹ (مثلاً اسٹاک 10 kg) میں اسٹاک یونٹ میں ہوتا ہے، اس لیے بنیادی مقدار میں بدل کر موازنہ کریں
+  const stockInBase = m.fromUnit ? (v.stock || 0) * grams : v.stock;
+  if(AppState.settings.trackInventory && resultGrams > stockInBase){
+    alert(`❌ Only ${Math.max(Math.round(stockInBase), 0)}${base} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
     return;
   }
 
@@ -10378,7 +10403,7 @@ function addReverseCalcToCart(){
   // اسی ایک آئٹم کو نئی مقدار/قیمت سے اپڈیٹ (اوور رائٹ) کریں — ڈپلیکیشن نہ ہو، ہمیشہ تازہ ترین ویلیو ہی بل میں رہے ----------
   const existing = Billing.cart.find(c => c.loose_product_id === ReverseCalc.productId);
   if(existing){
-    existing.name = `${productName} (loose) ${resultGrams}g`;
+    existing.name = `${productName} (loose) ${resultGrams}${base}`;
     existing.label = 'Loose';
     existing.qty = resultGrams;
     existing.unitPrice = Math.round(pricePerGram * 100) / 100;
@@ -10387,12 +10412,12 @@ function addReverseCalcToCart(){
     Billing.cart.push({
       variant_id: Date.now(), // منفرد نمبر، کسی اصل variant سے نہیں ٹکرائے گا
       loose_product_id: ReverseCalc.productId, // اسی پراڈکٹ کے دوبارہ وزن کیے جانے پر پہچان کے لیے — ڈپلیکیٹ روکنے کو
-      name: `${productName} (loose) ${resultGrams}g`,
+      name: `${productName} (loose) ${resultGrams}${base}`,
       label: 'Loose',
       qty: resultGrams,
       unitPrice: Math.round(pricePerGram * 100) / 100,
       costPerUnit: Math.round(costPerGram * 100) / 100,
-      unit: 'g'
+      unit: base
     });
     // ---------- پہلے یہاں خودکار پاپ اپ آتا تھا — اب مانگے پر ہی کارٹ کے 🔁 Sale Record بٹن سے دکھایا جائے گا ----------
   }
@@ -27651,7 +27676,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU026';
+  const APP_VERSION = 'AIO1310TU027';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
