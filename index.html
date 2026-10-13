@@ -582,7 +582,21 @@
   .uiZoomStepper button{width:28px; height:26px; border:none; border-radius:999px; background:transparent; color:var(--primary-dark); font-weight:800; font-size:12px; cursor:pointer; padding:0;}
   .uiZoomStepper button:active{background:rgba(0,0,0,.12);}
   .uiZoomStepper .uiZoomValueLabel{font-size:10.5px; font-weight:800; color:var(--primary); min-width:32px; text-align:center;}
-  #globalUiZoomBar{display:flex; justify-content:flex-end; padding:4px 12px; background:var(--card); border-bottom:1px solid #e2e8f0;}
+  #globalUiZoomBar{display:flex; justify-content:flex-end; align-items:center; gap:10px; padding:4px 12px; background:var(--card); border-bottom:1px solid #e2e8f0;}
+  /* AIO1310TU036: سبسکرپشن/ٹرائل پٹی */
+  #subStatusStrip{flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:8px; padding:5px 12px; font-size:11.5px; font-weight:700; line-height:1.3; cursor:pointer;
+    background:#ecfdf5; color:#065f46; border-bottom:1px solid #a7f3d0;}
+  #subStatusStrip #sssText{flex:1 1 auto; min-width:0;}
+  #subStatusStrip #sssBtn{flex:0 0 auto; border:none; border-radius:999px; padding:4px 10px; font-size:11px; font-weight:800; background:#059669; color:#fff; cursor:pointer;}
+  #subStatusStrip.trial{background:#eef2ff; color:#3730a3; border-bottom-color:#c7d2fe;}
+  #subStatusStrip.trial #sssBtn{background:#4f46e5;}
+  #subStatusStrip.warn{background:#fff7ed; color:#9a3412; border-bottom-color:#fed7aa;}
+  #subStatusStrip.warn #sssBtn{background:#ea580c;}
+  #subStatusStrip.urgent{background:#fef2f2; color:#991b1b; border-bottom-color:#fecaca;}
+  #subStatusStrip.urgent #sssBtn{background:#dc2626;}
+  #subStatusStrip.life{background:#f5f3ff; color:#5b21b6; border-bottom-color:#ddd6fe;}
+  /* پرانے بڑے ٹرائل/سبسکرپشن ڈبے اب اس پٹی میں ضم */
+  #trialCountdownStrip, #subBoxRow{display:none !important;}
 
   /* ---------- 🎁 Trial Reminder — روزانہ ایک بار، چمکتا ہوا، حرکت کرتا ہوا Toast (بغیر بٹن، خود بخود غائب) ---------- */
   @keyframes trialToastSlide{
@@ -2237,7 +2251,9 @@
     /* ---------- 🔍 App Size زوم بار — سرچ بار کے بالکل نیچے، اپنی مخصوص grid row میں، سٹِکی —
     ہر صفحے پر ہمیشہ نظر آئے، بالکل سرچ بار کی طرح ---------- */
     /* AIO1310TU030: موبائل پر الگ زوم پٹی ختم — A− / A+ اب نیلی سرچ پٹی میں ہیں */
-    #globalUiZoomBar{display:none !important;}
+    /* AIO1310TU036: موبائل پر یہ قطار اب صرف سبسکرپشن پٹی کے لیے (A−/A+ نیلی پٹی میں ہیں) */
+    #globalUiZoomBar{grid-column:1; grid-row:3; padding:0 !important; border:none !important; background:transparent !important;}
+    #globalUiZoomBar .uiZoomStepper{display:none;}
     #globalSearchBar{padding:6px 10px;}
     #globalSearchBar .gsbTools{display:flex; align-items:center; gap:6px; margin-left:auto; min-width:0;}
     #globalSearchBar.expanded .gsbTools{display:none;}
@@ -2438,7 +2454,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU035</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU036</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2651,7 +2667,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU035</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU036</span>
     </div>
   </div>
 
@@ -2685,6 +2701,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
   <!-- ---------- 🔍 فوری App Size کنٹرول — اب ہر صفحے پر نظر آتا ہے (پہلے صرف Home پر تھا)، Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
   <div id="globalUiZoomBar">
+    <!-- AIO1310TU036: سبسکرپشن/ٹرائل کی پکی باریک پٹی — سرچ بار کے نیچے، ہر صفحے پر -->
+    <div id="subStatusStrip" style="display:none;" onclick="openPackagePlansModal()">
+      <span id="sssText"></span>
+      <button type="button" id="sssBtn" onclick="event.stopPropagation(); openPackagePlansModal()">Subscribe</button>
+    </div>
     <div class="uiZoomStepper">
       <button type="button" onclick="stepUiZoom(-5)" title="Smaller" aria-label="Smaller">A−</button>
       <span class="uiZoomValueLabel">100%</span>
@@ -8252,7 +8273,53 @@ function fmtCountdown(ms){
 }
 const TRIAL_SERIOUS_MS = 3*24*60*60*1000; // ---------- تین دن سے کم = سنجیدہ حالت ----------
 let _trialStripTimer = null;
+// ===================== AIO1310TU036: سرچ بار کے نیچے ہمیشہ نظر آنے والی سبسکرپشن پٹی =====================
+let _sssTimer = null;
+function renderSubStatusStrip(){
+  const el = document.getElementById('subStatusStrip');
+  if(!el) return;
+  const txt = document.getElementById('sssText'), btn = document.getElementById('sssBtn');
+  const s = AppState.settings;
+  const loggedIn = !!AppState.currentUser;
+  if(!loggedIn || s.developerUnlock || !isSubscriptionActive()){
+    el.style.display = 'none';
+    if(_sssTimer){ clearInterval(_sssTimer); _sssTimer = null; }
+    try{ window.fixMainAreaHeight && window.fixMainAreaHeight(); }catch(e){}
+    return;
+  }
+  const days = daysLeftInSubscription();
+  const ms = getSubscriptionMsLeft();
+  const since = s.subscriptionActivatedOn ? formatDateDMY(s.subscriptionActivatedOn) : '';
+  const till = formatDateDMY(s.subscriptionExpiry);
+  let cls = '', text = '', showBtn = true, btnText = 'Subscribe';
+  if(isLifetimeLicense()){
+    cls = 'life'; showBtn = false;
+    text = `♾️ Lifetime License${since ? ' · since ' + since : ''} — never expires`;
+  } else if(s.isOnFreeTrial){
+    cls = ms < TRIAL_SERIOUS_MS ? 'urgent' : 'trial';
+    text = ms < TRIAL_SERIOUS_MS
+      ? `⏳ Free Trial ends in ${fmtCountdown(ms)} — subscribe now to continue`
+      : `🎁 Free Trial · ${days} day${days===1?'':'s'} left (till ${till}) · subscribe now, unused trial days are added free`;
+  } else {
+    cls = days <= 3 ? 'urgent' : (days <= 7 ? 'warn' : '');
+    btnText = 'Renew';
+    showBtn = days <= 7;
+    text = `✅ Subscribed${since ? ' ' + since : ''} · Expires ${till} · ${days} day${days===1?'':'s'} left`;
+  }
+  el.className = cls;
+  txt.textContent = text;
+  btn.textContent = btnText;
+  btn.style.display = showBtn ? '' : 'none';
+  const wasHidden = el.style.display === 'none';
+  el.style.display = 'flex';
+  if(wasHidden){ try{ window.fixMainAreaHeight && window.fixMainAreaHeight(); }catch(e){} }
+  const needSec = s.isOnFreeTrial && ms < TRIAL_SERIOUS_MS;
+  if(_sssTimer){ clearInterval(_sssTimer); _sssTimer = null; }
+  _sssTimer = setInterval(renderSubStatusStrip, needSec ? 1000 : 60000);
+}
+
 function updateTrialStrip(){
+  try{ renderSubStatusStrip(); }catch(e){}
   const strip = document.getElementById('trialCountdownStrip');
   if(!strip) return;
   const activeScreen = document.querySelector('.screen.active');
@@ -27767,7 +27834,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU035';
+  const APP_VERSION = 'AIO1310TU036';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
