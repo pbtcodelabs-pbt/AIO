@@ -1675,6 +1675,7 @@
   .pendingStatusTag.rejected{background:#fef2f2; color:var(--danger);}
 
   .reviewSalesmanBar{background:#eef2ff; color:var(--primary-dark); padding:10px 14px; border-radius:10px; font-size:13px; font-weight:700; margin-bottom:14px;}
+  .newItemInlineBtn{flex:0 0 auto; border:none; border-radius:10px; padding:0 12px; background:var(--primary); color:#fff; font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap;}
   .reviewItemRow{display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9;}
   .reviewItemRow .riNo{width:20px; flex:0 0 auto; font-size:12px; font-weight:700; color:var(--muted); text-align:center; padding-top:8px;}
   .reviewItemRow .riName{flex:1; font-size:13px; font-weight:600; padding-top:8px; line-height:1.35;}
@@ -1682,6 +1683,14 @@
   .reviewItemRow input{padding:7px; border:1px solid #dbe1ea; border-radius:7px; font-size:13px;}
   .reviewItemRow .riQty{width:55px;}
   .reviewItemRow .riRate{width:75px;}
+  .reviewItemRow .riLineIn{width:72px; flex:0 0 auto; font-weight:700; background:#f0fdf4; border-color:#86efac !important;}
+  /* AIO1310TU040: شپمنٹ کی قطار میں نمبر پورے نظر آئیں */
+  #receiveShipmentModal .reviewItemRow{gap:5px;}
+  #receiveShipmentModal .reviewItemRow input{padding:7px 3px; text-align:center; -moz-appearance:textfield; appearance:textfield; flex:0 0 auto;}
+  #receiveShipmentModal .reviewItemRow input::-webkit-outer-spin-button, #receiveShipmentModal .reviewItemRow input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  #receiveShipmentModal .reviewItemRow .riQty{width:46px;}
+  #receiveShipmentModal .reviewItemRow .riRate{width:62px;}
+  #receiveShipmentModal .reviewItemRow .riVariant{width:46px;}
   .reviewItemRow .riLine{width:70px; text-align:right; font-weight:700; font-size:13px; padding-top:8px;}
   .reviewItemRow .riRemove{background:#fef2f2; color:var(--danger); border:none; border-radius:7px; width:28px; height:28px; cursor:pointer; font-weight:700; margin-top:2px;}
   .reviewActionBtns{display:flex; gap:8px; margin-top:16px;}
@@ -2458,7 +2467,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU039</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU040</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2671,7 +2680,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU039</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU040</span>
     </div>
   </div>
 
@@ -3037,7 +3046,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <input type="text" id="qaName" placeholder="Item name">
         <input type="number" id="qaPurchase" placeholder="Purchase price" onfocus="this.select()">
         <input type="number" id="qaSale" placeholder="Sale price" onfocus="this.select()">
-        <input type="number" id="qaStock" placeholder="Initial stock" onfocus="this.select()">
+        <input type="number" id="qaStock" placeholder="Initial stock" onfocus="this.select()" oninput="qaSyncFromTotal()">
+        <!-- AIO1310TU040: پرچیز آرڈر/شپمنٹ میں — اس آئٹم کا کل بل لکھیں تو فی یونٹ خرید قیمت خود نکلے -->
+        <input type="number" id="qaTotal" placeholder="Bill total for this item (optional)" onfocus="this.select()" oninput="qaSyncFromTotal()" style="display:none;">
+        <div id="qaTotalHint" style="display:none; font-size:11.5px; color:var(--muted); margin:-4px 2px 8px;"></div>
         <input type="text" id="qaUnit" placeholder="Unit (pcs/kg/dozen)">
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeQuickAdd()">Cancel</button>
@@ -3810,16 +3822,17 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <div style="display:flex; align-items:center; gap:8px; padding:0 0 4px; margin-top:4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid #e2e8f0;">
             <span style="width:20px; text-align:center;">#</span>
             <span style="flex:1;">Item</span>
-            <span style="width:52px; text-align:center;">Variant</span>
-            <span style="width:55px; text-align:center;">Qty<br>Received</span>
-            <span style="width:75px; text-align:center;">Cost<br>Price</span>
-            <span style="width:70px; text-align:right;">Line<br>Total</span>
-            <span style="width:28px; text-align:center;">✖</span>
+            <span style="width:46px; text-align:center;">Variant</span>
+            <span style="width:46px; text-align:center;">Qty</span>
+            <span style="width:62px; text-align:center;">Price<br>/ Unit</span>
+            <span style="width:72px; text-align:center;">Total<br>✏️</span>
+            <span style="width:28px; flex:0 0 auto; text-align:center;">✖</span>
           </div>
           <div id="receiveShipmentItemsList"></div>
 
-          <div class="searchRow" style="margin-top:10px;">
-            <input type="text" id="receiveShipmentAddInput" placeholder="🔍 Add an extra item that arrived..." oninput="searchReceiveShipmentItems(this.value)">
+          <div class="searchRow" style="margin-top:10px; display:flex; gap:6px;">
+            <input type="text" id="receiveShipmentAddInput" placeholder="🔍 Add an extra item that arrived..." oninput="searchReceiveShipmentItems(this.value)" style="flex:1; min-width:0;">
+            <button type="button" class="newItemInlineBtn" onclick="openQuickAddPrefilled(document.getElementById('receiveShipmentAddInput').value.trim(), 'receive')">➕ New Item</button>
           </div>
           <div class="searchResults" id="receiveShipmentSearchResults"></div>
 
@@ -3851,8 +3864,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
         <div class="productGrid" id="poBrowseList" style="margin-bottom:10px;"></div>
 
-        <div class="searchRow" style="margin-bottom:8px;">
-          <input type="text" id="poSearchInput" placeholder="🔍 Or type to search..." oninput="searchPoItems(this.value)">
+        <div class="searchRow" style="margin-bottom:8px; display:flex; gap:6px;">
+          <input type="text" id="poSearchInput" placeholder="🔍 Or type to search..." oninput="searchPoItems(this.value)" style="flex:1; min-width:0;">
+          <button type="button" class="newItemInlineBtn" onclick="openQuickAddPrefilled(document.getElementById('poSearchInput').value.trim(), 'po')">➕ New Item</button>
         </div>
         <div class="searchResults" id="poSearchResults"></div>
 
@@ -3870,7 +3884,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             </select>
           </div>
           <table class="cartTable" style="margin-bottom:6px;">
-            <thead><tr><th style="width:22px;">#</th><th>Item</th><th style="width:52px;">Variant</th><th>Qty</th><th>Purchase Price</th><th>Total</th><th></th></tr></thead>
+            <thead><tr><th style="width:22px;">#</th><th>Item</th><th style="width:52px;">Variant</th><th>Qty</th><th>Price / Unit</th><th>Total ✏️</th><th></th></tr></thead>
             <tbody id="poItemsBody"></tbody>
           </table>
         </div>
@@ -11521,6 +11535,7 @@ async function triggerQuickAddPhotoUpload(){
 
 function openQuickAdd(context){
   quickAddContext = context || 'billing';
+  qaPrepareForContext();
   qaPhotoDataUrl = null;
   renderQuickAddPhotoPreview(null);
   if(quickAddContext === 'po') document.getElementById('poModal').classList.remove('show');
@@ -11528,8 +11543,35 @@ function openQuickAdd(context){
   document.getElementById('quickAddModal').classList.add('show');
 }
 // ---------- سرچ میں Item نہ ملے تو یہاں سے ایک کلک میں پاپ اپ کھلے، Name خودکار بھرا ہوا ----------
+// AIO1310TU040: پرچیز آرڈر/شپمنٹ سے کھلے تو "Quantity" اور "Bill total" — ورنہ پرانا انداز
+function qaPrepareForContext(){
+  const isSupply = quickAddContext === 'po' || quickAddContext === 'receive';
+  const st = document.getElementById('qaStock'), tot = document.getElementById('qaTotal'), hint = document.getElementById('qaTotalHint');
+  if(st) st.placeholder = isSupply ? (quickAddContext === 'receive' ? 'Quantity received' : 'Quantity ordered') : 'Initial stock';
+  if(tot){ tot.style.display = isSupply ? '' : 'none'; tot.value = ''; }
+  if(hint){ hint.style.display = 'none'; hint.textContent = ''; }
+  const pu = document.getElementById('qaPurchase');
+  if(pu) pu.placeholder = isSupply ? 'Purchase price per unit (or fill Bill total)' : 'Purchase price';
+}
+function qaSyncFromTotal(){
+  const tot = document.getElementById('qaTotal');
+  if(!tot || tot.style.display === 'none') return;
+  const total = parseFloat(tot.value) || 0, qty = parseFloat(document.getElementById('qaStock').value) || 0;
+  const hint = document.getElementById('qaTotalHint');
+  if(total > 0 && qty > 0){
+    const per = costFromTotal(total, qty);
+    document.getElementById('qaPurchase').value = fmtCost(per);
+    hint.style.display = 'block';
+    hint.textContent = `Rs. ${total} ÷ ${qty} = Rs. ${fmtCost(per)} per unit`;
+  } else if(total > 0){
+    hint.style.display = 'block';
+    hint.textContent = 'Enter the quantity to calculate the per-unit price';
+  } else { hint.style.display = 'none'; }
+}
+
 function openQuickAddPrefilled(name, context){
   quickAddContext = context || 'billing';
+  qaPrepareForContext();
   qaPhotoDataUrl = null;
   renderQuickAddPhotoPreview(null);
   document.getElementById('qaName').value = name;
@@ -11545,7 +11587,7 @@ function openQuickAddPrefilled(name, context){
 }
 function closeQuickAdd(){
   document.getElementById('quickAddModal').classList.remove('show');
-  ['qaName','qaPurchase','qaSale','qaStock','qaUnit'].forEach(id => document.getElementById(id).value = '');
+  ['qaName','qaPurchase','qaSale','qaStock','qaUnit','qaTotal'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   qaPhotoDataUrl = null;
   renderQuickAddPhotoPreview(null);
   // ---------- منسوخ کرنے پر پیچھے والا modal دوبارہ دکھائیں ----------
@@ -11554,9 +11596,11 @@ function closeQuickAdd(){
 }
 function saveQuickAddItem(){
   const name = document.getElementById('qaName').value.trim();
-  const purchase = parseFloat(document.getElementById('qaPurchase').value) || 0;
   const sale = parseFloat(document.getElementById('qaSale').value) || 0;
   const stock = parseFloat(document.getElementById('qaStock').value) || 0;
+  const isSupply = quickAddContext === 'po' || quickAddContext === 'receive';
+  const billTotal = isSupply ? (parseFloat(document.getElementById('qaTotal')?.value) || 0) : 0;
+  const purchase = (billTotal > 0 && stock > 0) ? costFromTotal(billTotal, stock) : (parseFloat(document.getElementById('qaPurchase').value) || 0);
   const unit = document.getElementById('qaUnit').value.trim() || 'pcs';
 
   if(!name || !sale){
@@ -11574,7 +11618,8 @@ function saveQuickAddItem(){
     category: '',
     variants: [{
       variant_id: newVariantId, label:'Default', barcode:'NEW'+newVariantId,
-      purchase, retail: sale, wholesale: sale * 0.92, stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
+      // AIO1310TU040: پرچیز آرڈر/شپمنٹ سے بنے آئٹم کا اسٹاک 0 سے شروع — مال "Confirm Receipt" پر ہی اسٹاک میں جائے (پہلے دو بار جمع ہو جاتا تھا)
+      purchase, retail: sale, wholesale: sale * 0.92, stock: isSupply ? 0 : stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
     }]
   });
 
@@ -16712,6 +16757,27 @@ function removePoItem(variantId){
   renderPoCart();
 }
 
+// ===================== AIO1310TU040: کل رقم سے فی یونٹ خرید قیمت — سپلائر "20 پیس، کل 500" لکھے تو 25 خود نکلے =====================
+function costFromTotal(total, qty){
+  const t = Number(total) || 0, q = Number(qty) || 0;
+  if(q <= 0) return 0;
+  return Math.round((t / q) * 10000) / 10000;
+}
+function moneyRound(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+function fmtCost(n){ return String(Math.round((Number(n) || 0) * 100) / 100); }
+function updatePoLineTotal(variantId, total){
+  const item = poCart.find(i => i.variant_id === variantId);
+  if(!item) return;
+  item.cost = costFromTotal(Math.max(0, total), item.qty);
+  renderPoCart();
+}
+function updateReceiveLineTotal(idx, total){
+  const item = receiveShipmentCart[idx];
+  if(!item) return;
+  item.cost = costFromTotal(Math.max(0, total), item.qty);
+  renderReceiveShipmentCart();
+}
+
 function renderPoCart(){
   const body = document.getElementById('poItemsBody');
   const emptyMsg = document.getElementById('poEmptyMsg');
@@ -16739,13 +16805,13 @@ function renderPoCart(){
         <td>${baseName}</td>
         <td><span style="display:inline-block; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 6px; text-align:center;">${i.label || '—'}</span></td>
         <td><input type="number" min="1" value="${i.qty}" style="width:55px;" onfocus="this.select()" onchange="updatePoQty(${i.variant_id}, parseInt(this.value)||1)"></td>
-        <td><input type="number" min="0" value="${i.cost}" style="width:70px;" onfocus="this.select()" onchange="updatePoCost(${i.variant_id}, parseFloat(this.value)||0)"></td>
-        <td>Rs. ${lineTotal.toLocaleString()}</td>
+        <td><input type="number" min="0" value="${fmtCost(i.cost)}" style="width:70px;" onfocus="this.select()" onchange="updatePoCost(${i.variant_id}, parseFloat(this.value)||0)"></td>
+        <td><input type="number" min="0" value="${moneyRound(lineTotal)}" style="width:78px; font-weight:700; background:#f0fdf4; border-color:#86efac;" title="Type the bill total for this item — per-unit price is calculated" onfocus="this.select()" onchange="updatePoLineTotal(${i.variant_id}, parseFloat(this.value)||0)"></td>
         <td><button class="removeBtn" onclick="removePoItem(${i.variant_id})">✖</button></td>
       </tr>
     `;
   }).join('');
-  document.getElementById('poGrandTotal').textContent = 'Rs. ' + total.toLocaleString();
+  document.getElementById('poGrandTotal').textContent = 'Rs. ' + moneyRound(total).toLocaleString();
 }
 
 // ---------- کارٹ آئٹمز کو ترتیب دیں — مقدار، نام، یا ویریئنٹ کے حساب سے گروپ بنا کر —
@@ -16793,6 +16859,7 @@ function savePurchaseOrder(){
 
   let total = 0;
   poCart.forEach(item => { total += item.qty * item.cost; });
+  total = moneyRound(total);
 
   // ---------- اہم: صرف آرڈر بنے، ابھی سٹاک میں کچھ شامل نہیں ہوتا ----------
   // مال حقیقت میں تو ابھی ملا ہی نہیں — سٹاک صرف "Receive Shipment" مکمل ہونے پر بڑھے گا۔
@@ -18442,13 +18509,13 @@ function renderReceiveShipmentCart(){
           <span class="riName">${baseName}</span>
           <span class="riVariant">${item.label || '—'}</span>
           <input type="number" class="riQty" min="0" value="${item.qty}" onfocus="this.select()" onchange="updateReceiveQty(${idx}, parseInt(this.value)||0)">
-          <input type="number" class="riRate" min="0" value="${item.cost}" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">
-          <span class="riLine">Rs. ${lineTotal.toLocaleString()}</span>
+          <input type="number" class="riRate" min="0" value="${fmtCost(item.cost)}" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">
+          <input type="number" class="riLineIn" min="0" value="${moneyRound(lineTotal)}" title="Type the bill total for this item — per-unit price is calculated" onfocus="this.select()" onchange="updateReceiveLineTotal(${idx}, parseFloat(this.value)||0)">
           <button class="riRemove" onclick="removeReceiveItem(${idx})">✖</button>
         </div>`;
     }).join('');
   }
-  document.getElementById('receiveShipmentTotal').textContent = 'Rs. ' + total.toLocaleString();
+  document.getElementById('receiveShipmentTotal').textContent = 'Rs. ' + moneyRound(total).toLocaleString();
 }
 function updateReceiveQty(idx, qty){
   // ---------- مقدار 0 کر دیں تو مطلب یہ آئٹم شپمنٹ میں آیا ہی نہیں — خودکار ہٹا دیں ----------
@@ -18549,7 +18616,7 @@ function confirmShipmentReceipt(){
   }
   if(!confirm('Confirm that you have physically received this shipment? Stock will be updated.')) return;
 
-  const newTotal = receiveShipmentCart.reduce((sum, i) => sum + i.qty * i.cost, 0);
+  const newTotal = moneyRound(receiveShipmentCart.reduce((sum, i) => sum + i.qty * i.cost, 0));
   const oldTotal = po.total;
 
   // ---------- سٹاک میں اضافہ کریں (اصل موصول شدہ مقدار کے مطابق، آرڈر کی مقدار نہیں) ----------
@@ -27870,7 +27937,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU039';
+  const APP_VERSION = 'AIO1310TU040';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
