@@ -2454,7 +2454,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU036</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU037</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2667,7 +2667,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU036</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU037</span>
     </div>
   </div>
 
@@ -10889,17 +10889,19 @@ function renderCart(){
   // ---------- منافع کا خفیہ اشارہ — صرف بل بنانے والے کو نظر آئے، کسٹمر یا پرنٹ میں کبھی نہیں ----------
   const profitEl = document.getElementById('profitWatermark');
   if(profitEl){
+    // AIO1310TU037: جس آئٹم کی خرید قیمت درج نہیں (0) اس کی پوری قیمت منافع میں نہ گنیں — الگ سے ⚠️ بتائیں
+    let noCost = 0;
     const grossProfit = Billing.cart.reduce((sum, item) => {
-      const v = flat.find(f => f.variant_id === item.variant_id);
-      const cost = v ? v.purchase : (item.costPerUnit || 0);
-      return sum + ((item.unitPrice - cost) * item.qty);
+      const uc = itemUnitCost(item);
+      if(!uc.known){ noCost++; return sum; }
+      return sum + ((item.unitPrice - uc.cost) * item.qty);
     }, 0);
-    const profit = grossProfit - discount; // ڈسکاؤنٹ منافع میں سے کٹے گا
+    const profit = Math.round((grossProfit - discount) * 100) / 100; // ڈسکاؤنٹ منافع میں سے کٹے گا
     if(Billing.cart.length === 0){
       profitEl.style.display = 'none';
     } else {
       profitEl.style.display = 'block';
-      profitEl.innerHTML = `🪙 ${profit.toLocaleString()}`;
+      profitEl.innerHTML = `🪙 ${profit.toLocaleString()}${noCost ? ` <span style="font-size:10px;">⚠️${noCost} no cost</span>` : ''}`;
     }
   }
 
@@ -11040,7 +11042,7 @@ async function openBillPreviewBeforeComplete(){
     sold_by: AppState.currentUser?.name || 'Unknown',
     sale_mode: Billing.saleMode,
     payment_method: Billing.counterSale ? 'cash' : 'credit',
-    items: JSON.parse(JSON.stringify(Billing.cart)),
+    items: withCostSnapshot(Billing.cart),
     discount, tax_percent: taxPercent, tax_amount: taxAmount,
     grand_total: grandTotal,
     previous_balance: previousBalance,
@@ -11113,7 +11115,7 @@ function finalizeInvoice(){
     sold_by: AppState.currentUser?.name || 'Unknown',
     sale_mode: Billing.saleMode,
     payment_method: method,
-    items: JSON.parse(JSON.stringify(Billing.cart)), // snapshot
+    items: withCostSnapshot(Billing.cart), // snapshot (AIO1310TU037: خرید قیمت بھی محفوظ)
     discount: discount,
     tax_percent: taxPercent,
     tax_amount: taxAmount,
@@ -11221,7 +11223,7 @@ function submitBillForApproval(customer, method, subtotal){
     customer_name: customer ? customer.name : 'Walk-in Customer',
     sale_mode: Billing.saleMode,
     payment_method: method,
-    items: JSON.parse(JSON.stringify(Billing.cart)), // snapshot
+    items: withCostSnapshot(Billing.cart), // snapshot (AIO1310TU037: خرید قیمت بھی محفوظ)
     status: 'pending',
     admin_note: '',
     submitted_at: new Date().toISOString(),
@@ -11372,7 +11374,7 @@ async function previewPendingBillBeforeApproval(){
     sold_by: p.salesman_name,
     sale_mode: p.sale_mode || 'retail',
     payment_method: p.payment_method || 'cash',
-    items: JSON.parse(JSON.stringify(p.items)),
+    items: withCostSnapshot(p.items),
     discount: 0, tax_percent: taxPercent, tax_amount: taxAmount,
     grand_total: grandTotal,
     previous_balance: previousBalance,
@@ -11406,7 +11408,7 @@ function approvePendingBill(){
     sold_by: p.salesman_name,
     sale_mode: p.sale_mode,
     payment_method: p.payment_method,
-    items: JSON.parse(JSON.stringify(p.items)),
+    items: withCostSnapshot(p.items),
     tax_percent: taxPercent,
     tax_amount: taxAmount,
     grand_total: grandTotal,
@@ -12838,6 +12840,30 @@ function billPriceText(item, decimals){
   const u = item && item.unit;
   if(item && item.loose_product_id && (u === 'g' || u === 'ml')) return (item.unitPrice * 1000).toFixed(decimals) + (u === 'ml' ? '/L' : '/kg');
   return Number(item.unitPrice || 0).toFixed(decimals);
+}
+// ===================== AIO1310TU037: منافع کا ایک ہی درست اصول — ہر جگہ یہی استعمال ہو =====================
+// 1) بل بنتے وقت کی خرید قیمت (costPerUnit) بل میں محفوظ ہوتی ہے — بعد میں خرید قیمت بدلنے سے پرانے بلوں کا منافع نہ بدلے۔
+// 2) جس آئٹم کی خرید قیمت 0 یا خالی ہو اس کی پوری فروخت کو منافع نہ گنیں — "قیمت معلوم نہیں" (known:false) مانیں۔
+function itemUnitCost(it){
+  if(!it) return {cost:0, known:false};
+  let c = null;
+  if(it.costPerUnit != null && it.costPerUnit !== '') c = Number(it.costPerUnit);
+  else {
+    const v = (typeof findVariantById === 'function') ? findVariantById(it.variant_id) : null;
+    if(v) c = Number(v.purchase);
+  }
+  if(!(c > 0)) return {cost:0, known:false};
+  return {cost:c, known:true};
+}
+function withCostSnapshot(items){
+  const copy = JSON.parse(JSON.stringify(items || []));
+  copy.forEach(it => {
+    if(it.costPerUnit == null){
+      const v = (typeof findVariantById === 'function') ? findVariantById(it.variant_id) : null;
+      if(v && Number(v.purchase) > 0) it.costPerUnit = Number(v.purchase);
+    }
+  });
+  return copy;
 }
 function roundStock(n){ return Math.round((Number(n) || 0) * 1000) / 1000; }
 function resolveStockTarget(item, qty){
@@ -19945,19 +19971,14 @@ function sortTrendRows(rows){
 
 // ---------- ایک بل لائن کی فی یونٹ خرید قیمت — بالکل وہی اصول جو Billing کے منافع اشارے میں ہے:
 // پہلے اصل ویریئنٹ کی Purchase Price، نہ ملے تو (Loose/گرام آئٹم) بل میں محفوظ costPerUnit ----------
-function getTrendItemUnitCost(it){
-  const v = findVariantById(it.variant_id);
-  if(v) return { cost: Number(v.purchase) || 0, known: true };
-  if(it.costPerUnit != null) return { cost: Number(it.costPerUnit) || 0, known: true };
-  return { cost: 0, known: false };
-}
+function getTrendItemUnitCost(it){ return itemUnitCost(it); }
 
 // ---------- منتخب تاریخ کی حد میں موجود (اور Void نہ ہونے والے) بلوں سے آئٹم/کسٹمر/ایریا/منافع کا خلاصہ نکالیں ----------
 function computeTrendData(range){
   const items = new Map();      // name -> {qty, revenue, cost, costUnknown}
   const customers = new Map();  // key -> {name, qty, revenue, billCount}
   const areas = new Map();      // area -> {revenue, qty, billCount, customerIds:Set}
-  let totalRevenue = 0, totalBills = 0, totalQty = 0, totalItemRevenue = 0, totalCost = 0;
+  let totalRevenue = 0, totalBills = 0, totalQty = 0, totalItemRevenue = 0, totalCost = 0, costedRevenue = 0; // AIO1310TU037: منافع صرف ان آئٹمز سے جن کی خرید قیمت معلوم ہو
 
   invoicesData.forEach(inv => {
     if(inv.status === 'voided') return;
@@ -19974,9 +19995,10 @@ function computeTrendData(range){
       totalQty += it.qty;
       totalItemRevenue += rev;
       totalCost += cost;
-      const cur = items.get(it.name) || {qty:0, revenue:0, cost:0, costUnknown:false};
+      if(uc.known) costedRevenue += rev;
+      const cur = items.get(it.name) || {qty:0, revenue:0, cost:0, costUnknown:false, costedRevenue:0};
       cur.qty += it.qty; cur.revenue += rev; cur.cost += cost;
-      if(!uc.known) cur.costUnknown = true;
+      if(uc.known) cur.costedRevenue += rev; else cur.costUnknown = true;
       items.set(it.name, cur);
     });
 
@@ -20004,7 +20026,7 @@ function computeTrendData(range){
     }
   });
 
-  return { items, customers, areas, totalRevenue, totalBills, totalQty, totalItemRevenue, totalCost };
+  return { items, customers, areas, totalRevenue, totalBills, totalQty, totalItemRevenue, totalCost, costedRevenue };
 }
 
 function fmtTrendMoney(n){
@@ -20036,8 +20058,8 @@ function renderTrendsScreen(){
 
   if(trendGroupBy === 'profit'){
     // ---------- Profit ٹیب کا اپنا خلاصہ: کل منافع + مارجن % + بیچی گئی مقدار ----------
-    const totalProfit = data.totalItemRevenue - data.totalCost;
-    const totalMargin = data.totalItemRevenue > 0 ? (totalProfit / data.totalItemRevenue * 100) : 0;
+    const totalProfit = data.costedRevenue - data.totalCost;
+    const totalMargin = data.costedRevenue > 0 ? (totalProfit / data.costedRevenue * 100) : 0;
     const pColor = totalProfit < 0 ? '#b91c1c' : '#166534';
     const pBg = totalProfit < 0 ? '#fef2f2' : '#f0fdf4';
     document.getElementById('trendSummaryBar').innerHTML = `
@@ -20055,7 +20077,7 @@ function renderTrendsScreen(){
           <div style="font-size:16px; font-weight:800; color:#9a3412;">${data.totalQty}</div>
         </div>
       </div>
-      <div style="font-size:10.5px; color:var(--muted); text-align:center; margin-bottom:12px;">Gross profit = Sale − Purchase price (before bill discount)</div>`;
+      <div style="font-size:10.5px; color:var(--muted); text-align:center; margin-bottom:12px;">Gross profit = Sale − Purchase price (before bill discount)${data.costedRevenue < data.totalItemRevenue ? ' • ⚠️ items without a purchase price are not counted' : ''}</div>`;
   } else {
     document.getElementById('trendSummaryBar').innerHTML = `
     <div style="display:flex; gap:8px; margin-bottom:14px;">
@@ -20111,8 +20133,8 @@ function renderTrendsScreen(){
     `).join('');
   } else { // profit — کون سا آئٹم زیادہ اور کون سا کم منافع دے رہا ہے
     const rows = sortTrendRows(Array.from(data.items.entries()).map(([name, v]) => {
-      const profit = v.revenue - v.cost;
-      const margin = v.revenue > 0 ? (profit / v.revenue * 100) : 0;
+      const profit = v.costedRevenue - v.cost;
+      const margin = v.costedRevenue > 0 ? (profit / v.costedRevenue * 100) : 0;
       return {name, ...v, profit, margin};
     }));
     if(rows.length === 0){ wrap.innerHTML = '<div class="profileEmpty">No sales in this period</div>'; return; }
@@ -26830,9 +26852,14 @@ async function renderStockSaleProfitReportToCanvas(){
   const todayInvoices = (invoicesData || []).filter(inv => inv.created_at && toLocalDateStr(new Date(inv.created_at)) === todayStr && inv.status !== 'voided');
 
   const soldQtyMap = {};
+  const profitMap = {}; // AIO1310TU037: ہر ویرینٹ کا اصل منافع — بل میں محفوظ خرید قیمت سے، کھلا وزن بھی شامل
   todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
-    if(!it.variant_id) return;
-    soldQtyMap[it.variant_id] = (soldQtyMap[it.variant_id] || 0) + (it.qty || 0);
+    let vid = it.variant_id, units = it.qty || 0;
+    if(it.loose_product_id){ const t = resolveStockTarget(it, it.qty || 0); if(!t) return; vid = t.v.variant_id; units = t.units; }
+    if(!vid) return;
+    soldQtyMap[vid] = roundStock((soldQtyMap[vid] || 0) + units);
+    const uc = itemUnitCost(it);
+    if(uc.known) profitMap[vid] = (profitMap[vid] || 0) + (it.qty || 0) * ((it.unitPrice || 0) - uc.cost);
   }));
   const rows = [];
   productsData.forEach(p => {
@@ -26844,10 +26871,7 @@ async function renderStockSaleProfitReportToCanvas(){
       const remaining = v.stock || 0;
       const cost = v.purchase || 0;
       const salePrice = v.retail || 0;
-      let realProfit = 0;
-      todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
-        if(it.variant_id === v.variant_id) realProfit += (it.qty || 0) * ((it.unitPrice || 0) - cost);
-      }));
+      const realProfit = Math.round((profitMap[v.variant_id] || 0) * 100) / 100;
       rows.push({name: p.name || '', label: v.label || '', total, purchase: cost, sale: salePrice, sold, remaining, profit: realProfit});
     });
   });
@@ -27834,7 +27858,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU036';
+  const APP_VERSION = 'AIO1310TU037';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
