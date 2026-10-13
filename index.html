@@ -2438,7 +2438,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU032</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU035</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2651,7 +2651,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU032</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU035</span>
     </div>
   </div>
 
@@ -10446,9 +10446,11 @@ function addReverseCalcToCart(){
 
   // ---------- Track Inventory آن ہو تو یہاں بھی دستیاب سٹاک سے زیادہ شامل نہ ہو ----------
   // یونٹ والے ویرینٹ (مثلاً اسٹاک 10 kg) میں اسٹاک یونٹ میں ہوتا ہے، اس لیے بنیادی مقدار میں بدل کر موازنہ کریں
-  const stockInBase = m.fromUnit ? (v.stock || 0) * grams : v.stock;
+  // AIO1310TU035: اسٹاک ہمیشہ ویرینٹ کی اپنی یونٹ میں ہوتا ہے (مثلاً 50 × 1kg) — بنیادی مقدار (گرام/ml) میں بدل کر موازنہ
+  const stockInBase = Math.max(0, (v.stock || 0) * grams);
+  const fmtBase = q => q >= 1000 ? `${roundStock(q / 1000)} ${base === 'ml' ? 'L' : 'kg'}` : `${Math.round(q)}${base}`;
   if(AppState.settings.trackInventory && resultGrams > stockInBase){
-    alert(`❌ Only ${Math.max(Math.round(stockInBase), 0)}${base} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
+    alert(`❌ Only ${fmtBase(stockInBase)} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
     return;
   }
 
@@ -10462,17 +10464,21 @@ function addReverseCalcToCart(){
     existing.name = `${productName} (loose) ${resultGrams}${base}`;
     existing.label = 'Loose';
     existing.qty = resultGrams;
-    existing.unitPrice = Math.round(pricePerGram * 100) / 100;
-    existing.costPerUnit = Math.round(costPerGram * 100) / 100;
+    existing.unitPrice = Math.round(pricePerGram * 1e6) / 1e6; // AIO1310TU035: گرام کا ریٹ پورا رکھیں (پہلے 2 اعشاریہ پر کٹنے سے بل غلط بنتا تھا)
+    existing.costPerUnit = Math.round(costPerGram * 1e6) / 1e6;
+    existing.source_variant_id = v.variant_id;
+    existing.stock_per_qty = 1 / grams;
   } else {
     Billing.cart.push({
       variant_id: Date.now(), // منفرد نمبر، کسی اصل variant سے نہیں ٹکرائے گا
       loose_product_id: ReverseCalc.productId, // اسی پراڈکٹ کے دوبارہ وزن کیے جانے پر پہچان کے لیے — ڈپلیکیٹ روکنے کو
+      source_variant_id: v.variant_id, // AIO1310TU035: کس ویرینٹ کے اسٹاک سے کٹے
+      stock_per_qty: 1 / grams,        // ایک گرام/ml = اسٹاک کی کتنی یونٹ (مثلاً 1/1000 kg)
       name: `${productName} (loose) ${resultGrams}${base}`,
       label: 'Loose',
       qty: resultGrams,
-      unitPrice: Math.round(pricePerGram * 100) / 100,
-      costPerUnit: Math.round(costPerGram * 100) / 100,
+      unitPrice: Math.round(pricePerGram * 1e6) / 1e6, // AIO1310TU035: پورا ریٹ — مثلاً 145/kg پر 625g = 90.63، پہلے 93.75 بنتا تھا
+      costPerUnit: Math.round(costPerGram * 1e6) / 1e6,
       unit: base
     });
     // ---------- پہلے یہاں خودکار پاپ اپ آتا تھا — اب مانگے پر ہی کارٹ کے 🔁 Sale Record بٹن سے دکھایا جائے گا ----------
@@ -11053,12 +11059,7 @@ function finalizeInvoice(){
   invoicesData.unshift(invoice);
 
   // ---------- اسٹاک کاٹیں (productsData میں اصل variant سے) ----------
-  Billing.cart.forEach(item => {
-    productsData.forEach(p => {
-      const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; } // TODO: DB میں product_variants.current_stock -= qty
-    });
-  });
+  Billing.cart.forEach(item => deductStockForItem(item, item.qty, true)); // AIO1310TU035: کھلا وزن بھی اصل اسٹاک سے کٹے
 
   // ---------- پیمنٹ خودکار "Credit" ہے تو پہلے کسٹمر کے والٹ سے خودکار رقم کاٹیں، پھر صارف کا درج کردہ نقد بھی کاٹیں،
   // باقی بچی رقم ہی اصل بقایہ (Pending) میں جائے ----------
@@ -11350,12 +11351,7 @@ function approvePendingBill(){
   invoicesData.unshift(invoice);
 
   // ---------- اسٹاک کاٹیں ----------
-  p.items.forEach(item => {
-    productsData.forEach(prod => {
-      const v = prod.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v){ deductVariantStock(v, item.qty); v.salesCount = (v.salesCount || 0) + item.qty; }
-    });
-  });
+  p.items.forEach(item => deductStockForItem(item, item.qty, true));
 
   // ---------- کسٹمر حساب اپڈیٹ — یہاں بھی پہلے والٹ سے خودکار کاٹیں، باقی بچی رقم ہی بقایہ میں جائے ----------
   let walletApplied = 0;
@@ -12767,9 +12763,51 @@ function syncVariantFromBatches(v){
 }
 
 // ---------- فروخت/واپسی پر ایک ہی جگہ سے سٹاک کاٹیں — Batches موجود ہوں تو FEFO (پہلے ایکسپائر ہونے والی کھیپ پہلے خرچ) ----------
+// ===================== AIO1310TU035: بل کے آئٹم سے اصل ویرینٹ اور کاٹی جانے والی اسٹاک مقدار نکالیں =====================
+// کھلا (loose) وزن والا آئٹم مثلاً 625g — اسٹاک اصل ویرینٹ کی یونٹ میں ہوتا ہے (مثلاً 50 kg)، اس لیے 625g = 0.625 kg کٹے۔
+// پرانے بلوں میں source_variant_id نہیں تھا — ان کے لیے پراڈکٹ کا سب سے بڑا وزن والا ویرینٹ لیں۔
+// بل پرنٹ میں کھلے وزن کا ریٹ "0" کی بجائے فی کلو/لیٹر دکھائیں (مثلاً 160/kg)
+function billPriceText(item, decimals){
+  const u = item && item.unit;
+  if(item && item.loose_product_id && (u === 'g' || u === 'ml')) return (item.unitPrice * 1000).toFixed(decimals) + (u === 'ml' ? '/L' : '/kg');
+  return Number(item.unitPrice || 0).toFixed(decimals);
+}
+function roundStock(n){ return Math.round((Number(n) || 0) * 1000) / 1000; }
+function resolveStockTarget(item, qty){
+  if(!item) return null;
+  if(item.loose_product_id){
+    const prod = productsData.find(p => p.product_id === item.loose_product_id);
+    if(!prod) return null;
+    let v = item.source_variant_id ? prod.variants.find(x => x.variant_id === item.source_variant_id) : null;
+    let m = v ? variantMeasure(v) : null;
+    if(!v || !m){
+      const best = prod.variants.map(x => ({x, m: variantMeasure(x)})).filter(o => o.m).sort((a,b) => b.m.qty - a.m.qty)[0];
+      if(!best) return null;
+      v = best.x; m = best.m;
+    }
+    const per = item.stock_per_qty || (1 / m.qty);
+    return {v, units: roundStock(qty * per)};
+  }
+  for(const p of productsData){
+    const v = p.variants.find(x => x.variant_id === item.variant_id);
+    if(v) return {v, units: qty};
+  }
+  return null;
+}
+function deductStockForItem(item, qty, countSale){
+  const t = resolveStockTarget(item, qty);
+  if(!t) return;
+  deductVariantStock(t.v, t.units);
+  if(countSale) t.v.salesCount = roundStock((t.v.salesCount || 0) + t.units);
+}
+function restoreStockForItem(item, qty){
+  const t = resolveStockTarget(item, qty);
+  if(t) t.v.stock = roundStock((t.v.stock || 0) + t.units);
+}
+
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  v.stock = Math.max(0, (v.stock || 0) - qty);
+  v.stock = Math.max(0, roundStock((v.stock || 0) - qty));
   if(v.batches && v.batches.length){
     let remaining = qty;
     const sorted = [...v.batches].sort((a,b) => {
@@ -12780,8 +12818,8 @@ function deductVariantStock(v, qty){
     for(const b of sorted){
       if(remaining <= 0) break;
       const take = Math.min(b.qty, remaining);
-      b.qty -= take;
-      remaining -= take;
+      b.qty = roundStock(b.qty - take);
+      remaining = roundStock(remaining - take);
     }
     v.batches = v.batches.filter(b => b.qty > 0);
   }
@@ -15122,7 +15160,7 @@ function updateStockAdjField(variantId, field, rawValue){
   if(!v) return;
   const num = parseFloat(rawValue);
   if(isNaN(num)){ renderStockAdjustmentScreen(); return; }
-  if(field === 'stock') v.stock = Math.round(num); // ---------- منفی کی اجازت ہے، جان بوجھ کر کوئی حد نہیں لگائی ----------
+  if(field === 'stock') v.stock = Math.round(num * 1000) / 1000; // AIO1310TU035: کلو/لیٹر میں اعشاریہ اسٹاک (مثلاً 49.375) کی اجازت // ---------- منفی کی اجازت ہے، جان بوجھ کر کوئی حد نہیں لگائی ----------
   else if(field === 'retail') v.retail = num;
   else if(field === 'lowStockAt') v.lowStockAt = Math.max(0, Math.round(num));
   persistAllData();
@@ -18568,10 +18606,7 @@ function confirmBatchReturn(invoiceId){
   const returnedNames = [];
   picks.forEach(({idx, item, qty, amount}) => {
     // اسٹاک میں Item واپس شامل کریں
-    productsData.forEach(p => {
-      const v = p.variants.find(vv => vv.variant_id === item.variant_id);
-      if(v) v.stock += qty; // TODO: DB میں product_variants.current_stock += qty
-    });
+    restoreStockForItem(item, qty); // AIO1310TU035: کھلا وزن بھی صحیح یونٹ میں واپس
 
     item.returned = true;
     item.returnQty = qty;
@@ -20721,12 +20756,7 @@ function adminVoidBill(invoiceId){
 // Delete درخواست پر بھی چل سکے (وہاں دوبارہ پوچھنے کی ضرورت نہیں، Admin پہلے ہی Approve دبا چکا ہے) ----------
 function executeVoidBill(inv){
   // ---------- اسٹاک واپس کریں — بل کے ہر آئٹم کی مقدار اسٹاک میں دوبارہ شامل کریں ----------
-  inv.items.forEach(item => {
-    productsData.forEach(p => {
-      const v = p.variants.find(x => x.variant_id === item.variant_id);
-      if(v) v.stock += item.qty; // TODO: DB میں product_variants.current_stock += qty
-    });
-  });
+  inv.items.forEach(item => restoreStockForItem(item, item.qty)); // AIO1310TU035
 
   // ---------- نقد اثر واپس کریں — اگر یہ نقد بل تھا تو Cash in Hand سے وہی رقم منہا کریں ----------
   if(inv.payment_method === 'cash'){
@@ -21101,7 +21131,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     ctx.clip();
     ctx.fillText(variantText, (colX[2]+colX[3])/2, rowBaseline);
     ctx.restore();
-    const qtyText = String(remainingQty), priceText = item.unitPrice.toFixed(decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
+    const qtyText = String(remainingQty), priceText = billPriceText(item, decimals), totalText = (remainingQty*item.unitPrice).toFixed(decimals);
     // ---------- سخت کلپنگ کے ساتھ لکھیں — پہلے یہاں textAlign کبھی واپس سیٹ نہیں ہوتا تھا (Variant کے 'center' پر ہی اٹکا رہتا تھا)،
     // جس کی وجہ سے Right/Center منتخب کرنے پر نمبر کالم سے باہر نکل جاتے تھے۔ اب ہر کالم کی اپنی حد کے اندر مقفل ہے ----------
     const drawClippedNum = (text, x1, x2, textX) => {
@@ -21499,7 +21529,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.font = F('13px');
     ctx.textAlign = a4Align;
     ctx.fillText(String(remainingQtyA4), a4QtyX, rowBaseline);
-    ctx.fillText(item.unitPrice.toFixed(0), a4PriceX, rowBaseline);
+    ctx.fillText(billPriceText(item, 0), a4PriceX, rowBaseline);
     ctx.fillText((remainingQtyA4*item.unitPrice).toFixed(0), a4TotalX, rowBaseline);
     ctx.fillStyle = '#1a1a1a';
 
@@ -27737,7 +27767,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU034';
+  const APP_VERSION = 'AIO1310TU035';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
