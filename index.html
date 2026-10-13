@@ -240,10 +240,11 @@
   .homeBusinessCard .hbcSettingsGearBtn{width:34px; height:34px; font-size:16px; border-width:1.5px;}
   .homeBusinessCard .hbcEditBtn{order:3; position:static; width:26px; height:26px; font-size:12px; flex:0 0 auto;}
   .homeBusinessCard .hbcLastBackupLine{order:4; flex:1 1 100%; margin-top:0; padding:3px 8px; font-size:10px;}
-  #homePinLockOffBanner{padding:6px 10px !important; margin-bottom:6px !important; border-radius:10px !important;}
-  #homePinLockOffBanner span{font-size:11.5px !important;}
-  #homePinLockOffBanner button{padding:5px 10px !important; font-size:11px !important;}
-  #nearFuturePlansBtn{margin:2px 0 6px !important; padding:7px 10px !important; font-size:12.5px !important; border-radius:10px !important;}
+  /* AIO1310TU030: PIN اور Near Future — ایک پتلی قطار میں چھوٹے بٹن */
+  .homeTopChips{display:flex; gap:6px; align-items:center; margin:0 0 6px;}
+  .homeTopChips button{border:none; border-radius:999px; padding:5px 11px; font-size:11.5px; font-weight:800; cursor:pointer; white-space:nowrap; align-items:center; gap:4px;}
+  #homePinLockOffBanner{background:#fef3c7; color:#92400e; border:1px solid #fcd34d;}
+  #nearFuturePlansBtn{display:inline-flex; flex:1 1 auto; justify-content:center; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff;}
 
 
   /* --- 📅 Subscription Boxes — تین الگ خوبصورت ڈبے، ایک ہی لائن میں، صرف Billing پیج پر --- */
@@ -573,6 +574,12 @@
     #mainArea{grid-column:2; grid-row:2; min-width:0;}
   }
   @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  /* AIO1310TU030: سلائیڈر کی جگہ چھوٹا A− / A+ زوم کنٹرول */
+  .uiZoomStepper{display:inline-flex; align-items:center; gap:2px; border:1px solid #dbe1ea; border-radius:999px; padding:2px; background:var(--card); flex:0 0 auto;}
+  .uiZoomStepper button{width:28px; height:26px; border:none; border-radius:999px; background:transparent; color:var(--primary-dark); font-weight:800; font-size:12px; cursor:pointer; padding:0;}
+  .uiZoomStepper button:active{background:rgba(0,0,0,.12);}
+  .uiZoomStepper .uiZoomValueLabel{font-size:10.5px; font-weight:800; color:var(--primary); min-width:32px; text-align:center;}
+  #globalUiZoomBar{display:flex; justify-content:flex-end; padding:4px 12px; background:var(--card); border-bottom:1px solid #e2e8f0;}
 
   /* ---------- 🎁 Trial Reminder — روزانہ ایک بار، چمکتا ہوا، حرکت کرتا ہوا Toast (بغیر بٹن، خود بخود غائب) ---------- */
   @keyframes trialToastSlide{
@@ -2224,12 +2231,19 @@
 
     /* ---------- 🔍 App Size زوم بار — سرچ بار کے بالکل نیچے، اپنی مخصوص grid row میں، سٹِکی —
     ہر صفحے پر ہمیشہ نظر آئے، بالکل سرچ بار کی طرح ---------- */
-    #globalUiZoomBar{
-      grid-column:1; grid-row:3;
-      position:sticky; top:calc(56px + 54px); z-index:588;
-    }
-    /* ---------- بلنگ سکرین پر زوم بار مزید کمپیکٹ — تاکہ زیادہ سے زیادہ پراڈکٹس نظر آئیں ---------- */
-    body.billing-active #globalUiZoomBar{ padding:3px 12px; }
+    /* AIO1310TU030: موبائل پر الگ زوم پٹی ختم — A− / A+ اب نیلی سرچ پٹی میں ہیں */
+    #globalUiZoomBar{display:none !important;}
+    #globalSearchBar{padding:6px 10px;}
+    #globalSearchBar .gsbTools{display:flex; align-items:center; gap:6px; margin-left:auto; min-width:0;}
+    #globalSearchBar.expanded .gsbTools{display:none;}
+    #globalSearchBar .gsbHomeIcons{display:none; align-items:center; gap:5px;}
+    body.home-active #globalSearchBar .gsbHomeIcons{display:flex;}
+    #globalSearchBar .gsbBtn{width:30px; height:30px; border-radius:50%; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.18); color:#fff; font-size:14px; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;}
+    #globalSearchBar .gsbBtn.gsbGear{background:#fff; color:var(--primary-dark);}
+    #globalSearchBar .gsbBtn:active{transform:scale(.9);}
+    #globalSearchBar .uiZoomStepper{background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35);}
+    #globalSearchBar .uiZoomStepper button{color:#fff;}
+    #globalSearchBar .uiZoomStepper .uiZoomValueLabel{color:#fff;}
 
     /* ---------- AIO1210MO019: انگلش ایپ — مینیو بائیں طرف سے، اوپر سے نیچے تک ---------- */
     /* ---------- AIO1210MO020: چوڑائی صرف سب سے لمبے نام جتنی ---------- */
@@ -2419,7 +2433,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU029</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU030</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2640,7 +2654,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU029</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU030</span>
     </div>
   </div>
 
@@ -2655,15 +2669,30 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     </span>
     <input type="text" id="appSearchInput" placeholder="App Search — find any screen or setting..." oninput="renderAppSearchResults(this.value)" autocomplete="off">
     <div id="appSearchResults"></div>
+    <!-- ===== AIO1310TU030: ہوم کے بٹن (⚙️ شیئر 💬 🚪) نیلی پٹی میں چھوٹے، اور سلائیڈر کی جگہ چھوٹے A− / A+ بٹن ===== -->
+    <div class="gsbTools">
+      <div class="gsbHomeIcons">
+          <button class="gsbBtn gsbGear" id="hbcSettingsBtn" onclick="goTo('settings')" title="Settings">⚙️</button>
+          <button class="gsbBtn" onclick="shareAppLink()" title="Share This App"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
+          <button class="gsbBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
+          <button class="gsbBtn" onclick="logout()" title="Logout" style="background:rgba(239,68,68,.9);">🚪</button>
+          <button class="gsbBtn admin-only muOnly" onclick="openConnectHub()" title="Connect / Join / Contact">🔗</button>
+      </div>
+      <div class="uiZoomStepper">
+        <button type="button" onclick="stepUiZoom(-5)" title="Smaller" aria-label="Smaller">A−</button>
+        <span class="uiZoomValueLabel">100%</span>
+        <button type="button" onclick="stepUiZoom(5)" title="Bigger" aria-label="Bigger">A+</button>
+      </div>
+    </div>
   </div>
 
   <!-- ---------- 🔍 فوری App Size کنٹرول — اب ہر صفحے پر نظر آتا ہے (پہلے صرف Home پر تھا)، Settings کھولے بغیر یہیں سے سائز بدلیں ---------- -->
-  <div id="globalUiZoomBar" style="display:flex; align-items:center; gap:8px; background:var(--card); border-bottom:1px solid #e2e8f0; padding:6px 12px;">
-    <span style="font-size:13px;">🔍</span>
-    <span style="font-size:11px; color:var(--muted);">A</span>
-    <input type="range" class="uiZoomSlider" min="80" max="150" step="5" value="100" oninput="applyUiZoom(this.value)" style="flex:1;">
-    <span style="font-size:16px; color:var(--muted);">A</span>
-    <span class="uiZoomValueLabel" style="font-size:11px; font-weight:700; color:var(--primary); min-width:34px; text-align:right;">100%</span>
+  <div id="globalUiZoomBar">
+    <div class="uiZoomStepper">
+      <button type="button" onclick="stepUiZoom(-5)" title="Smaller" aria-label="Smaller">A−</button>
+      <span class="uiZoomValueLabel">100%</span>
+      <button type="button" onclick="stepUiZoom(5)" title="Bigger" aria-label="Bigger">A+</button>
+    </div>
   </div>
 
   <!-- ---------- SIDEBAR OVERLAY (موبائل پر sidebar کھلنے پر پیچھے دھندلا پن) ---------- -->
@@ -2710,10 +2739,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="screen" id="screen-home">
 
       <!-- ---------- 🔓 PIN Lock بند ہو تو یاد دہانی — دوبارہ آن کرنا ایک ٹیپ کی دوری پر ---------- -->
-      <div id="homePinLockOffBanner" class="admin-only" style="display:none; background:#fef3c7; color:#92400e; border-radius:12px; padding:10px 14px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;">
-        <span style="font-size:12.5px; font-weight:700;">🔓 PIN Lock is OFF — anyone can open this app</span>
-        <button onclick="openActivatePinLockModal()" style="background:#92400e; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap;">Activate</button>
-      </div>
 
       <!-- ---------- 🔔 سیلزمین کے بھیجے ہوئے بل جو منظوری کے منتظر ہیں — اب Home پر بھی نظر آئیں، صرف Dashboard میں نہیں ---------- -->
       <div class="pendingBillsBanner" id="pendingBillsBannerHome" onclick="openPendingBillsList()">
@@ -2731,6 +2756,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <span class="pbArrow">›</span>
       </div>
 
+      <!-- ---------- AIO1310TU030: 🔓 PIN Lock (چھوٹا بٹن) اور 🚀 Near Future Plans — ایک ہی پتلی قطار، سب سے اوپر ---------- -->
+      <div class="homeTopChips">
+        <button type="button" id="homePinLockOffBanner" class="admin-only" style="display:none;" onclick="openActivatePinLockModal()">🔓 PIN Lock: OFF</button>
+        <button type="button" id="nearFuturePlansBtn" onclick="openNearFuturePlansModal()">🚀 Near Future Plans</button>
+      </div>
+
       <!-- ---------- 🏪 HOME BUSINESS CARD ---------- -->
       <div class="homeBusinessCard">
         <button class="hbcEditBtn admin-only" onclick="goTo('myaccount')" title="Edit Business Card / Logo">✏️</button>
@@ -2744,13 +2775,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <div class="hbcOwnerName" id="hbcOwnerName"></div>
             <div class="hbcPhone" id="hbcPhone"></div>
           </div>
-        </div>
-        <div class="hbcIconsRow">
-          <button class="hbcSettingsGearBtn" id="hbcSettingsBtn" onclick="goTo('settings')" title="Settings">⚙️</button>
-          <button class="hbcChatBtn" onclick="shareAppLink()" title="Share This App" style="background:rgba(255,255,255,.9); color:var(--primary-dark);"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
-          <button class="hbcChatBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
-          <button class="hbcChatBtn" onclick="logout()" title="Logout" style="background:rgba(239,68,68,.85); color:#fff;">🚪</button>
-          <button class="hbcChatBtn admin-only muOnly" onclick="openConnectHub()" title="Connect / Join / Contact" style="background:rgba(59,130,246,.85); color:#fff;">🔗</button>
         </div>
         <!-- ---------- ☁️/📥 بٹنوں کے بالکل نیچے، ہمیشہ نظر آنے والی لائن — آخری بیک اپ فائل کا نام ہمیشہ سامنے رہے، غائب ہونے والا پیغام نہیں ---------- -->
         <div class="hbcLastBackupLine admin-only" id="hbcLastBackupLine"></div>
@@ -2769,10 +2793,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="subBox" id="subBoxDays"><div class="subBoxLabel">Remaining</div><div class="subBoxVal" id="subBoxDaysVal">—</div></div>
       </div>
 
-      <!-- ---------- 🚀 NEAR FUTURE PLANS — ہوم پیج صاف رکھنے کے لیے ایک ہی بٹن، تفصیل موڈل میں ---------- -->
-      <button type="button" id="nearFuturePlansBtn" onclick="openNearFuturePlansModal()" style="width:100%; margin:6px 0 12px; padding:12px; border:none; border-radius:12px; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; font-weight:800; font-size:13.5px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
-        🚀 Near Future Plans <span style="opacity:.85; font-weight:600;">— coming soon</span>
-      </button>
 
       <!-- ---------- 🎁 روزانہ ایک بار، ہلکا سا چمکتا/حرکت کرتا یاد دہانی Toast — کوئی بٹن نہیں، خود بخود 4.5 سیکنڈ میں غائب ---------- -->
       <div id="trialReminderToast" style="display:none;">
@@ -8991,6 +9011,7 @@ function goTo(screenName, _isHistoryNav){
   // نوٹ: advOrderPicker میں بھی بلنگ جیسا فلوٹنگ کارٹ بار ہوتا ہے، اس لیے وہاں بھی یہی کلاس لگائیں
   // تاکہ نیچے کا Back/Home/Forward بار اس کارٹ بار کے اوپر رہے، اس کے نیچے دب کر نہ رہ جائے۔
   document.body.classList.toggle('billing-active', screenName === 'billing' || screenName === 'advOrderPicker');
+  document.body.classList.toggle('home-active', screenName === 'home'); // AIO1310TU030: ہوم کے بٹن نیلی پٹی میں صرف ہوم پر
   document.getElementById('navArrowBar').style.display = (screenName === 'home') ? 'none' : 'flex';
   renderSubscriptionBanner(); // ---------- ہر صفحہ بدلنے پر تازہ چیک — صرف Billing (ہوم) پر نظر آئے گی ----------
 }
@@ -12556,7 +12577,7 @@ function renderProductList(query = ''){
     <div class="productCard capCard ${openProductCards.has(p.product_id) ? 'open' : ''}" id="pcard-${p.product_id}">
       <div class="productHead capRow ${idx % 2 ? 'alt' : ''} ${anyNeg ? 'capNeg' : ''}" onclick="toggleProductCard(${p.product_id})">
         ${capThumbHtml(p.name, img, p.product_id)}
-        <div class="capBox capName"><b>${p.name}</b><small>${cat} • ${priceTxt}</small></div>
+        <div class="capBox capName"><b>${p.name}${p.variants.some(v => variantMeasure(v) !== null) ? `<button type="button" class="pgRowScale" title="Rs to weight calculator" onclick="event.stopPropagation(); openReverseCalc(${p.product_id})">⚖️</button>` : ''}</b><small>${cat} • ${priceTxt}</small></div>
         <div class="capBox capMid ${anyNeg ? 'neg' : (anyLow ? 'low' : '')}" title="Total stock"><b>${Math.round(stockTot*100)/100}</b><small>${p.variants.length} var.</small></div>
         <div class="capBtns">
           <button class="capBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
@@ -22415,6 +22436,13 @@ function applyUiZoom(pct){
   document.querySelectorAll('.uiZoomSlider').forEach(el => { if(Number(el.value) !== clamped) el.value = clamped; });
 }
 
+// ---------- AIO1310TU030: A− / A+ بٹن — ہر دبانے پر 5% چھوٹا/بڑا، اور محفوظ ----------
+function stepUiZoom(delta){
+  const cur = Number(AppState.settings.uiZoom) || 100;
+  applyUiZoom(cur + delta);
+  try{ saveToStorage('settings', AppState.settings); }catch(e){}
+}
+
 // ---------- تصویر نہ ہونے پر پراڈکٹ کارڈ پر نظر آنے والے نام کا سائز — فوری اثر، تینوں گرڈز پر (Billing/Purchase/Advance Order) ----------
 function adjustProductCardNameSize(px){
   const clamped = Math.max(8, Math.min(22, Number(px) || 13));
@@ -23247,7 +23275,7 @@ function syncPinLockUI(){
   // ---------- ہوم سکرین پر یاد دہانی — صرف اسی وقت جب واقعی بند ہو ----------
   const banner = document.getElementById('homePinLockOffBanner');
   const inTrial = AppState.settings.isOnFreeTrial && isSubscriptionActive(); // ---------- ٹرائل میں PIN کا ذکر ہی نہ ہو ----------
-  if(banner) banner.style.display = (on || inTrial) ? 'none' : 'flex';
+  if(banner) banner.style.display = (on || inTrial) ? 'none' : 'inline-flex';
 }
 
 /* =====================================================================
@@ -27678,7 +27706,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU029';
+  const APP_VERSION = 'AIO1310TU030';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
