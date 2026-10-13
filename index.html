@@ -845,6 +845,41 @@
     .bcRow{padding:5px 5px;}
   }
 
+  /* ===================== AIO1310TU041: پرچیز آرڈر اور شپمنٹ — بلنگ کارٹ جیسے ابھرے ہوئے رنگدار کیپسول ===================== */
+  .pcHead, .pcMain{display:grid; grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr); gap:4px; align-items:center;}
+  .pcMain{grid-template-areas:"s n n n" "s q p t"; row-gap:5px;}
+  .pcHead{grid-template-areas:"s q p t"; background:linear-gradient(180deg,#14532d,#166534); color:#fff; padding:8px 6px;
+    border-radius:14px 14px 0 0; border-bottom:3px solid #facc15; font-size:11.5px; font-weight:800; text-align:center; margin-top:4px;}
+  .pcHead span:nth-child(1){grid-area:s;} .pcHead span:nth-child(2){grid-area:q;} .pcHead span:nth-child(3){grid-area:p;} .pcHead span:nth-child(4){grid-area:t;}
+  .pcList{padding:6px 2px 2px;}
+  .pcMain > .bcSerial{grid-area:s; align-self:center;}
+  .pcName{grid-area:n; position:relative; background:#fff; border:1.5px solid #e2e8f0; border-radius:10px; min-height:34px; padding:4px 32px 4px 8px;
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13.5px; font-weight:700; color:#0f172a; line-height:1.25; overflow-wrap:anywhere;}
+  .pcVar{font-size:10.5px; font-weight:800; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:2px 6px;}
+  .pcDel{position:absolute; right:4px; top:50%; transform:translateY(-50%); width:24px; height:24px; border:none; border-radius:7px;
+    background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:900; cursor:pointer; padding:0; line-height:1;}
+  .pcQty{grid-area:q; display:flex; align-items:center; gap:2px; height:38px; padding:0 2px; background:#fff; border:1.5px solid #93c5fd; border-radius:11px; min-width:0;}
+  .pcQty button{flex:0 0 auto; width:24px; height:30px; border:none; border-radius:9px; color:#fff; font-size:17px; font-weight:900; line-height:1; padding:0; cursor:pointer;
+    background:linear-gradient(180deg,#60a5fa,#1d4ed8); box-shadow:0 3px 0 #1e3a8a, 0 4px 5px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.45);}
+  .pcQty button.bcMinus{background:linear-gradient(180deg,#f87171,#dc2626); box-shadow:0 3px 0 #7f1d1d, 0 4px 5px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.45);}
+  .pcQty button:active{transform:translateY(2px);}
+  .pcQty input{flex:1; min-width:0; width:100%; border:none; background:transparent; text-align:center; font-weight:900; font-size:14px; color:#1e3a8a; padding:0;}
+  .pcPrice, .pcTotal{height:38px; width:100%; min-width:0; box-sizing:border-box; border-radius:10px; text-align:center; font-weight:900; font-size:13.5px; padding:0 2px;}
+  .pcPrice{grid-area:p; border:2px solid #f59e0b; background:#fffbeb; color:#78350f;}
+  .pcTotal{grid-area:t; border:2px solid #86efac; background:#f0fdf4; color:#14532d;}
+  .pcPrice.bcZero{border-color:#dc2626; background:#fef2f2; color:#b91c1c;}
+  .pcQty input, .pcPrice, .pcTotal{-moz-appearance:textfield; appearance:textfield;}
+  .pcQty input::-webkit-outer-spin-button, .pcQty input::-webkit-inner-spin-button,
+  .pcPrice::-webkit-outer-spin-button, .pcPrice::-webkit-inner-spin-button,
+  .pcTotal::-webkit-outer-spin-button, .pcTotal::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .pcPrice:focus, .pcTotal:focus, .pcQty input:focus{outline:2px solid #2563eb; outline-offset:1px;}
+  /* موڈل کے عام input انداز (سفید ڈبہ، پیڈنگ، مارجن) کیپسول پر حاوی نہ ہوں */
+  .pcMain input{margin:0 !important; box-shadow:none !important;}
+  .pcMain .pcQty input{border:none !important; background:transparent !important; padding:0 !important; color:#1e3a8a !important; font-weight:900 !important; font-size:14px !important; height:30px !important; width:100% !important;}
+  .pcMain .pcPrice{border:2px solid #f59e0b !important; background:#fffbeb !important; color:#78350f !important; padding:0 2px !important; height:38px !important; width:100% !important;}
+  .pcMain .pcPrice.bcZero{border-color:#dc2626 !important; background:#fef2f2 !important; color:#b91c1c !important;}
+  .pcMain .pcTotal{border:2px solid #86efac !important; background:#f0fdf4 !important; color:#14532d !important; padding:0 2px !important; height:38px !important; width:100% !important;}
+
   /* --- Right: Checkout Panel --- */
   .checkoutPanel{background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:0 2px 10px rgba(41,29,10,.07); display:flex; flex-direction:column;}
 
@@ -2467,7 +2502,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU040</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU041</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2680,7 +2715,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU040</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU041</span>
     </div>
   </div>
 
@@ -3819,16 +3854,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
               <option value="nameDesc">Name: Z → A</option>
             </select>
           </div>
-          <div style="display:flex; align-items:center; gap:8px; padding:0 0 4px; margin-top:4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; border-bottom:2px solid #e2e8f0;">
-            <span style="width:20px; text-align:center;">#</span>
-            <span style="flex:1;">Item</span>
-            <span style="width:46px; text-align:center;">Variant</span>
-            <span style="width:46px; text-align:center;">Qty</span>
-            <span style="width:62px; text-align:center;">Price<br>/ Unit</span>
-            <span style="width:72px; text-align:center;">Total<br>✏️</span>
-            <span style="width:28px; flex:0 0 auto; text-align:center;">✖</span>
-          </div>
-          <div id="receiveShipmentItemsList"></div>
+          <div class="pcHead"><span>#</span><span>Qty</span><span>Price / Unit</span><span>Total ✏️</span></div>
+          <div class="pcList" id="receiveShipmentItemsList"></div>
 
           <div class="searchRow" style="margin-top:10px; display:flex; gap:6px;">
             <input type="text" id="receiveShipmentAddInput" placeholder="🔍 Add an extra item that arrived..." oninput="searchReceiveShipmentItems(this.value)" style="flex:1; min-width:0;">
@@ -3883,10 +3910,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
               <option value="nameDesc">Name: Z → A</option>
             </select>
           </div>
-          <table class="cartTable" style="margin-bottom:6px;">
-            <thead><tr><th style="width:22px;">#</th><th>Item</th><th style="width:52px;">Variant</th><th>Qty</th><th>Price / Unit</th><th>Total ✏️</th><th></th></tr></thead>
-            <tbody id="poItemsBody"></tbody>
-          </table>
+          <div class="pcHead"><span>#</span><span>Qty</span><span>Price / Unit</span><span>Total ✏️</span></div>
+          <div class="pcList" id="poItemsBody"></div>
         </div>
         <div class="emptyCart" id="poEmptyMsg" style="padding:20px 0;">No items added — select from the list above</div>
 
@@ -16778,6 +16803,39 @@ function updateReceiveLineTotal(idx, total){
   renderReceiveShipmentCart();
 }
 
+// AIO1310TU041: ایک ہی کیپسول قطار — PO اور شپمنٹ دونوں کے لیے (kind: 'po' یا 'rs')
+function supplyCapsuleRow(item, idx, kind){
+  const key = kind === 'po' ? item.variant_id : idx;
+  const fn = kind === 'po'
+    ? {qty:'updatePoQty', cost:'updatePoCost', total:'updatePoLineTotal', del:'confirmRemoveSupplyItem'}
+    : {qty:'updateReceiveQty', cost:'updateReceiveCost', total:'updateReceiveLineTotal', del:'confirmRemoveSupplyItem'};
+  let baseName = item.name;
+  if(item.label && baseName.endsWith(item.label)) baseName = baseName.slice(0, baseName.length - item.label.length).trim();
+  const lineTotal = moneyRound(item.qty * item.cost);
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  return `
+    <div class="bcRow ${idx % 2 ? 'alt' : ''}">
+      <div class="pcMain">
+        <span class="bcSerial">${idx+1}</span>
+        <div class="pcName">${esc(baseName)}${item.label && item.label !== 'Default' ? `<span class="pcVar">${esc(item.label)}</span>` : ''}
+          <button type="button" class="pcDel" onclick="${fn.del}('${kind}', ${key})" title="Remove" aria-label="Remove">✖</button></div>
+        <div class="pcQty">
+          <button type="button" class="bcMinus" onclick="${fn.qty}(${key}, Math.max(1, ${item.qty} - 1))">−</button>
+          <input type="number" min="0" value="${item.qty}" onfocus="this.select()" onchange="${fn.qty}(${key}, parseFloat(this.value)||${kind === 'po' ? 1 : 0})">
+          <button type="button" onclick="${fn.qty}(${key}, ${item.qty} + 1)">+</button>
+        </div>
+        <input type="number" class="pcPrice ${Number(item.cost) ? '' : 'bcZero'}" min="0" value="${fmtCost(item.cost)}" title="Price per unit" onfocus="this.select()" onchange="${fn.cost}(${key}, parseFloat(this.value)||0)">
+        <input type="number" class="pcTotal" min="0" value="${lineTotal}" title="Type the bill total for this item — per-unit price is calculated" onfocus="this.select()" onchange="${fn.total}(${key}, parseFloat(this.value)||0)">
+      </div>
+    </div>`;
+}
+function confirmRemoveSupplyItem(kind, key){
+  const item = kind === 'po' ? poCart.find(i => i.variant_id === key) : receiveShipmentCart[key];
+  if(!item) return;
+  if(!confirm(`⚠️ Remove "${item.name}"?`)) return;
+  if(kind === 'po') removePoItem(key); else removeReceiveItem(key);
+}
+
 function renderPoCart(){
   const body = document.getElementById('poItemsBody');
   const emptyMsg = document.getElementById('poEmptyMsg');
@@ -16791,26 +16849,8 @@ function renderPoCart(){
   emptyMsg.style.display = 'none';
 
   let total = 0;
-  body.innerHTML = poCart.map((i, idx) => {
-    const lineTotal = i.qty * i.cost;
-    total += lineTotal;
-    // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی پوری ایپ کی طرح یہاں بھی الگ کالم میں ----------
-    let baseName = i.name;
-    if(i.label && baseName.endsWith(i.label)){
-      baseName = baseName.slice(0, baseName.length - i.label.length).trim();
-    }
-    return `
-      <tr>
-        <td style="text-align:center; color:var(--muted); font-weight:700;">${idx+1}</td>
-        <td>${baseName}</td>
-        <td><span style="display:inline-block; font-size:11px; font-weight:700; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:4px 6px; text-align:center;">${i.label || '—'}</span></td>
-        <td><input type="number" min="1" value="${i.qty}" style="width:55px;" onfocus="this.select()" onchange="updatePoQty(${i.variant_id}, parseInt(this.value)||1)"></td>
-        <td><input type="number" min="0" value="${fmtCost(i.cost)}" style="width:70px;" onfocus="this.select()" onchange="updatePoCost(${i.variant_id}, parseFloat(this.value)||0)"></td>
-        <td><input type="number" min="0" value="${moneyRound(lineTotal)}" style="width:78px; font-weight:700; background:#f0fdf4; border-color:#86efac;" title="Type the bill total for this item — per-unit price is calculated" onfocus="this.select()" onchange="updatePoLineTotal(${i.variant_id}, parseFloat(this.value)||0)"></td>
-        <td><button class="removeBtn" onclick="removePoItem(${i.variant_id})">✖</button></td>
-      </tr>
-    `;
-  }).join('');
+  poCart.forEach(i => { total += i.qty * i.cost; });
+  body.innerHTML = poCart.map((i, idx) => supplyCapsuleRow(i, idx, 'po')).join('');
   document.getElementById('poGrandTotal').textContent = 'Rs. ' + moneyRound(total).toLocaleString();
 }
 
@@ -18494,26 +18534,8 @@ function renderReceiveShipmentCart(){
   if(receiveShipmentCart.length === 0){
     list.innerHTML = `<div class="profileEmpty">No items in this shipment</div>`;
   } else {
-    list.innerHTML = receiveShipmentCart.map((item, idx) => {
-      const lineTotal = item.qty * item.cost;
-      total += lineTotal;
-      // ---------- Item کے نام سے ویریئنٹ الگ کریں — باقی ایپ کی طرح یہاں بھی "چینی Kg" کی بجائے
-      // نام اور Variant الگ الگ خانوں میں نظر آئیں ----------
-      let baseName = item.name;
-      if(item.label && baseName.endsWith(item.label)){
-        baseName = baseName.slice(0, baseName.length - item.label.length).trim();
-      }
-      return `
-        <div class="reviewItemRow">
-          <span class="riNo">${idx+1}</span>
-          <span class="riName">${baseName}</span>
-          <span class="riVariant">${item.label || '—'}</span>
-          <input type="number" class="riQty" min="0" value="${item.qty}" onfocus="this.select()" onchange="updateReceiveQty(${idx}, parseInt(this.value)||0)">
-          <input type="number" class="riRate" min="0" value="${fmtCost(item.cost)}" onfocus="this.select()" onchange="updateReceiveCost(${idx}, parseFloat(this.value)||0)">
-          <input type="number" class="riLineIn" min="0" value="${moneyRound(lineTotal)}" title="Type the bill total for this item — per-unit price is calculated" onfocus="this.select()" onchange="updateReceiveLineTotal(${idx}, parseFloat(this.value)||0)">
-          <button class="riRemove" onclick="removeReceiveItem(${idx})">✖</button>
-        </div>`;
-    }).join('');
+    receiveShipmentCart.forEach(item => { total += item.qty * item.cost; });
+    list.innerHTML = receiveShipmentCart.map((item, idx) => supplyCapsuleRow(item, idx, 'rs')).join('');
   }
   document.getElementById('receiveShipmentTotal').textContent = 'Rs. ' + moneyRound(total).toLocaleString();
 }
@@ -27937,7 +27959,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU040';
+  const APP_VERSION = 'AIO1310TU041';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
