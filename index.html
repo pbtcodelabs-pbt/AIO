@@ -1425,6 +1425,10 @@
   .vcFieldWrap input, .vcFieldWrap .vcInputRow{width:100%;}
   .vcFieldWrap input{padding:6px 2px; border:none; border-radius:0; font-size:15px; font-weight:700; background:transparent; color:#1e293b;}
   .vcFieldWrap input:focus{outline:none;}
+  /* ===================== AIO1310TU026: پراڈکٹ کی یونٹ — مکمل فہرست + اپنی یونٹ ===================== */
+  .vcFieldWrap select.npUnitSelect{width:100%; padding:6px 2px; border:none; font-size:15px; font-weight:700; background:transparent; color:#1e293b; -webkit-appearance:auto; appearance:auto;}
+  .vcFieldWrap select.npUnitSelect:focus{outline:none;}
+  #npUnitCustom{margin-top:6px; border-top:1px dashed #cbd5e1 !important; padding-top:8px !important;}
   .vcFieldWrap:focus-within{border-color:var(--primary); box-shadow:0 2px 10px rgba(37,99,235,.15);}
   .vcFieldWrap.vcNameField input{font-size:16px; font-weight:800;}
   .vcInputRow{display:flex; gap:6px; align-items:center;}
@@ -2411,7 +2415,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1210MO025</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU026</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2632,7 +2636,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1210MO025</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU026</span>
     </div>
   </div>
 
@@ -3091,6 +3095,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <span class="vcFieldLabel">Expiry Date (optional)</span>
             <input type="date" id="npExpiry">
           </div>
+        </div>
+        <div class="vcFieldWrap vcFieldFull" id="npUnitWrap">
+          <span class="vcFieldLabel">Unit</span>
+          <select id="npUnit" class="npUnitSelect" onchange="npUnitChanged()"></select>
+          <input type="text" id="npUnitCustom" placeholder="Type your unit, e.g. peti" maxlength="20" style="display:none;" autocomplete="off">
         </div>
         <div class="vcFieldWrap vcFieldFull npExtra">
           <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
@@ -6532,6 +6541,7 @@ function buildBackupObject(){
     pendingBills: pendingBillsData,
     nextPendingId,
     customCategories: customCategories,
+    customUnits: (typeof customUnits !== 'undefined') ? customUnits : [],
     expiryAlertDays: expiryAlertDays,
     quickDockItems: quickDockItems,
   };
@@ -6957,6 +6967,7 @@ function proceedWithImport(){
       nextPendingId = backup.nextPendingId || nextPendingId;
       // ---------- مکمل آڈٹ کے بعد ملیں: یہ دو بھی بحال کریں ----------
       if(typeof customCategories !== 'undefined' && backup.customCategories){ customCategories.length = 0; customCategories.push(...backup.customCategories); }
+      if(typeof customUnits !== 'undefined' && Array.isArray(backup.customUnits)){ customUnits.length = 0; customUnits.push(...backup.customUnits); saveToStorage('customUnits', customUnits); }
       if(backup.expiryAlertDays != null) expiryAlertDays = backup.expiryAlertDays;
       if(typeof quickDockItems !== 'undefined' && backup.quickDockItems){ quickDockItems.length = 0; quickDockItems.push(...backup.quickDockItems); }
 
@@ -11599,6 +11610,55 @@ let nextVariantId = loadFromStorage('nextVariantId', 28);
 // ---------- خالی/نئی کیٹیگریز جو ابھی کسی پراڈکٹ پر لاگو نہیں ہوئیں — Categories ڈراپ ڈاؤن کے "➕ Add New" سے شامل ہوں گی ----------
 let customCategories = loadFromStorage('customCategories', []);
 
+// ===================== AIO1310TU026: پراڈکٹ کی یونٹ — عام یونٹس کی مکمل فہرست (گنتی، وزن، ناپ، لمبائی، رقبہ)؛
+// فہرست میں نہ ہو تو "Other" سے اپنی یونٹ لکھیں، وہ بھی آئندہ کے لیے فہرست میں شامل ہو جاتی ہے =====================
+const NP_UNIT_GROUPS = [
+  ['Count / Packing', ['pcs','dozen','pair','pack','packet','box','carton','case','bundle','set','strip','sheet','roll','tablet','capsule','sachet','pouch','bottle','can','jar','tin','tube','bag','sack','tray','card','cup','plate','piece set']],
+  ['Weight', ['mg','g','kg','pao','seer','maund','quintal','ton','tola','masha','ratti','oz','lb']],
+  ['Volume / Liquid', ['ml','L','gallon','fl oz','drum','cylinder']],
+  ['Length', ['mm','cm','inch','ft','m','yard','gaz','km']],
+  ['Area', ['sq ft','sq m','sq yard','marla','kanal']],
+  ['Time / Service', ['hour','day','month','service']]
+];
+let customUnits = loadFromStorage('customUnits', []);
+if(!Array.isArray(customUnits)) customUnits = [];
+function npAllBuiltInUnits(){ return NP_UNIT_GROUPS.flatMap(g => g[1]); }
+function npFillUnitSelect(selected){
+  const sel = document.getElementById('npUnit');
+  if(!sel) return;
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const builtIn = npAllBuiltInUnits();
+  const used = (typeof productsData !== 'undefined' ? productsData : []).flatMap(p => (p.variants || []).map(v => v.unit)).filter(Boolean);
+  const mine = [...new Set([...customUnits, ...used])].filter(u => !builtIn.includes(u)).sort((a,b) => a.localeCompare(b));
+  let html = NP_UNIT_GROUPS.map(([label, list]) => `<optgroup label="${esc(label)}">${list.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('')}</optgroup>`).join('');
+  if(mine.length) html += `<optgroup label="My Units">${mine.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('')}</optgroup>`;
+  html += `<option value="__other__">➕ Other (type your own)</option>`;
+  sel.innerHTML = html;
+  sel.value = selected && [...builtIn, ...mine].includes(selected) ? selected : 'pcs';
+  const custom = document.getElementById('npUnitCustom');
+  if(custom){ custom.value = ''; custom.style.display = 'none'; }
+}
+function npUnitChanged(){
+  const sel = document.getElementById('npUnit');
+  const custom = document.getElementById('npUnitCustom');
+  if(!sel || !custom) return;
+  const isOther = sel.value === '__other__';
+  custom.style.display = isOther ? '' : 'none';
+  if(isOther) setTimeout(() => custom.focus(), 50);
+}
+function npReadUnit(){
+  const sel = document.getElementById('npUnit');
+  if(!sel) return 'pcs';
+  if(sel.value !== '__other__') return sel.value || 'pcs';
+  const typed = (document.getElementById('npUnitCustom').value || '').trim().replace(/\s+/g, ' ').slice(0, 20);
+  if(!typed) return 'pcs';
+  const existing = [...npAllBuiltInUnits(), ...customUnits].find(u => u.toLowerCase() === typed.toLowerCase());
+  if(existing) return existing;
+  customUnits.push(typed);
+  saveToStorage('customUnits', customUnits);
+  return typed;
+}
+
 // ---------- Render Product List (accordion style) ----------
 // ---------- Products screen: منتخب شدہ کیٹیگری یاد رکھیں (سرچ کے ساتھ مل کر فلٹر کرتی ہے) ----------
 let activeProductCategory = 'all';
@@ -13612,6 +13672,7 @@ function openNewProductModal(productId = null){
     document.getElementById('npLowStockAt').value = v.lowStockAt ?? 5;
     document.getElementById('npExpiry').value = v.expiryDate || '';
     document.getElementById('npLocation').value = v.location || '';
+    npFillUnitSelect(v.unit || 'pcs');
     npProductPhotoDataUrl = v.image || null;
     renderProductPhotoPreview(npProductPhotoDataUrl);
     document.getElementById('npAddVariantHint').textContent = product.variants.length > 1
@@ -13632,7 +13693,8 @@ function openNewProductModal(productId = null){
     document.getElementById('npExpiry').value = '';
     document.getElementById('npLocation').value = '';
     renderProductPhotoPreview(null);
-    document.getElementById('npAddVariantHint').innerHTML = 'ℹ️ Only sell one size/type of this item? You\'re all set — just tap Create Product below. Need multiple sizes/variants (e.g. 500g, 1kg)? Save this one first, then use "+ Add New Variant" on the product card.';
+    document.getElementById('npAddVariantHint').textContent = '';
+    npFillUnitSelect('pcs');
   }
 
   // ---------- نئی پراڈکٹ میں صرف نام، خرید اور فروخت کی قیمت — باقی خانے صرف ایڈٹ میں ----------
@@ -13659,6 +13721,7 @@ function saveNewProduct(){
   const lowStockAt = parseFloat(document.getElementById('npLowStockAt').value) || 0;
   const expiryDate = document.getElementById('npExpiry').value || '';
   const location = document.getElementById('npLocation').value.trim();
+  const unit = npReadUnit();
 
   if(!name){
     alert('Please enter product name.');
@@ -13694,6 +13757,7 @@ function saveNewProduct(){
         v0.lowStockAt = lowStockAt;
         v0.expiryDate = expiryDate;
         v0.location = location;
+        v0.unit = unit;
         if(!v0.batches || v0.batches.length <= 1){
           v0.batches = [{batchId: (v0.batches && v0.batches[0]?.batchId) || nextBatchId++, qty: v0.stock, expiryDate: v0.expiryDate || ''}];
           saveToStorage('nextBatchId', nextBatchId);
@@ -13714,7 +13778,7 @@ function saveNewProduct(){
       {
         variant_id: nextVariantId++, label:'Default', barcode,
         purchase, markupPercent: AppState.settings.markupPricingEnabled ? markupPercent : undefined,
-        retail, wholesale, stock, lowStockAt, location, expiryDate,
+        retail, wholesale, stock, lowStockAt, location, expiryDate, unit,
         image: npProductPhotoDataUrl || null,
         batches: [{batchId: nextBatchId++, qty: stock, expiryDate: expiryDate || ''}]
       }
@@ -27587,7 +27651,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1210MO025';
+  const APP_VERSION = 'AIO1310TU026';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
