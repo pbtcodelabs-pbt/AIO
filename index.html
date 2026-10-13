@@ -628,8 +628,10 @@
   }
   .subBox.subBoxUrgentGlow{ animation: subBoxDaysGlow 1.6s ease-in-out infinite; }
   /* ---------- AIO610TU027: لاگ ان صفحے کی Quick / Expired حالتیں ---------- */
-  #loginScreen.loginQuick .loginPanel, #loginScreen.loginQuick #loginTouchIdWrap, #loginScreen.loginQuick #touchIdDivider,
-  #loginScreen.loginQuick #enableTouchIdLabel, #loginScreen.loginQuick #turnOffTouchIdHint, #loginScreen.loginQuick .loginRememberRow,
+  /* AIO1310TU: Quick mode میں بھی فنگر پرنٹ کا بٹن/enable آپشن نظر آئے (پہلے یہ بھی چھپ جاتے تھے، اسی لیے
+     لاگ آؤٹ پر صرف Enter بٹن آتا تھا اور فنگر پرنٹ کا موقع نہیں بنتا تھا)۔ turnOffHint اور PIN پینل بدستور چھپے رہیں۔ */
+  #loginScreen.loginQuick .loginPanel, #loginScreen.loginQuick #touchIdDivider,
+  #loginScreen.loginQuick #turnOffTouchIdHint, #loginScreen.loginQuick .loginRememberRow,
   #loginScreen.loginQuick .loginForgotHint, #loginScreen.loginQuick #loginLockoutBox,
   #loginScreen.loginExpired .loginPanel, #loginScreen.loginExpired #loginTouchIdWrap, #loginScreen.loginExpired #touchIdDivider,
   #loginScreen.loginExpired #enableTouchIdLabel, #loginScreen.loginExpired #turnOffTouchIdHint, #loginScreen.loginExpired .loginRememberRow,
@@ -8414,7 +8416,16 @@ function refreshLoginLockoutUI(){
 async function login(){
   if(window._launchCheckPending === true) return;
   // ---------- AIO610TU027: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
-  if(document.getElementById('loginScreen').classList.contains('loginQuick')){ quickEnterApp(); return; }
+  if(document.getElementById('loginScreen').classList.contains('loginQuick')){
+    // 👆 AIO1310TU: Quick mode میں بھی اگر "فنگر پرنٹ آن کریں" چیک باکس آن ہو تو اندر جانے سے پہلے رجسٹر کر دیں
+    const _qChk = document.getElementById('enableTouchIdChk');
+    if(_qChk && _qChk.checked){
+      _qChk.checked = false;
+      const _qAdmin = usersData.find(u => u.role === 'admin' && u.is_active);
+      if(_qAdmin){ await enrollTouchId(_qAdmin); }
+    }
+    quickEnterApp(); return;
+  }
   if(isLoginLockedOut()) return;
 
   const role = AppState._loginActiveRole || 'admin';
@@ -8596,7 +8607,9 @@ async function refreshTouchIdUI(){
     // ---------- 👆 لاگ اِن اسکرین کھلتے ہی خودبخود فون کا فنگر پرنٹ پاپ اپ — صرف ایک بار فی سیشن،
     //   تاکہ ریفریش/اوپر کھینچنے پر بار بار نہ آئے۔ ایپ مکمل بند کر کے کھولنے پر نشانی مٹ جاتی ہے ----------
     let _ses = false; try{ _ses = sessionStorage.getItem('aioBioOk') === '1'; }catch(e){}
-    if(!_ses && !_aioBioAutoTried && !_tidBusy && !AppState.currentUser){
+    // Quick mode (PIN لاک بند) میں خودکار پاپ اپ نہیں — وہاں بے رکاوٹ داخلہ مقصود ہے؛ بٹن پھر بھی دکھتا ہے تاکہ بندہ چاہے تو فنگر پرنٹ استعمال کرے
+    const _isQuick = document.getElementById('loginScreen').classList.contains('loginQuick');
+    if(!_ses && !_aioBioAutoTried && !_tidBusy && !AppState.currentUser && !_isQuick){
       _aioBioAutoTried = true;
       setTimeout(function(){ try{ loginWithTouchId(); }catch(e){} }, 350);
     }
@@ -27724,7 +27737,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU033';
+  const APP_VERSION = 'AIO1310TU034';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
