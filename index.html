@@ -2454,27 +2454,19 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <!-- ---------- 🔒 لاک آؤٹ پیغام — بار بار غلط PIN پر نظر آئے، اس دوران Enter بٹن بند رہے ---------- -->
     <div id="loginLockoutBox" class="loginLockoutBox" style="display:none;"></div>
 
-    <!-- ---------- 👆 Touch ID / Fingerprint Unlock — صرف اس وقت نظر آئے جب ڈیوائس پر پہلے سے فعال ہو، PIN سسٹم بدستور موجود رہتا ہے ---------- -->
-    <div id="loginTouchIdWrap" style="display:none;">
-      <button id="loginTouchIdBtn" type="button" class="touchIdCircleBtn" onclick="loginWithTouchId()" aria-label="Unlock with Touch ID">
-        <svg width="72" height="72" viewBox="0 0 72 72" style="position:absolute; top:0; left:0;">
-          <circle cx="36" cy="36" r="32" fill="none" stroke="var(--border, #e2e8f0)" stroke-width="1.5"></circle>
-          <circle id="tidRingArc" cx="36" cy="36" r="32" fill="none" stroke="var(--primary)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201" transform="rotate(-90 36 36)"></circle>
-        </svg>
-        <span class="touchIdIconWrap">
-          <svg id="tidFpIcon" class="tid-idle-pulse" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dark)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 16v-4.639c0-.51.1-.999.285-1.453M17 16v-3.185m-7.778-5.08A5.506 5.506 0 0112 7c2.28 0 4.203 1.33 4.805 3.15M10 17v-2.177M14 17v-5.147C14 10.83 13.105 10 12 10s-2 .83-2 1.853v.794"></path>
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path>
-          </svg>
-          <span id="tidCheckWrap">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
-          </span>
-          <div id="tidScanLine" class="tidScanLine"></div>
-        </span>
-      </button>
-      <div id="tidStatusLabel">Tap to unlock with Touch ID</div>
+    <!-- ---------- 👆 فنگر پرنٹ — صدام کی ہدایت (13 اکتوبر): بڑا دائرہ/باکس اور "Tap to unlock" لیبل ختم۔
+         اب صرف ایک چھوٹا 👆 نشان؛ لاگ اِن اسکرین کھلتے ہی خودبخود فون کا فنگر پرنٹ پاپ اپ، منسوخ/ناکام پر یہی نشان دبا کر دوبارہ۔
+         پرانے tid* عناصر چھپے ہوئے رہتے ہیں تاکہ پرانا اینیمیشن کوڈ ٹوٹے نہیں ---------- -->
+    <div id="loginTouchIdWrap" style="display:none; flex-direction:row; align-items:center; justify-content:center; gap:6px; margin-bottom:10px;">
+      <span id="aioBioIcon" onclick="loginWithTouchId()" title="فنگر پرنٹ سے لاگ اِن" style="font-size:26px; cursor:pointer; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));">👆</span>
+      <!-- پرانے اینیمیشن عناصر — چھپے ہوئے، صرف اس لیے کہ playTouchId* کوڈ انہیں ڈھونڈتا ہے -->
+      <span style="display:none;">
+        <svg width="1" height="1"><circle id="tidRingArc" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle></svg>
+        <svg id="tidFpIcon"></svg><span id="tidCheckWrap"></span><div id="tidScanLine"></div>
+      </span>
+      <div id="tidStatusLabel" style="display:none;"></div>
     </div>
-    <div id="touchIdDivider" class="touchIdDivider" style="display:none;"><span>or use PIN</span></div>
+    <div id="touchIdDivider" class="touchIdDivider" style="display:none;"></div>
 
     <div id="loginFormArea">
       <!-- ---------- 👑 سنگل ایڈمن/یوزر پینل — صرف PIN، کوئی نام منتخب کرنے کی ضرورت نہیں ---------- -->
@@ -8568,6 +8560,7 @@ async function loginWithTouchId(){
       return;
     }
     resetLoginSecurity();
+    try{ sessionStorage.setItem('aioBioOk','1'); }catch(e){} // 👆 اسی سیشن میں دوبارہ خودکار پاپ اپ نہ آئے
     await playTouchIdSuccess(); // ---------- ✅ مختصر کنفرمیشن اینیمیشن، پھر ایپ میں داخل ----------
     finishLogin(user, true); // ---------- Touch ID سے آنے والا لاگ ان ہمیشہ سیشن یاد رکھے ----------
   }catch(err){
@@ -8582,6 +8575,8 @@ async function loginWithTouchId(){
 }
 
 // ---------- لاگ ان سکرین پر Touch ID بٹن/چیک باکس/آف کرنے کا لنک — موجودہ حالت کے مطابق دکھائیں/چھپائیں ----------
+// 👆 سیشن نشانی — ایک بار فنگر پرنٹ دینے کے بعد اسی سیشن میں دوبارہ خودکار پاپ اپ نہ آئے
+let _aioBioAutoTried = false;
 async function refreshTouchIdUI(){
   const wrap = document.getElementById('loginTouchIdWrap');
   const divider = document.getElementById('touchIdDivider');
@@ -8593,11 +8588,18 @@ async function refreshTouchIdUI(){
   const stored = getTouchIdCredential();
 
   if(stored && available){
-    wrap.style.display = 'flex';
+    wrap.style.display = 'flex';   // صرف چھوٹا 👆 نشان
     resetTouchIdVisual();
-    if(divider) divider.style.display = 'flex';
+    if(divider) divider.style.display = 'none';
     if(enableLabel) enableLabel.style.display = 'none';
     if(turnOffHint) turnOffHint.style.display = 'block';
+    // ---------- 👆 لاگ اِن اسکرین کھلتے ہی خودبخود فون کا فنگر پرنٹ پاپ اپ — صرف ایک بار فی سیشن،
+    //   تاکہ ریفریش/اوپر کھینچنے پر بار بار نہ آئے۔ ایپ مکمل بند کر کے کھولنے پر نشانی مٹ جاتی ہے ----------
+    let _ses = false; try{ _ses = sessionStorage.getItem('aioBioOk') === '1'; }catch(e){}
+    if(!_ses && !_aioBioAutoTried && !_tidBusy && !AppState.currentUser){
+      _aioBioAutoTried = true;
+      setTimeout(function(){ try{ loginWithTouchId(); }catch(e){} }, 350);
+    }
   } else {
     wrap.style.display = 'none';
     if(divider) divider.style.display = 'none';
@@ -8889,6 +8891,7 @@ function logout(){
   renderPendingBillsBanner(); // ---------- بینر فوری چھپا دیں تاکہ اگلے یوزر کو پرانی حالت نظر نہ آئے ----------
   clearLoginPinFields();
   saveToStorage('rememberedSession', null); // ---------- لاگ آؤٹ پر یاد رکھا ہوا سیشن ختم — اگلی بار پن دوبارہ مانگا جائے گا ----------
+  try{ sessionStorage.removeItem('aioBioOk'); }catch(e){} _aioBioAutoTried = false; // 👆 فنگر پرنٹ سیشن نشانی صاف — اگلی بار خودکار فنگر پرنٹ دوبارہ
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   refreshTouchIdUI(); // ---------- 🛠️ فکس: لاگ ان اسکرین دوبارہ نظر آتے ہی Touch ID بٹن اور _tidBusy کو تازہ/ری سیٹ کریں ----------
@@ -8904,6 +8907,7 @@ function fullLogoutAllAccounts(){
   AppState.currentUser = null;
   AppState.currentRole = null;
   saveToStorage('rememberedSession', null);
+  try{ sessionStorage.removeItem('aioBioOk'); }catch(e){} _aioBioAutoTried = false; // 👆 فنگر پرنٹ سیشن نشانی صاف
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   clearLoginPinFields();
@@ -27720,7 +27724,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU032';
+  const APP_VERSION = 'AIO1310TU033';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
