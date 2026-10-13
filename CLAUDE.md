@@ -10,7 +10,7 @@
 ## AIO DIRECT کے ساتھ برابری (مستقل اصول)
 - ہر AIO کام کے ساتھ وہی تبدیلی **pbtcodelabs-pbt/AIO-POS-DIRECT** میں بھی خود لگائیں، push اور merge کریں — جیسے سبزی منڈی/فروٹ منڈی کو برابر رکھتے ہیں۔
 - **چھوڑنا ہے:** پلے اسٹور/Google Play Billing، Package Plans، Restore Purchase، Cloudflare تصدیق — یہ صرف AIO میں۔ Direct کا اپنا ایکٹیویشن کوڈ/ڈویلپر پینل/گفٹ کوڈ والا سبسکرپشن نظام کبھی نہ چھیڑیں؛ Direct میں "Subscribe" = `openSubscribeModal()`۔
-- ہر کام کے آخر میں دونوں کے نئے ورژن بتائیں: AIO (`AIO…`) اور Direct (`AIODR…`، آخری `AIODR1310TU004`)۔
+- ہر کام کے آخر میں دونوں کے نئے ورژن بتائیں: AIO (`AIO…`) اور Direct (`AIODR…` — Direct کا تازہ ورژن اس کی `index.html` میں `APP_VERSION` سے دیکھیں)۔
 
 ## ورژن
 - شکل: `AIO` + تاریخ `DD` + مہینہ `MM` + دن کے دو حروف + تین ہندسوں کا سیریل، مثلاً `AIO1110SU018`۔ سیریل کبھی دوبارہ شروع نہیں ہوتا، ہر ریلیز پر ایک آگے۔
