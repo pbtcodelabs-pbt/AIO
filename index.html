@@ -823,6 +823,10 @@
   .bcQty span{flex:1; min-width:0; text-align:center; font-weight:900; font-size:14px; letter-spacing:-.3px; color:#1e3a8a; overflow:hidden;}
   .bcTotal{display:flex; align-items:center; justify-content:center; height:38px; border:2px solid #86efac; border-radius:10px; background:#f0fdf4;
     font-weight:900; font-size:12.5px; color:#14532d; padding:0 2px; overflow:hidden;}
+  /* AIO1310TU038: کارٹ کی ہر لائن پر فوری ڈیلیٹ 🗑️ — 625g جیسے وزن کو − دبا دبا کر صفر نہ کرنا پڑے */
+  .bcName{padding-right:46px !important;}
+  .bcDel{position:absolute; right:24px; top:50%; transform:translateY(-50%); width:19px; height:19px; min-height:0; border:none; border-radius:6px;
+    background:#fee2e2; color:#b91c1c; font-size:10px; cursor:pointer; padding:0; line-height:1;}
   .bcRec{position:absolute; right:2px; top:50%; transform:translateY(-50%); width:19px; height:19px; min-height:0; border:none; border-radius:6px;
     background:#eef2ff; font-size:10px; cursor:pointer; padding:0; line-height:1;}
   /* ===================== AIO1210MO025: کارٹ — نام کبھی حرف حرف نہ ٹوٹے؛ تنگ جگہ (زوم/چھوٹا فون) پر نام اوپر پوری لائن میں ===================== */
@@ -2454,7 +2458,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU037</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU038</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2667,7 +2671,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU037</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU038</span>
     </div>
   </div>
 
@@ -10672,6 +10676,7 @@ function changeQty(variantId, delta){
 function removeFromCart(variantId){
   Billing.cart = Billing.cart.filter(c => c.variant_id !== variantId);
   renderCart();
+  try{ renderBillingProductGrid(); }catch(e){} // کارڈ پر مقدار کا بیج بھی فوراً صاف ہو
 }
 
 // ---------- AIO910FR003: موجودہ موڈ کی قیمت — Wholesale بند ہو، یا اس آئٹم کا Wholesale ریٹ خالی/صفر ہو، تو ہمیشہ Sale Price ----------
@@ -10776,7 +10781,7 @@ function renderCart(){
       <div class="bcRow ${idx % 2 ? 'alt' : ''}">
         <div class="bcMain">
           <span class="bcSerial">${idx+1}</span>
-          <div class="bcName" title="${safeName}">${item.name}<button type="button" class="bcRec" onclick="event.stopPropagation(); showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button></div>
+          <div class="bcName" title="${safeName}">${item.name}<button type="button" class="bcDel" onclick="event.stopPropagation(); removeFromCart(${item.variant_id})" title="Remove this item" aria-label="Remove">🗑️</button><button type="button" class="bcRec" onclick="event.stopPropagation(); showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button></div>
           <input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${item.unitPrice}" min="0" onfocus="this.select()"
                  onchange="updateCartRate(${item.variant_id}, this.value)">
           <div class="bcQty">
@@ -27858,7 +27863,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU037';
+  const APP_VERSION = 'AIO1310TU038';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
