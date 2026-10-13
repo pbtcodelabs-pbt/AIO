@@ -2107,6 +2107,7 @@
   .profileSidebar button:active{transform:scale(.92) translateY(1px); box-shadow:0 2px 5px -2px rgba(0,0,0,.3);}
   .profileSidebar button.active{outline:2px solid rgba(255,255,255,.8); outline-offset:1px;}
   .profileSidebar button .sideIcon{font-size:15px; line-height:1;}
+  body.role-admin .profileSidebar button.admin-only{display:flex;} /* AIO1310TU043: Delete بٹن بھی باقی آئیکنز جیسا */
   .profileSidebar button .sideLabel{font-size:6.8px; font-weight:800; line-height:1.05; text-align:center; padding:0 1px;}
   .profileMain{flex:1 1 auto; min-width:0; padding:12px 14px 20px; overflow-y:auto;}
 
@@ -2537,7 +2538,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU042</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU043</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2750,7 +2751,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU042</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU043</span>
     </div>
   </div>
 
@@ -15519,7 +15520,6 @@ function partyCapsuleRow(p, idx, kind){
   const id = isCust ? p.customer_id : p.supplier_id;
   const due = Number(isCust ? p.total_receivable : p.total_payable) || 0;
   const open = isCust ? `openCustomerProfile(${id})` : `openSupplierProfile(${id})`;
-  const del = isCust ? `deleteCustomer(${id})` : `deleteSupplier(${id})`;
   const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const no = p.photo ? `<span class="ptyNo photo"><img src="${p.photo}" alt=""></span>` : `<span class="ptyNo">${idx+1}</span>`;
   return `
@@ -15531,7 +15531,6 @@ function partyCapsuleRow(p, idx, kind){
       </div>
       <div class="ptyBal" onclick="${open}" title="${isCust ? 'Receivable' : 'Payable'}">${due > 0 ? 'Rs.' + due.toLocaleString() : '—'}</div>
       <div class="ptyIcons">${partyContactIcons(p.phone, p.name, due, isCust ? 'receivable' : 'payable')}</div>
-      <button type="button" class="ptyDel" onclick="event.stopPropagation(); ${del}" title="Delete" aria-label="Delete">✖</button>
     </div>`;
 }
 
@@ -15553,6 +15552,66 @@ function renderPartyList(query = ''){
     }
     wrap.innerHTML = filtered.map((s, idx) => partyCapsuleRow(s, idx, 'suppliers')).join('');
   }
+}
+
+// ===================== AIO1310TU043: کسٹمر/سپلائر ڈیلیٹ — صرف پروفائل سے، دو وارننگ + ایڈمن PIN =====================
+let _secureDel = null;
+function secureDeleteParty(kind, id){
+  const isCust = kind === 'customers';
+  const p = isCust ? customersData.find(x => x.customer_id === id) : suppliersData.find(x => x.supplier_id === id);
+  if(!p) return;
+  const due = Number(isCust ? p.total_receivable : p.total_payable) || 0;
+  const who = isCust ? 'customer' : 'supplier';
+  let msg1 = `⚠️ You are about to DELETE the ${who} "${p.name}".\n\nTheir account, balance, ledger (khata) and payment history will be permanently removed.`;
+  if(due > 0) msg1 += isCust ? `\n\n❗ They still owe you Rs. ${due.toLocaleString()}.` : `\n\n❗ You still owe them Rs. ${due.toLocaleString()}.`;
+  if(!confirm(msg1)) return;
+  if(!confirm(`⚠️ FINAL WARNING\n\n"${p.name}" and all their records will be lost forever. This cannot be undone.\n\nContinue?`)) return;
+  _secureDel = {kind, id};
+  const hasAdminPin = usersData.some(u => u.role === 'admin' && u.is_active && u.pin);
+  if(!hasAdminPin){ finishSecureDelete(); return; }
+  let m = document.getElementById('secureDelModal');
+  if(!m){
+    m = document.createElement('div');
+    m.className = 'modalOverlay'; m.id = 'secureDelModal';
+    m.innerHTML = `<div class="modalBox" style="max-width:340px;">
+      <h3 style="color:#b91c1c;">🔐 Admin PIN required</h3>
+      <div id="secureDelName" style="font-size:13px; color:var(--muted); margin-bottom:10px;"></div>
+      <input type="password" id="secureDelPin" inputmode="numeric" maxlength="8" placeholder="Admin PIN" style="text-align:center; letter-spacing:4px;" onkeydown="if(event.key==='Enter') confirmSecureDelete()">
+      <div id="secureDelErr" style="display:none; color:var(--danger); font-size:12px; font-weight:700; margin:-4px 0 8px;">❌ Wrong Admin PIN</div>
+      <div class="modalBtns">
+        <button class="cancelBtn" onclick="document.getElementById('secureDelModal').classList.remove('show')">Cancel</button>
+        <button class="saveBtn" style="background:linear-gradient(155deg,#dc2626,#7f1d1d);" onclick="confirmSecureDelete()">🗑️ Delete</button>
+      </div></div>`;
+    document.body.appendChild(m);
+  }
+  document.getElementById('secureDelName').textContent = `Enter the Admin PIN to delete "${p.name}".`;
+  document.getElementById('secureDelPin').value = '';
+  document.getElementById('secureDelErr').style.display = 'none';
+  m.classList.add('show');
+  setTimeout(() => document.getElementById('secureDelPin')?.focus(), 80);
+}
+async function confirmSecureDelete(){
+  const pin = (document.getElementById('secureDelPin').value || '').trim();
+  const h = await hashPin(pin);
+  const ok = usersData.some(u => u.role === 'admin' && u.is_active && u.pin === h);
+  if(!ok){ document.getElementById('secureDelErr').style.display = 'block'; return; }
+  document.getElementById('secureDelModal').classList.remove('show');
+  finishSecureDelete();
+}
+function finishSecureDelete(){
+  if(!_secureDel) return;
+  const {kind, id} = _secureDel; _secureDel = null;
+  if(kind === 'customers'){
+    idbDeleteImage('customer_' + id);
+    customersData = customersData.filter(x => x.customer_id !== id);
+  } else {
+    idbDeleteImage('supplier_' + id);
+    suppliersData = suppliersData.filter(x => x.supplier_id !== id);
+  }
+  persistAllData();
+  closeProfileModal();
+  renderPartyList(document.getElementById('partySearchInput')?.value || '');
+  alert('✅ Deleted.');
 }
 
 // ---------- کسٹمر ڈیلیٹ کریں — اگر بقایہ رقم ہو تو خاص طور پر واضح انتباہ دیں تاکہ غلطی سے مالی ریکارڈ ضائع نہ ہو ----------
@@ -15754,6 +15813,7 @@ function openCustomerProfile(customerId){
     ${c.total_receivable > 0 ? `<button style="background:linear-gradient(155deg,#fb923c,#c2410c);" onclick="openCustomerReminderModal(${c.customer_id})"><span class="sideIcon">📢</span><span class="sideLabel">Remind</span></button>` : ''}
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareCustomerProfile(${c.customer_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
+    <button class="admin-only" style="background:linear-gradient(155deg,#7f1d1d,#450a0a); margin-top:10px;" onclick="secureDeleteParty('customers', ${c.customer_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">Delete</span></button>
   `;
 
   renderCustomerMainContent(c.customer_id);
@@ -16065,6 +16125,7 @@ function openSupplierProfile(supplierId){
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">Pay Supplier</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
+    <button class="admin-only" style="background:linear-gradient(155deg,#7f1d1d,#450a0a); margin-top:10px;" onclick="secureDeleteParty('suppliers', ${s.supplier_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">Delete</span></button>
   `;
 
   renderSupplierMainContent(s.supplier_id);
@@ -28007,7 +28068,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU042';
+  const APP_VERSION = 'AIO1310TU043';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
