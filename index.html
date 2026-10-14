@@ -11056,18 +11056,22 @@ function renderCart(){
     body.innerHTML = Billing.cart.map((item, idx) => {
       const lineTotal = (item.qty * item.unitPrice).toLocaleString(undefined, {maximumFractionDigits:0});
       const safeName = String(item.name).replace(/"/g,'&quot;');
+      // ---------- یونٹ: قیمت کے نیچے "/kg"، "/pcs"، "/L" — کھلا وزن (گرام/ml) کا ریٹ فی کلو/لیٹر میں؛ وزن/مائع/لمبائی والی مقدار کے ساتھ چھوٹا یونٹ ----------
+      const u = item.unit || 'pcs';
+      const looseW = !!item.loose_product_id && (u === 'g' || u === 'ml');
+      const rf = looseW ? 1000 : 1;
+      const rateUnit = looseW ? (u === 'ml' ? 'L' : 'kg') : u;
+      const qtyUnit = ['g','kg','ton','ml','L','inch','ft','m'].includes(u) ? u : '';
       return `
       <div class="bcRow ${idx % 2 ? 'alt' : ''}">
         <div class="bcMain">
           <span class="bcSerial">${idx+1}</span>
           <div class="bcName" title="${safeName}" onclick="openCartItemEdit(${item.variant_id})"><span class="bcNameTxt">${item.name}</span><span class="bcBtns"><button type="button" class="bcEdit" onclick="event.stopPropagation(); openCartItemEdit(${item.variant_id})" title="Edit weight / qty / rate / amount" aria-label="Edit">✏️</button><button type="button" class="bcDel" onclick="event.stopPropagation(); confirmRemoveFromCart(${item.variant_id})" title="Remove this item" aria-label="Remove">🗑️</button><button type="button" class="bcRec" onclick="event.stopPropagation(); showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button></span></div>
-          ${item.loose_product_id ? `<div class="bcPriceWrap"><input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${Math.round(item.unitPrice * 1000 * 100) / 100}" min="0" onfocus="this.select()"
-                 onchange="updateCartRate(${item.variant_id}, this.value / 1000)" title="Rate per ${item.unit === 'ml' ? 'litre' : 'kg'}"><span class="bcPerUnit">/${item.unit === 'ml' ? 'L' : 'kg'}</span></div>`
-            : `<input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${Math.round(item.unitPrice * 100) / 100}" min="0" onfocus="this.select()"
-                 onchange="updateCartRate(${item.variant_id}, this.value)">`}
+          <div class="bcPriceWrap"><input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${Math.round(item.unitPrice * rf * 100) / 100}" min="0" onfocus="this.select()"
+                 onchange="updateCartRate(${item.variant_id}, this.value / ${rf})" title="Rate per ${rateUnit}"><span class="bcPerUnit">/${rateUnit}</span></div>
           <div class="bcQty">
             <button type="button" class="bcMinus" onclick="changeQty(${item.variant_id}, -1)">−</button>
-            <span onclick="openCartItemEdit(${item.variant_id})">${item.qty}${item.loose_product_id ? `<small class="bcQtyUnit">${item.unit === 'ml' ? 'ml' : 'g'}</small>` : ''}</span>
+            <span onclick="openCartItemEdit(${item.variant_id})">${item.qty}${qtyUnit ? `<small class="bcQtyUnit">${qtyUnit}</small>` : ''}</span>
             <button type="button" onclick="changeQty(${item.variant_id}, 1)">+</button>
           </div>
           <div class="bcTotal" onclick="openCartItemEdit(${item.variant_id})">${lineTotal}</div>
