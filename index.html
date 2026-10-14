@@ -1514,6 +1514,46 @@
   .vcActionsRow button{flex:1; border:none; border-radius:10px; padding:10px; font-size:12.5px; font-weight:700; cursor:pointer;}
   .vcBatchBtn{background:#eef2ff; color:var(--primary-dark);}
   .vcDeleteBtn{background:#fef2f2; color:var(--danger);}
+  /* ===================== 📜 ITEM LEDGER — آئٹم کی مکمل ہسٹری (خریداری/سیل/واپسی) ===================== */
+  .capBtn.ledger{background:linear-gradient(180deg,#eff6ff,#bfdbfe); box-shadow:0 3px 0 #2563eb, 0 4px 5px rgba(0,0,0,.15), inset 0 1px 0 #fff;}
+  .vcLedgerBtn{background:#ecfdf5; color:#047857;}
+  #itemLedgerModal .ilBox{width:min(480px, calc(100vw - 20px)); padding:14px; display:flex; flex-direction:column; gap:9px;}
+  .ilHead{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .ilHead h3{font-size:16px; line-height:1.25;}
+  .ilChips{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;}
+  .ilChips:empty{display:none;}
+  .ilChip{flex:0 0 auto; border:1px solid #cbd5e1; background:#fff; border-radius:999px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; color:#334155;}
+  .ilChip.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .ilSummary{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px;}
+  .ilStat{border-radius:12px; padding:7px 8px; background:#f8fafc; border:1px solid #e2e8f0;}
+  .ilStat small{display:block; font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.2px;}
+  .ilStat b{display:block; font-size:15px; font-weight:900; color:#0f172a; line-height:1.2;}
+  .ilStat span{display:block; font-size:10.5px; font-weight:700; color:#475569;}
+  .ilStat.in{background:#eff6ff; border-color:#bfdbfe;} .ilStat.in b{color:#1d4ed8;}
+  .ilStat.out{background:#ecfdf5; border-color:#a7f3d0;} .ilStat.out b{color:#047857;}
+  .ilStat.stk b{color:#0f766e;}
+  .ilTabs{display:flex; gap:4px; background:#f1f5f9; border-radius:12px; padding:3px;}
+  .ilTabs button{flex:1; border:none; background:transparent; border-radius:9px; padding:7px 2px; font-size:11.5px; font-weight:800; color:#475569; cursor:pointer;}
+  .ilTabs button.active{background:#fff; color:var(--primary-dark); box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  .ilDates{display:flex; gap:6px; align-items:center; font-size:12px; color:#64748b;}
+  .ilDates input{flex:1; min-width:0; padding:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12px;}
+  .ilDates button{border:1px solid #dbe1ea; background:#f8fafc; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;}
+  .ilList{display:flex; flex-direction:column; gap:6px; max-height:46vh; max-height:46dvh; overflow-y:auto;}
+  .ilRow{border:1px solid #e2e8f0; border-left:4px solid #94a3b8; border-radius:10px; padding:8px 10px; background:#fff; cursor:pointer;}
+  .ilRow:active{background:#f8fafc;}
+  .ilRow.purchase{border-left-color:#2563eb;} .ilRow.sale{border-left-color:#059669;}
+  .ilRow.sreturn{border-left-color:#d97706;} .ilRow.preturn{border-left-color:#dc2626;}
+  .ilRow.muted{opacity:.55;}
+  .ilTop{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .ilType{font-size:10.5px; font-weight:900; padding:2px 7px; border-radius:999px; background:#f1f5f9; color:#334155; white-space:nowrap;}
+  .ilRow.purchase .ilType{background:#dbeafe; color:#1d4ed8;} .ilRow.sale .ilType{background:#d1fae5; color:#047857;}
+  .ilRow.sreturn .ilType{background:#fef3c7; color:#b45309;} .ilRow.preturn .ilType{background:#fee2e2; color:#b91c1c;}
+  .ilDate{font-size:11px; font-weight:700; color:#64748b;}
+  .ilParty{font-size:13px; font-weight:800; color:#0f172a; margin-top:4px;}
+  .ilRef{font-size:11px; font-weight:700; color:var(--primary-dark);}
+  .ilQty{display:flex; justify-content:space-between; gap:8px; font-size:12px; color:#475569; margin-top:3px;}
+  .ilQty b{font-size:13.5px; color:#0f172a;}
+  .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
 
 
@@ -2543,7 +2583,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE045</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE046</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2760,7 +2800,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE045</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE046</span>
     </div>
   </div>
 
@@ -4025,6 +4065,30 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="walletHistoryList" id="walletHistoryList"></div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeHistoryModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📜 ITEM LEDGER — ہر آئٹم کی مکمل ہسٹری: خریداری، سیل، واپسی — ہر قطار پر بل/PO کا حوالہ (تھپتھپانے سے وہی بل کھلے) -->
+    <div class="modalOverlay" id="itemLedgerModal" onclick="if(event.target===this) closeItemLedger()">
+      <div class="modalBox ilBox">
+        <div class="ilHead">
+          <h3 id="ilTitle" style="margin:0;">📜 Item Ledger</h3>
+          <span class="closeBtn" onclick="closeItemLedger()">✖</span>
+        </div>
+        <div id="ilVariantChips" class="ilChips"></div>
+        <div id="ilSummary" class="ilSummary"></div>
+        <div class="ilTabs" id="ilTabs"></div>
+        <div class="ilDates">
+          <input type="date" id="ilFrom" onchange="renderItemLedger()">
+          <span>to</span>
+          <input type="date" id="ilTo" onchange="renderItemLedger()">
+          <button type="button" onclick="document.getElementById('ilFrom').value=''; document.getElementById('ilTo').value=''; renderItemLedger();">All</button>
+        </div>
+        <div id="ilList" class="ilList"></div>
+        <div class="modalBtns">
+          <button class="saveBtn" onclick="shareItemLedger()">📤 Share</button>
+          <button class="cancelBtn" onclick="closeItemLedger()">Close</button>
         </div>
       </div>
     </div>
@@ -12803,6 +12867,7 @@ function renderProductList(query = ''){
         <div class="capBox capName"><b>${p.name}${p.variants.some(v => variantMeasure(v) !== null) ? `<button type="button" class="pgRowScale" title="Rs to weight calculator" onclick="event.stopPropagation(); openReverseCalc(${p.product_id})">⚖️</button>` : ''}</b><small>${cat} • ${priceTxt}</small></div>
         <div class="capBox capMid ${anyNeg ? 'neg' : (anyLow ? 'low' : '')}" title="Total stock"><b>${Math.round(stockTot*100)/100}</b><small>${p.variants.length} var.</small></div>
         <div class="capBtns">
+          <button class="capBtn ledger" title="Item ledger — full purchase &amp; sale history" onclick="event.stopPropagation(); openItemLedger(${p.product_id})">📜</button>
           <button class="capBtn" title="Edit product" onclick="event.stopPropagation(); openNewProductModal(${p.product_id})">✏️</button>
           <button class="capBtn danger" title="Delete product" onclick="event.stopPropagation(); deleteProduct(${p.product_id})">🗑️</button>
         </div>
@@ -12898,6 +12963,7 @@ function renderVariantCardSection(productId){
       </div>
       <div class="vcActionsRow">
         <button class="vcBatchBtn" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : ''}</button>
+        <button class="vcLedgerBtn" onclick="openItemLedger(${productId},${v.variant_id})">📜 Ledger</button>
         <button class="vcDeleteBtn" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete This Variant</button>
       </div>
     </div>
@@ -12919,6 +12985,163 @@ function changeActiveVariant(productId, delta){
   if(wrap) wrap.innerHTML = renderVariantCardSection(productId);
 }
 
+
+/* =====================================================================
+   📜 ITEM LEDGER (Stock Card) — کسی بھی پراڈکٹ/ویریئنٹ کی مکمل ہسٹری ایک جگہ:
+   خریداری (Purchase Orders / Shipments)، سیل (Bills)، کسٹمر واپسی، سپلائر واپسی —
+   ہر قطار پر بل نمبر/PO اور پارٹی کا نام؛ قطار تھپتھپانے سے وہی بل/PO کھل جاتا ہے۔
+   کوئی نیا ڈیٹا محفوظ نہیں ہوتا — موجودہ بلوں اور پرچیز ہسٹری سے ہی خودکار بنتا ہے۔
+   ===================================================================== */
+const itemLedgerState = {productId: null, variantId: 'all', tab: 'all', entries: []};
+const IL_TYPE_LABEL = {purchase: '📥 Purchase', sale: '🧾 Sale', sreturn: '↩️ Customer Return', preturn: '↪️ Return to Supplier'};
+
+function ilEsc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function ilNum(n){ return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
+
+function openItemLedger(productId, variantId){
+  const p = productsData.find(pr => pr.product_id === productId);
+  if(!p) return;
+  itemLedgerState.productId = productId;
+  itemLedgerState.variantId = variantId != null ? variantId : 'all';
+  itemLedgerState.tab = 'all';
+  document.getElementById('ilFrom').value = '';
+  document.getElementById('ilTo').value = '';
+  document.getElementById('itemLedgerModal').classList.add('show');
+  renderItemLedger();
+}
+function closeItemLedger(){
+  document.getElementById('itemLedgerModal').classList.remove('show');
+}
+function setItemLedgerVariant(v){ itemLedgerState.variantId = v; renderItemLedger(); }
+function setItemLedgerTab(t){ itemLedgerState.tab = t; renderItemLedger(); }
+
+// ---------- اس پراڈکٹ کی ساری حرکتیں (entries) بلوں اور سپلائرز کی پرچیز ہسٹری سے اکٹھی کریں ----------
+function buildItemLedgerEntries(p){
+  const vids = new Set(p.variants.map(v => v.variant_id));
+  const out = [];
+  const itemVid = it => vids.has(it.variant_id) ? it.variant_id
+    : (it.loose_product_id === p.product_id ? (resolveStockTarget(it, 1)?.v?.variant_id ?? null) : null);
+  const stockUnits = (it, qty) => it.loose_product_id ? (resolveStockTarget(it, qty)?.units ?? qty) : qty;
+
+  // ---- سیل اور کسٹمر واپسی (Bills) ----
+  invoicesData.forEach(inv => {
+    (inv.items || []).forEach(it => {
+      const vid = itemVid(it);
+      if(vid == null) return;
+      const qty = Number(it.qty) || 0, rate = Number(it.unitPrice) || 0;
+      const date = (inv.created_at || '').split('T')[0];
+      const voided = inv.status === 'voided';
+      const open = `openInvoicePreview(${inv.invoice_id})`;
+      out.push({kind: 'sale', vid, date, ts: inv.created_at || date, ref: inv.invoice_no || 'Bill', party: inv.customer_name || 'Walk-in Customer',
+        qty, unit: it.unit || '', rate, amount: qty * rate, stockQty: stockUnits(it, qty), cost: Number(it.costPerUnit) || 0,
+        note: voided ? 'Voided bill' : (inv.sold_by ? `By ${inv.sold_by}` : ''), excluded: voided, open});
+      if(it.returned && !voided){
+        const rq = Number(it.returnQty) || 0;
+        const rd = it.returnDate || date;
+        out.push({kind: 'sreturn', vid, date: rd, ts: rd + 'T23:59', ref: inv.invoice_no || 'Bill', party: inv.customer_name || 'Walk-in Customer',
+          qty: rq, unit: it.unit || '', rate: rq ? (Number(it.returnAmount) || 0) / rq : 0, amount: Number(it.returnAmount) || 0, stockQty: stockUnits(it, rq),
+          note: it.returnMethod === 'wallet' ? 'Refund to wallet' : 'Cash refund', open});
+      }
+    });
+  });
+
+  // ---- خریداری اور سپلائر واپسی (Purchase Orders) ----
+  suppliersData.forEach(s => {
+    (s.purchaseHistory || []).forEach((po, idx) => {
+      (po.items || []).forEach(it => {
+        if(!vids.has(it.variant_id)) return;
+        const qty = Number(it.qty) || 0, rate = Number(it.cost) || 0;
+        const received = po.status === 'received';
+        const date = received ? (po.receivedDate || po.date) : po.date;
+        const open = `openPoPreview(${s.supplier_id}, ${idx})`;
+        out.push({kind: 'purchase', vid: it.variant_id, date, ts: date + 'T12:00', ref: `PO ${formatDateDMY(po.date)}`, party: s.name,
+          qty, unit: it.unit || '', rate, amount: qty * rate, stockQty: qty,
+          note: received ? 'Received' : 'Ordered — not received yet', excluded: !received, open});
+        if(it.returned){
+          const rq = Number(it.returnQty) || 0;
+          const rd = it.returnDate || date;
+          out.push({kind: 'preturn', vid: it.variant_id, date: rd, ts: rd + 'T23:59', ref: `PO ${formatDateDMY(po.date)}`, party: s.name,
+            qty: rq, unit: it.unit || '', rate: rq ? (Number(it.returnAmount) || 0) / rq : 0, amount: Number(it.returnAmount) || 0, stockQty: rq,
+            note: 'Returned to supplier', open});
+        }
+      });
+    });
+  });
+
+  out.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
+  return out;
+}
+
+function renderItemLedger(){
+  const p = productsData.find(pr => pr.product_id === itemLedgerState.productId);
+  if(!p){ closeItemLedger(); return; }
+  const vSel = itemLedgerState.variantId;
+  const multi = p.variants.length > 1;
+  const vLabel = id => (p.variants.find(v => v.variant_id === id) || {}).label || '';
+
+  document.getElementById('ilTitle').textContent = `📜 ${p.name}`;
+  document.getElementById('ilVariantChips').innerHTML = multi
+    ? [`<button class="ilChip ${vSel === 'all' ? 'active' : ''}" onclick="setItemLedgerVariant('all')">All variants</button>`]
+        .concat(p.variants.map(v => `<button class="ilChip ${vSel === v.variant_id ? 'active' : ''}" onclick="setItemLedgerVariant(${v.variant_id})">${ilEsc(v.label || 'Variant')}</button>`)).join('')
+    : '';
+
+  const from = document.getElementById('ilFrom').value, to = document.getElementById('ilTo').value;
+  let entries = buildItemLedgerEntries(p).filter(e => vSel === 'all' || e.vid === vSel);
+  entries = entries.filter(e => (!from || e.date >= from) && (!to || e.date <= to));
+
+  // ---------- خلاصہ: کتنا آیا، کتنا گیا، کتنے کا بکا، اور منافع ----------
+  const sum = {inQty: 0, inAmt: 0, outQty: 0, outAmt: 0, sretQty: 0, pretQty: 0, cost: 0, bills: new Set()};
+  entries.forEach(e => {
+    if(e.excluded) return;
+    if(e.kind === 'purchase'){ sum.inQty += e.stockQty; sum.inAmt += e.amount; }
+    else if(e.kind === 'sale'){ sum.outQty += e.stockQty; sum.outAmt += e.amount; sum.cost += e.cost * e.qty; sum.bills.add(e.ref); }
+    else if(e.kind === 'sreturn'){ sum.sretQty += e.stockQty; sum.outAmt -= e.amount; }
+    else if(e.kind === 'preturn'){ sum.pretQty += e.stockQty; sum.inAmt -= e.amount; }
+  });
+  const curStock = p.variants.filter(v => vSel === 'all' || v.variant_id === vSel).reduce((t, v) => t + (Number(v.stock) || 0), 0);
+  const profitTxt = sum.cost > 0 ? `<span>Profit ≈ Rs. ${ilNum(sum.outAmt - sum.cost)}</span>` : `<span>${sum.bills.size} bill${sum.bills.size === 1 ? '' : 's'}</span>`;
+  document.getElementById('ilSummary').innerHTML = `
+    <div class="ilStat in"><small>Purchased</small><b>${ilNum(sum.inQty - sum.pretQty)}</b><span>Rs. ${ilNum(sum.inAmt)}</span></div>
+    <div class="ilStat out"><small>Sold</small><b>${ilNum(sum.outQty - sum.sretQty)}</b>${profitTxt}</div>
+    <div class="ilStat stk"><small>Stock now</small><b>${ilNum(curStock)}</b><span>Sales Rs. ${ilNum(sum.outAmt)}</span></div>`;
+
+  const tabs = [['all', 'All'], ['purchase', 'Purchases'], ['sale', 'Sales'], ['returns', 'Returns']];
+  const count = k => k === 'all' ? entries.length : k === 'returns' ? entries.filter(e => e.kind === 'sreturn' || e.kind === 'preturn').length : entries.filter(e => e.kind === k).length;
+  document.getElementById('ilTabs').innerHTML = tabs.map(([k, l]) =>
+    `<button class="${itemLedgerState.tab === k ? 'active' : ''}" onclick="setItemLedgerTab('${k}')">${l} (${count(k)})</button>`).join('');
+
+  const tab = itemLedgerState.tab;
+  const shown = entries.filter(e => tab === 'all' || (tab === 'returns' ? (e.kind === 'sreturn' || e.kind === 'preturn') : e.kind === tab));
+  itemLedgerState.entries = shown;
+  const list = document.getElementById('ilList');
+  if(!shown.length){
+    list.innerHTML = `<div class="ilEmpty">No ${tab === 'all' ? '' : tabs.find(t => t[0] === tab)[1].toLowerCase() + ' '}history found for this item yet.<br><small>Purchases (received shipments), bills and returns will appear here automatically.</small></div>`;
+    return;
+  }
+  list.innerHTML = shown.map(e => `
+    <div class="ilRow ${e.kind} ${e.excluded ? 'muted' : ''}" onclick="${e.open}" title="Tap to open this ${e.kind === 'purchase' || e.kind === 'preturn' ? 'purchase order' : 'bill'}">
+      <div class="ilTop"><span class="ilType">${IL_TYPE_LABEL[e.kind]}</span><span class="ilDate">${formatDateDMY(e.date)}</span></div>
+      <div class="ilTop"><div class="ilParty">${ilEsc(e.party)}</div><span class="ilRef">${ilEsc(e.ref)} ›</span></div>
+      <div class="ilQty"><span>${multi && vSel === 'all' ? ilEsc(vLabel(e.vid)) + ' • ' : ''}<b>${ilNum(e.qty)}${e.unit ? ' ' + ilEsc(e.unit) : ''}</b> × Rs. ${ilNum(e.rate)}</span><b>Rs. ${ilNum(e.amount)}</b></div>
+      ${e.note ? `<div class="ilDate" style="margin-top:2px;">${ilEsc(e.note)}</div>` : ''}
+    </div>`).join('');
+}
+
+// ---------- لیجر کو سادہ متن میں WhatsApp/دیگر ایپ پر بھیجیں ----------
+function shareItemLedger(){
+  const p = productsData.find(pr => pr.product_id === itemLedgerState.productId);
+  if(!p) return;
+  const vSel = itemLedgerState.variantId;
+  const vName = vSel === 'all' ? '' : ' — ' + ((p.variants.find(v => v.variant_id === vSel) || {}).label || '');
+  const lines = [`📜 Item Ledger: ${p.name}${vName}`, ''];
+  itemLedgerState.entries.forEach(e => {
+    lines.push(`${formatDateDMY(e.date)} | ${IL_TYPE_LABEL[e.kind].replace(/^\S+\s/, '')} | ${e.ref} | ${e.party} | ${ilNum(e.qty)}${e.unit ? ' ' + e.unit : ''} × ${ilNum(e.rate)} = Rs. ${ilNum(e.amount)}${e.excluded ? ' (' + e.note + ')' : ''}`);
+  });
+  if(!itemLedgerState.entries.length) lines.push('No history yet.');
+  const text = lines.join('\n');
+  if(navigator.share){ navigator.share({title: `Item Ledger — ${p.name}`, text}).catch(() => {}); }
+  else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
 
 // ---------- ایکسپائری تاریخ سے رنگ کا درجہ (tier) نکالیں: 30 دن=پیلا, 15=نارنجی, 7 یا کم=سرخ ----------
 function getExpiryTier(expiryDate){
@@ -18998,6 +19221,7 @@ function confirmBatchReturn(invoiceId){
     item.returnQty = qty;
     item.returnAmount = amount;
     item.returnMethod = method;
+    item.returnDate = new Date().toISOString().split('T')[0]; // 📜 آئٹم لیجر میں واپسی کی اصل تاریخ
 
     totalRefund += amount;
     returnedNames.push(`${item.name} (${qty})`);
@@ -19184,6 +19408,7 @@ function confirmSupplierReturn(itemIndex){
   item.returned = true;
   item.returnQty = qty;
   item.returnAmount = amount;
+  item.returnDate = new Date().toISOString().split('T')[0]; // 📜 آئٹم لیجر میں واپسی کی اصل تاریخ
 
   renderSupplierReturnModal();
   renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
@@ -28151,7 +28376,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1410WE045';
+  const APP_VERSION = 'AIO1410WE046';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
