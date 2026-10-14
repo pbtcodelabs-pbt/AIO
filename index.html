@@ -2583,7 +2583,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE046</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE047</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2800,7 +2800,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE046</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE047</span>
     </div>
   </div>
 
@@ -11161,11 +11161,11 @@ function getDayAbbrev(dateStr){
 // دونوں نمبر Bill History کی سادہ سرچ سے مل جاتے ہیں کیونکہ دونوں ایک ہی invoice_no سٹرنگ کا حصہ ہیں
 function generateBillNumbers(){
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+  const todayStr = localDateStr(now); // YYYY-MM-DD (مقامی وقت)
   const monthStr = todayStr.slice(0, 7);              // YYYY-MM
 
-  const dailyCount = invoicesData.filter(inv => (inv.created_at || '').split('T')[0] === todayStr).length + 1;
-  const monthlyCount = invoicesData.filter(inv => (inv.created_at || '').slice(0, 7) === monthStr).length + 1;
+  const dailyCount = invoicesData.filter(inv => invLocalDate(inv) === todayStr).length + 1;
+  const monthlyCount = invoicesData.filter(inv => invLocalDate(inv).slice(0, 7) === monthStr).length + 1;
 
   // ---------- نمبروں کے آگے زیرو نہیں لگانا — یہ Infinite Sequence ہیں (1, 2 ... 9999 ... کبھی 4 فگر پر واپس زیرو نہیں ہوں گے) ----------
   const daily_bill_no = String(dailyCount);
@@ -13029,7 +13029,7 @@ function buildItemLedgerEntries(p){
       const vid = itemVid(it);
       if(vid == null) return;
       const qty = Number(it.qty) || 0, rate = Number(it.unitPrice) || 0;
-      const date = (inv.created_at || '').split('T')[0];
+      const date = invLocalDate(inv);
       const voided = inv.status === 'voided';
       const open = `openInvoicePreview(${inv.invoice_id})`;
       out.push({kind: 'sale', vid, date, ts: inv.created_at || date, ref: inv.invoice_no || 'Bill', party: inv.customer_name || 'Walk-in Customer',
@@ -14495,9 +14495,9 @@ function renderKpiCards(){
   const expiryCount = countExpiringBatches();
 
   // ---------- Today's Sales اب لائیو حساب ہے — آج کے مکمل شدہ invoices کا مجموعہ (پرانی جامد قیمت کی بجائے) ----------
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = localDateStr(new Date());
   const todaySales = invoicesData
-    .filter(inv => inv.status === 'completed' && (inv.created_at || '').split('T')[0] === todayStr)
+    .filter(inv => inv.status === 'completed' && invLocalDate(inv) === todayStr)
     .reduce((sum, inv) => sum + inv.grand_total, 0);
 
   const stats = [
@@ -16185,6 +16185,16 @@ function applyCustomerBillFilter(field, value){
 
 // ---------- سپلائر پروفائل ----------
 // ---------- تاریخ کو 'YYYY-MM-DD' سے 'DD-MM-YYYY' میں بدلیں (پاکستان/برصغیر کا معیاری انداز) ----------
+// ---------- مقامی (پاکستانی) وقت کی تاریخ 'YYYY-MM-DD' — toISOString() UTC دیتا ہے جس سے رات 12 سے صبح 5 بجے تک کے بل پچھلی تاریخ میں چلے جاتے تھے ----------
+function localDateStr(d){
+  d = d instanceof Date ? d : new Date(d);
+  if(isNaN(d)) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function invLocalDate(inv){ return inv && inv.created_at ? localDateStr(inv.created_at) : ''; }
+// ---------- بل کے آئٹم کی خالص (واپسی کے بعد) مقدار اور رقم — Trend/منافع میں واپس شدہ مال سیل شمار نہ ہو ----------
+function netSoldQty(it){ return Math.max(0, (Number(it.qty) || 0) - (it.returned ? (Number(it.returnQty) || 0) : 0)); }
+function netSoldRevenue(it){ return Math.max(0, (Number(it.qty) || 0) * (Number(it.unitPrice) || 0) - (it.returned ? (Number(it.returnAmount) || 0) : 0)); }
 function formatDateDMY(isoDate){
   if(!isoDate) return '—';
   const [y, m, d] = isoDate.split('-');
@@ -20507,15 +20517,18 @@ function computeTrendData(range){
 
     // ---------- آئٹم وائز (اور منافع کے لیے خرید قیمت) ----------
     (inv.items || []).forEach(it => {
-      const rev = it.qty * it.unitPrice;
+      // ---------- واپس شدہ مقدار/رقم منہا — مکمل واپس ہونے والا آئٹم سیل میں شمار ہی نہ ہو ----------
+      const q = netSoldQty(it);
+      if(q <= 0) return;
+      const rev = netSoldRevenue(it);
       const uc = getTrendItemUnitCost(it);
-      const cost = it.qty * uc.cost;
-      totalQty += it.qty;
+      const cost = q * uc.cost;
+      totalQty += q;
       totalItemRevenue += rev;
       totalCost += cost;
       if(uc.known) costedRevenue += rev;
       const cur = items.get(it.name) || {qty:0, revenue:0, cost:0, costUnknown:false, costedRevenue:0};
-      cur.qty += it.qty; cur.revenue += rev; cur.cost += cost;
+      cur.qty += q; cur.revenue += rev; cur.cost += cost;
       if(uc.known) cur.costedRevenue += rev; else cur.costUnknown = true;
       items.set(it.name, cur);
     });
@@ -20524,7 +20537,7 @@ function computeTrendData(range){
     const custKey = inv.customer_id != null ? ('c'+inv.customer_id) : 'walkin';
     const custName = inv.customer_id != null ? inv.customer_name : 'Walk-in Customers';
     const custCur = customers.get(custKey) || {name: custName, qty:0, revenue:0, billCount:0};
-    custCur.qty += (inv.items || []).reduce((s,it) => s + it.qty, 0);
+    custCur.qty += (inv.items || []).reduce((s,it) => s + netSoldQty(it), 0);
     custCur.revenue += inv.grand_total || 0;
     custCur.billCount++;
     customers.set(custKey, custCur);
@@ -20536,7 +20549,7 @@ function computeTrendData(range){
       if(area){
         const areaCur = areas.get(area) || {revenue:0, qty:0, billCount:0, customerIds:new Set()};
         areaCur.revenue += inv.grand_total || 0;
-        areaCur.qty += (inv.items || []).reduce((s,it) => s + it.qty, 0);
+        areaCur.qty += (inv.items || []).reduce((s,it) => s + netSoldQty(it), 0);
         areaCur.billCount++;
         areaCur.customerIds.add(inv.customer_id);
         areas.set(area, areaCur);
@@ -21249,7 +21262,7 @@ function renderBillHistory(){
     }
     if(dateFilterVal){
       // تاریخ منتخب ہو تو صرف اسی تاریخ کے بل (دن خودکار میچ ہو چکا ہے)
-      filtered = filtered.filter(inv => (inv.created_at || '').split('T')[0] === dateFilterVal);
+      filtered = filtered.filter(inv => invLocalDate(inv) === dateFilterVal);
     } else if(dayFilterVal){
       // صرف دن منتخب ہو (تاریخ نہیں) تو ہر ہفتے کے اسی دن کے سارے بل
       filtered = filtered.filter(inv => getDayAbbrev(inv.created_at) === dayFilterVal);
@@ -21261,8 +21274,8 @@ function renderBillHistory(){
     const rangePreset = document.getElementById('billRangePreset')?.value || 'all';
     if(rangePreset !== 'all'){
       const {from, to} = getBillRangeDates(rangePreset);
-      if(from) filtered = filtered.filter(inv => new Date((inv.created_at||'').split('T')[0]) >= from);
-      if(to) filtered = filtered.filter(inv => new Date((inv.created_at||'').split('T')[0]) <= to);
+      if(from) filtered = filtered.filter(inv => new Date(invLocalDate(inv) + 'T00:00') >= from);
+      if(to) filtered = filtered.filter(inv => new Date(invLocalDate(inv) + 'T00:00') <= to);
     }
   }
 
@@ -28376,7 +28389,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1410WE046';
+  const APP_VERSION = 'AIO1410WE047';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
