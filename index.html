@@ -2609,7 +2609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE050</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE051</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2826,7 +2826,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE050</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE051</span>
     </div>
   </div>
 
@@ -7679,7 +7679,7 @@ function renderHomeUnfinishedCartCard(){
     card.innerHTML = '';
     return;
   }
-  const itemCount = Billing.cart.reduce((s,i) => s + i.qty, 0);
+  const itemCount = Billing.cart.reduce((s,i) => s + itemCountUnits(i), 0); // کھلا وزن = 1 آئٹم
   const total = Billing.cart.reduce((s,i) => s + i.qty*i.unitPrice, 0);
   card.style.display = 'block';
   card.innerHTML = `
@@ -11215,7 +11215,7 @@ function updateCartRate(variantId, newRate){
 function renderFloatingCartBar(){
   const bar = document.getElementById('floatingCartBar');
   if(!bar) return;
-  const itemCount = Billing.cart.reduce((s,i) => s + i.qty, 0);
+  const itemCount = Billing.cart.reduce((s,i) => s + itemCountUnits(i), 0); // کھلا وزن = 1 آئٹم
   const subtotal = Billing.cart.reduce((s,i) => s + (i.qty*i.unitPrice), 0);
 
   if(Billing.cart.length === 0){
@@ -16359,6 +16359,14 @@ function localDateStr(d){
 }
 function invLocalDate(inv){ return inv && inv.created_at ? localDateStr(inv.created_at) : ''; }
 // ---------- بل کے آئٹم کی خالص (واپسی کے بعد) مقدار اور رقم — Trend/منافع میں واپس شدہ مال سیل شمار نہ ہو ----------
+// ---------- کھلا وزن (گرام/ml) والا آئٹم: گنتی میں 1 آئٹم شمار ہو (10000g کو 10000 آئٹم نہیں)، وزن الگ kg/L میں دکھے ----------
+function isLooseWeightItem(it){ return !!(it && it.loose_product_id && (it.unit === 'g' || it.unit === 'ml')); }
+function itemCountUnits(it, qty){ qty = qty == null ? (Number(it.qty) || 0) : qty; return isLooseWeightItem(it) ? (qty > 0 ? 1 : 0) : qty; }
+function fmtLooseWeight(q, unit){
+  q = Number(q) || 0;
+  const big = unit === 'ml' ? 'L' : 'kg';
+  return q >= 1000 ? `${Math.round(q / 1000 * 1000) / 1000} ${big}` : `${Math.round(q * 100) / 100} ${unit === 'ml' ? 'ml' : 'g'}`;
+}
 function netSoldQty(it){ return Math.max(0, (Number(it.qty) || 0) - (it.returned ? (Number(it.returnQty) || 0) : 0)); }
 function netSoldRevenue(it){ return Math.max(0, (Number(it.qty) || 0) * (Number(it.unitPrice) || 0) - (it.returned ? (Number(it.returnAmount) || 0) : 0)); }
 function formatDateDMY(isoDate){
@@ -20689,21 +20697,26 @@ function computeTrendData(range){
       const rev = netSoldRevenue(it);
       const uc = getTrendItemUnitCost(it);
       const cost = q * uc.cost;
-      totalQty += q;
+      const loose = isLooseWeightItem(it);
+      const cnt = itemCountUnits(it, q); // کھلا وزن = 1 آئٹم فی فروخت
+      totalQty += cnt;
       totalItemRevenue += rev;
       totalCost += cost;
       if(uc.known) costedRevenue += rev;
-      const cur = items.get(it.name) || {qty:0, revenue:0, cost:0, costUnknown:false, costedRevenue:0};
-      cur.qty += q; cur.revenue += rev; cur.cost += cost;
+      // ---------- کھلا وزن: "Atta (loose) 10000g" اور "Atta (loose) 500g" ایک ہی قطار "Atta (loose)" میں — وزن جمع ہو کر kg میں ----------
+      const key = loose ? String(it.name).replace(/\s*\d+(\.\d+)?\s*(g|ml)$/i, '') : it.name;
+      const cur = items.get(key) || {qty:0, revenue:0, cost:0, costUnknown:false, costedRevenue:0, weight:0, unit:'', loose:false};
+      cur.qty += cnt; cur.revenue += rev; cur.cost += cost;
+      if(loose){ cur.loose = true; cur.unit = it.unit; cur.weight += q; }
       if(uc.known) cur.costedRevenue += rev; else cur.costUnknown = true;
-      items.set(it.name, cur);
+      items.set(key, cur);
     });
 
     // ---------- کسٹمر وائز — Walk-in سب کو ایک ساتھ گنا جاتا ہے، رجسٹرڈ کسٹمر الگ الگ ----------
     const custKey = inv.customer_id != null ? ('c'+inv.customer_id) : 'walkin';
     const custName = inv.customer_id != null ? inv.customer_name : 'Walk-in Customers';
     const custCur = customers.get(custKey) || {name: custName, qty:0, revenue:0, billCount:0};
-    custCur.qty += (inv.items || []).reduce((s,it) => s + netSoldQty(it), 0);
+    custCur.qty += (inv.items || []).reduce((s,it) => s + itemCountUnits(it, netSoldQty(it)), 0);
     custCur.revenue += inv.grand_total || 0;
     custCur.billCount++;
     customers.set(custKey, custCur);
@@ -20715,7 +20728,7 @@ function computeTrendData(range){
       if(area){
         const areaCur = areas.get(area) || {revenue:0, qty:0, billCount:0, customerIds:new Set()};
         areaCur.revenue += inv.grand_total || 0;
-        areaCur.qty += (inv.items || []).reduce((s,it) => s + netSoldQty(it), 0);
+        areaCur.qty += (inv.items || []).reduce((s,it) => s + itemCountUnits(it, netSoldQty(it)), 0);
         areaCur.billCount++;
         areaCur.customerIds.add(inv.customer_id);
         areas.set(area, areaCur);
@@ -20726,6 +20739,11 @@ function computeTrendData(range){
   return { items, customers, areas, totalRevenue, totalBills, totalQty, totalItemRevenue, totalCost, costedRevenue };
 }
 
+// ---------- "کتنا بکا" — کھلے وزن کا کل وزن kg/L میں + کتنی بار بکا؛ عام آئٹم کی تعداد ----------
+function trendSoldText(r){
+  if(r.loose) return `${fmtLooseWeight(r.weight, r.unit)} sold • ${r.qty} sale${r.qty === 1 ? '' : 's'}`;
+  return `${Math.round(r.qty * 100) / 100} sold`;
+}
 function fmtTrendMoney(n){
   const r = Math.round((n || 0) * 100) / 100;
   return 'Rs. ' + r.toLocaleString();
@@ -20801,7 +20819,7 @@ function renderTrendsScreen(){
     wrap.innerHTML = rows.map((r, i) => `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
-          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.qty} sold</div></div>
+          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${trendSoldText(r)}</div></div>
           <div style="font-weight:800; font-size:15px; color:#166534;">Rs. ${r.revenue.toLocaleString()}</div>
         </div>
       </div>
@@ -20842,7 +20860,7 @@ function renderTrendsScreen(){
       return `
       <div class="bankAccCard">
         <div class="bankAccCardTop">
-          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${r.qty} sold • Sale ${fmtTrendMoney(r.revenue)} • Cost ${fmtTrendMoney(r.cost)}${warn}</div></div>
+          <div style="min-width:0;"><div class="bankAccType">#${i+1} — ${r.name}</div><div class="bankAccTitle">${trendSoldText(r)} • Sale ${fmtTrendMoney(r.revenue)} • Cost ${fmtTrendMoney(r.cost)}${warn}</div></div>
           <div style="text-align:end; flex:0 0 auto;">
             <div style="font-weight:800; font-size:15px; color:${color};">${loss ? '🔻 ' : ''}${fmtTrendMoney(r.profit)}</div>
             <div style="font-size:11.5px; font-weight:700; color:${color};">${r.margin.toFixed(1)}%</div>
@@ -28555,7 +28573,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1410WE050';
+  const APP_VERSION = 'AIO1410WE051';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
