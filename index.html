@@ -841,6 +841,11 @@
   .bcName .bcEdit, .bcName .bcDel, .bcName .bcRec{position:static; transform:none; width:22px; height:22px;}
   .bcEdit{width:22px; height:22px; min-height:0; border:none; border-radius:6px; background:#fef3c7; color:#92400e; font-size:11px; cursor:pointer; padding:0; line-height:1;}
   .bcQty span, .bcTotal{cursor:pointer;}
+  /* کھلا وزن: قیمت کے خانے میں فی کلو/لیٹر ریٹ (مثلاً 1400 /kg) — پہلے فی گرام (1.4) دکھتا تھا جو الجھن پیدا کرتا تھا */
+  .bcPriceWrap{position:relative; min-width:0;}
+  .bcPriceWrap .bcPrice{padding-bottom:9px;}
+  .bcPerUnit{position:absolute; left:0; right:0; bottom:2px; text-align:center; font-size:9px; font-weight:800; color:#b45309; pointer-events:none; line-height:1;}
+  .bcQtyUnit{font-size:10px; font-weight:800; margin-left:1px;}
   #cartItemEditModal .modalBox{width:min(380px, calc(100vw - 24px));}
   .ciEditName{font-size:13px; font-weight:800; color:var(--primary-dark); margin:-4px 0 10px;}
   .ciEditField{display:flex; flex-direction:column; gap:3px; margin-bottom:9px;}
@@ -858,7 +863,7 @@
     .bcHead span:nth-child(1){grid-area:s;} .bcHead span:nth-child(2){display:none;} .bcHead span:nth-child(3){grid-area:p;} .bcHead span:nth-child(4){grid-area:q;} .bcHead span:nth-child(5){grid-area:t;}
     .bcMain > .bcSerial{grid-area:s; align-self:center;}
     .bcMain > .bcName{grid-area:n; min-height:32px;}
-    .bcMain > .bcPrice{grid-area:p;}
+    .bcMain > .bcPrice, .bcMain > .bcPriceWrap{grid-area:p;}
     .bcMain > .bcQty{grid-area:q;}
     .bcMain > .bcTotal{grid-area:t;}
     .bcMain > .bcPrice::placeholder{color:#b45309;}
@@ -2604,7 +2609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE049</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE050</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2821,7 +2826,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE049</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE050</span>
     </div>
   </div>
 
@@ -11051,16 +11056,22 @@ function renderCart(){
     body.innerHTML = Billing.cart.map((item, idx) => {
       const lineTotal = (item.qty * item.unitPrice).toLocaleString(undefined, {maximumFractionDigits:0});
       const safeName = String(item.name).replace(/"/g,'&quot;');
+      // ---------- یونٹ: قیمت کے نیچے "/kg"، "/pcs"، "/L" — کھلا وزن (گرام/ml) کا ریٹ فی کلو/لیٹر میں؛ وزن/مائع/لمبائی والی مقدار کے ساتھ چھوٹا یونٹ ----------
+      const u = item.unit || 'pcs';
+      const looseW = !!item.loose_product_id && (u === 'g' || u === 'ml');
+      const rf = looseW ? 1000 : 1;
+      const rateUnit = looseW ? (u === 'ml' ? 'L' : 'kg') : u;
+      const qtyUnit = ['g','kg','ton','ml','L','inch','ft','m'].includes(u) ? u : '';
       return `
       <div class="bcRow ${idx % 2 ? 'alt' : ''}">
         <div class="bcMain">
           <span class="bcSerial">${idx+1}</span>
           <div class="bcName" title="${safeName}" onclick="openCartItemEdit(${item.variant_id})"><span class="bcNameTxt">${item.name}</span><span class="bcBtns"><button type="button" class="bcEdit" onclick="event.stopPropagation(); openCartItemEdit(${item.variant_id})" title="Edit weight / qty / rate / amount" aria-label="Edit">✏️</button><button type="button" class="bcDel" onclick="event.stopPropagation(); confirmRemoveFromCart(${item.variant_id})" title="Remove this item" aria-label="Remove">🗑️</button><button type="button" class="bcRec" onclick="event.stopPropagation(); showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button></span></div>
-          <input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${item.unitPrice}" min="0" onfocus="this.select()"
-                 onchange="updateCartRate(${item.variant_id}, this.value)">
+          <div class="bcPriceWrap"><input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${Math.round(item.unitPrice * rf * 100) / 100}" min="0" onfocus="this.select()"
+                 onchange="updateCartRate(${item.variant_id}, this.value / ${rf})" title="Rate per ${rateUnit}"><span class="bcPerUnit">/${rateUnit}</span></div>
           <div class="bcQty">
             <button type="button" class="bcMinus" onclick="changeQty(${item.variant_id}, -1)">−</button>
-            <span onclick="openCartItemEdit(${item.variant_id})">${item.qty}</span>
+            <span onclick="openCartItemEdit(${item.variant_id})">${item.qty}${qtyUnit ? `<small class="bcQtyUnit">${qtyUnit}</small>` : ''}</span>
             <button type="button" onclick="changeQty(${item.variant_id}, 1)">+</button>
           </div>
           <div class="bcTotal" onclick="openCartItemEdit(${item.variant_id})">${lineTotal}</div>
@@ -28544,7 +28555,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1410WE049';
+  const APP_VERSION = 'AIO1410WE050';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
