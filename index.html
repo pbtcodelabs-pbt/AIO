@@ -2543,7 +2543,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1310TU044</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE045</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2760,7 +2760,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1310TU044</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE045</span>
     </div>
   </div>
 
@@ -3876,7 +3876,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="profileHead">
           <div class="pAvatarLg">📥</div>
           <div class="pInfo">
-            <div class="pName">Receive Shipment</div>
+            <div class="pName" id="receiveShipmentTitle">Receive Shipment</div>
             <div class="pMeta" id="receiveShipmentMeta">—</div>
           </div>
           <span class="closeBtn" onclick="closeReceiveShipmentModal()">✖</span>
@@ -3918,7 +3918,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <div class="grand"><span>Revised Total</span><span id="receiveShipmentTotal">Rs. 0</span></div>
           </div>
 
-          <button class="checkoutBtn" style="margin-top:10px;" onclick="confirmShipmentReceipt()">✅ Confirm Receipt (Add to Stock)</button>
+          <button class="checkoutBtn" id="receiveShipmentConfirmBtn" style="margin-top:10px;" onclick="confirmShipmentReceipt()">✅ Confirm Receipt (Add to Stock)</button>
         </div>
       </div>
     </div>
@@ -16048,7 +16048,8 @@ function renderPurchaseOrdersScreen(){
             ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 Receive Shipment</button>
                <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>
                <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ Delete</button>`
-            : `<button class="btnPrint" onclick="openSupplierReturnModal(${po.supplier_id}, ${po.po_idx})">↩️ Return Items</button>`}
+            : `<button class="btnPrint" onclick="openEditReceivedShipment(${po.supplier_id}, ${po.po_idx})">✏️ Edit</button>
+               <button class="btnPrint" onclick="openSupplierReturnModal(${po.supplier_id}, ${po.po_idx})">↩️ Return Items</button>`}
         </div>
       </div>`;
   }).join('');
@@ -16175,6 +16176,7 @@ function renderSupplierPoSection(supplierId){
              <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>
              <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ Delete</button>`
           : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openEditReceivedShipment(${s.supplier_id}, ${idx});">✏️ Edit</button>
              <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
         return `
         <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default;">
@@ -16208,11 +16210,11 @@ function renderSupplierTransactionsSection(supplierId){
   const ledgerHtml = ledger.length === 0
     ? `<div class="profileEmpty">No transactions yet</div>`
     : ledger.map(h => {
-        const label = h.type === 'payment' ? '💵 Payment Sent' : h.type === 'return' ? '↩️ Item Return' : h.type;
-        const isGot = h.type === 'return'; // ریٹرن ہمارے حق میں کم واجب الادا کرتا ہے — سبز، ادائیگی سرخ
+        const label = h.type === 'payment' ? '💵 Payment Sent' : h.type === 'return' ? '↩️ Item Return' : h.type === 'adjust' ? '✏️ Shipment Edited' : h.type;
+        const isGot = h.type === 'return' || (h.type === 'adjust' && h.amount < 0); // ریٹرن/کمی ہمارے حق میں — سبز، ادائیگی/اضافہ سرخ
         return `<div class="ledgerRow"><div class="lrTop">
             <div><div class="lrDate">${h.date}${h.note ? ' — ' + h.note : ''}</div><div class="lrDesc">${label}</div></div>
-            <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
+            <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${Math.abs(h.amount).toLocaleString()}</div>
           </div></div>`;
       }).join('');
 
@@ -18619,6 +18621,9 @@ function openReceiveShipmentModal(supplierId, poIdx){
 
   activeReceiveSupplierId = supplierId;
   activeReceivePoIdx = poIdx;
+  receiveEditMode = false;
+  const _t = document.getElementById('receiveShipmentTitle'); if(_t) _t.textContent = 'Receive Shipment';
+  const _b = document.getElementById('receiveShipmentConfirmBtn'); if(_b) _b.textContent = '✅ Confirm Receipt (Add to Stock)';
   // ---------- PO کی اصل مقدار سے شروع کریں — یہاں تبدیل کر کے حقیقی موصول شدہ مقدار درج کریں ----------
   receiveShipmentCart = JSON.parse(JSON.stringify(po.items));
   receiveShipmentBillPhoto = po.billPhoto || null;
@@ -18745,7 +18750,76 @@ function updateReceiveShipmentBillPreview(){
 }
 
 // ---------- شپمنٹ کی تصدیق — یہیں سٹاک اصل میں بڑھتا ہے، اور واجب الادا کا فرق ایڈجسٹ ہوتا ہے ----------
+// ===================== AIO1410WE045: موصول شدہ شپمنٹ بعد میں ایڈٹ — صرف فرق اسٹاک اور سپلائر کے کھاتے میں =====================
+let receiveEditMode = false;
+function openEditReceivedShipment(supplierId, poIdx){
+  const s = suppliersData.find(x => x.supplier_id === supplierId);
+  const po = (s?.purchaseHistory || [])[poIdx];
+  if(!s || !po || po.status !== 'received') return;
+  if((po.items || []).some(i => i.returned)){
+    alert('⚠️ Some items of this shipment were already returned to the supplier, so it can no longer be edited.');
+    return;
+  }
+  openReceiveShipmentModal(supplierId, poIdx);
+  receiveEditMode = true;
+  document.getElementById('receiveShipmentTitle').textContent = '✏️ Edit Received Shipment';
+  document.getElementById('receiveShipmentMeta').textContent = `${s.name} — Received ${po.receivedDate || po.date}`;
+  document.getElementById('receiveShipmentConfirmBtn').textContent = '💾 Save Changes (adjust stock & balance)';
+}
+function saveEditedShipment(){
+  const s = suppliersData.find(x => x.supplier_id === activeReceiveSupplierId);
+  const po = (s?.purchaseHistory || [])[activeReceivePoIdx];
+  if(!s || !po) return;
+  if(receiveShipmentCart.length === 0){ alert('This shipment has no items. Remove it with Return, or add at least one item.'); return; }
+  const oldItems = po.items || [];
+  const oldQty = {}, newQty = {};
+  oldItems.forEach(i => { oldQty[i.variant_id] = (oldQty[i.variant_id] || 0) + (Number(i.qty) || 0); });
+  receiveShipmentCart.forEach(i => { newQty[i.variant_id] = (newQty[i.variant_id] || 0) + (Number(i.qty) || 0); });
+  const newTotal = moneyRound(receiveShipmentCart.reduce((sum, i) => sum + i.qty * i.cost, 0));
+  const oldTotal = Number(po.total) || 0;
+  const diff = moneyRound(newTotal - oldTotal);
+  const changes = [];
+  new Set([...Object.keys(oldQty), ...Object.keys(newQty)]).forEach(k => {
+    const d = roundStock((newQty[k] || 0) - (oldQty[k] || 0));
+    if(d !== 0){
+      const it = receiveShipmentCart.find(i => String(i.variant_id) === k) || oldItems.find(i => String(i.variant_id) === k);
+      changes.push(`• ${it ? it.name : k}: ${d > 0 ? '+' : ''}${d}`);
+    }
+  });
+  let msg = '⚠️ Save changes to this received shipment?\n\n';
+  msg += changes.length ? 'Stock will change:\n' + changes.join('\n') + '\n\n' : 'No quantity change.\n\n';
+  msg += `Supplier balance: Rs. ${oldTotal.toLocaleString()} → Rs. ${newTotal.toLocaleString()} (${diff >= 0 ? '+' : ''}${diff.toLocaleString()})`;
+  if(!confirm(msg)) return;
+
+  Object.keys(newQty).concat(Object.keys(oldQty)).filter((k, i, a) => a.indexOf(k) === i).forEach(k => {
+    const d = roundStock((newQty[k] || 0) - (oldQty[k] || 0));
+    const v = findVariantById(Number(k));
+    if(!v || d === 0) return;
+    if(d > 0){ v.stock = roundStock((v.stock || 0) + d); recordStockAddedToday(v.variant_id, d); }
+    else deductVariantStock(v, -d);
+  });
+  receiveShipmentCart.forEach(i => { const v = findVariantById(i.variant_id); if(v) v.purchase = i.cost; });
+
+  s.total_payable = moneyRound((Number(s.total_payable) || 0) + diff);
+  po.items = JSON.parse(JSON.stringify(receiveShipmentCart));
+  po.total = newTotal;
+  po.editedDate = new Date().toISOString().split('T')[0];
+  if(receiveShipmentBillPhoto) po.billPhoto = receiveShipmentBillPhoto;
+  s.ledgerHistory = s.ledgerHistory || [];
+  if(diff !== 0) s.ledgerHistory.unshift({type:'adjust', amount: diff, date: po.editedDate, note: `Shipment of ${po.date} edited (Rs. ${oldTotal.toLocaleString()} → Rs. ${newTotal.toLocaleString()})`});
+
+  receiveEditMode = false;
+  persistAllData();
+  const sid = activeReceiveSupplierId, pidx = activeReceivePoIdx;
+  closeReceiveShipmentModal();
+  renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
+  renderBillingProductGrid();
+  renderPartyList(document.getElementById('partySearchInput') ? document.getElementById('partySearchInput').value : '');
+  openPoPreview(sid, pidx);
+}
+
 function confirmShipmentReceipt(){
+  if(receiveEditMode){ saveEditedShipment(); return; }
   const s = suppliersData.find(x => x.supplier_id === activeReceiveSupplierId);
   const po = (s?.purchaseHistory || [])[activeReceivePoIdx];
   if(!s || !po) return;
@@ -28077,7 +28151,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1310TU044';
+  const APP_VERSION = 'AIO1410WE045';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
