@@ -6,7 +6,7 @@ var DEFAULT_PACKAGE = "com.pbtcodelabs.aiopos";
 var APPS = {
   "com.pbtcodelabs.aiopos": ["aio_user1plus0_3m", "aio_user1plus0_6m", "aio_user1plus0_12m"],
   "com.pbtcodelabs.ffpos": ["ffpos_monthly", "ffpos_quarterly", "ffpos_halfyearly", "ffpos_yearly", "ffpos_premium"],
-  "com.pbtcodelabs.dgkhata": ["dg_khata_1m", "dg_khata_3m", "dg_khata_6m", "dg_khata_12m"]
+  "com.pbtcodelabs.dgkhata": ["dg_khata_1m", "dg_khata_12m"]
 };
 
 // ایک بار کی خریداری (لائف ٹائم) — کبھی ختم نہیں
