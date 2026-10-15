@@ -2609,7 +2609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1410WE052</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1510TH053</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2826,7 +2826,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1410WE052</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1510TH053</span>
     </div>
   </div>
 
@@ -11131,7 +11131,8 @@ function renderCart(){
   if(receivedHint){
     // ---------- یہاں اوپری حد نہیں لگاتے — کسٹمر بل سے زیادہ رقم بھی دے سکتا ہے (مثلاً 5000 کا نوٹ)، تبھی Change پکڑا جا سکے ----------
     const receivedRaw = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
-    const remaining = combinedTotal - receivedRaw; // منفی ہو تو مطلب زائد رقم (Change) بنتی ہے — پرانے بقایہ سمیت
+    const remainingRaw = combinedTotal - receivedRaw; // منفی ہو تو مطلب زائد رقم (Change) بنتی ہے — پرانے بقایہ سمیت
+    const remaining = Math.abs(remainingRaw) < 0.5 ? 0 : remainingRaw; // آدھے روپے سے کم فرق (کھلے وزن کا اعشاریہ) = پوری ادائیگی
 
     if(receivedRaw > 0){
       sumReceivedRow.style.display = 'flex';
@@ -11369,7 +11370,10 @@ function finalizeInvoice(){
   // (a) عام Retail/Wholesale موڈ میں ہمیشہ (پرانا رویہ) — یا
   // (b) Walk-in موڈ میں بھی، اگر صارف نے جزوی رقم درج کی ہو جو بل سے کم ہے (نیا رویہ — ورنہ Walk-in خاموشی سے مکمل نقد ہی رہے) ----------
   const rawReceivedForCheck = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
-  const isWalkInPartial = Billing.counterSale && rawReceivedForCheck > 0 && rawReceivedForCheck < grandTotal;
+  // ---------- کوئی کسٹمر منتخب نہیں = Walk-in (نقد کاؤنٹر) — پرانی حالت (ہٹایا گیا کسٹمر/ڈرافٹ) کی وجہ سے ادھار موڈ میں اٹک کر نام نہ مانگے ----------
+  if(!customer) Billing.counterSale = true;
+  // ---------- کھلے وزن سے بل 170.40 جیسا بنتا ہے مگر دکھتا 170 ہے — آدھے روپے تک کا فرق "پوری ادائیگی" مانیں ----------
+  const isWalkInPartial = Billing.counterSale && rawReceivedForCheck > 0 && (rawReceivedForCheck + 0.5) < grandTotal;
   if(!customer && (!Billing.counterSale || isWalkInPartial)){
     document.getElementById('qccName').value = '';
     document.getElementById('qccPhone').value = '';
@@ -11440,7 +11444,9 @@ function finalizeInvoice(){
   // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو — یہ صرف اسی بل کے لیے نہیں بلکہ پرانے بقایہ سمیت پوری واجب الادا رقم کے خلاف لاگو ہوگی ----------
   const dueAfterWallet = Math.max(0, grandTotal - walletApplied);
   const combinedDueForPayment = previousBalance + dueAfterWallet; // ---------- پرانا بقایہ + اسی بل کا بقایہ حصہ = کل واجب الادا ----------
-  const rawReceivedInput = (method === 'credit') ? Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0) : 0;
+  let rawReceivedInput = (method === 'credit') ? Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0) : 0;
+  // ---------- آدھے روپے سے کم کمی (کھلے وزن کا اعشاریہ، مثلاً بل 170.40 اور وصول 170) = پوری ادائیگی، بقایہ نہ بنے ----------
+  if(rawReceivedInput > 0 && rawReceivedInput < combinedDueForPayment && rawReceivedInput + 0.5 >= combinedDueForPayment) rawReceivedInput = combinedDueForPayment;
   const changeToWallet = document.getElementById('changeToWalletChk')?.checked || false;
 
   let cashReceivedNow, remainingDue, changeGiven = 0, changeCreditedToWallet = 0;
@@ -28576,7 +28582,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1410WE052';
+  const APP_VERSION = 'AIO1510TH053';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
