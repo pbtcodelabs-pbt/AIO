@@ -1,4 +1,4 @@
-// AIO / FFPOS / DG Khatabook — Google Play purchase verify (subscriptions + one-time lifetime)
+// AIO / FFPOS / GG Khatabook — Google Play purchase verify (subscriptions + one-time lifetime)
 // خفیہ چابی (SERVICE_ACCOUNT_JSON) کوڈ میں نہیں، Cloudflare کی Settings → Variables and Secrets میں ہے۔
 var DEFAULT_PACKAGE = "com.pbtcodelabs.aiopos";
 
@@ -6,7 +6,8 @@ var DEFAULT_PACKAGE = "com.pbtcodelabs.aiopos";
 var APPS = {
   "com.pbtcodelabs.aiopos": ["aio_user1plus0_3m", "aio_user1plus0_6m", "aio_user1plus0_12m"],
   "com.pbtcodelabs.ffpos": ["ffpos_monthly", "ffpos_quarterly", "ffpos_halfyearly", "ffpos_yearly", "ffpos_premium"],
-  "com.pbtcodelabs.dgkhata": ["dg_khata_1m", "dg_khata_12m"]
+  "com.pbtcodelabs.dgkhata": ["dg_khata_1m", "dg_khata_12m"],
+  "com.pbtcodelabs.ggkhatabook": ["gg_khatabook_1m", "gg_khatabook_12m"]
 };
 
 // ایک بار کی خریداری (لائف ٹائم) — کبھی ختم نہیں
