@@ -1534,6 +1534,28 @@
   .vcActionsRow button{flex:1; border:none; border-radius:10px; padding:10px; font-size:12.5px; font-weight:700; cursor:pointer;}
   .vcBatchBtn{background:#eef2ff; color:var(--primary-dark);}
   .vcDeleteBtn{background:#fef2f2; color:var(--danger);}
+  /* ===================== 🛡️ محفوظ ڈیلیٹ — خوبصورت وارننگ کارڈ (2 مرحلے، PIN لگا ہو تو PIN) ===================== */
+  #dangerConfirmModal{z-index:2000; background:rgba(15,23,42,.6); backdrop-filter:blur(2px);}
+  #dangerConfirmModal .dcBox{width:min(360px, calc(100vw - 28px)); background:#fff; border-radius:22px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.35); animation:dcPop .18s ease-out;}
+  @keyframes dcPop{from{transform:scale(.92); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .dcTop{padding:20px 18px 14px; text-align:center; background:linear-gradient(160deg,#fff1f2,#ffe4e6); border-bottom:1px solid #fecdd3;}
+  .dcTop.final{background:linear-gradient(160deg,#fee2e2,#fecaca);}
+  .dcIcon{width:62px; height:62px; margin:0 auto 8px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px;
+    background:linear-gradient(160deg,#ef4444,#991b1b); color:#fff; box-shadow:0 6px 16px rgba(185,28,28,.35), inset 0 2px 0 rgba(255,255,255,.3);}
+  .dcStep{display:inline-block; font-size:10.5px; font-weight:900; letter-spacing:.6px; color:#b91c1c; background:#fff; border:1px solid #fecaca; border-radius:999px; padding:2px 10px; margin-bottom:6px;}
+  .dcTitle{font-size:17px; font-weight:900; color:#7f1d1d; line-height:1.3;}
+  .dcBody{padding:14px 18px 6px; font-size:13.5px; color:#334155; line-height:1.55; text-align:center;}
+  .dcName{display:block; margin:6px auto 2px; font-weight:900; font-size:15px; color:#0f172a; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:10px; padding:6px 10px;}
+  .dcNote{display:block; margin-top:8px; font-size:12px; font-weight:700; color:#b91c1c;}
+  .dcPin{display:none; padding:4px 18px 0;}
+  .dcPin input{width:100%; box-sizing:border-box; text-align:center; letter-spacing:8px; font-size:22px; font-weight:900; padding:10px; border:2px solid #fecaca; border-radius:12px; margin:0;}
+  .dcPin input:focus{outline:none; border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,.15);}
+  .dcErr{display:none; color:#b91c1c; font-size:12px; font-weight:800; text-align:center; margin-top:6px;}
+  .dcBtns{display:flex; gap:10px; padding:14px 18px 18px;}
+  .dcBtns button{flex:1; border:none; border-radius:12px; padding:12px 8px; font-size:14px; font-weight:900; cursor:pointer;}
+  .dcCancel{background:#f1f5f9; color:#334155; box-shadow:0 3px 0 #cbd5e1;}
+  .dcOk{background:linear-gradient(160deg,#ef4444,#991b1b); color:#fff; box-shadow:0 3px 0 #7f1d1d;}
+  .dcBtns button:active{transform:translateY(2px); box-shadow:none;}
   /* 📇 فون بک سے کسٹمر — نام کے خانے کے ساتھ بٹن */
   .pbRow{display:flex; gap:6px; align-items:center;}
   .pbRow input{flex:1 1 auto; min-width:0;}
@@ -2609,7 +2631,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1510TH053</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1510TH054</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2826,7 +2848,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1510TH053</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1510TH054</span>
     </div>
   </div>
 
@@ -14318,8 +14340,11 @@ function addVariantRow(productId){
   rerenderProductListPreserveScroll();
 }
 
-function deleteVariant(productId, variantId){
-  if(!confirm('Are you sure you want to delete this variant?')) return;
+async function deleteVariant(productId, variantId){
+  const pr = productsData.find(p => p.product_id === productId);
+  const vr = pr && pr.variants.find(v => v.variant_id === variantId);
+  if(!vr) return;
+  if(!(await secureDeleteConfirm(`${pr.name} — ${vr.label || 'Variant'}`, 'variant'))) return;
   idbDeleteImage('product_' + variantId); // ---------- تصویر بھی صاف کریں تاکہ IndexedDB میں بے کار ڈیٹا جمع نہ ہو ----------
   const product = productsData.find(p => p.product_id === productId);
   product.variants = product.variants.filter(v => v.variant_id !== variantId);
@@ -14533,10 +14558,83 @@ function saveNewProduct(){
 }
 
 // ---------- پورا پراڈکٹ (سب variants سمیت) ڈیلیٹ کریں ----------
-function deleteProduct(productId){
+/* =====================================================================
+   🛡️ محفوظ ڈیلیٹ — ایک ٹچ پر کبھی ڈیلیٹ نہیں:
+   مرحلہ 1: خوبصورت وارننگ کارڈ ("یہ واپس نہیں ہو سکے گا")
+   مرحلہ 2: اگر ایڈمن PIN لگا ہو تو PIN مانگے؛ ورنہ دوسری "آخری وارننگ"
+   ===================================================================== */
+let _dcResolve = null, _dcMode = 'confirm';
+function ensureDangerConfirmModal(){
+  let m = document.getElementById('dangerConfirmModal');
+  if(m) return m;
+  m = document.createElement('div');
+  m.className = 'modalOverlay'; m.id = 'dangerConfirmModal';
+  m.innerHTML = `<div class="dcBox">
+    <div class="dcTop" id="dcTop"><div class="dcIcon" id="dcIcon">🗑️</div><div class="dcStep" id="dcStep">STEP 1 OF 2</div><div class="dcTitle" id="dcTitle"></div></div>
+    <div class="dcBody" id="dcBody"></div>
+    <div class="dcPin" id="dcPinWrap"><input type="password" id="dcPin" inputmode="numeric" maxlength="8" placeholder="••••" onkeydown="if(event.key==='Enter') dangerConfirmOk()"><div class="dcErr" id="dcErr">❌ Wrong PIN — try again</div></div>
+    <div class="dcBtns"><button type="button" class="dcCancel" onclick="dangerConfirmClose(false)">Cancel</button><button type="button" class="dcOk" id="dcOkBtn" onclick="dangerConfirmOk()">Delete</button></div>
+  </div>`;
+  m.addEventListener('click', e => { if(e.target === m) dangerConfirmClose(false); });
+  document.body.appendChild(m);
+  return m;
+}
+function dangerConfirm(opts){
+  const m = ensureDangerConfirmModal();
+  _dcMode = opts.pin ? 'pin' : 'confirm';
+  document.getElementById('dcTop').classList.toggle('final', !!opts.final);
+  document.getElementById('dcIcon').textContent = opts.icon || (opts.pin ? '🔐' : (opts.final ? '⚠️' : '🗑️'));
+  document.getElementById('dcStep').textContent = opts.step || '';
+  document.getElementById('dcTitle').textContent = opts.title || 'Delete?';
+  document.getElementById('dcBody').innerHTML = opts.html || '';
+  document.getElementById('dcPinWrap').style.display = opts.pin ? 'block' : 'none';
+  document.getElementById('dcErr').style.display = 'none';
+  document.getElementById('dcPin').value = '';
+  document.getElementById('dcOkBtn').textContent = opts.okText || 'Delete';
+  m.classList.add('show');
+  if(opts.pin) setTimeout(() => document.getElementById('dcPin')?.focus(), 120);
+  return new Promise(res => { _dcResolve = res; });
+}
+function dangerConfirmClose(val){
+  document.getElementById('dangerConfirmModal')?.classList.remove('show');
+  const r = _dcResolve; _dcResolve = null;
+  if(r) r(val);
+}
+async function dangerConfirmOk(){
+  if(_dcMode !== 'pin'){ dangerConfirmClose(true); return; }
+  const pin = (document.getElementById('dcPin').value || '').trim();
+  const h = await hashPin(pin);
+  if(usersData.some(u => u.role === 'admin' && u.is_active && u.pin === h)){ dangerConfirmClose(true); return; }
+  document.getElementById('dcErr').style.display = 'block';
+  const el = document.getElementById('dcPin'); el.value = ''; el.focus();
+}
+// ---------- پورا دو مرحلہ عمل — true تب ہی جب صارف دونوں بار تصدیق کرے (یا درست PIN دے) ----------
+async function secureDeleteConfirm(name, what, extraHtml){
+  const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const ok1 = await dangerConfirm({
+    step: 'STEP 1 OF 2', title: `Delete this ${what}?`, okText: 'Yes, continue',
+    html: `You are about to delete<span class="dcName">${esc(name)}</span>${extraHtml || ''}<span class="dcNote">⚠️ This cannot be undone.</span>`
+  });
+  if(!ok1) return false;
+  if(isPinGateNeeded()){
+    return await dangerConfirm({
+      step: 'STEP 2 OF 2', title: 'Enter your PIN to delete', pin: true, final: true, okText: '🗑️ Delete',
+      html: `Your app is protected with a PIN.<br>Enter it to permanently delete <b>${esc(name)}</b>.`
+    });
+  }
+  return await dangerConfirm({
+    step: 'STEP 2 OF 2 — FINAL', title: 'Are you really sure?', final: true, okText: '🗑️ Delete forever',
+    html: `<b>${esc(name)}</b> will be removed permanently.<br>It <b>cannot be recovered</b> later.`
+  });
+}
+
+async function deleteProduct(productId){
   const product = productsData.find(p => p.product_id === productId);
   if(!product) return;
-  if(!confirm(`Delete "${product.name}" and all its variants? This cannot be undone.`)) return;
+  const nv = (product.variants || []).length;
+  const stock = (product.variants || []).reduce((t, v) => t + (Number(v.stock) || 0), 0);
+  const extra = `<div style="font-size:12.5px; color:#64748b;">${nv} variant${nv === 1 ? '' : 's'} • stock ${Math.round(stock * 100) / 100} will be removed</div>`;
+  if(!(await secureDeleteConfirm(product.name, 'product', extra))) return;
   (product.variants || []).forEach(v => idbDeleteImage('product_' + v.variant_id)); // ---------- ہر ویریئنٹ کی تصویر بھی صاف کریں ----------
   productsData = productsData.filter(p => p.product_id !== productId);
   persistAllData();
@@ -28582,7 +28680,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1510TH053';
+  const APP_VERSION = 'AIO1510TH054';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
