@@ -1545,6 +1545,7 @@
     box-shadow:0 3px 0 #fbbf24, 0 4px 8px rgba(180,83,9,.15);}
   .hbChip:active{transform:translateY(2px); box-shadow:0 1px 0 #fbbf24;}
   .hbName{font-size:13px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hbItems{font-size:11px; font-weight:700; color:#92400e; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .hbMeta{font-size:11px; font-weight:700; color:#475569; margin-top:2px; white-space:nowrap;}
   .hbAmt{font-size:13px; font-weight:900; color:#166534; margin-top:2px;}
   .hbX{position:absolute; top:5px; right:5px; width:20px; height:20px; border:none; border-radius:6px; background:#fee2e2; color:#b91c1c; font-size:10px; cursor:pointer; padding:0; line-height:1;}
@@ -2646,7 +2647,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1710SA055</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1710SA056</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2863,7 +2864,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1710SA055</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1710SA056</span>
     </div>
   </div>
 
@@ -10005,12 +10006,17 @@ function hbToast(msg){
   const t = document.createElement('div'); t.className = 'hbToast'; t.textContent = msg;
   document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
 }
+function nextWalkInHoldLabel(){
+  const used = heldBills.map(h => (/^Walk-in #(\d+)$/.exec(h.label || '') || [])[1]).filter(Boolean).map(Number);
+  let n = 1; while(used.includes(n)) n++;
+  return `Walk-in #${n}`;
+}
 function currentBillSnapshot(){
   const custId = document.getElementById('customerSelect')?.value || '';
   const cust = custId ? customersData.find(c => c.customer_id == custId) : null;
   return {
     id: Date.now(),
-    label: cust ? cust.name : 'Walk-in Customer',
+    label: cust ? cust.name : nextWalkInHoldLabel(), // بغیر نام والے بل: Walk-in #1، #2 … تاکہ آپس میں پہچانے جائیں
     customerId: custId,
     cart: JSON.parse(JSON.stringify(Billing.cart)),
     saleMode: Billing.saleMode,
@@ -10083,6 +10089,7 @@ function renderHeldBills(){
       return `<div class="hbChip" onclick="resumeHeldBill(${h.id})">
         <button type="button" class="hbX" onclick="event.stopPropagation(); discardHeldBill(${h.id})" title="Remove held bill">✕</button>
         <div class="hbName">${h.customerId ? '👤' : '🚶'} ${name}</div>
+        <div class="hbItems">${String((h.cart || [])[0]?.name || '').replace(/[<>&]/g, '')}${cnt > 1 ? ` +${cnt - 1} more` : ''}</div>
         <div class="hbMeta">${cnt} item${cnt === 1 ? '' : 's'} • ${hbAgo(h.heldAt)}</div>
         <div class="hbAmt">Rs. ${Math.round(total).toLocaleString()}</div>
       </div>`; }).join('')}</div>` : '';
@@ -28803,7 +28810,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1710SA055';
+  const APP_VERSION = 'AIO1710SA056';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
