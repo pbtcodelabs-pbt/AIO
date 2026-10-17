@@ -107,10 +107,56 @@ async function verifyOneTime(base, accessToken, sku, token) {
   });
 }
 
+// ---------- MCS: دکان کے بورڈ کی تصویر سے نام اور موبائل نمبر (Cloudflare Workers AI) ----------
+// فون میں Tesseract اردو بورڈ (نستعلیق، رنگین پس منظر) ٹھیک نہیں پڑھتا، اس لیے تصویر یہاں AI ماڈل پڑھتا ہے۔
+var OCR_MODELS = ["@cf/google/gemma-3-12b-it", "@cf/mistralai/mistral-small-3.1-24b-instruct"];
+var OCR_PROMPT =
+  "This is a photo of a shop signboard in Pakistan (Urdu and/or English). Read it carefully and reply with ONLY a JSON object, no other text:\n" +
+  '{"name_ur":"shop name exactly as written in Urdu script, or empty","name_en":"shop name in English letters if written on the board, or empty","phones":["every mobile number on the board in the form 03xx-xxxxxxx"],"owner":"owner/proprietor name if written, or empty","address":"address/road/area if written, or empty"}\n' +
+  "Rules: the shop name is usually the biggest text. Do not invent anything that is not visible. Digits must be exactly as on the board.";
+
+function ocrParse(text) {
+  const t = String(text || "");
+  const m = t.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try { return JSON.parse(m[0]); } catch (e) { return null; }
+}
+
+async function handleOcr(request, env) {
+  if (!env.AI) return reply({ error: "ai_not_configured" }, 500);
+  let body;
+  try { body = await request.json(); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const img = body && body.image;
+  if (typeof img !== "string" || !/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 2500000) {
+    return reply({ error: "bad_image" }, 400);
+  }
+  let lastErr = "";
+  for (const model of OCR_MODELS) {
+    try {
+      const out = await env.AI.run(model, {
+        messages: [{ role: "user", content: [
+          { type: "text", text: OCR_PROMPT },
+          { type: "image_url", image_url: { url: img } }
+        ] }],
+        max_tokens: 400,
+        temperature: 0
+      });
+      const raw = out && (out.response !== undefined ? out.response : out);
+      const data = typeof raw === "object" && raw ? raw : ocrParse(raw);
+      if (data) return reply({ ok: true, model, data });
+      lastErr = "unparsed: " + String(raw).slice(0, 200);
+    } catch (e) {
+      lastErr = String(e && e.message || e).slice(0, 300);
+    }
+  }
+  return reply({ ok: false, error: lastErr }, 502);
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
+    if (new URL(request.url).pathname === "/ocr") return handleOcr(request, env);
 
     let body;
     try {

@@ -30,3 +30,13 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: cloudflare-worker
+      # MCS: بورڈ پڑھنے والے راستے (/ocr) کی جانچ — ناکام ہو تب بھی Deploy پر اثر نہیں
+      - name: Test /ocr (board reader)
+        if: env.HAS_TOKEN == 'true'
+        continue-on-error: true
+        run: |
+          sleep 8
+          IMG="data:image/jpeg;base64,$(base64 -w0 cloudflare-worker/test-board.jpg)"
+          printf '{"image":"%s"}' "$IMG" > /tmp/ocr.json
+          curl -sS -m 90 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/ocr -H 'Content-Type: application/json' --data @/tmp/ocr.json
+          echo
