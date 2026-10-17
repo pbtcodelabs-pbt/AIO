@@ -1534,6 +1534,21 @@
   .vcActionsRow button{flex:1; border:none; border-radius:10px; padding:10px; font-size:12.5px; font-weight:700; cursor:pointer;}
   .vcBatchBtn{background:#eef2ff; color:var(--primary-dark);}
   .vcDeleteBtn{background:#fef2f2; color:var(--danger);}
+  /* ===================== ⏸️ HOLD BILL — بل روک کر دوسرا بل، پھر واپس ===================== */
+  .holdBillBtn{background:linear-gradient(160deg,#fde68a,#f59e0b); color:#78350f; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:800; cursor:pointer; box-shadow:0 2px 0 #b45309;}
+  .holdBillBtn:active{transform:translateY(1px); box-shadow:none;}
+  .heldBillsStrip{margin:8px 0 10px; padding:9px 10px; border-radius:14px; background:linear-gradient(135deg,#fffbeb,#fef3c7); border:1.5px solid #fcd34d;}
+  .hbHead{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; font-weight:900; color:#92400e; margin-bottom:7px;}
+  .hbHead small{font-weight:700; color:#b45309; font-size:11px;}
+  .hbList{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; -webkit-overflow-scrolling:touch;}
+  .hbChip{position:relative; flex:0 0 auto; min-width:138px; max-width:190px; background:#fff; border:1.5px solid #f59e0b; border-radius:12px; padding:7px 28px 7px 10px; cursor:pointer;
+    box-shadow:0 3px 0 #fbbf24, 0 4px 8px rgba(180,83,9,.15);}
+  .hbChip:active{transform:translateY(2px); box-shadow:0 1px 0 #fbbf24;}
+  .hbName{font-size:13px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hbMeta{font-size:11px; font-weight:700; color:#475569; margin-top:2px; white-space:nowrap;}
+  .hbAmt{font-size:13px; font-weight:900; color:#166534; margin-top:2px;}
+  .hbX{position:absolute; top:5px; right:5px; width:20px; height:20px; border:none; border-radius:6px; background:#fee2e2; color:#b91c1c; font-size:10px; cursor:pointer; padding:0; line-height:1;}
+  .hbToast{position:fixed; left:50%; bottom:90px; transform:translateX(-50%); z-index:3000; background:#0f172a; color:#fff; font-size:13px; font-weight:700; padding:10px 16px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.3); max-width:calc(100vw - 32px); text-align:center;}
   /* ===================== 🛡️ محفوظ ڈیلیٹ — خوبصورت وارننگ کارڈ (2 مرحلے، PIN لگا ہو تو PIN) ===================== */
   #dangerConfirmModal{z-index:2000; background:rgba(15,23,42,.6); backdrop-filter:blur(2px);}
   #dangerConfirmModal .dcBox{width:min(360px, calc(100vw - 28px)); background:#fff; border-radius:22px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.35); animation:dcPop .18s ease-out;}
@@ -2631,7 +2646,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1510TH054</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1710SA055</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2848,7 +2863,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1510TH054</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1710SA055</span>
     </div>
   </div>
 
@@ -3003,6 +3018,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
       <!-- ---------- 🛒 ادھورا بل موجود ہو تو یہاں نظر آتا رہے — جب تک مکمل یا ڈیلیٹ نہ کریں ---------- -->
       <div id="homeUnfinishedCartCard" style="display:none;"></div>
+      <!-- ---------- ⏸️ ہولڈ کیے گئے بل — دوسرے گاہک کو پہلے نمٹا کر یہاں سے واپس کھولیں ---------- -->
+      <div id="homeHeldBills" class="heldBillsStrip" style="display:none;"></div>
 
       <!-- ---------- 🧭 بڑے بڑے نیویگیشن آئیکن — ہر بڑے سیکشن کا دروازہ ---------- -->
       <div class="homeIconGrid" id="homeIconGrid"></div>
@@ -3018,6 +3035,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <span class="pbArrow">›</span>
       </div>
       <div id="rejectionNotice"></div>
+      <div id="billingHeldBills" class="heldBillsStrip" style="display:none;"></div>
 
       <div class="billingTopBar">
         <div class="modeToggleRow">
@@ -3082,6 +3100,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="cartSheetHead">
           <strong>🛒 Your Cart</strong>
           <span style="display:flex; align-items:center; gap:10px;">
+            <button type="button" class="holdBillBtn" onclick="holdCurrentBill()" title="Keep this bill on hold and start a new one">⏸️ Hold</button>
             <button type="button" onclick="deleteBillingCartDraft()" style="background:#fee2e2; color:#991b1b; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">🗑️ Delete Cart</button>
             <span class="closeBtn" onclick="closeCartSheet()">✖</span>
           </span>
@@ -7694,6 +7713,7 @@ const HOME_TILES_SALESMAN = [
 
 // ---------- ہوم پیج پر ادھورے بل کا کارڈ — جب تک بل مکمل یا خود ڈیلیٹ نہ کریں، ہمیشہ نظر آتا رہے ----------
 function renderHomeUnfinishedCartCard(){
+  try{ renderHeldBills(); }catch(e){}
   const card = document.getElementById('homeUnfinishedCartCard');
   if(!card) return;
   if(!Billing.cart || Billing.cart.length === 0){
@@ -9957,6 +9977,11 @@ function clearBillingCartDraft(){
 function deleteBillingCartDraft(){
   if(Billing.cart.length === 0){ closeCartSheet(); return; }
   if(!confirm('Delete this entire cart? This cannot be undone.')) return;
+  resetBillingCart();
+  closeCartSheet();
+}
+// ---------- کارٹ کو بالکل نئے بل کی حالت میں لائیں (Walk-in، کوئی رعایت/وصولی نہیں) ----------
+function resetBillingCart(){
   Billing.cart = [];
   clearBillingCartDraft();
   const custSel = document.getElementById('customerSelect');
@@ -9968,7 +9993,105 @@ function deleteBillingCartDraft(){
   Billing.counterSale = true;
   syncCartModeControls();
   renderCart();
-  closeCartSheet();
+}
+
+/* =====================================================================
+   ⏸️ HOLD BILL — ایک گاہک کا بل بیچ میں روک کر (Hold) دوسرے جلدی والے گاہک کا بل بنائیں،
+   پھر ہولڈ والا بل ایک ٹچ سے واپس کھولیں۔ ہولڈ بل بلنگ اسکرین اور ہوم پیج دونوں پر نظر آتے ہیں۔
+   ===================================================================== */
+let heldBills = loadFromStorage('heldBills', []);
+function saveHeldBills(){ saveToStorage('heldBills', heldBills); }
+function hbToast(msg){
+  const t = document.createElement('div'); t.className = 'hbToast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+function currentBillSnapshot(){
+  const custId = document.getElementById('customerSelect')?.value || '';
+  const cust = custId ? customersData.find(c => c.customer_id == custId) : null;
+  return {
+    id: Date.now(),
+    label: cust ? cust.name : 'Walk-in Customer',
+    customerId: custId,
+    cart: JSON.parse(JSON.stringify(Billing.cart)),
+    saleMode: Billing.saleMode,
+    discount: document.getElementById('discountInput')?.value || 0,
+    received: document.getElementById('amountReceivedInput')?.value || '',
+    heldAt: new Date().toISOString()
+  };
+}
+function holdCurrentBill(silent){
+  if(!Billing.cart.length){ if(!silent) alert('Cart is empty — nothing to hold.'); return false; }
+  const snap = currentBillSnapshot();
+  heldBills.push(snap);
+  saveHeldBills();
+  resetBillingCart();
+  renderHeldBills();
+  if(!silent){
+    closeCartSheet();
+    hbToast(`⏸️ "${snap.label}" bill is on hold — start the next bill`);
+  }
+  return true;
+}
+function resumeHeldBill(id){
+  const h = heldBills.find(x => x.id === id);
+  if(!h) return;
+  // ---------- ابھی کوئی دوسرا بل کھلا ہو تو وہ بھی ضائع نہ ہو — خود ہولڈ میں چلا جائے (آپس میں تبادلہ) ----------
+  let swapped = '';
+  if(Billing.cart.length){ const cur = currentBillSnapshot(); heldBills.push(cur); swapped = cur.label; resetBillingCart(); }
+  heldBills = heldBills.filter(x => x.id !== id);
+  saveHeldBills();
+  Billing.cart = JSON.parse(JSON.stringify(h.cart || []));
+  Billing.saleMode = h.saleMode || 'retail';
+  ['modeRetail','cartModeRetail'].forEach(i => document.getElementById(i)?.classList.toggle('active', Billing.saleMode === 'retail'));
+  ['modeWholesale','cartModeWholesale'].forEach(i => document.getElementById(i)?.classList.toggle('active', Billing.saleMode === 'wholesale'));
+  const custSel = document.getElementById('customerSelect');
+  if(custSel){
+    if(typeof populateCustomerDropdown === 'function') populateCustomerDropdown();
+    custSel.value = (h.customerId && Array.from(custSel.options).some(o => o.value == h.customerId)) ? h.customerId : '';
+  }
+  const d = document.getElementById('discountInput'); if(d) d.value = h.discount || 0;
+  const r = document.getElementById('amountReceivedInput'); if(r) r.value = h.received || '';
+  onCustomerChange(); // کسٹمر/Walk-in حالت، بقایہ اور کارٹ دوبارہ بنائیں
+  renderBillingProductGrid();
+  renderHeldBills();
+  if(currentScreenName !== 'billing') goTo('billing');
+  openCartSheet();
+  if(swapped) hbToast(`🔁 "${swapped}" bill moved to hold`);
+}
+async function discardHeldBill(id){
+  const h = heldBills.find(x => x.id === id);
+  if(!h) return;
+  const total = (h.cart || []).reduce((t, i) => t + i.qty * i.unitPrice, 0);
+  const ok = await dangerConfirm({step: 'HELD BILL', title: 'Remove this held bill?', okText: '🗑️ Remove',
+    html: `<span class="dcName">${String(h.label).replace(/[<>&]/g, '')}</span>${(h.cart || []).length} item(s) • Rs. ${Math.round(total).toLocaleString()}<span class="dcNote">⚠️ Items will be removed. This cannot be undone.</span>`});
+  if(!ok) return;
+  heldBills = heldBills.filter(x => x.id !== id);
+  saveHeldBills();
+  renderHeldBills();
+}
+function hbAgo(iso){
+  const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.floor(m / 60)} hr ago` : `${Math.floor(m / 1440)} day ago`;
+}
+function renderHeldBills(){
+  const html = heldBills.length ? `
+    <div class="hbHead"><span>⏸️ Bills on Hold (${heldBills.length})</span><small>Tap to continue</small></div>
+    <div class="hbList">${heldBills.map(h => {
+      const total = (h.cart || []).reduce((t, i) => t + i.qty * i.unitPrice, 0);
+      const cnt = (h.cart || []).length;
+      const name = String(h.label || 'Walk-in Customer').replace(/[<>&]/g, '');
+      return `<div class="hbChip" onclick="resumeHeldBill(${h.id})">
+        <button type="button" class="hbX" onclick="event.stopPropagation(); discardHeldBill(${h.id})" title="Remove held bill">✕</button>
+        <div class="hbName">${h.customerId ? '👤' : '🚶'} ${name}</div>
+        <div class="hbMeta">${cnt} item${cnt === 1 ? '' : 's'} • ${hbAgo(h.heldAt)}</div>
+        <div class="hbAmt">Rs. ${Math.round(total).toLocaleString()}</div>
+      </div>`; }).join('')}</div>` : '';
+  ['homeHeldBills', 'billingHeldBills'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = html;
+    el.style.display = heldBills.length ? 'block' : 'none';
+  });
 }
 
 // ---------- Bills Awaiting Approval (سیلزمین کے بھیجے ہوئے بل جو ایڈمن کی منظوری کے منتظر ہیں) ----------
@@ -28680,7 +28803,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1510TH054';
+  const APP_VERSION = 'AIO1710SA055';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
