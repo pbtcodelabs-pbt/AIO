@@ -2647,7 +2647,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1810SU057</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1810SU058</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2709,7 +2709,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <button id="loginEnterBtn" onclick="login()">Enter</button>
 
       <!-- ---------- 🎁 ٹرائل ختم ہونے پر یہاں سے سیدھا سبسکرائب کریں ---------- -->
-      <button id="loginTrialBtn" onclick="goTo('billing'); openPackagePlansModal();" style="display:none; background:#fff7ed; color:#c2410c; border:1.5px solid #fdba74; margin-top:10px;">🎟️ 14-Day Free Trial / Subscribe</button>
+      <button id="loginTrialBtn" onclick="goTo('billing'); openPackagePlansModal();" style="display:none; background:#fff7ed; color:#c2410c; border:1.5px solid #fdba74; margin-top:10px;">🎟️ 7-Day Free Trial / Subscribe</button>
       <!-- ---------- 🔄 فون بدلنے کے بعد پرانی خریداری واپس ---------- -->
       <button id="loginRestoreBtn" type="button" onclick="restorePurchaseNow(this)" style="background:#fff; color:var(--primary-dark); border:1.5px solid #c7d2fe; margin-top:10px; font-size:13.5px; font-weight:800;">🔄 Restore Purchase</button>
     </div>
@@ -2864,7 +2864,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1810SU057</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1810SU058</span>
     </div>
   </div>
 
@@ -7487,7 +7487,7 @@ function getDeveloperContact(){
 }
 
 // ---------- ہر انسٹالیشن کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
-// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 14 دن کا مفت (Beta) ٹرائل بھی شروع ہو جاتا ہے — تاکہ
+// نوٹ: بالکل پہلی بار (نیا ڈیوائس) پر خودکار 7 دن کا مفت (Beta) ٹرائل بھی شروع ہو جاتا ہے — تاکہ
 // کسی نئے صارف کو فائل کھولتے ہی PIN/Activation کے چکر میں نہ الجھنا پڑے، وہ فوراً ایپ آزما سکے۔
 function getOrCreateDeviceUID(){
   if(AppState.settings.deviceUID) return AppState.settings.deviceUID;
@@ -7495,7 +7495,7 @@ function getOrCreateDeviceUID(){
   AppState.settings.deviceUID = uid;
   if(!AppState.settings.subscriptionExpiry && !AppState.settings.freeTrialGranted){
     const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 14); // ---------- AIOTEST28: پہلے 30 دن تھا، اب 14 دن ----------
+    trialEnd.setDate(trialEnd.getDate() + 7); // ---------- AIOTEST28: پہلے 30 دن، پھر 14 دن؛ AIO1810SU058: اب صرف نئی انسٹالیشن کو 7 دن (پرانے صارفین کی محفوظ تاریخ نہیں بدلتی) ----------
     AppState.settings.subscriptionExpiry = toLocalDateStr(trialEnd);
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.freeTrialGranted = true;
@@ -8327,7 +8327,7 @@ async function shareAppLink(){
   // ---------- 📲 ہمیشہ گوگل پلے اسٹور کا اصلی لنک شیئر ہو (ہر گاہک کے فون پر، بغیر کسی سیٹنگ کے) ----------
   const link = 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos';
   const customMsg = (AppState.settings.appShareMessage || '').trim();
-  const text = customMsg ? `${customMsg}\n${link}` : `📲 AIO POS — shop billing, stock & udhaar (credit) app.\n✅ 14 days FREE trial.\nDownload from Google Play:\n${link}`;
+  const text = customMsg ? `${customMsg}\n${link}` : `📲 AIO POS — shop billing, stock & udhaar (credit) app.\n✅ 7 days FREE trial.\nDownload from Google Play:\n${link}`;
   if(navigator.share){
     try{ await navigator.share({ title: 'AIO POS', text: text }); }
     catch(err){ /* یوزر نے شیئر Cancel کر دیا — کوئی ایکشن درکار نہیں */ }
@@ -8606,7 +8606,7 @@ async function setupLoginScreen(){
       const days = daysLeftInSubscription();
       statusEl.className = AppState.settings.isOnFreeTrial ? 'subscribedBadge' : 'subscribedBadge';
       statusEl.textContent = isLifetimeLicense() ? '♾️ Lifetime License — never expires' : AppState.settings.isOnFreeTrial
-        ? `🎁 14-Day Free Trial — ${days} day${days===1?'':'s'} remaining`
+        ? `🎁 Free Trial — ${days} day${days===1?'':'s'} remaining` // پرانے 14 دن والے اور نئے 7 دن والے دونوں کے لیے درست
         : `✅ Subscribed — ${days} day${days===1?'':'s'} remaining`;
     } else {
       statusEl.className = 'trialEndedBadge';
@@ -9116,7 +9116,7 @@ function tryAutoLogin(){
   if(AppState.settings.forceLoginScreen === true){
     return false;
   }
-  // ---------- AIO610TU027: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (14 دن ٹرائل + Enter) لازماً نظر آئے ----------
+  // ---------- AIO610TU027: بالکل نئی انسٹالیشن پر پہلی بار لاگ ان صفحہ (7 دن ٹرائل + Enter) لازماً نظر آئے ----------
   if(AppState.settings.needsFirstEnter === true) return false;
   // ---------- AIO610TU027: ٹرائل/سبسکرپشن ختم ہو تو اندر نہیں جانے دینا — لاگ ان صفحے پر "Subscription Required" نظر آئے ----------
   if(!isSubscriptionActive()) return false;
@@ -24620,7 +24620,7 @@ let selectedPlanPrice = null;
    ===================================================================== */
 const PLAY_BILLING_PRODUCTS = [
   // ---------- ہر مدت کی اپنی الگ سبسکرپشن (Play Console کا Product ID) — Digital Goods API صرف Product ID سے خریدتی ہے،
-  // بیس پلان نہیں چن سکتی، اس لیے ایک سبسکرپشن = ایک مدت۔ مفت ٹرائل ایپ کے اندر 14 دن کا خود ہے (Play کا نہیں) ----------
+  // بیس پلان نہیں چن سکتی، اس لیے ایک سبسکرپشن = ایک مدت۔ مفت ٹرائل ایپ کے اندر 7 دن کا خود ہے (Play کا نہیں) ----------
   { sku: 'aio_user1plus0_3m',  days: 90,  label: '3 Months' },
   { sku: 'aio_user1plus0_6m',  days: 180, label: '6 Months' },
   { sku: 'aio_user1plus0_12m', days: 365, label: '1 Year'   },
@@ -24832,7 +24832,7 @@ async function syncPlayBillingRenewal(){
   // ---------- سرور کے بغیر خودکار توسیع بند: پہلے منسوخ کرنے والا گاہک ایک مدت مفت لے سکتا تھا ----------
   if(!PLAY_VERIFY_URL) return;
   const daysLeft = isSubscriptionActive() ? daysLeftInSubscription() : -1;
-  // ---------- AIO610TU027: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 14 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
+  // ---------- AIO610TU027: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 7 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
   if(daysLeft > 3 && !AppState.settings.isOnFreeTrial) return; // ---------- پیڈ سبسکرپشن کے فعال دورانیے میں بار بار نہ پوچھیں ----------
   try{
     const service = await window.getDigitalGoodsService('https://play.google.com/billing');
@@ -24911,7 +24911,7 @@ async function restorePurchaseCore(){
 
 
 // ---------- 🚀 نئی انسٹالیشن پر سب سے پہلے گوگل پلے اکاؤنٹ کی خریداری چیک (AIO610TU027) —
-// جب تک یہ چیک مکمل نہ ہو (زیادہ سے زیادہ 12 سیکنڈ) Enter بٹن رکا رہتا ہے، تاکہ پرانے خریدار کو نیا 14 دن ٹرائل نظر ہی نہ آئے۔
+// جب تک یہ چیک مکمل نہ ہو (زیادہ سے زیادہ 12 سیکنڈ) Enter بٹن رکا رہتا ہے، تاکہ پرانے خریدار کو نیا 7 دن ٹرائل نظر ہی نہ آئے۔
 // انٹرنیٹ/گوگل نہ چلے تو ایپ کو روکتے نہیں؛ ٹرائل کے دوران ہر بار کھلنے پر خودکار چیک چلتا رہتا ہے ----------
 async function launchRestoreCheck(){
   try{
@@ -25056,7 +25056,7 @@ function sharePackagePlansTextWhatsApp(){
   const msg =
     `📦 *AIO POS — Subscription Plans*\n\n` +
     lines.join('\n') + `\n\n` +
-    `✅ First 14 days free trial.\n` +
+    `✅ First 7 days free trial.\n` +
     `🔄 3/6/12-month plans renew automatically; you can cancel anytime from Google Play.\n` +
     `♾️ Lifetime is a one-time payment — no renewal.\n` +
     `💳 Payment is made through Google Play. Tax may be added separately by Google.\n\n` +
@@ -28810,7 +28810,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1810SU057';
+  const APP_VERSION = 'AIO1810SU058';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
