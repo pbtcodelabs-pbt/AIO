@@ -20,3 +20,5 @@
 - پیکج `PLAY_BILLING_PRODUCTS` (`index.html`) میں؛ لائف ٹائم = one-time product `aio_lifetime_onetime`۔
 - تصدیق کا سرور (aio-pos-verify، AIO اور FFPOS دونوں) کا کوڈ `cloudflare-worker/` میں؛ main میں بدلے تو `deploy-worker.yml` خود Deploy کرتا ہے۔ نیا پیکج ہو تو یہاں بھی جوڑیں۔
 - مالک کو Cloudflare کے ایڈیٹر میں کوڈ لگانے کا کبھی نہ کہیں۔ Play Console کا کام مالک کرتے ہیں — Product ID پہلے سے تیار کر کے دیں اور قدم بہ قدم ساتھ رہیں۔
+
+- **ہر ریلیز پر** PWA والے حصے میں `APP_VERSION` کے ساتھ `UPDATE_NOTE` (انگریزی، ایک چھوٹی لائن کہ کیا بدلا) بھی بدلیں — Update complete کارڈ میں دکھتی ہے۔
