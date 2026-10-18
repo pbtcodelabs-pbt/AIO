@@ -2738,7 +2738,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1810SU059</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1810SU060</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2955,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1810SU059</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1810SU060</span>
     </div>
   </div>
 
@@ -8414,17 +8414,238 @@ function openDevChat(context){
 // ---------- 📤 ایپ کا لائیو لنک شیئر کریں — Login اور Home دونوں جگہ سے کال ہوتا ہے۔
 // Web Share API سپورٹ ہو تو یوزر اپنی مرضی کی ایپ (WhatsApp, SMS, Email وغیرہ) چن سکتا ہے،
 // ورنہ سیدھا WhatsApp پر کھل جائے گا۔ لنک Settings > Admin Control > App Share Link سے بدلا جا سکتا ہے۔ ----------
-async function shareAppLink(){
-  // ---------- 📲 ہمیشہ گوگل پلے اسٹور کا اصلی لنک شیئر ہو (ہر گاہک کے فون پر، بغیر کسی سیٹنگ کے) ----------
-  const link = 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos';
-  const customMsg = (AppState.settings.appShareMessage || '').trim();
-  const text = customMsg ? `${customMsg}\n${link}` : `📲 AIO POS — shop billing, stock & udhaar (credit) app.\n✅ 7 days FREE trial.\nDownload from Google Play:\n${link}`;
-  if(navigator.share){
-    try{ await navigator.share({ title: 'AIO POS', text: text }); }
-    catch(err){ /* یوزر نے شیئر Cancel کر دیا — کوئی ایکشن درکار نہیں */ }
-  } else {
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+// ---------- 🖼️ ایپ کا پوسٹر شیئر کریں — خوبصورت تصویر (لوگو، فائدے، پلے اسٹور لنک، ڈویلپر کا نمبر) + ساتھ لکھا پیغام۔
+// MCS والے پوسٹر کی طرح: لوگ تصویر دیکھ کر سمجھ جائیں کہ ایپ کیا کرتی ہے اور لنک سے فوراً ڈاؤن لوڈ کر لیں ----------
+const APP_POSTER = {
+  name: 'AIO POS',
+  subtitle: 'BILLING • STOCK • UDHAAR • PROFIT',
+  tagline: 'دکان کا مکمل حساب — ایک ہی ایپ میں',
+  badge: '7 دن بالکل مفت ٹرائل',
+  benefits: [
+    'سیکنڈوں میں بل بنائیں — پرنٹ یا واٹس ایپ پر بھیجیں',
+    'بارکوڈ اسکین سے فوری سیل، ہر چیز کا اسٹاک خودکار',
+    'ادھار / کھاتہ — ہر گاہک اور سپلائر کا حساب محفوظ',
+    'روزانہ اور ماہانہ منافع اور خرچ کی رپورٹ',
+    'پرچیز آرڈر، شپمنٹ اور سپلائر کا مکمل ریکارڈ',
+    'انٹرنیٹ کے بغیر بھی چلتی ہے — تیز اور آسان',
+    'ڈیٹا کا بیک اپ — فون بدلنے پر بھی سب محفوظ'
+  ],
+  link: 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos',
+  dev: 'عبدالحفیظ',
+  phone: '0320-6793793',
+  email: 'pbtcodelabs@gmail.com',
+  logo: 'icon-512.png',
+  bg: ['#0b4f4a', '#0f766e', '#042f2e'],
+  accent: '#0f766e',
+  font: 'Jameel Noori Nastaleeq Kasheeda',
+  fontUrl: 'https://ffpos-pbt.github.io/jameel-noori-kasheeda.woff2',
+  file: 'aio-pos-app.png'
+};
+let _posterFontReady = null;
+function loadPosterFont(){
+  if(_posterFontReady) return _posterFontReady;
+  _posterFontReady = (async ()=>{
+    try{
+      if(APP_POSTER.fontUrl && window.FontFace){
+        const ff = new FontFace(APP_POSTER.font, `url(${APP_POSTER.fontUrl})`);
+        await Promise.race([ff.load().then(f=>document.fonts.add(f)), new Promise(r=>setTimeout(r,8000))]);
+      }
+      await Promise.race([document.fonts.load(`700 40px "${APP_POSTER.font}"`), new Promise(r=>setTimeout(r,8000))]);
+    }catch(e){ /* فونٹ نہ ملے تو عام فونٹ سے پوسٹر بنے گا */ }
+  })();
+  return _posterFontReady;
+}
+function _pRound(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function _pFit(ctx, text, maxW, font, start, min){
+  let s = start; ctx.font = font.replace('#', s);
+  while(s > min && ctx.measureText(text).width > maxW){ s--; ctx.font = font.replace('#', s); }
+  return s;
+}
+function _pPlayLogo(ctx, x, y, s){
+  // گوگل پلے کا چار رنگوں والا مثلث
+  ctx.save(); ctx.translate(x,y);
+  const tri=(a,col)=>{ ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(a[0]*s,a[1]*s); ctx.lineTo(a[2]*s,a[3]*s); ctx.lineTo(a[4]*s,a[5]*s); ctx.closePath(); ctx.fill(); };
+  tri([0,0, 0,1, .9,.5], '#ffce00');
+  tri([0,0, .68,.38, .5,.5], '#00e676');
+  tri([0,1, .68,.62, .5,.5], '#ff3a44');
+  tri([0,0, .5,.5, 0,1], '#00b0ff');
+  ctx.restore();
+}
+function _pWaIcon(ctx, cx, cy, r){
+  ctx.save();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx-r*.75,cy+r*.95); ctx.lineTo(cx-r*.95,cy+r*.2); ctx.lineTo(cx-r*.2,cy+r*.7); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#25d366'; ctx.beginPath(); ctx.arc(cx,cy,r*.78,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(cx-r*.22,cy-r*.2,r*.17,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+r*.24,cy+r*.24,r*.17,0,Math.PI*2); ctx.fill();
+  ctx.lineWidth=r*.2; ctx.strokeStyle='#fff'; ctx.beginPath(); ctx.moveTo(cx-r*.22,cy-r*.2); ctx.quadraticCurveTo(cx-r*.15,cy+r*.15,cx+r*.24,cy+r*.24); ctx.stroke();
+  ctx.restore();
+}
+async function buildAppPosterCanvas(){
+  await loadPosterFont();
+  const P = APP_POSTER, FF = `"${P.font}", "Noto Nastaliq Urdu", "Noto Naskh Arabic", sans-serif`;
+  const rowH = 78, ph = 110 + P.benefits.length*rowH;
+  const W = 1080, H = 670 + ph + 45 + 55 + 112 + 28 + 85 + 215 + 60;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+
+  // پس منظر
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,P.bg[0]); bg.addColorStop(.55,P.bg[1]); bg.addColorStop(1,P.bg[2]);
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+  const glow = ctx.createRadialGradient(W/2,200,20,W/2,200,620);
+  glow.addColorStop(0,'rgba(255,230,160,.30)'); glow.addColorStop(1,'rgba(255,230,160,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = 'rgba(255,255,255,.05)';
+  [[90,120,160],[1000,420,220],[60,1180,200],[1010,H-160,170]].forEach(([x,y,r])=>{ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); });
+  // سنہری فریم
+  ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(244,213,141,.85)'; _pRound(ctx,22,22,W-44,H-44,40); ctx.stroke();
+  ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(244,213,141,.45)'; _pRound(ctx,36,36,W-72,H-72,32); ctx.stroke();
+
+  // لوگو
+  const logo = await new Promise(res=>{ const im = new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src = P.logo; });
+  const lx = W/2, ly = 175, lr = 95;
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=30; ctx.shadowOffsetY=10;
+  const ring = ctx.createLinearGradient(0,ly-lr,0,ly+lr); ring.addColorStop(0,'#fff2c9'); ring.addColorStop(1,'#c99a34');
+  ctx.fillStyle = ring; ctx.beginPath(); ctx.arc(lx,ly,lr+10,0,Math.PI*2); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(lx,ly,lr,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle='#fff'; ctx.fillRect(lx-lr,ly-lr,lr*2,lr*2);
+  if(logo) ctx.drawImage(logo, lx-lr, ly-lr, lr*2, lr*2);
+  ctx.restore();
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  // ایپ کا نام
+  ctx.direction = 'ltr';
+  ctx.font = '900 104px "Arial Black", Arial, sans-serif';
+  const ng = ctx.createLinearGradient(0,300,0,400); ng.addColorStop(0,'#fff6d8'); ng.addColorStop(.5,'#f4d58d'); ng.addColorStop(1,'#c99a34');
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.55)'; ctx.shadowBlur=8; ctx.shadowOffsetY=6; ctx.fillStyle = ng;
+  ctx.fillText(P.name, W/2, 385); ctx.restore();
+  ctx.font = '700 30px Arial, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.85)';
+  ctx.fillText(P.subtitle, W/2, 432);
+
+  // اردو ٹیگ لائن
+  ctx.direction = 'rtl'; ctx.fillStyle = '#ffffff';
+  _pFit(ctx, P.tagline, W-140, `700 #px ${FF}`, 52, 30);
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.45)'; ctx.shadowBlur=4; ctx.shadowOffsetY=3;
+  ctx.fillText(P.tagline, W/2, 515); ctx.restore();
+
+  // مفت ٹرائل والی پٹی
+  if(P.badge){
+    ctx.font = `700 40px ${FF}`;
+    const bw = Math.min(ctx.measureText(P.badge).width + 90, W-160), bh = 76, bx = W/2-bw/2, by = 560;
+    const bgd = ctx.createLinearGradient(0,by,0,by+bh); bgd.addColorStop(0,'#ff9800'); bgd.addColorStop(1,'#e65100');
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,.4)'; ctx.shadowBlur=14; ctx.shadowOffsetY=6;
+    ctx.fillStyle = bgd; _pRound(ctx,bx,by,bw,bh,bh/2); ctx.fill(); ctx.restore();
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(255,240,200,.8)'; _pRound(ctx,bx,by,bw,bh,bh/2); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.fillText(P.badge, W/2, by+52);
   }
+
+  // فائدے
+  const px = 70, py = 670, pw = W-140;
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=24; ctx.shadowOffsetY=10;
+  ctx.fillStyle = 'rgba(255,255,255,.96)'; _pRound(ctx,px,py,pw,ph,34); ctx.fill(); ctx.restore();
+  ctx.fillStyle = P.accent; ctx.font = `700 44px ${FF}`;
+  ctx.fillText('ڈاؤن لوڈ کرنے کے فائدے', W/2, py+68);
+  ctx.fillStyle = P.accent; ctx.fillRect(W/2-150, py+88, 300, 4);
+  P.benefits.forEach((b,i)=>{
+    const y = py + 150 + i*rowH;
+    const cx = px+pw-50;
+    ctx.fillStyle = '#16a34a'; ctx.beginPath(); ctx.arc(cx, y-12, 22, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(cx-10,y-12); ctx.lineTo(cx-3,y-4); ctx.lineTo(cx+11,y-21); ctx.stroke();
+    ctx.textAlign = 'right'; ctx.fillStyle = '#1f2937';
+    _pFit(ctx, b, pw-130, `700 #px ${FF}`, 36, 22);
+    ctx.fillText(b, cx-40, y);
+    ctx.textAlign = 'center';
+    if(i < P.benefits.length-1){ ctx.fillStyle='rgba(0,0,0,.07)'; ctx.fillRect(px+40, y+28, pw-80, 2); }
+  });
+
+  // پلے اسٹور بٹن + لنک
+  let y0 = py + ph + 45;
+  ctx.font = `700 34px ${FF}`; ctx.fillStyle = '#fff2c9';
+  ctx.fillText('ابھی ڈاؤن لوڈ کریں 👇', W/2, y0+30);
+  const gw = 420, gh = 112, gx = W/2-gw/2, gy = y0+55;
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=18; ctx.shadowOffsetY=6;
+  ctx.fillStyle = '#000'; _pRound(ctx,gx,gy,gw,gh,22); ctx.fill(); ctx.restore();
+  ctx.lineWidth = 3; ctx.strokeStyle = '#a6a6a6'; _pRound(ctx,gx,gy,gw,gh,22); ctx.stroke();
+  _pPlayLogo(ctx, gx+38, gy+26, 60);
+  ctx.direction='ltr'; ctx.textAlign='left'; ctx.fillStyle='#fff';
+  ctx.font = '600 22px Arial, sans-serif'; ctx.fillText('GET IT ON', gx+125, gy+44);
+  ctx.font = '700 46px Arial, sans-serif'; ctx.fillText('Google Play', gx+122, gy+92);
+  ctx.textAlign='center';
+  const ly2 = gy+gh+28;
+  _pFit(ctx, P.link, W-170, '700 #px Arial, sans-serif', 27, 16);
+  const lw = Math.min(ctx.measureText(P.link).width + 50, W-120);
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; _pRound(ctx, W/2-lw/2, ly2, lw, 52, 26); ctx.fill();
+  ctx.fillStyle = '#f4d58d'; ctx.fillText(P.link, W/2, ly2+35);
+
+  // ڈویلپر
+  const fy = ly2 + 85;
+  const fg = ctx.createLinearGradient(0,fy,0,fy+180); fg.addColorStop(0,'#f7dd9c'); fg.addColorStop(1,'#c99a34');
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=16; ctx.shadowOffsetY=6;
+  ctx.fillStyle = fg; _pRound(ctx,70,fy,W-140,215,30); ctx.fill(); ctx.restore();
+  ctx.direction='rtl'; ctx.fillStyle = '#3a2600'; ctx.font = `700 36px ${FF}`;
+  ctx.fillText('ڈویلپر: ' + P.dev + '  —  رابطہ / مدد', W/2, fy+58);
+  ctx.direction='ltr'; ctx.font = '800 38px Arial, sans-serif';
+  const nw = ctx.measureText(P.phone).width, pw2 = nw + 120, pX = W/2-pw2/2, pY = fy+82, pH = 66;
+  const pg = ctx.createLinearGradient(0,pY,0,pY+pH); pg.addColorStop(0,'#2fd66b'); pg.addColorStop(1,'#1aa851');
+  ctx.fillStyle = pg; _pRound(ctx,pX,pY,pw2,pH,pH/2); ctx.fill();
+  _pWaIcon(ctx, pX+42, pY+pH/2, 22);
+  ctx.fillStyle = '#fff'; ctx.fillText(P.phone, pX+pw2/2+26, pY+47);
+  ctx.fillStyle = '#3a2600'; ctx.font = '600 26px Arial, sans-serif';
+  ctx.fillText(P.email, W/2, pY+pH+42);
+  return c;
+}
+function appPosterCaption(){
+  const P = APP_POSTER;
+  return [
+    `🌟 *${P.name}* — ${P.tagline}`,
+    P.badge ? `🎁 ${P.badge}` : '',
+    '',
+    '✅ *ڈاؤن لوڈ کرنے کے فائدے:*',
+    ...P.benefits.map(b=>'✔️ ' + b),
+    '',
+    '📲 *Google Play سے ڈاؤن لوڈ کریں:*',
+    P.link,
+    '',
+    `👨‍💻 ڈویلپر: ${P.dev}`,
+    `📞 WhatsApp: ${P.phone}`,
+    `📧 ${P.email}`
+  ].filter((l,i,a)=>!(l==='' && a[i-1]==='')).join('\n');
+}
+let _posterBusy = false;
+async function shareAppPoster(customText){
+  if(_posterBusy) return; _posterBusy = true;
+  const caption = (customText && customText.trim()) ? `${customText.trim()}\n${APP_POSTER.link}` : appPosterCaption();
+  const fname = APP_POSTER.file;
+  try{
+    if(typeof showToast === 'function') try{ showToast('پوسٹر بن رہا ہے...'); }catch(e){}
+    const canvas = await buildAppPosterCanvas();
+    const blob = await new Promise(r=>canvas.toBlob(r,'image/png'));
+    if(blob && window.File){
+      const file = new File([blob], fname, {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file], title:APP_POSTER.name, text:caption}); return; }
+        catch(e){ if(e && e.name==='AbortError') return; }
+      }
+      // فائل شیئر نہ ہو سکے تو تصویر محفوظ کریں اور پیغام واٹس ایپ پر کھولیں
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname;
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+    if(navigator.share){ try{ await navigator.share({title:APP_POSTER.name, text:caption}); return; }catch(e){ if(e && e.name==='AbortError') return; } }
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank');
+  }catch(e){
+    window.open(`https://wa.me/?text=${encodeURIComponent(caption)}`, '_blank');
+  }finally{ _posterBusy = false; }
+}
+async function shareAppLink(){
+  // ---------- 📲 گوگل پلے اسٹور کا لنک اب پوسٹر (تصویر) کے ساتھ شیئر ہوتا ہے — فائدے، لنک اور ڈویلپر کا نمبر سب تصویر میں ----------
+  const customMsg = (AppState.settings.appShareMessage || '').trim();
+  return shareAppPoster(customMsg);
 }
 
 
@@ -28901,9 +29122,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1810SU059';
+  const APP_VERSION = 'AIO1810SU060';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New clean update popup — one-line summary and an OK button';
+  const UPDATE_NOTE = 'New share poster — app benefits, Play Store link and developer contact in one image';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
