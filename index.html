@@ -2738,7 +2738,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1810SU060</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1910MO061</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2955,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1810SU060</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1910MO061</span>
     </div>
   </div>
 
@@ -7283,6 +7283,21 @@ function proceedToRestoreFilePicker(){
   if(inputId) document.getElementById(inputId)?.click();
 }
 
+// ---------- بیک اپ بحال کرتے وقت سیٹنگز (تھیم، پرنٹ، دکان کا نام…) بیک اپ سے آئیں، مگر اس فون کی سبسکرپشن/ٹرائل/
+// ایکٹیویشن اور ڈیوائس کی شناخت کبھی نہ بدلیں — تاکہ AIO (پلے اسٹور) کا بیک اپ AIO Direct میں (یا الٹ) بحال کریں
+// تو ڈیٹا پورا آ جائے مگر یہاں کی ایکٹیویشن خراب نہ ہو، اور کسی دوسرے فون کی سبسکرپشن یہاں نہ آ جائے ----------
+const BACKUP_KEEP_LOCAL_SETTINGS = ['developerUnlock','deviceRecordPending','deviceUID','freeTrialGranted','isOnFreeTrial','lastActivationCode',
+  'lifetimeLicense','subscriptionActivatedOn','subscriptionExpiry','subscriptionPlans','subscriptionViaPlayBilling','pendingPlayAcks',
+  'trialLockConfirmedOnline','trialReminderShownOn','needsFirstEnter'];
+function restoreSettingsKeepingLicense(backupSettings){
+  const keep = {};
+  BACKUP_KEEP_LOCAL_SETTINGS.forEach(k => { if(Object.prototype.hasOwnProperty.call(AppState.settings, k)) keep[k] = AppState.settings[k]; });
+  Object.assign(AppState.settings, backupSettings || {});
+  BACKUP_KEEP_LOCAL_SETTINGS.forEach(k => {
+    if(Object.prototype.hasOwnProperty.call(keep, k)) AppState.settings[k] = keep[k];
+    else delete AppState.settings[k];
+  });
+}
 function importBackupData(event){
   const file = event.target.files[0];
   if(!file) return;
@@ -7337,7 +7352,7 @@ function proceedWithImport(){
       nextUserId = backup.nextUserId || nextUserId;
       nextRequestId = backup.nextRequestId || nextRequestId;
       nextBatchId = backup.nextBatchId || nextBatchId;
-      if(backup.settings) Object.assign(AppState.settings, backup.settings);
+      if(backup.settings) restoreSettingsKeepingLicense(backup.settings); // سبسکرپشن/ایکٹیویشن اسی فون کی رہے
       if(typeof expenseData !== 'undefined'){ expenseData.length = 0; expenseData.push(...(backup.expenses || [])); }
       nextExpenseId = backup.nextExpenseId || nextExpenseId;
       // ---------- اہم فکس: My Diary، Payments، اور Advance Orders بحال کریں — پہلے یہ بیک اپ میں شامل ہی نہیں تھے ----------
@@ -29122,7 +29137,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1810SU060';
+  const APP_VERSION = 'AIO1910MO061';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
   const UPDATE_NOTE = 'New share poster — app benefits, Play Store link and developer contact in one image';
   const UPD_KEY = 'aioUpdateFromVersion';
