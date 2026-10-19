@@ -2622,8 +2622,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   + '.aupd-card .av b{direction:ltr;unicode-bidi:isolate;font-family:Arial,sans-serif;font-size:14.5px;letter-spacing:.4px}'
   + '.aupd-card .av.o b{color:#9ca3af;text-decoration:line-through}.aupd-card .av.n{border-color:#34d399;background:#ecfdf5}.aupd-card .av.n b{color:#047857}'
   + '.aupd-card .aa{color:#10b981;font-size:16px;line-height:1}'
-  + '.aupd-card .anote{margin:10px 0 4px;padding:8px 12px;border-radius:12px;background:#fffbeb;border:1px solid #fcd34d;color:#78350f;font-size:13.5px;font-weight:700;line-height:1.7;'
-  +   'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}'
+  + '.aupd-card .anote{margin:10px 0 4px;padding:8px 12px;border-radius:12px;background:#fffbeb;border:1px solid #fcd34d;color:#78350f;font-size:13px;font-weight:700;line-height:1.6;'
+  +   'white-space:normal;overflow-wrap:anywhere;max-height:40vh;overflow-y:auto}'
   + '.aupd-card .af{padding:10px 16px 16px;display:flex;justify-content:center}'
   + '.aupd-card .aok{min-width:140px;height:44px;border:none;border-radius:14px;background:linear-gradient(135deg,#0d3b66,#0f766e);color:#fff;font-size:17px;font-weight:800;font-family:inherit;box-shadow:0 5px 0 #0a2c4d;cursor:pointer}'
   + '.aupd-card .aok:active{transform:translateY(3px);box-shadow:0 2px 0 #0a2c4d}'
@@ -2738,7 +2738,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1910MO061</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1910MO062</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2955,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1910MO061</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1910MO062</span>
     </div>
   </div>
 
@@ -29137,9 +29137,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1910MO061';
+  const APP_VERSION = 'AIO1910MO062';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New share poster — app benefits, Play Store link and developer contact in one image';
+  const UPDATE_NOTE = 'Update popup now shows the full note — no text cut off';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
