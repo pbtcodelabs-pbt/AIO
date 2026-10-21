@@ -2738,7 +2738,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2110WE063</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2110WE064</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2955,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2110WE063</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2110WE064</span>
     </div>
   </div>
 
@@ -22783,7 +22783,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     const summary = getBillSummaryRows(invoice);
     estimatedHeight += 24 + Math.round(34*rowScale) + ((summary.rows.length + 1) * Math.round(28*rowScale)) + 8 + 40; // Payment Summary باکس (متحرک اونچائی)
   }
-  estimatedHeight += Math.round(130*fscale); // دستخط کی جگہ
+  estimatedHeight += Math.round(50*fscale); // آخری خالی جگہ (دستخط والی لائن ہٹا دی گئی)
   estimatedHeight += Math.round(50*fscale); // فوٹر
 
   canvas.width = pxWidth;
@@ -23067,19 +23067,8 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     y = boxTop + boxH + 40;
   }
 
-  // ---------- دستخط کی جگہ ----------
-  y += Math.round(60*fscale);
-  ctx.strokeStyle = rc.border;
-  ctx.beginPath();
-  ctx.moveTo(tableRight - 220, y);
-  ctx.lineTo(tableRight, y);
-  ctx.stroke();
-  ctx.font = F('13px');
-  ctx.fillStyle = '#666';
-  ctx.textAlign = 'center';
-  ctx.fillText('Authorized Signature', tableRight - 110, y + Math.round(20*fscale));
-
-  y += Math.round(60*fscale);
+  // ---------- AIO2110WE064: "Authorized Signature" والی لائن ہٹا دی (مالک کی ہدایت) ----------
+  y += Math.round(40*fscale);
   ctx.font = F('14px');
   ctx.fillStyle = '#1a1a1a';
   ctx.textAlign = 'center';
@@ -29204,9 +29193,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2110WE063';
+  const APP_VERSION = 'AIO2110WE064';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Bill now shows Cash Received and Change Return when the customer pays more than the bill';
+  const UPDATE_NOTE = 'A4 bill: Authorized Signature line removed';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
