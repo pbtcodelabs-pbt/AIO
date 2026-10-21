@@ -2738,7 +2738,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1910MO062</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2110WE063</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2955,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1910MO062</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2110WE063</span>
     </div>
   </div>
 
@@ -11827,6 +11827,13 @@ async function openBillPreviewBeforeComplete(){
     status: 'draft',
     created_at: new Date().toISOString()
   };
+  // ---------- AIO2110WE063: پریویو میں بھی 💵 دیے گئے / واپسی (صرف دکھانے کے لیے) ----------
+  const draftTendered = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
+  const draftChange = draftTendered - (grandTotal + (customer ? Math.max(0, previousBalance) : 0));
+  if(draftChange >= 0.5 && !(document.getElementById('changeToWalletChk')?.checked && customer)){
+    draftInvoice.cash_tendered = draftTendered;
+    draftInvoice.change_return = draftChange;
+  }
 
   await renderInvoiceToCanvas(draftInvoice);
   const canvas = document.getElementById('invoiceCanvas');
@@ -11961,6 +11968,15 @@ function finalizeInvoice(){
   invoice.amount_due = remainingDue;
   invoice.paid_now = grandTotal - remainingDue; // ---------- اس بل میں سے ابھی کتنا ادا ہوا (نقد یا والٹ سے)، بل پر دکھانے کے لیے ----------
   invoice.new_balance = customer ? customer.total_receivable : 0; // ---------- اس بل کے بعد کسٹمر کا کل بقایہ — ہمیشہ کے لیے بل پر محفوظ ----------
+  // ---------- AIO2110WE063: 💵 کسٹمر نے کتنے دیے اور کتنے واپس (Change) — صرف بل پر دکھانے کے لیے؛ کیش، بقایہ، والٹ یا کسی حساب میں استعمال نہیں ہوتے ----------
+  const tenderedForDisplay = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
+  if(method === 'cash' && tenderedForDisplay - grandTotal >= 0.5){
+    invoice.cash_tendered = tenderedForDisplay;
+    invoice.change_return = tenderedForDisplay - grandTotal;
+  } else if(method === 'credit' && changeGiven > 0){
+    invoice.cash_tendered = rawReceivedInput;
+    invoice.change_return = changeGiven;
+  }
   if(walletApplied > 0 || cashReceivedNow > 0) invoice.payment_method = remainingDue > 0 ? 'partial+credit' : (walletApplied > 0 ? 'wallet' : 'cash');
 
   // ---------- نقد (Counter Sale) بل — یہ رقم فوری کیش میں آئی، Cash in Hand میں شامل کریں ----------
@@ -22295,6 +22311,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const totalReturnedAmt = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
   if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += 34; // Grand Total لائن
+  if(invoice.change_return > 0) estimatedHeight += Math.round(62 * fscale); // ---------- 💵 دیے گئے / واپسی کا ڈبہ ----------
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
   if(AppState.settings.printShowBranding) estimatedHeight += 20;
   estimatedHeight += 40; // فوٹر + مارجن
@@ -22573,6 +22590,28 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.textAlign = 'left';
   y += 34;
 
+  // ---------- AIO2110WE063: 💵 کسٹمر نے کتنے دیے / کتنے واپس — صرف دکھانے کے لیے ----------
+  if(invoice.change_return > 0){
+    const chBoxW = Math.min(Math.round(330 * scale * Math.max(1, fscale)), tableRight - tableLeft);
+    const chLeft = tableRight - chBoxW;
+    const chH = Math.round(52 * fscale);
+    const chTop = y - Math.round(16 * fscale);
+    ctx.save();
+    ctx.fillStyle = '#f0fdf4'; ctx.fillRect(chLeft, chTop, chBoxW, chH);
+    ctx.setLineDash([5, 3]); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
+    ctx.strokeRect(chLeft + 0.5, chTop + 0.5, chBoxW - 1, chH - 1);
+    ctx.restore();
+    ctx.fillStyle = '#000';
+    ctx.font = F('14px');
+    ctx.textAlign = 'left';  ctx.fillText('💵 Cash Received', chLeft + 10, y + 4);
+    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.cash_tendered.toFixed(decimals), tableRight - 10, y + 4);
+    ctx.font = F('bold 17px');
+    ctx.textAlign = 'left';  ctx.fillText('🔄 Change Return', chLeft + 10, y + Math.round(26 * fscale));
+    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.change_return.toFixed(decimals), tableRight - 10, y + Math.round(26 * fscale));
+    ctx.textAlign = 'left';
+    y += chH + 10;
+  }
+
   // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
   // بائیں طرف بچنے والی جگہ (Item کالم جتنی) میں پیمنٹ اکاؤنٹ + QR کوڈ ساتھ ساتھ — بل غیرضروری لمبا نہ ہو ----------
   let paymentBoxTop = y;
@@ -22739,6 +22778,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const totalReturnedAmtA4 = invoice.items.reduce((s,i) => s + (i.returnAmount||0), 0);
   if(totalReturnedAmtA4 > 0) estimatedHeight += Math.round(56*fscale); // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += grandTotalBoxH + 30; // Grand Total باکس
+  if(invoice.change_return > 0) estimatedHeight += Math.round(78 * fscale); // ---------- 💵 دیے گئے / واپسی کا ڈبہ ----------
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
     estimatedHeight += 24 + Math.round(34*rowScale) + ((summary.rows.length + 1) * Math.round(28*rowScale)) + 8 + 40; // Payment Summary باکس (متحرک اونچائی)
@@ -22953,6 +22993,29 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.textAlign = 'left'; ctx.fillText('Grand Total', tableLeft + 16, gtBaseline);
   ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.grand_total.toFixed(0), tableRight - 16, gtBaseline);
   y += grandTotalBoxH + 30;
+
+  // ---------- AIO2110WE063: 💵 کسٹمر نے کتنے دیے / کتنے واپس — صرف دکھانے کے لیے ----------
+  if(invoice.change_return > 0){
+    const chW = Math.round((tableRight - tableLeft) * 0.5);
+    const chLeft = tableRight - chW;
+    const chH = Math.round(62 * fscale);
+    const chTop = y - Math.round(14 * fscale);
+    ctx.save();
+    ctx.fillStyle = '#f0fdf4'; ctx.fillRect(chLeft, chTop, chW, chH);
+    ctx.setLineDash([6, 4]); ctx.strokeStyle = theme.primary; ctx.lineWidth = 1.5;
+    ctx.strokeRect(chLeft + 0.5, chTop + 0.5, chW - 1, chH - 1);
+    ctx.restore();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = F('16px');
+    const r1 = chTop + Math.round(24 * fscale), r2 = chTop + Math.round(50 * fscale);
+    ctx.textAlign = 'left';  ctx.fillText('💵 Cash Received', chLeft + 14, r1);
+    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.cash_tendered.toFixed(0), tableRight - 14, r1);
+    ctx.font = F('bold 19px');
+    ctx.textAlign = 'left';  ctx.fillText('🔄 Change Return', chLeft + 14, r2);
+    ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.change_return.toFixed(0), tableRight - 14, r2);
+    ctx.textAlign = 'left';
+    y += chH + 16;
+  }
 
   // ---------- بل کی مکمل ادائیگی تفصیل — تھرمل بل جیسا ہی تنگ، بارڈر والا، الائنمنٹ کے مطابق ----------
   if(invoice.customer_id){
@@ -23667,6 +23730,10 @@ function buildInvoicePlainText(invoice){
   });
   lines.push('-'.repeat(cols));
   lines.push(padRightMono('Grand Total', cols - totalW) + padLeftMono('Rs.' + invoice.grand_total.toFixed(decimals), totalW));
+  if(invoice.change_return > 0){ // ---------- AIO2110WE063: صرف دکھانے کے لیے ----------
+    lines.push(padRightMono('Cash Received', cols - totalW) + padLeftMono('Rs.' + invoice.cash_tendered.toFixed(decimals), totalW));
+    lines.push(padRightMono('Change Return', cols - totalW) + padLeftMono('Rs.' + invoice.change_return.toFixed(decimals), totalW));
+  }
   lines.push('', centerMono('Thank you for your purchase!', cols), '', '', '');
   return lines.join('\n');
 }
@@ -29137,9 +29204,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1910MO062';
+  const APP_VERSION = 'AIO2110WE063';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Update popup now shows the full note — no text cut off';
+  const UPDATE_NOTE = 'Bill now shows Cash Received and Change Return when the customer pays more than the bill';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
