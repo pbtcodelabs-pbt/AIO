@@ -2738,7 +2738,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2110WE064</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2210TH065</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2955,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2110WE064</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2210TH065</span>
     </div>
   </div>
 
@@ -4155,6 +4155,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="modalBoxWide" style="width:460px; max-height:90vh; overflow-y:auto;">
         <h3 id="poModalTitle">📦 Purchase Order</h3>
 
+        <!-- مکمل سرچ — نام، کیٹیگری، بارکوڈ، SKU/ID، ویریئنٹ، اردو/انگلش، کوئی بھی حصہ؛ نیچے والی فہرست فوراً چھٹ جاتی ہے -->
+        <div class="searchRow" style="margin-bottom:10px; display:flex; gap:6px; position:sticky; top:-1px; z-index:5; background:var(--card, #fff); padding:4px 0;">
+          <div style="position:relative; flex:1; min-width:0;">
+            <input type="text" id="poSearchInput" placeholder="🔍 Search item / category / ID" oninput="searchPoItems(this.value)" autocomplete="off" style="width:100%; box-sizing:border-box; padding-right:34px; border:2px solid var(--primary); border-radius:10px; font-weight:600;">
+            <button type="button" id="poSearchClearBtn" onclick="clearPoSearch()" style="display:none; position:absolute; right:6px; top:50%; transform:translateY(-50%); border:none; background:#e2e8f0; color:#475569; width:24px; height:24px; border-radius:50%; font-weight:800; cursor:pointer; padding:0;">✕</button>
+          </div>
+          <button type="button" class="newItemInlineBtn" onclick="openQuickAddPrefilled(document.getElementById('poSearchInput').value.trim(), 'po')">➕ New Item</button>
+        </div>
+        <div id="poSearchInfo" style="display:none; font-size:11.5px; font-weight:700; color:var(--muted); margin:-4px 0 8px;"></div>
+
         <!-- کیٹیگری اور سٹاک ترتیب — لکھ لکھ کر ڈھونڈنے کی بجائے سیدھا منتخب کریں -->
         <button type="button" onclick="openPoLowStockPicker()" style="width:100%; padding:11px; margin-bottom:10px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;">📥 Get from Low Stock Items</button>
         <div class="billingCategoryRail" id="poCategoryRail" style="margin-bottom:8px;"></div>
@@ -4164,11 +4174,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
         <div class="productGrid" id="poBrowseList" style="margin-bottom:10px;"></div>
 
-        <div class="searchRow" style="margin-bottom:8px; display:flex; gap:6px;">
-          <input type="text" id="poSearchInput" placeholder="🔍 Or type to search..." oninput="searchPoItems(this.value)" style="flex:1; min-width:0;">
-          <button type="button" class="newItemInlineBtn" onclick="openQuickAddPrefilled(document.getElementById('poSearchInput').value.trim(), 'po')">➕ New Item</button>
-        </div>
-        <div class="searchResults" id="poSearchResults"></div>
 
         <div class="poTableScroll">
           <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
@@ -10268,6 +10273,7 @@ function getFlatVariants(){
         retail: v.retail,
         wholesale: v.wholesale,
         stock: v.stock,
+        lowStockAt: v.lowStockAt ?? 0,
         unit: v.unit || 'pcs',
         location: v.location,
         image: v.image || null,
@@ -17560,6 +17566,7 @@ let poCart = []; // {variant_id, name, qty, cost}
 
 let activePoCategory = 'all';
 let activePoSort = 'asc'; // 'asc' | 'desc' — سٹاک کے حساب سے ترتیب
+let activePoSearch = ''; // پرچیز آرڈر سرچ بار کا لفظ
 
 function openPoModal(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
@@ -17573,8 +17580,9 @@ function openPoModal(supplierId){
   activePoCategory = 'all';
   activePoSort = 'asc';
   document.getElementById('poModalTitle').textContent = `📦 Purchase Order — ${s.name}`;
+  activePoSearch = '';
   document.getElementById('poSearchInput').value = '';
-  document.getElementById('poSearchResults').classList.remove('show');
+  syncPoSearchUi(0);
   document.getElementById('poSortAsc').classList.add('active');
   document.getElementById('poSortDesc').classList.remove('active');
   renderPoCategoryRail();
@@ -17621,9 +17629,18 @@ function renderPoBrowseList(){
   if(activePoCategory !== 'all'){
     flat = flat.filter(v => v.category === activePoCategory);
   }
+  if(activePoSearch){
+    flat = flat.filter(v => poSearchMatch(v, activePoSearch));
+    syncPoSearchUi(new Set(flat.map(v => v.product_id)).size);
+  }
 
   if(flat.length === 0){
-    wrap.innerHTML = `<div class="placeholder" style="grid-column:1/-1;">No items in this category</div>`;
+    if(activePoSearch){
+      const q = activePoSearch.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      wrap.innerHTML = `<div class="placeholder" style="grid-column:1/-1; cursor:pointer;" onclick="openQuickAddPrefilled(document.getElementById('poSearchInput').value.trim(), 'po')">"${q}" not found — tap to add as new item ➕</div>`;
+    } else {
+      wrap.innerHTML = `<div class="placeholder" style="grid-column:1/-1;">No items in this category</div>`;
+    }
     return;
   }
 
@@ -17783,26 +17800,94 @@ function closePoModal(){
   activePoSupplierId = null;
 }
 
-// ---------- پرچیز آرڈر میں آئٹم تلاش کریں ----------
-function searchPoItems(query){
-  const box = document.getElementById('poSearchResults');
-  query = query.trim().toLowerCase();
-  if(!query){ box.classList.remove('show'); box.innerHTML = ''; return; }
-
-  const flat = getFlatVariants().filter(v => v.name.toLowerCase().includes(query));
-  if(flat.length === 0){
-    box.innerHTML = `
-      <div class="resultItem" onclick="openQuickAddPrefilled('${query.replace(/'/g,"\\'")}', 'po')">
-        <div><div class="rName">➕ "${query}" not found — tap to add as new item</div><div class="rMeta">Tap to auto-fill the name</div></div>
-      </div>`;
-  } else {
-    box.innerHTML = flat.slice(0, 8).map(v => `
-      <div class="resultItem" onclick="addToPoCart(${v.variant_id})">
-        <div><div class="rName">${v.name}</div><div class="rMeta">Current stock: ${v.stock} | Purchase: Rs. ${v.purchase}</div></div>
-      </div>
-    `).join('');
+// ---------- پرچیز آرڈر کی مکمل سرچ — اوپر والا سرچ بار نیچے والی فہرست کو فوراً چھانٹ دیتا ہے ----------
+// اردو/عربی حروف اور ہندسے ایک جیسے کریں، اعراب ہٹائیں — "کیک"/"كيك"، "۱۲"/"12" سب ایک
+function normalizePoSearchText(str){
+  return String(str == null ? '' : str).toLowerCase()
+    .replace(/[ً-ٰٟـ]/g, '')
+    .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
+    .replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/[ةۃه]/g, 'ہ').replace(/[أإآٱ]/g, 'ا').replace(/ؤ/g, 'و')
+    .replace(/[^0-9a-z؀-ۿ]+/g, ' ')
+    .trim();
+}
+// ایک حرف کی غلطی معاف (4+ حروف والے لفظ میں) — "biscut" سے "biscuit"، "amal" سے "amla" بھی آ جائے
+function poWithinOneEdit(a, b){
+  if(Math.abs(a.length - b.length) > 1) return false;
+  if(a.length === b.length){
+    const d = [];
+    for(let k = 0; k < a.length; k++) if(a[k] !== b[k]) d.push(k);
+    if(d.length === 2 && d[1] === d[0] + 1 && a[d[0]] === b[d[1]] && a[d[1]] === b[d[0]]) return true;
   }
-  box.classList.add('show');
+  let i = 0, j = 0, diff = 0;
+  while(i < a.length && j < b.length){
+    if(a[i] === b[j]){ i++; j++; continue; }
+    if(++diff > 1) return false;
+    if(a.length > b.length) i++;
+    else if(b.length > a.length) j++;
+    else { i++; j++; }
+  }
+  return diff + (a.length - i) + (b.length - j) <= 1;
+}
+// آواز کا ڈھانچہ (صرف حروفِ صحیح) — اردو میں لکھا انگلش نام بھی ملے: "لپٹن" = "Lipton"، "سرف" = "Surf"
+const PO_URDU_SKEL = {'ب':'b','پ':'p','ت':'t','ٹ':'t','ط':'t','ث':'s','س':'s','ص':'s','ش':'s','ج':'j','چ':'c','خ':'k','ک':'k','ق':'k','گ':'g','غ':'g','د':'d','ڈ':'d','ذ':'z','ز':'z','ض':'z','ظ':'z','ژ':'z','ر':'r','ڑ':'r','ف':'f','ل':'l','م':'m','ن':'n','ں':'n'};
+function poSoundSkeleton(word){
+  let w = String(word);
+  if(/[\u0600-\u06FF]/.test(w)){
+    w = w.split('').map(ch => PO_URDU_SKEL[ch] || (/[0-9]/.test(ch) ? ch : '')).join('');
+  } else {
+    w = w.replace(/ch/g,'c').replace(/sh/g,'s').replace(/ph/g,'f').replace(/kh/g,'k').replace(/gh/g,'g').replace(/th/g,'t')
+      .replace(/x/g,'ks').replace(/[cq]/g,'k').replace(/[aeiouyhw]/g,'');
+  }
+  return w.replace(/(.)\1+/g, '$1');
+}
+function poSearchMatch(v, query){
+  if(!v._poHay){
+    const prod = productsData.find(p => p.product_id === v.product_id) || {};
+    const raw = [v.name, prod.name, v.label, v.category, v.barcode, prod.sku, v.location, v.unit,
+      'id' + v.product_id, 'v' + v.variant_id, v.product_id, v.variant_id].join(' ');
+    const hay = normalizePoSearchText(raw);
+    v._poHay = hay;
+    v._poCompact = hay.replace(/ /g, '');
+    v._poWords = hay.split(' ');
+    v._poSkels = v._poWords.map(poSoundSkeleton).filter(Boolean);
+  }
+  const q = normalizePoSearchText(query);
+  if(!q) return true;
+  if(v._poCompact.includes(q.replace(/ /g, ''))) return true;
+  // ہر لفظ کہیں بھی ملے، کسی بھی ترتیب میں — شروع، درمیان یا آخر
+  // اردو کا بہت چھوٹا لفظ ("آئل"، "ٹی") نہ ملے تو باقی الفاظ کے ملنے پر نظرانداز
+  const toks = q.split(' ');
+  const hit = toks.map(tok =>
+    v._poHay.includes(tok) ||
+    (tok.length >= 4 && v._poWords.some(w => poWithinOneEdit(tok, w) || (w.length > tok.length && poWithinOneEdit(tok, w.slice(0, tok.length))))) ||
+    (tok.length >= 3 && (sk => sk.length >= 2 && v._poSkels.some(w => w.startsWith(sk) || (sk.length >= 3 && w.includes(sk))))(poSoundSkeleton(tok)))
+  );
+  return hit.some(Boolean) && toks.every((tok, i) => hit[i] || (/[\u0600-\u06FF]/.test(tok) && poSoundSkeleton(tok).length < 2));
+}
+function syncPoSearchUi(count){
+  const info = document.getElementById('poSearchInfo');
+  const clr = document.getElementById('poSearchClearBtn');
+  if(clr) clr.style.display = activePoSearch ? 'block' : 'none';
+  if(!info) return;
+  if(!activePoSearch){ info.style.display = 'none'; info.textContent = ''; return; }
+  info.style.display = 'block';
+  info.textContent = count > 0 ? `🔎 ${count} item${count === 1 ? '' : 's'} found` : '🔎 No match';
+}
+function searchPoItems(query){
+  activePoSearch = String(query || '').trim();
+  // سرچ کرتے وقت سب کیٹیگریز میں ڈھونڈیں
+  if(activePoSearch && activePoCategory !== 'all'){
+    activePoCategory = 'all';
+    renderPoCategoryRail();
+  }
+  syncPoSearchUi(0);
+  renderPoBrowseList();
+}
+function clearPoSearch(){
+  const input = document.getElementById('poSearchInput');
+  if(input){ input.value = ''; input.focus(); }
+  searchPoItems('');
 }
 
 function addToPoCart(variantId){
@@ -17815,8 +17900,10 @@ function addToPoCart(variantId){
   else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
 
   document.getElementById('poSearchInput').value = '';
-  document.getElementById('poSearchResults').classList.remove('show');
+  activePoSearch = '';
+  syncPoSearchUi(0);
   renderPoCart();
+  renderPoBrowseList();
 }
 
 // ---------- Low Stock بلک پکر — ایک ٹیپ سے تمام کم اسٹاک آئٹمز کی چیک باکس فہرست کھولیں ----------
@@ -29193,9 +29280,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2110WE064';
+  const APP_VERSION = 'AIO2210TH065';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'A4 bill: Authorized Signature line removed';
+  const UPDATE_NOTE = 'Purchase Order: full search bar (name, category, barcode, ID, Urdu/English)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
