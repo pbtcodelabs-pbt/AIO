@@ -1290,6 +1290,12 @@
   .capHead span:nth-child(2){text-align:left; padding-left:4px;}
   /* Stock Adjustment */
   .saGrid{display:grid; grid-template-columns:40px minmax(0,1fr) 50px 58px 44px; gap:5px; align-items:center;}
+  .saGrid5{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:5px; align-items:center;}
+  .capHead.saGrid5 span{text-align:center !important; padding-left:0 !important; font-size:10px; line-height:1.15;}
+  .capRow.saRow{display:block; padding:6px 7px;}
+  .saTop{display:grid; grid-template-columns:40px minmax(0,1fr); gap:6px; align-items:center; margin-bottom:6px;}
+  .capIn.capLocked{display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#475569; border-style:dashed; cursor:not-allowed; font-weight:800; font-size:12.5px; white-space:nowrap; overflow:hidden;}
+  .capIn.added{color:#047857; border-color:#6ee7b7; background:#ecfdf5;}
   .capIn{width:100%; min-width:0; height:38px; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:10px; background:#fff; text-align:center;
     font-weight:900; font-size:13px; color:#166534; padding:0 2px; -moz-appearance:textfield;}
   .capIn::-webkit-outer-spin-button, .capIn::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
@@ -2738,7 +2744,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2210TH065</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2210TH066</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2955,7 +2961,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2210TH065</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2210TH066</span>
     </div>
   </div>
 
@@ -14721,6 +14727,36 @@ function ensureDailyStockSnapshot(){
   saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
 }
 ensureDailyStockSnapshot();
+// ---------- پرانا سٹاک (Previous) — دن کی شروعات والا، لاک؛ آج بنا نیا آئٹم ہو تو پرانا 0 اور اس کا سٹاک "آج شامل" ----------
+function getOpeningStock(v){
+  ensureDailyStockSnapshot();
+  let o = dailyStockSnapshot.opening[v.variant_id];
+  if(o === undefined){
+    o = 0;
+    dailyStockSnapshot.opening[v.variant_id] = 0;
+    if((v.stock || 0) > 0) dailyStockSnapshot.added[v.variant_id] = roundStock((dailyStockSnapshot.added[v.variant_id] || 0) + v.stock);
+    saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
+  }
+  return o;
+}
+function getAddedToday(v){
+  getOpeningStock(v);
+  return dailyStockSnapshot.added[v.variant_id] || 0;
+}
+// ---------- Stock Adjustment سے "آج شامل" کو سیدھا لکھیں — فرق کے برابر اصل سٹاک بھی اوپر/نیچے (غلطی درست ہو سکے) ----------
+function setAddedToday(v, newAdded){
+  const oldAdded = getAddedToday(v);
+  newAdded = Math.max(0, roundStock(newAdded));
+  const delta = roundStock(newAdded - oldAdded);
+  if(!delta) return;
+  v.stock = roundStock((v.stock || 0) + delta);
+  dailyStockSnapshot.added[v.variant_id] = newAdded;
+  saveToStorage('dailyStockSnapshot', dailyStockSnapshot);
+  if(!v.batches || v.batches.length <= 1){
+    v.batches = [{batchId: (v.batches && v.batches[0]?.batchId) || nextBatchId++, qty: v.stock, expiryDate: v.expiryDate || ''}];
+    saveToStorage('nextBatchId', nextBatchId);
+  }
+}
 function recordStockAddedToday(variantId, deltaQty){
   ensureDailyStockSnapshot();
   if(deltaQty <= 0) return;
@@ -16322,19 +16358,28 @@ function renderStockAdjustmentScreen(){
   }
 
   applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والے رنگ
-  wrap.innerHTML = `<div class="capHead saGrid"><span>📷</span><span>Item</span><span>Stock</span><span>Price</span><span>Low</span></div>` + list.map((item, idx) => {
+  // ---------- کالم: 🔒 پرانا سٹاک (لاک) | ➕ آج شامل | قیمت خرید | قیمت فروخت | Low — بِکا/باقی/منافع صرف رپورٹ میں ----------
+  wrap.innerHTML = `<div class="capHead saGrid5"><span>🔒 Previous</span><span>➕ Added Today</span><span>Purchase</span><span>Sale</span><span>Low Alert</span></div>` + list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
     const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
     const cat = (item.product.category && item.product.category.trim()) ? item.product.category.trim() : 'Uncategorized';
     const img = v.image || item.product.image || '';
+    const prev = getOpeningStock(v);
+    const added = getAddedToday(v);
     return `
-      <div class="capRow saGrid ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}">
-        ${capThumbHtml(item.product.name, img, item.product.product_id)}
-        <div class="capBox capName"><b>${item.displayName.replace(/</g,'&lt;')}</b><small>${cat.replace(/</g,'&lt;')}</small></div>
-        <input type="number" class="capIn ${isNegative ? 'neg' : (isLow ? 'low' : '')}" value="${v.stock}" onchange="updateStockAdjField(${v.variant_id}, 'stock', this.value)" onfocus="this.select()" title="Stock">
-        <input type="number" class="capIn price" value="${v.retail}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()" title="Price">
-        <input type="number" class="capIn" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()" title="Low stock alert at">
+      <div class="capRow saRow ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}">
+        <div class="saTop">
+          ${capThumbHtml(item.product.name, img, item.product.product_id)}
+          <div class="capBox capName"><b>${item.displayName.replace(/</g,'&lt;')}</b><small>${cat.replace(/</g,'&lt;')}</small></div>
+        </div>
+        <div class="saGrid5">
+          <div class="capIn capLocked" title="Previous stock (start of day) — locked">🔒 ${roundStock(prev)}</div>
+          <input type="number" class="capIn added" min="0" step="any" value="${roundStock(added)}" onchange="updateStockAdjField(${v.variant_id}, 'added', this.value)" onfocus="this.select()" title="Stock added today">
+          <input type="number" class="capIn" step="any" value="${v.purchase || 0}" onchange="updateStockAdjField(${v.variant_id}, 'purchase', this.value)" onfocus="this.select()" title="Purchase price">
+          <input type="number" class="capIn price" step="any" value="${v.retail || 0}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()" title="Sale price">
+          <input type="number" class="capIn ${isNegative ? 'neg' : (isLow ? 'low' : '')}" min="0" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()" title="Low stock alert at">
+        </div>
       </div>`;
   }).join('');
 }
@@ -16353,7 +16398,18 @@ function updateStockAdjField(variantId, field, rawValue){
   const num = parseFloat(rawValue);
   if(isNaN(num)){ renderStockAdjustmentScreen(); return; }
   if(field === 'stock') v.stock = Math.round(num * 1000) / 1000; // AIO1310TU035: کلو/لیٹر میں اعشاریہ اسٹاک (مثلاً 49.375) کی اجازت // ---------- منفی کی اجازت ہے، جان بوجھ کر کوئی حد نہیں لگائی ----------
-  else if(field === 'retail') v.retail = num;
+  else if(field === 'added') setAddedToday(v, num); // پرانا سٹاک لاک — صرف آج کا اضافہ بدلتا ہے
+  else if(field === 'purchase'){
+    v.purchase = Math.max(0, num);
+    if(AppState.settings.markupPricingEnabled){
+      const markup = v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0;
+      v.retail = Math.round(v.purchase * (1 + markup / 100) * 100) / 100;
+    }
+  }
+  else if(field === 'retail'){
+    v.retail = num;
+    if(AppState.settings.markupPricingEnabled && (v.purchase || 0) > 0) v.markupPercent = Math.round(((v.retail - v.purchase) / v.purchase) * 1000) / 10;
+  }
   else if(field === 'lowStockAt') v.lowStockAt = Math.max(0, Math.round(num));
   persistAllData();
   renderStockAdjustmentScreen(); // ---------- تازہ ترتیب کے ساتھ دوبارہ دکھائیں (مائنس والے سب سے اوپر) ----------
@@ -28258,8 +28314,8 @@ async function renderDiarySummaryReportToCanvas(){
 }
 
 // ---------- 📊 Daily Stock, Sale & Profit Report (English, Left-to-Right) ----------
-// کالم: # | Item / Packing | Total Stock | Purchase Price | Sale Price | Sold | Remaining | Profit
-// نام والا کالم سب سے لمبے نام کے برابر (بائیں سے لکھا ہوا)، باقی 6 خانے بالکل برابر چوڑائی کے، کم از کم 6 ہندسوں جتنے۔
+// کالم: # | Item / Packing | Previous Stock | Added Today | Total Stock | Purchase Price | Sale Price | Sold | Remaining | Profit
+// نام والا کالم سب سے لمبے نام کے برابر (بائیں سے لکھا ہوا)، باقی 8 خانے بالکل برابر چوڑائی کے، کم از کم 6 ہندسوں جتنے۔
 // ہندسوں کی ترتیب (بائیں/درمیان/دائیں)، فونٹ، رنگ، سائز، اعشاریہ — سب Advanced Formatting Options سے۔
 // ترتیب (Sort): زیادہ منافع / کم منافع / زیادہ فروخت / کم فروخت / A–Z — منسوخ شدہ (voided) بل شامل نہیں ----------
 async function renderStockSaleProfitReportToCanvas(){
@@ -28286,15 +28342,15 @@ async function renderStockSaleProfitReportToCanvas(){
   const rows = [];
   productsData.forEach(p => {
     (p.variants || []).forEach(v => {
-      const opening = dailyStockSnapshot.opening[v.variant_id] ?? (v.stock || 0);
-      const added = dailyStockSnapshot.added[v.variant_id] || 0;
-      const total = opening + added;
+      const opening = getOpeningStock(v);
+      const added = getAddedToday(v);
+      const total = roundStock(opening + added);
       const sold = soldQtyMap[v.variant_id] || 0;
       const remaining = v.stock || 0;
       const cost = v.purchase || 0;
       const salePrice = v.retail || 0;
       const realProfit = Math.round((profitMap[v.variant_id] || 0) * 100) / 100;
-      rows.push({name: p.name || '', label: v.label || '', total, purchase: cost, sale: salePrice, sold, remaining, profit: realProfit});
+      rows.push({name: p.name || '', label: v.label || '', opening, added, total, purchase: cost, sale: salePrice, sold, remaining, profit: realProfit});
     });
   });
 
@@ -28364,16 +28420,19 @@ async function renderStockSaleProfitReportToCanvas(){
   const minNameW = Math.round(totalW * 0.18);
   const maxNameW = Math.round(totalW * 0.40);
   let wName = Math.min(maxNameW, Math.max(minNameW, Math.round(maxNameTextW + namePad)));
-  let wNum = Math.floor((totalW - wSerial - wName) / 6);
+  const NUM_COLS = 8;
+  let wNum = Math.floor((totalW - wSerial - wName) / NUM_COLS);
   if(wNum < minNumW){
-    wName = Math.max(minNameW, totalW - wSerial - minNumW * 6);
-    wNum = Math.floor((totalW - wSerial - wName) / 6);
+    wName = Math.max(minNameW, totalW - wSerial - minNumW * NUM_COLS);
+    wNum = Math.floor((totalW - wSerial - wName) / NUM_COLS);
   }
-  wName = totalW - wSerial - wNum * 6;
+  wName = totalW - wSerial - wNum * NUM_COLS;
 
   const cols = [
     {key:'serial',    label:'#',              width:wSerial},
     {key:'name',      label:'Item / Packing', width:wName},
+    {key:'opening',   label:'Previous Stock', short:'Prev.', width:wNum},
+    {key:'added',     label:'Added Today',    short:'Added', width:wNum},
     {key:'total',     label:'Total Stock',    width:wNum},
     {key:'purchase',  label:'Purchase Price', short:'Cost', width:wNum},
     {key:'sale',      label:'Sale Price',     width:wNum},
@@ -29280,9 +29339,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2210TH065';
+  const APP_VERSION = 'AIO2210TH066';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Purchase Order: full search bar (name, category, barcode, ID, Urdu/English)';
+  const UPDATE_NOTE = 'Stock: Previous Stock (locked) + Added Today; report shows Previous, Added, Total';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
