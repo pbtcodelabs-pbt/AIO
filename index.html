@@ -1290,11 +1290,19 @@
   .capHead span:nth-child(2){text-align:left; padding-left:4px;}
   /* Stock Adjustment */
   .saGrid{display:grid; grid-template-columns:40px minmax(0,1fr) 50px 58px 44px; gap:5px; align-items:center;}
-  .saGrid5{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:5px; align-items:center;}
-  .capHead.saGrid5 span{text-align:center !important; padding-left:0 !important; font-size:10px; line-height:1.15;}
-  .capRow.saRow{display:block; padding:6px 7px;}
-  .saTop{display:grid; grid-template-columns:40px minmax(0,1fr); gap:6px; align-items:center; margin-bottom:6px;}
-  .capIn.capLocked{display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#475569; border-style:dashed; cursor:not-allowed; font-weight:800; font-size:12.5px; white-space:nowrap; overflow:hidden;}
+  /* ایک لائن کا کیپسول: چھوٹا آئیکن | نام | 🔒 پرانا | ➕ آج | خرید | فروخت | Low */
+  .saGrid7{display:grid; grid-template-columns:24px minmax(0,1fr) repeat(5, minmax(30px,37px)); gap:2px; align-items:center;}
+  .capHead.saGrid7{padding:6px 5px;}
+  .capHead.saGrid7 span{text-align:center !important; padding-left:0 !important; font-size:9px; line-height:1.1;}
+  .capHead.saGrid7 span:nth-child(2){text-align:left !important; padding-left:2px !important;}
+  .capRow.saGrid7{padding:3px 5px; margin-bottom:5px;}
+  .capRow.saGrid7 .pgRowThumb{width:24px; height:24px; border-radius:8px; font-size:13px;}
+  .capRow.saGrid7 .capBox{min-height:32px; padding:2px 5px; border-radius:9px;}
+  .capRow.saGrid7 .capName b{font-size:11.5px; line-height:1.15; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .capRow.saGrid7 .capName small{font-size:9.5px;}
+  .capRow.saGrid7 .capIn{height:32px; font-size:11.5px; padding:0 1px; border-radius:9px;}
+  .capRow.saGrid7 .capName{padding:2px 4px;}
+  .capIn.capLocked{display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#475569; border-style:dashed; cursor:not-allowed; font-weight:800; white-space:nowrap; overflow:hidden;}
   .capIn.added{color:#047857; border-color:#6ee7b7; background:#ecfdf5;}
   .capIn{width:100%; min-width:0; height:38px; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:10px; background:#fff; text-align:center;
     font-weight:900; font-size:13px; color:#166534; padding:0 2px; -moz-appearance:textfield;}
@@ -2744,7 +2752,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2210TH066</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2210TH067</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2961,7 +2969,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2210TH066</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2210TH067</span>
     </div>
   </div>
 
@@ -16359,7 +16367,7 @@ function renderStockAdjustmentScreen(){
 
   applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والے رنگ
   // ---------- کالم: 🔒 پرانا سٹاک (لاک) | ➕ آج شامل | قیمت خرید | قیمت فروخت | Low — بِکا/باقی/منافع صرف رپورٹ میں ----------
-  wrap.innerHTML = `<div class="capHead saGrid5"><span>🔒 Previous</span><span>➕ Added Today</span><span>Purchase</span><span>Sale</span><span>Low Alert</span></div>` + list.map((item, idx) => {
+  wrap.innerHTML = `<div class="capHead saGrid7"><span>📷</span><span>Item</span><span>🔒 Prev.</span><span>➕ Added</span><span>Cost</span><span>Sale</span><span>Low</span></div>` + list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
     const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
@@ -16368,18 +16376,14 @@ function renderStockAdjustmentScreen(){
     const prev = getOpeningStock(v);
     const added = getAddedToday(v);
     return `
-      <div class="capRow saRow ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}">
-        <div class="saTop">
+      <div class="capRow saGrid7 ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}">
           ${capThumbHtml(item.product.name, img, item.product.product_id)}
-          <div class="capBox capName"><b>${item.displayName.replace(/</g,'&lt;')}</b><small>${cat.replace(/</g,'&lt;')}</small></div>
-        </div>
-        <div class="saGrid5">
-          <div class="capIn capLocked" title="Previous stock (start of day) — locked">🔒 ${roundStock(prev)}</div>
+          <div class="capBox capName" title="${item.displayName.replace(/"/g,'&quot;')}"><b>${(item.product.name || item.displayName).replace(/</g,'&lt;')}</b><small>${(v.label || cat).replace(/</g,'&lt;')}</small></div>
+          <div class="capIn capLocked" title="Previous stock (start of day) — locked">${roundStock(prev)}</div>
           <input type="number" class="capIn added" min="0" step="any" value="${roundStock(added)}" onchange="updateStockAdjField(${v.variant_id}, 'added', this.value)" onfocus="this.select()" title="Stock added today">
           <input type="number" class="capIn" step="any" value="${v.purchase || 0}" onchange="updateStockAdjField(${v.variant_id}, 'purchase', this.value)" onfocus="this.select()" title="Purchase price">
           <input type="number" class="capIn price" step="any" value="${v.retail || 0}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()" title="Sale price">
           <input type="number" class="capIn ${isNegative ? 'neg' : (isLow ? 'low' : '')}" min="0" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()" title="Low stock alert at">
-        </div>
       </div>`;
   }).join('');
 }
@@ -29339,9 +29343,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2210TH066';
+  const APP_VERSION = 'AIO2210TH067';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Stock: Previous Stock (locked) + Added Today; report shows Previous, Added, Total';
+  const UPDATE_NOTE = 'Stock Adjustment: one-line capsule rows';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
