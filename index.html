@@ -1319,6 +1319,21 @@
   .capRow.saGrid7 .capName{padding:2px 4px;}
   .capIn.capLocked{display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#475569; border-style:dashed; cursor:not-allowed; font-weight:800; white-space:nowrap; overflow:hidden;}
   /* 🔒 لاک خانے (Old، Available) — کونے میں چھوٹا تالا، تاکہ صاف لگے کہ یہاں لکھا نہیں جا سکتا */
+  /* 💻 کروم بک / ٹیبلٹ (بڑی اسکرین): خانے کھلے اور لکھائی بڑی — فون والا ڈیزائن ہی، بس کشادہ */
+  @media (min-width:700px){
+    .saGrid7{grid-template-columns:34px minmax(0,1fr) repeat(6, minmax(56px,88px)); gap:6px;}
+    .capRow.saGrid7 .pgRowThumb{width:32px; height:32px;}
+    .capRow.saGrid7 .capIn{height:38px; font-size:14px;}
+    .capRow.saGrid7 .capName b{font-size:13.5px;}
+    .capRow.saGrid7 .capName small{font-size:11px;}
+    .capHead.saHead2 .saSubCap{gap:6px;}
+    .capHead.saHead2 .saSubCap > span{height:38px; font-size:11px !important;}
+    .capHead.saHead2 .saSubCap > .saTabAvail{font-size:10px !important; letter-spacing:0;}
+    .capHead.saHead2 .saRow2{font-size:11px !important;}
+    .capHead.saHead2 .saGroupPill{font-size:12px; padding:4px 8px;}
+    .capIn.capLocked::after{font-size:9px;}
+    .capHead.saHead2 .saTabNew span{font-size:inherit !important;}
+  }
   .capIn.capLocked{position:relative;}
   .capIn.capLocked::after{content:'🔒'; position:absolute; top:-1px; right:1px; font-size:7px; line-height:1; opacity:.8;}
   .capIn.capStockNow{border-style:dashed !important;}
@@ -2798,7 +2813,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR080</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR081</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3015,7 +3030,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR080</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR081</span>
     </div>
   </div>
 
@@ -29829,9 +29844,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR080';
+  const APP_VERSION = 'AIO2310FR081';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Billing: Payment Mode (Net Cash, EasyPaisa, JazzCash, Bank Transfer) with split; printed on bill';
+  const UPDATE_NOTE = 'Chromebook / large screen: roomier Stock Adjustment columns';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
