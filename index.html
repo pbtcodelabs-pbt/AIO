@@ -1318,6 +1318,10 @@
   .capRow.saGrid7 .capIn{height:32px; font-size:11.5px; padding:0 1px; border-radius:9px;}
   .capRow.saGrid7 .capName{padding:2px 4px;}
   .capIn.capLocked{display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#475569; border-style:dashed; cursor:not-allowed; font-weight:800; white-space:nowrap; overflow:hidden;}
+  /* 🔒 لاک خانے (Old، Available) — کونے میں چھوٹا تالا، تاکہ صاف لگے کہ یہاں لکھا نہیں جا سکتا */
+  .capIn.capLocked{position:relative;}
+  .capIn.capLocked::after{content:'🔒'; position:absolute; top:-1px; right:1px; font-size:7px; line-height:1; opacity:.8;}
+  .capIn.capStockNow{border-style:dashed !important;}
   .capIn.capStockNow{background:#eff6ff; color:#1d4ed8; border-color:#93c5fd; border-style:solid;}
   .capIn.capStockNow.low{background:#fff7ed; color:#c2410c; border-color:#fdba74;}
   .capIn.capStockNow.neg{background:#fef2f2; color:#b91c1c; border-color:#fca5a5;}
@@ -2780,7 +2784,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR078</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR079</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2997,7 +3001,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR078</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR079</span>
     </div>
   </div>
 
@@ -16539,7 +16543,7 @@ function renderStockAdjustmentScreen(){
 
   applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والے رنگ
   // ---------- کالم: 🔒 پرانا سٹاک (لاک) | ➕ آج شامل | 📦 موجودہ سٹاک (خودکار، لاک) | قیمت خرید | قیمت فروخت | Low — بِکا/باقی/منافع صرف رپورٹ میں ----------
-  wrap.innerHTML = `<div class="capHead saGrid7 saHead2"><span class="saRow2" style="grid-column:1;">📷</span><span class="saRow2" style="grid-column:2;">Item</span><span class="saGroup"><span class="saGroupPill">📦 Stock Position</span></span><span class="saRow2" style="grid-column:6; font-size:7.5px;">Purchase<br>Price</span><span class="saRow2" style="grid-column:7; font-size:7.5px;">Sale<br>Price</span><span class="saRow2" style="grid-column:8; font-size:7.5px;">Low<br>Limit</span><span class="saSubCap"><span class="saTabOld">🔒 Old</span><span class="saTabNew"><b class="saPlus">+</b><span>Add<br>New</span></span><span class="saTabAvail">Available</span></span></div>` + list.map((item, idx) => {
+  wrap.innerHTML = `<div class="capHead saGrid7 saHead2"><span class="saRow2" style="grid-column:1;">📷</span><span class="saRow2" style="grid-column:2;">Item</span><span class="saGroup"><span class="saGroupPill">📦 Stock Position</span></span><span class="saRow2" style="grid-column:6; font-size:7.5px;">Purchase<br>Price</span><span class="saRow2" style="grid-column:7; font-size:7.5px;">Sale<br>Price</span><span class="saRow2" style="grid-column:8; font-size:7.5px;">Low<br>Limit</span><span class="saSubCap"><span class="saTabOld">🔒 Old</span><span class="saTabNew"><b class="saPlus">+</b><span>Add<br>New</span></span><span class="saTabAvail">🔒 Available</span></span></div>` + list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
     const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
@@ -16551,9 +16555,9 @@ function renderStockAdjustmentScreen(){
       <div class="capRow saGrid7 ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}" data-said="${v.variant_id}">
           ${capThumbHtml(item.product.name, img, item.product.product_id)}
           <div class="capBox capName" title="${item.displayName.replace(/"/g,'&quot;')}"><b>${(item.product.name || item.displayName).replace(/</g,'&lt;')}</b><small>${(v.label || cat).replace(/</g,'&lt;')}</small></div>
-          <div class="capIn capLocked" title="Previous stock (start of day) — locked">${roundStock(prev)}</div>
+          <div class="capIn capLocked" title="Previous stock (start of day) — locked" onclick="showNavToast('🔒 Old stock is locked — add stock in “Add New”')">${roundStock(prev)}</div>
           <input type="number" class="capIn added" min="0" step="any" value="${roundStock(added)}" oninput="previewStockAdjAdded(${v.variant_id}, this)" onchange="updateStockAdjField(${v.variant_id}, 'added', this.value)" onfocus="this.select()" title="Stock added today">
-          <div class="capIn capLocked capStockNow ${isNegative ? 'neg' : (isLow ? 'low' : '')}" title="Current stock available now (after today's sales) — updates automatically">${roundStock(v.stock)}</div>
+          <div class="capIn capLocked capStockNow ${isNegative ? 'neg' : (isLow ? 'low' : '')}" title="Available stock — locked, updates automatically" onclick="showNavToast('🔒 Available is automatic — change stock only in “Add New”')">${roundStock(v.stock)}</div>
           <input type="number" class="capIn" step="any" value="${v.purchase || 0}" onchange="updateStockAdjField(${v.variant_id}, 'purchase', this.value)" onfocus="this.select()" title="Purchase price">
           <input type="number" class="capIn price" step="any" value="${v.retail || 0}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()" title="Sale price">
           <input type="number" class="capIn" min="0" value="${v.lowStockAt ?? 0}" onchange="updateStockAdjField(${v.variant_id}, 'lowStockAt', this.value)" onfocus="this.select()" title="Low stock alert at">
@@ -29659,9 +29663,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR078';
+  const APP_VERSION = 'AIO2310FR079';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Stock Adjustment fix: Add New updates Available instantly, row stays in place';
+  const UPDATE_NOTE = 'Stock Adjustment: Old and Available clearly locked; only Add New changes stock';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
