@@ -1623,6 +1623,20 @@
   .pbRow input{flex:1 1 auto; min-width:0;}
   .pbPickBtn{flex:0 0 46px; height:44px; border:1.5px solid #c7d2fe; background:#eef2ff; color:var(--primary-dark); border-radius:10px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;}
   .pbHint{font-size:11px; color:var(--muted); margin:-4px 0 6px;}
+  /* 💳 Payment Mode — رنگین کیپسول، ہر طریقے کا اپنا رنگ */
+  .payModeBox{margin:4px 0 12px; padding:8px; border-radius:14px; border:1.5px solid #c7d2fe; background:linear-gradient(180deg,#ffffff,#eef2ff); box-shadow:0 2px 0 #c7d2fe, 0 3px 8px rgba(0,0,0,.06);}
+  .pmHead{display:flex; align-items:baseline; justify-content:space-between; gap:6px; font-size:12.5px; font-weight:900; color:#1e1b4b; margin:0 2px 6px;}
+  .pmHead small{font-size:10px; font-weight:700; color:#64748b;}
+  .pmGrid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px;}
+  .pmCard{display:grid; grid-template-columns:28px minmax(0,1fr); align-items:center; gap:5px; padding:6px; border-radius:12px; border:1.5px solid #e2e8f0; background:#fff; cursor:pointer; box-shadow:0 2px 0 #e2e8f0; transition:transform .08s;}
+  .pmCard:active{transform:translateY(1px);}
+  .pmCard .pmIco{flex:0 0 26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; font-weight:900; box-shadow:inset 0 1px 0 rgba(255,255,255,.4);}
+  .pmCard .pmName{min-width:0; font-size:12.5px; font-weight:900; color:#0f172a; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pmCard input{grid-column:1 / span 2; width:100%; height:30px; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:8px; text-align:center; font-size:12px; font-weight:800; padding:0 2px; background:#f8fafc; -moz-appearance:textfield;}
+  .pmCard input::-webkit-outer-spin-button, .pmCard input::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .pmCard.on{border-color:var(--pm); background:var(--pmBg); box-shadow:0 2px 0 var(--pm), 0 0 0 2px var(--pmRing);}
+  .pmCard.on input{border-color:var(--pm); background:#fff; color:var(--pm);}
+  .pmCard.on .pmName::after{content:' ✓'; color:var(--pm);}
   .fullCashBtn{flex:0 0 auto; border:1.5px solid #86efac; background:#f0fdf4; color:#166534; border-radius:8px; padding:7px 9px; font-size:12px; font-weight:800; cursor:pointer;}
   /* ===================== 📜 ITEM LEDGER — آئٹم کی مکمل ہسٹری (خریداری/سیل/واپسی) ===================== */
   .capBtn.ledger{background:linear-gradient(180deg,#eff6ff,#bfdbfe); box-shadow:0 3px 0 #2563eb, 0 4px 5px rgba(0,0,0,.15), inset 0 1px 0 #fff;}
@@ -2784,7 +2798,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR079</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR080</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3001,7 +3015,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR079</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR080</span>
     </div>
   </div>
 
@@ -3328,6 +3342,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                    style="width:110px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
           </div>
           <div id="amountReceivedHint" style="display:none; font-size:11.5px; color:var(--muted); margin:-6px 0 10px;"></div>
+
+          <!-- ---------- 💳 ادائیگی کا طریقہ — Net Cash / EasyPaisa / JazzCash / Bank Transfer؛ ایک چنیں یا رقمیں لکھ کر تقسیم کریں (مثلاً 1000 نقد + 1000 JazzCash) — بل پرنٹ میں آتا ہے ---------- -->
+          <div class="payModeBox" id="payModeBox">
+            <div class="pmHead"><span>💳 Payment Mode</span><small id="pmHint">Tap one — or type amounts to split</small></div>
+            <div class="pmGrid" id="pmGrid"></div>
+          </div>
 
           <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
             <label style="font-size:12px; color:var(--muted); font-weight:600;">🏷️ Discount (Rs.)</label>
@@ -11767,6 +11787,7 @@ function renderCart(){
   const taxAmount = AppState.settings.taxEnabled ? Math.round((subtotal - discount) * (AppState.settings.taxPercent || 0) / 100) : 0;
   const grandTotal = subtotal - discount + taxAmount;
   Billing.thisBillTotal = grandTotal; // "💵 Full" بٹن کے لیے
+  try{ setTimeout(renderPayModeBox, 0); }catch(e){}
 
   // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
   const custIdForBalance = document.getElementById('customerSelect')?.value;
@@ -11945,10 +11966,94 @@ function onCustomerChange(){
 // ---------- Walk-in سوئچ: عام ٹوگل نہیں — دبانے پر ہمیشہ Walk-in کو ہی ON کرتا ہے (منتخب کسٹمر ہو تو ہٹا دیتا ہے)۔
 // کسٹمر کو دوبارہ منتخب کرنے کے لیے نیچے کی ہمیشہ ایکٹو کسٹمر لسٹ استعمال کریں ----------
 // ---------- "💵 Full" — کسٹمر نے یہ پورا بل ابھی نقد ادا کر دیا (پرانا بقایہ الگ رہتا ہے) ----------
+// ===================== 💳 ادائیگی کا طریقہ (Payment Mode) =====================
+const PAY_MODES = [
+  {k:'cash',      name:'Net Cash',      ico:'💵', c:'#15803d', bg:'#f0fdf4', ring:'rgba(22,163,74,.18)'},
+  {k:'easypaisa', name:'EasyPaisa',     ico:'E',  c:'#0f9d58', bg:'#ecfdf5', ring:'rgba(16,185,129,.2)'},
+  {k:'jazzcash',  name:'JazzCash',      ico:'J',  c:'#dc2626', bg:'#fff7ed', ring:'rgba(220,38,38,.18)'},
+  {k:'bank',      name:'Bank Transfer', ico:'🏦', c:'#1d4ed8', bg:'#eff6ff', ring:'rgba(37,99,235,.18)'}
+];
+Billing.payMode = {sel:'cash', split:{}, splitOn:false};
+function payModeInfo(k){ return PAY_MODES.find(m => m.k === k) || PAY_MODES[0]; }
+// ---------- ابھی کتنی رقم وصول ہو رہی ہے — Walk-in میں خالی ہو تو پورا بل ----------
+function payModeExpectedPaid(){
+  const rec = Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0);
+  if(rec > 0) return rec;
+  return Billing.counterSale ? Math.round(Billing.thisBillTotal || 0) : 0;
+}
+function renderPayModeBox(){
+  const grid = document.getElementById('pmGrid');
+  if(!grid) return;
+  const pm = Billing.payMode, exp = payModeExpectedPaid();
+  const focused = document.activeElement && document.activeElement.closest && document.activeElement.closest('#pmGrid') ? document.activeElement.dataset.k : null;
+  if(focused){ // لکھتے وقت پورا گرڈ دوبارہ نہ بنائیں — صرف رنگ تازہ
+    grid.querySelectorAll('.pmCard').forEach(card => {
+      const k = card.dataset.k, v = parseFloat(pm.split[k]) || 0;
+      card.classList.toggle('on', pm.splitOn ? v > 0 : k === pm.sel);
+    });
+    return;
+  }
+  grid.innerHTML = PAY_MODES.map(m => {
+    const val = pm.splitOn ? (pm.split[m.k] || '') : '';
+    const ph = (!pm.splitOn && m.k === pm.sel && exp > 0) ? String(exp) : 'Rs.';
+    const on = pm.splitOn ? (parseFloat(pm.split[m.k]) || 0) > 0 : m.k === pm.sel;
+    return `<div class="pmCard ${on ? 'on' : ''}" data-k="${m.k}" style="--pm:${m.c}; --pmBg:${m.bg}; --pmRing:${m.ring};" onclick="if(event.target.tagName!=='INPUT') selectPayMode('${m.k}')">
+      <span class="pmIco" style="background:${m.c};">${m.ico}</span>
+      <span class="pmName">${m.name}</span>
+      <input type="number" inputmode="decimal" min="0" data-k="${m.k}" value="${val}" placeholder="${ph}" onfocus="this.select()" oninput="onPayModeAmount('${m.k}', this.value)">
+    </div>`;
+  }).join('');
+  const hint = document.getElementById('pmHint');
+  if(hint){
+    if(pm.splitOn){
+      const sum = PAY_MODES.reduce((t, m) => t + (parseFloat(pm.split[m.k]) || 0), 0);
+      hint.textContent = `Split total: Rs. ${Math.round(sum).toLocaleString()}`;
+    } else hint.textContent = exp > 0 ? `All Rs. ${exp.toLocaleString()} via ${payModeInfo(pm.sel).name}` : 'Tap one — or type amounts to split';
+  }
+}
+function selectPayMode(k){
+  Billing.payMode = {sel:k, split:{}, splitOn:false};
+  renderPayModeBox();
+}
+// ---------- کسی طریقے میں رقم لکھیں = تقسیم؛ سب کا جوڑ "Amount Received" میں خود چلا جائے ----------
+function onPayModeAmount(k, v){
+  const pm = Billing.payMode;
+  pm.splitOn = true;
+  pm.split[k] = v;
+  const sum = PAY_MODES.reduce((t, m) => t + (parseFloat(pm.split[m.k]) || 0), 0);
+  if(sum <= 0){ pm.splitOn = false; pm.split = {}; }
+  const rec = document.getElementById('amountReceivedInput');
+  if(rec) rec.value = sum > 0 ? Math.round(sum * 100) / 100 : '';
+  renderCart();
+  const hint = document.getElementById('pmHint');
+  if(hint) hint.textContent = sum > 0 ? `Split total: Rs. ${Math.round(sum).toLocaleString()}` : 'Tap one — or type amounts to split';
+}
+// ---------- بل میں محفوظ ہونے والی تفصیل: [{k, amount}] — ادا شدہ رقم کے مطابق (واپسی/فرق نقد میں ایڈجسٹ) ----------
+function buildPaymentModes(paid){
+  paid = Math.round((Number(paid) || 0) * 100) / 100;
+  if(paid <= 0) return [];
+  const pm = Billing.payMode || {sel:'cash'};
+  if(!pm.splitOn) return [{k: pm.sel || 'cash', amount: paid}];
+  const list = PAY_MODES.map(m => ({k:m.k, amount: Math.max(0, parseFloat(pm.split[m.k]) || 0)})).filter(x => x.amount > 0);
+  let diff = Math.round((paid - list.reduce((t, x) => t + x.amount, 0)) * 100) / 100;
+  if(diff !== 0){
+    let cash = list.find(x => x.k === 'cash');
+    if(!cash && diff > 0){ cash = {k:'cash', amount:0}; list.unshift(cash); }
+    if(cash) cash.amount = Math.max(0, Math.round((cash.amount + diff) * 100) / 100);
+    else list[0].amount = Math.max(0, Math.round((list[0].amount + diff) * 100) / 100);
+  }
+  return list.filter(x => x.amount > 0);
+}
+function paymentModeRows(invoice){
+  return (invoice && Array.isArray(invoice.payment_modes) ? invoice.payment_modes : []).filter(x => x && x.amount > 0)
+    .map(x => { const m = payModeInfo(x.k); return [(m.k === 'easypaisa' || m.k === 'jazzcash' ? '📱 ' : m.ico + ' ') + m.name, x.amount]; });
+}
+
 function fillFullCashReceived(){
   const el = document.getElementById('amountReceivedInput');
   if(!el) return;
   el.value = Math.round(Billing.thisBillTotal || 0);
+  if(Billing.payMode && Billing.payMode.splitOn) Billing.payMode = {sel:'cash', split:{}, splitOn:false};
   renderCart();
 }
 function toggleCounterSale(){
@@ -12031,6 +12136,9 @@ async function openBillPreviewBeforeComplete(){
     draftInvoice.change_return = draftChange;
   }
 
+  const draftPaid = Math.min(payModeExpectedPaid(), grandTotal + (customer ? Math.max(0, previousBalance) : 0));
+  draftInvoice.payment_modes = buildPaymentModes(draftPaid);
+  if(customer) draftInvoice.cash_received_now = draftPaid;
   await renderInvoiceToCanvas(draftInvoice);
   const canvas = document.getElementById('invoiceCanvas');
   showImageSharePreview(canvas, 'Bill_Preview.png', '👁️ Bill Preview — Not Yet Saved', 'Bill preview');
@@ -12174,6 +12282,9 @@ function finalizeInvoice(){
     invoice.change_return = changeGiven;
   }
   if(walletApplied > 0 || cashReceivedNow > 0) invoice.payment_method = remainingDue > 0 ? 'partial+credit' : (walletApplied > 0 ? 'wallet' : 'cash');
+  // ---------- 💳 ادائیگی کا طریقہ — Net Cash / EasyPaisa / JazzCash / Bank (والٹ والی رقم الگ دکھتی ہے) ----------
+  invoice.payment_modes = buildPaymentModes(method === 'cash' ? grandTotal : cashReceivedNow);
+  Billing.payMode = {sel:'cash', split:{}, splitOn:false};
 
   // ---------- نقد (Counter Sale) بل — یہ رقم فوری کیش میں آئی، Cash in Hand میں شامل کریں ----------
   if(method === 'cash'){
@@ -22556,7 +22667,7 @@ function renderBillHistory(){
         ${isAdmin && bulkDeleteMode ? `<input type="checkbox" class="billCheckbox" data-invoice-id="${inv.invoice_id}" ${selectedBillIds.has(inv.invoice_id) ? 'checked' : ''} onchange="toggleBillSelection(${inv.invoice_id}, this.checked)">` : ''}
         ${capThumbHtml(inv.customer_name, '', String(inv.customer_name || '').length + (inv.invoice_id || 0))}
         <div class="capBox capName"><b>${inv.invoice_no}</b><small><bdi>${custName}</bdi>${dateTxt ? ' • ' + dateTxt : ''}</small>
-          <div class="cbTags"><span class="billStatusTag ${inv.status}">${statusTxt}</span>${creatorBadge}${inv.reviewed_by_admin ? '<span class="pendingStatusTag approved">✔ REVIEWED</span>' : ''}</div>
+          <div class="cbTags"><span class="billStatusTag ${inv.status}">${statusTxt}</span>${creatorBadge}${(inv.payment_modes || []).filter(x => x.amount > 0).map(x => { const m = payModeInfo(x.k); return `<span class="pendingStatusTag" style="background:${m.bg}; color:${m.c};">${m.k === 'cash' || m.k === 'bank' ? m.ico : '📱'} ${m.name}</span>`; }).join('')}${inv.reviewed_by_admin ? '<span class="pendingStatusTag approved">✔ REVIEWED</span>' : ''}</div>
         </div>
         <div class="capBox cbAmt ${due > 0 ? 'due' : ''}"><b>Rs. ${inv.grand_total.toLocaleString()}</b><small>${due > 0 ? `⏳ Due ${due.toLocaleString()}` : '✅ Clear'}</small></div>
       </div>
@@ -22779,6 +22890,8 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   if(totalReturnedAmt > 0) estimatedHeight += 44; // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += 34; // Grand Total لائن
   if(invoice.change_return > 0) estimatedHeight += Math.round(62 * fscale); // ---------- 💵 دیے گئے / واپسی کا ڈبہ ----------
+  const pmRowsT = paymentModeRows(invoice);
+  if(pmRowsT.length) estimatedHeight += Math.round(22 * fscale) * (pmRowsT.length + 1) + 22; // ---------- 💳 Payment Mode ڈبہ ----------
   if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += 16;
   if(AppState.settings.printShowBranding) estimatedHeight += 20;
   estimatedHeight += 40; // فوٹر + مارجن
@@ -23079,6 +23192,29 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
     y += chH + 10;
   }
 
+  // ---------- 💳 Payment Mode — کس طریقے سے کتنی ادائیگی ہوئی (Net Cash / EasyPaisa / JazzCash / Bank Transfer) ----------
+  if(pmRowsT.length){
+    const pmW = Math.min(Math.round(330 * scale * Math.max(1, fscale)), tableRight - tableLeft);
+    const pmLeft = tableRight - pmW, lh = Math.round(22 * fscale);
+    const pmTop = y - Math.round(16 * fscale), pmH = lh * (pmRowsT.length + 1) + 8;
+    ctx.save();
+    ctx.fillStyle = '#eef2ff'; ctx.fillRect(pmLeft, pmTop, pmW, pmH);
+    ctx.setLineDash([5, 3]); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
+    ctx.strokeRect(pmLeft + 0.5, pmTop + 0.5, pmW - 1, pmH - 1);
+    ctx.restore();
+    ctx.fillStyle = '#000';
+    ctx.font = F('bold 14px'); ctx.textAlign = 'left';
+    ctx.fillText('💳 Payment Mode', pmLeft + 10, y + 2);
+    ctx.font = F('14px');
+    pmRowsT.forEach(([lbl, amt], i) => {
+      const ry = y + 2 + lh * (i + 1);
+      ctx.textAlign = 'left';  ctx.fillText(lbl, pmLeft + 10, ry);
+      ctx.textAlign = 'right'; ctx.fillText('Rs. ' + Number(amt).toFixed(decimals), tableRight - 10, ry);
+    });
+    ctx.textAlign = 'left';
+    y += pmH + 10;
+  }
+
   // ---------- بل کی مکمل ادائیگی تفصیل — اب دائیں طرف، صرف Qty+Price+Total کالمز جتنی چوڑائی میں —
   // بائیں طرف بچنے والی جگہ (Item کالم جتنی) میں پیمنٹ اکاؤنٹ + QR کوڈ ساتھ ساتھ — بل غیرضروری لمبا نہ ہو ----------
   let paymentBoxTop = y;
@@ -23246,6 +23382,8 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   if(totalReturnedAmtA4 > 0) estimatedHeight += Math.round(56*fscale); // ---------- Subtotal + Return Items کی دو اضافی لائنیں ----------
   estimatedHeight += grandTotalBoxH + 30; // Grand Total باکس
   if(invoice.change_return > 0) estimatedHeight += Math.round(78 * fscale); // ---------- 💵 دیے گئے / واپسی کا ڈبہ ----------
+  const pmRowsA = paymentModeRows(invoice);
+  if(pmRowsA.length) estimatedHeight += Math.round(26 * fscale) * (pmRowsA.length + 1) + 30; // ---------- 💳 Payment Mode ڈبہ ----------
   if(invoice.customer_id){
     const summary = getBillSummaryRows(invoice);
     estimatedHeight += 24 + Math.round(34*rowScale) + ((summary.rows.length + 1) * Math.round(28*rowScale)) + 8 + 40; // Payment Summary باکس (متحرک اونچائی)
@@ -23482,6 +23620,29 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     ctx.textAlign = 'right'; ctx.fillText('Rs. ' + invoice.change_return.toFixed(0), tableRight - 14, r2);
     ctx.textAlign = 'left';
     y += chH + 16;
+  }
+
+  // ---------- 💳 Payment Mode — کس طریقے سے کتنی ادائیگی ہوئی ----------
+  if(pmRowsA.length){
+    const pmW = Math.round((tableRight - tableLeft) * 0.5);
+    const pmLeft = tableRight - pmW, lh = Math.round(26 * fscale);
+    const pmTop = y - Math.round(14 * fscale), pmH = lh * (pmRowsA.length + 1) + 12;
+    ctx.save();
+    ctx.fillStyle = '#eef2ff'; ctx.fillRect(pmLeft, pmTop, pmW, pmH);
+    ctx.setLineDash([6, 4]); ctx.strokeStyle = theme.primary; ctx.lineWidth = 1.5;
+    ctx.strokeRect(pmLeft + 0.5, pmTop + 0.5, pmW - 1, pmH - 1);
+    ctx.restore();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = F('bold 17px'); ctx.textAlign = 'left';
+    ctx.fillText('💳 Payment Mode', pmLeft + 14, pmTop + Math.round(24 * fscale));
+    ctx.font = F('16px');
+    pmRowsA.forEach(([lbl, amt], i) => {
+      const ry = pmTop + Math.round(24 * fscale) + lh * (i + 1);
+      ctx.textAlign = 'left';  ctx.fillText(lbl, pmLeft + 14, ry);
+      ctx.textAlign = 'right'; ctx.fillText('Rs. ' + Number(amt).toFixed(0), tableRight - 14, ry);
+    });
+    ctx.textAlign = 'left';
+    y += pmH + 16;
   }
 
   // ---------- بل کی مکمل ادائیگی تفصیل — تھرمل بل جیسا ہی تنگ، بارڈر والا، الائنمنٹ کے مطابق ----------
@@ -24189,6 +24350,11 @@ function buildInvoicePlainText(invoice){
   if(invoice.change_return > 0){ // ---------- AIO2110WE063: صرف دکھانے کے لیے ----------
     lines.push(padRightMono('Cash Received', cols - totalW) + padLeftMono('Rs.' + invoice.cash_tendered.toFixed(decimals), totalW));
     lines.push(padRightMono('Change Return', cols - totalW) + padLeftMono('Rs.' + invoice.change_return.toFixed(decimals), totalW));
+  }
+  const pmRowsX = (invoice.payment_modes || []).filter(x => x && x.amount > 0);
+  if(pmRowsX.length){
+    lines.push('Payment Mode:');
+    pmRowsX.forEach(x => lines.push(padRightMono('  ' + payModeInfo(x.k).name, cols - totalW) + padLeftMono('Rs.' + Number(x.amount).toFixed(decimals), totalW)));
   }
   lines.push('', centerMono('Thank you for your purchase!', cols), '', '', '');
   return lines.join('\n');
@@ -29663,9 +29829,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR079';
+  const APP_VERSION = 'AIO2310FR080';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Stock Adjustment: Old and Available clearly locked; only Add New changes stock';
+  const UPDATE_NOTE = 'Billing: Payment Mode (Net Cash, EasyPaisa, JazzCash, Bank Transfer) with split; printed on bill';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
