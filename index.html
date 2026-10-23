@@ -2780,7 +2780,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR077</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR078</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2997,7 +2997,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR077</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR078</span>
     </div>
   </div>
 
@@ -16548,11 +16548,11 @@ function renderStockAdjustmentScreen(){
     const prev = getOpeningStock(v);
     const added = getAddedToday(v);
     return `
-      <div class="capRow saGrid7 ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}">
+      <div class="capRow saGrid7 ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}" data-said="${v.variant_id}">
           ${capThumbHtml(item.product.name, img, item.product.product_id)}
           <div class="capBox capName" title="${item.displayName.replace(/"/g,'&quot;')}"><b>${(item.product.name || item.displayName).replace(/</g,'&lt;')}</b><small>${(v.label || cat).replace(/</g,'&lt;')}</small></div>
           <div class="capIn capLocked" title="Previous stock (start of day) — locked">${roundStock(prev)}</div>
-          <input type="number" class="capIn added" min="0" step="any" value="${roundStock(added)}" onchange="updateStockAdjField(${v.variant_id}, 'added', this.value)" onfocus="this.select()" title="Stock added today">
+          <input type="number" class="capIn added" min="0" step="any" value="${roundStock(added)}" oninput="previewStockAdjAdded(${v.variant_id}, this)" onchange="updateStockAdjField(${v.variant_id}, 'added', this.value)" onfocus="this.select()" title="Stock added today">
           <div class="capIn capLocked capStockNow ${isNegative ? 'neg' : (isLow ? 'low' : '')}" title="Current stock available now (after today's sales) — updates automatically">${roundStock(v.stock)}</div>
           <input type="number" class="capIn" step="any" value="${v.purchase || 0}" onchange="updateStockAdjField(${v.variant_id}, 'purchase', this.value)" onfocus="this.select()" title="Purchase price">
           <input type="number" class="capIn price" step="any" value="${v.retail || 0}" onchange="updateStockAdjField(${v.variant_id}, 'retail', this.value)" onfocus="this.select()" title="Sale price">
@@ -16589,7 +16589,44 @@ function updateStockAdjField(variantId, field, rawValue){
   }
   else if(field === 'lowStockAt') v.lowStockAt = Math.max(0, Math.round(num));
   persistAllData();
-  renderStockAdjustmentScreen(); // ---------- تازہ ترتیب کے ساتھ دوبارہ دکھائیں (مائنس والے سب سے اوپر) ----------
+  // ---------- پوری فہرست دوبارہ ترتیب نہ دیں (ورنہ لائن اپنی جگہ سے ہٹ جاتی اور دوسری لائن کا 0 نظر آتا) — صرف یہی لائن فوراً تازہ ----------
+  refreshStockAdjRow(v);
+}
+// ---------- Add New میں لکھتے لکھتے ہی Available میں نیا اسٹاک دکھائیں (محفوظ خانے سے نکلنے پر) ----------
+function previewStockAdjAdded(variantId, el){
+  const v = findVariantById(variantId);
+  const row = el.closest('[data-said]');
+  if(!v || !row) return;
+  const n = Math.max(0, parseFloat(el.value) || 0);
+  const preview = roundStock((v.stock || 0) + (n - getAddedToday(v)));
+  const avail = row.querySelector('.capStockNow');
+  if(!avail) return;
+  avail.textContent = preview;
+  avail.classList.toggle('neg', preview < 0);
+  avail.classList.toggle('low', preview >= 0 && preview <= (v.lowStockAt ?? 0));
+}
+function refreshStockAdjRow(v){
+  const row = document.querySelector(`#stockAdjustmentListWrap [data-said="${v.variant_id}"]`);
+  if(!row){ renderStockAdjustmentScreen(); return; }
+  const isNegative = v.stock < 0;
+  const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
+  row.classList.toggle('capNeg', isNegative);
+  const prevEl = row.querySelector('.capLocked:not(.capStockNow)');
+  if(prevEl) prevEl.textContent = roundStock(getOpeningStock(v));
+  const addEl = row.querySelector('input.added');
+  if(addEl && document.activeElement !== addEl) addEl.value = roundStock(getAddedToday(v));
+  const avail = row.querySelector('.capStockNow');
+  if(avail){
+    avail.textContent = roundStock(v.stock);
+    avail.classList.toggle('neg', isNegative);
+    avail.classList.toggle('low', isLow);
+  }
+  const ins = row.querySelectorAll('input.capIn');
+  if(ins[1] && document.activeElement !== ins[1]) ins[1].value = v.purchase || 0;
+  if(ins[2] && document.activeElement !== ins[2]) ins[2].value = v.retail || 0;
+  const anyNeg = getLiveVariantList().some(item => item.variant.stock < 0);
+  const resetBtn = document.getElementById('stockAdjResetAllBtn');
+  if(resetBtn) resetBtn.style.display = anyNeg ? 'block' : 'none';
 }
 
 // ---------- ایک ہی بٹن سے تمام منفی سٹاک والے آئٹمز کو زیرو پر لے آئیں (ایک ایک کر کے درست کرنے کی بجائے) ----------
@@ -29622,9 +29659,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR077';
+  const APP_VERSION = 'AIO2310FR078';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Units: yard/gaz and more; Rs to metre/yard and back; fractions in all measured units';
+  const UPDATE_NOTE = 'Stock Adjustment fix: Add New updates Available instantly, row stays in place';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
