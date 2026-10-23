@@ -1299,8 +1299,13 @@
   /* ہیڈر دو منزلہ: اوپر «Stock Position» تین خانوں پر، نیچے Old | New | Available Stock */
   .capHead.saHead2{row-gap:3px;}
   .capHead.saHead2 .saSpan2{grid-row:span 2; align-self:center;}
-  .capHead.saHead2 .saGroup{grid-column:3 / span 3; font-size:9.5px; font-weight:800; padding-bottom:3px; border-bottom:1.5px solid rgba(255,255,255,.55); letter-spacing:.02em;}
-  .capHead.saHead2 .saSub{font-size:8px !important; line-height:1.1;}
+  .capHead.saHead2 .saGroup{grid-column:3 / span 3; display:flex; justify-content:center;}
+  .capHead.saHead2 .saGroupPill{display:block; width:100%; box-sizing:border-box; text-align:center; font-size:9.5px; font-weight:800; letter-spacing:.02em; color:#14532d; padding:3px 6px; border-radius:999px;
+    background:linear-gradient(180deg,#fef08a,#facc15 55%,#eab308); border:1.5px solid #fde68a; box-shadow:0 2px 0 #a16207, inset 0 1px 0 rgba(255,255,255,.8); white-space:nowrap;}
+  .capHead.saHead2 .saSubCap{grid-column:3 / span 3; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2px; align-items:center; padding:3px 2px; border-radius:999px;
+    background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.08)); border:1.5px solid rgba(255,255,255,.45); box-shadow:inset 0 1px 0 rgba(255,255,255,.25);}
+  .capHead.saHead2 .saSubCap span{font-size:8px !important; line-height:1.1; text-align:center !important; padding:0 !important;}
+  .capHead.saHead2 .saPlus{color:#fff; font-size:12px; font-weight:900; line-height:1; vertical-align:-1px;}
   .capRow.saGrid7 .pgRowThumb{width:24px; height:24px; border-radius:8px; font-size:13px;}
   .capRow.saGrid7 .capBox{min-height:32px; padding:2px 5px; border-radius:9px;}
   .capRow.saGrid7 .capName b{font-size:11.5px; line-height:1.15; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
@@ -2760,7 +2765,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR071</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR072</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2977,7 +2982,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR071</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR072</span>
     </div>
   </div>
 
@@ -16375,7 +16380,7 @@ function renderStockAdjustmentScreen(){
 
   applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والے رنگ
   // ---------- کالم: 🔒 پرانا سٹاک (لاک) | ➕ آج شامل | 📦 موجودہ سٹاک (خودکار، لاک) | قیمت خرید | قیمت فروخت | Low — بِکا/باقی/منافع صرف رپورٹ میں ----------
-  wrap.innerHTML = `<div class="capHead saGrid7 saHead2"><span class="saSpan2">📷</span><span class="saSpan2">Item</span><span class="saGroup">📦 Stock Position</span><span class="saSpan2" style="font-size:7.5px;">Purchase<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Sale<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Low<br>Limit</span><span class="saSub">🔒 Old</span><span class="saSub">➕ New</span><span class="saSub">Available<br>Stock</span></div>` + list.map((item, idx) => {
+  wrap.innerHTML = `<div class="capHead saGrid7 saHead2"><span class="saSpan2">📷</span><span class="saSpan2">Item</span><span class="saGroup"><span class="saGroupPill">📦 Stock Position</span></span><span class="saSpan2" style="font-size:7.5px;">Purchase<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Sale<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Low<br>Limit</span><span class="saSubCap"><span>🔒 Old</span><span><b class="saPlus">+</b> Add<br>New</span><span style="font-size:7px !important;">Available<br>Stock</span></span></div>` + list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
     const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
@@ -29352,9 +29357,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR071';
+  const APP_VERSION = 'AIO2310FR072';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Stock Adjustment: Stock Position heading (Old, New, Available Stock)';
+  const UPDATE_NOTE = 'Stock Adjustment: Stock Position capsule heading, + Add New';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
