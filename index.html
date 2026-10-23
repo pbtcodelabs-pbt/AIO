@@ -1341,6 +1341,16 @@
   .productHead.capRow .chevron{font-size:11px; color:#0f172a; justify-self:center;}
   .productCard.capCard .variantCardWrap{margin:-4px 4px 8px;}
   .productList.capList{gap:0 !important;}
+  /* Purchase Orders — پراڈکٹس/بل ہسٹری جیسے رنگین کیپسول */
+  .poStatusRail{display:flex; gap:6px; background:var(--card); border-radius:12px; padding:6px; box-shadow:0 2px 8px rgba(41,29,10,.07); margin-bottom:12px;}
+  .poStatusRail .categoryPill{flex:1 1 0; min-width:0;}
+  .poFilterRow{display:flex; gap:6px; margin-bottom:10px;}
+  .poFilterRow select{flex:1 1 0; min-width:0; padding:9px 6px; border:1px solid #dbe1ea; border-radius:10px; font-size:12px; font-weight:700; background:#fff; color:var(--text);}
+  .poItemsTxt{display:block; font-size:10px; font-weight:700; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px;}
+  .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
+  .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
+  .poPickRow{cursor:pointer;}
+  .poPickRow .cbAmt b{font-size:12px;}
   /* Bill History */
   .billCard.capBill{display:block; padding:5px 6px; margin:0 0 8px;}
   .cbTop{display:grid; grid-template-columns:40px minmax(0,1fr) auto; gap:5px; align-items:center;}
@@ -2765,7 +2775,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR072</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR073</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -2982,7 +2992,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR072</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR073</span>
     </div>
   </div>
 
@@ -4534,25 +4544,57 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="screen admin-only" id="screen-purchaseorders">
       <div class="pageTitle">📦 Purchase Orders</div>
 
-      <div class="modeToggle" style="width:100%; margin-bottom:10px;">
-        <button id="poFilterall" class="active" onclick="setPoListFilter('all')" style="flex:1;">All</button>
-        <button id="poFilterpending" onclick="setPoListFilter('pending')" style="flex:1;">⏳ Pending</button>
-        <button id="poFilterreceived" onclick="setPoListFilter('received')" style="flex:1;">✅ Received</button>
+      <!-- ---------- اسٹیٹس کیپسول: All / Pending Shipment / Received — ہر ایک کی گنتی کے ساتھ ---------- -->
+      <div class="poStatusRail">
+        <div class="categoryPill active" id="poFilterall" onclick="setPoListFilter('all')">All<span class="catCount" id="poCntall">0</span></div>
+        <div class="categoryPill" id="poFilterpending" onclick="setPoListFilter('pending')">⏳ Pending<span class="catCount" id="poCntpending">0</span></div>
+        <div class="categoryPill" id="poFilterreceived" onclick="setPoListFilter('received')">✅ Received<span class="catCount" id="poCntreceived">0</span></div>
       </div>
 
-      <div class="partyToolbar">
-        <select id="poSortSelect" onchange="renderPurchaseOrdersScreen()" style="flex:1; padding:10px; border-radius:10px; border:1px solid #dbe1ea; font-size:13px;">
-          <option value="newest">🕐 Newest First</option>
-          <option value="oldest">🕐 Oldest First</option>
+      <!-- ---------- سرچ: سپلائر کا نام/فون، آئٹم، تاریخ، رقم، pending/received — اور یہیں سے نیا PO ---------- -->
+      <div class="productToolbar">
+        <input type="text" id="poListSearchInput" placeholder="🔍 Supplier, item, date, Rs." oninput="renderPurchaseOrdersScreen()" autocomplete="off">
+        <button onclick="openPoSupplierPicker()">+ New PO</button>
+      </div>
+
+      <div class="poFilterRow">
+        <select id="poDateFilterSelect" onchange="renderPurchaseOrdersScreen()">
+          <option value="all">📅 All Time</option>
+          <option value="today">Today</option>
+          <option value="week">Last 7 Days</option>
+          <option value="month">This Month</option>
+          <option value="lastmonth">Last Month</option>
         </select>
-        <select id="poSupplierFilterSelect" onchange="renderPurchaseOrdersScreen()" style="flex:1; padding:10px; border-radius:10px; border:1px solid #dbe1ea; font-size:13px;">
+        <select id="poSupplierFilterSelect" onchange="renderPurchaseOrdersScreen()">
           <option value="all">🏭 All Suppliers</option>
+        </select>
+        <select id="poSortSelect" onchange="renderPurchaseOrdersScreen()">
+          <option value="newest">🕐 Newest</option>
+          <option value="oldest">🕐 Oldest</option>
+          <option value="amountHigh">Rs. High → Low</option>
+          <option value="amountLow">Rs. Low → High</option>
+          <option value="pendingLong">⏳ Longest Pending</option>
         </select>
       </div>
 
       <div class="billSummaryBar" id="poSummaryBar"></div>
 
       <div id="poListWrap"></div>
+    </div>
+
+    <!-- ---------- نیا PO: پہلے سپلائر چنیں (سرچ کے ساتھ) یا نیا سپلائر بنائیں ---------- -->
+    <div class="modalOverlay" id="poSupplierPickModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="modalBoxWide" style="width:440px; max-height:85vh; overflow-y:auto;">
+        <h3>📦 New Purchase Order — Select Supplier</h3>
+        <div class="productToolbar" style="margin-bottom:10px;">
+          <input type="text" id="poPickSupplierSearch" placeholder="🔍 Search supplier name / phone" oninput="renderPoSupplierPickList()" autocomplete="off">
+          <button onclick="openNewSupplierFromPoPicker()">+ New Supplier</button>
+        </div>
+        <div id="poPickSupplierList"></div>
+        <div class="modalBtns" style="margin-top:10px;">
+          <button class="cancelBtn" onclick="document.getElementById('poSupplierPickModal').classList.remove('show')">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <!-- BILL HISTORY (دونوں roles کو نظر آتی ہے، لیکن salesman کو edit/delete پر approval درکار ہوگی) -->
@@ -16380,7 +16422,7 @@ function renderStockAdjustmentScreen(){
 
   applyProductRowStyleVars(wrap); // AIO1210MO024: بلنگ والے رنگ
   // ---------- کالم: 🔒 پرانا سٹاک (لاک) | ➕ آج شامل | 📦 موجودہ سٹاک (خودکار، لاک) | قیمت خرید | قیمت فروخت | Low — بِکا/باقی/منافع صرف رپورٹ میں ----------
-  wrap.innerHTML = `<div class="capHead saGrid7 saHead2"><span class="saSpan2">📷</span><span class="saSpan2">Item</span><span class="saGroup"><span class="saGroupPill">📦 Stock Position</span></span><span class="saSpan2" style="font-size:7.5px;">Purchase<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Sale<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Low<br>Limit</span><span class="saSubCap"><span>🔒 Old</span><span><b class="saPlus">+</b> Add<br>New</span><span style="font-size:7px !important;">Available<br>Stock</span></span></div>` + list.map((item, idx) => {
+  wrap.innerHTML = `<div class="capHead saGrid7 saHead2"><span class="saSpan2">📷</span><span class="saSpan2">Item</span><span class="saGroup"><span class="saGroupPill">📦 Stock Position</span></span><span class="saSpan2" style="font-size:7.5px;">Purchase<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Sale<br>Price</span><span class="saSpan2" style="font-size:7.5px;">Low<br>Limit</span><span class="saSubCap"><span>🔒 Old</span><span><b class="saPlus">+</b> Add<br>New</span><span>Available</span></span></div>` + list.map((item, idx) => {
     const v = item.variant;
     const isNegative = v.stock < 0;
     const isLow = !isNegative && v.stock <= (v.lowStockAt ?? 0);
@@ -17043,6 +17085,7 @@ function daysSince(dateStr){
    Purchase Orders — مرکزی صفحہ (تمام سپلائرز کے تمام PO ایک جگہ)
    ===================================================================== */
 let poListFilter = 'all'; // 'all' | 'pending' | 'received'
+let poOpenAfterNewSupplier = false; // + New PO → نیا سپلائر محفوظ ہوتے ہی اس کا PO کھلے
 
 // ---------- تمام سپلائرز کے پرچیز آرڈرز ایک فہرست میں یکجا کریں ----------
 function getAllPurchaseOrders(){
@@ -17061,6 +17104,75 @@ function setPoListFilter(f){
   renderPurchaseOrdersScreen();
 }
 
+// ---------- PO سرچ — سپلائر نام/فون، آئٹم کے نام، تاریخ، رقم، اسٹیٹس؛ کئی لفظ کسی بھی ترتیب میں ----------
+function poListMatches(po, query){
+  if(!query) return true;
+  const sup = suppliersData.find(x => x.supplier_id === po.supplier_id) || {};
+  const d = new Date(po.date);
+  const dateTxt = isNaN(d) ? '' : d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+  const hay = normalizePoSearchText([
+    po.supplier_name, sup.phone, sup.keywords, sup.area, po.date, dateTxt, po.total,
+    (po.items || []).map(it => `${it.name || ''} ${it.label || ''}`).join(' '),
+    po.status === 'received' ? 'received done shipment' : 'pending shipment due',
+  ].join(' '));
+  const compact = hay.replace(/ /g, '');
+  const q = normalizePoSearchText(query);
+  if(!q || compact.includes(q.replace(/ /g, ''))) return true;
+  return q.split(' ').every(tok => hay.includes(tok) ||
+    (tok.length >= 3 && (sk => sk.length >= 2 && hay.split(' ').some(w => poSoundSkeleton(w).startsWith(sk)))(poSoundSkeleton(tok))));
+}
+function poDateInRange(dateStr, key){
+  if(key === 'all') return true;
+  const d = new Date(dateStr + 'T00:00:00');
+  if(isNaN(d)) return false;
+  const now = new Date(); const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if(key === 'today') return d.getTime() === today.getTime();
+  if(key === 'week') return d >= new Date(today.getTime() - 6 * 86400000);
+  if(key === 'month') return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  if(key === 'lastmonth'){ const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.getFullYear() === lm.getFullYear() && d.getMonth() === lm.getMonth(); }
+  return true;
+}
+
+// ---------- نیا PO: سپلائر چننے والا پاپ اپ ----------
+function openPoSupplierPicker(){
+  const inp = document.getElementById('poPickSupplierSearch');
+  if(inp) inp.value = '';
+  renderPoSupplierPickList();
+  document.getElementById('poSupplierPickModal').classList.add('show');
+  setTimeout(() => inp && inp.focus(), 150);
+}
+function renderPoSupplierPickList(){
+  const wrap = document.getElementById('poPickSupplierList');
+  if(!wrap) return;
+  const q = normalizePoSearchText(document.getElementById('poPickSupplierSearch')?.value || '');
+  const list = suppliersData.filter(sp => !q || normalizePoSearchText(`${sp.name} ${sp.phone || ''} ${sp.keywords || ''} ${sp.area || ''}`).includes(q))
+    .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="placeholder" style="cursor:pointer;" onclick="openNewSupplierFromPoPicker()">No supplier found — tap to add a new supplier ➕</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map((sp, i) => {
+    const pend = (sp.purchaseHistory || []).filter(po => po.status !== 'received').length;
+    return `
+    <div class="billCard capRow capBill poPickRow ${i % 2 ? 'alt' : ''}" onclick="document.getElementById('poSupplierPickModal').classList.remove('show'); openPoModal(${sp.supplier_id});">
+      <div class="cbTop">
+        ${capThumbHtml(sp.name, sp.photo || '', sp.supplier_id)}
+        <div class="capBox capName"><b><bdi>${String(sp.name).replace(/</g,'&lt;')}</bdi></b><small>${sp.phone ? '📱 ' + String(sp.phone).replace(/</g,'&lt;') : 'No phone'}</small></div>
+        <div class="capBox cbAmt ${pend ? 'poPend' : ''}"><b>${(sp.purchaseHistory || []).length} PO</b><small>${pend ? '⏳ ' + pend + ' pending' : '✅ Clear'}</small></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openNewSupplierFromPoPicker(){
+  document.getElementById('poSupplierPickModal').classList.remove('show');
+  const typed = (document.getElementById('poPickSupplierSearch')?.value || '').trim();
+  currentPartyTab = 'suppliers';
+  openNewPartyModal();
+  poOpenAfterNewSupplier = true;
+  const nameInp = document.getElementById('npPartyName');
+  if(nameInp && typed) nameInp.value = typed;
+}
+
 function renderPurchaseOrdersScreen(){
   const allOrders = getAllPurchaseOrders();
 
@@ -17069,53 +17181,82 @@ function renderPurchaseOrdersScreen(){
   const currentSupplierVal = supplierSelect.value || 'all';
   const uniqueSuppliers = [...new Map(allOrders.map(po => [po.supplier_id, po.supplier_name])).entries()];
   supplierSelect.innerHTML = `<option value="all">🏭 All Suppliers</option>` +
-    uniqueSuppliers.map(([id, name]) => `<option value="${id}">${name}</option>`).join('');
+    uniqueSuppliers.map(([id, name]) => `<option value="${id}">${String(name).replace(/</g,'&lt;')}</option>`).join('');
   supplierSelect.value = uniqueSuppliers.some(([id]) => String(id) === currentSupplierVal) ? currentSupplierVal : 'all';
 
-  // ---------- فلٹرنگ ----------
-  let filtered = allOrders;
+  // ---------- سرچ، سپلائر اور تاریخ کا فلٹر (اسٹیٹس سے پہلے — تاکہ کیپسول کی گنتی درست رہے) ----------
+  const query = (document.getElementById('poListSearchInput')?.value || '').trim();
+  const dateKey = document.getElementById('poDateFilterSelect')?.value || 'all';
+  const supplierFilterVal = supplierSelect.value;
+  let base = allOrders.filter(po => poListMatches(po, query) && poDateInRange(po.date, dateKey) &&
+    (supplierFilterVal === 'all' || String(po.supplier_id) === supplierFilterVal));
+
+  const pendCount = base.filter(po => po.status !== 'received').length;
+  const cnt = {all: base.length, pending: pendCount, received: base.length - pendCount};
+  ['all','pending','received'].forEach(x => { const el = document.getElementById('poCnt' + x); if(el) el.textContent = cnt[x]; });
+
+  let filtered = base;
   if(poListFilter === 'pending') filtered = filtered.filter(po => po.status !== 'received');
   else if(poListFilter === 'received') filtered = filtered.filter(po => po.status === 'received');
 
-  const supplierFilterVal = supplierSelect.value;
-  if(supplierFilterVal !== 'all') filtered = filtered.filter(po => String(po.supplier_id) === supplierFilterVal);
-
   // ---------- ترتیب ----------
   const sortVal = document.getElementById('poSortSelect').value;
-  filtered = [...filtered].sort((a,b) => sortVal === 'newest' ? new Date(b.date)-new Date(a.date) : new Date(a.date)-new Date(b.date));
+  filtered = [...filtered].sort((a,b) => {
+    if(sortVal === 'oldest') return new Date(a.date) - new Date(b.date);
+    if(sortVal === 'amountHigh') return (b.total || 0) - (a.total || 0);
+    if(sortVal === 'amountLow') return (a.total || 0) - (b.total || 0);
+    if(sortVal === 'pendingLong'){
+      const ap = a.status !== 'received', bp = b.status !== 'received';
+      if(ap !== bp) return ap ? -1 : 1;
+      return new Date(a.date) - new Date(b.date);
+    }
+    return new Date(b.date) - new Date(a.date);
+  });
 
   // ---------- خلاصہ پٹی ----------
-  const totalAmount = filtered.reduce((s,po) => s + po.total, 0);
+  const totalAmount = filtered.reduce((s,po) => s + (po.total || 0), 0);
   document.getElementById('poSummaryBar').innerHTML = `<span>Purchase Orders</span><span>${filtered.length} order(s) • Rs. ${totalAmount.toLocaleString()}</span>`;
 
   const wrap = document.getElementById('poListWrap');
   if(filtered.length === 0){
-    wrap.innerHTML = `<div class="placeholder">No purchase orders found</div>`;
+    wrap.innerHTML = query
+      ? `<div class="placeholder">No purchase order matches "${query.replace(/</g,'&lt;')}"</div>`
+      : `<div class="placeholder">No purchase orders found — tap "+ New PO" to create one</div>`;
     return;
   }
 
-  wrap.innerHTML = filtered.map(po => {
+  wrap.innerHTML = filtered.map((po, i) => {
     const isPending = po.status !== 'received';
     const daysPending = daysSince(po.date);
+    const sup = suppliersData.find(x => x.supplier_id === po.supplier_id) || {};
+    const d = new Date(po.date);
+    const dateTxt = isNaN(d) ? po.date : d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+    const names = (po.items || []).map(it => String(it.name || '').trim()).filter(Boolean);
+    const itemsTxt = names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '');
     const statusTag = isPending
-      ? `<span class="pendingStatusTag pending">⏳ PENDING • ${daysPending}d</span>`
+      ? `<span class="pendingStatusTag pending">⏳ PENDING SHIPMENT • ${daysPending}d</span>`
       : `<span class="pendingStatusTag approved">✅ RECEIVED</span>`;
+    const supName = String(po.supplier_name || '').replace(/</g,'&lt;');
     return `
-      <div class="billCard">
-        <div>
-          <div class="bNo">🏭 ${po.supplier_name} ${statusTag}</div>
-          <div class="bMeta">${po.date} | ${po.items.length} item(s) | Rs. ${po.total.toLocaleString()}</div>
+    <div class="billCard capRow capBill ${i % 2 ? 'alt' : ''}">
+      <div class="cbTop">
+        ${capThumbHtml(po.supplier_name, sup.photo || '', po.supplier_id)}
+        <div class="capBox capName"><b><bdi>${supName}</bdi></b><small>📅 ${dateTxt} • ${(po.items || []).length} item(s)</small>
+          <span class="poItemsTxt">${itemsTxt.replace(/</g,'&lt;')}</span>
+          <div class="cbTags">${statusTag}</div>
         </div>
-        <div class="billActions">
-          <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ Print</button>
-          ${isPending
-            ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 Receive Shipment</button>
-               <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>
-               <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ Delete</button>`
-            : `<button class="btnPrint" onclick="openEditReceivedShipment(${po.supplier_id}, ${po.po_idx})">✏️ Edit</button>
-               <button class="btnPrint" onclick="openSupplierReturnModal(${po.supplier_id}, ${po.po_idx})">↩️ Return Items</button>`}
-        </div>
-      </div>`;
+        <div class="capBox cbAmt ${isPending ? 'poPend' : ''}"><b>Rs. ${(po.total || 0).toLocaleString()}</b><small>${isPending ? '⏳ Pending' : '✅ Received'}</small></div>
+      </div>
+      <div class="billActions cbActs">
+        <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ Print</button>
+        ${isPending
+          ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 Receive</button>
+             <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>
+             <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="deletePendingPurchaseOrder(${po.supplier_id}, ${po.po_idx}); renderPurchaseOrdersScreen();">🗑️ Delete</button>`
+          : `<button class="btnPrint" onclick="openEditReceivedShipment(${po.supplier_id}, ${po.po_idx})">✏️ Edit</button>
+             <button class="btnPrint" onclick="openSupplierReturnModal(${po.supplier_id}, ${po.po_idx})">↩️ Return</button>`}
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -20352,6 +20493,7 @@ function resetNewPartyForm(){
 // ---------- نیا کسٹمر/سپلائر شامل کریں ----------
 function openNewPartyModal(){
   editingPartyId = null;
+  poOpenAfterNewSupplier = false;
   resetNewPartyForm();
   document.getElementById('newPartyTitle').textContent = currentPartyTab === 'customers' ? '🧑‍🤝‍🧑 New Customer' : '🚚 New Supplier';
   document.getElementById('newPartyModal').classList.add('show');
@@ -20546,6 +20688,12 @@ function saveNewParty(){
 
   closeNewPartyModal();
   renderPartyList();
+  // ---------- Purchase Orders کے "+ New PO" سے نیا سپلائر بنایا ہو تو سیدھا اسی کا PO کھولیں ----------
+  if(poOpenAfterNewSupplier && editingPartyId === null && currentPartyTab !== 'customers'){
+    poOpenAfterNewSupplier = false;
+    openPoModal(suppliersData[suppliersData.length - 1].supplier_id);
+  }
+  poOpenAfterNewSupplier = false;
 }
 
 // ---------- Wallet Deposit/Redeem Modal ----------
@@ -29357,9 +29505,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR072';
+  const APP_VERSION = 'AIO2310FR073';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Stock Adjustment: Stock Position capsule heading, + Add New';
+  const UPDATE_NOTE = 'Purchase Orders: capsule design, search, + New PO, date filter; Available label';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
