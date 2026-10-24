@@ -2813,7 +2813,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2310FR083</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2410SA084</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3030,7 +3030,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2310FR083</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2410SA084</span>
     </div>
   </div>
 
@@ -5006,6 +5006,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="previewActions" id="pscBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('invoiceCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
+        <!-- ---------- 🔌 USB پرنٹر (OTG تار سے) — کوئی دوسری ایپ نہیں ---------- -->
+        <div class="previewActions" style="padding-top:0;">
+          <button style="background:#ede9fe; color:#5b21b6; flex:1;" onclick="printViaWebUSB('invoiceCanvas')">🔌 Direct USB Print (OTG cable — no app needed)</button>
+        </div>
         <!-- ---------- ⚡ فاسٹ پرنٹ — خالص سادہ متن، تصویر نہیں — تھرمل پرنٹر پر بہت تیز اور قابلِ بھروسہ،
              خاص طور پر ایسے پرنٹرز کے لیے جو تصویر/فونٹ والی پرنٹنگ میں سست یا ناکام رہتے ہوں ---------- -->
         <div class="previewActions" style="padding-top:0;">
@@ -5243,6 +5247,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="previewActions" id="aopBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('advOrderCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
         </div>
+        <!-- ---------- 🔌 USB پرنٹر (OTG تار سے) — کوئی دوسری ایپ نہیں ---------- -->
+        <div class="previewActions" style="padding-top:0;">
+          <button style="background:#ede9fe; color:#5b21b6; flex:1;" onclick="printViaWebUSB('advOrderCanvas')">🔌 Direct USB Print (OTG cable — no app needed)</button>
+        </div>
         <div class="previewActions" style="padding-top:0;">
           <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printAdvOrderFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
         </div>
@@ -5325,6 +5333,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
         <div class="previewActions" id="poBtPrintRow" style="padding-top:0;">
           <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('poCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+        </div>
+        <!-- ---------- 🔌 USB پرنٹر (OTG تار سے) — کوئی دوسری ایپ نہیں ---------- -->
+        <div class="previewActions" style="padding-top:0;">
+          <button style="background:#ede9fe; color:#5b21b6; flex:1;" onclick="printViaWebUSB('poCanvas')">🔌 Direct USB Print (OTG cable — no app needed)</button>
         </div>
         <div class="previewActions" style="padding-top:0;">
           <button style="background:#fef9c3; color:#854d0e; flex:1;" onclick="printPoFastText()">⚡ Fast Print (Simple Text — No Fonts/Images)</button>
@@ -5829,6 +5841,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <!-- ---------- تھرمل رول کے لیے — بغیر کسی اضافی ایپ کے سیدھا بلوٹوتھ پرنٹر سے پرنٹ — A4 پر یہ متعلقہ نہیں (PDF راستہ استعمال ہوتا ہے) ---------- -->
     <div class="previewActions" id="rpBtPrintRow" style="padding-top:0;">
       <button style="background:#e0f2fe; color:#075985; flex:1;" onclick="printViaWebBluetooth('reportCanvas')">🔵 Try Direct Bluetooth Print (no app needed)</button>
+    </div>
+    <!-- ---------- 🔌 USB پرنٹر (OTG تار سے) — کوئی دوسری ایپ نہیں ---------- -->
+    <div class="previewActions" style="padding-top:0;">
+      <button style="background:#ede9fe; color:#5b21b6; flex:1;" onclick="printViaWebUSB('reportCanvas')">🔌 Direct USB Print (OTG cable — no app needed)</button>
     </div>
     <!-- ---------- A4 PDF کا اپنا شیئر بٹن — Android کی نیٹو شیئر شیٹ کھلتی ہے جس میں Print/WhatsApp/دیگر سب مل جاتی ہیں ---------- -->
     <div class="previewActions" id="rpA4ShareRow" style="padding-top:0; display:none;">
@@ -24228,6 +24244,93 @@ async function printViaWebBluetooth(canvasId){
   }
 }
 
+// ---------- 🔌 براہ راست USB پرنٹنگ (WebUSB) — فون میں OTG کنیکٹر سے USB تھرمل پرنٹر (مثلاً SpeedX SP-210) لگائیں،
+// کوئی RawBT/دوسری ایپ نہیں چاہیے۔ پہلی بار پرنٹر چننا ہوتا ہے، اس کے بعد وہی یاد رہتا ہے اور ایک ٹچ میں پرنٹ ----------
+async function getUsbPrinter(forcePick){
+  if(!forcePick){
+    try{
+      const known = await navigator.usb.getDevices();
+      if(known.length) return known[0];
+    }catch(e){}
+  }
+  return await navigator.usb.requestDevice({filters: []}); // سب USB ڈیوائسز دکھائیں — پرنٹر خود چنیں
+}
+async function openUsbPrinter(device){
+  if(!device.opened) await device.open();
+  if(device.configuration === null) await device.selectConfiguration(1);
+  for(const iface of device.configuration.interfaces){
+    for(const alt of iface.alternates){
+      const ep = alt.endpoints.find(e => e.direction === 'out' && e.type === 'bulk');
+      if(ep){
+        try{ await device.claimInterface(iface.interfaceNumber); }catch(e){ continue; }
+        if(alt.alternateSetting) { try{ await device.selectAlternateInterface(iface.interfaceNumber, alt.alternateSetting); }catch(e){} }
+        return {iface: iface.interfaceNumber, ep: ep.endpointNumber};
+      }
+    }
+  }
+  throw new Error('NO_BULK_OUT');
+}
+// ---------- لمبی رسید کو چھوٹی پٹیوں (bands) میں بھیجیں — کچھ پرنٹرز ایک بڑی تصویر ایک ساتھ نہیں لیتے ----------
+function canvasToEscPosBands(canvas, paperWidthMM){
+  const widthDots = paperWidthMM === 80 ? 576 : 384;
+  const w = Math.min(widthDots, canvas.width), h = canvas.height;
+  const data = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+  const widthBytes = Math.ceil(widthDots / 8), BAND = 128;
+  const parts = [new Uint8Array([0x1B, 0x40])]; // ESC @
+  for(let y0 = 0; y0 < h; y0 += BAND){
+    const bh = Math.min(BAND, h - y0);
+    const raster = new Uint8Array(widthBytes * bh);
+    for(let y = 0; y < bh; y++){
+      for(let x = 0; x < w; x++){
+        const i = ((y0 + y) * w + x) * 4;
+        if(data[i+3] > 0 && (data[i] + data[i+1] + data[i+2]) / 3 < 180) raster[y * widthBytes + (x >> 3)] |= (1 << (7 - (x & 7)));
+      }
+    }
+    parts.push(new Uint8Array([0x1D, 0x76, 0x30, 0x00, widthBytes & 0xFF, (widthBytes >> 8) & 0xFF, bh & 0xFF, (bh >> 8) & 0xFF]), raster);
+  }
+  parts.push(new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A, 0x1D, 0x56, 0x42, 0x00])); // کاغذ آگے + کاٹیں (کٹر ہو تو)
+  const out = new Uint8Array(parts.reduce((t, p) => t + p.length, 0));
+  let o = 0; parts.forEach(p => { out.set(p, o); o += p.length; });
+  return out;
+}
+async function sendBytesToUsbPrinter(bytes, forcePick){
+  const device = await getUsbPrinter(forcePick);
+  const {iface, ep} = await openUsbPrinter(device);
+  try{
+    for(let i = 0; i < bytes.length; i += 16384){
+      const r = await device.transferOut(ep, bytes.slice(i, i + 16384));
+      if(r.status !== 'ok') throw new Error('USB transfer ' + r.status);
+    }
+  } finally {
+    try{ await device.releaseInterface(iface); }catch(e){}
+    try{ await device.close(); }catch(e){}
+  }
+  return device;
+}
+async function printViaWebUSB(canvasId){
+  canvasId = canvasId || 'invoiceCanvas';
+  if(!navigator.usb){
+    alert('❌ This phone/browser does not support direct USB printing. Please use the regular 🖨️ Print button.');
+    return;
+  }
+  const canvas = document.getElementById(canvasId);
+  if(!canvas){ return; }
+  const bytes = canvasToEscPosBands(canvas, AppState.settings.paperWidth);
+  try{
+    await sendBytesToUsbPrinter(bytes, false);
+  }catch(e){
+    if(e && e.name === 'NotFoundError') return; // صارف نے پرنٹر چننا منسوخ کیا
+    // ---------- یاد رکھا ہوا پرنٹر نہ ملا/نہ کھلا — ایک بار دوبارہ چننے کا موقع دیں ----------
+    try{
+      await sendBytesToUsbPrinter(bytes, true);
+    }catch(e2){
+      if(e2 && e2.name === 'NotFoundError') return;
+      console.error(e, e2);
+      alert('❌ USB printing failed.\n\n• Check the printer is ON and the USB cable is connected to the phone through an OTG connector.\n• When the list opens, choose the printer.\n• If it still fails, use the regular 🖨️ Print button.');
+    }
+  }
+}
+
 // ---------- کینوس کو ESC/POS "raster image" کمانڈز میں بدلیں (GS v 0) — تھرمل پرنٹر کی زبان ----------
 function canvasToEscPosRaster(canvas, paperWidthMM){
   const widthDots = paperWidthMM === 80 ? 576 : 384;
@@ -29844,9 +29947,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2310FR083';
+  const APP_VERSION = 'AIO2410SA084';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Install fix: app no longer shows "already installed" by mistake';
+  const UPDATE_NOTE = 'New: Direct USB Print for USB thermal printers (OTG cable)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
