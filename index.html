@@ -2813,7 +2813,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2410SA085</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2410SA086</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3030,7 +3030,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2410SA085</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2410SA086</span>
     </div>
   </div>
 
@@ -24283,12 +24283,18 @@ function canvasToEscPosBands(canvas, paperWidthMM){
     for(let y = 0; y < bh; y++){
       for(let x = 0; x < w; x++){
         const i = ((y0 + y) * w + x) * 4;
-        if(data[i+3] > 0 && (data[i] + data[i+1] + data[i+2]) / 3 < 180) raster[y * widthBytes + (x >> 3)] |= (1 << (7 - (x & 7)));
+        // ---------- گہرا پرنٹ: رنگین لکیریں/ہلکے کنارے بھی سیاہ (روشنی < 205)، اور ہر لکیر 1 ڈاٹ موٹی (دائیں طرف) —
+        // پتلے فونٹ تھرمل پرنٹر پر مدھم آتے تھے ----------
+        const lum = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+        if(data[i+3] > 0 && lum < 205){
+          raster[y * widthBytes + (x >> 3)] |= (1 << (7 - (x & 7)));
+          if(x + 1 < widthDots) raster[y * widthBytes + ((x + 1) >> 3)] |= (1 << (7 - ((x + 1) & 7)));
+        }
       }
     }
     parts.push(new Uint8Array([0x1D, 0x76, 0x30, 0x00, widthBytes & 0xFF, (widthBytes >> 8) & 0xFF, bh & 0xFF, (bh >> 8) & 0xFF]), raster);
   }
-  parts.push(new Uint8Array([0x0A, 0x0A, 0x0A, 0x0A, 0x1D, 0x56, 0x42, 0x00])); // کاغذ آگے + کاٹیں (کٹر ہو تو)
+  parts.push(new Uint8Array([0x1D, 0x56, 0x42, 0x28])); // تھوڑا کاغذ آگے (40 ڈاٹ) + کاٹیں — پہلے 4 خالی لائنیں اضافی کاغذ ضائع کرتی تھیں
   const out = new Uint8Array(parts.reduce((t, p) => t + p.length, 0));
   let o = 0; parts.forEach(p => { out.set(p, o); o += p.length; });
   return out;
@@ -24395,6 +24401,13 @@ function escposTextBytes(text){
 }
 // ---------- BLE سے پرنٹر کو سادہ متن بائٹس بھیجیں — ناکامی پر خودکار براؤزر پرنٹ کی طرف چلا جائے ---------- -->
 async function sendPlainTextToPrinter(text, fallbackFn){
+  // ---------- 🔌 USB پرنٹر پہلے سے جڑا/یاد ہو تو ⚡ Fast Print سیدھا USB سے — پرنٹر کا اپنا صاف فونٹ (ٹیسٹ پرنٹ جیسا گہرا) ----------
+  try{
+    if(navigator.usb && (await navigator.usb.getDevices()).length){
+      await sendBytesToUsbPrinter(escposTextBytes(text), false);
+      return;
+    }
+  }catch(e){ console.warn('USB fast print failed, trying Bluetooth/browser', e); }
   if(!navigator.bluetooth){ fallbackFn(text); return; }
   try{
     const device = await navigator.bluetooth.requestDevice({
@@ -29947,9 +29960,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2410SA085';
+  const APP_VERSION = 'AIO2410SA086';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Update card now always shows old → new version and what changed (USB Print added in last update)';
+  const UPDATE_NOTE = 'USB Print: darker, sharper bills; Fast Print now prints via USB printer too';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
