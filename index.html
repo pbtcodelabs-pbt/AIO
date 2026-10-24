@@ -2813,7 +2813,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2410SA084</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2410SA085</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3030,7 +3030,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2410SA084</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2410SA085</span>
     </div>
   </div>
 
@@ -29947,9 +29947,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2410SA084';
+  const APP_VERSION = 'AIO2410SA085';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New: Direct USB Print for USB thermal printers (OTG cable)';
+  const UPDATE_NOTE = 'Update card now always shows old → new version and what changed (USB Print added in last update)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -29968,11 +29968,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('appUpdateBanner')?.classList.remove('show');
   };
   // ---------- ری لوڈ کے بعد: اگر ابھی اپڈیٹ ہوئی ہے تو پرانا اور نیا ورژن دکھائیں ----------
+  // ---------- پہلے صرف تب کارڈ آتا تھا جب اپڈیٹ ایپ کے چلتے ہوئے آئے؛ ایپ کھلتے ہی سیدھا نیا ورژن لوڈ ہو تو کچھ نہ دکھتا تھا۔
+  // اب آخری دیکھا ہوا ورژن ہمیشہ یاد رہتا ہے — ورژن بدلا ہو تو ہر حال میں پرانا → نیا ورژن اور "کیا نیا ہے" دکھے ----------
+  const SEEN_KEY = 'aioPos_lastSeenVersion';
   (function showUpdatedResult(){
-    const from = lsGet(UPD_KEY);
-    if(!from) return;
+    const pending = lsGet(UPD_KEY), seen = lsGet(SEEN_KEY);
     lsDel(UPD_KEY);
-    if(from === APP_VERSION) return;
+    lsSet(SEEN_KEY, APP_VERSION);
+    const from = (seen && seen !== APP_VERSION) ? seen : ((pending && pending !== APP_VERSION) ? pending : null);
+    let showIt = !!from;
+    if(!seen && !from){
+      // اس نظام کے بعد پہلی بار: پرانا ورژن معلوم نہیں — پرانا صارف (ڈیٹا موجود) ہو تو نیا ورژن اور تبدیلی پھر بھی دکھائیں
+      try{ showIt = Object.keys(localStorage).some(k => k.indexOf('aioPos_') === 0 && k !== SEEN_KEY); }catch(e){}
+    }
+    if(!showIt) return;
     const show = () => AppUpd.done(from, APP_VERSION, UPDATE_NOTE);
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show); else show();
   })();
