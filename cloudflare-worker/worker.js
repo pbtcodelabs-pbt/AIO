@@ -16,6 +16,86 @@ var ONETIME = {
 };
 var LIFETIME_EXPIRY = "2099-12-31";
 
+// ---------- 🔔 نئی خریداری پر مالک کے فون پر پیغام (ntfy ایپ) ----------
+// مالک فون میں «ntfy» ایپ میں یہی topic سبسکرائب کرے۔ صرف پہلی تصدیق (acknowledge) پر پیغام، تجدید پر نہیں۔
+var NTFY_TOPIC = "aio-sales-7bg2fo5j6vist8funtq7jk";
+var APP_NAMES = {
+  "com.pbtcodelabs.aiopos": "AIO POS",
+  "com.pbtcodelabs.ffpos": "FFPOS",
+  "com.pbtcodelabs.dgkhata": "DG Khata",
+  "com.pbtcodelabs.ggkhatabook": "GG Khatabook"
+};
+
+function planName(sku) {
+  if (/lifetime/i.test(sku)) return "لائف ٹائم (ایک بار)";
+  const m = String(sku).match(/_(\d+)m$/);
+  if (m) return Number(m[1]) === 12 ? "1 سال" : m[1] + " مہینے";
+  if (/halfyearly/i.test(sku)) return "6 مہینے";
+  if (/yearly/i.test(sku)) return "1 سال";
+  if (/quarterly/i.test(sku)) return "3 مہینے";
+  if (/monthly/i.test(sku)) return "1 مہینہ";
+  return sku;
+}
+
+function countryName(code) {
+  if (!code) return "معلوم نہیں";
+  try {
+    const n = new Intl.DisplayNames(["en"], { type: "region" }).of(code);
+    return n && n !== code ? n + " (" + code + ")" : code;
+  } catch (e) {
+    return code;
+  }
+}
+
+function notifySale(ctx, info) {
+  const lines = [
+    "📱 ایپ: " + (APP_NAMES[info.pkg] || info.pkg),
+    "📦 پیکج: " + planName(info.sku) + " — " + info.sku,
+    "🌍 ملک: " + countryName(info.country),
+    "💰 قیمت: " + (info.price || "معلوم نہیں")
+  ];
+  if (info.trial) lines.push("🎁 مفت آزمائش سے شروع");
+  if (info.test) lines.push("🧪 یہ ٹیسٹ خریداری ہے (اصل پیسے نہیں)");
+  const p = fetch("https://ntfy.sh/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      topic: NTFY_TOPIC,
+      title: "🎉 نئی سبسکرپشن — " + (APP_NAMES[info.pkg] || info.pkg),
+      message: lines.join("\n"),
+      tags: ["tada"],
+      priority: 4
+    })
+  }).catch(() => {});
+  if (ctx && ctx.waitUntil) ctx.waitUntil(p);
+  return p;
+}
+
+function fmtPrice(micros, cur) {
+  const n = Number(micros);
+  if (!cur || isNaN(n)) return "";
+  return (n / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 }) + " " + cur;
+}
+
+// پرانا (v1) سبسکرپشن جواب — اس میں قیمت، کرنسی اور ملک ہوتا ہے
+async function subPriceInfo(base, accessToken, sku, token) {
+  try {
+    const r = await fetch(base + "/purchases/subscriptions/" + encodeURIComponent(sku) + "/tokens/" + encodeURIComponent(token), {
+      headers: { Authorization: "Bearer " + accessToken }
+    });
+    if (!r.ok) return {};
+    const v = await r.json();
+    return {
+      price: fmtPrice(v.priceAmountMicros, v.priceCurrencyCode),
+      country: v.countryCode || "",
+      test: v.purchaseType === 0,
+      trial: v.paymentState === 2
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
 var ACCESS_STATES = [
   "SUBSCRIPTION_STATE_ACTIVE",
   "SUBSCRIPTION_STATE_CANCELED",
@@ -74,7 +154,7 @@ async function getAccessToken(env) {
 
 // ---------- ♾️ لائف ٹائم (one-time product) کی تصدیق اور منظوری ----------
 // purchaseState: 0 = خریدا گیا، 1 = منسوخ/واپس، 2 = ادائیگی زیرِ التوا
-async function verifyOneTime(base, accessToken, sku, token) {
+async function verifyOneTime(base, accessToken, sku, token, ctx, pkg) {
   const url = base + "/purchases/products/" + encodeURIComponent(sku) + "/tokens/" + encodeURIComponent(token);
   const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken } });
   if (!res.ok) return reply({ access: false, error: "google_" + res.status, productId: sku });
@@ -89,6 +169,9 @@ async function verifyOneTime(base, accessToken, sku, token) {
         body: "{}"
       });
       acknowledged = ackRes.ok;
+      if (ackRes.ok) {
+        notifySale(ctx, { pkg, sku, country: d.regionCode || "", price: "", test: d.purchaseType === 0 });
+      }
     } catch (e) {
       acknowledged = false;
     }
@@ -155,7 +238,7 @@ async function handleOcr(request, env) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
     if (new URL(request.url).pathname === "/ocr") return handleOcr(request, env);
@@ -182,7 +265,7 @@ export default {
 
       // ---------- لائف ٹائم ہو تو products والا راستہ ----------
       if (sku && (ONETIME[pkg] || []).includes(sku)) {
-        return await verifyOneTime(base, accessToken, sku, token);
+        return await verifyOneTime(base, accessToken, sku, token, ctx, pkg);
       }
 
       // ---------- باقی سب سبسکرپشن (پہلے جیسا) ----------
@@ -203,6 +286,15 @@ export default {
             body: "{}"
           });
           acknowledged = ackRes.ok;
+          if (ackRes.ok) {
+            const pi = await subPriceInfo(base, accessToken, line.productId, token);
+            notifySale(ctx, {
+              pkg, sku: line.productId,
+              country: pi.country || d.regionCode || "",
+              price: pi.price, test: pi.test || !!d.testPurchase,
+              trial: pi.trial || !!(line.offerDetails && /trial/i.test(line.offerDetails.offerId || ""))
+            });
+          }
         } catch (e) {
           acknowledged = false;
         }
