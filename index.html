@@ -2220,8 +2220,15 @@
   .testPrintBtn{width:100%; margin-top:16px; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer;}
 
   /* ===================== BARCODE SCANNER (کیمرہ) ===================== */
+  .scanTools{display:flex; gap:6px; margin-left:auto; margin-right:10px;}
+  .scanToolBtn{display:inline-flex; align-items:center; justify-content:center; min-width:40px; height:34px; padding:0 10px; border-radius:17px; border:1.5px solid rgba(255,255,255,.55); background:rgba(255,255,255,.15); color:#fff; font-size:14px; font-weight:800; cursor:pointer;}
+  .scanToolBtn.on{background:#facc15; color:#1f2937; border-color:#facc15;}
   .scannerBox{background:#000; border-radius:var(--radius); width:92vw; max-width:420px; overflow:hidden; position:relative;}
   .scannerBox video{width:100%; display:block; max-height:70vh; object-fit:cover; background:#000;}
+  /* کیمرہ اور سبز ڈبہ ایک ہی خانے میں — ڈبہ ہمیشہ تصویر کے بیچ میں، نیچے لکھائی پر نہیں */
+  .scanView{position:relative; width:100%; aspect-ratio:3/4; max-height:62vh; background:#000; overflow:hidden;}
+  .scanView video{position:absolute; inset:0; width:100%; height:100%; max-height:none; object-fit:cover;}
+  @media (min-width:700px){ .scannerBox{max-width:560px;} .scanView{aspect-ratio:4/3;} }
   .scannerHead{position:absolute; top:0; left:0; right:0; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(rgba(0,0,0,.6),transparent); z-index:2;}
   .scannerHead .sTitle{color:#fff; font-weight:700; font-size:14px;}
   .scannerHead .closeBtn{color:#fff; font-size:20px; cursor:pointer;}
@@ -2833,7 +2840,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU087</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU088</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3050,7 +3057,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU087</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU088</span>
     </div>
   </div>
 
@@ -3963,10 +3970,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="scannerBox">
         <div class="scannerHead">
           <span class="sTitle">📷 Scan Barcode</span>
+          <span class="scanTools">
+            <button type="button" class="scanToolBtn" id="scannerZoomBtn" onclick="toggleScannerZoom()" style="display:none;">🔍 2×</button>
+            <button type="button" class="scanToolBtn" id="scannerTorchBtn" onclick="toggleScannerTorch()" style="display:none;">🔦</button>
+          </span>
           <span class="closeBtn" onclick="closeBarcodeScanner()">✖</span>
         </div>
-        <video id="scannerVideo" autoplay playsinline muted></video>
-        <div class="scanFrame"><div class="scanLine"></div></div>
+        <div class="scanView">
+          <video id="scannerVideo" autoplay playsinline muted></video>
+          <div class="scanFrame"><div class="scanLine"></div></div>
+        </div>
         <div class="scannerFooter">
           <div class="sHint" id="scannerHint">Point the camera at a barcode</div>
           <input type="text" id="manualBarcodeInput" placeholder="Or type barcode manually" onkeydown="if(event.key==='Enter') submitManualBarcode()">
@@ -10672,39 +10685,174 @@ let nextPendingId = loadFromStorage('nextPendingId', 1);
 let scannerStream = null;
 let scannerDetectorLoop = null;
 let scannerTargetInputId = null; // null = بلنگ سرچ/سیل موڈ؛ ورنہ اس ID والے فیلڈ میں اسکین شدہ بارکوڈ بھر دیا جائے گا (پراڈکٹ/ویرینٹ فیڈ کرتے وقت)
+// ===================== تیز اور مضبوط اسکینر =====================
+// 1) کیمرہ اونچی ریزولوشن (1920×1080) اور مسلسل فوکس پر — چھوٹا/دھندلا بارکوڈ بھی پڑھے
+// 2) ہر فریم پورا نہیں — درمیان والا حصہ (سبز ڈبہ) کاٹ کر بڑا کر کے پڑھیں، ہر 90ms
+// 3) BarcodeDetector (Android/Chromebook کا اپنا) سب فارمیٹس کے ساتھ (ITF، Codabar، Code 93 بھی)؛
+//    وہ نہ ہو یا 1.5 سیکنڈ میں نہ پڑھ سکے تو ZXing بھی ساتھ ساتھ کوشش کرے
+// 4) 🔦 ٹارچ اور 🔍 زوم بٹن (جہاں فون سپورٹ کرے)؛ ملنے پر بیپ + ہلکی وائبریشن
+let scannerBusy = false, scannerZxing = null, scannerZxingLoading = null, scannerTorchOn = false, scannerZoomed = false, scannerStartedAt = 0, scannerTick = 0;
+const SCAN_ZXING_URL = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+function scannerLoadZxing(){
+  if(window.ZXing) return Promise.resolve(window.ZXing);
+  if(scannerZxingLoading) return scannerZxingLoading;
+  scannerZxingLoading = new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.src = SCAN_ZXING_URL; sc.async = true;
+    sc.onload = () => res(window.ZXing); sc.onerror = () => { scannerZxingLoading = null; rej(new Error('zxing')); };
+    document.head.appendChild(sc);
+  });
+  return scannerZxingLoading;
+}
+function scannerZxingReader(){
+  if(scannerZxing || !window.ZXing) return scannerZxing;
+  const Z = window.ZXing, F = Z.BarcodeFormat;
+  const hints = new Map();
+  hints.set(Z.DecodeHintType.TRY_HARDER, true);
+  hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.CODE_39, F.CODE_93, F.ITF, F.CODABAR, F.QR_CODE, F.DATA_MATRIX].filter(x => x !== undefined));
+  scannerZxing = new Z.MultiFormatReader();
+  scannerZxing.setHints(hints);
+  return scannerZxing;
+}
+// ---------- ایک فریم (یا اس کا درمیانی حصہ) کینوس پر — پڑھنے کے لیے ----------
+const scanCanvas = document.createElement('canvas');
+// crop: false = پورا فریم؛ true/1 = درمیانی بڑا حصہ؛ 2 = پتلی پٹی (بارکوڈ کی لائن)؛ 3 = درمیانہ ڈبہ
+const SCAN_CROPS = {1:[0.86, 0.5], 2:[0.86, 0.22], 3:[0.7, 0.35]};
+function scannerGrabFrame(video, crop){
+  const vw = video.videoWidth, vh = video.videoHeight;
+  if(!vw || !vh) return null;
+  let sx = 0, sy = 0, sw = vw, sh = vh;
+  const cz = crop ? SCAN_CROPS[crop === true ? 1 : crop] : null;
+  if(cz){ sw = Math.round(vw * cz[0]); sh = Math.round(vh * cz[1]); sx = Math.round((vw - sw) / 2); sy = Math.round((vh - sh) / 2); }
+  const maxW = 1280, k = Math.min(1, maxW / sw);
+  scanCanvas.width = Math.round(sw * k); scanCanvas.height = Math.round(sh * k);
+  const c = scanCanvas.getContext('2d', {willReadFrequently: true});
+  c.drawImage(video, sx, sy, sw, sh, 0, 0, scanCanvas.width, scanCanvas.height);
+  return scanCanvas;
+}
+function scannerZxingDecode(canvas){
+  const r = scannerZxingReader();
+  if(!r || !canvas) return '';
+  const Z = window.ZXing;
+  const src = new Z.HTMLCanvasElementLuminanceSource(canvas);
+  // دو طریقے: Hybrid (عام) اور GlobalHistogram (دھندلے/مدھم 1D بارکوڈ کے لیے بہتر)
+  for(const B of [Z.HybridBinarizer, Z.GlobalHistogramBinarizer]){
+    try{ const t = r.decode(new Z.BinaryBitmap(new B(src))).getText(); if(t) return t; }
+    catch(e){} finally { try{ r.reset(); }catch(e){} }
+  }
+  return '';
+}
+function scannerSuccessFeedback(){
+  try{ navigator.vibrate && navigator.vibrate(70); }catch(e){}
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    const ac = new AC(), o = ac.createOscillator(), g = ac.createGain();
+    o.frequency.value = 1750; g.gain.value = 0.08; o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + 0.09); setTimeout(() => ac.close(), 300);
+  }catch(e){}
+}
+function scannerTrack(){ return scannerStream ? scannerStream.getVideoTracks()[0] : null; }
+function scannerSetupControls(){
+  const t = scannerTrack();
+  const caps = t && t.getCapabilities ? t.getCapabilities() : {};
+  const torchBtn = document.getElementById('scannerTorchBtn'), zoomBtn = document.getElementById('scannerZoomBtn');
+  if(torchBtn) torchBtn.style.display = caps.torch ? 'inline-flex' : 'none';
+  if(zoomBtn) zoomBtn.style.display = (caps.zoom && caps.zoom.max > 1) ? 'inline-flex' : 'none';
+  scannerTorchOn = false; scannerZoomed = false;
+  if(torchBtn) torchBtn.classList.remove('on');
+  if(zoomBtn){ zoomBtn.classList.remove('on'); zoomBtn.textContent = '🔍 2×'; }
+  // مسلسل فوکس (جہاں ممکن ہو)
+  if(t && caps.focusMode && caps.focusMode.includes('continuous')){ t.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(() => {}); }
+}
+function toggleScannerTorch(){
+  const t = scannerTrack(); if(!t) return;
+  scannerTorchOn = !scannerTorchOn;
+  t.applyConstraints({advanced:[{torch: scannerTorchOn}]}).catch(() => {});
+  document.getElementById('scannerTorchBtn').classList.toggle('on', scannerTorchOn);
+}
+function toggleScannerZoom(){
+  const t = scannerTrack(); if(!t || !t.getCapabilities) return;
+  const z = t.getCapabilities().zoom; if(!z) return;
+  scannerZoomed = !scannerZoomed;
+  const val = scannerZoomed ? Math.min(z.max, Math.max(z.min, 2)) : z.min;
+  t.applyConstraints({advanced:[{zoom: val}]}).catch(() => {});
+  const b = document.getElementById('scannerZoomBtn');
+  b.classList.toggle('on', scannerZoomed); b.textContent = scannerZoomed ? '🔍 1×' : '🔍 2×';
+}
 
 async function openBarcodeScanner(targetInputId = null){
   scannerTargetInputId = targetInputId;
   document.getElementById('scannerModal').classList.add('show');
   document.getElementById('manualBarcodeInput').value = '';
   document.getElementById('scannerHint').textContent = 'Starting camera…';
+  scannerBusy = false; scannerTick = 0;
 
   try{
-    scannerStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' } // پیچھے والا کیمرہ (بارکوڈ اسکیننگ کے لیے بہتر)
-    });
+    try{
+      scannerStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: {ideal:'environment'}, width: {ideal:1920}, height: {ideal:1080}, advanced: [{focusMode:'continuous'}] }, audio: false
+      });
+    }catch(e1){
+      scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    }
+    if(!document.getElementById('scannerModal').classList.contains('show')){ closeBarcodeScanner(); return; }
     const video = document.getElementById('scannerVideo');
     video.srcObject = scannerStream;
-    document.getElementById('scannerHint').textContent = 'Point the camera at a barcode';
+    try{ await video.play(); }catch(e){}
+    scannerSetupControls();
+    document.getElementById('scannerHint').textContent = 'Hold the barcode inside the green box';
+    scannerStartedAt = Date.now();
 
-    // ---------- اگر براؤزر BarcodeDetector سپورٹ کرے تو خودکار لائیو اسکیننگ شروع کریں ----------
+    // ---------- BarcodeDetector: فون/کروم بک جو بھی فارمیٹ سپورٹ کرے، سب ----------
+    let detector = null;
     if('BarcodeDetector' in window){
-      const detector = new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
-      const loop = async () => {
-        if(!scannerStream) return; // اسکینر بند ہو چکا
-        try{
-          const codes = await detector.detect(video);
-          if(codes.length > 0){
-            handleScannedBarcode(codes[0].rawValue);
-            return; // ایک بار مل جائے تو لوپ روک دیں
-          }
-        } catch(e){ /* frame تیار نہیں تھا، اگلی کوشش */ }
-        scannerDetectorLoop = requestAnimationFrame(loop);
-      };
-      scannerDetectorLoop = requestAnimationFrame(loop);
-    } else {
-      document.getElementById('scannerHint').textContent = 'Auto-scan not supported on this device — please type the barcode below';
+      try{
+        const want = ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','code_93','itf','codabar','qr_code','data_matrix','pdf417','aztec'];
+        let sup = [];
+        try{ sup = await BarcodeDetector.getSupportedFormats(); }catch(e){}
+        const formats = sup.length ? want.filter(f => sup.includes(f)) : want;
+        if(formats.length) detector = new BarcodeDetector({formats});
+      }catch(e){ detector = null; }
     }
+    if(!detector) scannerLoadZxing().catch(() => {
+      if(!window.ZXing) document.getElementById('scannerHint').textContent = 'Auto-scan needs internet once on this device — type the barcode below';
+    });
+
+    const finish = (code) => {
+      code = String(code || '').trim();
+      if(!code || !scannerStream) return false;
+      scannerSuccessFeedback();
+      handleScannedBarcode(code);
+      return true;
+    };
+    const loop = async () => {
+      if(!scannerStream) return;
+      if(scannerBusy){ scannerDetectorLoop = setTimeout(loop, 40); return; }
+      scannerBusy = true;
+      try{
+        scannerTick++;
+        const crop = scannerTick % 3 !== 0; // زیادہ تر درمیانی حصہ (بڑا کر کے)، ہر تیسری بار پورا فریم
+        if(detector){
+          const src = crop ? scannerGrabFrame(video, true) : video;
+          if(src){
+            const codes = await detector.detect(src);
+            if(codes && codes.length && finish(codes[0].rawValue)) return;
+          }
+          // 1.5 سیکنڈ میں نہ ملے تو ZXing بھی ساتھ لگائیں (کچھ فونز کا اپنا اسکینر پرانے/مدھم لیبل نہیں پڑھتا)
+          if(Date.now() - scannerStartedAt > 1500){
+            scannerLoadZxing().catch(() => {});
+            if(window.ZXing && scannerTick % 2 === 0 && finish(scannerZxingDecode(scannerGrabFrame(video, [2, 3, 1][(scannerTick / 2) % 3 | 0])))) return;
+          }
+        } else if(window.ZXing){
+          // باری باری: پتلی پٹی، درمیانہ ڈبہ، بڑا حصہ، پورا فریم — جو بھی پہلے پڑھ لے
+          if(finish(scannerZxingDecode(scannerGrabFrame(video, [2, 3, 1, false][scannerTick % 4])))) return;
+        }
+      }catch(e){ /* frame تیار نہیں تھا، اگلی کوشش */ }
+      finally{ scannerBusy = false; }
+      if(scannerStream) scannerDetectorLoop = setTimeout(loop, 90);
+    };
+    scannerDetectorLoop = setTimeout(loop, 250);
   } catch(err){
     document.getElementById('scannerHint').textContent = 'Camera access denied — please type the barcode below';
   }
@@ -10712,8 +10860,12 @@ async function openBarcodeScanner(targetInputId = null){
 
 function closeBarcodeScanner(){
   document.getElementById('scannerModal').classList.remove('show');
-  if(scannerDetectorLoop){ cancelAnimationFrame(scannerDetectorLoop); scannerDetectorLoop = null; }
-  if(scannerStream){ scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+  if(scannerDetectorLoop){ clearTimeout(scannerDetectorLoop); scannerDetectorLoop = null; }
+  if(scannerStream){
+    try{ if(scannerTorchOn) scannerTrack().applyConstraints({advanced:[{torch:false}]}).catch(() => {}); }catch(e){}
+    scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null;
+  }
+  scannerBusy = false;
 }
 
 /* =====================================================================
@@ -30130,9 +30282,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU087';
+  const APP_VERSION = 'AIO2510SU088';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New: ⚡ Scan & Add Products — scan barcode, name fills itself, type price, save, next';
+  const UPDATE_NOTE = 'Barcode scanner: faster and stronger (HD camera, focus, more formats, torch, zoom)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
