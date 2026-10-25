@@ -2840,7 +2840,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU088</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU089</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3057,7 +3057,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU088</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU089</span>
     </div>
   </div>
 
@@ -5670,7 +5670,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div style="padding:8px 0; border-bottom:1px solid #eef1f6; font-size:12.5px; color:var(--muted);">
           💳 Payment account footer + QR now prints automatically for any account marked "🧾 Show on Receipt" in My Payment Accounts — no separate toggle needed here anymore.
         </div>
-        <label style="display:flex; align-items:center; gap:10px; padding:8px 0;">
+        <label style="display:none; align-items:center; gap:10px; padding:8px 0;">
           <input type="checkbox" id="printShowBrandingChk" onchange="updatePrintToggle('printShowBranding', this.checked)" style="width:18px; height:18px; margin:0;">
           <span style="font-size:13px;">Show small "Powered by AIO POS" line in footer</span>
         </label>
@@ -14442,7 +14442,7 @@ function shareItemLedger(){
     lines.push(`${formatDateDMY(e.date)} | ${IL_TYPE_LABEL[e.kind].replace(/^\S+\s/, '')} | ${e.ref} | ${e.party} | ${ilNum(e.qty)}${e.unit ? ' ' + e.unit : ''} × ${ilNum(e.rate)} = Rs. ${ilNum(e.amount)}${e.excluded ? ' (' + e.note + ')' : ''}`);
   });
   if(!itemLedgerState.entries.length) lines.push('No history yet.');
-  const text = lines.join('\n');
+  const text = brandMsg(lines.join('\n'));
   if(navigator.share){ navigator.share({title: `Item Ledger — ${p.name}`, text}).catch(() => {}); }
   else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
@@ -17180,7 +17180,7 @@ function buildQuickContactIcons(phone, name, dueAmount, dueType){
       ? `Dear ${name}, your outstanding balance with us is Rs. ${dueAmount.toLocaleString()}. Please settle at your earliest convenience. Thank you!`
       : `Hello ${name}, this is regarding our outstanding balance of Rs. ${dueAmount.toLocaleString()} with you. Please let us know a convenient time to settle. Thank you!`;
   }
-  const encodedMsg = encodeURIComponent(msg);
+  const encodedMsg = encodeURIComponent(brandMsg(msg));
   return `
     <a class="prIconBtn cCall" href="tel:+${digits}" title="Call">📞</a>
     <a class="prIconBtn cWhatsapp" href="https://wa.me/${digits}?text=${encodedMsg}" target="_blank" rel="noopener" title="WhatsApp">💬</a>
@@ -17229,7 +17229,7 @@ function partyContactIcons(phone, name, dueAmount, dueType){
       ? `Dear ${name}, your outstanding balance with us is Rs. ${dueAmount.toLocaleString()}. Please settle at your earliest convenience. Thank you!`
       : `Hello ${name}, this is regarding our outstanding balance of Rs. ${dueAmount.toLocaleString()} with you. Please let us know a convenient time to settle. Thank you!`;
   }
-  const m = encodeURIComponent(msg);
+  const m = encodeURIComponent(brandMsg(msg));
   return `<a class="ptyIc call" href="tel:+${digits}" title="Call" onclick="event.stopPropagation()">${PTY_SVG.call}</a>`
        + `<a class="ptyIc wa" href="https://wa.me/${digits}?text=${m}" target="_blank" rel="noopener" title="WhatsApp" onclick="event.stopPropagation()">${PTY_SVG.wa}</a>`
        + `<a class="ptyIc sms" href="sms:+${digits}?body=${m}" title="SMS" onclick="event.stopPropagation()">${PTY_SVG.sms}</a>`;
@@ -17918,7 +17918,7 @@ function sendCustomerReminderWhatsapp(){
     alert("This customer's phone number isn't saved.");
     return;
   }
-  window.open(`https://wa.me/${formatPhoneForWhatsApp(c.phone)}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${formatPhoneForWhatsApp(c.phone)}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
   document.getElementById('customerReminderModal').classList.remove('show');
 }
 
@@ -19922,7 +19922,7 @@ function shareAdvOrderWhatsapp(){
   }
   const digits = formatPhoneForWhatsApp(order.customerPhone);
   const text = `Advance Order #${order.id} — ${order.customerName} — Approx. Total: Rs. ${advOrderTotal(order).toLocaleString()} (approximate pricing, subject to change at delivery)`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
 }
 
 // ---------- WhatsApp/دیگر ایپس کو اصل بل کی تصویر بھیجیں — ٹیکسٹ میسج نہیں، Web Share API کے ذریعے اصل پرنٹ ایبل بل ----------
@@ -20373,7 +20373,7 @@ function sharePoWhatsapp(){
   }
   const digits = formatPhoneForWhatsApp(s.phone);
   const text = `${po.status === 'received' ? 'Goods Received' : 'Purchase Order'} — ${s.name} — Total: Rs. ${po.total.toLocaleString()}`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
 }
 function sharePoUniversal(){
   const ref = getCurrentPreviewPo();
@@ -20518,7 +20518,7 @@ function sendPoReminderWhatsapp(){
     alert("This supplier's phone number isn't saved.");
     return;
   }
-  window.open(`https://wa.me/${formatPhoneForWhatsApp(s.phone)}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${formatPhoneForWhatsApp(s.phone)}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
   document.getElementById('poReminderModal').classList.remove('show');
 }
 
@@ -23668,12 +23668,6 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   ctx.font = F('13px');
   ctx.fillText('Thank you for your purchase!', pxWidth/2, y);
 
-  if(AppState.settings.printShowBranding){
-    y += 18;
-    ctx.font = F('10px');
-    ctx.fillStyle = '#888';
-    ctx.fillText('Powered by AIO POS — Best Billing App', pxWidth/2, y);
-  }
 }
 
 function drawSolidLine(ctx, y, width){
@@ -24908,7 +24902,7 @@ function shareInvoiceWhatsapp(){
   // اسی لیے یہاں سے صرف صحیح چیٹ کھلے گی، تصویر خود Print/Share بٹن سے لے کر یہاں بھیجیں۔
   const digits = formatPhoneForWhatsApp(inv.customer_phone);
   const text = `${inv.invoice_no} — Grand Total: Rs. ${inv.grand_total.toLocaleString()}`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank');
+  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
 }
 
 // ---------- یونیورسل شیئر (Web Share API — واٹس ایپ کے علاوہ کسی بھی ایپ کو bills کی تصویر بھیجیں) ----------
@@ -27535,7 +27529,84 @@ async function renderAccountPosterToCanvas(acc){
 }
 // ---------- کارڈ/پوسٹر بننے کے بعد سیدھا شیئر شیٹ پر نہیں جاتے — پہلے تصویر دکھاتے ہیں تاکہ صارف دیکھ لے یہ کیسی بنی ہے، پھر خود فیصلہ کرے شیئر کرنی ہے یا نہیں ----------
 let pendingShareCanvas = null, pendingShareFilename = '', pendingShareTitle = '', pendingShareText = '';
+// ===================== 🏷️ PBT Code Labs برانڈنگ — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور واٹس ایپ پیغام کے نیچے (ہمیشہ) =====================
+const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & Android';
+function brandPhone(){
+  const d = String(AppState.settings.devSms || '03206793793').replace(/[^0-9]/g, '');
+  return d.length === 11 ? d.slice(0, 4) + '-' + d.slice(4) : (d || '0320-6793793');
+}
+function brandLine2(){ return `All types of custom business software • PBT Code Labs • WhatsApp ${brandPhone()}`; }
+// ---------- کینوس کے نیچے برانڈنگ پٹی جوڑیں — ایک ہی کینوس پر دو بار نہیں (اونچائی/چوڑائی سے پہچان) ----------
+function appendBrandFooter(canvas){
+  if(!canvas || !canvas.getContext || !canvas.width || !canvas.height) return canvas;
+  if(canvas._brandSig === canvas.width + 'x' + canvas.height) return canvas;
+  const w = canvas.width, h = canvas.height;
+  const fs = Math.max(11, Math.min(24, Math.round(w / 34)));
+  const band = Math.round(fs * 3.6);
+  const copy = document.createElement('canvas');
+  copy.width = w; copy.height = h;
+  copy.getContext('2d').drawImage(canvas, 0, 0);
+  canvas.height = h + band; // کینوس صاف ہو جاتا ہے — پرانی تصویر واپس بنائیں
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h + band);
+  ctx.drawImage(copy, 0, 0);
+  ctx.save();
+  ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1; ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(Math.round(w * 0.06), h + Math.round(fs * 0.5)); ctx.lineTo(Math.round(w * 0.94), h + Math.round(fs * 0.5)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  const fam = "'Noto Sans', 'Segoe UI', Arial, sans-serif";
+  const fit = (txt, px, weight) => {
+    let p = px; ctx.font = `${weight} ${p}px ${fam}`;
+    while(ctx.measureText(txt).width > w * 0.92 && p > 7){ p -= 0.5; ctx.font = `${weight} ${p}px ${fam}`; }
+  };
+  ctx.fillStyle = '#0f172a'; fit('💻 ' + BRAND_LINE_1, fs, '800');
+  ctx.fillText('💻 ' + BRAND_LINE_1, w / 2, h + Math.round(fs * 1.75));
+  ctx.fillStyle = '#475569'; fit(brandLine2(), Math.round(fs * 0.86), '600');
+  ctx.fillText(brandLine2(), w / 2, h + Math.round(fs * 2.95));
+  ctx.restore();
+  canvas._brandSig = canvas.width + 'x' + canvas.height;
+  return canvas;
+}
+// ---------- سادہ لکھائی (Fast Print / USB / واٹس ایپ) کے نیچے برانڈنگ ----------
+function brandTextLines(){ return ['Reach us for the best software', 'PC, Mobile & Android apps', 'PBT Code Labs ' + brandPhone()]; }
+function brandPlainText(text, cols){
+  const c = cols || Math.max(32, ...String(text || '').split('\n').map(l => l.length).filter(n => n <= 64));
+  const ctr = t => { const pad = Math.max(0, Math.floor((c - t.length) / 2)); return ' '.repeat(pad) + t; };
+  const body = String(text || '').replace(/\s+$/, '');
+  return body + '\n' + '-'.repeat(Math.min(c, 48)) + '\n' + brandTextLines().map(ctr).join('\n') + '\n\n\n';
+}
+function brandMsg(text){
+  return String(text || '') + `\n\n💻 ${BRAND_LINE_1}\nPBT Code Labs • WhatsApp ${brandPhone()}`;
+}
+// ---------- سب رینڈر فنکشنز کو لپیٹ دیں — جو بھی کینوس بنے، اس کے نیچے برانڈنگ خود لگے ----------
+(function wrapBrandedRenderers(){
+  const map = {
+    renderInvoiceToCanvas:'invoiceCanvas', renderInvoiceToA4Canvas:'invoiceCanvas', renderAdvOrderToCanvas:'advOrderCanvas',
+    renderPoToCanvas:'poCanvas', renderAccountCardToCanvas:'accountCardCanvas', renderReportToCanvas:'reportCanvas',
+    renderTodaySaleReportToCanvas:'reportCanvas', renderDiarySummaryReportToCanvas:'reportCanvas', renderStockSaleProfitReportToCanvas:'reportCanvas',
+    renderReturnReceiptToCanvas:null, renderPaymentReceiptToCanvas:null, renderAccountPosterToCanvas:null,
+    renderPartyProfilePosterToCanvas:null, renderDiaryTransactionPoster:null, renderDiaryFullLedgerPoster:null
+  };
+  Object.keys(map).forEach(name => {
+    const orig = window[name];
+    if(typeof orig !== 'function') return;
+    window[name] = async function(...args){
+      const r = await orig.apply(this, args);
+      const cv = (r && r.getContext) ? r : (map[name] ? document.getElementById(map[name]) : null);
+      if(cv) appendBrandFooter(cv);
+      return r;
+    };
+  });
+  ['buildInvoicePlainText', 'buildAdvOrderPlainText', 'buildPoPlainText'].forEach(name => {
+    const orig = window[name];
+    if(typeof orig !== 'function') return;
+    window[name] = function(...args){ return brandPlainText(orig.apply(this, args)); };
+  });
+})();
+
 function showImageSharePreview(canvas, filename, title, text){
+  appendBrandFooter(canvas); // جو کینوس کسی اور راستے سے بنا ہو، اس پر بھی برانڈنگ
   pendingShareCanvas = canvas;
   pendingShareFilename = filename;
   pendingShareTitle = title;
@@ -30282,9 +30353,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU088';
+  const APP_VERSION = 'AIO2510SU089';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Barcode scanner: faster and stronger (HD camera, focus, more formats, torch, zoom)';
+  const UPDATE_NOTE = 'PBT Code Labs branding footer on every bill, report, print and WhatsApp message';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
