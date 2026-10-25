@@ -2855,7 +2855,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU094</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU095</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3072,7 +3072,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU094</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU095</span>
     </div>
   </div>
 
@@ -10871,6 +10871,14 @@ async function openBarcodeScanner(targetInputId = null, opts = {}){
   document.getElementById('scannerHint').textContent = 'Starting camera…';
   scannerBusy = false; scannerTick = 0;
 
+  // ---------- 💻 کمپیوٹر جس میں کیمرہ نہیں (USB/بلوٹوتھ اسکینر لگا ہے) — دیر نہ کریں، سیدھا اسکینر سے لیں ----------
+  try{
+    if(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices){
+      const devs = await navigator.mediaDevices.enumerateDevices();
+      if(!devs.some(d => d.kind === 'videoinput')){ scannerNoCameraMode(); return; }
+    }
+  }catch(e){}
+
   try{
     try{
       scannerStream = await navigator.mediaDevices.getUserMedia({
@@ -10954,10 +10962,17 @@ async function openBarcodeScanner(targetInputId = null, opts = {}){
     };
     scannerDetectorLoop = setTimeout(loop, 250);
   } catch(err){
-    document.getElementById('scannerHint').textContent = 'Camera access denied — please type the barcode below';
+    scannerNoCameraMode();
   }
 }
 
+// ---------- کیمرہ نہیں/اجازت نہیں: بارکوڈ خانہ خود چنا جائے — گن/کاؤنٹر اسکینر سے اسکین ہوتے ہی Enter سے خود قبول ----------
+function scannerNoCameraMode(){
+  const hint = document.getElementById('scannerHint');
+  if(hint) hint.textContent = '📟 No camera on this device — scan with your barcode scanner now (or type the barcode)';
+  const inp = document.getElementById('manualBarcodeInput');
+  if(inp){ inp.value = ''; setTimeout(() => inp.focus(), 60); }
+}
 function closeBarcodeScanner(){
   document.getElementById('scannerModal').classList.remove('show');
   if(scannerDetectorLoop){ clearTimeout(scannerDetectorLoop); scannerDetectorLoop = null; }
@@ -30594,9 +30609,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU094';
+  const APP_VERSION = 'AIO2510SU095';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Counter scanner: same barcode within 1 second is not added twice';
+  const UPDATE_NOTE = 'PC without camera: scanner window takes barcode from USB scanner instantly';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
