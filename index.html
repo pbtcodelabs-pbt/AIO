@@ -1716,6 +1716,75 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+  /* ---------- AIO2510SU098: مختصر ویرینٹ لسٹ — ہر سائز ایک لائن، باقی تفصیل ⋯ میں ---------- */
+  .productCard.capCard .variantCardWrap{padding:0 0 12px;}
+  .vlBox{background:var(--card); border:1px solid #e5e9f0; border-radius:14px; padding:8px 6px; box-shadow:0 4px 14px rgba(41,29,10,.05);}
+  .vlHead, .vlMain{display:grid; grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,1fr)) 28px; gap:4px; align-items:center;}
+  .vlHead{padding:0 2px 4px; font-size:10.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px;}
+  .vlHead span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .vlRow{border-top:1px solid #eef1f6; padding:5px 0;}
+  .vlRow:first-of-type{border-top:none;}
+  .vlMain input{width:100%; min-width:0; height:36px; padding:4px 5px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; background:#fff; color:var(--text); margin:0;}
+  .vlMain input[type=number]{-moz-appearance:textfield; text-align:center;}
+  .vlMain input[type=number]::-webkit-inner-spin-button, .vlMain input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none; margin:0;}
+  .vlMain input:focus, .vlF input:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 2px rgba(14,116,144,.15);}
+  .vlMain input.vlName{font-weight:700;}
+  .vlMain input.vlLow{background:#fffbeb; border-color:#f59e0b; color:#92400e;}
+  .vlMain input.negativeStockInput{background:#fef2f2; border-color:#ef4444; color:#b91c1c;}
+  .vlMoreBtn{width:28px; height:36px; border:1px solid #dbe1ea; border-radius:8px; background:#f8fafc; color:#334155; font-size:16px; font-weight:800; cursor:pointer; padding:0; line-height:1;}
+  .vlRow.open .vlMoreBtn{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .vlMoreBox{display:none; margin-top:6px; padding:8px; background:#f8fafc; border:1px solid #eef1f6; border-radius:10px;}
+  .vlRow.open .vlMoreBox{display:block;}
+  .vlGrid{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .vlF{display:flex; flex-direction:column; gap:2px; font-size:10.5px; font-weight:700; color:var(--muted); min-width:0;}
+  .vlF.vlFull, body.wsOff .vlF.vlLoc{grid-column:1 / -1;}
+  .vlF input{width:100%; min-width:0; height:34px; padding:4px 8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13.5px; background:#fff; color:var(--text); margin:0;}
+  .vlIn{display:flex; gap:4px;}
+  .vlIn button{flex:0 0 38px; border:1px solid #dbe1ea; border-radius:8px; background:#fff; cursor:pointer; font-size:15px;}
+  .vlActs{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .vlActs button{flex:1 1 auto; min-height:34px; padding:6px 8px; border:1px solid #dbe1ea; border-radius:8px; background:#fff; color:#334155; font-size:12.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;}
+  .vlActs button img{width:22px; height:22px; border-radius:5px; object-fit:cover;}
+  .vlActs .vlDel{color:var(--danger); border-color:#fecaca; background:#fff5f5;}
+  .vlFoot{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;}
+  .vlFoot button{min-height:40px; padding:8px 6px; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap;}
+  .vlFoot .vlWide, .vlFoot .vlDone{grid-column:1 / -1;}
+  .vlFoot .vlAdd{background:#eef2ff; color:var(--primary-dark); border:1px dashed var(--primary);}
+  .vlFoot .vlPack{background:#fff7ed; color:#9a3412; border:1px solid #fdba74;}
+  .vlFoot .vlDone{background:var(--primary); color:#fff; border:none;}
+  @media (min-width:700px){
+    .productCard.capCard .variantCardWrap{padding:0 6px 14px;}
+    .vlBox{padding:10px 12px;}
+    .vlHead, .vlMain{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr)) 36px; gap:8px;}
+    .vlMoreBtn{width:36px;}
+    .vlGrid{grid-template-columns:repeat(4,1fr);}
+    .vlF.vlFull{grid-column:span 2;}
+    body.wsOff .vlF.vlLoc{grid-column:span 1;}
+    .vlFoot{display:flex; justify-content:flex-end;}
+    .vlFoot button{padding:8px 18px;}
+    .vlFoot .vlDone{min-width:140px;}
+  }
+  /* ---------- 📦 پیکٹ بنائیں (ری پیکنگ) ---------- */
+  .rpBox{width:min(440px, 94vw); padding:16px;}
+  .rpBox .ilHead{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .rpHave{display:flex; align-items:center; justify-content:space-between; gap:8px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:10px 12px; margin-bottom:8px;}
+  .rpHave small{font-size:12px; font-weight:700; color:#166534;}
+  .rpHave b{font-size:20px; color:#166534;}
+  .rpBox select#rpSrc{margin:0 0 8px; height:38px; padding:4px 8px;}
+  .rpHint{font-size:12px; color:var(--muted); margin:0 2px 6px;}
+  .rpRow{display:grid; grid-template-columns:minmax(0,1fr) 16px 84px minmax(0,1fr); gap:6px; align-items:center; padding:6px 2px; border-top:1px solid #eef1f6;}
+  .rpRow:first-child{border-top:none;}
+  .rpSize{font-weight:800; font-size:15px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .rpX{color:var(--muted); font-weight:800; text-align:center;}
+  .rpBox .rpRow input{height:38px; margin:0; padding:4px 6px; text-align:center; font-size:16px; font-weight:800;}
+  .rpEq{font-size:13px; color:var(--muted); font-weight:700; text-align:right; white-space:nowrap;}
+  .rpEq.on{color:var(--primary-dark);}
+  .rpNew{display:flex; gap:6px; margin-top:6px;}
+  .rpBox .rpNew input{margin:0; height:38px; flex:1; min-width:0;}
+  .rpNew button{flex:0 0 auto; padding:0 12px; border:1px dashed var(--primary); border-radius:8px; background:#eef2ff; color:var(--primary-dark); font-weight:800; cursor:pointer;}
+  .rpLeft{margin-top:10px; padding:10px 12px; border-radius:12px; background:#eff6ff; border:1px solid #bfdbfe; display:flex; justify-content:space-between; align-items:center; gap:8px; font-weight:700; color:#1e3a8a; font-size:13px;}
+  .rpLeft b{font-size:18px;}
+  .rpLeft.bad{background:#fef2f2; border-color:#fecaca; color:#b91c1c;}
+  .rpBox .saveBtn:disabled{opacity:.45; cursor:not-allowed;}
 
 
   .expiryInput.exp-red{background:#fef2f2; border-color:var(--danger); color:var(--danger); font-weight:700;}
@@ -2857,7 +2926,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU097</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU098</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3074,7 +3143,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU097</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU098</span>
     </div>
   </div>
 
@@ -4443,6 +4512,26 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     </div>
 
     <!-- 📜 ITEM LEDGER — ہر آئٹم کی مکمل ہسٹری: خریداری، سیل، واپسی — ہر قطار پر بل/PO کا حوالہ (تھپتھپانے سے وہی بل کھلے) -->
+    <!-- 📦 پیکٹ بنائیں: کھلے وزن (مثلاً چینی کی بوری) سے 1 kg / 500 g / 250 g کے پیکٹ — باقی کھلا وزن خود حساب -->
+    <div class="modalOverlay" id="repackModal" onclick="if(event.target===this) closeRepack()">
+      <div class="modalBox rpBox">
+        <div class="ilHead">
+          <h3 id="rpTitle" style="margin:0;">📦 Make Packets</h3>
+          <span class="closeBtn" onclick="closeRepack()">✖</span>
+        </div>
+        <select id="rpSrc" onchange="rpSetSource(+this.value)"></select>
+        <div class="rpHave"><small>Loose stock now</small><b id="rpHave">0</b></div>
+        <div class="rpHint">How many packets of each size? (leave empty if none)</div>
+        <div id="rpRows"></div>
+        <div class="rpNew"><input id="rpNewSize" placeholder="New size, e.g. 200 g" onkeydown="if(event.key==='Enter') rpAddSize()"><button type="button" onclick="rpAddSize()">+ Add size</button></div>
+        <div class="rpLeft" id="rpLeft"></div>
+        <div class="modalActions" style="margin-top:12px;">
+          <button class="cancelBtn" onclick="closeRepack()">Cancel</button>
+          <button class="saveBtn" id="rpSave" onclick="saveRepack()">✓ Save</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modalOverlay" id="itemLedgerModal" onclick="if(event.target===this) closeItemLedger()">
       <div class="modalBox ilBox">
         <div class="ilHead">
@@ -14429,95 +14518,230 @@ function renderProductList(query = ''){
 // ---------- ہر پراڈکٹ کے لیے فی الوقت کون سا ویریئنٹ کارڈ کھلا ہوا ہے، یاد رکھا جاتا ہے ----------
 let activeVariantIndexByProduct = new Map();
 
+// ---------- ⋯ والی کھلی لائنیں یاد رہیں (لسٹ دوبارہ بنے تو بھی کھلی رہیں) ----------
+const vlOpenRows = new Set();
 function renderVariantCardSection(productId){
+  // AIO2510SU098: پرانا لمبا کارڈ (ہر ویرینٹ ایک پوری اسکرین) ختم — اب ہر سائز ایک لائن: نام | خرید | فروخت | اسٹاک | ⋯
   const p = productsData.find(pr => pr.product_id === productId);
   if(!p || !p.variants.length) return '';
-  let idx = activeVariantIndexByProduct.get(productId) ?? 0;
-  idx = Math.max(0, Math.min(p.variants.length - 1, idx));
-  activeVariantIndexByProduct.set(productId, idx);
-  const v = p.variants[idx];
-  const isLow = v.stock <= v.lowStockAt && v.stock >= 0;
-  const isNegative = v.stock < 0;
-  const expiryTier = getExpiryTier(v.expiryDate);
-
+  const esc = t => String(t ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  const mk = AppState.settings.markupPricingEnabled;
+  const rows = p.variants.map(v => {
+    const isNeg = v.stock < 0, isLow = !isNeg && v.stock <= (v.lowStockAt ?? 0);
+    const tier = getExpiryTier(v.expiryDate);
+    const nb = v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : '';
+    return `
+    <div class="vlRow ${vlOpenRows.has(v.variant_id) ? 'open' : ''}" id="vlRow-${v.variant_id}">
+      <div class="vlMain">
+        <input class="vlName" id="vlName-${v.variant_id}" value="${esc(v.label)}" placeholder="e.g. 500 g" title="Size / name" onfocus="this.select()" onchange="vlLabelChange(${productId},${v.variant_id},this.value)">
+        <input type="number" inputmode="decimal" id="purchaseInput-${v.variant_id}" value="${v.purchase}" title="Purchase price" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'purchase',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
+        <input type="number" inputmode="decimal" id="retailInput-${v.variant_id}" value="${v.retail}" title="Sale price" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'retail',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
+        <input type="number" inputmode="decimal" id="stockInput-${v.variant_id}" value="${v.stock}" class="${isNeg ? 'negativeStockInput' : (isLow ? 'vlLow' : '')}" title="Stock${isLow ? ' — low' : ''}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
+        <button type="button" class="vlMoreBtn" title="More: barcode, wholesale, expiry, photo, delete" onclick="toggleVlMore(${v.variant_id})">⋯</button>
+      </div>
+      <div class="vlMoreBox">
+        <div class="vlGrid">
+          <div class="vlF vlFull">Barcode
+            <div class="vlIn"><input id="variantBarcode-${v.variant_id}" value="${esc(v.barcode)}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)"><button type="button" onclick="openBarcodeScanner('variantBarcode-${v.variant_id}')" title="Scan barcode">📷</button></div>
+          </div>
+          ${mk ? `<div class="vlF">Markup %<input type="number" id="markupInput-${v.variant_id}" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'markupPercent',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)"></div>` : ''}
+          <div class="vlF wsOnly">Wholesale<input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></div>
+          <div class="vlF">Low stock alert<input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value)"></div>
+          <div class="vlF">Expiry<input type="date" class="expiryInput ${tier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)"></div>
+          <div class="vlF vlLoc">Location<input value="${esc(v.location)}" placeholder="Shelf B" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)"></div>
+        </div>
+        <div class="vlActs">
+          <button type="button" onclick="triggerImageUpload(${productId},${v.variant_id})">${v.image ? `<img src="${v.image}">` : '📷'} Photo</button>
+          <button type="button" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${nb}</button>
+          <button type="button" onclick="openItemLedger(${productId},${v.variant_id})">📜 Ledger</button>
+          <button type="button" class="vlDel" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const canPack = p.variants.some(v => rpMeasure(v));
   return `
-    <div class="vcNavBar">
-      <div class="vcNavTitle">
-        ${idx === 0 ? `<span class="vcMainBadge">MAIN</span>` : ''}
-        <span>Variant ${idx + 1} of ${p.variants.length}</span>
+    <div class="vlBox">
+      <div class="vlHead"><span>Size / Name</span><span>Buy</span><span>Sell</span><span>Stock</span><span></span></div>
+      ${rows}
+      <div class="vlFoot">
+        <button type="button" class="vlAdd${canPack ? '' : ' vlWide'}" onclick="addVariantRow(${productId})">+ Add size</button>
+        ${canPack ? `<button type="button" class="vlPack" onclick="openRepack(${productId})">📦 Make packets</button>` : ''}
+        <button type="button" class="vlDone" onclick="toggleProductCard(${productId})">✓ Done</button>
       </div>
-      <div class="vcNavArrows">
-        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, -1)" ${idx === 0 ? 'disabled' : ''} title="Previous variant">◀</button>
-        <button class="vcNavBtn" onclick="changeActiveVariant(${productId}, 1)" ${idx === p.variants.length - 1 ? 'disabled' : ''} title="Next variant">▶</button>
-      </div>
-    </div>
-    <div class="vcCard">
-      <div class="vcPhotoArea">
-        <div class="vcPhotoBox" onclick="triggerImageUpload(${productId},${v.variant_id})" title="Tap to add/change photo">
-          ${v.image ? `<img src="${v.image}">` : `<span class="vcPhotoIcon">📷</span>`}
-        </div>
-      </div>
-      <div class="vcFieldsArea">
-        <div class="vcFieldWrap vcFieldFull vcNameField">
-          <span class="vcFieldLabel">Variant Name / Size</span>
-          <input value="${v.label}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'label',this.value)">
-        </div>
-        <div class="vcFieldWrap vcFieldFull">
-          <span class="vcFieldLabel">Barcode</span>
-          <div class="vcInputRow">
-            <input id="variantBarcode-${v.variant_id}" value="${v.barcode}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'barcode',this.value)">
-            <button type="button" onclick="openBarcodeScanner('variantBarcode-${v.variant_id}')" title="Scan barcode">📷</button>
-          </div>
-        </div>
-        <div class="vcFieldGrid">
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Purchase Price</span>
-            <input type="number" id="purchaseInput-${v.variant_id}" value="${v.purchase}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'purchase',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'purchase',this.value)">
-          </div>
-          ${AppState.settings.markupPricingEnabled ? `
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Markup %</span>
-            <input type="number" id="markupInput-${v.variant_id}" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'markupPercent',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)">
-          </div>` : ''}
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Sale Price</span>
-            <input type="number" id="retailInput-${v.variant_id}" value="${v.retail}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'retail',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'retail',this.value)">
-          </div>
-          <div class="vcFieldWrap wsOnly">
-            <span class="vcFieldLabel">Wholesale Price</span>
-            <input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)">
-          </div>
-          <div class="vcFieldWrap vcStockWrap">
-            <span class="vcFieldLabel">Stock</span>
-            <input type="number" value="${v.stock}" class="${isNegative ? 'negativeStockInput' : ''}" id="stockInput-${v.variant_id}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'stock',this.value)">
-            <div class="vcStockTag" id="lowStockTag-${v.variant_id}" style="display:${isLow ? 'block' : 'none'}; color:#b45309;">⚠️ Low Stock</div>
-            <div class="vcStockTag" id="negativeStockTag-${v.variant_id}" style="display:${isNegative ? 'block' : 'none'}; color:var(--danger);">❌ Negative Stock</div>
-          </div>
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Low Stock Alert At</span>
-            <input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" title="Low Stock alert will trigger when stock reaches this number or below" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value)">
-          </div>
-          <div class="vcFieldWrap">
-            <span class="vcFieldLabel">Expiry Date</span>
-            <input type="date" class="expiryInput ${expiryTier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)">
-          </div>
-        </div>
-        <div class="vcFieldWrap vcFieldFull">
-          <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
-          <input value="${v.location}" placeholder="e.g. Aisle 4, Shelf B" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)">
-        </div>
-      </div>
-      <div class="vcActionsRow">
-        <button class="vcBatchBtn" onclick="openVariantBatchesModal(${productId},${v.variant_id})">🗓️ Batches${v.batches && v.batches.length > 1 ? ` (${v.batches.length})` : ''}</button>
-        <button class="vcLedgerBtn" onclick="openItemLedger(${productId},${v.variant_id})">📜 Ledger</button>
-        <button class="vcDeleteBtn" onclick="deleteVariant(${productId},${v.variant_id})">🗑️ Delete This Variant</button>
-      </div>
-    </div>
-    <div class="vcBottomBtns">
-      <button class="addVariantBtn" onclick="addVariantRow(${productId})">+ Add New Variant (e.g. 100g)</button>
-      <button class="collapseCardBtn" onclick="toggleProductCard(${productId})">▲ Done — Collapse this product</button>
     </div>
   `;
+}
+
+// ---------- ⋯ دبانے پر صرف اسی لائن کی باقی تفصیل کھلے/بند (پوری لسٹ دوبارہ نہیں بنتی) ----------
+function toggleVlMore(variantId){
+  const row = document.getElementById('vlRow-' + variantId);
+  if(!row) return;
+  const open = row.classList.toggle('open');
+  if(open) vlOpenRows.add(variantId); else vlOpenRows.delete(variantId);
+}
+
+// ---------- نیا سائز لکھا (مثلاً "250 g") اور قیمتیں ابھی خالی ہیں → اسی پراڈکٹ کے کسی وزن والے سائز سے حساب لگا کر خود بھر دیں ----------
+function vlLabelChange(productId, variantId, value){
+  updateVariantField(productId, variantId, 'label', value);
+  const p = productsData.find(pr => pr.product_id === productId);
+  const v = p && p.variants.find(x => x.variant_id === variantId);
+  if(!v || (Number(v.purchase) || 0) > 0 || (Number(v.retail) || 0) > 0) return;
+  const m = rpMeasure(v);
+  if(!m) return;
+  const ref = p.variants.find(x => x !== v && (Number(x.retail) || 0) > 0 && rpMeasure(x) && rpMeasure(x).base === m.base);
+  if(!ref) return;
+  const r = m.qty / rpMeasure(ref).qty;
+  v.purchase = Math.round((Number(ref.purchase) || 0) * r * 100) / 100;
+  v.retail = Math.ceil((Number(ref.retail) || 0) * r);
+  v.wholesale = Math.ceil((Number(ref.wholesale) || Number(ref.retail) || 0) * r);
+  const pi = document.getElementById('purchaseInput-' + variantId), ri = document.getElementById('retailInput-' + variantId);
+  if(pi) pi.value = v.purchase;
+  if(ri) ri.value = v.retail;
+  if(typeof showNavToast === 'function') showNavToast(`💡 Prices filled from ${ref.label}: Buy ${v.purchase} · Sell ${v.retail} — change if needed`);
+}
+
+/* =====================================================================
+   📦 MAKE PACKETS (ری پیکنگ) — کھلا مال (چینی/چاول کی بوری) سے 1 kg، 500 g، 250 g کے پیکٹ بنانا۔
+   ہر سائز کے آگے صرف تعداد لکھیں → استعمال ہونے والا وزن اور باقی کھلا وزن ساتھ ساتھ خود دکھے۔
+   محفوظ: کھلا اسٹاک کم، پیکٹوں کا اسٹاک زیادہ؛ ریکارڈ p.packLog میں (Item Ledger میں نظر آتا ہے)۔
+   باقی کھلا مال ⚖️ (روپوں سے وزن) سے بکتا رہتا ہے — p.looseVid والے سائز سے کٹتا ہے۔
+   ===================================================================== */
+// ---------- سائز کی پیمائش: "500 g"، "1 kg"، "Loose 1 kg"، "Sugar 250g" — سب پہچانے؛ ورنہ ویرینٹ کی یونٹ ----------
+function rpMeasure(v){
+  if(!v) return null;
+  const m = variantMeasure(v);
+  if(m) return m;
+  const lm = String(v.label || '').match(/(\d+(?:\.\d+)?)\s*(kg|kgs|g|gm|gms|gram|grams|l|ltr|litre|liter|ml)\b/i);
+  if(lm){
+    const k = unitKey(lm[2]), li = UNIT_TO_BASE[k] || UNIT_TO_BASE[{kgs:'kg', gm:'g', gms:'g', gram:'g', grams:'g', ltr:'l', litre:'l', liter:'l'}[lm[2].toLowerCase()]];
+    if(li) return {qty: parseFloat(lm[1]) * li.q, base: li.b, text: v.label};
+  }
+  return null;
+}
+const rpState = {productId: null, srcVid: null, counts: {}};
+function rpFmt(q, base){ return fmtBaseQty(Math.round(q * 1000) / 1000, base); }
+function rpDefaultSource(p){
+  const ms = p.variants.filter(v => rpMeasure(v));
+  const saved = ms.find(v => v.variant_id === p.looseVid);
+  if(saved) return saved;
+  const named = ms.find(v => /loose|khula|کھلا|bulk|bori|bag/i.test(v.label || ''));
+  if(named) return named;
+  return ms.slice().sort((a, b) => (Math.max(0, b.stock) * rpMeasure(b).qty) - (Math.max(0, a.stock) * rpMeasure(a).qty))[0] || null;
+}
+function openRepack(productId){
+  const p = productsData.find(pr => pr.product_id === productId);
+  if(!p) return;
+  const src = rpDefaultSource(p);
+  if(!src){ alert('Add a size with weight first, e.g. "1 kg" or "500 g".'); return; }
+  rpState.productId = productId; rpState.srcVid = src.variant_id; rpState.counts = {};
+  document.getElementById('rpTitle').textContent = '📦 Make Packets — ' + p.name;
+  document.getElementById('rpNewSize').value = '';
+  document.getElementById('repackModal').classList.add('show');
+  renderRepack();
+}
+function closeRepack(){ document.getElementById('repackModal').classList.remove('show'); }
+function rpSetSource(vid){ rpState.srcVid = vid; rpState.counts = {}; renderRepack(); }
+function rpCtx(){
+  const p = productsData.find(pr => pr.product_id === rpState.productId);
+  const src = p && p.variants.find(v => v.variant_id === rpState.srcVid);
+  const sm = rpMeasure(src);
+  if(!p || !src || !sm) return null;
+  const targets = p.variants.filter(v => v !== src && rpMeasure(v) && rpMeasure(v).base === sm.base);
+  return {p, src, sm, targets, have: Math.max(0, Number(src.stock) || 0) * sm.qty};
+}
+function renderRepack(){
+  const c = rpCtx();
+  if(!c){ closeRepack(); return; }
+  const esc = t => String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const ms = c.p.variants.filter(v => rpMeasure(v));
+  const sel = document.getElementById('rpSrc');
+  sel.innerHTML = ms.map(v => `<option value="${v.variant_id}" ${v === c.src ? 'selected' : ''}>Pack from: ${esc(v.label)} (stock ${roundStock(v.stock)})</option>`).join('');
+  sel.style.display = ms.length > 1 ? '' : 'none';
+  document.getElementById('rpHave').textContent = rpFmt(c.have, c.sm.base);
+  document.getElementById('rpRows').innerHTML = c.targets.length ? c.targets.map(v => `
+    <div class="rpRow">
+      <span class="rpSize" title="${esc(v.label)}">${esc(v.label)}</span>
+      <span class="rpX">×</span>
+      <input type="number" inputmode="numeric" min="0" step="1" placeholder="0" id="rpN-${v.variant_id}" value="${rpState.counts[v.variant_id] || ''}" oninput="rpCount(${v.variant_id}, this.value)" onfocus="this.select()">
+      <span class="rpEq" id="rpEq-${v.variant_id}"></span>
+    </div>`).join('')
+    : `<div class="rpHint" style="text-align:center; padding:8px;">No packet sizes yet — add one below (e.g. 1 kg, 500 g, 250 g).</div>`;
+  rpUpdate();
+}
+function rpCount(vid, val){
+  const n = Math.max(0, Math.floor(Number(val) || 0));
+  if(n) rpState.counts[vid] = n; else delete rpState.counts[vid];
+  rpUpdate();
+}
+function rpUpdate(){
+  const c = rpCtx();
+  if(!c) return;
+  let used = 0;
+  c.targets.forEach(v => {
+    const n = rpState.counts[v.variant_id] || 0, q = n * rpMeasure(v).qty;
+    used += q;
+    const eq = document.getElementById('rpEq-' + v.variant_id);
+    if(eq){ eq.textContent = n ? '= ' + rpFmt(q, c.sm.base) : ''; eq.classList.toggle('on', !!n); }
+  });
+  const left = c.have - used, bad = left < -0.0001;
+  const el = document.getElementById('rpLeft');
+  el.classList.toggle('bad', bad);
+  el.innerHTML = bad ? `<span>⚠️ Not enough loose stock — short by</span><b>${rpFmt(-left, c.sm.base)}</b>`
+    : `<span>${used ? 'Packing ' + rpFmt(used, c.sm.base) + ' · Left loose' : 'Left loose'}</span><b>${rpFmt(left, c.sm.base)}</b>`;
+  document.getElementById('rpSave').disabled = bad || used <= 0;
+}
+function rpAddSize(){
+  const c = rpCtx();
+  const inp = document.getElementById('rpNewSize');
+  const txt = inp.value.trim().replace(/^(\d+(?:\.\d+)?)\s*(kg|g|ml|l)$/i, (a, n, u) => n + ' ' + (u.toLowerCase() === 'l' ? 'L' : u.toLowerCase()));
+  if(!c || !txt) return;
+  const m = rpMeasure({label: txt});
+  if(!m || m.base !== c.sm.base){ alert(c.sm.base === 'ml' ? 'Write the size like: 500 ml, 1 L' : 'Write the size like: 250 g, 500 g, 2 kg'); inp.focus(); return; }
+  const same = c.p.variants.find(v => rpMeasure(v) && rpMeasure(v).qty === m.qty && v !== c.src);
+  if(same){ inp.value = ''; const el = document.getElementById('rpN-' + same.variant_id); if(el) el.focus(); return; }
+  const r = m.qty / c.sm.qty;
+  c.p.variants.push({
+    variant_id: nextVariantId++, label: txt, barcode: '',
+    purchase: Math.round((Number(c.src.purchase) || 0) * r * 100) / 100,
+    retail: Math.ceil((Number(c.src.retail) || 0) * r), wholesale: Math.ceil((Number(c.src.wholesale) || Number(c.src.retail) || 0) * r),
+    stock: 0, lowStockAt: 5, location: c.src.location || '', image: null, expiryDate: '', batches: []
+  });
+  inp.value = '';
+  renderRepack();
+  const nv = c.p.variants[c.p.variants.length - 1];
+  const el = document.getElementById('rpN-' + nv.variant_id);
+  if(el) el.focus();
+  persistAllData();
+}
+function saveRepack(){
+  const c = rpCtx();
+  if(!c) return;
+  const items = c.targets.filter(v => rpState.counts[v.variant_id] > 0).map(v => ({v, n: rpState.counts[v.variant_id]}));
+  const used = items.reduce((t, x) => t + x.n * rpMeasure(x.v).qty, 0);
+  if(!items.length || used > c.have + 0.0001) return;
+  deductVariantStock(c.src, roundStock(used / c.sm.qty));
+  items.forEach(({v, n}) => {
+    v.stock = roundStock((Number(v.stock) || 0) + n);
+    if(!v.batches || v.batches.length <= 1){
+      v.batches = [{batchId: (v.batches && v.batches[0]?.batchId) || nextBatchId++, qty: v.stock, expiryDate: v.expiryDate || ''}];
+    } else {
+      v.batches.push({batchId: nextBatchId++, qty: n, expiryDate: c.src.expiryDate || ''});
+    }
+    if(!(Number(v.purchase) > 0)) v.purchase = Math.round((Number(c.src.purchase) || 0) * (rpMeasure(v).qty / c.sm.qty) * 100) / 100;
+    recordStockAddedToday(v.variant_id, n);
+  });
+  saveToStorage('nextBatchId', nextBatchId);
+  c.p.looseVid = c.src.variant_id;
+  const now = new Date();
+  (c.p.packLog = c.p.packLog || []).push({date: toLocalDateStr(now), ts: now.toISOString(), from: c.src.variant_id, used: roundStock(used), base: c.sm.base,
+    srcQty: roundStock(used / c.sm.qty), items: items.map(x => ({vid: x.v.variant_id, n: x.n})), by: (AppState.currentUser && AppState.currentUser.name) || ''});
+  persistAllData();
+  closeRepack();
+  openProductCards.add(c.p.product_id);
+  rerenderProductListPreserveScroll();
+  const left = Math.max(0, Number(c.src.stock) || 0) * c.sm.qty;
+  if(typeof showNavToast === 'function') showNavToast(`✅ ${items.map(x => x.n + ' × ' + x.v.label).join(', ')} packed · Left loose: ${rpFmt(left, c.sm.base)}`);
 }
 
 // ---------- Prev/Next بٹن — پورا کارڈ دوبارہ نہیں، صرف اسی پراڈکٹ کا ویریئنٹ سیکشن دوبارہ بناتا ہے (تیز، جھٹکا نہیں لگتا) ----------
@@ -14539,7 +14763,7 @@ function changeActiveVariant(productId, delta){
    کوئی نیا ڈیٹا محفوظ نہیں ہوتا — موجودہ بلوں اور پرچیز ہسٹری سے ہی خودکار بنتا ہے۔
    ===================================================================== */
 const itemLedgerState = {productId: null, variantId: 'all', tab: 'all', entries: []};
-const IL_TYPE_LABEL = {purchase: '📥 Purchase', sale: '🧾 Sale', sreturn: '↩️ Customer Return', preturn: '↪️ Return to Supplier'};
+const IL_TYPE_LABEL = {purchase: '📥 Purchase', sale: '🧾 Sale', sreturn: '↩️ Customer Return', preturn: '↪️ Return to Supplier', packin: '📦 Packed', packout: '📦 Used for packets'};
 
 function ilEsc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function ilNum(n){ return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
@@ -14614,6 +14838,18 @@ function buildItemLedgerEntries(p){
     });
   });
 
+  // ---- 📦 پیکٹ بنائے گئے (کھلے مال سے) ----
+  (p.packLog || []).forEach(pk => {
+    const lbl = id => (p.variants.find(v => v.variant_id === id) || {}).label || 'Packet';
+    const what = (pk.items || []).map(x => x.n + ' × ' + lbl(x.vid)).join(', ');
+    if(vids.has(pk.from)) out.push({kind: 'packout', vid: pk.from, date: pk.date, ts: pk.ts, ref: 'Packing', party: what,
+      qty: pk.srcQty, unit: '', rate: 0, amount: 0, stockQty: pk.srcQty, note: (pk.by ? 'By ' + pk.by + ' · ' : '') + fmtBaseQty(pk.used, pk.base) + ' packed', open: 'void 0'});
+    (pk.items || []).forEach(x => {
+      if(vids.has(x.vid)) out.push({kind: 'packin', vid: x.vid, date: pk.date, ts: pk.ts, ref: 'Packing', party: 'From ' + lbl(pk.from),
+        qty: x.n, unit: '', rate: 0, amount: 0, stockQty: x.n, note: pk.by ? 'By ' + pk.by : '', open: 'void 0'});
+    });
+  });
+
   out.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
   return out;
 }
@@ -14668,7 +14904,7 @@ function renderItemLedger(){
     <div class="ilRow ${e.kind} ${e.excluded ? 'muted' : ''}" onclick="${e.open}" title="Tap to open this ${e.kind === 'purchase' || e.kind === 'preturn' ? 'purchase order' : 'bill'}">
       <div class="ilTop"><span class="ilType">${IL_TYPE_LABEL[e.kind]}</span><span class="ilDate">${formatDateDMY(e.date)}</span></div>
       <div class="ilTop"><div class="ilParty">${ilEsc(e.party)}</div><span class="ilRef">${ilEsc(e.ref)} ›</span></div>
-      <div class="ilQty"><span>${multi && vSel === 'all' ? ilEsc(vLabel(e.vid)) + ' • ' : ''}<b>${ilNum(e.qty)}${e.unit ? ' ' + ilEsc(e.unit) : ''}</b> × Rs. ${ilNum(e.rate)}</span><b>Rs. ${ilNum(e.amount)}</b></div>
+      <div class="ilQty"><span>${multi && vSel === 'all' ? ilEsc(vLabel(e.vid)) + ' • ' : ''}<b>${ilNum(e.qty)}${e.unit ? ' ' + ilEsc(e.unit) : ''}</b>${e.kind === 'packin' || e.kind === 'packout' ? '' : ` × Rs. ${ilNum(e.rate)}`}</span><b>${e.kind === 'packin' ? '+' + ilNum(e.stockQty) : e.kind === 'packout' ? '−' + ilNum(e.stockQty) : 'Rs. ' + ilNum(e.amount)}</b></div>
       ${e.note ? `<div class="ilDate" style="margin-top:2px;">${ilEsc(e.note)}</div>` : ''}
     </div>`).join('');
 }
@@ -14769,6 +15005,12 @@ function resolveStockTarget(item, qty){
     if(!prod) return null;
     let v = item.source_variant_id ? prod.variants.find(x => x.variant_id === item.source_variant_id) : null;
     let m = v ? variantMeasure(v) : null;
+    // ---------- 📦 پیکٹ بنانے کے بعد کھلا مال اسی "کھلے" سائز سے کٹے، پیکٹوں سے نہیں ----------
+    if((!v || !m) && prod.looseVid){
+      const lv = prod.variants.find(x => x.variant_id === prod.looseVid);
+      const lm = lv ? rpMeasure(lv) : null;
+      if(lv && lm){ v = lv; m = lm; }
+    }
     if(!v || !m){
       const best = prod.variants.map(x => ({x, m: variantMeasure(x)})).filter(o => o.m).sort((a,b) => b.m.qty - a.m.qty)[0];
       if(!best) return null;
@@ -15691,6 +15933,7 @@ function updateVariantField(productId, variantId, field, value, inputEl){
     }
     if(negTag) negTag.style.display = isNegative ? 'block' : 'none';
     if(stockInput) stockInput.classList.toggle('negativeStockInput', isNegative);
+    if(stockInput) stockInput.classList.toggle('vlLow', !isNegative && variant.stock <= (variant.lowStockAt ?? 0));
     // ---------- اگر صرف ایک ہی batch ہے تو اسے بھی سیدھا مطابق رکھیں — دو یا زیادہ batches ہوں تو تفصیل صرف 🗓️ Batches سے بدلیں ----------
     if(field === 'stock' && (!variant.batches || variant.batches.length <= 1)){
       variant.batches = [{batchId: (variant.batches && variant.batches[0]?.batchId) || nextBatchId++, qty: variant.stock, expiryDate: variant.expiryDate || ''}];
@@ -15736,13 +15979,16 @@ function addVariantRow(productId){
 
   product.variants.push({
     variant_id: nextVariantId++,
-    label: 'New Variant', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
+    label: '', barcode: '', purchase:0, retail:0, wholesale:0, stock:0, lowStockAt:5, location:'', image:null, expiryDate:''
   });
+  const newVid = product.variants[product.variants.length - 1].variant_id;
 
   // ---------- نیا ویریئنٹ شامل ہوتے ہی اسی کا کارڈ فوراً سامنے لے آئیں، تاکہ صارف فوراً اس میں تفصیلات بھر سکے ----------
   activeVariantIndexByProduct.set(productId, product.variants.length - 1);
   openProductCards.add(productId);
   rerenderProductListPreserveScroll();
+  const nameEl = document.getElementById('vlName-' + newVid);
+  if(nameEl){ nameEl.scrollIntoView({block: 'center'}); nameEl.focus(); }
 }
 
 async function deleteVariant(productId, variantId){
@@ -30643,9 +30889,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU097';
+  const APP_VERSION = 'AIO2510SU098';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New Product is now short: name, barcode, prices, stock → Create (more details optional)';
+  const UPDATE_NOTE = 'Variants now one line each (size, buy, sell, stock); new 📦 Make packets: pack loose stock into 1 kg / 500 g / 250 g, left-over shown live';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
