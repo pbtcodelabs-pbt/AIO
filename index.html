@@ -1595,6 +1595,26 @@
   .vcActionsRow button{flex:1; border:none; border-radius:10px; padding:10px; font-size:12.5px; font-weight:700; cursor:pointer;}
   .vcBatchBtn{background:#eef2ff; color:var(--primary-dark);}
   .vcDeleteBtn{background:#fef2f2; color:var(--danger);}
+  /* ===================== ⚡ SCAN & ADD PRODUCTS ===================== */
+  .qsOpenBtn{width:100%; margin:8px 0; border:none; border-radius:12px; padding:12px; font-size:15px; font-weight:800; cursor:pointer; color:#fff;
+    background:linear-gradient(135deg,#f59e0b,#d97706); box-shadow:0 3px 0 #b45309;}
+  .qsOpenBtn small{display:block; font-size:11px; font-weight:700; opacity:.9;}
+  .qsOpenBtn:active{transform:translateY(2px); box-shadow:none;}
+  #quickScanModal .qsBox{width:min(440px, calc(100vw - 20px));}
+  .qsHead{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .qsCount{font-size:12px; font-weight:800; color:#166534; min-height:16px;}
+  .qsLbl{display:block; font-size:12px; font-weight:800; color:#475569; margin:6px 0 3px;}
+  .qsLbl small{font-weight:600; color:var(--muted);}
+  .qsRow{display:flex; gap:6px;}
+  .qsRow input{flex:1; min-width:0; margin:0 !important; font-size:17px !important; font-weight:800; letter-spacing:1px;}
+  .qsCam{flex:0 0 52px; border:none; border-radius:10px; background:#eef2ff; font-size:22px; cursor:pointer;}
+  .qsStatus{margin:8px 0 2px; padding:8px 10px; border-radius:10px; background:#f8fafc; border:1px solid #e2e8f0; font-size:12.5px; font-weight:700; color:#334155;}
+  .qsStatus.ok{background:#f0fdf4; border-color:#86efac; color:#166534;}
+  .qsStatus.web{background:#eff6ff; border-color:#93c5fd; color:#1d4ed8;}
+  .qsStatus.new{background:#fffbeb; border-color:#fcd34d; color:#92400e;}
+  #qsForm input{margin:0 !important; width:100%; box-sizing:border-box;}
+  .qsGrid{display:grid; grid-template-columns:1fr 1fr; gap:4px 8px;}
+  #qsRetail, #qsStock{font-size:18px !important; font-weight:900; text-align:center;}
   /* ===================== ⏸️ HOLD BILL — بل روک کر دوسرا بل، پھر واپس ===================== */
   .holdBillBtn{background:linear-gradient(160deg,#fde68a,#f59e0b); color:#78350f; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:800; cursor:pointer; box-shadow:0 2px 0 #b45309;}
   .holdBillBtn:active{transform:translateY(1px); box-shadow:none;}
@@ -2813,7 +2833,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2410SA086</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU087</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3030,7 +3050,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2410SA086</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU087</span>
     </div>
   </div>
 
@@ -3681,6 +3701,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <input type="text" id="productSearchInput" placeholder="🔍 Search products..." oninput="renderProductList(this.value)">
             <button onclick="openNewProductModal()">+ New Product</button>
           </div>
+          <!-- ---------- ⚡ تیز اندراج: بارکوڈ اسکین → نام خود → قیمت/اسٹاک → Save → اگلا ---------- -->
+          <button type="button" class="qsOpenBtn" onclick="openQuickScanAdd()">⚡ Scan &amp; Add Products <small>(barcode → price → save → next)</small></button>
           <div class="csvImportBar">
             <button class="csvTemplateBtn" onclick="downloadProductCsvTemplate()">📄 Download Excel/CSV Template</button>
             <button class="csvImportBtn" onclick="document.getElementById('productCsvInput').click()">📥 Import Products</button>
@@ -3909,6 +3931,34 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     </div>
 
     <!-- BARCODE SCANNER MODAL (کیمرہ سے براہ راست بارکوڈ اسکین) -->
+    <!-- ⚡ SCAN & ADD PRODUCTS — بارکوڈ سے تیز اندراج (اسکینر اسی کے اوپر کھلتا ہے، اس لیے یہ اس سے پہلے) -->
+    <div class="modalOverlay" id="quickScanModal">
+      <div class="modalBox qsBox">
+        <div class="qsHead"><h3 style="margin:0;">⚡ Scan &amp; Add Products</h3><span class="closeBtn" onclick="closeQuickScanAdd()">✖</span></div>
+        <div class="qsCount" id="qsCount"></div>
+        <label class="qsLbl">Barcode</label>
+        <div class="qsRow">
+          <input type="text" id="qsBarcode" inputmode="numeric" autocomplete="off" placeholder="Scan or type barcode, then Enter" onkeydown="if(event.key==='Enter'){event.preventDefault(); qsLookup(this.value);}" onchange="qsLookup(this.value)">
+          <button type="button" class="qsCam" onclick="qsUseCamera=true; openBarcodeScanner('qsBarcode')" title="Scan with camera">📷</button>
+        </div>
+        <div class="qsStatus" id="qsStatus">Scan a product barcode (camera 📷 or barcode gun)</div>
+        <div id="qsForm" style="display:none;">
+          <label class="qsLbl">Product name</label>
+          <input type="text" id="qsName" autocomplete="off" placeholder="e.g. Tapal Danedar 190g">
+          <div class="qsGrid">
+            <div><label class="qsLbl">Sale price (Rs.)</label><input type="number" id="qsRetail" inputmode="decimal" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('qsStock').focus();}"></div>
+            <div><label class="qsLbl" id="qsStockLbl">Stock</label><input type="number" id="qsStock" inputmode="decimal" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault(); qsSave();}"></div>
+            <div><label class="qsLbl">Purchase price <small>(optional)</small></label><input type="number" id="qsPurchase" inputmode="decimal" onfocus="this.select()"></div>
+            <div><label class="qsLbl">Category <small>(optional)</small></label><input type="text" id="qsCategory" list="categoryDatalist" autocomplete="off"></div>
+          </div>
+        </div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeQuickScanAdd()">Done</button>
+          <button class="saveBtn" id="qsSaveBtn" onclick="qsSave()" disabled>✅ Save &amp; Next</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modalOverlay" id="scannerModal" onclick="if(event.target===this) closeBarcodeScanner()">
       <div class="scannerBox">
         <div class="scannerHead">
@@ -10664,6 +10714,126 @@ function closeBarcodeScanner(){
   document.getElementById('scannerModal').classList.remove('show');
   if(scannerDetectorLoop){ cancelAnimationFrame(scannerDetectorLoop); scannerDetectorLoop = null; }
   if(scannerStream){ scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+}
+
+/* =====================================================================
+   ⚡ SCAN & ADD PRODUCTS — دکان کی چیزیں تیزی سے ایپ میں ڈالنا:
+   بارکوڈ اسکین (موبائل کیمرہ یا PC پر بارکوڈ گن) → پہلے سے موجود ہو تو قیمت/اسٹاک بڑھائیں،
+   نئی ہو تو نام خود (اسی دکان کی پرانی چیزوں سے، ورنہ انٹرنیٹ کی مفت عالمی فہرست Open Food Facts سے) →
+   قیمت + اسٹاک → Save → کیمرہ خود اگلی چیز کے لیے کھلے۔ فائربیس کی ضرورت نہیں۔
+   ===================================================================== */
+let qsUseCamera = false, qsCurrent = null, qsAdded = 0, qsLookupSeq = 0;
+function openQuickScanAdd(){
+  qsAdded = 0; qsUseCamera = false;
+  renderCategoryDatalist();
+  qsReset();
+  document.getElementById('quickScanModal').classList.add('show');
+  setTimeout(() => document.getElementById('qsBarcode').focus(), 150);
+}
+function closeQuickScanAdd(){
+  document.getElementById('quickScanModal').classList.remove('show');
+  qsCurrent = null;
+}
+function qsSetStatus(cls, txt){ const el = document.getElementById('qsStatus'); el.className = 'qsStatus ' + (cls || ''); el.textContent = txt; }
+function qsReset(){
+  qsCurrent = null;
+  ['qsBarcode','qsName','qsRetail','qsStock','qsPurchase'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('qsForm').style.display = 'none';
+  document.getElementById('qsSaveBtn').disabled = true;
+  document.getElementById('qsCount').textContent = qsAdded ? `✅ ${qsAdded} item${qsAdded === 1 ? '' : 's'} saved — scan the next one` : '';
+  qsSetStatus('', 'Scan a product barcode (camera 📷 or barcode gun)');
+}
+async function qsLookup(raw){
+  const code = String(raw || '').trim();
+  if(!code || (qsCurrent && qsCurrent.code === code)) return;
+  const seq = ++qsLookupSeq;
+  const nameEl = document.getElementById('qsName');
+  document.getElementById('qsForm').style.display = 'block';
+  document.getElementById('qsSaveBtn').disabled = false;
+  const existing = getFlatVariants().find(v => v.barcode && v.barcode === code);
+  if(existing){
+    qsCurrent = {code, variantId: existing.variant_id, productId: existing.product_id};
+    nameEl.value = existing.name.replace(/ Default$/, '');
+    nameEl.readOnly = true;
+    document.getElementById('qsRetail').value = existing.retail || '';
+    document.getElementById('qsPurchase').value = existing.purchase || '';
+    document.getElementById('qsCategory').value = existing.category === 'Uncategorized' ? '' : (existing.category || '');
+    document.getElementById('qsStock').value = '';
+    document.getElementById('qsStockLbl').textContent = `Add stock (now ${Math.round((existing.stock || 0) * 100) / 100})`;
+    qsSetStatus('ok', '✅ Already in your products — update price or add stock');
+    setTimeout(() => document.getElementById('qsRetail').focus(), 60);
+    return;
+  }
+  qsCurrent = {code, variantId: null};
+  nameEl.readOnly = false; nameEl.value = '';
+  document.getElementById('qsRetail').value = ''; document.getElementById('qsPurchase').value = ''; document.getElementById('qsStock').value = '';
+  document.getElementById('qsStockLbl').textContent = 'Stock';
+  if(!navigator.onLine){ qsSetStatus('new', '✍️ New item — type the name (offline, online name search skipped)'); nameEl.focus(); return; }
+  qsSetStatus('', '🔎 New item — looking up the name online…');
+  let found = '';
+  try{
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 5000);
+    const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=product_name,product_name_en,brands,quantity`, {signal: ctl.signal});
+    clearTimeout(t);
+    if(r.ok){
+      const j = await r.json();
+      const p = j && j.status === 1 ? (j.product || {}) : null;
+      if(p){
+        const brand = String(p.brands || '').split(',')[0].trim();
+        const pn = String(p.product_name_en || p.product_name || '').trim();
+        const qty = String(p.quantity || '').trim();
+        found = [brand && !pn.toLowerCase().includes(brand.toLowerCase()) ? brand : '', pn, qty && !pn.includes(qty) ? qty : ''].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+      }
+    }
+  }catch(e){}
+  if(seq !== qsLookupSeq) return; // اس دوران دوسرا بارکوڈ آ گیا
+  if(found){
+    nameEl.value = found;
+    qsSetStatus('web', '🌐 Name found online — check it, then type the price');
+    document.getElementById('qsRetail').focus();
+  } else {
+    qsSetStatus('new', '✍️ New item — type the name (not found online)');
+    nameEl.focus();
+  }
+}
+function qsSave(){
+  if(!qsCurrent){ document.getElementById('qsBarcode').focus(); return; }
+  const retail = parseFloat(document.getElementById('qsRetail').value);
+  const purchaseRaw = document.getElementById('qsPurchase').value.trim();
+  const purchase = parseFloat(purchaseRaw) || 0;
+  const stockIn = parseFloat(document.getElementById('qsStock').value) || 0;
+  const category = document.getElementById('qsCategory').value.trim();
+  if(!(retail > 0)){ alert('Please enter the sale price.'); document.getElementById('qsRetail').focus(); return; }
+  if(category && !(customCategories || []).includes(category)) customCategories.push(category);
+  if(qsCurrent.variantId){
+    const p = productsData.find(x => x.product_id === qsCurrent.productId);
+    const v = p && p.variants.find(x => x.variant_id === qsCurrent.variantId);
+    if(!v){ qsReset(); return; }
+    v.retail = retail;
+    if(purchaseRaw !== '') v.purchase = purchase;
+    if(category) p.category = category;
+    if(stockIn){
+      if(v.batches && v.batches.length > 1){ v.batches.push({batchId: nextBatchId++, qty: stockIn, expiryDate: ''}); syncVariantFromBatches(v); saveToStorage('nextBatchId', nextBatchId); }
+      else { v.stock = roundStock((Number(v.stock) || 0) + stockIn); if(v.batches && v.batches[0]) v.batches[0].qty = v.stock; }
+    }
+  } else {
+    const name = document.getElementById('qsName').value.trim();
+    if(!name){ alert('Please enter the product name.'); document.getElementById('qsName').focus(); return; }
+    productsData.push({
+      product_id: nextProductId++, name, category,
+      variants: [{ variant_id: nextVariantId++, label: 'Default', barcode: qsCurrent.code, purchase, retail, wholesale: retail,
+        stock: stockIn, lowStockAt: 0, location: '', expiryDate: '', unit: 'pcs', image: null,
+        batches: [{batchId: nextBatchId++, qty: stockIn, expiryDate: ''}] }]
+    });
+    saveToStorage('nextBatchId', nextBatchId);
+  }
+  persistAllData();
+  qsAdded++;
+  try{ renderProductList(document.getElementById('productSearchInput')?.value || ''); }catch(e){}
+  try{ renderBillingProductGrid(); }catch(e){}
+  qsReset();
+  if(qsUseCamera) setTimeout(() => openBarcodeScanner('qsBarcode'), 250); // کیمرہ خود اگلی چیز کے لیے
+  else setTimeout(() => document.getElementById('qsBarcode').focus(), 60);  // بارکوڈ گن: سیدھا اگلا اسکین
 }
 
 function handleScannedBarcode(code){
@@ -29960,9 +30130,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2410SA086';
+  const APP_VERSION = 'AIO2510SU087';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'USB Print: darker, sharper bills; Fast Print now prints via USB printer too';
+  const UPDATE_NOTE = 'New: ⚡ Scan & Add Products — scan barcode, name fills itself, type price, save, next';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
