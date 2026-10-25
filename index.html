@@ -2855,7 +2855,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU095</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU096</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3072,7 +3072,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU095</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU096</span>
     </div>
   </div>
 
@@ -6536,8 +6536,14 @@ async function fetchDocTypeFromCloud(docType, silent){
     const doc = await res.json();
     const jsonStr = doc.fields?.json?.stringValue;
     if(!jsonStr) return false;
-    const cloudItems = JSON.parse(jsonStr);
+    let cloudItems = JSON.parse(jsonStr);
     if(!Array.isArray(cloudItems)) return false;
+    // ---------- کلاؤڈ میں پرانی نمونے کی چیزیں پڑی ہوں تو واپس نہ آئیں ----------
+    if(docType === 'products' || docType === 'suppliers'){
+      const before = cloudItems.length;
+      cloudItems = stripDemoSeedItems(cloudItems, docType === 'products' ? PRODUCTS_SEED_DATA : SUPPLIERS_SEED_DATA, docType === 'products' ? 'product_id' : 'supplier_id');
+      if(cloudItems.length !== before) AppState.settings[docType + 'PendingSync'] = true;
+    }
     // ---------- AIOTEST27: payments کی slip تصویر کبھی کلاؤڈ پر نہیں جاتی (سائز کی وجہ سے) — فیچ سے پہلے پرانی مقامی
     // تصویریں محفوظ کر لیں، ورنہ نیچے والا overwrite اسی فون کی اپنی کھینچی تصویریں بھی مٹا دے گا ----------
     const oldLocalById = (docType === 'payments') ? new Map(meta.data.map(p => [p.payment_id, p.slip_image])) : null;
@@ -13474,7 +13480,7 @@ function isoDaysFromToday(n){
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0,10);
 }
-let productsData = loadFromStorage('products', PRODUCTS_SEED_DATA);
+let productsData = loadFromStorage('products', []); // نئی جگہ ایپ خالی شروع ہو — نمونے کی چیزیں نہیں (PRODUCTS_SEED_DATA صرف کلاؤڈ حفاظتی چیک کے لیے)
 let nextProductId = loadFromStorage('nextProductId', 10);
 let nextVariantId = loadFromStorage('nextVariantId', 28);
 // ---------- خالی/نئی کیٹیگریز جو ابھی کسی پراڈکٹ پر لاگو نہیں ہوئیں — Categories ڈراپ ڈاؤن کے "➕ Add New" سے شامل ہوں گی ----------
@@ -16312,7 +16318,23 @@ const SUPPLIERS_SEED_DATA = [
   {supplier_id:1, name:'Unilever Pakistan', phone:'923001112223', address:'Karachi', keywords:'', total_payable:12500},
   {supplier_id:2, name:'Local Grocery Supplier', phone:'923337778889', address:'Lahore', keywords:'', total_payable:6000},
 ];
-let suppliersData = loadFromStorage('suppliers', SUPPLIERS_SEED_DATA);
+let suppliersData = loadFromStorage('suppliers', []); // نئی جگہ خالی — نمونے کے سپلائر نہیں
+// ---------- 🧹 نمونے کی چیزیں (Lipton، Sugar، Olivia…) اور نمونے کے سپلائر ہٹائیں — صرف وہی جن کا ID + نام بالکل نمونے والا ہو؛
+// دکاندار کی اپنی ڈالی ہوئی چیزیں (ID 10 سے آگے) کبھی نہیں ہٹتیں۔ پرانے فون/PC پر ایک بار، اور کلاؤڈ سے آئے ڈیٹا میں ہر بار ----------
+function stripDemoSeedItems(list, seed, idKey){
+  if(!Array.isArray(list)) return list;
+  return list.filter(it => !seed.some(sd => sd[idKey] === it[idKey] && sd.name === it.name));
+}
+(function purgeDemoSeedsOnce(){
+  if(loadFromStorage('demoSeedPurgedV1', false)) return;
+  const p0 = productsData.length, s0 = suppliersData.length;
+  productsData = stripDemoSeedItems(productsData, PRODUCTS_SEED_DATA, 'product_id');
+  suppliersData = stripDemoSeedItems(suppliersData, SUPPLIERS_SEED_DATA, 'supplier_id');
+  if(productsData.length !== p0){ saveToStorage('products', productsData); try{ AppState.settings.productsPendingSync = true; }catch(e){} }
+  if(suppliersData.length !== s0){ saveToStorage('suppliers', suppliersData); try{ AppState.settings.suppliersPendingSync = true; }catch(e){} }
+  try{ saveToStorage('settings', AppState.settings); }catch(e){}
+  saveToStorage('demoSeedPurgedV1', true);
+})();
 let nextSupplierId = loadFromStorage('nextSupplierId', 3);
 
 /* =====================================================================
@@ -30609,9 +30631,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU095';
+  const APP_VERSION = 'AIO2510SU096';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'PC without camera: scanner window takes barcode from USB scanner instantly';
+  const UPDATE_NOTE = 'Demo items removed: app starts empty, old sample products and suppliers cleaned';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
