@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connecting…</title>
+<style>
+  body{margin:0; height:100vh; display:flex; align-items:center; justify-content:center; background:#0f766e; font-family:'Segoe UI',Arial,sans-serif; color:#fff; text-align:center;}
+  .box{background:rgba(0,0,0,.18); padding:34px 40px; border-radius:20px; max-width:440px;}
+  h1{margin:0 0 10px; font-size:24px;}
+  p{margin:0 0 20px; font-size:15px; line-height:1.5; opacity:.92;}
+  button{border:none; background:#facc15; color:#1f2937; font-weight:800; font-size:16px; padding:12px 26px; border-radius:12px; cursor:pointer;}
+</style></head>
+<body><div class="box">
+  <h1>📶 Internet needed once</h1>
+  <p>The app opens fully offline after the first successful start.<br>Please connect to the internet and press Retry.</p>
+  <button onclick="location.href=new URLSearchParams(location.search).get('u')">🔄 Retry</button>
+</div>
+<script>setTimeout(function(){ var u = new URLSearchParams(location.search).get('u'); if(navigator.onLine && u) location.href = u; }, 8000);</script>
+</body></html>

@@ -1,0 +1,57 @@
+name: Build Windows Desktop App (EXE)
+
+# ونڈوز انسٹالر (AIO-POS-Setup.exe) بنائے اور GitHub Release میں لگائے — سیدھا ڈاؤن لوڈ لنک
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-desktop.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: App icon
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path desktop/build | Out-Null
+          Copy-Item icon-512.png desktop/build/icon.png -Force
+
+      - name: Install
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+
+      - name: Build installer
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --win nsis --x64 --publish never
+
+      - name: Version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (Get-Content desktop/package.json | ConvertFrom-Json).version
+          "tag=desktop-v$v-${{ github.run_number }}" >> $env:GITHUB_OUTPUT
+
+      - name: Publish release (direct download)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Windows Desktop App ${{ steps.ver.outputs.tag }}
+          body: |
+            AIO POS for Windows — download **AIO-POS-Setup.exe** below, double-click to install.
+            If Windows shows "Windows protected your PC": click **More info → Run anyway**.
+          files: desktop/dist/AIO-POS-Setup.exe
+          make_latest: true
