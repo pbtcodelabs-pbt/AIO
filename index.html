@@ -2855,7 +2855,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU091</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU092</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3072,7 +3072,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU091</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU092</span>
     </div>
   </div>
 
@@ -5725,6 +5725,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
         <canvas id="barcodeLabelPreviewCanvas" style="display:none; width:100%; max-width:320px; margin:0 auto 10px; border:1px solid #eef1f6; border-radius:8px;"></canvas>
         <button class="testPrintBtn" onclick="printBarcodeLabels()">🖨️ Print Barcode Label(s)</button>
+        <button class="testPrintBtn" style="margin-top:8px; background:#fef9c3; color:#854d0e;" onclick="printGunCommandCard()">🔫 Print Scanner-Gun Command Card (Complete Bill / Undo)</button>
       </div>
     </div>
 
@@ -11658,6 +11659,106 @@ function renderBillingProductGrid(){
       </div>`;
   }).join('');
 }
+
+// ===================== 🔫 بارکوڈ گن (بلوٹوتھ/USB) — بلنگ اسکرین پر کہیں بھی، سرچ خانہ چنا ہو یا نہ ہو =====================
+// گن کی بورڈ کی طرح بہت تیزی سے حروف لکھ کر Enter دباتی ہے — اسی تیزی سے پہچانیں (انسان اتنا تیز نہیں لکھتا)۔
+// کمانڈ کارڈ: AIO-DONE = بل مکمل + پرنٹ، AIO-UNDO = آخری چیز ہٹائیں (Settings → Barcode Labels سے کارڈ پرنٹ)
+const GUN_CMD_DONE = 'AIO-DONE', GUN_CMD_UNDO = 'AIO-UNDO';
+let gunBuf = '', gunLastKey = 0, gunFast = 0, gunLastAdded = null;
+function billingScreenVisible(){
+  const sc = document.getElementById('screen-billing');
+  return !!(sc && sc.offsetParent !== null);
+}
+function gunBeep(ok){
+  try{ navigator.vibrate && navigator.vibrate(ok ? 60 : [80, 60, 80]); }catch(e){}
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+    const ac = new AC(), g = ac.createGain(); g.gain.value = 0.12; g.connect(ac.destination);
+    const tone = (freq, t0, dur) => { const o = ac.createOscillator(); o.frequency.value = freq; o.connect(g); o.start(ac.currentTime + t0); o.stop(ac.currentTime + t0 + dur); };
+    if(ok) tone(1800, 0, 0.09); else { tone(420, 0, 0.16); tone(330, 0.22, 0.22); }
+    setTimeout(() => ac.close(), 700);
+  }catch(e){}
+}
+function gunToast(msg, ok){
+  let t = document.getElementById('gunToast');
+  if(!t){
+    t = document.createElement('div'); t.id = 'gunToast';
+    t.style.cssText = 'position:fixed; left:50%; top:16px; transform:translateX(-50%); z-index:100001; max-width:92vw; padding:12px 18px; border-radius:16px; font-size:16px; font-weight:900; color:#fff; box-shadow:0 8px 22px rgba(0,0,0,.35); transition:opacity .25s; pointer-events:none; text-align:center;';
+    document.body.appendChild(t);
+  }
+  t.style.background = ok ? 'linear-gradient(180deg,#16a34a,#15803d)' : 'linear-gradient(180deg,#dc2626,#991b1b)';
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._h); t._h = setTimeout(() => { t.style.opacity = '0'; }, ok ? 1600 : 2600);
+}
+// ---------- گن سے آیا ہوا بارکوڈ / کمانڈ ----------
+function processGunCode(raw){
+  const code = String(raw || '').trim();
+  if(!code) return;
+  const up = code.toUpperCase();
+  if(up === GUN_CMD_DONE){ gunCompleteBill(); return; }
+  if(up === GUN_CMD_UNDO){
+    if(!Billing.cart.length){ gunBeep(false); gunToast('Bill is empty', false); return; }
+    const last = (gunLastAdded && Billing.cart.find(c => c.variant_id === gunLastAdded)) || Billing.cart[Billing.cart.length - 1];
+    if(last.qty > 1) last.qty -= 1; else Billing.cart = Billing.cart.filter(c => c !== last);
+    renderCart(); try{ renderBillingProductGrid(); }catch(e){}
+    gunBeep(true); gunToast(`↩️ Removed: ${last.name}`, true);
+    return;
+  }
+  const v = getFlatVariants().find(x => x.barcode && x.barcode === code);
+  if(!v){ gunBeep(false); gunToast(`❌ Not in your products: ${code}`, false); return; }
+  // پچھلا بل کا پریویو کھلا ہو (نیا گاہک) تو بند کر کے نیا بل شروع
+  const prev = document.getElementById('invoicePreviewModal');
+  if(prev && prev.classList.contains('show') && !Billing.cart.length) prev.classList.remove('show');
+  const inCart = Billing.cart.find(c => c.variant_id === v.variant_id)?.qty || 0;
+  if(AppState.settings.trackInventory && inCart + 1 > v.stock){ // alert نہیں — گن والا دور کھڑا ہے، فون پر رکاوٹ نہ بنے
+    gunBeep(false); gunToast(`❌ Out of stock: ${v.name} (${Math.max(v.stock, 0)} left)`, false); return;
+  }
+  addToCart(v.variant_id);
+  gunLastAdded = v.variant_id;
+  const q = Billing.cart.find(c => c.variant_id === v.variant_id)?.qty || 1;
+  const total = Billing.cart.reduce((t, i) => t + i.qty * i.unitPrice, 0);
+  gunBeep(true); gunToast(`✅ ${v.name}${q > 1 ? ' ×' + q : ''}  •  Total Rs. ${Math.round(total).toLocaleString()}`, true);
+}
+// ---------- گن سے بل مکمل: بل محفوظ، پھر پرنٹ (USB پرنٹر یاد ہو تو خود، ورنہ پریویو کھلا رہے) ----------
+async function gunCompleteBill(){
+  if(!Billing.cart.length){ gunBeep(false); gunToast('Bill is empty — scan items first', false); return; }
+  try{ closeCartSheet(); }catch(e){}
+  const before = invoicesData.length;
+  const origAlert = window.alert; window.alert = (m) => gunToast(String(m).split('\n')[0], true); // واپسی رقم وغیرہ کا پیغام رکاوٹ نہ بنے
+  try{ finalizeInvoice(); } finally { setTimeout(() => { window.alert = origAlert; }, 50); }
+  if(invoicesData.length === before){ gunBeep(false); gunToast('⚠️ Bill needs attention on the phone', false); return; }
+  gunBeep(true); gunToast('✅ Bill complete — printing…', true);
+  gunLastAdded = null;
+  try{
+    if(navigator.usb && (await navigator.usb.getDevices()).length){
+      setTimeout(() => printViaWebUSB('invoiceCanvas').catch(() => {}), 900); // پریویو بننے کے بعد
+    } else {
+      setTimeout(() => gunToast('🖨️ Tap Print on the phone (USB printer prints by itself)', true), 1800);
+    }
+  }catch(e){}
+}
+document.addEventListener('keydown', (e) => {
+  if(!billingScreenVisible()) return;
+  const t = e.target, tag = (t && t.tagName) || '';
+  const inOtherField = (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) && t.id !== 'searchInput';
+  if(inOtherField) return; // ڈسکاؤنٹ/رقم وغیرہ لکھتے وقت دخل نہ دیں
+  const now = Date.now(), gap = now - gunLastKey;
+  if(e.key === 'Enter'){
+    const code = gunBuf; const fast = gunFast >= Math.max(2, code.length - 2);
+    gunBuf = ''; gunFast = 0; gunLastKey = now;
+    if(code.length >= 3 && fast && gap < 300){
+      e.preventDefault(); e.stopImmediatePropagation();
+      if(t && t.id === 'searchInput'){ t.value = ''; try{ searchItems(''); }catch(err){} }
+      processGunCode(code);
+    }
+    return;
+  }
+  if(e.key && e.key.length === 1){
+    if(gap > 120){ gunBuf = ''; gunFast = 0; }
+    else gunFast++;
+    gunBuf += e.key; gunLastKey = now;
+  }
+}, true);
 
 // ---------- Barcode scan اسی input سے ہینڈل ہوگا (Enter دبانے پر پہلی exact match شامل ہو) ----------
 document.getElementById('searchInput')?.addEventListener('keydown', (e)=>{
@@ -25784,6 +25885,33 @@ function updateBarcodeLabelPreview(){
   canvas.style.display = 'block';
 }
 // ---------- منتخب ویریئنٹ کے اتنے لیبل بنائیں جتنی Copies درج ہوں، پھر پرنٹ ڈائیلاگ کھولیں ----------
+// ---------- 🔫 بارکوڈ گن کمانڈ کارڈ — ایک بار پرنٹ کر کے کاؤنٹر/گن پر لگائیں: ✅ بل مکمل + پرنٹ، ↩️ آخری چیز ہٹائیں ----------
+function printGunCommandCard(){
+  const items = [[GUN_CMD_DONE, '✅ COMPLETE BILL & PRINT'], [GUN_CMD_UNDO, '↩️ UNDO LAST ITEM']];
+  const W = 384, blockH = 170;
+  const sheet = document.createElement('canvas');
+  sheet.width = W; sheet.height = blockH * items.length + 40;
+  const ctx = sheet.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, sheet.width, sheet.height);
+  ctx.fillStyle = '#000'; ctx.textAlign = 'center';
+  ctx.font = 'bold 15px Arial'; ctx.fillText('AIO POS — Scanner Gun Commands', W / 2, 24);
+  items.forEach(([code, label], i) => {
+    const y = 40 + i * blockH;
+    const bc = document.createElement('canvas');
+    renderCode39ToCanvas(code, bc, {narrow:2, height:80});
+    ctx.strokeStyle = '#999'; ctx.setLineDash([5, 4]); ctx.strokeRect(6, y, W - 12, blockH - 12); ctx.setLineDash([]);
+    ctx.font = 'bold 18px Arial'; ctx.fillText(label, W / 2, y + 26);
+    const bw = Math.min(W - 30, bc.width);
+    ctx.drawImage(bc, (W - bw) / 2, y + 36, bw, 90);
+    ctx.font = '12px monospace'; ctx.fillText(code, W / 2, y + 144);
+  });
+  appendBrandFooter(sheet);
+  const area = document.getElementById('printReceiptArea');
+  enterPrintMode();
+  area.innerHTML = `<img src="${sheet.toDataURL('image/png')}" style="width:100%;" onload="this.dispatchEvent(new Event('printready'))">`;
+  area.querySelector('img').addEventListener('printready', () => triggerPrint(), {once:true});
+}
+
 function printBarcodeLabels(){
   const variantId = document.getElementById('barcodeLabelProductSelect').value;
   if(!variantId){ alert('Please select a product variant first.'); return; }
@@ -30459,9 +30587,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU091';
+  const APP_VERSION = 'AIO2510SU092';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Scanner: saved barcodes accept instantly, unknown codes need a double read (no wrong items)';
+  const UPDATE_NOTE = 'Scanner gun: auto-add anywhere on Billing; command card to complete bill and print';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
