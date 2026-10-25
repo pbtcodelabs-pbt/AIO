@@ -2220,6 +2220,21 @@
   .testPrintBtn{width:100%; margin-top:16px; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer;}
 
   /* ===================== BARCODE SCANNER (کیمرہ) ===================== */
+  .scanContPanel{background:#0f172a; border:1.5px solid #334155; border-radius:14px; padding:8px; margin-bottom:8px; text-align:left;}
+  .scanContMsg{font-size:13px; font-weight:800; color:#e2e8f0; padding:6px 8px; border-radius:10px; background:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .scanContMsg.ok{background:#14532d; color:#dcfce7;}
+  .scanContMsg.miss{background:#7f1d1d; color:#fee2e2;}
+  .scanContRow{display:flex; justify-content:space-between; align-items:center; color:#cbd5e1; font-size:13px; font-weight:800; margin:7px 2px;}
+  .scanContRow b{color:#facc15; font-size:17px;}
+  .scanContBtns{display:flex; gap:6px;}
+  .scanContBtns button{flex:1; padding:10px 4px; border-radius:11px; border:none; font-weight:900; font-size:12.5px; cursor:pointer;}
+  .scannerFooter .scanContBtns .scanContManual{background:#e2e8f0; color:#0f172a;}
+  .scannerFooter .scanContBtns .scanContDone{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff;}
+  .scannerFooter .scanContMini{background:#facc15; color:#1f2937; width:auto;}
+  .scanContMini{display:inline-flex; margin-top:6px; padding:6px 10px; border-radius:9px; border:none; background:#facc15; color:#1f2937; font-weight:900; font-size:12px; cursor:pointer;}
+  #scannerModal.scanCont .scanView{aspect-ratio:4/3;}
+  body:has(#scannerModal.show) .floatingCartBar{display:none !important;} /* اسکینر کھلا ہو تو نیچے والی کارٹ پٹی اوپر نہ آئے */
+  #scannerModal{z-index:1200;}
   .scanTools{display:flex; gap:6px; margin-left:auto; margin-right:10px;}
   .scanToolBtn{display:inline-flex; align-items:center; justify-content:center; min-width:40px; height:34px; padding:0 10px; border-radius:17px; border:1.5px solid rgba(255,255,255,.55); background:rgba(255,255,255,.15); color:#fff; font-size:14px; font-weight:800; cursor:pointer;}
   .scanToolBtn.on{background:#facc15; color:#1f2937; border-color:#facc15;}
@@ -2840,7 +2855,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU089</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU090</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3057,7 +3072,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU089</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU090</span>
     </div>
   </div>
 
@@ -3262,6 +3277,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <input type="text" id="searchInput" placeholder="🔍 Search by name or barcode (or scan)..." autofocus
                  oninput="searchItems(this.value)">
           <button onclick="openBarcodeScanner()" title="Scan barcode" style="flex:0 0 46px; padding:0;">📷</button>
+          <button onclick="openContinuousScan()" title="Continuous scan — keep scanning items into the bill" class="contScanBtn" style="flex:0 0 46px; padding:0; font-size:17px;">⚡</button>
           <button onclick="openQuickAdd()" title="Add new item" style="flex:0 0 46px; padding:0; font-size:18px;">+</button>
         </div>
         <div id="billingSearchSuggestions" class="billingSearchSuggestions"></div>
@@ -3981,6 +3997,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <div class="scanFrame"><div class="scanLine"></div></div>
         </div>
         <div class="scannerFooter">
+          <!-- ⚡ لگاتار اسکین: آخری چیز، کل آئٹم اور رقم، دستی چیز، مکمل -->
+          <div id="scanContPanel" class="scanContPanel" style="display:none;">
+            <div class="scanContMsg" id="scanContMsg">—</div>
+            <button type="button" class="scanContMini" id="scanContAddBtn" onclick="scanContAddMissing()" style="display:none;">➕ Add as new product</button>
+            <div class="scanContRow"><span id="scanContCount">🧾 0 items</span><b id="scanContTotal">Rs. 0</b></div>
+            <div class="scanContBtns">
+              <button type="button" class="scanContManual" onclick="scanContManualItem()">⚖️ Manual / Loose item</button>
+              <button type="button" class="scanContDone" onclick="scanContDone()">✅ Done — Checkout</button>
+            </div>
+          </div>
           <div class="sHint" id="scannerHint">Point the camera at a barcode</div>
           <input type="text" id="manualBarcodeInput" placeholder="Or type barcode manually" onkeydown="if(event.key==='Enter') submitManualBarcode()">
           <button onclick="submitManualBarcode()">Search</button>
@@ -10781,8 +10807,64 @@ function toggleScannerZoom(){
   b.classList.toggle('on', scannerZoomed); b.textContent = scannerZoomed ? '🔍 1×' : '🔍 2×';
 }
 
-async function openBarcodeScanner(targetInputId = null){
+// ===================== ⚡ لگاتار اسکین (Continuous Scan) — کیمرہ کھلا رہے، ہر اسکین سیدھا بل میں =====================
+let scannerContinuous = false, scanContLastCode = '', scanContLastAt = 0, scanContPauseUntil = 0, scanContMissing = '';
+function openContinuousScan(){ openBarcodeScanner(null, {continuous:true}); }
+function scanContRenderPanel(msg, cls){
+  const panel = document.getElementById('scanContPanel');
+  if(!panel) return;
+  const n = Billing.cart.length;
+  const total = Billing.cart.reduce((t, i) => t + (i.qty * i.unitPrice), 0);
+  document.getElementById('scanContCount').textContent = `🧾 ${n} item${n === 1 ? '' : 's'}`;
+  document.getElementById('scanContTotal').textContent = `Rs. ${Math.round(total).toLocaleString()}`;
+  if(msg !== undefined){
+    const m = document.getElementById('scanContMsg');
+    m.textContent = msg; m.className = 'scanContMsg ' + (cls || '');
+    document.getElementById('scanContAddBtn').style.display = cls === 'miss' ? 'inline-flex' : 'none';
+  }
+}
+// ---------- اسکین ہوا بارکوڈ بل میں: موجود ہو تو +1، نہ ہو تو "نیا پراڈکٹ بنائیں" ----------
+function scanContHandle(code){
+  const exact = getFlatVariants().filter(v => v.barcode && v.barcode === code);
+  if(!exact.length){
+    scanContMissing = code;
+    scanContRenderPanel(`❌ Not in your products: ${code}`, 'miss');
+    try{ navigator.vibrate && navigator.vibrate([60, 60, 60]); }catch(e){}
+    return;
+  }
+  const v = exact[0];
+  const before = Billing.cart.find(c => c.variant_id === v.variant_id)?.qty || 0;
+  addToCart(v.variant_id);
+  const after = Billing.cart.find(c => c.variant_id === v.variant_id)?.qty || 0;
+  if(after > before) scanContRenderPanel(`✅ ${v.name}${after > 1 ? '  ×' + after : ''} — Rs. ${getModePrice(v)}`, 'ok');
+  else scanContRenderPanel(`⚠️ ${v.name} — not added (stock out)`, 'miss');
+}
+function scanContManualItem(){
+  closeBarcodeScanner();
+  const el = document.getElementById('searchInput');
+  if(el){ el.value = ''; el.focus(); }
+}
+function scanContAddMissing(){
+  const code = scanContMissing;
+  closeBarcodeScanner();
+  if(typeof openNewProductModal === 'function'){
+    openNewProductModal();
+    setTimeout(() => { const b = document.getElementById('npBarcode'); if(b){ b.value = code; b.dispatchEvent(new Event('input', {bubbles:true})); } }, 120);
+  }
+}
+function scanContDone(){
+  closeBarcodeScanner();
+  if(Billing.cart.length && typeof openCartSheet === 'function') openCartSheet();
+}
+
+async function openBarcodeScanner(targetInputId = null, opts = {}){
   scannerTargetInputId = targetInputId;
+  scannerContinuous = !!(opts && opts.continuous) && !targetInputId;
+  scanContLastCode = ''; scanContLastAt = 0; scanContPauseUntil = 0; scanContMissing = '';
+  document.getElementById('scannerModal').classList.toggle('scanCont', scannerContinuous);
+  const panel = document.getElementById('scanContPanel');
+  if(panel) panel.style.display = scannerContinuous ? 'block' : 'none';
+  if(scannerContinuous) scanContRenderPanel('Scan items one by one — each beep adds to the bill', '');
   document.getElementById('scannerModal').classList.add('show');
   document.getElementById('manualBarcodeInput').value = '';
   document.getElementById('scannerHint').textContent = 'Starting camera…';
@@ -10822,13 +10904,22 @@ async function openBarcodeScanner(targetInputId = null){
     const finish = (code) => {
       code = String(code || '').trim();
       if(!code || !scannerStream) return false;
+      if(scannerContinuous){
+        // ایک ہی بارکوڈ 2 سیکنڈ میں دوبارہ نہ لگے (کیمرہ اسی چیز پر رکا ہو)؛ کیمرہ کھلا رہے، اگلی چیز
+        const now = Date.now();
+        if(code === scanContLastCode && now - scanContLastAt < 2000){ scanContLastAt = now; return false; }
+        scanContLastCode = code; scanContLastAt = now; scanContPauseUntil = now + 700;
+        scannerSuccessFeedback();
+        scanContHandle(code);
+        return false;
+      }
       scannerSuccessFeedback();
       handleScannedBarcode(code);
       return true;
     };
     const loop = async () => {
       if(!scannerStream) return;
-      if(scannerBusy){ scannerDetectorLoop = setTimeout(loop, 40); return; }
+      if(scannerBusy || Date.now() < scanContPauseUntil){ scannerDetectorLoop = setTimeout(loop, 60); return; }
       scannerBusy = true;
       try{
         scannerTick++;
@@ -10866,6 +10957,8 @@ function closeBarcodeScanner(){
     scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null;
   }
   scannerBusy = false;
+  scannerContinuous = false;
+  document.getElementById('scannerModal').classList.remove('scanCont');
 }
 
 /* =====================================================================
@@ -11021,6 +11114,11 @@ function submitManualBarcode(){
   const code = document.getElementById('manualBarcodeInput').value.trim();
   if(!code){
     document.getElementById('scannerHint').textContent = 'Please type a barcode first';
+    return;
+  }
+  if(scannerContinuous){ // لگاتار اسکین میں کیمرہ بند نہ ہو — لکھا ہوا بارکوڈ بھی بل میں، خانہ خالی
+    scanContHandle(code);
+    const el = document.getElementById('manualBarcodeInput'); el.value = ''; el.focus();
     return;
   }
   handleScannedBarcode(code);
@@ -30353,9 +30451,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU089';
+  const APP_VERSION = 'AIO2510SU090';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'PBT Code Labs branding footer on every bill, report, print and WhatsApp message';
+  const UPDATE_NOTE = 'Continuous Scan: camera stays open, every scan adds to the bill';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
