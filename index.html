@@ -1716,7 +1716,7 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
-  /* ---------- AIO2510SU098: مختصر ویرینٹ لسٹ — ہر سائز ایک لائن، باقی تفصیل ⋯ میں ---------- */
+  /* ---------- AIO2610MO099: مختصر ویرینٹ لسٹ — ہر سائز ایک لائن، باقی تفصیل ⋯ میں ---------- */
   .productCard.capCard .variantCardWrap{padding:0 0 12px;}
   .vlBox{background:var(--card); border:1px solid #e5e9f0; border-radius:14px; padding:8px 6px; box-shadow:0 4px 14px rgba(41,29,10,.05);}
   .vlHead, .vlMain{display:grid; grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,1fr)) 28px; gap:4px; align-items:center;}
@@ -2926,7 +2926,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2510SU098</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2610MO099</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3143,7 +3143,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2510SU098</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2610MO099</span>
     </div>
   </div>
 
@@ -11831,7 +11831,7 @@ function processGunCode(raw){
   const prev = document.getElementById('invoicePreviewModal');
   if(prev && prev.classList.contains('show') && !Billing.cart.length) prev.classList.remove('show');
   const inCart = Billing.cart.find(c => c.variant_id === v.variant_id)?.qty || 0;
-  if(AppState.settings.trackInventory && inCart + 1 > v.stock){ // alert نہیں — گن والا دور کھڑا ہے، فون پر رکاوٹ نہ بنے
+  if(AppState.settings.trackInventory && inCart + 1 > sellableStock(findVariantById(v.variant_id))){ // alert نہیں — گن والا دور کھڑا ہے، فون پر رکاوٹ نہ بنے
     gunBeep(false); gunToast(`❌ Out of stock: ${v.name} (${Math.max(v.stock, 0)} left)`, false); return;
   }
   addToCart(v.variant_id);
@@ -11906,7 +11906,7 @@ function addToCart(variantId){
   const qtyAlreadyInCart = existing ? existing.qty : 0;
 
   // ---------- Track Inventory (Settings) آن ہو تو دستیاب سٹاک سے زیادہ کارٹ میں شامل نہیں ہونے دیں گے ----------
-  if(AppState.settings.trackInventory && (qtyAlreadyInCart + 1) > product.stock){
+  if(AppState.settings.trackInventory && (qtyAlreadyInCart + 1) > sellableStock(findVariantById(variantId))){
     alert(`❌ Only ${Math.max(product.stock, 0)} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
     return;
   }
@@ -11944,6 +11944,10 @@ function openReverseCalc(productId){
 
   ReverseCalc.productId = productId;
   ReverseCalc.variantId = weightVariants[0].variant_id;
+  // کھلا مال (Make packets والا ذریعہ / Loose نام) ہو تو کھلا وزن ہمیشہ اسی سے کٹے، بڑے پیکٹ سے نہیں
+  const rcProd = productsData.find(pr => pr.product_id === productId);
+  const rcLoose = rcProd && (rcProd.variants.find(x => x.variant_id === rcProd.looseVid) || rcProd.variants.find(x => /loose|khula|کھلا|bulk|bori/i.test(x.label || '')));
+  if(rcLoose && weightVariants.some(w => w.variant_id === rcLoose.variant_id)) ReverseCalc.variantId = rcLoose.variant_id;
 
   document.getElementById('reverseCalcProductName').textContent =
     productsData.find(p => p.product_id === productId)?.name || '—';
@@ -12225,7 +12229,7 @@ function changeQty(variantId, delta){
   if(!item) return;
   if(delta > 0 && AppState.settings.trackInventory){
     const product = getFlatVariants().find(p => p.variant_id === variantId);
-    if(product && (item.qty + delta) > product.stock){
+    if(product && (item.qty + delta) > sellableStock(findVariantById(variantId))){
       alert(`❌ Only ${Math.max(product.stock, 0)} in stock. "Track Inventory" is ON in Settings, so sales can't exceed available stock.`);
       return;
     }
@@ -12307,7 +12311,7 @@ function saveCartItemEdit(){
   if(rate < 0){ alert('Please enter a valid rate.'); return; }
   if(AppState.settings.trackInventory){
     const t = resolveStockTarget(item, q);
-    if(t && t.units > (t.v.stock || 0)){ alert(`❌ Not enough stock (available: ${Math.max(t.v.stock || 0, 0)}). "Track Inventory" is ON in Settings.`); return; }
+    if(t && t.units > (ciIsLoose(item) ? (t.v.stock || 0) : sellableStock(t.v))){ alert(`❌ Not enough stock (available: ${Math.max(t.v.stock || 0, 0)}). "Track Inventory" is ON in Settings.`); return; }
   }
   item.qty = q;
   item.unitPrice = ciIsLoose(item) ? Math.round(rate * 1e6) / 1e6 : rate;
@@ -12865,8 +12869,9 @@ function finalizeInvoice(){
     const flatVariants = getFlatVariants();
     for(const item of Billing.cart){
       const v = flatVariants.find(f => f.variant_id === item.variant_id);
-      if(v && item.qty > v.stock){
-        alert(`"${item.name}" is low on stock (available: ${v.stock}). Please reduce quantity.`);
+      const avail = (v && !item.loose_product_id) ? sellableStock(findVariantById(item.variant_id)) : (v ? v.stock : 0);
+      if(v && item.qty > avail){
+        alert(`"${item.name}" is low on stock (available: ${avail}). Please reduce quantity.`);
         return;
       }
     }
@@ -14521,7 +14526,7 @@ let activeVariantIndexByProduct = new Map();
 // ---------- ⋯ والی کھلی لائنیں یاد رہیں (لسٹ دوبارہ بنے تو بھی کھلی رہیں) ----------
 const vlOpenRows = new Set();
 function renderVariantCardSection(productId){
-  // AIO2510SU098: پرانا لمبا کارڈ (ہر ویرینٹ ایک پوری اسکرین) ختم — اب ہر سائز ایک لائن: نام | خرید | فروخت | اسٹاک | ⋯
+  // AIO2610MO099: پرانا لمبا کارڈ (ہر ویرینٹ ایک پوری اسکرین) ختم — اب ہر سائز ایک لائن: نام | خرید | فروخت | اسٹاک | ⋯
   const p = productsData.find(pr => pr.product_id === productId);
   if(!p || !p.variants.length) return '';
   const esc = t => String(t ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
@@ -15025,7 +15030,37 @@ function resolveStockTarget(item, qty){
   }
   return null;
 }
+// ===================== 📦 پیکٹ + کھلا مال ایک ساتھ — پیکٹ بکے تو پہلے بنے ہوئے پیکٹوں سے، ختم ہوں تو باقی وزن کھلے (مین) اسٹاک سے =====================
+// کھلا ذریعہ صرف تب: پراڈکٹ میں «Make packets» استعمال ہوا ہو (p.looseVid) یا کسی سائز کا نام Loose/Khula/Bulk/Bori ہو
+function productOfVariant(v){ return v ? productsData.find(p => p.variants.includes(v) || p.variants.some(x => x.variant_id === v.variant_id)) : null; }
+function packLooseSource(p, v){
+  if(!p || !v) return null;
+  const src = p.variants.find(x => x.variant_id === p.looseVid) || p.variants.find(x => /loose|khula|کھلا|bulk|bori/i.test(x.label || ''));
+  if(!src || src.variant_id === v.variant_id) return null;
+  const sm = rpMeasure(src), vm = rpMeasure(v);
+  if(!sm || !vm || sm.base !== vm.base) return null;
+  return {src, sm, vm};
+}
+// ---------- بیچنے کے لیے کل دستیاب: اپنا اسٹاک + کھلے مال سے بن سکنے والے پیکٹ ----------
+function sellableStock(v){
+  if(!v) return 0;
+  const ls = packLooseSource(productOfVariant(v), v);
+  if(!ls) return Number(v.stock) || 0;
+  return roundStock(Math.max(0, Number(v.stock) || 0) + Math.floor(Math.max(0, Number(ls.src.stock) || 0) * ls.sm.qty / ls.vm.qty + 1e-9));
+}
 function deductStockForItem(item, qty, countSale){
+  if(item && !item.loose_product_id){
+    const t0 = resolveStockTarget(item, qty);
+    const ls = t0 && packLooseSource(productOfVariant(t0.v), t0.v);
+    if(ls){
+      const own = Math.max(0, Number(t0.v.stock) || 0);
+      const fromOwn = Math.min(own, t0.units), rest = roundStock(t0.units - fromOwn);
+      if(fromOwn > 0) deductVariantStock(t0.v, fromOwn);
+      if(rest > 0) deductVariantStock(ls.src, roundStock(rest * ls.vm.qty / ls.sm.qty)); // باقی پیکٹ کھلے مال سے
+      if(countSale) t0.v.salesCount = roundStock((t0.v.salesCount || 0) + t0.units);
+      return;
+    }
+  }
   const t = resolveStockTarget(item, qty);
   if(!t) return;
   deductVariantStock(t.v, t.units);
@@ -30889,9 +30924,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2510SU098';
+  const APP_VERSION = 'AIO2610MO099';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Variants now one line each (size, buy, sell, stock); new 📦 Make packets: pack loose stock into 1 kg / 500 g / 250 g, left-over shown live';
+  const UPDATE_NOTE = 'Packets sold now draw from loose (main) stock when packet stock runs out; ⚖️ loose sale reduces main stock';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
