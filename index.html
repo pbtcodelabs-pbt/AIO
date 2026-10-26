@@ -1375,6 +1375,16 @@
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
   .poPickRow .cbAmt b{font-size:12px;}
+  /* 📝 ڈرافٹ (واٹس ایپ جیسا) — ادھورا PO / شپمنٹ / ایڈوانس آرڈر جہاں چھوڑا وہیں سے */
+  .draftBanner{display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#fffbeb; border:1.5px dashed #f59e0b; color:#92400e; border-radius:10px; padding:8px 10px; margin:0 0 10px; font-size:12.5px; font-weight:700;}
+  .draftBanner b{color:#b45309;}
+  .draftBanner .dbTxt{flex:1; min-width:170px;}
+  .draftBanner button{border:none; border-radius:8px; padding:7px 11px; font-size:12px; font-weight:800; cursor:pointer;}
+  .draftBanner .dbGo{background:#f59e0b; color:#fff;}
+  .draftBanner .dbDel{background:#fee2e2; color:#b91c1c;}
+  .pendingStatusTag.draft{background:#fef3c7; color:#b45309;}
+  .billCard.draftCard{border:1.5px dashed #f59e0b !important; background:#fffbeb !important;}
+  #poModal .modalBtns{position:sticky; bottom:-1px; z-index:6; background:var(--card, #fff); padding:8px 0 4px; margin-bottom:-4px; box-shadow:0 -8px 10px -8px rgba(0,0,0,.18);}
   /* Bill History */
   .billCard.capBill{display:block; padding:5px 6px; margin:0 0 8px;}
   .cbTop{display:grid; grid-template-columns:40px minmax(0,1fr) auto; gap:5px; align-items:center;}
@@ -2926,7 +2936,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2610MO100</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2610MO101</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3143,7 +3153,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2610MO100</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2610MO101</span>
     </div>
   </div>
 
@@ -4349,7 +4359,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
-    <div class="modalOverlay" id="receiveShipmentModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="modalOverlay" id="receiveShipmentModal" onclick="if(event.target===this) closeReceiveShipmentModal()">
       <div class="profileBox" style="width:460px;">
         <div class="profileHead">
           <div class="pAvatarLg">📥</div>
@@ -4396,14 +4406,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <div class="grand"><span>Revised Total</span><span id="receiveShipmentTotal">Rs. 0</span></div>
           </div>
 
+          <div id="rsDraftBanner" class="draftBanner" style="display:none; margin:10px 0 0;"></div>
           <button class="checkoutBtn" id="receiveShipmentConfirmBtn" style="margin-top:10px;" onclick="confirmShipmentReceipt()">✅ Confirm Receipt (Add to Stock)</button>
         </div>
       </div>
     </div>
 
-    <div class="modalOverlay" id="poModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="modalOverlay" id="poModal" onclick="if(event.target===this) closePoModal()">
       <div class="modalBoxWide" style="width:460px; max-height:90vh; overflow-y:auto;">
         <h3 id="poModalTitle">📦 Purchase Order</h3>
+        <div id="poDraftBanner" class="draftBanner" style="display:none;"></div>
 
         <!-- مکمل سرچ — نام، کیٹیگری، بارکوڈ، SKU/ID، ویریئنٹ، اردو/انگلش، کوئی بھی حصہ؛ نیچے والی فہرست فوراً چھٹ جاتی ہے -->
         <div class="searchRow" style="margin-bottom:10px; display:flex; gap:6px; position:sticky; top:-1px; z-index:5; background:var(--card, #fff); padding:4px 0;">
@@ -4448,7 +4460,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
 
         <div class="modalBtns">
-          <button class="cancelBtn" onclick="closePoModal()">Cancel</button>
+          <button class="cancelBtn" id="poCancelBtn" onclick="closePoModal()">Cancel</button>
           <button class="saveBtn" onclick="savePurchaseOrder()">Save (will be added to stock)</button>
         </div>
       </div>
@@ -18325,7 +18337,7 @@ function renderPoSupplierPickList(){
       <div class="cbTop">
         ${capThumbHtml(sp.name, sp.photo || '', sp.supplier_id)}
         <div class="capBox capName"><b><bdi>${String(sp.name).replace(/</g,'&lt;')}</bdi></b><small>${sp.phone ? '📱 ' + String(sp.phone).replace(/</g,'&lt;') : 'No phone'}</small></div>
-        <div class="capBox cbAmt ${pend ? 'poPend' : ''}"><b>${(sp.purchaseHistory || []).length} PO</b><small>${pend ? '⏳ ' + pend + ' pending' : '✅ Clear'}</small></div>
+        <div class="capBox cbAmt ${pend ? 'poPend' : ''}"><b>${(sp.purchaseHistory || []).length} PO</b><small>${poDraftFor(sp.supplier_id) ? '📝 Draft — continue' : pend ? '⏳ ' + pend + ' pending' : '✅ Clear'}</small></div>
       </div>
     </div>`;
   }).join('');
@@ -18362,6 +18374,33 @@ function renderPurchaseOrdersScreen(){
   const cnt = {all: base.length, pending: pendCount, received: base.length - pendCount};
   ['all','pending','received'].forEach(x => { const el = document.getElementById('poCnt' + x); if(el) el.textContent = cnt[x]; });
 
+  // ---------- 📝 ادھورے ڈرافٹ سب سے اوپر — "DRAFT — not saved / not sent" ----------
+  const qNorm = normalizePoSearchText(query);
+  const poDraftList = poListFilter === 'received' ? [] : Object.entries(getPoDrafts())
+    .map(([sid, d]) => ({sup: suppliersData.find(x => String(x.supplier_id) === sid), d}))
+    .filter(x => x.sup && x.d && Array.isArray(x.d.items) && x.d.items.length &&
+      (supplierFilterVal === 'all' || String(x.sup.supplier_id) === supplierFilterVal) &&
+      (!qNorm || normalizePoSearchText(`${x.sup.name} ${x.sup.phone || ''} draft ${x.d.items.map(it => it.name).join(' ')}`).includes(qNorm)))
+    .sort((a, b) => (b.d.at || 0) - (a.d.at || 0));
+  const draftsHtml = poDraftList.map(({sup, d}) => {
+    const tot = moneyRound(d.items.reduce((a, it) => a + (Number(it.qty) || 0) * (Number(it.cost) || 0), 0));
+    return `
+    <div class="billCard capRow capBill draftCard">
+      <div class="cbTop">
+        ${capThumbHtml(sup.name, sup.photo || '', sup.supplier_id)}
+        <div class="capBox capName"><b><bdi>${String(sup.name).replace(/</g,'&lt;')}</bdi></b><small>✏️ ${draftAgo(d.at)} • ${d.items.length} item(s)</small>
+          <span class="poItemsTxt">${draftItemsTxt(d.items)}</span>
+          <div class="cbTags"><span class="pendingStatusTag draft">📝 DRAFT — NOT SAVED • NOT SENT</span></div>
+        </div>
+        <div class="capBox cbAmt poPend"><b>Rs. ${tot.toLocaleString()}</b><small>📝 Draft</small></div>
+      </div>
+      <div class="billActions cbActs">
+        <button class="btnReceiveShipment" onclick="openPoModal(${sup.supplier_id})">✏️ Continue</button>
+        <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="discardPoDraft(${sup.supplier_id})">🗑️ Discard</button>
+      </div>
+    </div>`;
+  }).join('');
+
   let filtered = base;
   if(poListFilter === 'pending') filtered = filtered.filter(po => po.status !== 'received');
   else if(poListFilter === 'received') filtered = filtered.filter(po => po.status === 'received');
@@ -18382,17 +18421,17 @@ function renderPurchaseOrdersScreen(){
 
   // ---------- خلاصہ پٹی ----------
   const totalAmount = filtered.reduce((s,po) => s + (po.total || 0), 0);
-  document.getElementById('poSummaryBar').innerHTML = `<span>Purchase Orders</span><span>${filtered.length} order(s) • Rs. ${totalAmount.toLocaleString()}</span>`;
+  document.getElementById('poSummaryBar').innerHTML = `<span>Purchase Orders</span><span>${filtered.length} order(s) • Rs. ${totalAmount.toLocaleString()}${poDraftList.length ? ` • 📝 ${poDraftList.length} draft` : ''}</span>`;
 
   const wrap = document.getElementById('poListWrap');
   if(filtered.length === 0){
-    wrap.innerHTML = query
+    wrap.innerHTML = draftsHtml + (query
       ? `<div class="placeholder">No purchase order matches "${query.replace(/</g,'&lt;')}"</div>`
-      : `<div class="placeholder">No purchase orders found — tap "+ New PO" to create one</div>`;
+      : (draftsHtml ? '' : `<div class="placeholder">No purchase orders found — tap "+ New PO" to create one</div>`));
     return;
   }
 
-  wrap.innerHTML = filtered.map((po, i) => {
+  wrap.innerHTML = draftsHtml + filtered.map((po, i) => {
     const isPending = po.status !== 'received';
     const daysPending = daysSince(po.date);
     const sup = suppliersData.find(x => x.supplier_id === po.supplier_id) || {};
@@ -18401,7 +18440,7 @@ function renderPurchaseOrdersScreen(){
     const names = (po.items || []).map(it => String(it.name || '').trim()).filter(Boolean);
     const itemsTxt = names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '');
     const statusTag = isPending
-      ? `<span class="pendingStatusTag pending">⏳ PENDING SHIPMENT • ${daysPending}d</span>`
+      ? `<span class="pendingStatusTag pending">⏳ PENDING SHIPMENT • ${daysPending}d</span>${shipDraftFor(po) ? ' <span class="pendingStatusTag draft">📝 Receive draft</span>' : ''}`
       : `<span class="pendingStatusTag approved">✅ RECEIVED</span>`;
     const supName = String(po.supplier_name || '').replace(/</g,'&lt;');
     return `
@@ -18570,7 +18609,7 @@ function renderSupplierPoSection(supplierId){
     ${buildSupplierBankAccountsHtml(s)}
     <div class="profileSectionTitle"><span>📦 All Purchase Orders</span><span class="cnt">${orders.length} orders</span></div>
     ${filterBarHtml}
-    <div id="profilePoListWrap">${ordersHtml}</div>
+    <div id="profilePoListWrap">${(pd => pd ? `<div class="draftBanner"><span class="dbTxt">📝 <b>DRAFT PO</b> — not saved yet • ${pd.items.length} item(s) • ${draftAgo(pd.at)}</span><button type="button" class="dbGo" onclick="closeProfileModal(); openPoModal(${s.supplier_id});">✏️ Continue</button><button type="button" class="dbDel" onclick="discardPoDraft(${s.supplier_id}); renderSupplierPoSection(${s.supplier_id});">🗑️</button></div>` : '')(poDraftFor(s.supplier_id))}${ordersHtml}</div>
   `;
 }
 
@@ -18950,15 +18989,56 @@ let activePoCategory = 'all';
 let activePoSort = 'asc'; // 'asc' | 'desc' — سٹاک کے حساب سے ترتیب
 let activePoSearch = ''; // پرچیز آرڈر سرچ بار کا لفظ
 
+// ---------- 📝 PO ڈرافٹ (واٹس ایپ جیسا) — PO بناتے بناتے کسٹمر آ جائے/بل بنانے چلے جائیں/ایپ بند ہو جائے،
+// جہاں تک بنایا تھا وہیں محفوظ رہے؛ واپس آئیں تو "DRAFT — not saved" کے ساتھ وہیں سے۔ ہر سپلائر کا الگ ڈرافٹ ----------
+function getPoDrafts(){ const d = loadFromStorage('poDrafts', {}); return (d && typeof d === 'object' && !Array.isArray(d)) ? d : {}; }
+function poDraftFor(supplierId){ const d = getPoDrafts()[supplierId]; return d && Array.isArray(d.items) && d.items.length ? d : null; }
+function savePoDraft(){
+  if(!activePoSupplierId) return;
+  const all = getPoDrafts();
+  if(poCart.length) all[activePoSupplierId] = {items: poCart, sort: poCartSortMode, at: Date.now()};
+  else delete all[activePoSupplierId];
+  saveToStorage('poDrafts', all);
+}
+function clearPoDraft(supplierId){ const all = getPoDrafts(); delete all[supplierId]; saveToStorage('poDrafts', all); }
+function discardPoDraft(supplierId){
+  if(!confirm('Discard this draft Purchase Order? Items added so far will be removed.')) return;
+  clearPoDraft(supplierId);
+  if(activePoSupplierId === supplierId){ poCart = []; renderPoBrowseList(); renderPoCart(); }
+  refreshDraftViews();
+}
+function draftAgo(ts){
+  const m = Math.round((Date.now() - (ts || Date.now())) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : Math.round(m / 1440) + ' day(s) ago';
+}
+function draftItemsTxt(items){
+  const names = (items || []).map(it => String(it.name || '').trim()).filter(Boolean);
+  return (names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '')).replace(/</g,'&lt;');
+}
+function refreshDraftViews(){
+  try{ if(document.getElementById('poListWrap')) renderPurchaseOrdersScreen(); }catch(e){}
+  try{ if(document.getElementById('advOrderListWrap')) renderAdvanceOrdersScreen(); }catch(e){}
+}
+function renderPoDraftBanner(){
+  const has = poCart.length > 0;
+  const btn = document.getElementById('poCancelBtn');
+  if(btn) btn.textContent = has ? '📝 Close (keep draft)' : 'Cancel';
+  const el = document.getElementById('poDraftBanner');
+  if(!el) return;
+  el.style.display = has ? 'flex' : 'none';
+  if(has) el.innerHTML = `<span class="dbTxt">📝 <b>DRAFT</b> — not saved, not sent yet • ${poCart.length} item(s) • auto-saved, close anytime</span><button type="button" class="dbDel" onclick="discardPoDraft(${activePoSupplierId})">🗑️ Discard</button>`;
+}
+
 function openPoModal(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
 
   activePoSupplierId = supplierId;
-  poCart = [];
-  poCartSortMode = 'added';
+  const poDraft = poDraftFor(supplierId); // ---------- 📝 ادھورا ڈرافٹ ہو تو وہیں سے شروع ----------
+  poCart = poDraft ? JSON.parse(JSON.stringify(poDraft.items)) : [];
+  poCartSortMode = (poDraft && poDraft.sort) || 'added';
   const poSortSel = document.getElementById('poCartSortSelect');
-  if(poSortSel) poSortSel.value = 'added';
+  if(poSortSel) poSortSel.value = poCartSortMode;
   activePoCategory = 'all';
   activePoSort = 'asc';
   document.getElementById('poModalTitle').textContent = `📦 Purchase Order — ${s.name}`;
@@ -18971,6 +19051,7 @@ function openPoModal(supplierId){
   renderPoBrowseList();
   renderPoCart();
   document.getElementById('poModal').classList.add('show');
+  if(poDraft) showNavToast('📝 Draft restored — continue where you left off');
 }
 
 // ---------- کیٹیگری کے مطابق فلٹر کریں (لکھ لکھ کر ڈھونڈنے کی بجائے سیدھا منتخب کریں) ----------
@@ -19178,8 +19259,11 @@ function renderPoVariantChooserList(productId){
 
 
 function closePoModal(){
+  const kept = activePoSupplierId && poCart.length > 0;
+  if(kept) savePoDraft();
   document.getElementById('poModal').classList.remove('show');
   activePoSupplierId = null;
+  if(kept){ showNavToast('📝 Saved as draft — open it again to continue'); refreshDraftViews(); }
 }
 
 // ---------- پرچیز آرڈر کی مکمل سرچ — اوپر والا سرچ بار نیچے والی فہرست کو فوراً چھانٹ دیتا ہے ----------
@@ -19410,6 +19494,8 @@ function confirmRemoveSupplyItem(kind, key){
 }
 
 function renderPoCart(){
+  savePoDraft(); // ---------- ہر تبدیلی پر خودکار ڈرافٹ ----------
+  renderPoDraftBanner();
   const body = document.getElementById('poItemsBody');
   const emptyMsg = document.getElementById('poEmptyMsg');
 
@@ -19480,12 +19566,15 @@ function savePurchaseOrder(){
   s.total_payable += total; // آرڈر کی مالیت طے ہو گئی، ادائیگی کا وعدہ بن گیا
   s.purchaseHistory = s.purchaseHistory || [];
   s.purchaseHistory.unshift({
+    po_id: Date.now(),
     items: JSON.parse(JSON.stringify(poCart)),
     total,
     date: new Date().toISOString().split('T')[0],
     status: 'pending_receipt' // 'pending_receipt' | 'received'
   });
 
+  clearPoDraft(s.supplier_id); // ---------- محفوظ ہو گیا — اب ڈرافٹ نہیں ----------
+  poCart = [];
   closePoModal();
   renderProductList(document.getElementById('productSearchInput') ? document.getElementById('productSearchInput').value : '');
   renderBillingProductGrid(); // نیا اسٹاک بلنگ گرڈ میں بھی فوراً نظر آئے
@@ -19506,10 +19595,39 @@ let advOrderMeta = {customerName:'', customerPhone:'', note:''}; // ---------- �
 let activeAdvOrderCategory = 'all';
 let activeAdvOrderGridSearch = '';
 
+// ---------- 📝 ایڈوانس آرڈر ڈرافٹ — نیا آرڈر ('new') یا کسی آرڈر کی ادھوری ایڈٹ، جہاں چھوڑا وہیں سے ----------
+function getAdvDrafts(){ const d = loadFromStorage('advOrderDrafts', {}); return (d && typeof d === 'object' && !Array.isArray(d)) ? d : {}; }
+function advDraftKey(){ return editingAdvOrderId ? String(editingAdvOrderId) : 'new'; }
+function advOrderMetaNow(){
+  const m = document.getElementById('advOrderModal');
+  if(m && m.classList.contains('show')){
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    return {customerName: v('advCustomerName'), customerPhone: v('advCustomerPhone'), note: v('advOrderNote')};
+  }
+  return advOrderMeta;
+}
+function saveAdvOrderDraft(){
+  const all = getAdvDrafts(), key = advDraftKey(), meta = advOrderMetaNow();
+  const existing = editingAdvOrderId ? advanceOrdersData.find(o => o.id === editingAdvOrderId) : null;
+  const same = existing && JSON.stringify(existing.items) === JSON.stringify(advOrderCart) &&
+    existing.customerName === meta.customerName && (existing.customerPhone || '') === meta.customerPhone && (existing.note || '') === meta.note;
+  if(advOrderCart.length && !same) all[key] = {cart: advOrderCart, meta, at: Date.now()};
+  else delete all[key];
+  saveToStorage('advOrderDrafts', all);
+}
+function clearAdvOrderDraft(key){ const all = getAdvDrafts(); delete all[key || advDraftKey()]; saveToStorage('advOrderDrafts', all); }
+function discardAdvDraftFromList(key){
+  if(!confirm('Discard this draft? Items added so far will be removed.')) return;
+  clearAdvOrderDraft(key);
+  refreshDraftViews();
+}
+document.addEventListener('input', e => { if(['advCustomerName','advCustomerPhone','advOrderNote'].includes(e.target && e.target.id)) saveAdvOrderDraft(); });
+
 // ---------- "➕ New Advance Order" / "✏️ Edit" پر — بالکل بلنگ سکرین جیسا پورا کیٹلاگ صفحہ کھولیں ----------
 function openAdvanceOrderModal(orderId){
   editingAdvOrderId = orderId || null;
   const existing = orderId ? advanceOrdersData.find(o => o.id === orderId) : null;
+  const advDraft = getAdvDrafts()[advDraftKey()];
 
   advOrderCart = existing ? JSON.parse(JSON.stringify(existing.items)) : [];
   advOrderMeta = {
@@ -19517,6 +19635,11 @@ function openAdvanceOrderModal(orderId){
     customerPhone: existing ? existing.customerPhone : '',
     note: existing ? (existing.note || '') : ''
   };
+  if(advDraft && Array.isArray(advDraft.cart) && advDraft.cart.length){
+    advOrderCart = JSON.parse(JSON.stringify(advDraft.cart));
+    advOrderMeta = Object.assign({customerName:'', customerPhone:'', note:''}, advDraft.meta || {});
+    setTimeout(() => showNavToast('📝 Draft restored — continue where you left off'), 100);
+  }
 
   goTo('advOrderPicker');
 }
@@ -19534,7 +19657,7 @@ function renderAdvOrderPickerScreen(){
 
 // ---------- پکر سکرین کا ◀ Back — اگر کچھ آئٹم شامل ہو چکے ہوں تو پہلے پوچھیں ----------
 function backFromAdvOrderPicker(){
-  if(advOrderCart.length > 0 && !confirm('Go back without saving? Your items so far will be lost.')) return;
+  if(advOrderCart.length > 0){ saveAdvOrderDraft(); if(getAdvDrafts()[advDraftKey()]) showNavToast('📝 Saved as draft — open it again to continue'); }
   advOrderCart = [];
   editingAdvOrderId = null;
   advOrderMeta = {customerName:'', customerPhone:'', note:''};
@@ -19740,6 +19863,7 @@ function renderAdvOrderVariantChooserList(productId){
 
 // ---------- نیچے فلوٹنگ کارٹ بار کی عبارت اپڈیٹ کریں ----------
 function updateAdvOrderFloatingCartBar(){
+  if(document.getElementById('advOrderGridSearchInput')?.offsetParent) saveAdvOrderDraft(); // ---------- پکر کھلا ہو تو ہر تبدیلی پر ڈرافٹ ----------
   const textEl = document.getElementById('advOrderFloatingCartText');
   const totalEl = document.getElementById('advOrderFloatingCartTotal');
   if(!textEl || !totalEl) return;
@@ -19860,6 +19984,7 @@ document.addEventListener('click', (e) => {
 // ---------- پورا آرڈر ہی رد کریں (تصدیق لے کر) ----------
 function discardAdvOrderDraft(){
   if(!confirm('Discard this advance order? All items will be lost.')) return;
+  clearAdvOrderDraft();
   document.getElementById('advOrderModal').classList.remove('show');
   advOrderCart = [];
   editingAdvOrderId = null;
@@ -19897,6 +20022,7 @@ function removeAdvItem(idx){
 }
 
 function renderAdvOrderCart(){
+  saveAdvOrderDraft();
   const body = document.getElementById('advItemsBody');
   const emptyMsg = document.getElementById('advEmptyMsg');
 
@@ -19950,6 +20076,7 @@ function saveAdvanceOrder(){
     });
   }
 
+  clearAdvOrderDraft(); // ---------- محفوظ ہو گیا — اب ڈرافٹ نہیں ----------
   document.getElementById('advOrderModal').classList.remove('show');
   advOrderCart = [];
   editingAdvOrderId = null;
@@ -20026,12 +20153,32 @@ function renderAdvanceOrdersScreen(){
     `<span>Advance Orders</span><span>${filtered.length} order(s) • ${totalItems} item(s) • Approx. Rs. ${totalAmount.toLocaleString()}</span>`;
 
   const wrap = document.getElementById('advOrderListWrap');
+  // ---------- 📝 ادھورے ڈرافٹ سب سے اوپر ----------
+  const advDraftsHtml = advOrderListFilter === 'fulfilled' ? '' : Object.entries(getAdvDrafts())
+    .filter(([k, d]) => d && Array.isArray(d.cart) && d.cart.length && (k === 'new' || advanceOrdersData.some(o => String(o.id) === k)))
+    .sort((a, b) => (b[1].at || 0) - (a[1].at || 0))
+    .map(([k, d]) => {
+      const who = String((d.meta && d.meta.customerName) || (k === 'new' ? 'New advance order' : (advanceOrdersData.find(o => String(o.id) === k) || {}).customerName || '')).replace(/</g,'&lt;');
+      const tot = d.cart.reduce((a, i) => a + (Number(i.qty) || 0) * (Number(i.unitPrice) || 0), 0);
+      return `
+      <div class="billCard draftCard">
+        <div>
+          <div class="bNo">🧑 ${who} <span class="pendingStatusTag draft">📝 ${k === 'new' ? 'DRAFT — NOT SAVED' : 'UNSAVED EDITS'}</span></div>
+          <div class="bMeta">✏️ ${draftAgo(d.at)} | ${d.cart.length} item(s): ${draftItemsTxt(d.cart)}</div>
+          <div class="bMeta" style="font-weight:700; color:var(--primary-dark);">Approx. Total: Rs. ${tot.toLocaleString()}</div>
+        </div>
+        <div class="billActions">
+          <button class="btnReceiveShipment" onclick="openAdvanceOrderModal(${k === 'new' ? 'null' : Number(k)})">✏️ Continue</button>
+          <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="discardAdvDraftFromList('${k}')">🗑️ Discard</button>
+        </div>
+      </div>`;
+    }).join('');
   if(filtered.length === 0){
-    wrap.innerHTML = `<div class="placeholder">No advance orders found</div>`;
+    wrap.innerHTML = advDraftsHtml || `<div class="placeholder">No advance orders found</div>`;
     return;
   }
 
-  wrap.innerHTML = filtered.map(o => {
+  wrap.innerHTML = advDraftsHtml + filtered.map(o => {
     const isPending = o.status !== 'fulfilled';
     const statusTag = isPending
       ? `<span class="pendingStatusTag pending">⏳ PENDING BILL</span>`
@@ -21016,6 +21163,34 @@ let activeReceivePoIdx = null;
 let receiveShipmentCart = [];
 let receiveShipmentBillPhoto = null;
 
+// ---------- 📝 شپمنٹ وصولی کا ڈرافٹ — مال گنتے گنتے کسٹمر آ جائے تو گنتی ضائع نہ ہو (PO کی po_id سے) ----------
+function getShipDrafts(){ const d = loadFromStorage('shipDrafts', {}); return (d && typeof d === 'object' && !Array.isArray(d)) ? d : {}; }
+function shipDraftFor(po){ const d = po && po.po_id ? getShipDrafts()[po.po_id] : null; return d && Array.isArray(d.items) ? d : null; }
+function clearShipDraft(po){ if(!po || !po.po_id) return; const all = getShipDrafts(); delete all[po.po_id]; saveToStorage('shipDrafts', all); }
+function activeReceivePo(){ const s = suppliersData.find(x => x.supplier_id === activeReceiveSupplierId); return (s?.purchaseHistory || [])[activeReceivePoIdx] || null; }
+function saveShipDraft(){
+  const el = document.getElementById('rsDraftBanner');
+  const po = receiveEditMode ? null : activeReceivePo();
+  if(!po || !po.po_id){ if(el) el.style.display = 'none'; return; }
+  const all = getShipDrafts();
+  const changed = JSON.stringify(receiveShipmentCart) !== JSON.stringify(po.items);
+  if(changed) all[po.po_id] = {items: receiveShipmentCart, at: Date.now()};
+  else delete all[po.po_id];
+  saveToStorage('shipDrafts', all);
+  if(el){
+    el.style.display = changed ? 'flex' : 'none';
+    if(changed) el.innerHTML = `<span class="dbTxt">📝 <b>DRAFT</b> — receipt not confirmed yet • changes auto-saved, close anytime</span><button type="button" class="dbDel" onclick="discardShipDraft()">↺ Reset to PO</button>`;
+  }
+}
+function discardShipDraft(){
+  const po = activeReceivePo();
+  if(!po || !confirm('Discard your changes and start again from the original Purchase Order?')) return;
+  clearShipDraft(po);
+  receiveShipmentCart = JSON.parse(JSON.stringify(po.items));
+  renderReceiveShipmentCart();
+  refreshDraftViews();
+}
+
 // ---------- سپلائر کو Purchase Order کا ریمائنڈر بھیجیں (کتنے دن سے پینڈنگ ہے، خودکار تازہ حساب) ----------
 let activePoReminderSupplierId = null;
 let activePoReminderPoIdx = null;
@@ -21072,14 +21247,17 @@ function openReceiveShipmentModal(supplierId, poIdx){
   const po = (s?.purchaseHistory || [])[poIdx];
   if(!s || !po) return;
 
+  if(!po.po_id){ po.po_id = Date.now() + poIdx; persistAllData(); } // ---------- ڈرافٹ کے لیے مستقل شناخت (پرانے PO) ----------
   activeReceiveSupplierId = supplierId;
   activeReceivePoIdx = poIdx;
   receiveEditMode = false;
   const _t = document.getElementById('receiveShipmentTitle'); if(_t) _t.textContent = 'Receive Shipment';
   const _b = document.getElementById('receiveShipmentConfirmBtn'); if(_b) _b.textContent = '✅ Confirm Receipt (Add to Stock)';
   // ---------- PO کی اصل مقدار سے شروع کریں — یہاں تبدیل کر کے حقیقی موصول شدہ مقدار درج کریں ----------
-  receiveShipmentCart = JSON.parse(JSON.stringify(po.items));
+  const shipDraft = shipDraftFor(po); // ---------- 📝 ادھوری گنتی ہو تو وہیں سے ----------
+  receiveShipmentCart = JSON.parse(JSON.stringify(shipDraft ? shipDraft.items : po.items));
   receiveShipmentBillPhoto = po.billPhoto || null;
+  if(shipDraft) setTimeout(() => showNavToast('📝 Draft restored — continue where you left off'), 50);
 
   document.getElementById('receiveShipmentMeta').textContent = `${s.name} — Ordered ${po.date}`;
   document.getElementById('receiveShipmentAddInput').value = '';
@@ -21092,6 +21270,8 @@ function openReceiveShipmentModal(supplierId, poIdx){
   document.getElementById('receiveShipmentModal').classList.add('show');
 }
 function closeReceiveShipmentModal(){
+  const kept = !receiveEditMode && shipDraftFor(activeReceivePo());
+  if(kept){ showNavToast('📝 Saved as draft — open Receive again to continue'); setTimeout(refreshDraftViews, 0); }
   document.getElementById('receiveShipmentModal').classList.remove('show');
   activeReceiveSupplierId = null;
   activeReceivePoIdx = null;
@@ -21105,6 +21285,7 @@ function setReceiveCartSort(mode){
 }
 
 function renderReceiveShipmentCart(){
+  saveShipDraft();
   const list = document.getElementById('receiveShipmentItemsList');
   let total = 0;
   if(receiveShipmentCart.length === 0){
@@ -21282,6 +21463,7 @@ function confirmShipmentReceipt(){
     return;
   }
   if(!confirm('Confirm that you have physically received this shipment? Stock will be updated.')) return;
+  clearShipDraft(po);
 
   const newTotal = moneyRound(receiveShipmentCart.reduce((sum, i) => sum + i.qty * i.cost, 0));
   const oldTotal = po.total;
@@ -30925,9 +31107,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2610MO100';
+  const APP_VERSION = 'AIO2610MO101';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Unit box is back on New Product (next to Stock) — weighed, measured or counted item is clear';
+  const UPDATE_NOTE = 'Purchase Order, Receive Shipment and Advance Order now keep a 📝 Draft — leave anytime and continue where you left off';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
