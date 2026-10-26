@@ -1716,7 +1716,7 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
-  /* ---------- AIO2610MO099: مختصر ویرینٹ لسٹ — ہر سائز ایک لائن، باقی تفصیل ⋯ میں ---------- */
+  /* ---------- AIO2510SU098: مختصر ویرینٹ لسٹ — ہر سائز ایک لائن، باقی تفصیل ⋯ میں ---------- */
   .productCard.capCard .variantCardWrap{padding:0 0 12px;}
   .vlBox{background:var(--card); border:1px solid #e5e9f0; border-radius:14px; padding:8px 6px; box-shadow:0 4px 14px rgba(41,29,10,.05);}
   .vlHead, .vlMain{display:grid; grid-template-columns:minmax(0,1.35fr) repeat(3,minmax(0,1fr)) 28px; gap:4px; align-items:center;}
@@ -2926,7 +2926,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2610MO099</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2610MO100</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3143,7 +3143,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2610MO099</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2610MO100</span>
     </div>
   </div>
 
@@ -3650,6 +3650,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <span class="vcFieldLabel">Stock</span>
             <input type="number" id="npStock" value="0" onfocus="this.select()">
           </div>
+          <!-- یونٹ ہمیشہ نظر آئے (Stock کے ساتھ) — پتا چلے کہ چیز تولنے، ناپنے یا گننے والی ہے -->
+          <div class="vcFieldWrap" id="npUnitWrap">
+            <span class="vcFieldLabel">Unit</span>
+            <select id="npUnit" class="npUnitSelect" onchange="npUnitChanged()"></select>
+            <input type="text" id="npUnitCustom" placeholder="Type your unit, e.g. peti" maxlength="20" style="display:none;" autocomplete="off">
+          </div>
           <div class="vcFieldWrap npExtra">
             <span class="vcFieldLabel">Low Stock Alert At</span>
             <input type="number" id="npLowStockAt" value="5" onfocus="this.select()">
@@ -3659,17 +3665,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <input type="date" id="npExpiry">
           </div>
         </div>
-        <div class="vcFieldWrap vcFieldFull npExtra" id="npUnitWrap">
-          <span class="vcFieldLabel">Unit</span>
-          <select id="npUnit" class="npUnitSelect" onchange="npUnitChanged()"></select>
-          <input type="text" id="npUnitCustom" placeholder="Type your unit, e.g. peti" maxlength="20" style="display:none;" autocomplete="off">
-        </div>
         <div class="vcFieldWrap vcFieldFull npExtra">
           <span class="vcFieldLabel">Location (Aisle / Shelf / Warehouse)</span>
           <input type="text" id="npLocation" placeholder="e.g. Aisle 4, Shelf B">
         </div>
         <!-- نئی چیز: صرف ضروری خانے؛ باقی (تصویر، کیٹیگری، ہول سیل، ایکسپائری، یونٹ…) اختیاری — بٹن دبانے پر -->
-        <button type="button" id="npMoreBtn" class="npMoreBtn" onclick="npShowMore()">➕ More details (optional) — photo, category, wholesale, low-stock, expiry, unit, location</button>
+        <button type="button" id="npMoreBtn" class="npMoreBtn" onclick="npShowMore()">➕ More details (optional) — photo, category, wholesale, low-stock, expiry, location</button>
         <div class="settingsHint" id="npAddVariantHint" style="margin-top:0; margin-bottom:14px;"></div>
 
         <div class="modalBtns">
@@ -14526,7 +14527,7 @@ let activeVariantIndexByProduct = new Map();
 // ---------- ⋯ والی کھلی لائنیں یاد رہیں (لسٹ دوبارہ بنے تو بھی کھلی رہیں) ----------
 const vlOpenRows = new Set();
 function renderVariantCardSection(productId){
-  // AIO2610MO099: پرانا لمبا کارڈ (ہر ویرینٹ ایک پوری اسکرین) ختم — اب ہر سائز ایک لائن: نام | خرید | فروخت | اسٹاک | ⋯
+  // AIO2510SU098: پرانا لمبا کارڈ (ہر ویرینٹ ایک پوری اسکرین) ختم — اب ہر سائز ایک لائن: نام | خرید | فروخت | اسٹاک | ⋯
   const p = productsData.find(pr => pr.product_id === productId);
   if(!p || !p.variants.length) return '';
   const esc = t => String(t ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
@@ -30924,9 +30925,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2610MO099';
+  const APP_VERSION = 'AIO2610MO100';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Packets sold now draw from loose (main) stock when packet stock runs out; ⚖️ loose sale reduces main stock';
+  const UPDATE_NOTE = 'Unit box is back on New Product (next to Stock) — weighed, measured or counted item is clear';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
