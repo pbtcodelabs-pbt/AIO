@@ -1378,7 +1378,13 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
-  /* ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
+  /* ✏️ AIO2710TU106: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
+  .editBillBanner{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px; padding:10px 12px; border-radius:14px; background:linear-gradient(180deg,#fff7ed,#ffedd5); border:2px solid #fb923c; color:#9a3412; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(251,146,60,.25);}
+  .editBillBanner .ebTxt{flex:1; min-width:200px; line-height:1.4;}
+  .editBillBanner .ebTxt small{display:block; font-weight:600; color:#c2410c; font-size:11.5px;}
+  .editBillBanner button{border:1.5px solid #fdba74; background:#fff; color:#b91c1c; border-radius:999px; padding:7px 14px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:inherit;}
+  .btnEditBill{background:linear-gradient(180deg,#fb923c,#ea580c) !important; color:#fff !important;}
+  /* ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
   .pcOnly{display:none !important;}
   html.isPC .pcOnly{display:revert !important;}
   html.isPC .pcOnly.pcFlex{display:flex !important;}
@@ -2951,7 +2957,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <!-- ---------- AIO2710TU105: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <!-- ---------- AIO2710TU106: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
     <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
@@ -3003,7 +3009,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU105</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU106</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3220,7 +3226,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU105</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU106</span>
     </div>
   </div>
 
@@ -3385,6 +3391,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="screen" id="screen-billing">
 
       <div class="pageTitle billingPageTitle">🛒 Billing Screen</div>
+      <div class="editBillBanner" style="display:none;"></div>
       <div class="pendingBillsBanner" id="pendingBillsBannerBilling" onclick="openPendingBillsList()">
         <span class="pbIcon">🔔</span>
         <span class="pbText" id="pendingBillsBannerTextBilling">Bills Awaiting Approval</span>
@@ -3519,6 +3526,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
 
 
+        <div class="editBillBanner" style="display:none; margin:8px 12px 0;"></div>
         <div class="cartSheetBody">
           <div class="cartWrap">
             <!-- ---------- AIO910FR002: ہر آئٹم ایک الگ ابھرا ہوا کیپسول — نام، تعداد، ریٹ، کل رقم سب اسی کے اندر ---------- -->
@@ -4547,7 +4555,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
-    <!-- ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
+    <!-- ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
     <div class="modalOverlay" id="shortcutsModal" onclick="if(event.target===this) closeShortcutsModal()">
       <div class="modalBoxWide kbWrap">
         <div class="kbHead">
@@ -5222,6 +5230,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="previewHeader">
           <strong>🖨️ Bill Ready To Print</strong>
           <div style="display:flex; align-items:center; gap:10px;">
+            <span id="previewEditBillBtn" style="cursor:pointer; font-size:13px; font-weight:800; color:#fff; background:linear-gradient(180deg,#fb923c,#ea580c); padding:5px 10px; border-radius:8px;" onclick="startEditBill(currentPreviewInvoiceId)" title="Fix items, rates, quantity or customer">✏️ Edit Bill</span>
             <span style="cursor:pointer; font-size:13px; font-weight:700; color:var(--primary-dark); background:#eef2ff; padding:5px 10px; border-radius:8px;" onclick="openEditBillCustomerModal()">✏️ Edit Customer</span>
             <span style="cursor:pointer;" onclick="closeInvoicePreview()">✖</span>
           </div>
@@ -5664,7 +5673,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           </div>
         </div>
 
-        <!-- --- ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
+        <!-- --- ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
         <div class="settingsCard pcOnly" id="settingsCardShortcuts">
           <h3>⌨️ Keyboard Shortcuts <span style="font-size:11px; font-weight:800; color:#fff; background:var(--primary,#0f766e); padding:2px 8px; border-radius:999px; vertical-align:middle;">PC</span></h3>
           <div class="settingsHint">Work faster on a computer — choose your own key for each action (billing, search, complete &amp; print, screens). Saved on this computer only.</div>
@@ -10620,7 +10629,7 @@ function initQuickDockDrag(){
   });
 }
 
-// ===================== ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
+// ===================== ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
 // یوسف بھائی کا مشورہ: کمپیوٹر پر کام تیز ہو — ہر صارف اپنی مرضی کی کی خود رکھے تاکہ یاد رہے۔
 // صرف اسی کمپیوٹر پر محفوظ (kbShortcuts)؛ بیک اپ/کلاؤڈ میں نہیں۔ فون پر بٹن/کارڈ چھپے رہتے ہیں۔
 function isPcDevice(){
@@ -12777,7 +12786,79 @@ function endCustomerSelection(){
 
 // ---------- Render Cart Table + Totals ----------
 let billingDraftCustomerRestored = false;
+// ===================== ✏️ AIO2710TU106: بنے/پرنٹ شدہ بل میں ترمیم =====================
+// بل بلنگ میں کھلتا ہے — آئٹم، ریٹ، مقدار، گاہک، ڈسکاؤنٹ ٹھیک کریں، پھر Complete۔ وہی بل نمبر رہتا ہے؛
+// پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس ہو کر نیا اثر لگتا ہے۔ Complete سے پہلے پرانا بل جوں کا توں رہتا ہے۔
+let billEdit = loadFromStorage('billEditDraft', null); // {invoice_id, invoice_no}
+function editingInvoice(){ return billEdit ? invoicesData.find(i => i.invoice_id === billEdit.invoice_id && i.status !== 'voided') || null : null; }
+function startEditBill(invoiceId){
+  if(AppState.currentRole === 'salesman'){ alert('Only the admin can edit a completed bill — use ✏️ Request Edit.'); return; }
+  const inv = invoicesData.find(i => i.invoice_id === invoiceId);
+  if(!inv) return;
+  if(inv.status === 'voided'){ alert('This bill is deleted (voided) — it cannot be edited.'); return; }
+  if((inv.items || []).some(it => it.returned)){ alert('Some items of this bill were returned, so it cannot be edited.\nDelete it and make a new bill instead.'); return; }
+  const sameAlready = billEdit && billEdit.invoice_id === invoiceId;
+  if(!sameAlready && Billing.cart.length && !confirm('Billing already has items. Replace them with this bill to edit it?')) return;
+  if(!sameAlready && !confirm(`Edit ${inv.invoice_no}?\n\nThe bill opens in Billing — change items, rates, quantity, customer or discount, then tap Complete.\nThe same bill number stays, and stock, cash and the customer's balance are corrected automatically.`)) return;
+  billEdit = {invoice_id: inv.invoice_id, invoice_no: inv.invoice_no};
+  saveToStorage('billEditDraft', billEdit);
+  if(!sameAlready){
+    Billing.cart = JSON.parse(JSON.stringify(inv.items || [])).map(it => { delete it.returned; delete it.returnQty; delete it.returnAmount; return it; });
+    if(inv.sale_mode){
+      Billing.saleMode = inv.sale_mode; // بل کے اپنے ریٹ رہیں — دوبارہ قیمت نہ لگائیں
+      ['modeRetail','cartModeRetail'].forEach(id => document.getElementById(id)?.classList.toggle('active', inv.sale_mode === 'retail'));
+      ['modeWholesale','cartModeWholesale'].forEach(id => document.getElementById(id)?.classList.toggle('active', inv.sale_mode === 'wholesale'));
+    }
+    const sel = document.getElementById('customerSelect');
+    if(sel){ sel.value = inv.customer_id || ''; try{ onCustomerChange(); }catch(e){} }
+    const d = document.getElementById('discountInput'); if(d) d.value = inv.discount || 0;
+    const r = document.getElementById('amountReceivedInput'); if(r) r.value = inv.cash_received_now > 0 ? inv.cash_received_now : '';
+  }
+  try{ document.getElementById('invoicePreviewModal').classList.remove('show'); currentPreviewInvoiceId = null; }catch(e){}
+  goTo('billing');
+  renderCart(); try{ renderBillingProductGrid(); }catch(e){}
+  setTimeout(() => { try{ openCartSheet(); }catch(e){} }, 150);
+}
+function cancelEditBill(){
+  if(!confirm('Stop editing? The original bill stays exactly as it was.')) return;
+  billEdit = null; saveToStorage('billEditDraft', null);
+  try{ resetBillingCart(); }catch(e){ Billing.cart = []; }
+  renderCart(); try{ renderBillingProductGrid(); }catch(e){}
+  try{ closeCartSheet(); }catch(e){}
+}
+function renderEditBillBanner(){
+  const inv = editingInvoice();
+  if(billEdit && !inv){ billEdit = null; saveToStorage('billEditDraft', null); }
+  document.querySelectorAll('.editBillBanner').forEach(el => {
+    el.style.display = inv ? 'flex' : 'none';
+    if(inv) el.innerHTML = `<span class="ebTxt">✏️ Editing ${String(inv.invoice_no).replace(/</g,'&lt;')}<small>Fix items, rates, quantity or customer — then tap Complete. Same bill number is kept.</small></span><button type="button" onclick="cancelEditBill()">✖ Cancel edit</button>`;
+  });
+}
+// ---------- پرانے بل کا اثر واپس — اسٹاک، نقد، گاہک کا بقایہ اور والٹ (Complete پر، نیا بل لگنے سے پہلے) ----------
+function reverseInvoiceForEdit(inv){
+  (inv.items || []).forEach(item => restoreStockForItem(item, item.qty));
+  const customer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
+  const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
+  if(wasCounterCash){ financeDummy.cashInHand -= (inv.grand_total || 0); return; }
+  financeDummy.cashInHand -= (inv.cash_received_now || 0);
+  if(customer){
+    const billDelta = (inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0);
+    customer.total_receivable = Math.max(0, (customer.total_receivable || 0) - billDelta);
+    const today = new Date().toISOString().split('T')[0];
+    customer.walletHistory = customer.walletHistory || [];
+    if(inv.wallet_applied > 0){
+      customer.wallet_balance = (customer.wallet_balance || 0) + inv.wallet_applied;
+      customer.walletHistory.unshift({type:'deposit', amount:inv.wallet_applied, date:today, note:`Returned — ${inv.invoice_no} edited`});
+    }
+    if(inv.change_credited_to_wallet > 0){
+      customer.wallet_balance = Math.max(0, (customer.wallet_balance || 0) - inv.change_credited_to_wallet);
+      customer.walletHistory.unshift({type:'redeem', amount:inv.change_credited_to_wallet, date:today, note:`Change taken back — ${inv.invoice_no} edited`});
+    }
+  }
+}
+
 function renderCart(){
+  try{ renderEditBillBanner(); }catch(e){}
   saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
   renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
   if(!billingDraftCustomerRestored && Billing.cart.length > 0){
@@ -13199,6 +13280,7 @@ async function openBillPreviewBeforeComplete(){
 
 function finalizeInvoice(){
   if(Billing.cart.length === 0) return;
+  const editInv = editingInvoice(); // ✏️ بنے ہوئے بل کی ترمیم چل رہی ہے؟
 
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
@@ -13234,7 +13316,8 @@ function finalizeInvoice(){
     const flatVariants = getFlatVariants();
     for(const item of Billing.cart){
       const v = flatVariants.find(f => f.variant_id === item.variant_id);
-      const avail = (v && !item.loose_product_id) ? sellableStock(findVariantById(item.variant_id)) : (v ? v.stock : 0);
+      const oldQty = editInv ? (editInv.items || []).filter(x => x.variant_id === item.variant_id).reduce((a, x) => a + (Number(x.qty) || 0), 0) : 0; // ترمیم: پرانے بل کا مال واپس شمار
+      const avail = ((v && !item.loose_product_id) ? sellableStock(findVariantById(item.variant_id)) : (v ? v.stock : 0)) + oldQty;
       if(v && item.qty > avail){
         alert(`"${item.name}" is low on stock (available: ${avail}). Please reduce quantity.`);
         return;
@@ -13247,6 +13330,9 @@ function finalizeInvoice(){
     submitBillForApproval(customer, method, grandTotal, taxPercent, taxAmount);
     return;
   }
+
+  // ---------- ✏️ ترمیم: پہلے پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس، پھر نیا بل اسی نمبر سے ----------
+  if(editInv) reverseInvoiceForEdit(editInv);
 
   // ---------- کسٹمر کا بقایہ کتنا تھا، اس بل سے پہلے (پرنٹ پر مستقل طور پر یہی نظر آئے گا، بعد میں کچھ بھی بدلے) ----------
   const previousBalance = customer ? customer.total_receivable : 0;
@@ -13271,7 +13357,18 @@ function finalizeInvoice(){
     created_at: new Date().toISOString()
   };
   // TODO: یہاں invoices + invoice_items table میں اصل INSERT ہوگا
-  invoicesData.unshift(invoice);
+  if(editInv){
+    // ---------- وہی بل نمبر، وہی تاریخ؛ فہرست میں اسی جگہ پرانے کی جگہ نیا ----------
+    Object.assign(invoice, {
+      invoice_id: editInv.invoice_id, daily_bill_no: editInv.daily_bill_no, monthly_bill_no: editInv.monthly_bill_no,
+      invoice_no: editInv.invoice_no, created_at: editInv.created_at, sold_by: editInv.sold_by || invoice.sold_by,
+      edited_at: new Date().toISOString(), edited_by: AppState.currentUser?.name || 'Admin', edit_count: (editInv.edit_count || 0) + 1
+    });
+    const ix = invoicesData.indexOf(editInv);
+    if(ix >= 0) invoicesData.splice(ix, 1, invoice); else invoicesData.unshift(invoice);
+  } else {
+    invoicesData.unshift(invoice);
+  }
 
   // ---------- اسٹاک کاٹیں (productsData میں اصل variant سے) ----------
   Billing.cart.forEach(item => deductStockForItem(item, item.qty, true)); // AIO1310TU035: کھلا وزن بھی اصل اسٹاک سے کٹے
@@ -13371,6 +13468,7 @@ function finalizeInvoice(){
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
+  if(editInv){ billEdit = null; saveToStorage('billEditDraft', null); renderEditBillBanner(); showNavToast(`✅ ${invoice.invoice_no} updated`); }
   openInvoicePreview(invoice.invoice_id); // خودکار پریمیم پرنٹ پریویو کھل جائے
 }
 
@@ -15438,7 +15536,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU105: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU106: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -23759,7 +23857,7 @@ function resolveApproval(requestId, decision){
       alert('⚠️ Approved, but that bill could not be found (may have been removed already) — no changes made to any bill.');
     }
   } else if(decision === 'approved' && r.action_type === 'edit_bill'){
-    alert('ℹ️ Edit request approved. Note: AIO POS does not yet have a bill-editing screen — to correct the bill, void it and create a new one with the right details.');
+    alert('ℹ️ Edit request approved. Open the bill in Bill History and tap ✏️ Edit to correct it.');
   }
 
   persistAllData();
@@ -24102,7 +24200,7 @@ function renderBillHistory(){
         ${isAdmin && bulkDeleteMode ? `<input type="checkbox" class="billCheckbox" data-invoice-id="${inv.invoice_id}" ${selectedBillIds.has(inv.invoice_id) ? 'checked' : ''} onchange="toggleBillSelection(${inv.invoice_id}, this.checked)">` : ''}
         ${capThumbHtml(inv.customer_name, '', String(inv.customer_name || '').length + (inv.invoice_id || 0))}
         <div class="capBox capName"><b>${inv.invoice_no}</b><small><bdi>${custName}</bdi>${dateTxt ? ' • ' + dateTxt : ''}</small>
-          <div class="cbTags"><span class="billStatusTag ${inv.status}">${statusTxt}</span>${creatorBadge}${(inv.payment_modes || []).filter(x => x.amount > 0).map(x => { const m = payModeInfo(x.k); return `<span class="pendingStatusTag" style="background:${m.bg}; color:${m.c};">${m.k === 'cash' || m.k === 'bank' ? m.ico : '📱'} ${m.name}</span>`; }).join('')}${inv.reviewed_by_admin ? '<span class="pendingStatusTag approved">✔ REVIEWED</span>' : ''}</div>
+          <div class="cbTags"><span class="billStatusTag ${inv.status}">${statusTxt}</span>${creatorBadge}${(inv.payment_modes || []).filter(x => x.amount > 0).map(x => { const m = payModeInfo(x.k); return `<span class="pendingStatusTag" style="background:${m.bg}; color:${m.c};">${m.k === 'cash' || m.k === 'bank' ? m.ico : '📱'} ${m.name}</span>`; }).join('')}${inv.reviewed_by_admin ? '<span class="pendingStatusTag approved">✔ REVIEWED</span>' : ''}${inv.edited_at ? '<span class="pendingStatusTag" style="background:#ffedd5; color:#c2410c;">✏️ Edited</span>' : ''}</div>
         </div>
         <div class="capBox cbAmt ${due > 0 ? 'due' : ''}"><b>Rs. ${inv.grand_total.toLocaleString()}</b><small>${due > 0 ? `⏳ Due ${due.toLocaleString()}` : '✅ Clear'}</small></div>
       </div>
@@ -24112,6 +24210,7 @@ function renderBillHistory(){
         ${isAdmin ? (inv.status === 'voided' ? `
           <button class="btnRequestDelete" onclick="permanentlyDeleteBill(${inv.invoice_id})">🗑️ Permanently Delete</button>
         ` : `
+          <button class="btnPrint btnEditBill" onclick="startEditBill(${inv.invoice_id})">✏️ Edit</button>
           <button class="btnRequestDelete" onclick="adminVoidBill(${inv.invoice_id})">🗑️ Delete</button>
           <button class="btnCollect" onclick="openReturnItemModal(${inv.invoice_id})">↩️ Return</button>
         `) : `
@@ -31462,9 +31561,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU105';
+  const APP_VERSION = 'AIO2710TU106';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'PC keyboard shortcuts — set your own key for billing, search, complete & print and screens (⌨️ / F1)';
+  const UPDATE_NOTE = '✏️ Edit Bill: fix items, rates, quantity or customer of a completed bill — same bill number, stock and balance corrected';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
