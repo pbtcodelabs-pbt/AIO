@@ -1378,6 +1378,33 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
+  /* ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
+  .pcOnly{display:none !important;}
+  html.isPC .pcOnly{display:revert !important;}
+  html.isPC .pcOnly.pcFlex{display:flex !important;}
+  .modalBoxWide.kbWrap, .kbWrap{width:min(720px, 94vw) !important; max-width:720px !important; max-height:88vh; overflow-y:auto; box-sizing:border-box;}
+  .kbHead{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .kbHead h3{margin:0;}
+  .kbSub{font-size:12.5px; color:var(--muted,#64748b); margin:0 0 10px;}
+  .kbBar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; padding:10px; border-radius:14px; background:#f8fafc; border:1px solid #e2e8f0;}
+  .kbBar label{display:flex; align-items:center; gap:8px; font-weight:800; font-size:13px; flex:1; min-width:180px; cursor:pointer;}
+  .kbBar button{border:none; border-radius:999px; padding:8px 14px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:inherit;}
+  .kbBtnGhost{background:#fff; color:var(--primary-dark,#0f766e); border:1.5px solid var(--primary,#0f766e) !important;}
+  .kbGroup{font-size:12px; font-weight:900; letter-spacing:.4px; text-transform:uppercase; color:var(--primary-dark,#0f766e); margin:14px 2px 6px;}
+  .kbList{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:6px;}
+  .kbKey{flex:0 0 auto;}
+  .kbRow{display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:14px; background:#fff; border:1.5px solid #e2e8f0; box-shadow:0 1px 0 #e2e8f0; min-height:46px;}
+  .kbRow.listening{border-color:#f59e0b; background:#fffbeb; box-shadow:0 0 0 3px rgba(245,158,11,.25);}
+  .kbName{flex:1; min-width:0; font-size:13px; font-weight:800; color:var(--text,#0f172a); line-height:1.25;}
+  .kbName small{display:block; font-size:11px; font-weight:600; color:var(--muted,#64748b);}
+  .kbKey{display:inline-flex; align-items:center; gap:3px; flex-wrap:wrap; justify-content:flex-end; cursor:pointer; border:none; background:none; padding:0; font-family:inherit;}
+  .kbKey kbd{display:inline-block; min-width:22px; padding:4px 8px; border-radius:8px; background:linear-gradient(180deg,#fff,#e2e8f0); border:1px solid #cbd5e1; border-bottom-width:3px; font:800 12px/1.2 ui-monospace,Menlo,Consolas,monospace; color:#0f172a; text-align:center;}
+  .kbKey .kbNone{font-size:11.5px; font-weight:700; color:#94a3b8; padding:4px 8px; border:1.5px dashed #cbd5e1; border-radius:8px;}
+  .kbKey .kbWait{font-size:12px; font-weight:800; color:#b45309;}
+  .kbX{border:none; background:#f1f5f9; color:#64748b; width:26px; height:26px; border-radius:50%; font-weight:900; cursor:pointer; flex:0 0 auto;}
+  .kbX:hover{background:#fee2e2; color:#b91c1c;}
+  .kbMsg{min-height:18px; font-size:12px; font-weight:800; text-align:center; margin-top:10px;}
+  .kbCardRow{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
   /* 🛠️ ڈویلپر پینل — اوپر کیپسول بٹن، ہر بٹن کا اپنا الگ حصہ (لمبا اسکرول نہیں) */
   .devTabs{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 12px; position:sticky; top:0; z-index:3; background:var(--card, #fff); padding:4px 0 8px;}
   .devTab{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:60px; padding:8px 10px; border:1.5px solid #dbe1ea; border-radius:22px; background:linear-gradient(180deg,#fff,#eef2f7); box-shadow:0 2px 0 #cbd5e1, 0 4px 10px rgba(15,23,42,.08); color:#0f172a; cursor:pointer; text-align:center; font-family:inherit; -webkit-tap-highlight-color:transparent;}
@@ -2924,7 +2951,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <!-- ---------- AIO2710TU104: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <!-- ---------- AIO2710TU105: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
     <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
@@ -2976,7 +3003,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU104</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU105</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3193,7 +3220,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU104</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU105</span>
     </div>
   </div>
 
@@ -3382,6 +3409,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button class="fontsFabMain" id="cardStyleBtnBilling" onclick="switchHomeSettingsTab('card'); toggleHomeSettingsPanel(event, 'cardStyleBtnBilling');" title="Product Card Style" style="flex:0 0 auto;">🏷️</button>
 
           <!-- ---------- AIO1010SA015: ☰ List / ▦ Cards — بلنگ پر پراڈکٹس دکھانے کا انداز ---------- -->
+          <button class="fontsFabMain pcOnly" onclick="openShortcutsModal()" title="Keyboard shortcuts (F1)" style="flex:0 0 auto; font-size:15px; min-width:44px;">⌨️</button>
           <button class="fontsFabMain" id="billViewToggleBtn" onclick="toggleBillingViewMode()" title="List / Cards view" style="flex:0 0 auto; font-size:12px; font-weight:900; min-width:64px;">▦ Cards</button>
 
           <!-- ---------- FONTS بٹن — کاؤنٹر سیل کے دائیں طرف، مستقل جگہ پر (پراڈکٹس پر کبھی نہیں چڑھتا) ---------- -->
@@ -4519,6 +4547,24 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
+    <!-- ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
+    <div class="modalOverlay" id="shortcutsModal" onclick="if(event.target===this) closeShortcutsModal()">
+      <div class="modalBoxWide kbWrap">
+        <div class="kbHead">
+          <h3>⌨️ Keyboard Shortcuts</h3>
+          <span class="closeBtn" onclick="closeShortcutsModal()" style="cursor:pointer; font-size:18px; font-weight:900;">✖</span>
+        </div>
+        <div class="kbSub">Click a key to change it, then press your new key (F-keys or Alt + key work everywhere; a single letter/number works only when no typing box is selected). <b>F1</b> opens this list anytime.</div>
+        <div class="kbBar">
+          <label><input type="checkbox" id="kbEnabledChk" onchange="setShortcutsEnabled(this.checked)" style="width:18px; height:18px; margin:0;"> Shortcuts ON</label>
+          <button type="button" class="kbBtnGhost" onclick="printShortcutsSheet()">🖨️ Print list</button>
+          <button type="button" class="kbBtnGhost" onclick="resetShortcuts()">↺ Reset to default</button>
+        </div>
+        <div id="kbListWrap"></div>
+        <div class="kbMsg" id="kbMsg"></div>
+      </div>
+    </div>
+
     <!-- WALLET TRANSACTION MODAL (صرف Customers کے لیے) -->
     <div class="modalOverlay" id="walletModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
@@ -5615,6 +5661,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <div class="settingsHint" id="storageUsageText">Calculating…</div>
           <div style="width:100%; height:10px; background:#e2e8f0; border-radius:6px; overflow:hidden; margin-top:8px;">
             <div id="storageUsageBar" style="height:100%; width:0%; background:var(--primary); transition:width .3s;"></div>
+          </div>
+        </div>
+
+        <!-- --- ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
+        <div class="settingsCard pcOnly" id="settingsCardShortcuts">
+          <h3>⌨️ Keyboard Shortcuts <span style="font-size:11px; font-weight:800; color:#fff; background:var(--primary,#0f766e); padding:2px 8px; border-radius:999px; vertical-align:middle;">PC</span></h3>
+          <div class="settingsHint">Work faster on a computer — choose your own key for each action (billing, search, complete &amp; print, screens). Saved on this computer only.</div>
+          <div class="kbCardRow" style="margin-top:8px;">
+            <button class="testPrintBtn" style="flex:1; margin:0;" onclick="openShortcutsModal()">⌨️ Set my shortcuts</button>
           </div>
         </div>
 
@@ -10565,10 +10620,188 @@ function initQuickDockDrag(){
   });
 }
 
-// ---------- KEYBOARD SHORTCUT STUB (بعد میں F2=Search, F4=Checkout وغیرہ) ----------
-document.addEventListener('keydown', (e)=>{
-  // TODO: یہاں keyboard-driven billing shortcuts شامل ہوں گے
-});
+// ===================== ⌨️ AIO2710TU105: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
+// یوسف بھائی کا مشورہ: کمپیوٹر پر کام تیز ہو — ہر صارف اپنی مرضی کی کی خود رکھے تاکہ یاد رہے۔
+// صرف اسی کمپیوٹر پر محفوظ (kbShortcuts)؛ بیک اپ/کلاؤڈ میں نہیں۔ فون پر بٹن/کارڈ چھپے رہتے ہیں۔
+function isPcDevice(){
+  try{ if(window.aioDesktop && window.aioDesktop.isDesktop) return true; }catch(e){}
+  try{ return window.matchMedia('(hover: hover) and (pointer: fine)').matches; }catch(e){ return false; }
+}
+function applyPcClass(){ document.documentElement.classList.toggle('isPC', isPcDevice()); }
+applyPcClass();
+try{ window.matchMedia('(hover: hover) and (pointer: fine)').addEventListener('change', applyPcClass); }catch(e){}
+
+function kbBillingField(id){
+  if(!billingScreenVisible()) goTo('billing');
+  setTimeout(() => {
+    let el = document.getElementById(id);
+    if(!el || el.offsetParent === null){ try{ openCartSheet(); }catch(e){} }
+    setTimeout(() => { el = document.getElementById(id); if(el){ el.focus(); try{ el.select(); }catch(e){} } }, 120);
+  }, 60);
+}
+function kbLastItem(delta){
+  if(!billingScreenVisible()) goTo('billing');
+  if(!Billing.cart.length){ showNavToast('Bill is empty'); return; }
+  const last = (gunLastAdded && Billing.cart.find(c => c.variant_id === gunLastAdded)) || Billing.cart[Billing.cart.length - 1];
+  if(delta > 0){ addToCart(last.variant_id); }
+  else { if(last.qty > 1) last.qty -= 1; else Billing.cart = Billing.cart.filter(c => c !== last); renderCart(); try{ renderBillingProductGrid(); }catch(e){} }
+  const now = Billing.cart.find(c => c.variant_id === last.variant_id);
+  showNavToast(now ? `${last.name} × ${now.qty}` : `↩️ Removed: ${last.name}`);
+}
+function kbTopModal(){
+  const open = Array.from(document.querySelectorAll('.modalOverlay.show')).filter(m => m.offsetParent !== null || getComputedStyle(m).display !== 'none');
+  return open.length ? open[open.length - 1] : null;
+}
+// ---------- تمام کام — [شناخت, گروپ, نام, وضاحت, ڈیفالٹ کی, عمل] ----------
+const KB_ACTIONS = [
+  ['help',      'General',  'Show shortcuts',          'This list',                          'F1',          () => openShortcutsModal()],
+  ['close',     'General',  'Close popup',             'Close the open window',              'Escape',      () => { const m = kbTopModal(); if(m){ m.classList.remove('show'); } }],
+  ['save',      'General',  'Save',                    'Press the Save button of the open window', 'Ctrl+S', () => { const m = kbTopModal(); const b = m && Array.from(m.querySelectorAll('.saveBtn, .checkoutBtn')).find(x => x.offsetParent !== null); if(b) b.click(); else showNavToast('Nothing to save here'); }],
+  ['search',    'Billing',  'Search / scan item',      'Jump to the item search box',        'F2',          () => { if(!billingScreenVisible()) goTo('billing'); setTimeout(() => { const el = document.getElementById('searchInput'); if(el){ el.focus(); el.select(); } }, 60); }],
+  ['undo',      'Billing',  'Remove last item',        'Take the last item off the bill',    'F3',          () => kbLastItem(-1)],
+  ['plus',      'Billing',  'Last item +1',            'Add one more of the last item',      'Alt+ArrowUp', () => kbLastItem(1)],
+  ['minus',     'Billing',  'Last item −1',            'One less of the last item',          'Alt+ArrowDown', () => kbLastItem(-1)],
+  ['checkout',  'Billing',  'Open bill / checkout',    'See the full bill',                  'F4',          () => { if(!billingScreenVisible()) goTo('billing'); setTimeout(() => { try{ openCartSheet(); }catch(e){} }, 60); }],
+  ['customer',  'Billing',  'Choose customer',         'Search customer by name/phone',      'F6',          () => kbBillingField('custSearchInput')],
+  ['discount',  'Billing',  'Discount',                'Type a discount',                    'F7',          () => kbBillingField('discountInput')],
+  ['received',  'Billing',  'Amount received',         'Type cash received',                 'F8',          () => kbBillingField('amountReceivedInput')],
+  ['complete',  'Billing',  'Complete bill & print',   'Save the bill and print it',         'F9',          () => { if(!billingScreenVisible()) goTo('billing'); gunCompleteBill(); }],
+  ['newbill',   'Billing',  'New bill (clear)',        'Empty the current bill',             'Ctrl+Delete', () => { if(!billingScreenVisible()) goTo('billing'); deleteBillingCartDraft(); }],
+  ['home',      'Screens',  'Home',                    '',                                   'Alt+1',       () => goTo('home')],
+  ['billing',   'Screens',  'Billing',                 '',                                   'Alt+2',       () => goTo('billing')],
+  ['products',  'Screens',  'Products',                '',                                   'Alt+3',       () => goTo('products')],
+  ['po',        'Screens',  'Purchase Orders',         '',                                   'Alt+4',       () => goTo('purchaseorders')],
+  ['stock',     'Screens',  'Stock Adjustment',        '',                                   'Alt+5',       () => goTo('stockadjustment')],
+  ['history',   'Screens',  'Bill History',            '',                                   'Alt+6',       () => goTo('billhistory')],
+  ['parties',   'Screens',  'Customers & Suppliers',   '',                                   'Alt+7',       () => goTo('customers')],
+  ['expense',   'Screens',  'Expenses',                '',                                   'Alt+8',       () => goTo('expenditure')],
+  ['reports',   'Screens',  'Reports / Dashboard',     '',                                   'Alt+9',       () => goTo('dashboard')],
+  ['newprod',   'Quick add','New product',             'Open the new product form',          'Alt+N',       () => { goTo('products'); setTimeout(() => openNewProductModal(), 80); }],
+  ['newpo',     'Quick add','New purchase order',      'Choose a supplier and start a PO',   'Alt+O',       () => { goTo('purchaseorders'); setTimeout(() => openPoSupplierPicker(), 80); }],
+];
+const KB_RESERVED = ['Ctrl+C','Ctrl+V','Ctrl+X','Ctrl+A','Ctrl+Z','Ctrl+Y','Ctrl+P','Ctrl+R','Ctrl+W','Ctrl+T','Ctrl+N','Ctrl+F','Ctrl+L','Ctrl+Tab','F5','F11','F12','Ctrl+Shift+I','Ctrl+Shift+J','Alt+F4','Alt+Tab','Alt+F','Alt+E','Tab','Shift+Tab','Enter','Backspace'];
+let kbListeningId = null;
+function kbDefaults(){ const m = {}; KB_ACTIONS.forEach(a => { m[a[0]] = a[4]; }); return m; }
+function kbState(){
+  const st = loadFromStorage('kbShortcuts', null);
+  const map = Object.assign(kbDefaults(), (st && st.map) || {});
+  return {enabled: !st || st.enabled !== false, map};
+}
+function kbSave(st){ saveToStorage('kbShortcuts', st); }
+// ---------- دبائی گئی کی سے "Ctrl+Alt+Shift+Key" ----------
+function kbComboFromEvent(e){
+  const k = e.key;
+  if(['Control','Alt','Shift','Meta','AltGraph','CapsLock','Dead','Unidentified'].includes(k)) return '';
+  let main;
+  const c = e.code || '';
+  if(/^Key[A-Z]$/.test(c)) main = c.slice(3);
+  else if(/^Digit\d$/.test(c)) main = c.slice(5);
+  else if(/^Numpad\d$/.test(c)) main = 'Num' + c.slice(6);
+  else if(c === 'NumpadAdd') main = 'Num+';
+  else if(c === 'NumpadSubtract') main = 'Num-';
+  else if(c === 'NumpadMultiply') main = 'Num*';
+  else if(c === 'NumpadDivide') main = 'Num/';
+  else if(c === 'NumpadEnter') main = 'NumEnter';
+  else if(k === ' ') main = 'Space';
+  else main = k.length === 1 ? k.toUpperCase() : k;
+  const parts = [];
+  if(e.ctrlKey || e.metaKey) parts.push('Ctrl');
+  if(e.altKey) parts.push('Alt');
+  if(e.shiftKey && main.length > 1) parts.push('Shift'); // Shift+حرف = بڑا حرف — الگ شمار نہ کریں
+  parts.push(main);
+  return parts.join('+');
+}
+function kbKeyHtml(combo){
+  if(!combo) return '<span class="kbNone">— none —</span>';
+  const pretty = {ArrowUp:'↑', ArrowDown:'↓', ArrowLeft:'←', ArrowRight:'→', Escape:'Esc', Delete:'Del', PageUp:'PgUp', PageDown:'PgDn'};
+  return combo.split('+').map(p => `<kbd>${(pretty[p] || p).replace(/</g,'&lt;')}</kbd>`).join('<span style="font-weight:900; color:#94a3b8;">+</span>');
+}
+function kbMsg(txt, ok){ const el = document.getElementById('kbMsg'); if(el){ el.style.color = ok ? 'var(--success,#15803d)' : '#b45309'; el.textContent = txt || ''; } }
+function renderShortcutsList(){
+  const st = kbState(), wrap = document.getElementById('kbListWrap');
+  if(!wrap) return;
+  document.getElementById('kbEnabledChk').checked = st.enabled;
+  const groups = [];
+  KB_ACTIONS.forEach(a => { if(!groups.includes(a[1])) groups.push(a[1]); });
+  wrap.innerHTML = groups.map(g => `<div class="kbGroup">${g}</div><div class="kbList">` +
+    KB_ACTIONS.filter(a => a[1] === g).map(a => {
+      const lis = kbListeningId === a[0];
+      return `<div class="kbRow ${lis ? 'listening' : ''}">
+        <div class="kbName">${a[2]}${a[3] ? `<small>${a[3]}</small>` : ''}</div>
+        <button type="button" class="kbKey" title="Click, then press a new key" onclick="startShortcutCapture('${a[0]}')">${lis ? '<span class="kbWait">Press a key… (Esc = cancel)</span>' : kbKeyHtml(st.map[a[0]])}</button>
+        <button type="button" class="kbX" title="Remove this shortcut" onclick="clearShortcut('${a[0]}')">✕</button>
+      </div>`;
+    }).join('') + `</div>`).join('');
+}
+function openShortcutsModal(){
+  kbListeningId = null;
+  renderShortcutsList(); kbMsg('');
+  document.getElementById('shortcutsModal').classList.add('show');
+}
+function closeShortcutsModal(){ kbListeningId = null; document.getElementById('shortcutsModal').classList.remove('show'); }
+function startShortcutCapture(id){ kbListeningId = id; renderShortcutsList(); kbMsg('Press the new key now…', true); }
+function clearShortcut(id){ const st = kbState(); st.map[id] = ''; kbSave(st); kbListeningId = null; renderShortcutsList(); kbMsg('Shortcut removed', true); }
+function setShortcutsEnabled(on){ const st = kbState(); st.enabled = !!on; kbSave(st); kbMsg(on ? '✅ Shortcuts are ON' : 'Shortcuts are OFF', !!on); }
+function resetShortcuts(){
+  if(!confirm('Put all shortcuts back to the default keys?')) return;
+  kbSave({enabled: true, map: kbDefaults()}); kbListeningId = null; renderShortcutsList(); kbMsg('↺ Default keys restored', true);
+}
+function printShortcutsSheet(){
+  const st = kbState();
+  const rows = KB_ACTIONS.filter(a => st.map[a[0]]).map(a => `<tr><td>${a[1]}</td><td>${a[2]}</td><td style="text-align:right;"><b>${String(st.map[a[0]]).replace(/</g,'&lt;')}</b></td></tr>`).join('');
+  const w = window.open('', '_blank');
+  if(!w){ kbMsg('Allow pop-ups to print the list'); return; }
+  w.document.write(`<html><head><title>Keyboard Shortcuts</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{margin:0 0 10px}table{border-collapse:collapse;width:100%}td{border:1px solid #cbd5e1;padding:7px 10px;font-size:14px}tr:nth-child(even){background:#f1f5f9}</style></head><body><h2>⌨️ Keyboard Shortcuts</h2><table>${rows}</table><script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+  w.document.close();
+}
+// ---------- نئی کی پکڑنا (پاپ اپ میں) ----------
+function kbCapture(e){
+  if(!kbListeningId) return false;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(e.key === 'Escape' && !e.ctrlKey && !e.altKey){ kbListeningId = null; renderShortcutsList(); kbMsg(''); return true; }
+  const combo = kbComboFromEvent(e);
+  if(!combo) return true; // صرف Ctrl/Alt دبایا — اگلی کی کا انتظار
+  if(KB_RESERVED.includes(combo)){ kbMsg(`${combo} is used by the browser/computer — choose another key`); return true; }
+  const st = kbState();
+  const other = KB_ACTIONS.find(a => a[0] !== kbListeningId && st.map[a[0]] === combo);
+  if(other){
+    if(!confirm(`${combo} is already set for "${other[2]}". Move it to this action?`)){ return true; }
+    st.map[other[0]] = '';
+  }
+  st.map[kbListeningId] = combo; kbSave(st);
+  const name = (KB_ACTIONS.find(a => a[0] === kbListeningId) || [])[2];
+  kbListeningId = null; renderShortcutsList();
+  kbMsg(`✅ ${name}: ${combo}` + (/^[A-Z0-9]$/.test(combo) ? ' — works when no typing box is selected' : ''), true);
+  return true;
+}
+// ---------- اصل شارٹ کٹ — ہر جگہ ----------
+document.addEventListener('keydown', (e) => {
+  const stamp = Date.now() + Math.random(); kbLastKeyAt = stamp; // ہر کی کا وقت — گن پہچاننے کے لیے
+  if(kbCapture(e)) return;
+  if(!isPcDevice() || e.repeat && e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+  if(!document.body.contains(document.getElementById('app')) || document.getElementById('app').style.display === 'none') return; // لاگ ان/لاک اسکرین پر نہیں
+  const st = kbState();
+  if(!st.enabled) return;
+  const combo = kbComboFromEvent(e);
+  if(!combo) return;
+  const act = KB_ACTIONS.find(a => st.map[a[0]] === combo);
+  if(!act) return;
+  // ---------- لکھتے وقت سادہ حرف/ہندسہ نہ پکڑیں — صرف F-کی، Ctrl/Alt والی، یا Esc ----------
+  const t = e.target, tag = (t && t.tagName) || '';
+  const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
+  const strong = /^F\d{1,2}$/.test(combo.split('+').pop()) || /^(Ctrl|Alt)\+/.test(combo) || combo === 'Escape';
+  if(typing && !strong) return;
+  if(act[0] === 'close' && !kbTopModal()) return; // کوئی پاپ اپ کھلا نہیں — Esc عام رہے
+  e.preventDefault(); e.stopPropagation();
+  const run = () => {
+    try{ act[5](); }catch(err){ console.warn('shortcut', act[0], err); }
+    if(!['help','close','search','customer','discount','received'].includes(act[0])) showNavToast(`⌨️ ${act[2]}`);
+  };
+  if(strong){ run(); return; }
+  // ---------- سادہ حرف/ہندسہ: بارکوڈ گن بہت تیزی سے حروف بھیجتی ہے — اگلی کی 80ms میں آ جائے تو یہ گن ہے، شارٹ کٹ نہیں ----------
+  setTimeout(() => { if(kbLastKeyAt === stamp) run(); }, 80);
+}, true);
+let kbLastKeyAt = 0;
 
 /* =====================================================================
    Billing اسکرین لاجک — اب یہ سیدھا productsData (Products اسکرین) سے جُڑا ہے
@@ -15205,7 +15438,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU104: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU105: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -31229,9 +31462,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU104';
+  const APP_VERSION = 'AIO2710TU105';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Developer panel: capsule buttons on top — Developer Unlock first, each option opens on its own';
+  const UPDATE_NOTE = 'PC keyboard shortcuts — set your own key for billing, search, complete & print and screens (⌨️ / F1)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
