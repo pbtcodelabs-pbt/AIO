@@ -1378,7 +1378,7 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
-  /* 👥 AIO2710TU110: Staff & Devices */
+  /* 👥 AIO2710TU111: Staff & Devices */
   .loginJoinShopBtn{display:block; width:100%; margin-top:10px; padding:10px; border:1.5px dashed var(--primary,#0f766e); border-radius:12px; background:transparent; color:var(--primary-dark,#0f766e); font-weight:800; font-size:13px; cursor:pointer; font-family:inherit;}
   body:not(.muOff) .loginJoinShopBtn{display:none;}
   #loginScreen button.loginJoinShopBtn{background:#fff !important; color:var(--primary-dark,#0f766e) !important; border:1.5px dashed var(--primary,#0f766e) !important; box-shadow:none !important; font-size:13px !important; font-weight:800 !important; padding:10px !important; min-height:0 !important;}
@@ -1398,13 +1398,13 @@
   .mdStatus{font-size:12.5px; font-weight:800; margin:4px 0 10px;}
   .mdSteps{font-size:12.5px; color:var(--text,#334155); background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; margin:8px 0; line-height:1.6;}
   .mdRow2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
-  /* ✏️ AIO2710TU110: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
+  /* ✏️ AIO2710TU111: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
   .editBillBanner{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px; padding:10px 12px; border-radius:14px; background:linear-gradient(180deg,#fff7ed,#ffedd5); border:2px solid #fb923c; color:#9a3412; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(251,146,60,.25);}
   .editBillBanner .ebTxt{flex:1; min-width:200px; line-height:1.4;}
   .editBillBanner .ebTxt small{display:block; font-weight:600; color:#c2410c; font-size:11.5px;}
   .editBillBanner button{border:1.5px solid #fdba74; background:#fff; color:#b91c1c; border-radius:999px; padding:7px 14px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:inherit;}
   .btnEditBill{background:linear-gradient(180deg,#fb923c,#ea580c) !important; color:#fff !important;}
-  /* ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
+  /* ⌨️ AIO2710TU111: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
   .pcOnly{display:none !important;}
   html.isPC .pcOnly{display:revert !important;}
   html.isPC .pcOnly.pcFlex{display:flex !important;}
@@ -2977,7 +2977,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <!-- ---------- AIO2710TU110: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <!-- ---------- AIO2710TU111: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
     <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
@@ -3029,7 +3029,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU110</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU111</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3247,7 +3247,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU110</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU111</span>
     </div>
   </div>
 
@@ -4576,7 +4576,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
-    <!-- ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
+    <!-- ⌨️ AIO2710TU111: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
     <div class="modalOverlay" id="shortcutsModal" onclick="if(event.target===this) closeShortcutsModal()">
       <div class="modalBoxWide kbWrap">
         <div class="kbHead">
@@ -5694,7 +5694,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           </div>
         </div>
 
-        <!-- --- ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
+        <!-- --- ⌨️ AIO2710TU111: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
         <div class="settingsCard pcOnly" id="settingsCardShortcuts">
           <h3>⌨️ Keyboard Shortcuts <span style="font-size:11px; font-weight:800; color:#fff; background:var(--primary,#0f766e); padding:2px 8px; border-radius:999px; vertical-align:middle;">PC</span></h3>
           <div class="settingsHint">Work faster on a computer — choose your own key for each action (billing, search, complete &amp; print, screens). Saved on this computer only.</div>
@@ -5805,7 +5805,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
 
         <!-- --- ☁️ Cloud Sync — Business Code، ملازمین اسی سے جُڑتے ہیں (Multi-Device) --- -->
-        <!-- ---------- AIO2710TU110: 👥 Staff & Devices — ایک دکان، کئی فون/PC (مالک اور ملازم اپنے اپنے PIN سے) ---------- -->
+        <!-- ---------- AIO2710TU111: 👥 Staff & Devices — ایک دکان، کئی فون/PC (مالک اور ملازم اپنے اپنے PIN سے) ---------- -->
         <div class="settingsCard admin-only" id="staffDevicesCard"></div>
 
         <div class="settingsCard muOnly" id="settingsCardCloudSync" style="display:none !important;">
@@ -6608,13 +6608,13 @@ async function aioAuthFetch(path, options = {}){
 
 // ---------- AIO910FR006: ملٹی یوزر نظام (Cloud Sync / Business Code / ملازمین / Salesman / آن لائن کیٹلاگ) فی الحال بند —
 // یہ ایپ ابھی سنگل یوزر پیکج ہے۔ کوڈ مکمل موجود ہے؛ الگ پیکج کے طور پر دینا ہو تو صرف یہ true کر دیں ----------
-let AIO_MULTIUSER_ENABLED = false; // AIO2710TU110: اب دکان کی سیٹنگ سے (refreshMultiFlag) — Staff & Devices کارڈ سے آن
+let AIO_MULTIUSER_ENABLED = false; // AIO2710TU111: اب دکان کی سیٹنگ سے (refreshMultiFlag) — Staff & Devices کارڈ سے آن
 try{ if(!AIO_MULTIUSER_ENABLED) document.body.classList.add('muOff'); }catch(e){}
 
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
 const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses']; // ---------- AIOTEST27: Advance Orders/Recovery/Finance بھی شامل ----------
 const cloudPollTimers = {};
-// ===================== ☁️ AIO2710TU110: ملٹی ڈیوائس سنک v2 — ایک دکان، ایک ڈیٹا، کئی فون/PC =====================
+// ===================== ☁️ AIO2710TU111: ملٹی ڈیوائس سنک v2 — ایک دکان، ایک ڈیٹا، کئی فون/PC =====================
 // پرانا طریقہ پوری فہرست اوپر لکھ دیتا تھا (دو فون ایک ساتھ بل بنائیں تو ایک کا بل/اسٹاک مٹ سکتا تھا) اور سارے بل
 // ایک ہی دستاویز میں (1MB حد)۔ اب:
 //   • ہر فہرست چھوٹے حصوں (chunks) میں — بل روزانہ، ادائیگی/خرچ ماہانہ، باقی ایک ایک
@@ -6632,6 +6632,7 @@ const SYNC_POLL_MS = 30000;
 let devicesData = loadFromStorage('syncDevices', []);
 let shopInfoData = loadFromStorage('syncShopInfo', []);
 let syncBusy = false, syncAgain = false, syncTimer = null, syncPollTimer = null;
+const syncDocStamp = {}; // ہر فہرست کی آخری سنک شدہ حالت — بدلی نہ ہو تو اگلی بار جانچ نہیں
 const syncLastScheduledJSON = {};
 
 function aioMultiOn(){ try{ return !!(AppState && AppState.settings && AppState.settings.syncOn && AppState.settings.businessId); }catch(e){ return false; } }
@@ -6651,14 +6652,37 @@ function refreshMultiFlag(){
 }
 
 // ---------- کس فہرست کا کون سا ریکارڈ کس حصے (chunk) میں ----------
+// ---------- AIO2710TU111: کلاؤڈ کا ہر ڈبہ (دستاویز) زیادہ سے زیادہ 1MB — فروٹ/سبزی منڈی میں ڈبہ بھر کر بل رک گئے تھے۔
+// یہاں شروع سے ہی ہر بڑی فہرست کئی ڈبوں میں: بل ہر دن 8 ڈبے، پراڈکٹ/گاہک/سپلائر 8-8، باقی مہینہ وار۔
+// ڈبوں کے نام میں __v3_ — پرانے نام والے ڈبے نظرانداز ----------
+const SYNC_BUCKETS = {products: 8, customers: 8, suppliers: 8};
+const SYNC_SINGLE = ['users','devices','shopinfo'];
+function syncBucket(v, n){ let h = 0; for(const ch of String(v == null ? '' : v)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % n; }
 function syncChunkOf(docType, rec){
   const d = s => String(s || '').slice(0, 10).replace(/-/g, '_');
-  if(docType === 'invoices') return 'invoices__' + (d(rec.created_at) || 'old');
-  if(docType === 'payments') return 'payments__' + (d(rec.date || rec.created_at).slice(0, 7) || 'old');
-  if(docType === 'expenses') return 'expenses__' + (d(rec.date || rec.createdAt).slice(0, 7) || 'old');
-  return docType;
+  const mon = s => d(s).slice(0, 7) || 'old';
+  if(SYNC_SINGLE.includes(docType)) return docType;
+  if(docType === 'invoices') return 'invoices__v3_' + (d(rec.created_at) || 'old') + '_' + syncBucket(rec.invoice_id, 8);
+  if(docType === 'payments') return 'payments__v3_' + mon(rec.date || rec.created_at) + '_' + syncBucket(rec.payment_id, 2);
+  if(docType === 'expenses') return 'expenses__v3_' + mon(rec.date || rec.createdAt);
+  if(docType === 'pendingbills') return 'pendingbills__v3_' + mon(rec.submitted_at);
+  if(docType === 'approvalrequests') return 'approvalrequests__v3_' + mon(rec.date || rec.created_at);
+  if(docType === 'advanceorders') return 'advanceorders__v3_' + mon(rec.createdAt);
+  const n = SYNC_BUCKETS[docType] || 1;
+  return docType + '__v3_b' + syncBucket(rec[aioGetDocTypeMeta(docType).matchKey], n);
 }
+function syncChunkValid(c){ return SYNC_SINGLE.includes(c) || String(c).includes('__v3_'); }
 function syncDocTypeOfChunk(chunk){ return String(chunk).split('__')[0]; }
+// ---------- 📦 ڈبوں کا میٹر — ہر ڈبے کا سائز؛ 60% سے اوپر تو مالک کو تنبیہ؛ 95% پر لکھنا روک کر صاف پیغام ----------
+const SYNC_BOX_LIMIT = 1000000;
+const syncBoxSizes = loadFromStorage('syncBoxSizes', {});
+function syncBiggestBox(){ let best = ['', 0]; Object.entries(syncBoxSizes).forEach(([c, n]) => { if(n > best[1]) best = [c, n]; }); return {chunk: best[0], bytes: best[1], pct: Math.round(best[1] / SYNC_BOX_LIMIT * 100)}; }
+let syncBoxWarned = false;
+function syncNoteBox(chunk, bytes){
+  syncBoxSizes[chunk] = bytes; saveToStorage('syncBoxSizes', syncBoxSizes);
+  if(bytes / SYNC_BOX_LIMIT >= 0.6 && !syncBoxWarned && AppState.currentRole === 'admin'){ syncBoxWarned = true; try{ showNavToast('📦 One cloud box is ' + Math.round(bytes / SYNC_BOX_LIMIT * 100) + '% full — please contact the developer'); }catch(e){} }
+}
+function syncLocalStorageBytes(){ let t = 0; try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith(STORAGE_PREFIX)) t += (k.length + (localStorage.getItem(k) || '').length) * 2; } }catch(e){} return t; }
 
 // ---------- تصویریں الگ — کلاؤڈ پر صرف ہلکا ڈیٹا ----------
 function syncStrip(rec){
@@ -6740,9 +6764,10 @@ function syncDb(){
   if(!syncDbP) syncDbP = new Promise((res, rej) => { const rq = indexedDB.open(STORAGE_PREFIX + 'sync_v1', 1); rq.onupgradeneeded = () => rq.result.createObjectStore('kv'); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
   return syncDbP;
 }
-async function syncBaseGet(chunk){ try{ const db = await syncDb(); return await new Promise(res => { const rq = db.transaction('kv').objectStore('kv').get('base:' + chunk); rq.onsuccess = () => res(rq.result == null ? null : rq.result); rq.onerror = () => res(null); }); }catch(e){ return null; } }
-async function syncBaseSet(chunk, str){ try{ const db = await syncDb(); await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(str, 'base:' + chunk); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
-async function syncBaseClearAll(){ try{ const db = await syncDb(); await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').clear(); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
+const syncBaseMem = new Map();
+async function syncBaseGet(chunk){ if(syncBaseMem.has(chunk)) return syncBaseMem.get(chunk); try{ const db = await syncDb(); return await new Promise(res => { const rq = db.transaction('kv').objectStore('kv').get('base:' + chunk); rq.onsuccess = () => res(rq.result == null ? null : rq.result); rq.onerror = () => res(null); }); }catch(e){ return null; } }
+async function syncBaseSet(chunk, str){ syncBaseMem.set(chunk, str); try{ const db = await syncDb(); await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(str, 'base:' + chunk); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
+async function syncBaseClearAll(){ syncBaseMem.clear(); try{ const db = await syncDb(); await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').clear(); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
 
 // ---------- Firestore (REST) ----------
 function syncPath(doc){ return `businesses/${AppState.settings.businessId}/store/${doc}?key=${AIO_FIREBASE_API_KEY}`; }
@@ -6819,7 +6844,7 @@ function syncApplyChunk(docType, chunk, merged){
 // ---------- ایک حصے کا سنک ----------
 async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
   const k = known[chunk] || {};
-  const mustFetch = (idxMs || 0) > (k.ms || 0) || !k.ut;
+  const mustFetch = (idxMs || 0) > (k.ms || 0) || (!k.ut && !!idxMs);
   let remoteItems = null, ut = k.ut || null;
   if(mustFetch){
     const r = await syncGetChunk(chunk);
@@ -6837,14 +6862,24 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
     return true;
   }
   if(merged.length === 0 && !ut){ await syncBaseSet(chunk, mergedStr); return true; }
+  if(mergedStr.length > SYNC_BOX_LIMIT * 0.95){
+    // ---------- ڈبہ بھرنے والا ہے — یہ ٹکڑا ابھی کلاؤڈ پر نہیں جائے گا؛ اس فون پر سب محفوظ، بل بنتے رہیں گے ----------
+    syncNoteBox(chunk, mergedStr.length);
+    window.__syncBoxFull = {chunk, msg: `Cloud box "${chunk}" is full (${Math.round(mergedStr.length / 1024)} KB) — data is safe on this device; contact the developer`};
+    window.__cloudSyncError = window.__syncBoxFull.msg;
+    cloudSyncStatus = 'error';
+    return 'skip';
+  }
   const put = await syncPutChunk(chunk, mergedStr, ut);
   if(put === null) throw new Error('offline');
-  if(put === 'error'){ cloudSyncStatus = 'error'; return false; }
+  if(put === 'error'){ cloudSyncStatus = 'error'; return 'skip'; }
   if(put === 'conflict'){
     if(remoteItems !== null) await syncBaseSet(chunk, remoteStr);
     known[chunk] = {ms: 0, ut: null}; syncAgain = true; return false;
   }
   const ms = Date.now();
+  syncNoteBox(chunk, mergedStr.length);
+  if(window.__syncBoxFull && window.__syncBoxFull.chunk === chunk) window.__syncBoxFull = null;
   await syncBaseSet(chunk, mergedStr);
   known[chunk] = {ms, ut: put.ut, idxPending: !(await syncSetIndex(chunk, ms))};
   return true;
@@ -6863,18 +6898,24 @@ async function syncNow(){
     for(const [c, v] of Object.entries(known)){ if(v && v.idxPending && v.ms){ if(await syncSetIndex(c, v.ms)) v.idxPending = false; } }
     for(const docType of SYNC_TYPES){
       const meta = aioGetDocTypeMeta(docType); if(!meta) continue;
+      const remoteC = Object.keys(idx).filter(c => syncChunkValid(c) && syncDocTypeOfChunk(c) === docType);
+      const remoteChangedAny = remoteC.some(c => (idx[c] || 0) > ((known[c] || {}).ms || 0));
+      let stamp = ''; try{ stamp = JSON.stringify(meta.data); }catch(e){}
+      if(!remoteChangedAny && syncDocStamp[docType] === stamp) continue; // نہ یہاں کچھ بدلا، نہ کلاؤڈ پر
       const groups = syncGroupLocal(docType, meta.data);
-      const chunks = new Set([...groups.keys(), ...Object.keys(idx).filter(c => syncDocTypeOfChunk(c) === docType), ...Object.keys(known).filter(c => syncDocTypeOfChunk(c) === docType)]);
+      const chunks = new Set([...groups.keys(), ...remoteC, ...Object.keys(known).filter(c => syncChunkValid(c) && syncDocTypeOfChunk(c) === docType)]);
+      let allOk = true;
       for(const chunk of chunks){
         const localItems = groups.get(chunk) || [];
         const baseStr = await syncBaseGet(chunk);
         const localChanged = baseStr === null ? localItems.length > 0 : JSON.stringify(localItems) !== baseStr;
         const remoteChanged = (idx[chunk] || 0) > ((known[chunk] || {}).ms || 0);
         if(!localChanged && !remoteChanged) continue;
-        await syncChunk(docType, chunk, localItems, baseStr, idx[chunk], known);
+        if((await syncChunk(docType, chunk, localItems, baseStr, idx[chunk], known)) === false) allOk = false;
         touched.add(docType);
         saveToStorage('syncKnown', known);
       }
+      if(allOk){ try{ syncDocStamp[docType] = JSON.stringify(meta.data); }catch(e){} } else syncAgain = true;
     }
     if(cloudSyncStatus !== 'error') cloudSyncStatus = 'online';
     window.__cloudSyncError = cloudSyncStatus === 'online' ? null : window.__cloudSyncError;
@@ -6976,6 +7017,7 @@ function syncWipeLocalBusinessData(){
   ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses'].forEach(t => { const m = aioGetDocTypeMeta(t); if(m) m.data = []; });
   devicesData = []; shopInfoData = [];
   saveToStorage('syncKnown', {});
+  Object.keys(syncDocStamp).forEach(k => delete syncDocStamp[k]);
 }
 function syncDisconnect(wipe){
   const s = AppState.settings;
@@ -8473,7 +8515,7 @@ function disableDeveloperUnlock(){
 }
 
 function isSubscriptionActive(){
-  if(linkedShopActive()) return true; // AIO2710TU110: دکان سے جڑا ملازم/دوسرا فون — مالک کی سبسکرپشن پر چلتا ہے
+  if(linkedShopActive()) return true; // AIO2710TU111: دکان سے جڑا ملازم/دوسرا فون — مالک کی سبسکرپشن پر چلتا ہے
   if(AppState.settings.developerUnlock) return true; // ---------- AIO910FR008: Developer Console سے کھلا فون — کبھی ختم نہیں ----------
   const exp = AppState.settings.subscriptionExpiry;
   if(!exp) return false;
@@ -9576,7 +9618,7 @@ function sendDevChat(channel){
 // ڈیفالٹ 1234 والا اَن چھوا PIN گاہک کو معلوم ہی نہیں ہوتا، اس لیے اس پر PIN اسکرین نہیں آنی چاہیے ----------
 const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 function isPinGateNeeded(){
-  if(aioMultiOn()) return true; // AIO2710TU110: کئی فون — ہر کوئی اپنے PIN سے
+  if(aioMultiOn()) return true; // AIO2710TU111: کئی فون — ہر کوئی اپنے PIN سے
   if(AppState.settings.pinLockEnabled === false) return false;
   const admin = usersData.find(u => u.role === 'admin' && u.is_active);
   if(!admin) return false;
@@ -10917,7 +10959,7 @@ function initQuickDockDrag(){
   });
 }
 
-// ===================== ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
+// ===================== ⌨️ AIO2710TU111: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
 // یوسف بھائی کا مشورہ: کمپیوٹر پر کام تیز ہو — ہر صارف اپنی مرضی کی کی خود رکھے تاکہ یاد رہے۔
 // صرف اسی کمپیوٹر پر محفوظ (kbShortcuts)؛ بیک اپ/کلاؤڈ میں نہیں۔ فون پر بٹن/کارڈ چھپے رہتے ہیں۔
 function isPcDevice(){
@@ -13074,7 +13116,7 @@ function endCustomerSelection(){
 
 // ---------- Render Cart Table + Totals ----------
 let billingDraftCustomerRestored = false;
-// ===================== ✏️ AIO2710TU110: بنے/پرنٹ شدہ بل میں ترمیم =====================
+// ===================== ✏️ AIO2710TU111: بنے/پرنٹ شدہ بل میں ترمیم =====================
 // بل بلنگ میں کھلتا ہے — آئٹم، ریٹ، مقدار، گاہک، ڈسکاؤنٹ ٹھیک کریں، پھر Complete۔ وہی بل نمبر رہتا ہے؛
 // پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس ہو کر نیا اثر لگتا ہے۔ Complete سے پہلے پرانا بل جوں کا توں رہتا ہے۔
 let billEdit = loadFromStorage('billEditDraft', null); // {invoice_id, invoice_no}
@@ -13235,7 +13277,7 @@ function renderCart(){
   // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
   const custIdForBalance = document.getElementById('customerSelect')?.value;
   const customerForBalance = custIdForBalance ? customersData.find(c => c.customer_id == custIdForBalance) : null;
-  const previousBalance = customerForBalance ? Math.max(0, balanceExcludingEditedBill(customerForBalance)) : 0; // ✏️ AIO2710TU110: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
+  const previousBalance = customerForBalance ? Math.max(0, balanceExcludingEditedBill(customerForBalance)) : 0; // ✏️ AIO2710TU111: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
   const combinedTotal = grandTotal + previousBalance; // ---------- یہی اصل رقم ہے جو کسٹمر پر واجب ہے، Received/Balance Due/Change اسی کے خلاف حساب ہوں گے ----------
 
   document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(2).replace(/\.00$/, '')}`;
@@ -13594,7 +13636,7 @@ function finalizeInvoice(){
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
-  const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU110: 2939.919999 نہیں، 2939.92
+  const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU111: 2939.919999 نہیں، 2939.92
   const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
@@ -13634,7 +13676,7 @@ function finalizeInvoice(){
     }
   }
 
-  // ---------- AIO2710TU110: ملازم کا بل سیدھا بنتا ہے (مالک بل ہسٹری میں دیکھتا ہے)؛ مالک نے «منظوری» آن کی ہو تو پہلے منظوری ----------
+  // ---------- AIO2710TU111: ملازم کا بل سیدھا بنتا ہے (مالک بل ہسٹری میں دیکھتا ہے)؛ مالک نے «منظوری» آن کی ہو تو پہلے منظوری ----------
   if(AppState.currentRole === 'salesman' && staffBillsNeedApproval()){
     submitBillForApproval(customer, method, grandTotal, taxPercent, taxAmount);
     return;
@@ -15846,7 +15888,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU110: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU111: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -22378,7 +22420,7 @@ function confirmBatchReturn(invoiceId){
   const picks = [];
   for(const idx of selectedIdx){
     const item = inv.items[idx];
-    const qty = parseFloat(document.getElementById(`retQty_${idx}`).value) || 0; // AIO2710TU110: 1.5 کلو وغیرہ بھی
+    const qty = parseFloat(document.getElementById(`retQty_${idx}`).value) || 0; // AIO2710TU111: 1.5 کلو وغیرہ بھی
     const amount = parseFloat(document.getElementById(`retAmt_${idx}`).value) || 0;
     if(qty <= 0 || qty > item.qty){ alert(`Please enter a valid quantity for "${item.name}" (max ${item.qty}).`); return; }
     if(amount < 0){ alert(`Please enter a valid refund amount for "${item.name}".`); return; }
@@ -22402,7 +22444,7 @@ function confirmBatchReturn(invoiceId){
     returnedNames.push(`${item.name} (${qty})`);
   });
 
-  // ---------- AIO2710TU110: بل کی رقم ابھی باقی (ادھار) ہو تو واپسی پہلے اسی بقایہ سے کٹے — گاہک کو نقد نہ دیں جو اس نے دیا ہی نہیں ----------
+  // ---------- AIO2710TU111: بل کی رقم ابھی باقی (ادھار) ہو تو واپسی پہلے اسی بقایہ سے کٹے — گاہک کو نقد نہ دیں جو اس نے دیا ہی نہیں ----------
   let offsetFromDue = 0;
   const dueCustomer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
   if(dueCustomer && (inv.amount_due || 0) > 0){
@@ -24573,7 +24615,7 @@ function adminVoidBill(invoiceId){
 // ---------- AIOTEST25: adminVoidBill کے confirm/alert سے الگ کر کے — تاکہ یہی اصل حساب کتاب Salesman کی منظور شدہ
 // Delete درخواست پر بھی چل سکے (وہاں دوبارہ پوچھنے کی ضرورت نہیں، Admin پہلے ہی Approve دبا چکا ہے) ----------
 function executeVoidBill(inv){
-  // ---------- AIO2710TU110: ایڈٹ والا درست حساب — اسٹاک، نقد (جزوی ادائیگی سمیت)، بقایہ، والٹ سب پہلے جیسا ----------
+  // ---------- AIO2710TU111: ایڈٹ والا درست حساب — اسٹاک، نقد (جزوی ادائیگی سمیت)، بقایہ، والٹ سب پہلے جیسا ----------
   if(!(inv.items || []).some(it => it.returned)){ reverseInvoiceForEdit(inv, 'deleted'); inv.status = 'voided'; return; }
   // ---------- اسٹاک واپس کریں — بل کے ہر آئٹم کی مقدار اسٹاک میں دوبارہ شامل کریں ----------
   inv.items.forEach(item => restoreStockForItem(item, item.qty)); // AIO1310TU035
@@ -27018,7 +27060,7 @@ function renderLastBackupStatus(){
 
 // ---------- ☁️ Cloud Sync سیٹنگز کارڈ کو موجودہ Business Code/Status سے بھریں ----------
 
-// ===================== 👥 AIO2710TU110: Staff & Devices — کارڈ، جوڑنا، نکالنا =====================
+// ===================== 👥 AIO2710TU111: Staff & Devices — کارڈ، جوڑنا، نکالنا =====================
 const SYNC_SEED_STAFF_PINS = ['0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c','edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9']; // نمونہ: 1111، 2222
 function mdEsc(v){ return String(v == null ? '' : v).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 function mdAgo(ms){ if(!ms) return '—'; const m = Math.round((Date.now() - ms) / 60000); return m < 1 ? 'online now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : Math.round(m / 1440) + ' day(s) ago'; }
@@ -27050,6 +27092,9 @@ function renderStaffDevicesCard(){
     <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; margin:8px 0;"><input type="checkbox" ${sh.staffApproval ? 'checked' : ''} onchange="setStaffApproval(this.checked)" style="width:18px; height:18px; margin:0;"> Staff bills need my approval first</label>
     <button type="button" class="mdBigBtn" onclick="goTo('users')">👤 Add / manage staff &amp; their screens</button>`
     : `<div class="settingsHint">This device is connected to <b>${mdEsc(sh.businessName || 'the shop')}</b> (${s.syncRole === 'owner2' ? 'owner — 2nd device' : 'staff'}).</div>`}
+    ${(() => { const bx = syncBiggestBox(), ls = syncLocalStorageBytes(), lsPct = Math.round(ls / (5 * 1024 * 1024) * 100);
+      const col = p => p >= 80 ? '#dc2626' : p >= 60 ? '#d97706' : '#15803d';
+      return `<div class="mdSteps" style="font-size:12px;">📦 Biggest cloud box: <b style="color:${col(bx.pct)}">${bx.pct}%</b>${bx.bytes ? ' (' + Math.round(bx.bytes / 1024) + ' KB)' : ''} &nbsp;•&nbsp; 📱 This device storage: <b style="color:${col(lsPct)}">${lsPct}%</b>${window.__syncBoxFull ? `<br><span style="color:#b91c1c; font-weight:800;">⚠️ ${mdEsc(window.__syncBoxFull.msg)}</span>` : (window.__cloudSyncError && cloudSyncStatus === 'error' ? `<br><span style="color:#b91c1c; font-weight:800;">⚠️ ${mdEsc(window.__cloudSyncError)}</span>` : '')}</div>`; })()}
     <div class="settingsSubLabel">Devices (${devs.length})</div>
     ${devHtml}
     <div class="mdRow2" style="margin-top:6px;"><button type="button" class="mdBigBtn ghost" onclick="syncNow(); showNavToast('🔄 Syncing…')">🔄 Sync now</button>
@@ -32020,9 +32065,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU110';
+  const APP_VERSION = 'AIO2710TU111';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Multi-Device: same shop data on several phones/PCs — owner and staff log in with their own PIN (Settings → Staff & Devices)';
+  const UPDATE_NOTE = 'Multi-Device: cloud boxes split from the start (bills 8 boxes a day) so they never fill up; box meter in Staff & Devices; billing never stops';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -32139,7 +32184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 "Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
 <div id="printReceiptArea"></div>
 <script>
-/* 👁️ (ہر PIN/پاس ورڈ خانہ) AIO2710TU110: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+/* 👁️ (ہر PIN/پاس ورڈ خانہ) AIO2710TU111: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
    جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
 (function(){
   var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -32199,7 +32244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
-    <!-- AIO2710TU110: 🔗 دکان سے جڑیں — ملازم یا مالک کا دوسرا فون/PC -->
+    <!-- AIO2710TU111: 🔗 دکان سے جڑیں — ملازم یا مالک کا دوسرا فون/PC -->
     <div class="modalOverlay" id="joinShopModal" style="z-index:100050;" onclick="if(event.target===this) closeJoinShopModal()">
       <div class="modalBox" style="max-width:420px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
