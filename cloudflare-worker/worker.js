@@ -4,7 +4,9 @@ var DEFAULT_PACKAGE = "com.pbtcodelabs.aiopos";
 
 // سبسکرپشنز (ہر مدت والی)
 var APPS = {
-  "com.pbtcodelabs.aiopos": ["aio_user1plus0_3m", "aio_user1plus0_6m", "aio_user1plus0_12m"],
+  "com.pbtcodelabs.aiopos": ["aio_user1plus0_3m", "aio_user1plus0_6m", "aio_user1plus0_12m",
+    // ملازم والے پیکج (مالک + 1/2/3 ملازم) — ہر فون 500 روپے مہینہ؛ صرف 6 مہینے اور سال
+    "aio_user1plus1_6m", "aio_user1plus1_12m", "aio_user1plus2_6m", "aio_user1plus2_12m", "aio_user1plus3_6m", "aio_user1plus3_12m"],
   "com.pbtcodelabs.ffpos": ["ffpos_monthly", "ffpos_quarterly", "ffpos_halfyearly", "ffpos_yearly", "ffpos_premium"],
   "com.pbtcodelabs.dgkhata": ["dg_khata_1m", "dg_khata_12m"],
   "com.pbtcodelabs.ggkhatabook": ["gg_khatabook_1m", "gg_khatabook_12m"]
@@ -29,7 +31,9 @@ var APP_NAMES = {
 function planName(sku) {
   if (/lifetime/i.test(sku)) return "لائف ٹائم (ایک بار)";
   const m = String(sku).match(/_(\d+)m$/);
-  if (m) return Number(m[1]) === 12 ? "1 سال" : m[1] + " مہینے";
+  const st = String(sku).match(/plus([1-9])_/);
+  const staff = st ? " — مالک + " + st[1] + " ملازم" : "";
+  if (m) return (Number(m[1]) === 12 ? "1 سال" : m[1] + " مہینے") + staff;
   if (/halfyearly/i.test(sku)) return "6 مہینے";
   if (/yearly/i.test(sku)) return "1 سال";
   if (/quarterly/i.test(sku)) return "3 مہینے";
