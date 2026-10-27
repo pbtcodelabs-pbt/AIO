@@ -1378,6 +1378,29 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
+  /* 🛠️ ڈویلپر پینل — اوپر کیپسول بٹن، ہر بٹن کا اپنا الگ حصہ (لمبا اسکرول نہیں) */
+  .devTabs{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 12px; position:sticky; top:0; z-index:3; background:var(--card, #fff); padding:4px 0 8px;}
+  .devTab{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:60px; padding:8px 10px; border:1.5px solid #dbe1ea; border-radius:22px; background:linear-gradient(180deg,#fff,#eef2f7); box-shadow:0 2px 0 #cbd5e1, 0 4px 10px rgba(15,23,42,.08); color:#0f172a; cursor:pointer; text-align:center; font-family:inherit; -webkit-tap-highlight-color:transparent;}
+  .devTab b{font-size:13px; font-weight:800; line-height:1.2;}
+  .devTab small{font-size:10.5px; font-weight:600; color:#64748b; line-height:1.25;}
+  .devTab.active{background:linear-gradient(180deg,#14b8a6,#0f766e); border-color:#0f766e; color:#fff; box-shadow:0 2px 0 #115e59, 0 6px 14px rgba(15,118,110,.35);}
+  .devTab.active small{color:#ccfbf1;}
+  .devTab:focus-visible{outline:3px solid #f59e0b; outline-offset:2px;}
+  .devTabs .devTab:last-child:nth-child(odd){grid-column:1/-1;}
+  .devSec{animation:devSecIn .18s ease;}
+  @keyframes devSecIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+  .devStateBox{border-radius:14px; padding:12px; font-weight:800; font-size:13.5px; text-align:center; margin-bottom:10px;}
+  .devStateBox.on{background:#dcfce7; color:#166534; border:1.5px solid #86efac;}
+  .devStateBox.off{background:#f1f5f9; color:#334155; border:1.5px solid #e2e8f0;}
+  .devStateBox small{display:block; font-weight:600; font-size:11.5px; margin-top:4px;}
+  .devBigBtn{width:100%; padding:13px; border:none; border-radius:999px; font-weight:900; font-size:14px; cursor:pointer; font-family:inherit; margin-top:4px;}
+  .devBigBtn.go{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; box-shadow:0 3px 0 #166534;}
+  .devBigBtn.stop{background:#fff; color:#b91c1c; border:1.5px solid #fca5a5;}
+  .devInput{width:100%; box-sizing:border-box; padding:11px; margin-bottom:8px; border:1.5px solid #dbe1ea; border-radius:12px; font-size:14px;}
+  .devInfoRow{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; background:#f8fafc; border:1px solid #eef2f7; margin-bottom:6px; font-size:12.5px;}
+  .devInfoRow span{color:#64748b; font-weight:700; white-space:nowrap;}
+  .devInfoRow b{color:#0f172a; text-align:right; word-break:break-all;}
+  .devSecHint{font-size:11.5px; color:#64748b; margin-top:8px; text-align:center;}
   .poPickRow .cbAmt b{font-size:12px;}
   /* 📝 ڈرافٹ (واٹس ایپ جیسا) — ادھورا PO / شپمنٹ / ایڈوانس آرڈر جہاں چھوڑا وہیں سے */
   .draftBanner{display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#fffbeb; border:1.5px dashed #f59e0b; color:#92400e; border-radius:10px; padding:8px 10px; margin:0 0 10px; font-size:12.5px; font-weight:700;}
@@ -2889,7 +2912,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
 <!-- ---------- AIO910FR008: 🛠️ Developer Console — لاگ ان صفحے پر ورژن بیج پر 7 ٹیپ سے کھلتا ہے، صرف ڈویلپر کے لیے ---------- -->
 <div class="modalOverlay" id="devConsoleModal" style="z-index:9500;" onclick="if(event.target===this) closeDevConsole()">
-  <div class="modalBox" style="max-width:340px;">
+  <div class="modalBox" style="max-width:420px;">
     <div class="modalHeader" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
       <h3 style="margin:0;">🛠️ Developer Console</h3>
       <span class="closeBtn" onclick="closeDevConsole()" style="cursor:pointer;">✖</span>
@@ -2901,9 +2924,22 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <div id="devConsoleOpen" style="display:none;">
-      <div style="background:#dcfce7; color:#166534; border-radius:10px; padding:10px; font-weight:800; font-size:13px; text-align:center; margin-bottom:10px;">✅ Developer Unlock is active on this phone<br><span style="font-weight:600; font-size:11.5px;">The app will never expire here.</span></div>
-      <button type="button" onclick="disableDeveloperUnlock()" style="width:100%; padding:10px; border:1.5px solid #fca5a5; border-radius:10px; background:#fff; color:#b91c1c; font-weight:800; font-size:13px; cursor:pointer;">Turn off Developer Unlock</button>
+    <!-- ---------- AIO2710TU104: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
+      <div class="devTabs" role="tablist">
+        <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
+        <button type="button" class="devTab" data-sec="pass" role="tab" onclick="showDevSec('devConsoleOpen','pass')"><b>🔑 Change Password</b><small>New Developer Console password</small></button>
+        <button type="button" class="devTab" data-sec="device" role="tab" onclick="showDevSec('devConsoleOpen','device')"><b>📱 This Device</b><small>Device ID, Play plan &amp; subscription status</small></button>
+      </div>
+      <div class="devSec" data-sec="unlock"><div class="devUnlockState"></div></div>
+      <div class="devSec" data-sec="pass" style="display:none;">
+        <div class="settingsHint" style="margin:0 0 8px;">The new password works on this phone from now on (the old one stops working here). It is never saved in backups.</div>
+        <input type="password" id="devConsoleNewPass" class="devInput" autocomplete="new-password" placeholder="New developer password (min 6)">
+        <input type="password" id="devConsoleNewPass2" class="devInput" autocomplete="new-password" placeholder="Type the new password again" onkeydown="if(event.key==='Enter') saveDevConsolePassword()">
+        <button type="button" class="devBigBtn go" onclick="saveDevConsolePassword()">💾 Save Password</button>
+        <div id="devConsolePassMsg" class="devSecHint"></div>
+      </div>
+      <div class="devSec" data-sec="device" style="display:none;"><div class="devDeviceInfo"></div></div>
     </div>
   </div>
 </div>
@@ -2940,7 +2976,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU103</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU104</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3157,7 +3193,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU103</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU104</span>
     </div>
   </div>
 
@@ -7632,7 +7668,7 @@ function proceedToRestoreFilePicker(){
 // ---------- بیک اپ بحال کرتے وقت سیٹنگز (تھیم، پرنٹ، دکان کا نام…) بیک اپ سے آئیں، مگر اس فون کی سبسکرپشن/ٹرائل/
 // ایکٹیویشن اور ڈیوائس کی شناخت کبھی نہ بدلیں — تاکہ AIO (پلے اسٹور) کا بیک اپ AIO Direct میں (یا الٹ) بحال کریں
 // تو ڈیٹا پورا آ جائے مگر یہاں کی ایکٹیویشن خراب نہ ہو، اور کسی دوسرے فون کی سبسکرپشن یہاں نہ آ جائے ----------
-const BACKUP_KEEP_LOCAL_SETTINGS = ['developerUnlock','deviceRecordPending','deviceUID','freeTrialGranted','isOnFreeTrial','lastActivationCode',
+const BACKUP_KEEP_LOCAL_SETTINGS = ['developerUnlock','devAuth','devPanelPasswordHash','deviceRecordPending','deviceUID','freeTrialGranted','isOnFreeTrial','lastActivationCode',
   'lifetimeLicense','subscriptionActivatedOn','subscriptionExpiry','subscriptionPlans','subscriptionViaPlayBilling','pendingPlayAcks',
   'trialLockConfirmedOnline','trialReminderShownOn','needsFirstEnter'];
 function restoreSettingsKeepingLicense(backupSettings){
@@ -7971,13 +8007,13 @@ function devConsoleBadgeTap(){
   if(_devTapCount >= 7){ _devTapCount = 0; openDevConsole(); }
 }
 function openDevConsole(){
-  const unlocked = !!AppState.settings.developerUnlock;
-  document.getElementById('devConsoleLocked').style.display = unlocked ? 'none' : 'block';
-  document.getElementById('devConsoleOpen').style.display = unlocked ? 'block' : 'none';
+  // ---------- ہر بار پاسورڈ — ان لاک فون پر بھی (کوئی اور ہاتھ لگائے تو بند نہ کر سکے) ----------
+  document.getElementById('devConsoleLocked').style.display = 'block';
+  document.getElementById('devConsoleOpen').style.display = 'none';
   document.getElementById('devConsoleErr').style.display = 'none';
   const inp = document.getElementById('devConsolePass'); inp.value = '';
   document.getElementById('devConsoleModal').classList.add('show');
-  if(!unlocked) setTimeout(() => inp.focus(), 150);
+  setTimeout(() => inp.focus(), 150);
 }
 function closeDevConsole(){ document.getElementById('devConsoleModal').classList.remove('show'); }
 async function devPassMatches(pass){
@@ -7987,8 +8023,28 @@ async function devPassMatches(pass){
     const key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
     const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt: enc.encode(DEV_UNLOCK_SALT), iterations:200000}, key, 256);
     const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,'0')).join('');
-    return hex === DEV_UNLOCK_HASH;
+    return hex === (loadFromStorage('devConsoleHash', '') || DEV_UNLOCK_HASH); // ---------- اس فون پر بدلا ہوا پاسورڈ ہو تو وہی ----------
   }catch(e){ return false; }
+}
+async function devPassHash(pass){
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt: enc.encode(DEV_UNLOCK_SALT), iterations:200000}, key, 256);
+  return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+// ---------- 🔑 پاسورڈ بدلیں — الگ کلید میں (settings میں نہیں)، اس لیے بیک اپ میں کبھی نہیں جاتا ----------
+async function saveDevConsolePassword(){
+  const a = document.getElementById('devConsoleNewPass'), b = document.getElementById('devConsoleNewPass2'), msg = document.getElementById('devConsolePassMsg');
+  const p1 = a.value.trim(), p2 = b.value.trim();
+  msg.style.color = 'var(--danger,#dc2626)';
+  if(p1.length < 6){ msg.textContent = '⚠️ At least 6 letters/digits'; return; }
+  if(p1 !== p2){ msg.textContent = '⚠️ Both passwords must match'; return; }
+  msg.style.color = 'var(--muted,#64748b)'; msg.textContent = '⏳ Saving…';
+  try{
+    saveToStorage('devConsoleHash', await devPassHash(p1));
+    a.value = ''; b.value = '';
+    msg.style.color = 'var(--success,#15803d)'; msg.textContent = '✅ Password changed on this phone';
+  }catch(e){ msg.style.color = 'var(--danger,#dc2626)'; msg.textContent = '❌ Could not save — ' + e.message; }
 }
 async function submitDevConsolePass(){
   const btn = document.getElementById('devConsoleBtn');
@@ -7998,13 +8054,64 @@ async function submitDevConsolePass(){
   const ok = await devPassMatches(pass);
   btn.disabled = false; btn.textContent = 'Unlock';
   if(!ok){ document.getElementById('devConsoleErr').style.display = 'block'; return; }
-  AppState.settings.developerUnlock = true;
-  AppState.settings.isOnFreeTrial = false;
+  // ---------- صحیح پاسورڈ: سیدھا ان لاک نہیں — کیپسول بٹنوں والا پینل کھلے، سب سے پہلے Developer Unlock ----------
+  document.getElementById('devConsolePass').value = '';
+  document.getElementById('devConsoleLocked').style.display = 'none';
+  document.getElementById('devConsoleOpen').style.display = 'block';
+  showDevSec('devConsoleOpen', 'unlock');
+}
+// ---------- 🛠️ ڈویلپر پینل کے کیپسول بٹن — جو بٹن دبائیں صرف وہی حصہ سامنے (پورا صفحہ اسکرول نہیں) ----------
+function showDevSec(rootId, name){
+  const root = document.getElementById(rootId);
+  if(!root) return;
+  root.querySelectorAll('.devTab').forEach(b => { const on = b.dataset.sec === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
+  root.querySelectorAll('.devSec').forEach(sec => { sec.style.display = sec.dataset.sec === name ? 'block' : 'none'; });
+  root.scrollTop = 0;
+  if(name === 'unlock') renderDevUnlockSec(root);
+  if(name === 'device') renderDevDeviceSec(root);
+}
+// ---------- 🔓 مستقل ان لاک — صرف اسی فون پر؛ بیک اپ/ری اسٹور سے کسی اور فون پر کبھی نہیں جاتا (BACKUP_KEEP_LOCAL_SETTINGS) ----------
+function renderDevUnlockSec(root){
+  const el = root && root.querySelector('.devUnlockState');
+  if(!el) return;
+  const on = !!AppState.settings.developerUnlock;
+  el.innerHTML = (on
+    ? `<div class="devStateBox on">✅ Permanently unlocked on this phone<small>The app never expires here — subscription and expiry don't apply to this phone.</small></div>
+       <button type="button" class="devBigBtn stop" onclick="setDevPermanentUnlock(false)">Turn off permanent unlock</button>`
+    : `<div class="devStateBox off">🔒 Not unlocked<small>This phone follows the normal subscription and expiry, like every customer.</small></div>
+       <button type="button" class="devBigBtn go" onclick="setDevPermanentUnlock(true)">🔓 Permanently unlock this app</button>`) +
+    `<div class="devSecHint">Only this phone is unlocked. It never goes into backups, so no customer ever gets it.</div>`;
+}
+function setDevPermanentUnlock(on){
+  if(!on && !confirm('Turn off permanent unlock on this phone?')) return;
+  AppState.settings.developerUnlock = !!on;
+  if(on) AppState.settings.isOnFreeTrial = false;
   persistAllData();
-  closeDevConsole();
   try{ setupLoginScreen(); }catch(e){}
   try{ renderSubscriptionBanner(); }catch(e){}
-  alert('✅ Developer Unlock is now active on this phone.');
+  document.querySelectorAll('[data-dev-root]').forEach(r => renderDevUnlockSec(r));
+  showNavToast(on ? '✅ This app is now permanently unlocked on this phone' : 'Permanent unlock turned off');
+}
+// ---------- 📱 یہ فون — ورژن، Device ID اور سبسکرپشن کی حالت ایک نظر میں ----------
+function renderDevDeviceSec(root){
+  const el = root && root.querySelector('.devDeviceInfo');
+  if(!el) return;
+  const st = AppState.settings, esc = v => String(v == null || v === '' ? '—' : v).replace(/</g,'&lt;');
+  let uid = ''; try{ uid = getOrCreateDeviceUID(); }catch(e){}
+  let active = false; try{ active = isSubscriptionActive(); }catch(e){}
+  let left = ''; try{ left = st.developerUnlock ? '∞' : (st.lifetimeLicense ? 'Lifetime' : daysLeftInSubscription()); }catch(e){}
+  const rows = [
+    ['App version', (document.getElementById('loginVersionBadge') || {}).textContent],
+    ['Device ID', uid],
+    ['Permanent unlock', st.developerUnlock ? '✅ ON' : 'OFF'],
+    ['Subscription', active ? '🟢 Active' : '🔴 Expired / none'],
+    ['Plan', st.developerUnlock ? '🛠️ Developer (permanent)' : st.lifetimeLicense ? '🌟 Lifetime' : (st.isOnFreeTrial ? 'Free trial' : (st.subscriptionViaPlayBilling ? 'Google Play' : (st.lastActivationCode ? 'Activation code' : '—')))],
+    ['Activated on', st.subscriptionActivatedOn],
+    ['Expires on', st.lifetimeLicense ? 'Never' : st.subscriptionExpiry],
+    ['Days left', left],
+  ];
+  el.innerHTML = rows.map(([k, v]) => `<div class="devInfoRow"><span>${k}</span><b>${esc(v)}</b></div>`).join('') +
+    (uid ? `<button type="button" class="devBigBtn go" style="margin-top:6px;" onclick="navigator.clipboard && navigator.clipboard.writeText('${String(uid).replace(/'/g,'')}').then(() => showNavToast('📋 Device ID copied'))">📋 Copy Device ID</button>` : '');
 }
 function disableDeveloperUnlock(){
   if(!confirm('Turn off Developer Unlock on this phone?')) return;
@@ -15098,7 +15205,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU103: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU104: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -31122,9 +31229,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU103';
+  const APP_VERSION = 'AIO2710TU104';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Tap a product card in Billing to add it — every tap adds one more (+ / − still work)';
+  const UPDATE_NOTE = 'Developer panel: capsule buttons on top — Developer Unlock first, each option opens on its own';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
