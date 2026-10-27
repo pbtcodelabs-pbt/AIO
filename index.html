@@ -1389,6 +1389,8 @@
   .mdBigBtn.danger{background:#fff; color:#b91c1c; border:1.5px solid #fca5a5; box-shadow:none;}
   .mdCode{display:flex; gap:8px; align-items:center; margin:6px 0;}
   .mdCode b{flex:1; text-align:center; padding:11px; border-radius:12px; background:#f0fdfa; border:1.5px dashed #14b8a6; font:900 16px/1.2 ui-monospace,Menlo,Consolas,monospace; letter-spacing:1px; color:#0f766e; word-break:break-all;}
+  html.isLinked #subStatusStrip, html.isLinked #subBoxRow, html.isLinked #trialCountdownStrip, html.isLinked #loginTrialBtn, html.isLinked .subOnly{display:none !important;}
+  html.isLinked .linkedOnly{display:block !important;}
   .mdDev{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:14px; background:#fff; border:1.5px solid #e2e8f0; margin-bottom:6px;}
   .mdDev .mdIco{width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#eef2ff; font-size:18px; flex:0 0 auto;}
   .mdDev .mdTxt{flex:1; min-width:0; font-size:13px; font-weight:800; color:var(--text,#0f172a);}
@@ -3029,7 +3031,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU111</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU112</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3213,7 +3215,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
          عام صارف کو کوئی بٹن نظر نہیں آتا، صرف Admin کو معلوم طریقہ ---------- -->
     <h2 style="cursor:default; user-select:none;">🔒 Subscription Required</h2>
     <p id="subGateStatus" style="font-size:13px; color:var(--muted); margin-bottom:14px;"></p>
-    <button onclick="openPackagePlansModal()" style="margin-top:6px;">🎟️ View Subscription Plans</button>
+    <button class="subOnly" onclick="openPackagePlansModal()" style="margin-top:6px;">🎟️ View Subscription Plans</button>
+    <button class="linkedOnly" onclick="leaveShop()" style="display:none; margin-top:10px; background:#fee2e2; color:#b91c1c;">Leave this shop</button>
   </div>
 </div>
 
@@ -3247,7 +3250,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU111</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU112</span>
     </div>
   </div>
 
@@ -6505,6 +6508,159 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 </div>
 
 <script>
+// ---------- AIO2710TU112: 💾 فون کی جگہ کبھی نہ بھرے — localStorage (~5MB، اسی ویب سائٹ کی سب ایپس میں بٹا ہوا) ----------
+// 1) بڑی فہرستیں (بل، گاہک، پراڈکٹ…) دبا کر (LZ) رکھی جاتی ہیں — 6 سے 10 گنا کم جگہ
+// 2) جو نہ بدلا ہو وہ دوبارہ نہیں لکھا جاتا (ہر 1.5 سیکنڈ والا خودکار محفوظ ہلکا)
+// 3) پھر بھی جگہ ختم ہو تو وہ فہرست فون کی بڑی جگہ (IndexedDB <prefix>store_v1) میں، localStorage میں صرف نشان؛
+//    ایپ کھلتے ہی وہیں سے واپس — کچھ ضائع نہیں، کوئی ڈرانے والا پیغام نہیں ----------
+var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();"function"==typeof define&&define.amd?define(function(){return LZString}):"undefined"!=typeof module&&null!=module?module.exports=LZString:"undefined"!=typeof angular&&null!=angular&&angular.module("LZString",[]).factory("LZString",function(){return LZString});
+const STORE_LZ_MIN = 8192, STORE_LZ_TAG = '\u0001LZ1:', STORE_IDB_TAG = '\u0001IDB1:', STORE_PARTS_TAG = '\u0001PARTS1:';
+const STORE_PART = 400; // بڑی فہرست 400-400 کے حصوں میں — نیا بل بنے تو صرف آخری حصہ دوبارہ دبتا ہے (فون پر تیز)
+function storeRemoveParts(key, from){ try{ for(let i = from || 0; localStorage.getItem(STORAGE_PREFIX + key + '#' + i) !== null; i++){ localStorage.removeItem(STORAGE_PREFIX + key + '#' + i); _storeLast.delete(key + '#' + i); } }catch(e){} }
+function storeDecode(raw){
+  if(raw.startsWith(STORE_LZ_TAG)){ const dec = LZString.decompressFromUTF16(raw.slice(STORE_LZ_TAG.length)); if(dec == null || dec === '') throw new Error('LZ decode failed'); return [dec, true]; }
+  return [raw, false];
+}
+// IndexedDB میں جا سکنے والی فہرستیں اور ان کے متغیر (ایپ کھلنے پر واپس لانے کے لیے)
+const STORE_BIG_KEYS = {
+  invoices: v => { invoicesData = v; }, payments: v => { paymentsData = v; }, expenses: v => { expenseData = v; },
+  customers: v => { customersData = v; }, products: v => { productsData = v; }, suppliers: v => { suppliersData = v; },
+  pendingBills: v => { pendingBillsData = v; }, advanceOrders: v => { advanceOrdersData = v; }, diary: v => { diaryData = v; },
+  approvalRequests: v => { approvalRequests = v; }, heldBills: v => { heldBills = v; }, customerOrders: v => { customerOrdersData = v; }
+};
+const _storeLast = new Map();       // آخری محفوظ JSON — نہ بدلے تو دوبارہ نہیں لکھنا
+const _storeIdbKeys = new Set();    // جو فہرستیں اب IndexedDB میں ہیں
+const _storePending = new Set();    // ایپ کھلتے وقت IndexedDB سے واپس آنی ہیں — تب تک ان پر لکھنا بند
+let _storeHydrating = false;
+let _storeDbP = null;
+function storeDb(){
+  if(!_storeDbP) _storeDbP = new Promise((res, rej) => { const rq = indexedDB.open(STORAGE_PREFIX + 'store_v1', 1); rq.onupgradeneeded = () => rq.result.createObjectStore('kv'); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
+  return _storeDbP;
+}
+async function storeIdbGet(key){ const db = await storeDb(); return new Promise((res, rej) => { const rq = db.transaction('kv').objectStore('kv').get(key); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); }
+async function storeIdbPut(key, val){ const db = await storeDb(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(val, key); tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); }); }
+const _storeIdbQ = new Map(); let _storeIdbBusy = false;
+function storeQueueIdb(key, json){
+  _storeIdbQ.set(key, json);
+  if(_storeIdbBusy) return;
+  _storeIdbBusy = true;
+  (async () => {
+    while(_storeIdbQ.size){
+      const [k, j] = _storeIdbQ.entries().next().value; _storeIdbQ.delete(k);
+      try{
+        await storeIdbPut(k, j);
+        if(!_storeIdbKeys.has(k)){
+          _storeIdbKeys.add(k);
+          try{ localStorage.removeItem(STORAGE_PREFIX + k); storeRemoveParts(k); localStorage.setItem(STORAGE_PREFIX + k, STORE_IDB_TAG + Date.now()); }catch(e){}
+          try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+        }
+      }catch(e){ console.warn('IndexedDB save failed', k, e); _storeLast.delete(k); storeQuotaAlert(); }
+    }
+    _storeIdbBusy = false;
+  })();
+}
+function loadFromStorage(key, fallback){
+  try{
+    let raw = localStorage.getItem(STORAGE_PREFIX + key);
+    if(raw === null || raw === undefined) return fallback;
+    if(raw.startsWith(STORE_IDB_TAG)){
+      _storeIdbKeys.add(key); _storePending.add(key); _storeHydrating = true;
+      return fallback; // اصل ڈیٹا IndexedDB سے فوراً واپس آئے گا (storeHydrate)
+    }
+    if(raw.startsWith(STORE_PARTS_TAG)){
+      const n = parseInt(raw.slice(STORE_PARTS_TAG.length)) || 0, out = [];
+      for(let i = 0; i < n; i++){
+        const pr = localStorage.getItem(STORAGE_PREFIX + key + '#' + i);
+        if(pr == null) throw new Error('part missing ' + i);
+        const [pj] = storeDecode(pr); const arr = JSON.parse(pj);
+        for(const x of arr) out.push(x);
+        _storeLast.set(key + '#' + i, pj);
+      }
+      _storeLast.set(key, raw);
+      return out;
+    }
+    let packed;
+    [raw, packed] = storeDecode(raw);
+    const v = JSON.parse(raw);
+    if(packed || raw.length < STORE_LZ_MIN) _storeLast.set(key, raw); // پرانی بڑی (بغیر دبائی) فہرست اگلی بار خود دب جائے
+    return v;
+  }catch(e){
+    console.warn('Problem reading saved data:', key, e);
+    return fallback;
+  }
+}
+let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
+function storeQuotaAlert(){
+  if(storageQuotaWarned) return;
+  storageQuotaWarned = true;
+  alert(
+    '⚠️ Storage Full — Recent changes may NOT be saved!\n\n' +
+    'Your device\'s storage for this app is full (this usually happens after adding many product photos). ' +
+    'Anything you change from now on — including product photos — may be lost when you close the app.\n\n' +
+    'Please do this now:\n' +
+    '1) Go to Dashboard → Export Backup (save it somewhere safe)\n' +
+    '2) Delete a few old/unused product photos to free up space\n' +
+    '3) Re-check that your latest changes were saved'
+  );
+}
+function saveToStorage(key, value){
+  if(_storePending.has(key)) return true; // ابھی IndexedDB سے واپس نہیں آیا — پرانی خالی فہرست سے اصل ڈیٹا نہ مٹے
+  if(Array.isArray(value) && value.length > STORE_PART && !_storeIdbKeys.has(key)) return storeSaveParts(key, value);
+  let json;
+  try{ json = JSON.stringify(value); }catch(e){ console.warn('Problem saving data:', key, e); return false; }
+  if(json === undefined) json = 'null';
+  if(_storeLast.get(key) === json) return true;
+  if(_storeIdbKeys.has(key)){ _storeLast.set(key, json); storeQueueIdb(key, json); return true; }
+  const out = json.length >= STORE_LZ_MIN ? STORE_LZ_TAG + LZString.compressToUTF16(json) : json;
+  try{
+    localStorage.setItem(STORAGE_PREFIX + key, out);
+    _storeLast.set(key, json);
+    if(Array.isArray(value)) storeRemoveParts(key); // پہلے حصوں میں تھی تو پرانے حصے ہٹائیں
+    return true;
+  }catch(e){
+    console.warn('Problem saving data:', key, e);
+    if(STORE_BIG_KEYS[key] && typeof indexedDB !== 'undefined'){ _storeLast.set(key, json); storeQueueIdb(key, json); return true; }
+    storeQuotaAlert();
+    return false;
+  }
+}
+function storeSaveParts(key, arr){
+  const n = Math.ceil(arr.length / STORE_PART);
+  let ok = true;
+  try{
+    for(let i = 0; i < n; i++){
+      const pk = key + '#' + i, j = JSON.stringify(arr.slice(i * STORE_PART, (i + 1) * STORE_PART));
+      if(_storeLast.get(pk) === j) continue;
+      localStorage.setItem(STORAGE_PREFIX + pk, STORE_LZ_TAG + LZString.compressToUTF16(j));
+      _storeLast.set(pk, j);
+    }
+    const man = STORE_PARTS_TAG + n;
+    if(_storeLast.get(key) !== man){ localStorage.setItem(STORAGE_PREFIX + key, man); _storeLast.set(key, man); }
+    storeRemoveParts(key, n);
+  }catch(e){ ok = false; console.warn('Problem saving data:', key, e); }
+  if(ok) return true;
+  if(STORE_BIG_KEYS[key] && typeof indexedDB !== 'undefined'){ const j = JSON.stringify(arr); _storeLast.set(key, j); storeQueueIdb(key, j); return true; }
+  storeQuotaAlert();
+  return false;
+}
+// ---------- ایپ کھلتے ہی IndexedDB والی فہرستیں واپس؛ تب تک خودکار محفوظ اور سنک رکے رہتے ہیں ----------
+async function storeHydrate(){
+  if(!_storePending.size){ _storeHydrating = false; return; }
+  let lost = [];
+  for(const key of Array.from(_storePending)){
+    try{
+      const j = await storeIdbGet(key);
+      if(typeof j === 'string'){ const v = JSON.parse(j); if(STORE_BIG_KEYS[key]) STORE_BIG_KEYS[key](v); _storeLast.set(key, j); }
+      else lost.push(key);
+    }catch(e){ lost.push(key); }
+    _storePending.delete(key);
+  }
+  _storeHydrating = false;
+  if(lost.length){ console.warn('IndexedDB data missing for', lost); lost.forEach(k => { _storeIdbKeys.delete(k); _storeLast.delete(k); }); }
+  try{ const a = document.querySelector('.screen.active'); if(a && AppState.currentUser) goTo(a.id.replace('screen-', '')); }catch(e){}
+}
+function storeIsHydrating(){ return _storeHydrating; }
+
 /* =====================================================================
    بنیادی ڈھانچہ (SKELETON) — صرف ساخت اور نیویگیشن، ابھی کوئی حقیقی فیچر نہیں
    ===================================================================== */
@@ -6644,10 +6800,15 @@ function syncDeviceUid(){
   return s.syncDevId;
 }
 function shopInfo(){ return shopInfoData.find(x => x.id === 'shop') || {}; }
+// ---------- AIO2710TU112: دکان سے جڑا فون — سبسکرپشن/پلان/ٹرائل کچھ نظر نہیں آتا، سب مالک کے فون سے ----------
+function isLinkedDevice(){ return aioMultiOn() && AppState.settings.syncJoined === true; }
+// مالک نے تجدید کی تو بند اسکرین خود کھل جائے
+setInterval(() => { try{ if(!isLinkedDevice()) return; const g = document.getElementById('subscriptionGateScreen'); if(g && g.style.display !== 'none' && isSubscriptionActive()) location.reload(); }catch(e){} }, 30000);
 function refreshMultiFlag(){
   AIO_MULTIUSER_ENABLED = aioMultiOn();
   try{ const sp = document.getElementById('loginPanelSalesman'); if(sp) sp.style.display = AIO_MULTIUSER_ENABLED ? '' : 'none'; if(AIO_MULTIUSER_ENABLED && AppState.settings.syncRole === 'staff' && typeof switchLoginRole === 'function') switchLoginRole('salesman'); }catch(e){}
   try{ document.body.classList.toggle('muOff', !AIO_MULTIUSER_ENABLED); }catch(e){}
+  try{ document.documentElement.classList.toggle('isLinked', isLinkedDevice()); }catch(e){}
   try{ const t = document.querySelector('.loginRoleTabs'); if(t) t.style.display = AIO_MULTIUSER_ENABLED ? '' : 'none'; const st = document.getElementById('loginTabSalesman'); if(st) st.style.display = AIO_MULTIUSER_ENABLED ? '' : 'none'; }catch(e){}
 }
 
@@ -6888,6 +7049,7 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
 // ---------- پورا سنک ----------
 async function syncNow(){
   if(!aioMultiOn()) return;
+  if(storeIsHydrating()){ setTimeout(() => syncNow(), 500); return; } // پہلے فون کا ڈیٹا IndexedDB سے واپس آ جائے
   if(syncBusy){ syncAgain = true; return; }
   syncBusy = true;
   const touched = new Set();
@@ -7488,42 +7650,10 @@ async function hydratePhotosFromIndexedDB(){
   }
 }
 
-function loadFromStorage(key, fallback){
-  try{
-    const raw = localStorage.getItem(STORAGE_PREFIX + key);
-    if(raw === null || raw === undefined) return fallback;
-    return JSON.parse(raw);
-  }catch(e){
-    console.warn('Problem reading saved data:', key, e);
-    return fallback;
-  }
-}
-let storageQuotaWarned = false; // ---------- ایک سیشن میں بار بار الرٹ نہ آئے، صرف پہلی بار ----------
-function saveToStorage(key, value){
-  try{
-    localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
-    return true;
-  }catch(e){
-    console.warn('Problem saving data:', key, e);
-    if(!storageQuotaWarned){
-      storageQuotaWarned = true;
-      alert(
-        '⚠️ Storage Full — Recent changes may NOT be saved!\n\n' +
-        'Your device\'s storage for this app is full (this usually happens after adding many product photos). ' +
-        'Anything you change from now on — including product photos — may be lost when you close the app.\n\n' +
-        'Please do this now:\n' +
-        '1) Go to Dashboard → Export Backup (save it somewhere safe)\n' +
-        '2) Delete a few old/unused product photos to free up space\n' +
-        '3) Re-check that your latest changes were saved'
-      );
-    }
-    return false;
-  }
-}
-
 // ---------- تمام اہم ڈیٹا ایک ساتھ محفوظ — یہ ہر چند سیکنڈ بعد خودکار چلتا ہے، اس لیے
 // کوڈ میں کہیں سے بھی کی گئی کوئی بھی تبدیلی (نیا پراڈکٹ، اسٹاک اپڈیٹ، نیا بل وغیرہ) خودکار محفوظ ہو جاتی ہے ----------
 function persistAllData(){
+  if(storeIsHydrating()) return;
   if(typeof productsData !== 'undefined') saveProductsLight();
   if(typeof customCategories !== 'undefined') saveToStorage('customCategories', customCategories);
   if(typeof customersData !== 'undefined') saveCustomersLight();
@@ -8515,8 +8645,8 @@ function disableDeveloperUnlock(){
 }
 
 function isSubscriptionActive(){
-  if(linkedShopActive()) return true; // AIO2710TU111: دکان سے جڑا ملازم/دوسرا فون — مالک کی سبسکرپشن پر چلتا ہے
   if(AppState.settings.developerUnlock) return true; // ---------- AIO910FR008: Developer Console سے کھلا فون — کبھی ختم نہیں ----------
+  if(isLinkedDevice()) return linkedShopActive(); // AIO2710TU112: جڑا فون صرف مالک کی سبسکرپشن پر — اپنا ٹرائل/خریداری نہیں
   const exp = AppState.settings.subscriptionExpiry;
   if(!exp) return false;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -8539,7 +8669,7 @@ function renderSubscriptionBanner(){
   // ---------- صرف Home صفحے پر نظر آئے — باقی تمام صفحات (بشمول Billing) پر چھپی رہے ----------
   const activeScreen = document.querySelector('.screen.active');
   const isHomePage = activeScreen && activeScreen.id === 'screen-home';
-  if(!isHomePage || !isSubscriptionActive() || AppState.settings.developerUnlock){ row.style.display = 'none'; updateTrialStrip(); return; }
+  if(!isHomePage || !isSubscriptionActive() || AppState.settings.developerUnlock || isLinkedDevice()){ row.style.display = 'none'; updateTrialStrip(); return; }
 
   const daysLeft = daysLeftInSubscription();
   if(isLifetimeLicense()){
@@ -8576,6 +8706,7 @@ function renderSubscriptionBanner(){
 // ---------- 🎁 روزانہ ایک بار Trial یاد دہانی — 2 دن یا کم بچے ہوں تو زیادہ نمایاں (بٹن والا) پاپ اپ،
 // ورنہ صرف ہلکا سا خود بخود غائب ہونے والا Toast (بغیر کسی بٹن کے، تنگ نہیں کرتا) ----------
 function maybeShowTrialReminder(daysLeft){
+  if(isLinkedDevice()) return;
   // ---------- پہلی بار ایپ کھلنے پر Google Drive والی دعوت آتی ہے — اس دن یہ پیغام نہ دکھائیں تاکہ دو پاپ اپ نہ ٹکرائیں ----------
   if(!AppState.settings.gdrivePromptShown) return;
   const todayStr = new Date().toISOString().slice(0,10);
@@ -9705,7 +9836,7 @@ function renderSubStatusStrip(){
   const txt = document.getElementById('sssText'), btn = document.getElementById('sssBtn');
   const s = AppState.settings;
   const loggedIn = !!AppState.currentUser;
-  if(!loggedIn || s.developerUnlock || !isSubscriptionActive()){
+  if(!loggedIn || s.developerUnlock || !isSubscriptionActive() || isLinkedDevice()){
     el.style.display = 'none';
     if(_sssTimer){ clearInterval(_sssTimer); _sssTimer = null; }
     try{ window.fixMainAreaHeight && window.fixMainAreaHeight(); }catch(e){}
@@ -10272,6 +10403,12 @@ function showRoleToast(role, name){
 
 // ---------- سبسکرپشن ختم/غیر فعال ہونے پر یہ صفحہ دکھایا جائے — سیدھا Google Play Billing پلانز کی طرف لے جائے ----------
 function showSubscriptionGate(){
+  if(isLinkedDevice()){
+    const sh = shopInfo();
+    document.getElementById('subGateStatus').textContent = `${sh.businessName || 'The shop'}'s subscription has ended${sh.subscriptionExpiry ? ' (' + formatDateDMY(sh.subscriptionExpiry) + ')' : ''}. Ask the owner to renew it on their phone — this device will open by itself.`;
+    document.getElementById('subscriptionGateScreen').style.display = 'flex';
+    return;
+  }
   const exp = AppState.settings.subscriptionExpiry;
   document.getElementById('subGateStatus').textContent = exp
     ? (AppState.settings.isOnFreeTrial
@@ -32052,6 +32189,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 </script>
 
 <!-- ========================================================================
@@ -32065,9 +32203,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU111';
+  const APP_VERSION = 'AIO2710TU112';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Multi-Device: cloud boxes split from the start (bills 8 boxes a day) so they never fill up; box meter in Staff & Devices; billing never stops';
+  const UPDATE_NOTE = 'Storage never fills: big lists packed 10x smaller and moved to device storage if needed; staff devices show no subscription — only the owner\'s';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
