@@ -1378,13 +1378,33 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
-  /* ✏️ AIO2710TU109: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
+  /* 👥 AIO2710TU110: Staff & Devices */
+  .loginJoinShopBtn{display:block; width:100%; margin-top:10px; padding:10px; border:1.5px dashed var(--primary,#0f766e); border-radius:12px; background:transparent; color:var(--primary-dark,#0f766e); font-weight:800; font-size:13px; cursor:pointer; font-family:inherit;}
+  body:not(.muOff) .loginJoinShopBtn{display:none;}
+  #loginScreen button.loginJoinShopBtn{background:#fff !important; color:var(--primary-dark,#0f766e) !important; border:1.5px dashed var(--primary,#0f766e) !important; box-shadow:none !important; font-size:13px !important; font-weight:800 !important; padding:10px !important; min-height:0 !important;}
+  .mdLbl{display:block; font-size:12px; font-weight:800; color:var(--muted,#64748b); margin:8px 0 4px;}
+  .mdInput{width:100%; box-sizing:border-box; padding:11px; border:1.5px solid #dbe1ea; border-radius:12px; font-size:15px;}
+  .mdBigBtn{width:100%; padding:13px; border:none; border-radius:999px; font-weight:900; font-size:15px; cursor:pointer; font-family:inherit; margin-top:8px; background:linear-gradient(180deg,#14b8a6,#0f766e); color:#fff; box-shadow:0 3px 0 #115e59;}
+  .mdBigBtn.ghost{background:#fff; color:var(--primary-dark,#0f766e); border:1.5px solid var(--primary,#0f766e); box-shadow:none;}
+  .mdBigBtn.danger{background:#fff; color:#b91c1c; border:1.5px solid #fca5a5; box-shadow:none;}
+  .mdCode{display:flex; gap:8px; align-items:center; margin:6px 0;}
+  .mdCode b{flex:1; text-align:center; padding:11px; border-radius:12px; background:#f0fdfa; border:1.5px dashed #14b8a6; font:900 16px/1.2 ui-monospace,Menlo,Consolas,monospace; letter-spacing:1px; color:#0f766e; word-break:break-all;}
+  .mdDev{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:14px; background:#fff; border:1.5px solid #e2e8f0; margin-bottom:6px;}
+  .mdDev .mdIco{width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#eef2ff; font-size:18px; flex:0 0 auto;}
+  .mdDev .mdTxt{flex:1; min-width:0; font-size:13px; font-weight:800; color:var(--text,#0f172a);}
+  .mdDev .mdTxt small{display:block; font-weight:600; font-size:11px; color:var(--muted,#64748b);}
+  .mdDev .mdTag{font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:999px; background:#dcfce7; color:#166534;}
+  .mdDev button{border:none; background:#fee2e2; color:#b91c1c; border-radius:999px; padding:6px 10px; font-weight:800; font-size:11.5px; cursor:pointer;}
+  .mdStatus{font-size:12.5px; font-weight:800; margin:4px 0 10px;}
+  .mdSteps{font-size:12.5px; color:var(--text,#334155); background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; margin:8px 0; line-height:1.6;}
+  .mdRow2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  /* ✏️ AIO2710TU110: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
   .editBillBanner{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px; padding:10px 12px; border-radius:14px; background:linear-gradient(180deg,#fff7ed,#ffedd5); border:2px solid #fb923c; color:#9a3412; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(251,146,60,.25);}
   .editBillBanner .ebTxt{flex:1; min-width:200px; line-height:1.4;}
   .editBillBanner .ebTxt small{display:block; font-weight:600; color:#c2410c; font-size:11.5px;}
   .editBillBanner button{border:1.5px solid #fdba74; background:#fff; color:#b91c1c; border-radius:999px; padding:7px 14px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:inherit;}
   .btnEditBill{background:linear-gradient(180deg,#fb923c,#ea580c) !important; color:#fff !important;}
-  /* ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
+  /* ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
   .pcOnly{display:none !important;}
   html.isPC .pcOnly{display:revert !important;}
   html.isPC .pcOnly.pcFlex{display:flex !important;}
@@ -2957,7 +2977,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <!-- ---------- AIO2710TU109: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <!-- ---------- AIO2710TU110: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
     <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
@@ -3009,7 +3029,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU109</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU110</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3069,6 +3089,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         👆 Enable Touch ID for faster login
       </label>
       <button id="loginEnterBtn" onclick="login()">Enter</button>
+      <button type="button" id="loginJoinShopBtn" class="loginJoinShopBtn" onclick="openJoinShopModal()">🔗 Join a shop — staff or second phone/PC</button>
 
       <!-- ---------- 🎁 ٹرائل ختم ہونے پر یہاں سے سیدھا سبسکرائب کریں ---------- -->
       <button id="loginTrialBtn" onclick="goTo('billing'); openPackagePlansModal();" style="display:none; background:#fff7ed; color:#c2410c; border:1.5px solid #fdba74; margin-top:10px;">🎟️ 7-Day Free Trial / Subscribe</button>
@@ -3226,7 +3247,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU109</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU110</span>
     </div>
   </div>
 
@@ -4555,7 +4576,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
-    <!-- ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
+    <!-- ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
     <div class="modalOverlay" id="shortcutsModal" onclick="if(event.target===this) closeShortcutsModal()">
       <div class="modalBoxWide kbWrap">
         <div class="kbHead">
@@ -5673,7 +5694,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           </div>
         </div>
 
-        <!-- --- ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
+        <!-- --- ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
         <div class="settingsCard pcOnly" id="settingsCardShortcuts">
           <h3>⌨️ Keyboard Shortcuts <span style="font-size:11px; font-weight:800; color:#fff; background:var(--primary,#0f766e); padding:2px 8px; border-radius:999px; vertical-align:middle;">PC</span></h3>
           <div class="settingsHint">Work faster on a computer — choose your own key for each action (billing, search, complete &amp; print, screens). Saved on this computer only.</div>
@@ -5784,7 +5805,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
 
         <!-- --- ☁️ Cloud Sync — Business Code، ملازمین اسی سے جُڑتے ہیں (Multi-Device) --- -->
-        <div class="settingsCard muOnly" id="settingsCardCloudSync">
+        <!-- ---------- AIO2710TU110: 👥 Staff & Devices — ایک دکان، کئی فون/PC (مالک اور ملازم اپنے اپنے PIN سے) ---------- -->
+        <div class="settingsCard admin-only" id="staffDevicesCard"></div>
+
+        <div class="settingsCard muOnly" id="settingsCardCloudSync" style="display:none !important;">
           <h3>☁️ Cloud Sync (Multi-Device)</h3>
           <div id="cloudSyncStatusLine" style="font-size:12px; font-weight:700; margin-bottom:10px;"></div>
           <div class="settingsSubLabel">Your Business Code</div>
@@ -6584,20 +6608,413 @@ async function aioAuthFetch(path, options = {}){
 
 // ---------- AIO910FR006: ملٹی یوزر نظام (Cloud Sync / Business Code / ملازمین / Salesman / آن لائن کیٹلاگ) فی الحال بند —
 // یہ ایپ ابھی سنگل یوزر پیکج ہے۔ کوڈ مکمل موجود ہے؛ الگ پیکج کے طور پر دینا ہو تو صرف یہ true کر دیں ----------
-const AIO_MULTIUSER_ENABLED = false;
+let AIO_MULTIUSER_ENABLED = false; // AIO2710TU110: اب دکان کی سیٹنگ سے (refreshMultiFlag) — Staff & Devices کارڈ سے آن
 try{ if(!AIO_MULTIUSER_ENABLED) document.body.classList.add('muOff'); }catch(e){}
 
 let cloudSyncStatus = 'connecting'; // 'connecting' | 'online' | 'offline' | 'error'
 const CLOUD_DOC_TYPES = ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses']; // ---------- AIOTEST27: Advance Orders/Recovery/Finance بھی شامل ----------
 const cloudPollTimers = {};
+// ===================== ☁️ AIO2710TU110: ملٹی ڈیوائس سنک v2 — ایک دکان، ایک ڈیٹا، کئی فون/PC =====================
+// پرانا طریقہ پوری فہرست اوپر لکھ دیتا تھا (دو فون ایک ساتھ بل بنائیں تو ایک کا بل/اسٹاک مٹ سکتا تھا) اور سارے بل
+// ایک ہی دستاویز میں (1MB حد)۔ اب:
+//   • ہر فہرست چھوٹے حصوں (chunks) میں — بل روزانہ، ادائیگی/خرچ ماہانہ، باقی ایک ایک
+//   • تین طرفہ ملاپ (پچھلی مشترکہ حالت + اس فون کی تبدیلی + دوسرے فون کی تبدیلی) ریکارڈ بہ ریکارڈ؛
+//     اسٹاک/بقایہ/والٹ میں دونوں کی کمی بیشی جمع تفریق سے ملتی ہے، کوئی تبدیلی ضائع نہیں
+//   • لکھتے وقت شرط (updateTime) — بیچ میں کسی اور نے لکھا ہو تو پہلے ملاپ، پھر لکھنا
+//   • _index میں ہر حصے کا وقت — ہر 30 سیکنڈ صرف ایک چھوٹی دستاویز پڑھی جاتی ہے، بدلا ہوا حصہ ہی لایا جاتا ہے
+//   • ہر فون کی اپنی "سلاٹ" — نئی آئی ڈیاں الگ رینج میں (دو فون آف لائن بھی ایک ہی نمبر نہ بنائیں)
+//   • تصویریں (data:) کلاؤڈ پر نہیں جاتیں — اسی فون پر رہتی ہیں
+// سب کچھ businesses/{shopCode}/store/{doc} میں (موجودہ Firestore رول کے اندر)۔
+const SYNC_TYPES = ['users','products','customers','suppliers','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses','devices','shopinfo'];
+const SYNC_LOCAL_ONLY_KEYS = ['image','photo','slip_image','billPhoto','qr','qrImage','logo'];
+const SYNC_DELTA_KEYS = ['stock','qty','salesCount','total_receivable','wallet_balance','total_payable'];
+const SYNC_POLL_MS = 30000;
+let devicesData = loadFromStorage('syncDevices', []);
+let shopInfoData = loadFromStorage('syncShopInfo', []);
+let syncBusy = false, syncAgain = false, syncTimer = null, syncPollTimer = null;
+const syncLastScheduledJSON = {};
+
+function aioMultiOn(){ try{ return !!(AppState && AppState.settings && AppState.settings.syncOn && AppState.settings.businessId); }catch(e){ return false; } }
+function syncSlot(){ return (AppState && AppState.settings && AppState.settings.syncSlot) || 0; }
+// ---------- اس انسٹال کی اپنی سنک شناخت (لائسنس والی Device ID نہیں — وہ ایک ہی کمپیوٹر کے دو براؤزر میں ایک جیسی ہو سکتی ہے) ----------
+function syncDeviceUid(){
+  const s = AppState.settings;
+  if(!s.syncDevId){ s.syncDevId = 'D-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase(); saveToStorage('settings', s); }
+  return s.syncDevId;
+}
+function shopInfo(){ return shopInfoData.find(x => x.id === 'shop') || {}; }
+function refreshMultiFlag(){
+  AIO_MULTIUSER_ENABLED = aioMultiOn();
+  try{ const sp = document.getElementById('loginPanelSalesman'); if(sp) sp.style.display = AIO_MULTIUSER_ENABLED ? '' : 'none'; if(AIO_MULTIUSER_ENABLED && AppState.settings.syncRole === 'staff' && typeof switchLoginRole === 'function') switchLoginRole('salesman'); }catch(e){}
+  try{ document.body.classList.toggle('muOff', !AIO_MULTIUSER_ENABLED); }catch(e){}
+  try{ const t = document.querySelector('.loginRoleTabs'); if(t) t.style.display = AIO_MULTIUSER_ENABLED ? '' : 'none'; const st = document.getElementById('loginTabSalesman'); if(st) st.style.display = AIO_MULTIUSER_ENABLED ? '' : 'none'; }catch(e){}
+}
+
+// ---------- کس فہرست کا کون سا ریکارڈ کس حصے (chunk) میں ----------
+function syncChunkOf(docType, rec){
+  const d = s => String(s || '').slice(0, 10).replace(/-/g, '_');
+  if(docType === 'invoices') return 'invoices__' + (d(rec.created_at) || 'old');
+  if(docType === 'payments') return 'payments__' + (d(rec.date || rec.created_at).slice(0, 7) || 'old');
+  if(docType === 'expenses') return 'expenses__' + (d(rec.date || rec.createdAt).slice(0, 7) || 'old');
+  return docType;
+}
+function syncDocTypeOfChunk(chunk){ return String(chunk).split('__')[0]; }
+
+// ---------- تصویریں الگ — کلاؤڈ پر صرف ہلکا ڈیٹا ----------
+function syncStrip(rec){
+  return JSON.parse(JSON.stringify(rec, (k, v) => (SYNC_LOCAL_ONLY_KEYS.includes(k) && typeof v === 'string' && v.slice(0, 5) === 'data:') ? undefined : v));
+}
+function syncRestoreLocalOnly(m, l){
+  if(!l || !m || typeof m !== 'object' || typeof l !== 'object') return m;
+  SYNC_LOCAL_ONLY_KEYS.forEach(k => { if(typeof l[k] === 'string' && l[k].slice(0, 5) === 'data:' && m[k] == null) m[k] = l[k]; });
+  if(Array.isArray(m.variants) && Array.isArray(l.variants)){
+    const lv = new Map(l.variants.map(v => [v.variant_id, v]));
+    m.variants.forEach(v => syncRestoreLocalOnly(v, lv.get(v.variant_id)));
+  }
+  return m;
+}
+
+// ---------- تین طرفہ ملاپ ----------
+const syncEq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const syncR2 = n => Math.round(n * 1000) / 1000;
+function syncIdOf(o){
+  if(!o || typeof o !== 'object') return null;
+  for(const k of ['variant_id','batchId','payment_id','invoice_id','customer_id','supplier_id','product_id','user_id','pending_id','request_id','uid','id']){ if(o[k] != null) return k + ':' + o[k]; }
+  return null;
+}
+function syncMergeArray(b, l, r){
+  b = Array.isArray(b) ? b : [];
+  const withIds = [...l, ...r].every(x => syncIdOf(x));
+  if(withIds){
+    const B = new Map(b.map(x => [syncIdOf(x), x])), L = new Map(l.map(x => [syncIdOf(x), x])), R = new Map(r.map(x => [syncIdOf(x), x]));
+    const order = [...R.keys(), ...[...L.keys()].filter(k => !R.has(k))];
+    const out = [];
+    order.forEach(id => { const v = syncMergeOne(B.get(id), L.get(id), R.get(id)); if(v) out.push(v); });
+    return out;
+  }
+  // ---------- بغیر شناخت والی فہرست (والٹ ہسٹری وغیرہ) — دوسرے کی + اس فون کی نئی اندراجات ----------
+  const bs = new Set(b.map(x => JSON.stringify(x))), rs = new Set(r.map(x => JSON.stringify(x)));
+  const removedHere = new Set(b.map(x => JSON.stringify(x)).filter(s => !l.some(x => JSON.stringify(x) === s)));
+  const fromLocal = l.filter(x => { const s = JSON.stringify(x); return !bs.has(s) && !rs.has(s); });
+  const remoteKept = r.filter(x => !removedHere.has(JSON.stringify(x)));
+  // نئی اندراجات اوپر (unshift والا انداز) — مقامی ترتیب جیسی
+  const localFirstIdx = l.findIndex(x => !bs.has(JSON.stringify(x)));
+  return localFirstIdx === 0 ? [...fromLocal, ...remoteKept] : [...remoteKept, ...fromLocal];
+}
+function syncMergeObj(b, l, r){
+  const res = Object.assign({}, r);
+  const keys = new Set([...Object.keys(l), ...Object.keys(r), ...(b ? Object.keys(b) : [])]);
+  keys.forEach(k => {
+    const bv = b ? b[k] : undefined, lv = l[k], rv = r[k];
+    if(syncEq(lv, bv)) return;                               // اس فون نے یہ خانہ نہیں بدلا — دوسرے والا
+    if(syncEq(rv, bv)){ if(lv === undefined) delete res[k]; else res[k] = lv; return; } // صرف اس فون نے بدلا
+    if(SYNC_DELTA_KEYS.includes(k) && typeof lv === 'number' && typeof rv === 'number' && typeof bv === 'number'){ res[k] = syncR2(rv + (lv - bv)); return; } // دونوں نے بدلا: کمی بیشی جمع
+    if(Array.isArray(lv) && Array.isArray(rv)){ res[k] = syncMergeArray(bv, lv, rv); return; }
+    if(lv && rv && typeof lv === 'object' && typeof rv === 'object'){ res[k] = syncMergeObj(bv && typeof bv === 'object' ? bv : null, lv, rv); return; }
+    res[k] = lv === undefined ? rv : lv;
+  });
+  return res;
+}
+function syncMergeOne(b, l, r){
+  if(!b){ if(l && r) return syncEq(l, r) ? r : syncMergeObj(null, l, r); return l || r || null; }
+  if(!l && !r) return null;
+  if(!l) return syncEq(r, b) ? null : r;   // اس فون پر ہٹایا، دوسرے نے نہیں بدلا — ہٹا دیں
+  if(!r) return syncEq(l, b) ? null : l;
+  if(syncEq(l, b)) return r;
+  if(syncEq(r, b)) return l;
+  return syncMergeObj(b, l, r);
+}
+function syncMerge3(docType, base, local, remote){
+  const key = aioGetDocTypeMeta(docType).matchKey;
+  const id = x => String(x[key]);
+  const B = new Map(base.map(x => [id(x), x])), L = new Map(local.map(x => [id(x), x])), R = new Map(remote.map(x => [id(x), x]));
+  const order = [...R.keys(), ...[...L.keys()].filter(k => !R.has(k))];
+  const out = [];
+  order.forEach(k => { const v = syncMergeOne(B.get(k), L.get(k), R.get(k)); if(v) out.push(v); });
+  return out;
+}
+
+// ---------- پچھلی مشترکہ حالت (base) — IndexedDB میں (localStorage دوسری ایپس کے ساتھ بٹا ہوا ہے) ----------
+let syncDbP = null;
+function syncDb(){
+  if(!syncDbP) syncDbP = new Promise((res, rej) => { const rq = indexedDB.open(STORAGE_PREFIX + 'sync_v1', 1); rq.onupgradeneeded = () => rq.result.createObjectStore('kv'); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
+  return syncDbP;
+}
+async function syncBaseGet(chunk){ try{ const db = await syncDb(); return await new Promise(res => { const rq = db.transaction('kv').objectStore('kv').get('base:' + chunk); rq.onsuccess = () => res(rq.result == null ? null : rq.result); rq.onerror = () => res(null); }); }catch(e){ return null; } }
+async function syncBaseSet(chunk, str){ try{ const db = await syncDb(); await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(str, 'base:' + chunk); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
+async function syncBaseClearAll(){ try{ const db = await syncDb(); await new Promise(res => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').clear(); tx.oncomplete = res; tx.onerror = res; }); }catch(e){} }
+
+// ---------- Firestore (REST) ----------
+function syncPath(doc){ return `businesses/${AppState.settings.businessId}/store/${doc}?key=${AIO_FIREBASE_API_KEY}`; }
+async function syncGetIndex(){
+  try{
+    const res = await aioAuthFetch(syncPath('_index'));
+    if(res.status === 404) return {};
+    if(!res.ok) return null;
+    const d = await res.json(), o = {};
+    Object.entries(d.fields || {}).forEach(([k, v]) => { o[k] = parseInt(v.integerValue || '0'); });
+    return o;
+  }catch(e){ return null; }
+}
+async function syncGetChunk(chunk){
+  try{
+    const res = await aioAuthFetch(syncPath(chunk));
+    if(res.status === 404) return {missing: true, items: []};
+    if(!res.ok) return null;
+    const d = await res.json();
+    let items = [];
+    try{ items = JSON.parse(d.fields?.json?.stringValue || '[]'); }catch(e){}
+    return {items: Array.isArray(items) ? items : [], ut: d.updateTime};
+  }catch(e){ return null; }
+}
+async function syncPutChunk(chunk, json, ut){
+  const pre = ut ? `&currentDocument.updateTime=${encodeURIComponent(ut)}` : '&currentDocument.exists=false';
+  try{
+    const res = await aioAuthFetch(syncPath(chunk) + pre, {
+      method: 'PATCH', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({fields: {json: {stringValue: json}, updatedAt: {integerValue: String(Date.now())}, by: {stringValue: syncDeviceUid()}}})
+    });
+    if(res.ok){ const d = await res.json(); return {ut: d.updateTime}; }
+    let st = ''; try{ st = (await res.json())?.error?.status || ''; }catch(e){}
+    if(['FAILED_PRECONDITION','ALREADY_EXISTS','ABORTED','NOT_FOUND'].includes(st) || res.status === 409 || res.status === 412) return 'conflict';
+    window.__cloudSyncError = `Save failed (${res.status} ${st}) — ${chunk}` + (json.length > 900000 ? ' — too big' : '');
+    return 'error';
+  }catch(e){ return null; }
+}
+async function syncSetIndex(chunk, ms){
+  try{
+    const res = await aioAuthFetch(syncPath('_index') + `&updateMask.fieldPaths=${chunk}`, {
+      method: 'PATCH', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({fields: {[chunk]: {integerValue: String(ms)}}})
+    });
+    return !!(res && res.ok);
+  }catch(e){ return false; }
+}
+
+// ---------- مقامی فہرست کو حصوں میں ----------
+function syncGroupLocal(docType, items){
+  const g = new Map();
+  (items || []).forEach(rec => { const c = syncChunkOf(docType, rec); if(!g.has(c)) g.set(c, []); g.get(c).push(syncStrip(rec)); });
+  return g;
+}
+const SYNC_NEWEST_FIRST = ['invoices','pendingbills','approvalrequests','payments','advanceorders'];
+function syncApplyChunk(docType, chunk, merged){
+  const meta = aioGetDocTypeMeta(docType); const key = meta.matchKey;
+  const old = meta.data.slice();
+  const mById = new Map(merged.map(m => [String(m[key]), m]));
+  const oldIds = new Set(old.map(r => String(r[key])));
+  const result = [];
+  old.forEach(r => {
+    if(syncChunkOf(docType, r) !== chunk){ result.push(r); return; }
+    const m = mById.get(String(r[key]));
+    if(m) result.push(syncRestoreLocalOnly(JSON.parse(JSON.stringify(m)), r));
+  });
+  const added = merged.filter(m => !oldIds.has(String(m[key]))).map(m => JSON.parse(JSON.stringify(m)));
+  if(SYNC_NEWEST_FIRST.includes(docType)){
+    added.sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0));
+    meta.data = [...added, ...result];
+  } else meta.data = [...result, ...added];
+}
+
+// ---------- ایک حصے کا سنک ----------
+async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
+  const k = known[chunk] || {};
+  const mustFetch = (idxMs || 0) > (k.ms || 0) || !k.ut;
+  let remoteItems = null, ut = k.ut || null;
+  if(mustFetch){
+    const r = await syncGetChunk(chunk);
+    if(r === null) throw new Error('offline');
+    remoteItems = r.items; ut = r.missing ? null : r.ut;
+  }
+  const base = baseStr ? JSON.parse(baseStr) : [];
+  const merged = remoteItems === null ? localItems : syncMerge3(docType, base, localItems, remoteItems);
+  const mergedStr = JSON.stringify(merged);
+  const remoteStr = remoteItems === null ? baseStr : JSON.stringify(remoteItems);
+  if(mergedStr !== JSON.stringify(localItems)) syncApplyChunk(docType, chunk, merged);
+  if(mergedStr === remoteStr){
+    await syncBaseSet(chunk, mergedStr);
+    known[chunk] = {ms: Math.max(idxMs || 0, k.ms || 0), ut};
+    return true;
+  }
+  if(merged.length === 0 && !ut){ await syncBaseSet(chunk, mergedStr); return true; }
+  const put = await syncPutChunk(chunk, mergedStr, ut);
+  if(put === null) throw new Error('offline');
+  if(put === 'error'){ cloudSyncStatus = 'error'; return false; }
+  if(put === 'conflict'){
+    if(remoteItems !== null) await syncBaseSet(chunk, remoteStr);
+    known[chunk] = {ms: 0, ut: null}; syncAgain = true; return false;
+  }
+  const ms = Date.now();
+  await syncBaseSet(chunk, mergedStr);
+  known[chunk] = {ms, ut: put.ut, idxPending: !(await syncSetIndex(chunk, ms))};
+  return true;
+}
+
+// ---------- پورا سنک ----------
+async function syncNow(){
+  if(!aioMultiOn()) return;
+  if(syncBusy){ syncAgain = true; return; }
+  syncBusy = true;
+  const touched = new Set();
+  try{
+    const idx = await syncGetIndex();
+    if(idx === null){ cloudSyncStatus = navigator.onLine === false ? 'offline' : 'error'; return; }
+    const known = loadFromStorage('syncKnown', {});
+    for(const [c, v] of Object.entries(known)){ if(v && v.idxPending && v.ms){ if(await syncSetIndex(c, v.ms)) v.idxPending = false; } }
+    for(const docType of SYNC_TYPES){
+      const meta = aioGetDocTypeMeta(docType); if(!meta) continue;
+      const groups = syncGroupLocal(docType, meta.data);
+      const chunks = new Set([...groups.keys(), ...Object.keys(idx).filter(c => syncDocTypeOfChunk(c) === docType), ...Object.keys(known).filter(c => syncDocTypeOfChunk(c) === docType)]);
+      for(const chunk of chunks){
+        const localItems = groups.get(chunk) || [];
+        const baseStr = await syncBaseGet(chunk);
+        const localChanged = baseStr === null ? localItems.length > 0 : JSON.stringify(localItems) !== baseStr;
+        const remoteChanged = (idx[chunk] || 0) > ((known[chunk] || {}).ms || 0);
+        if(!localChanged && !remoteChanged) continue;
+        await syncChunk(docType, chunk, localItems, baseStr, idx[chunk], known);
+        touched.add(docType);
+        saveToStorage('syncKnown', known);
+      }
+    }
+    if(cloudSyncStatus !== 'error') cloudSyncStatus = 'online';
+    window.__cloudSyncError = cloudSyncStatus === 'online' ? null : window.__cloudSyncError;
+  }catch(e){
+    cloudSyncStatus = navigator.onLine === false ? 'offline' : 'error';
+    if(!window.__cloudSyncError) window.__cloudSyncError = String(e && e.message || e);
+  }finally{
+    syncBusy = false;
+    if(touched.size){ syncAfterApply(touched); }
+    try{ renderStaffDevicesCard(); }catch(e){}
+    if(syncAgain){ syncAgain = false; setTimeout(syncNow, 600); }
+  }
+}
+function syncAfterApply(touched){
+  syncFixCounters();
+  saveToStorage('syncDevices', devicesData);
+  saveToStorage('syncShopInfo', shopInfoData);
+  try{ persistAllData(); }catch(e){}
+  touched.forEach(t => { try{ applyCloudDocTypeUI(t); }catch(e){} });
+  if(touched.has('devices')) syncCheckStillMember();
+  if(touched.has('products') || touched.has('invoices')){ try{ renderCart(); }catch(e){} }
+}
+function scheduleSync(delay){
+  if(!aioMultiOn()) return;
+  if(syncTimer) return;
+  syncTimer = setTimeout(() => { syncTimer = null; syncNow(); }, delay == null ? 2500 : delay);
+}
+function startSyncPolling(){
+  if(syncPollTimer) clearInterval(syncPollTimer);
+  if(!aioMultiOn()) return;
+  syncPollTimer = setInterval(() => { if(document.visibilityState !== 'hidden') syncNow(); }, SYNC_POLL_MS);
+  syncNow();
+  syncTouchMyDevice();
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') scheduleSync(300); });
+window.addEventListener('online', () => scheduleSync(300));
+
+// ---------- ہر فون کی اپنی آئی ڈی رینج (سلاٹ) — مالک 0، باقی 1، 2، 3… ----------
+function syncFixCounters(){
+  const s = syncSlot(), lo = s * 1000000, hi = lo + 1000000;
+  const fix = (ids, cur) => {
+    const own = ids.map(Number).filter(x => x >= lo && x < hi && isFinite(x));
+    const cand = own.length ? Math.max(...own) + 1 : lo + 1;
+    return (cur >= lo && cur < hi) ? Math.max(cur, cand) : cand;
+  };
+  SYNC_TYPES.forEach(t => {
+    const meta = aioGetDocTypeMeta(t);
+    if(!meta || !meta.setNextId || t === 'invoices' || t === 'devices' || t === 'shopinfo') return;
+    try{ meta.setNextId(fix(meta.data.map(x => x[meta.matchKey]), meta.nextIdVar())); }catch(e){}
+  });
+  try{ nextVariantId = fix(productsData.flatMap(p => (p.variants || []).map(v => v.variant_id)), nextVariantId); }catch(e){}
+}
+
+// ---------- آلات (devices) ----------
+function syncMyDevice(){ return devicesData.find(d => d.uid === syncDeviceUid()) || null; }
+function syncTouchMyDevice(force){
+  if(!aioMultiOn()) return;
+  const me = syncMyDevice(), now = Date.now();
+  if(me && !force && me.last_seen && now - me.last_seen < 10 * 60000) return;
+  const rec = Object.assign({}, me || {}, {uid: syncDeviceUid(), name: AppState.settings.syncDeviceName || (me && me.name) || 'Device', slot: syncSlot(),
+    role: AppState.settings.syncJoined ? (AppState.settings.syncRole || 'staff') : 'owner', last_seen: now, user: AppState.currentUser?.name || (me && me.user) || ''});
+  if(!me) rec.joined_at = now;
+  devicesData = devicesData.filter(d => d.uid !== rec.uid).concat([rec]);
+  saveToStorage('syncDevices', devicesData);
+  scheduleSync(800);
+}
+function syncCheckStillMember(){
+  if(!AppState.settings.syncJoined) return;
+  if(AppState.settings.syncWasListed && !syncMyDevice()){
+    syncDisconnect(true);
+    alert('This device was removed from the shop by the owner.');
+    location.reload();
+  }
+  if(syncMyDevice()) AppState.settings.syncWasListed = true;
+}
+// ---------- مالک کی سبسکرپشن اور سیٹنگ — جڑے ہوئے فون انہی پر چلتے ہیں ----------
+function syncPushShopInfo(){
+  if(!aioMultiOn() || AppState.settings.syncJoined) return;
+  const s = AppState.settings, cur = shopInfo();
+  const rec = Object.assign({}, cur, {id: 'shop', businessName: s.businessName || '', subscriptionExpiry: s.subscriptionExpiry || '', lifetime: !!s.lifetimeLicense,
+    staffApproval: cur.staffApproval === true, maxDevices: cur.maxDevices || 0});
+  if(syncEq(rec, cur)) return;
+  shopInfoData = [rec]; saveToStorage('syncShopInfo', shopInfoData); scheduleSync(800);
+}
+function linkedShopActive(){
+  try{
+    if(!aioMultiOn() || !AppState.settings.syncJoined) return false;
+    const sh = shopInfo();
+    if(sh.lifetime) return true;
+    if(!sh.subscriptionExpiry) return false;
+    const exp = new Date(sh.subscriptionExpiry + 'T23:59:59');
+    return !isNaN(exp) && exp.getTime() >= Date.now();
+  }catch(e){ return false; }
+}
+function staffBillsNeedApproval(){ return aioMultiOn() && shopInfo().staffApproval === true; }
+
+// ---------- مقامی کاروباری ڈیٹا صاف (جڑتے وقت / نکالے جانے پر) ----------
+function syncWipeLocalBusinessData(){
+  ['products','customers','suppliers','users','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses'].forEach(t => { const m = aioGetDocTypeMeta(t); if(m) m.data = []; });
+  devicesData = []; shopInfoData = [];
+  saveToStorage('syncKnown', {});
+}
+function syncDisconnect(wipe){
+  const s = AppState.settings;
+  if(syncPollTimer){ clearInterval(syncPollTimer); syncPollTimer = null; }
+  if(wipe) syncWipeLocalBusinessData();
+  s.syncOn = false; s.syncJoined = false; s.syncRole = ''; s.syncSlot = 0; s.syncWasListed = false; s.businessId = '';
+  saveToStorage('settings', s);
+  saveToStorage('syncKnown', {});
+  syncBaseClearAll();
+  refreshMultiFlag();
+  try{ persistAllData(); }catch(e){}
+}
 
 function initCloudSync(){
-  if(!AIO_MULTIUSER_ENABLED){ cloudSyncStatus = 'offline'; return; } // ---------- AIO910FR006: سنگل یوزر — کلاؤڈ سے کوئی رابطہ نہیں ----------
-  getOrCreateBusinessId();
-  aioEnsureAuth().then((token) => {
-    if(token){ startCloudPolling(); }
-  });
+  refreshMultiFlag();
+  if(!aioMultiOn()){ cloudSyncStatus = 'offline'; return; }
+  syncPushShopInfo();
+  aioEnsureAuth().then(t => { if(t) startCloudPolling(); else cloudSyncStatus = 'offline'; });
 }
+// ---------- پرانے نام — باقی ایپ انہی کو بلاتی ہے: اب صرف تبدیلی ہو تو سنک کا وقت مقرر ----------
+async function pushDocTypeToCloud(docType, items){
+  if(!aioMultiOn()) return true;
+  let str; try{ str = JSON.stringify(items); }catch(e){ return true; }
+  if(syncLastScheduledJSON[docType] === str) return true;
+  const first = syncLastScheduledJSON[docType] === undefined;
+  syncLastScheduledJSON[docType] = str;
+  if(!first) scheduleSync();
+  return true;
+}
+async function fetchDocTypeFromCloud(){ scheduleSync(300); return true; }
+let syncOrdersTimer = null;
+function startCloudPolling(){
+  startSyncPolling();
+  try{ fetchCustomerOrdersFromCloud(); }catch(e){}
+  if(syncOrdersTimer) clearInterval(syncOrdersTimer);
+  syncOrdersTimer = setInterval(() => { if(document.visibilityState !== 'hidden') fetchCustomerOrdersFromCloud(); }, 60000);
+}
+async function joinBusinessById(code){ openJoinShopModal(code); }
+
 
 // ---------- ہر کاروبار کی منفرد شناخت — پہلی بار خودکار بنتی ہے، پھر ہمیشہ وہی رہتی ہے ----------
 function getOrCreateBusinessId(){
@@ -6610,23 +7027,6 @@ function getOrCreateBusinessId(){
 }
 
 // ---------- ملازم اپنے ڈیوائس پر مالک کا دیا ہوا کوڈ درج کرتا ہے تو یہاں سے جُڑتا ہے ----------
-async function joinBusinessById(newId){
-  newId = String(newId || '').trim().toUpperCase();
-  if(!newId){ alert('Please enter a Business Code.'); return; }
-  if(newId === AppState.settings.businessId){ alert('This code is already active.'); return; }
-  if(!confirm('You are about to join this code:\n\n' + newId + '\n\n⚠️ Please check the code above — is it exactly the same as the owner sent? If yes, press OK.')){
-    return;
-  }
-  stopCloudPolling();
-  // ---------- نئے Business کے لیے پرانی pendingSync حالتیں صاف کریں ----------
-  CLOUD_DOC_TYPES.forEach(t => { AppState.settings[t + 'PendingSync'] = false; });
-  AppState.settings.businessId = newId;
-  saveToStorage('settings', AppState.settings);
-  for(const docType of CLOUD_DOC_TYPES){ await fetchDocTypeFromCloud(docType, false); }
-  startCloudPolling();
-  try{ renderCloudSyncCard(); }catch(e){}
-  alert('✅ Connected to this business — data loaded.');
-}
 
 // ---------- ہر docType کا اپنا مقامی array + seed ڈیٹا حوالہ — تاکہ نیچے عمومی (generic) push/fetch فنکشنز
 // ہر ٹائپ کے لیے دوبارہ الگ الگ نہ لکھنے پڑیں ----------
@@ -6648,6 +7048,8 @@ function aioGetDocTypeMeta(docType){
   if(docType === 'payments') return { get data(){ return paymentsData; }, set data(v){ paymentsData.length=0; paymentsData.push(...v); }, seed: [], idKey: 'nextPaymentId', nextIdVar: () => nextPaymentId, setNextId: (v) => { nextPaymentId = v; }, matchKey: 'payment_id', nameKey: 'party_name',
     // ---------- AIOTEST27: Slip کی تصویر (base64) Firestore کی 1MB فی دستاویز حد سے ٹکرا سکتی ہے — کلاؤڈ پر کبھی نہ بھیجیں، صرف اسی فون تک محدود رہے ----------
     stripForCloud: (p) => ({...p, slip_image: null}) };
+  if(docType === 'devices') return { get data(){ return devicesData; }, set data(v){ devicesData = v; }, seed: [], matchKey: 'uid', nameKey: 'name', nextIdVar: () => 0 };
+  if(docType === 'shopinfo') return { get data(){ return shopInfoData; }, set data(v){ shopInfoData = v; }, seed: [], matchKey: 'id', nameKey: 'id', nextIdVar: () => 0 };
   if(docType === 'expenses') return { get data(){ return expenseData; }, set data(v){ expenseData.length=0; expenseData.push(...v); }, seed: [], idKey: 'nextExpenseId', nextIdVar: () => nextExpenseId, setNextId: (v) => { nextExpenseId = v; }, matchKey: 'id', nameKey: 'name' };
   return null;
 }
@@ -6663,62 +7065,6 @@ const aioLastKnownUpdatedAt = {};
 // ---------- پورا مقامی array کلاؤڈ پر بھیجیں (JSON سٹرنگ کی صورت، Fruit Mandi کی طرح)۔
 // AIOTEST27: اگر meta.stripForCloud موجود ہو (جیسے payments کی slip تصویر) تو مقامی طور پر مکمل ڈیٹا محفوظ رہتا ہے،
 // صرف کلاؤڈ پر بھیجنے والی کاپی سے وہ بھاری/حساس فیلڈ ہٹا دی جاتی ہے ----------
-async function pushDocTypeToCloud(docType, items){
-  const meta = aioGetDocTypeMeta(docType);
-  if(!meta) return false;
-  saveToStorage(docType, items); // ---------- آف لائن فال بیک ہمیشہ پہلے مقامی طور پر (مکمل ڈیٹا سمیت) محفوظ کریں ----------
-  if(!AIO_MULTIUSER_ENABLED) return true; // ---------- AIO910FR006: سنگل یوزر — صرف اسی فون پر محفوظ ----------
-  const cloudItems = meta.stripForCloud ? items.map(meta.stripForCloud) : items;
-  const itemsJSON = JSON.stringify(cloudItems);
-  // ---------- اگر ڈیٹا آخری کامیاب push جیسا ہی ہے اور کوئی pending retry بھی نہیں تو Firestore write سکِپ کریں ----------
-  if(aioLastPushedJSON[docType] === itemsJSON && !AppState.settings[docType + 'PendingSync']){
-    return true;
-  }
-  const bizId = getOrCreateBusinessId();
-  try{
-    // ---------- AIOTEST23: لکھنے سے پہلے، کلاؤڈ پر موجودہ updatedAt چیک کریں —
-    // اگر ہمارے آخری فیچ کے بعد کسی اور فون نے یہاں لکھا ہے تو ابھی مت لکھیں (تصادم!) ----------
-    if(aioLastKnownUpdatedAt[docType] !== undefined){
-      try{
-        const checkRes = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`);
-        if(checkRes && checkRes.ok){
-          const checkDoc = await checkRes.json();
-          const cloudUpdatedAt = parseInt(checkDoc.fields?.updatedAt?.integerValue || '0');
-          if(cloudUpdatedAt && cloudUpdatedAt !== aioLastKnownUpdatedAt[docType]){
-            // ---------- تصادم مل گیا — ہماری تبدیلی مقامی طور پر محفوظ رہے گی (pendingSync=true رہے گا)،
-            // لیکن ابھی کلاؤڈ پر نہیں لکھیں گے۔ پہلے ان کا نیا ڈیٹا لے کر دیکھیں گے ----------
-            AppState.settings[docType + 'PendingSync'] = true;
-            saveToStorage('settings', AppState.settings);
-            try{ notifySyncConflict(docType); }catch(e){}
-            await fetchDocTypeFromCloud(docType, true);
-            return false;
-          }
-        }
-      }catch(e){ /* چیک ناکام ہو تو آگے بڑھ کر معمول کے مطابق لکھ دیں — انٹرنیٹ کا عارضی مسئلہ ہو سکتا ہے */ }
-    }
-    const newUpdatedAt = Date.now();
-    const res = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          json: { stringValue: itemsJSON },
-          nextId: { integerValue: String(meta.nextIdVar()) },
-          updatedAt: { integerValue: String(newUpdatedAt) }
-        }
-      })
-    });
-    const ok = !!(res && res.ok);
-    AppState.settings[docType + 'PendingSync'] = !ok;
-    saveToStorage('settings', AppState.settings);
-    if(ok){ cloudSyncStatus = 'online'; aioLastPushedJSON[docType] = itemsJSON; aioLastKnownUpdatedAt[docType] = newUpdatedAt; }
-    return ok;
-  }catch(e){
-    AppState.settings[docType + 'PendingSync'] = true;
-    saveToStorage('settings', AppState.settings);
-    return false; // ---------- آف لائن — ڈیٹا localStorage میں محفوظ ہو چکا، انٹرنیٹ ملتے ہی خودکار sync ہوگا ----------
-  }
-}
 
 // ---------- AIOTEST23: تصادم کا نرم پیغام — صرف Admin کو، صرف ایک بار فی سیشن فی ٹائپ (بار بار پریشان نہ کریں) ----------
 const aioConflictNotified = {};
@@ -6732,50 +7078,6 @@ function notifySyncConflict(docType){
 
 // ---------- کلاؤڈ سے تازہ ترین ڈیٹا لائیں — Fruit Mandi کا حفاظتی اصول شامل: اگر مقامی ڈیٹا ابھی تک صرف
 // اَن چھوا seed ڈیٹا ہے تو کبھی push نہ کریں (خالی/ڈیفالٹ ڈیٹا کلاؤڈ پر بھیج کر اصل محفوظ شدہ ڈیٹا مٹا سکتا تھا) ----------
-async function fetchDocTypeFromCloud(docType, silent){
-  if(!AIO_MULTIUSER_ENABLED) return false;
-  const meta = aioGetDocTypeMeta(docType);
-  if(!meta) return false;
-  const looksLikeUntouchedSeed = meta.data.length <= meta.seed.length &&
-    meta.data.every(item => meta.seed.some(s => s[meta.matchKey] === item[meta.matchKey] && s[meta.nameKey] === item[meta.nameKey]));
-  if(AppState.settings[docType + 'PendingSync'] && !looksLikeUntouchedSeed){
-    return await pushDocTypeToCloud(docType, meta.data);
-  }
-  try{
-    const bizId = getOrCreateBusinessId();
-    const res = await aioAuthFetch(`businesses/${bizId}/store/${docType}?key=${AIO_FIREBASE_API_KEY}`);
-    if(res.status === 404) return false; // ---------- ابھی تک کبھی کلاؤڈ پر محفوظ نہیں ہوا (بالکل نیا کاروبار) ----------
-    if(!res.ok) return false;
-    const doc = await res.json();
-    const jsonStr = doc.fields?.json?.stringValue;
-    if(!jsonStr) return false;
-    let cloudItems = JSON.parse(jsonStr);
-    if(!Array.isArray(cloudItems)) return false;
-    // ---------- کلاؤڈ میں پرانی نمونے کی چیزیں پڑی ہوں تو واپس نہ آئیں ----------
-    if(docType === 'products' || docType === 'suppliers'){
-      const before = cloudItems.length;
-      cloudItems = stripDemoSeedItems(cloudItems, docType === 'products' ? PRODUCTS_SEED_DATA : SUPPLIERS_SEED_DATA, docType === 'products' ? 'product_id' : 'supplier_id');
-      if(cloudItems.length !== before) AppState.settings[docType + 'PendingSync'] = true;
-    }
-    // ---------- AIOTEST27: payments کی slip تصویر کبھی کلاؤڈ پر نہیں جاتی (سائز کی وجہ سے) — فیچ سے پہلے پرانی مقامی
-    // تصویریں محفوظ کر لیں، ورنہ نیچے والا overwrite اسی فون کی اپنی کھینچی تصویریں بھی مٹا دے گا ----------
-    const oldLocalById = (docType === 'payments') ? new Map(meta.data.map(p => [p.payment_id, p.slip_image])) : null;
-    meta.data = cloudItems;
-    if(oldLocalById){
-      meta.data.forEach(p => { if(!p.slip_image && oldLocalById.has(p.payment_id)) p.slip_image = oldLocalById.get(p.payment_id); });
-    }
-    const cloudNextId = parseInt(doc.fields?.nextId?.integerValue || '0');
-    if(cloudNextId > meta.nextIdVar()) meta.setNextId(cloudNextId);
-    aioLastKnownUpdatedAt[docType] = parseInt(doc.fields?.updatedAt?.integerValue || '0'); // ---------- AIOTEST23: تصادم چیک کے لیے یاد رکھیں ----------
-    aioLastPushedJSON[docType] = jsonStr; // ---------- یہ ابھی تازہ ترین کلاؤڈ حالت ہے، اسے "ہماری آخری push" بھی سمجھیں تاکہ فوری بعد میں دوبارہ push نہ ہو ----------
-    saveToStorage(docType, meta.data);
-    cloudSyncStatus = 'online';
-    if(!silent) applyCloudDocTypeUI(docType);
-    return true;
-  }catch(e){
-    return false; // ---------- آف لائن — موجودہ مقامی فہرست پر ہی کام چلے گا ----------
-  }
-}
 
 // ---------- کلاؤڈ سے نیا ڈیٹا آنے پر متعلقہ سکرین دوبارہ بنائیں ----------
 function applyCloudDocTypeUI(docType){
@@ -6812,25 +7114,9 @@ function applyCloudDocTypeUI(docType){
 // ---------- AIOTEST16: ہر ڈیٹا ٹائپ کی اپنی پولنگ رفتار — Pending Bills تیز (منظوری میں تاخیر قابلِ قبول نہیں)،
 // باقی سب سست (Firebase کی مفت روزانہ حد سب صارفین میں مشترک ہے، اس لیے غیر ضروری تیزی سے بچنا ضروری ہے) ----------
 const CLOUD_POLL_INTERVALS = { pendingbills: 15000, approvalrequests: 15000, default: 45000 };
-function startCloudPolling(){
-  stopCloudPolling();
-  if(!AIO_MULTIUSER_ENABLED) return;
-  CLOUD_DOC_TYPES.forEach(docType => {
-    const interval = CLOUD_POLL_INTERVALS[docType] || CLOUD_POLL_INTERVALS.default;
-    cloudPollTimers[docType] = setInterval(() => { fetchDocTypeFromCloud(docType, false); }, interval);
-  });
-  // ---------- AIOTEST17: کسٹمر آرڈرز کی اپنی الگ subcollection ہے (عام docType نہیں)، اس لیے الگ ٹائمر ----------
-  fetchCustomerOrdersFromCloud();
-  cloudPollTimers['__customerOrders'] = setInterval(fetchCustomerOrdersFromCloud, 20000);
-}
 function stopCloudPolling(){
   Object.keys(cloudPollTimers).forEach(k => { if(cloudPollTimers[k]){ clearInterval(cloudPollTimers[k]); delete cloudPollTimers[k]; } });
 }
-window.addEventListener('online', () => {
-  CLOUD_DOC_TYPES.forEach(docType => {
-    if(AppState?.settings?.[docType + 'PendingSync']) pushDocTypeToCloud(docType, aioGetDocTypeMeta(docType).data);
-  });
-});
 
 
 /* =====================================================================
@@ -7732,7 +8018,7 @@ function proceedToRestoreFilePicker(){
 // ---------- بیک اپ بحال کرتے وقت سیٹنگز (تھیم، پرنٹ، دکان کا نام…) بیک اپ سے آئیں، مگر اس فون کی سبسکرپشن/ٹرائل/
 // ایکٹیویشن اور ڈیوائس کی شناخت کبھی نہ بدلیں — تاکہ AIO (پلے اسٹور) کا بیک اپ AIO Direct میں (یا الٹ) بحال کریں
 // تو ڈیٹا پورا آ جائے مگر یہاں کی ایکٹیویشن خراب نہ ہو، اور کسی دوسرے فون کی سبسکرپشن یہاں نہ آ جائے ----------
-const BACKUP_KEEP_LOCAL_SETTINGS = ['developerUnlock','devAuth','devPanelPasswordHash','deviceRecordPending','deviceUID','freeTrialGranted','isOnFreeTrial','lastActivationCode',
+const BACKUP_KEEP_LOCAL_SETTINGS = ['syncOn','businessId','syncJoined','syncRole','syncSlot','syncWasListed','syncDeviceName','syncDevId','aioFbAuth','developerUnlock','devAuth','devPanelPasswordHash','deviceRecordPending','deviceUID','freeTrialGranted','isOnFreeTrial','lastActivationCode',
   'lifetimeLicense','subscriptionActivatedOn','subscriptionExpiry','subscriptionPlans','subscriptionViaPlayBilling','pendingPlayAcks',
   'trialLockConfirmedOnline','trialReminderShownOn','needsFirstEnter'];
 function restoreSettingsKeepingLicense(backupSettings){
@@ -8187,6 +8473,7 @@ function disableDeveloperUnlock(){
 }
 
 function isSubscriptionActive(){
+  if(linkedShopActive()) return true; // AIO2710TU110: دکان سے جڑا ملازم/دوسرا فون — مالک کی سبسکرپشن پر چلتا ہے
   if(AppState.settings.developerUnlock) return true; // ---------- AIO910FR008: Developer Console سے کھلا فون — کبھی ختم نہیں ----------
   const exp = AppState.settings.subscriptionExpiry;
   if(!exp) return false;
@@ -9289,6 +9576,7 @@ function sendDevChat(channel){
 // ڈیفالٹ 1234 والا اَن چھوا PIN گاہک کو معلوم ہی نہیں ہوتا، اس لیے اس پر PIN اسکرین نہیں آنی چاہیے ----------
 const DEFAULT_ADMIN_PIN_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
 function isPinGateNeeded(){
+  if(aioMultiOn()) return true; // AIO2710TU110: کئی فون — ہر کوئی اپنے PIN سے
   if(AppState.settings.pinLockEnabled === false) return false;
   const admin = usersData.find(u => u.role === 'admin' && u.is_active);
   if(!admin) return false;
@@ -9461,7 +9749,7 @@ async function setupLoginScreen(){
     // ---------- 🎁 ٹرائل بٹن: صرف اسی وقت نظر آئے جب ٹرائل ختم ہو چکا ہو، تاکہ ہوم پیج صاف رہے ----------
     applyLoginMode();
 
-    switchLoginRole('admin');
+    switchLoginRole(aioMultiOn() && AppState.settings.syncRole === 'staff' ? 'salesman' : 'admin');
     populateLoginSalesmanList();
     refreshLoginLockoutUI();
     refreshTouchIdUI(); // ---------- 👆 اگر اس ڈیوائس پر Touch ID پہلے سے فعال ہے تو بٹن دکھائیں ----------
@@ -10629,7 +10917,7 @@ function initQuickDockDrag(){
   });
 }
 
-// ===================== ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
+// ===================== ⌨️ AIO2710TU110: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
 // یوسف بھائی کا مشورہ: کمپیوٹر پر کام تیز ہو — ہر صارف اپنی مرضی کی کی خود رکھے تاکہ یاد رہے۔
 // صرف اسی کمپیوٹر پر محفوظ (kbShortcuts)؛ بیک اپ/کلاؤڈ میں نہیں۔ فون پر بٹن/کارڈ چھپے رہتے ہیں۔
 function isPcDevice(){
@@ -12786,7 +13074,7 @@ function endCustomerSelection(){
 
 // ---------- Render Cart Table + Totals ----------
 let billingDraftCustomerRestored = false;
-// ===================== ✏️ AIO2710TU109: بنے/پرنٹ شدہ بل میں ترمیم =====================
+// ===================== ✏️ AIO2710TU110: بنے/پرنٹ شدہ بل میں ترمیم =====================
 // بل بلنگ میں کھلتا ہے — آئٹم، ریٹ، مقدار، گاہک، ڈسکاؤنٹ ٹھیک کریں، پھر Complete۔ وہی بل نمبر رہتا ہے؛
 // پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس ہو کر نیا اثر لگتا ہے۔ Complete سے پہلے پرانا بل جوں کا توں رہتا ہے۔
 let billEdit = loadFromStorage('billEditDraft', null); // {invoice_id, invoice_no}
@@ -12947,7 +13235,7 @@ function renderCart(){
   // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
   const custIdForBalance = document.getElementById('customerSelect')?.value;
   const customerForBalance = custIdForBalance ? customersData.find(c => c.customer_id == custIdForBalance) : null;
-  const previousBalance = customerForBalance ? Math.max(0, balanceExcludingEditedBill(customerForBalance)) : 0; // ✏️ AIO2710TU109: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
+  const previousBalance = customerForBalance ? Math.max(0, balanceExcludingEditedBill(customerForBalance)) : 0; // ✏️ AIO2710TU110: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
   const combinedTotal = grandTotal + previousBalance; // ---------- یہی اصل رقم ہے جو کسٹمر پر واجب ہے، Received/Balance Due/Change اسی کے خلاف حساب ہوں گے ----------
 
   document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(2).replace(/\.00$/, '')}`;
@@ -13248,7 +13536,7 @@ function generateBillNumbers(){
   return {
     daily_bill_no,
     monthly_bill_no,
-    invoice_no: `Bill#${daily_bill_no}/${monthly_bill_no}`
+    invoice_no: `Bill#${daily_bill_no}/${monthly_bill_no}` + (aioMultiOn() && syncSlot() > 0 ? '-' + syncSlot() : '')
   };
 }
 
@@ -13306,7 +13594,7 @@ function finalizeInvoice(){
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
-  const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU109: 2939.919999 نہیں، 2939.92
+  const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU110: 2939.919999 نہیں، 2939.92
   const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
@@ -13346,8 +13634,8 @@ function finalizeInvoice(){
     }
   }
 
-  // ---------- سیلزمین کا بل براہ راست فائنل نہیں ہوتا — پہلے ایڈمن کی منظوری درکار ہے ----------
-  if(AppState.currentRole === 'salesman'){
+  // ---------- AIO2710TU110: ملازم کا بل سیدھا بنتا ہے (مالک بل ہسٹری میں دیکھتا ہے)؛ مالک نے «منظوری» آن کی ہو تو پہلے منظوری ----------
+  if(AppState.currentRole === 'salesman' && staffBillsNeedApproval()){
     submitBillForApproval(customer, method, grandTotal, taxPercent, taxAmount);
     return;
   }
@@ -15558,7 +15846,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU109: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU110: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -22090,7 +22378,7 @@ function confirmBatchReturn(invoiceId){
   const picks = [];
   for(const idx of selectedIdx){
     const item = inv.items[idx];
-    const qty = parseFloat(document.getElementById(`retQty_${idx}`).value) || 0; // AIO2710TU109: 1.5 کلو وغیرہ بھی
+    const qty = parseFloat(document.getElementById(`retQty_${idx}`).value) || 0; // AIO2710TU110: 1.5 کلو وغیرہ بھی
     const amount = parseFloat(document.getElementById(`retAmt_${idx}`).value) || 0;
     if(qty <= 0 || qty > item.qty){ alert(`Please enter a valid quantity for "${item.name}" (max ${item.qty}).`); return; }
     if(amount < 0){ alert(`Please enter a valid refund amount for "${item.name}".`); return; }
@@ -22114,7 +22402,7 @@ function confirmBatchReturn(invoiceId){
     returnedNames.push(`${item.name} (${qty})`);
   });
 
-  // ---------- AIO2710TU109: بل کی رقم ابھی باقی (ادھار) ہو تو واپسی پہلے اسی بقایہ سے کٹے — گاہک کو نقد نہ دیں جو اس نے دیا ہی نہیں ----------
+  // ---------- AIO2710TU110: بل کی رقم ابھی باقی (ادھار) ہو تو واپسی پہلے اسی بقایہ سے کٹے — گاہک کو نقد نہ دیں جو اس نے دیا ہی نہیں ----------
   let offsetFromDue = 0;
   const dueCustomer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
   if(dueCustomer && (inv.amount_due || 0) > 0){
@@ -24285,7 +24573,7 @@ function adminVoidBill(invoiceId){
 // ---------- AIOTEST25: adminVoidBill کے confirm/alert سے الگ کر کے — تاکہ یہی اصل حساب کتاب Salesman کی منظور شدہ
 // Delete درخواست پر بھی چل سکے (وہاں دوبارہ پوچھنے کی ضرورت نہیں، Admin پہلے ہی Approve دبا چکا ہے) ----------
 function executeVoidBill(inv){
-  // ---------- AIO2710TU109: ایڈٹ والا درست حساب — اسٹاک، نقد (جزوی ادائیگی سمیت)، بقایہ، والٹ سب پہلے جیسا ----------
+  // ---------- AIO2710TU110: ایڈٹ والا درست حساب — اسٹاک، نقد (جزوی ادائیگی سمیت)، بقایہ، والٹ سب پہلے جیسا ----------
   if(!(inv.items || []).some(it => it.returned)){ reverseInvoiceForEdit(inv, 'deleted'); inv.status = 'voided'; return; }
   // ---------- اسٹاک واپس کریں — بل کے ہر آئٹم کی مقدار اسٹاک میں دوبارہ شامل کریں ----------
   inv.items.forEach(item => restoreStockForItem(item, item.qty)); // AIO1310TU035
@@ -26729,6 +27017,140 @@ function renderLastBackupStatus(){
 }
 
 // ---------- ☁️ Cloud Sync سیٹنگز کارڈ کو موجودہ Business Code/Status سے بھریں ----------
+
+// ===================== 👥 AIO2710TU110: Staff & Devices — کارڈ، جوڑنا، نکالنا =====================
+const SYNC_SEED_STAFF_PINS = ['0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c','edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9']; // نمونہ: 1111، 2222
+function mdEsc(v){ return String(v == null ? '' : v).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function mdAgo(ms){ if(!ms) return '—'; const m = Math.round((Date.now() - ms) / 60000); return m < 1 ? 'online now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : Math.round(m / 1440) + ' day(s) ago'; }
+function renderStaffDevicesCard(){
+  const el = document.getElementById('staffDevicesCard'); if(!el) return;
+  const s = AppState.settings;
+  if(!aioMultiOn()){
+    el.innerHTML = `<h3>👥 Staff &amp; Devices</h3>
+      <div class="settingsHint">Run your shop on <b>more phones and PCs with the same data</b> — you and your staff each log in with your own PIN. Bills, stock, customers and payments update on every device.</div>
+      <div class="mdSteps">1️⃣ Turn on here (this device becomes the owner's device)<br>2️⃣ Add your staff and their PINs (👤 Users)<br>3️⃣ On the other phone/PC: login screen → <b>🔗 Join a shop</b> → Shop Code + PIN</div>
+      <button type="button" class="mdBigBtn" onclick="enableMultiDevice()">📲 Turn on Multi-Device</button>`;
+    return;
+  }
+  const map = {connecting:'🔄 Connecting…', online:'✅ Connected — data is syncing', offline:'⚪ Offline — will sync when internet returns', error:'⚠️ Sync problem — check internet'};
+  const stCol = cloudSyncStatus === 'online' ? 'var(--success,#15803d)' : cloudSyncStatus === 'error' ? 'var(--danger,#dc2626)' : '#64748b';
+  const me = syncDeviceUid(), owner = !s.syncJoined, sh = shopInfo();
+  const devs = devicesData.slice().sort((a, b) => (a.slot || 0) - (b.slot || 0));
+  const devHtml = devs.length ? devs.map(d => `<div class="mdDev">
+      <span class="mdIco">${d.role === 'owner' || d.role === 'owner2' ? '👑' : '🧑‍💼'}</span>
+      <span class="mdTxt">${mdEsc(d.name || 'Device')} ${d.uid === me ? '<span class="mdTag">This device</span>' : ''}<small>${d.role === 'owner' ? 'Owner (main)' : d.role === 'owner2' ? 'Owner — 2nd device' : 'Staff'}${d.user ? ' • ' + mdEsc(d.user) : ''} • ${mdAgo(d.last_seen)}${d.slot ? ' • bills end with -' + d.slot : ''}</small></span>
+      ${owner && d.uid !== me ? `<button type="button" onclick="removeShopDevice('${mdEsc(d.uid)}')">✖ Remove</button>` : ''}
+    </div>`).join('') : '<div class="settingsHint">No devices yet.</div>';
+  el.innerHTML = `<h3>👥 Staff &amp; Devices</h3>
+    <div class="mdStatus" style="color:${stCol};">${map[cloudSyncStatus] || ''}</div>
+    ${owner ? `<div class="settingsSubLabel" style="margin-top:0;">Shop Code — give this to your staff</div>
+    <div class="mdCode"><b>${mdEsc(s.businessId)}</b></div>
+    <div class="mdRow2"><button type="button" class="mdBigBtn ghost" onclick="copyShopCode()">📋 Copy</button><button type="button" class="mdBigBtn ghost" onclick="shareShopCode()">📤 WhatsApp</button></div>
+    <div class="mdSteps">On the other phone/PC: open the app → login screen → <b>🔗 Join a shop</b> → enter this code and the person's own PIN.</div>
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; margin:8px 0;"><input type="checkbox" ${sh.staffApproval ? 'checked' : ''} onchange="setStaffApproval(this.checked)" style="width:18px; height:18px; margin:0;"> Staff bills need my approval first</label>
+    <button type="button" class="mdBigBtn" onclick="goTo('users')">👤 Add / manage staff &amp; their screens</button>`
+    : `<div class="settingsHint">This device is connected to <b>${mdEsc(sh.businessName || 'the shop')}</b> (${s.syncRole === 'owner2' ? 'owner — 2nd device' : 'staff'}).</div>`}
+    <div class="settingsSubLabel">Devices (${devs.length})</div>
+    ${devHtml}
+    <div class="mdRow2" style="margin-top:6px;"><button type="button" class="mdBigBtn ghost" onclick="syncNow(); showNavToast('🔄 Syncing…')">🔄 Sync now</button>
+    <button type="button" class="mdBigBtn danger" onclick="${owner ? 'turnOffMultiDevice()' : 'leaveShop()'}">${owner ? 'Turn off' : 'Leave shop'}</button></div>`;
+}
+async function enableMultiDevice(){
+  if(AppState.currentRole && AppState.currentRole !== 'admin'){ alert('Only the owner can turn this on.'); return; }
+  const admin = usersData.find(u => u.role === 'admin' && u.is_active);
+  if(!admin || (admin.pin === DEFAULT_ADMIN_PIN_HASH && AppState.settings.pinLockUserSet !== true)){
+    alert('First set your own Admin PIN — on every device each person logs in with a PIN.');
+    try{ openActivatePinLockModal(); }catch(e){}
+    return;
+  }
+  for(let i = usersData.length - 1; i >= 0; i--){ const u = usersData[i]; if(u.role !== 'admin' && SYNC_SEED_STAFF_PINS.includes(u.pin) && ['Aslam Bhai','Bilal'].includes(u.name)) usersData.splice(i, 1); } // نمونے کے ملازم (1111/2222) کبھی نہیں
+  if(!confirm('Turn on Multi-Device?\n\nThis device becomes the owner\'s device. Your shop data is copied to the secure cloud so your other phones/PCs and staff can use it.\nEveryone will log in with a PIN.')) return;
+  const s = AppState.settings;
+  s.businessId = ''; getOrCreateBusinessId();
+  s.syncOn = true; s.syncJoined = false; s.syncSlot = 0; s.syncRole = 'owner'; s.syncWasListed = false;
+  s.syncDeviceName = s.syncDeviceName || (typeof isPcDevice === 'function' && isPcDevice() ? 'Owner PC' : 'Owner phone');
+  saveToStorage('settings', s); saveToStorage('syncKnown', {}); await syncBaseClearAll();
+  refreshMultiFlag(); cloudSyncStatus = 'connecting'; renderStaffDevicesCard();
+  const tok = await aioEnsureAuth();
+  if(!tok){ s.syncOn = false; saveToStorage('settings', s); refreshMultiFlag(); renderStaffDevicesCard(); alert('Could not connect — please check the internet and try again.'); return; }
+  syncPushShopInfo(); syncTouchMyDevice(true); startCloudPolling();
+  setTimeout(renderStaffDevicesCard, 2500);
+  showNavToast('✅ Multi-Device is on');
+}
+function turnOffMultiDevice(){
+  if(!confirm('Turn off Multi-Device on this device?\n\nYour data stays on this device. Other devices will stop getting updates from it.')) return;
+  syncDisconnect(false); renderStaffDevicesCard();
+}
+function leaveShop(){
+  if(!confirm('Leave this shop?\n\nThe shop\'s data will be removed from this device.')) return;
+  devicesData = devicesData.filter(d => d.uid !== syncDeviceUid()); saveToStorage('syncDevices', devicesData);
+  syncNow().finally(() => { syncDisconnect(true); location.reload(); });
+}
+function removeShopDevice(uid){
+  const d = devicesData.find(x => x.uid === uid); if(!d) return;
+  if(!confirm(`Remove "${d.name || 'this device'}" from your shop?\n\nIt will be disconnected and the shop data removed from it.`)) return;
+  devicesData = devicesData.filter(x => x.uid !== uid); saveToStorage('syncDevices', devicesData);
+  renderStaffDevicesCard(); scheduleSync(300);
+}
+function setStaffApproval(on){
+  const cur = shopInfo(); shopInfoData = [Object.assign({}, cur, {id:'shop', staffApproval: !!on})];
+  saveToStorage('syncShopInfo', shopInfoData); scheduleSync(300);
+  showNavToast(on ? 'Staff bills will wait for your approval' : 'Staff bills are saved directly');
+}
+function copyShopCode(){ const c = AppState.settings.businessId || ''; try{ navigator.clipboard.writeText(c); showNavToast('📋 Shop Code copied'); }catch(e){ prompt('Shop Code', c); } }
+function shareShopCode(){
+  const c = AppState.settings.businessId || '';
+  const t = `🔗 Join our shop on the app\n\nShop Code: ${c}\n\nOpen the app → login screen → "Join a shop" → enter this code and your PIN.`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+function openJoinShopModal(code){
+  document.getElementById('joinShopCode').value = code ? String(code).trim().toUpperCase() : '';
+  document.getElementById('joinShopPin').value = '';
+  document.getElementById('joinShopDevName').value = AppState.settings.syncDeviceName || (typeof isPcDevice === 'function' && isPcDevice() ? 'Counter PC' : '');
+  document.getElementById('joinShopMsg').textContent = '';
+  document.getElementById('joinShopModal').classList.add('show');
+}
+function closeJoinShopModal(){ document.getElementById('joinShopModal').classList.remove('show'); }
+function joinMsg(t, ok){ const m = document.getElementById('joinShopMsg'); m.style.color = ok ? 'var(--success,#15803d)' : '#b91c1c'; m.textContent = t; }
+async function doJoinShop(){
+  const code = document.getElementById('joinShopCode').value.trim().toUpperCase().replace(/\s+/g, '');
+  const pin = document.getElementById('joinShopPin').value.trim();
+  const name = document.getElementById('joinShopDevName').value.trim();
+  if(!/^BIZ-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)){ joinMsg('Please check the Shop Code (BIZ-XXXX-XXXX-XXXX)'); return; }
+  if(pin.length < 4){ joinMsg('Please enter your PIN'); return; }
+  const hasData = (invoicesData || []).length > 0 || (productsData || []).length > 0;
+  if(hasData && !confirm('This device already has its own data.\nJoining will REPLACE it with the shop\'s data (take a backup first if you need it).\n\nContinue?')) return;
+  const btn = document.getElementById('joinShopBtn'); btn.disabled = true; joinMsg('⏳ Connecting…', true);
+  const s = AppState.settings, prev = {businessId: s.businessId, syncOn: s.syncOn};
+  const revert = (t) => { s.businessId = prev.businessId; s.syncOn = prev.syncOn; saveToStorage('settings', s); refreshMultiFlag(); btn.disabled = false; joinMsg(t); };
+  try{
+    s.businessId = code; s.syncOn = true; refreshMultiFlag();
+    if(!(await aioEnsureAuth())) return revert('No internet — could not connect');
+    const u = await syncGetChunk('users');
+    if(u === null) return revert('No internet — could not connect');
+    if(u.missing || !u.items.length) return revert('Shop not found — please check the code with the owner');
+    const h = await hashPin(pin);
+    const user = u.items.find(x => x.pin === h && x.is_active !== false && !(x.role !== 'admin' && SYNC_SEED_STAFF_PINS.includes(x.pin)));
+    if(!user) return revert('PIN not matched — use your own PIN set by the owner');
+    const dv = await syncGetChunk('devices'); const devs = (dv && dv.items) || [];
+    const sh = await syncGetChunk('shopinfo'); const shop = ((sh && sh.items) || []).find(x => x.id === 'shop') || {};
+    const mine = devs.find(d => d.uid === syncDeviceUid());
+    if(!mine && shop.maxDevices && devs.length >= shop.maxDevices) return revert(`Your package allows ${shop.maxDevices} devices — ask the owner to remove one or upgrade`);
+    const slot = mine ? (mine.slot || 1) : (Math.max(0, ...devs.map(d => d.slot || 0)) + 1);
+    syncWipeLocalBusinessData(); await syncBaseClearAll();
+    s.syncJoined = true; s.syncRole = user.role === 'admin' ? 'owner2' : 'staff'; s.syncSlot = slot; s.syncWasListed = false;
+    s.syncDeviceName = name || (user.role === 'admin' ? 'Owner device ' + slot : user.name + "'s device");
+    saveToStorage('settings', s); refreshMultiFlag();
+    joinMsg('⏳ Loading the shop\'s data…', true);
+    await syncNow();
+    AppState.currentUser = AppState.currentUser || {name: user.name};
+    syncTouchMyDevice(true); await syncNow();
+    syncFixCounters(); persistAllData();
+    joinMsg('✅ Connected!', true);
+    setTimeout(() => { alert(`✅ Connected to ${shop.businessName || 'the shop'}.\nLog in with your PIN.`); location.reload(); }, 300);
+  }catch(e){ revert('Could not connect — ' + (e && e.message || e)); }
+}
+
 function renderCloudSyncCard(){
   const codeEl = document.getElementById('businessCodeDisplay');
   const statusEl = document.getElementById('cloudSyncStatusLine');
@@ -26778,6 +27200,7 @@ function hubCopyBusinessCode(){
 
 function renderSettingsScreen(){
   renderCloudSyncCard();
+  try{ renderStaffDevicesCard(); }catch(e){}
   renderStorageUsage();
   renderLastBackupStatus();
   syncPinLockUI();
@@ -31597,9 +32020,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU109';
+  const APP_VERSION = 'AIO2710TU110';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Edit Bill no longer adds the same bill twice to Previous Balance; amounts show paisa (2939.92); returns reduce pending balance first; delete reverses partial payments';
+  const UPDATE_NOTE = 'Multi-Device: same shop data on several phones/PCs — owner and staff log in with their own PIN (Settings → Staff & Devices)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -31716,7 +32139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 "Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
 <div id="printReceiptArea"></div>
 <script>
-/* 👁️ (ہر PIN/پاس ورڈ خانہ) AIO2710TU109: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+/* 👁️ (ہر PIN/پاس ورڈ خانہ) AIO2710TU110: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
    جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
 (function(){
   var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -31730,7 +32153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.style.cssText = 'position:relative; display:block; margin:' + cs.marginTop + ' ' + cs.marginRight + ' ' + cs.marginBottom + ' ' + cs.marginLeft + ';';
     var pd = inp.parentElement ? getComputedStyle(inp.parentElement).display : '';
     if(/flex|grid/.test(pd)){ wrap.style.flex = cs.flexGrow + ' ' + cs.flexShrink + ' ' + cs.flexBasis; wrap.style.minWidth = '0'; wrap.style.alignSelf = cs.alignSelf; }
-    else if(/inline/.test(cs.display) && !/100%/.test(inp.style.width || '')){ wrap.style.display = 'inline-block'; wrap.style.verticalAlign = 'middle'; }
+    else if(/inline/.test(cs.display) && (/px/.test(inp.style.width || '') || (inp.offsetWidth > 0 && inp.parentElement && inp.offsetWidth < inp.parentElement.clientWidth * 0.9))){ wrap.style.display = 'inline-block'; wrap.style.verticalAlign = 'middle'; }
     inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
     inp.style.margin = '0'; inp.style.boxSizing = 'border-box';
     var rtl = cs.direction === 'rtl';
@@ -31776,5 +32199,24 @@ document.addEventListener('DOMContentLoaded', () => {
   try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
 })();
 </script>
+    <!-- AIO2710TU110: 🔗 دکان سے جڑیں — ملازم یا مالک کا دوسرا فون/PC -->
+    <div class="modalOverlay" id="joinShopModal" style="z-index:100050;" onclick="if(event.target===this) closeJoinShopModal()">
+      <div class="modalBox" style="max-width:420px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+          <h3 style="margin:0;">🔗 Join a shop</h3>
+          <span class="closeBtn" onclick="closeJoinShopModal()" style="cursor:pointer; font-size:18px; font-weight:900;">✖</span>
+        </div>
+        <div class="settingsHint" style="margin:6px 0 10px;">Use the same shop data on this phone/PC. Ask the owner for the <b>Shop Code</b> (Settings → 👥 Staff &amp; Devices), then enter your own PIN.</div>
+        <label class="mdLbl">Shop Code</label>
+        <input type="text" id="joinShopCode" class="mdInput" placeholder="BIZ-XXXX-XXXX-XXXX" autocomplete="off" style="text-transform:uppercase; letter-spacing:1px; text-align:center; font-weight:800;">
+        <label class="mdLbl">Your PIN (owner or staff)</label>
+        <input type="password" id="joinShopPin" class="mdInput" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align:center; letter-spacing:4px;">
+        <label class="mdLbl">Name of this device</label>
+        <input type="text" id="joinShopDevName" class="mdInput" placeholder="e.g. Counter PC / Ali's phone">
+        <div id="joinShopMsg" style="min-height:18px; font-size:12.5px; font-weight:800; text-align:center; margin:6px 0;"></div>
+        <button type="button" class="mdBigBtn" id="joinShopBtn" onclick="doJoinShop()">🔗 Connect</button>
+      </div>
+    </div>
+
 </body>
 </html>
