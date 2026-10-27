@@ -1378,13 +1378,13 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
-  /* ✏️ AIO2710TU106: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
+  /* ✏️ AIO2710TU107: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
   .editBillBanner{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px; padding:10px 12px; border-radius:14px; background:linear-gradient(180deg,#fff7ed,#ffedd5); border:2px solid #fb923c; color:#9a3412; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(251,146,60,.25);}
   .editBillBanner .ebTxt{flex:1; min-width:200px; line-height:1.4;}
   .editBillBanner .ebTxt small{display:block; font-weight:600; color:#c2410c; font-size:11.5px;}
   .editBillBanner button{border:1.5px solid #fdba74; background:#fff; color:#b91c1c; border-radius:999px; padding:7px 14px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:inherit;}
   .btnEditBill{background:linear-gradient(180deg,#fb923c,#ea580c) !important; color:#fff !important;}
-  /* ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
+  /* ⌨️ AIO2710TU107: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
   .pcOnly{display:none !important;}
   html.isPC .pcOnly{display:revert !important;}
   html.isPC .pcOnly.pcFlex{display:flex !important;}
@@ -2957,7 +2957,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <!-- ---------- AIO2710TU106: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <!-- ---------- AIO2710TU107: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
     <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
@@ -3009,7 +3009,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU106</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU107</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3226,7 +3226,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU106</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU107</span>
     </div>
   </div>
 
@@ -4555,7 +4555,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
-    <!-- ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
+    <!-- ⌨️ AIO2710TU107: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
     <div class="modalOverlay" id="shortcutsModal" onclick="if(event.target===this) closeShortcutsModal()">
       <div class="modalBoxWide kbWrap">
         <div class="kbHead">
@@ -5673,7 +5673,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           </div>
         </div>
 
-        <!-- --- ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
+        <!-- --- ⌨️ AIO2710TU107: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
         <div class="settingsCard pcOnly" id="settingsCardShortcuts">
           <h3>⌨️ Keyboard Shortcuts <span style="font-size:11px; font-weight:800; color:#fff; background:var(--primary,#0f766e); padding:2px 8px; border-radius:999px; vertical-align:middle;">PC</span></h3>
           <div class="settingsHint">Work faster on a computer — choose your own key for each action (billing, search, complete &amp; print, screens). Saved on this computer only.</div>
@@ -10629,7 +10629,7 @@ function initQuickDockDrag(){
   });
 }
 
-// ===================== ⌨️ AIO2710TU106: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
+// ===================== ⌨️ AIO2710TU107: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
 // یوسف بھائی کا مشورہ: کمپیوٹر پر کام تیز ہو — ہر صارف اپنی مرضی کی کی خود رکھے تاکہ یاد رہے۔
 // صرف اسی کمپیوٹر پر محفوظ (kbShortcuts)؛ بیک اپ/کلاؤڈ میں نہیں۔ فون پر بٹن/کارڈ چھپے رہتے ہیں۔
 function isPcDevice(){
@@ -12786,7 +12786,7 @@ function endCustomerSelection(){
 
 // ---------- Render Cart Table + Totals ----------
 let billingDraftCustomerRestored = false;
-// ===================== ✏️ AIO2710TU106: بنے/پرنٹ شدہ بل میں ترمیم =====================
+// ===================== ✏️ AIO2710TU107: بنے/پرنٹ شدہ بل میں ترمیم =====================
 // بل بلنگ میں کھلتا ہے — آئٹم، ریٹ، مقدار، گاہک، ڈسکاؤنٹ ٹھیک کریں، پھر Complete۔ وہی بل نمبر رہتا ہے؛
 // پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس ہو کر نیا اثر لگتا ہے۔ Complete سے پہلے پرانا بل جوں کا توں رہتا ہے۔
 let billEdit = loadFromStorage('billEditDraft', null); // {invoice_id, invoice_no}
@@ -15536,7 +15536,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU106: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU107: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -31561,9 +31561,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU106';
+  const APP_VERSION = 'AIO2710TU107';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = '✏️ Edit Bill: fix items, rates, quantity or customer of a completed bill — same bill number, stock and balance corrected';
+  const UPDATE_NOTE = 'Eye button on password boxes — tap to show, tap again to hide';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -31679,5 +31679,46 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- ---------- Android کا اپنا Print Service نظام (RawBT، Sunmi کا پرنٹر پلگ ان، WiFi/USB پرنٹر ڈرائیورز،
 "Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
 <div id="printReceiptArea"></div>
+<script>
+/* 👁️ AIO2710TU107: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+   جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
+(function(){
+  var IDS = ["devConsolePass", "devConsoleNewPass", "devConsoleNewPass2"];
+  var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var EYE = SVG + '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var EYE_OFF = SVG + '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+  function attach(inp){
+    if(!inp || inp.getAttribute('data-pw-eye')) return;
+    inp.setAttribute('data-pw-eye', '1');
+    var cs = getComputedStyle(inp);
+    var wrap = document.createElement('span');
+    wrap.style.cssText = 'position:relative; display:block; margin-top:' + cs.marginTop + '; margin-bottom:' + cs.marginBottom + ';';
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    inp.style.marginTop = '0'; inp.style.marginBottom = '0'; inp.style.boxSizing = 'border-box';
+    var rtl = cs.direction === 'rtl';
+    inp.style[rtl ? 'paddingLeft' : 'paddingRight'] = '48px';
+    if(cs.textAlign === 'center') inp.style[rtl ? 'paddingRight' : 'paddingLeft'] = '48px';
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.style.cssText = 'position:absolute; top:50%; transform:translateY(-50%); ' + (rtl ? 'left' : 'right') + ':6px; width:38px; height:38px; border:none; border-radius:50%; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; margin:0; -webkit-tap-highlight-color:transparent;';
+    function paint(){
+      var shown = inp.type === 'text';
+      b.innerHTML = shown ? EYE_OFF : EYE;
+      b.title = shown ? 'Hide password — پاس ورڈ چھپائیں' : 'Show password — پاس ورڈ دکھائیں';
+      b.setAttribute('aria-label', b.title);
+      b.setAttribute('aria-pressed', shown ? 'true' : 'false');
+      b.style.color = shown ? '#0f766e' : '#64748b';
+      b.style.background = shown ? 'rgba(15,118,110,.12)' : 'transparent';
+    }
+    b.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); inp.type = inp.type === 'password' ? 'text' : 'password'; paint(); try{ inp.focus(); }catch(_){} });
+    paint();
+    wrap.appendChild(b);
+  }
+  var queued = false;
+  function scan(){ queued = false; IDS.forEach(function(id){ var list = document.querySelectorAll('[id="' + id + '"]'); for(var i = 0; i < list.length; i++) attach(list[i]); }); }
+  scan();
+  try{ new MutationObserver(function(){ if(!queued){ queued = true; requestAnimationFrame(scan); } }).observe(document.documentElement, {childList:true, subtree:true}); }catch(e){}
+})();
+</script>
 </body>
 </html>
