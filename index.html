@@ -1378,13 +1378,13 @@
   .cbAmt.poPend b{color:#0f172a;} .cbAmt.poPend small{color:#c2410c;}
   .billActions.cbActs .btnReceiveShipment{background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:none;}
   .poPickRow{cursor:pointer;}
-  /* ✏️ AIO2710TU108: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
+  /* ✏️ AIO2710TU109: بنے ہوئے بل میں ترمیم — بلنگ اور کارٹ کے اوپر واضح پٹی */
   .editBillBanner{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px; padding:10px 12px; border-radius:14px; background:linear-gradient(180deg,#fff7ed,#ffedd5); border:2px solid #fb923c; color:#9a3412; font-size:13px; font-weight:800; box-shadow:0 3px 10px rgba(251,146,60,.25);}
   .editBillBanner .ebTxt{flex:1; min-width:200px; line-height:1.4;}
   .editBillBanner .ebTxt small{display:block; font-weight:600; color:#c2410c; font-size:11.5px;}
   .editBillBanner button{border:1.5px solid #fdba74; background:#fff; color:#b91c1c; border-radius:999px; padding:7px 14px; font-weight:800; font-size:12.5px; cursor:pointer; font-family:inherit;}
   .btnEditBill{background:linear-gradient(180deg,#fb923c,#ea580c) !important; color:#fff !important;}
-  /* ⌨️ AIO2710TU108: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
+  /* ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر (html.isPC)؛ فون پر یہ بٹن/کارڈ کبھی نظر نہیں آتے */
   .pcOnly{display:none !important;}
   html.isPC .pcOnly{display:revert !important;}
   html.isPC .pcOnly.pcFlex{display:flex !important;}
@@ -2957,7 +2957,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div id="devConsoleErr" style="display:none; color:var(--danger,#dc2626); font-size:12px; font-weight:700; text-align:center; margin-bottom:8px;">❌ Wrong password</div>
       <button type="button" id="devConsoleBtn" onclick="submitDevConsolePass()" style="width:100%; padding:11px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800; font-size:14px; cursor:pointer;">Unlock</button>
     </div>
-    <!-- ---------- AIO2710TU108: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
+    <!-- ---------- AIO2710TU109: پاسورڈ کے بعد کیپسول بٹن — جو دبائیں صرف وہی حصہ کھلے ---------- -->
     <div id="devConsoleOpen" data-dev-root style="display:none; max-height:72vh; overflow-y:auto;">
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
@@ -3009,7 +3009,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU108</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU109</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3226,7 +3226,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU108</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU109</span>
     </div>
   </div>
 
@@ -4555,7 +4555,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
 
-    <!-- ⌨️ AIO2710TU108: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
+    <!-- ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس — ہر کام کی اپنی مرضی کی کی (صرف PC) -->
     <div class="modalOverlay" id="shortcutsModal" onclick="if(event.target===this) closeShortcutsModal()">
       <div class="modalBoxWide kbWrap">
         <div class="kbHead">
@@ -5673,7 +5673,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           </div>
         </div>
 
-        <!-- --- ⌨️ AIO2710TU108: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
+        <!-- --- ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس — صرف PC/لیپ ٹاپ پر نظر آتا ہے --- -->
         <div class="settingsCard pcOnly" id="settingsCardShortcuts">
           <h3>⌨️ Keyboard Shortcuts <span style="font-size:11px; font-weight:800; color:#fff; background:var(--primary,#0f766e); padding:2px 8px; border-radius:999px; vertical-align:middle;">PC</span></h3>
           <div class="settingsHint">Work faster on a computer — choose your own key for each action (billing, search, complete &amp; print, screens). Saved on this computer only.</div>
@@ -10629,7 +10629,7 @@ function initQuickDockDrag(){
   });
 }
 
-// ===================== ⌨️ AIO2710TU108: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
+// ===================== ⌨️ AIO2710TU109: کی بورڈ شارٹ کٹس (صرف PC/لیپ ٹاپ) =====================
 // یوسف بھائی کا مشورہ: کمپیوٹر پر کام تیز ہو — ہر صارف اپنی مرضی کی کی خود رکھے تاکہ یاد رہے۔
 // صرف اسی کمپیوٹر پر محفوظ (kbShortcuts)؛ بیک اپ/کلاؤڈ میں نہیں۔ فون پر بٹن/کارڈ چھپے رہتے ہیں۔
 function isPcDevice(){
@@ -12786,7 +12786,7 @@ function endCustomerSelection(){
 
 // ---------- Render Cart Table + Totals ----------
 let billingDraftCustomerRestored = false;
-// ===================== ✏️ AIO2710TU108: بنے/پرنٹ شدہ بل میں ترمیم =====================
+// ===================== ✏️ AIO2710TU109: بنے/پرنٹ شدہ بل میں ترمیم =====================
 // بل بلنگ میں کھلتا ہے — آئٹم، ریٹ، مقدار، گاہک، ڈسکاؤنٹ ٹھیک کریں، پھر Complete۔ وہی بل نمبر رہتا ہے؛
 // پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس ہو کر نیا اثر لگتا ہے۔ Complete سے پہلے پرانا بل جوں کا توں رہتا ہے۔
 let billEdit = loadFromStorage('billEditDraft', null); // {invoice_id, invoice_no}
@@ -12811,9 +12811,8 @@ function startEditBill(invoiceId){
     }
     const sel = document.getElementById('customerSelect');
     if(sel){ sel.value = inv.customer_id || ''; try{ onCustomerChange(); }catch(e){} }
-    const d = document.getElementById('discountInput'); if(d) d.value = inv.discount || 0;
-    const r = document.getElementById('amountReceivedInput'); if(r) r.value = inv.cash_received_now > 0 ? inv.cash_received_now : '';
-  }
+    fillEditPaymentFields(inv, true);
+  } else fillEditPaymentFields(inv, false);
   try{ document.getElementById('invoicePreviewModal').classList.remove('show'); currentPreviewInvoiceId = null; }catch(e){}
   goTo('billing');
   renderCart(); try{ renderBillingProductGrid(); }catch(e){}
@@ -12829,30 +12828,52 @@ function cancelEditBill(){
 function renderEditBillBanner(){
   const inv = editingInvoice();
   if(billEdit && !inv){ billEdit = null; saveToStorage('billEditDraft', null); }
+  if(inv && !billEditFieldsFilled) fillEditPaymentFields(inv, false);
   document.querySelectorAll('.editBillBanner').forEach(el => {
     el.style.display = inv ? 'flex' : 'none';
     if(inv) el.innerHTML = `<span class="ebTxt">✏️ Editing ${String(inv.invoice_no).replace(/</g,'&lt;')}<small>Fix items, rates, quantity or customer — then tap Complete. Same bill number is kept.</small></span><button type="button" onclick="cancelEditBill()">✖ Cancel edit</button>`;
   });
 }
 // ---------- پرانے بل کا اثر واپس — اسٹاک، نقد، گاہک کا بقایہ اور والٹ (Complete پر، نیا بل لگنے سے پہلے) ----------
-function reverseInvoiceForEdit(inv){
+// ---------- اسی بل کے بغیر گاہک کا بقایہ — ایڈٹ میں Previous Balance اور پریویو کے لیے ----------
+function invoiceReceivableDelta(inv){
+  const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
+  return wasCounterCash ? 0 : ((inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0));
+}
+function balanceExcludingEditedBill(customer){
+  if(!customer) return 0;
+  let bal = customer.total_receivable || 0;
+  const inv = editingInvoice();
+  if(inv && inv.customer_id === customer.customer_id) bal = Math.max(0, bal - invoiceReceivableDelta(inv));
+  return bal;
+}
+// ---------- ایڈٹ میں وصول رقم/ڈسکاؤنٹ واپس بھریں (ایپ دوبارہ کھلنے پر بھی) ----------
+let billEditFieldsFilled = false;
+function fillEditPaymentFields(inv, force){
+  if(!inv) return;
+  const r = document.getElementById('amountReceivedInput');
+  if(r && (force || r.value === '')) r.value = inv.cash_received_now > 0 ? Math.round(inv.cash_received_now * 100) / 100 : '';
+  const d = document.getElementById('discountInput');
+  if(d && (force || !parseFloat(d.value))) d.value = inv.discount || 0;
+  billEditFieldsFilled = true;
+}
+function reverseInvoiceForEdit(inv, why){
   (inv.items || []).forEach(item => restoreStockForItem(item, item.qty));
   const customer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
   const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
   if(wasCounterCash){ financeDummy.cashInHand -= (inv.grand_total || 0); return; }
   financeDummy.cashInHand -= (inv.cash_received_now || 0);
   if(customer){
-    const billDelta = (inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0);
-    customer.total_receivable = Math.max(0, (customer.total_receivable || 0) - billDelta);
+    customer.total_receivable = Math.max(0, (customer.total_receivable || 0) - invoiceReceivableDelta(inv));
     const today = new Date().toISOString().split('T')[0];
     customer.walletHistory = customer.walletHistory || [];
     if(inv.wallet_applied > 0){
       customer.wallet_balance = (customer.wallet_balance || 0) + inv.wallet_applied;
-      customer.walletHistory.unshift({type:'deposit', amount:inv.wallet_applied, date:today, note:`Returned — ${inv.invoice_no} edited`});
+      customer.walletHistory.unshift({type:'deposit', amount:inv.wallet_applied, date:today, note:`Returned — ${inv.invoice_no} ${why || 'edited'}`});
     }
     if(inv.change_credited_to_wallet > 0){
       customer.wallet_balance = Math.max(0, (customer.wallet_balance || 0) - inv.change_credited_to_wallet);
-      customer.walletHistory.unshift({type:'redeem', amount:inv.change_credited_to_wallet, date:today, note:`Change taken back — ${inv.invoice_no} edited`});
+      customer.walletHistory.unshift({type:'redeem', amount:inv.change_credited_to_wallet, date:today, note:`Change taken back — ${inv.invoice_no} ${why || 'edited'}`});
     }
   }
 }
@@ -12926,21 +12947,21 @@ function renderCart(){
   // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
   const custIdForBalance = document.getElementById('customerSelect')?.value;
   const customerForBalance = custIdForBalance ? customersData.find(c => c.customer_id == custIdForBalance) : null;
-  const previousBalance = (customerForBalance && customerForBalance.total_receivable > 0) ? customerForBalance.total_receivable : 0;
+  const previousBalance = customerForBalance ? Math.max(0, balanceExcludingEditedBill(customerForBalance)) : 0; // ✏️ AIO2710TU109: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
   const combinedTotal = grandTotal + previousBalance; // ---------- یہی اصل رقم ہے جو کسٹمر پر واجب ہے، Received/Balance Due/Change اسی کے خلاف حساب ہوں گے ----------
 
-  document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(0)}`;
-  document.getElementById('sumDiscount').textContent = `Rs. ${discount.toFixed(0)}`;
+  document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(2).replace(/\.00$/, '')}`;
+  document.getElementById('sumDiscount').textContent = `Rs. ${discount.toFixed(2).replace(/\.00$/, '')}`;
   document.getElementById('sumTaxRow').style.display = AppState.settings.taxEnabled ? 'flex' : 'none';
   document.getElementById('sumTaxLabel').textContent = `Tax (${AppState.settings.taxPercent || 0}%)`;
-  document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(0)}`;
+  document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(2).replace(/\.00$/, '')}`;
 
   if(previousBalance > 0){
     // ---------- پرانا بقایہ موجود ہے — ٹیبل میں "This Bill" اور "Previous Balance" الگ دکھائیں، Grand Total دونوں کا مجموعہ ہو ----------
     document.getElementById('sumThisBillRow').style.display = 'flex';
-    document.getElementById('sumThisBill').textContent = `Rs. ${grandTotal.toFixed(0)}`;
+    document.getElementById('sumThisBill').textContent = `Rs. ${grandTotal.toFixed(2).replace(/\.00$/, '')}`;
     document.getElementById('sumPrevBalanceRow').style.display = 'flex';
-    document.getElementById('sumPrevBalance').textContent = `Rs. ${previousBalance.toFixed(0)}`;
+    document.getElementById('sumPrevBalance').textContent = `Rs. ${previousBalance.toFixed(2).replace(/\.00$/, '')}`;
     document.getElementById('sumGrandLabel').textContent = 'Total Balance';
     document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due (Total)';
   } else {
@@ -12949,7 +12970,7 @@ function renderCart(){
     document.getElementById('sumGrandLabel').textContent = 'Grand Total';
     document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due';
   }
-  document.getElementById('sumGrand').textContent = `Rs. ${combinedTotal.toFixed(0)}`;
+  document.getElementById('sumGrand').textContent = `Rs. ${combinedTotal.toFixed(2).replace(/\.00$/, '')}`;
 
   // ---------- جزوی ادائیگی + زائد رقم (Change) کا مکمل حساب — اب پرانے بقایہ سمیت پوری رقم کے خلاف، سب کچھ یہیں صاف نظر آئے ----------
   const receivedHint = document.getElementById('amountReceivedHint');
@@ -12966,7 +12987,7 @@ function renderCart(){
 
     if(receivedRaw > 0){
       sumReceivedRow.style.display = 'flex';
-      document.getElementById('sumReceived').textContent = `− Rs. ${receivedRaw.toFixed(0)}`;
+      document.getElementById('sumReceived').textContent = `− Rs. ${receivedRaw.toFixed(2).replace(/\.00$/, '')}`;
     } else {
       sumReceivedRow.style.display = 'none';
     }
@@ -12974,16 +12995,16 @@ function renderCart(){
     if(remaining >= 0){
       // ---------- عام صورت: کچھ یا سارا بقایہ ہے، کوئی Change نہیں ----------
       sumBalanceRow.style.display = receivedRaw > 0 ? 'flex' : 'none';
-      document.getElementById('sumBalance').textContent = `Rs. ${remaining.toFixed(0)}`;
+      document.getElementById('sumBalance').textContent = `Rs. ${remaining.toFixed(2).replace(/\.00$/, '')}`;
       document.getElementById('sumBalance').style.color = remaining > 0 ? 'var(--danger)' : 'var(--success)';
       changeDueBox.style.display = 'none';
       if(Billing.counterSale){
         receivedHint.textContent = (receivedRaw > 0 && remaining > 0)
-          ? `Rs. ${remaining.toFixed(0)} short — their Name & Mobile will be asked to save this as a Pending balance.`
+          ? `Rs. ${remaining.toFixed(2).replace(/\.00$/, '')} short — their Name & Mobile will be asked to save this as a Pending balance.`
           : '';
       } else {
         receivedHint.textContent = receivedRaw > 0
-          ? (remaining > 0 ? `Rs. ${remaining.toFixed(0)} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
+          ? (remaining > 0 ? `Rs. ${remaining.toFixed(2).replace(/\.00$/, '')} will remain as Pending.` : `✅ Fully paid — nothing will remain pending.`)
           : '';
       }
     } else {
@@ -12991,8 +13012,8 @@ function renderCart(){
       const changeAmt = -remaining;
       sumBalanceRow.style.display = 'none';
       changeDueBox.style.display = 'block';
-      document.getElementById('changeDueAmount').textContent = `Rs. ${changeAmt.toFixed(0)}`;
-      receivedHint.textContent = `✅ Fully paid — Rs. ${changeAmt.toFixed(0)} extra received.`;
+      document.getElementById('changeDueAmount').textContent = `Rs. ${changeAmt.toFixed(2).replace(/\.00$/, '')}`;
+      receivedHint.textContent = `✅ Fully paid — Rs. ${changeAmt.toFixed(2).replace(/\.00$/, '')} extra received.`;
 
       const custId = document.getElementById('customerSelect')?.value;
       if(custId){
@@ -13243,7 +13264,7 @@ async function openBillPreviewBeforeComplete(){
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
   const grandTotal = subtotal - discount + taxAmount;
-  const previousBalance = customer ? customer.total_receivable : 0;
+  const previousBalance = customer ? balanceExcludingEditedBill(customer) : 0;
 
   const draftInvoice = {
     invoice_id: 'DRAFT',
@@ -13285,11 +13306,11 @@ function finalizeInvoice(){
   const custId = document.getElementById('customerSelect').value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
-  const subtotal = Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0);
+  const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU109: 2939.919999 نہیں، 2939.92
   const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
   const taxPercent = AppState.settings.taxEnabled ? (AppState.settings.taxPercent || 0) : 0;
   const taxAmount = Math.round((subtotal - discount) * taxPercent / 100);
-  const grandTotal = subtotal - discount + taxAmount;
+  const grandTotal = Math.round((subtotal - discount + taxAmount) * 100) / 100;
 
   // ---------- کسٹمر منتخب نہیں، اور کسی نہ کسی صورت بقایہ رہ جائے گا — ادھار ٹریک کرنے کے لیے نام/نمبر مانگیں:
   // (a) عام Retail/Wholesale موڈ میں ہمیشہ (پرانا رویہ) — یا
@@ -13413,13 +13434,14 @@ function finalizeInvoice(){
 
   if(customer && method === 'credit'){
     // ---------- کسٹمر کا نیا کل بقایہ سیدھا SET کریں (پرانا + یہ بل − وصولی) — increment نہیں، تاکہ پرانے بقایہ پر بھی ادائیگی درست جھلکے ----------
-    customer.total_receivable = Math.max(0, combinedDueForPayment - cashReceivedNow);
+    customer.total_receivable = Math.max(0, Math.round((combinedDueForPayment - cashReceivedNow) * 100) / 100); // 439.9200000001 نہیں، 439.92
     // TODO: customers.total_receivable UPDATE
   }
   invoice.wallet_applied = walletApplied;
   invoice.cash_received_now = cashReceivedNow;
   invoice.change_given = changeGiven;
   invoice.change_credited_to_wallet = changeCreditedToWallet;
+  remainingDue = Math.round(remainingDue * 100) / 100;
   invoice.amount_due = remainingDue;
   invoice.paid_now = grandTotal - remainingDue; // ---------- اس بل میں سے ابھی کتنا ادا ہوا (نقد یا والٹ سے)، بل پر دکھانے کے لیے ----------
   invoice.new_balance = customer ? customer.total_receivable : 0; // ---------- اس بل کے بعد کسٹمر کا کل بقایہ — ہمیشہ کے لیے بل پر محفوظ ----------
@@ -15536,7 +15558,7 @@ function restoreStockForItem(item, qty){
 
 function deductVariantStock(v, qty){
   if(!v || qty <= 0) return;
-  // ---------- AIO2710TU108: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
+  // ---------- AIO2710TU109: صفر پر نہ روکیں — مال آنے سے پہلے بیچا تو اسٹاک مائنس دکھے، تاکہ بعد میں آنے والا مال پہلے یہ کمی پوری کرے (−10 + 20 = 10) ----------
   v.stock = roundStock((v.stock || 0) - qty);
   if(v.batches && v.batches.length){
     let remaining = qty;
@@ -22068,7 +22090,7 @@ function confirmBatchReturn(invoiceId){
   const picks = [];
   for(const idx of selectedIdx){
     const item = inv.items[idx];
-    const qty = parseInt(document.getElementById(`retQty_${idx}`).value) || 0;
+    const qty = parseFloat(document.getElementById(`retQty_${idx}`).value) || 0; // AIO2710TU109: 1.5 کلو وغیرہ بھی
     const amount = parseFloat(document.getElementById(`retAmt_${idx}`).value) || 0;
     if(qty <= 0 || qty > item.qty){ alert(`Please enter a valid quantity for "${item.name}" (max ${item.qty}).`); return; }
     if(amount < 0){ alert(`Please enter a valid refund amount for "${item.name}".`); return; }
@@ -22092,13 +22114,25 @@ function confirmBatchReturn(invoiceId){
     returnedNames.push(`${item.name} (${qty})`);
   });
 
+  // ---------- AIO2710TU109: بل کی رقم ابھی باقی (ادھار) ہو تو واپسی پہلے اسی بقایہ سے کٹے — گاہک کو نقد نہ دیں جو اس نے دیا ہی نہیں ----------
+  let offsetFromDue = 0;
+  const dueCustomer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
+  if(dueCustomer && (inv.amount_due || 0) > 0){
+    offsetFromDue = Math.min(totalRefund, inv.amount_due, Math.max(0, dueCustomer.total_receivable || 0));
+    offsetFromDue = Math.round(offsetFromDue * 100) / 100;
+    if(offsetFromDue > 0){
+      dueCustomer.total_receivable = Math.max(0, (dueCustomer.total_receivable || 0) - offsetFromDue);
+      inv.amount_due = Math.max(0, Math.round((inv.amount_due - offsetFromDue) * 100) / 100);
+    }
+  }
+  const refundOut = Math.round((totalRefund - offsetFromDue) * 100) / 100;
   if(method === 'wallet'){
     // ---------- طے شدہ رقم کسٹمر کے والٹ میں شامل کریں ----------
-    customer.wallet_balance += totalRefund; // TODO: customers.wallet_balance UPDATE
-    customer.walletHistory.unshift({type:'deposit', amount: totalRefund, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
+    if(refundOut > 0) customer.wallet_balance += refundOut; // TODO: customers.wallet_balance UPDATE
+    if(refundOut > 0) customer.walletHistory.unshift({type:'deposit', amount: refundOut, date:new Date().toISOString().split('T')[0], note:`Item Return: ${returnedNames.join(', ')}`});
   } else {
     // ---------- کیش ریفنڈ — کیش ان ہینڈ سے رقم منہا کریں ----------
-    financeDummy.cashInHand -= totalRefund; // TODO: نقدی لیجر (cash ledger) میں INSERT
+    financeDummy.cashInHand -= refundOut; // TODO: نقدی لیجر (cash ledger) میں INSERT
   }
 
   // ---------- بل کی مجموعی رقم میں سے واپس شدہ رقم منہا کریں تاکہ آج کی سیل/آمدن خودکار درست ہو جائے ----------
@@ -22109,7 +22143,7 @@ function confirmBatchReturn(invoiceId){
   document.getElementById('billSearchInput') && renderBillHistory();
   if(typeof renderDashboard === 'function') renderDashboard();
   const methodLabel = method === 'wallet' ? "customer's wallet" : 'cash (deducted from cash in hand)';
-  alert(`✅ Returned: ${returnedNames.join(', ')}.\nRs. ${totalRefund.toLocaleString()} refunded via ${methodLabel}. Stock updated and today's sales adjusted.`);
+  alert(`✅ Returned: ${returnedNames.join(', ')}.\n` + (offsetFromDue > 0 ? `Rs. ${offsetFromDue.toLocaleString()} taken off the customer's pending balance.\n` : '') + (refundOut > 0 ? `Rs. ${refundOut.toLocaleString()} refunded via ${methodLabel}. ` : 'Nothing to give back in cash. ') + `Stock updated and today's sales adjusted.`);
 
   // ---------- واپسی کی الگ رسید (Return Receipt) بنا کر واٹس ایپ/شیئر کے لیے تیار کر دیں ----------
   renderReturnReceiptToCanvas(inv, picks, totalRefund, method).then(canvas => {
@@ -24251,6 +24285,8 @@ function adminVoidBill(invoiceId){
 // ---------- AIOTEST25: adminVoidBill کے confirm/alert سے الگ کر کے — تاکہ یہی اصل حساب کتاب Salesman کی منظور شدہ
 // Delete درخواست پر بھی چل سکے (وہاں دوبارہ پوچھنے کی ضرورت نہیں، Admin پہلے ہی Approve دبا چکا ہے) ----------
 function executeVoidBill(inv){
+  // ---------- AIO2710TU109: ایڈٹ والا درست حساب — اسٹاک، نقد (جزوی ادائیگی سمیت)، بقایہ، والٹ سب پہلے جیسا ----------
+  if(!(inv.items || []).some(it => it.returned)){ reverseInvoiceForEdit(inv, 'deleted'); inv.status = 'voided'; return; }
   // ---------- اسٹاک واپس کریں — بل کے ہر آئٹم کی مقدار اسٹاک میں دوبارہ شامل کریں ----------
   inv.items.forEach(item => restoreStockForItem(item, item.qty)); // AIO1310TU035
 
@@ -31561,9 +31597,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU108';
+  const APP_VERSION = 'AIO2710TU109';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Eye button on every PIN and password box — tap to show, tap again to hide';
+  const UPDATE_NOTE = 'Edit Bill no longer adds the same bill twice to Previous Balance; amounts show paisa (2939.92); returns reduce pending balance first; delete reverses partial payments';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -31680,7 +31716,7 @@ document.addEventListener('DOMContentLoaded', () => {
 "Save as PDF" وغیرہ) خودکار اسی سے جُڑ جاتا ہے — کسی ایک برانڈ کے SDK کی ضرورت نہیں۔ ---------- -->
 <div id="printReceiptArea"></div>
 <script>
-/* 👁️ (ہر PIN/پاس ورڈ خانہ) AIO2710TU108: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
+/* 👁️ (ہر PIN/پاس ورڈ خانہ) AIO2710TU109: پاس ورڈ کے خانوں میں آنکھ کا بٹن — ایک بار دبائیں تو پاس ورڈ صاف نظر آئے، دوبارہ دبائیں تو چھپ جائے؛
    جب تک خود نہ دبائیں، ویسا ہی رہتا ہے (دبائے رکھنے کی ضرورت نہیں) */
 (function(){
   var SVG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
