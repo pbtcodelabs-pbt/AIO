@@ -1808,6 +1808,17 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+  /* AIO2810WE113: 📦 پیکج (فون کتنے) — Staff & Devices اور Package Plans */
+  .mdPlan{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:9px 12px; border-radius:14px; background:linear-gradient(135deg,#f5f3ff,#ede9fe); border:1.5px solid #c4b5fd; color:#5b21b6; font-size:13px; font-weight:700; margin:8px 0;}
+  .mdPlan span:first-child{flex:1;}
+  .mdPlan.full{background:linear-gradient(135deg,#fff7ed,#ffedd5); border-color:#fdba74; color:#9a3412;}
+  .mdPlan button{width:auto; margin:0; padding:6px 12px; border-radius:999px; border:none; background:linear-gradient(155deg,#7c3aed,#5b21b6); color:#fff; font-size:12px; font-weight:800; cursor:pointer;}
+  .ppPhones{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0 0 12px;}
+  .ppPhones button{padding:9px 6px; border-radius:12px; border:1.5px solid #c7d2fe; background:#fff; color:var(--primary-dark); font-size:13px; font-weight:800; cursor:pointer; line-height:1.25;}
+  .ppPhones button small{display:block; font-size:10.5px; font-weight:700; color:var(--muted);}
+  .ppPhones button.on{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .ppPhones button.on small{color:rgba(255,255,255,.85);}
+  .ppHint{font-size:11.5px; color:var(--muted); margin:-6px 2px 10px;}
   /* ---------- AIO2510SU098: مختصر ویرینٹ لسٹ — ہر سائز ایک لائن، باقی تفصیل ⋯ میں ---------- */
   .productCard.capCard .variantCardWrap{padding:0 0 12px;}
   .vlBox{background:var(--card); border:1px solid #e5e9f0; border-radius:14px; padding:8px 6px; box-shadow:0 4px 14px rgba(41,29,10,.05);}
@@ -3031,7 +3042,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2710TU112</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE113</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3250,7 +3261,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2710TU112</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE113</span>
     </div>
   </div>
 
@@ -7158,14 +7169,31 @@ function syncPushShopInfo(){
   if(!aioMultiOn() || AppState.settings.syncJoined) return;
   const s = AppState.settings, cur = shopInfo();
   const rec = Object.assign({}, cur, {id: 'shop', businessName: s.businessName || '', subscriptionExpiry: s.subscriptionExpiry || '', lifetime: !!s.lifetimeLicense,
-    staffApproval: cur.staffApproval === true, maxDevices: cur.maxDevices || 0});
+    staffApproval: cur.staffApproval === true, maxDevices: planMaxDevices()});
   if(syncEq(rec, cur)) return;
   shopInfoData = [rec]; saveToStorage('syncShopInfo', shopInfoData); scheduleSync(800);
+}
+// ---------- AIO2810WE113: 📦 پیکج — P1+0 (صرف مالک)، P1+1، P1+2، P1+3 (مالک + ملازم)؛ Play Store کے پیکج سے (aio_user1plusN_*) ----------
+const PLAN_MAX_PACK = 4;
+function planName(n){ n = Math.max(1, parseInt(n) || 1); return 'P1+' + (n - 1); }
+function planMaxDevices(){
+  const s = AppState.settings;
+  if(s.developerUnlock) return 99;
+  if(s.isOnFreeTrial) return PLAN_MAX_PACK; // مفت ٹرائل میں سب آزما سکیں
+  return Math.max(1, parseInt(s.planDevices) || 1);
+}
+// جڑے ہوئے فون: سلاٹ کی ترتیب میں پیکج سے زیادہ والا فون بند (مالک نے پیکج چھوٹا کیا ہو)
+function syncOverPlanLimit(){
+  const max = shopInfo().maxDevices; if(!max) return false;
+  const devs = devicesData.slice().sort((a, b) => (a.slot || 0) - (b.slot || 0));
+  const i = devs.findIndex(d => d.uid === syncDeviceUid());
+  return i >= max;
 }
 function linkedShopActive(){
   try{
     if(!aioMultiOn() || !AppState.settings.syncJoined) return false;
     const sh = shopInfo();
+    if(syncOverPlanLimit()) return false;
     if(sh.lifetime) return true;
     if(!sh.subscriptionExpiry) return false;
     const exp = new Date(sh.subscriptionExpiry + 'T23:59:59');
@@ -10405,7 +10433,9 @@ function showRoleToast(role, name){
 function showSubscriptionGate(){
   if(isLinkedDevice()){
     const sh = shopInfo();
-    document.getElementById('subGateStatus').textContent = `${sh.businessName || 'The shop'}'s subscription has ended${sh.subscriptionExpiry ? ' (' + formatDateDMY(sh.subscriptionExpiry) + ')' : ''}. Ask the owner to renew it on their phone — this device will open by itself.`;
+    document.getElementById('subGateStatus').textContent = syncOverPlanLimit()
+      ? `The shop's package does not include this device. Ask the owner to upgrade or remove another device.`
+      : `${sh.businessName || 'The shop'}'s subscription has ended${sh.subscriptionExpiry ? ' (' + formatDateDMY(sh.subscriptionExpiry) + ')' : ''}. Ask the owner to renew it on their phone — this device will open by itself.`;
     document.getElementById('subscriptionGateScreen').style.display = 'flex';
     return;
   }
@@ -27206,6 +27236,7 @@ function renderStaffDevicesCard(){
   const s = AppState.settings;
   if(!aioMultiOn()){
     el.innerHTML = `<h3>👥 Staff &amp; Devices</h3>
+      ${planMaxDevices() < 99 ? `<div class="mdPlan${planMaxDevices() < 2 ? ' full' : ''}"><span>📦 Your package <b>${planName(planMaxDevices())}</b></span><span>${planMaxDevices()} device${planMaxDevices() > 1 ? 's' : ''}${AppState.settings.isOnFreeTrial ? ' (trial)' : ''}</span>${planMaxDevices() < PLAN_MAX_PACK || AppState.settings.isOnFreeTrial ? `<button type="button" onclick="openPackagePlansModal(2)">⬆️ Upgrade</button>` : ''}</div>` : ''}
       <div class="settingsHint">Run your shop on <b>more phones and PCs with the same data</b> — you and your staff each log in with your own PIN. Bills, stock, customers and payments update on every device.</div>
       <div class="mdSteps">1️⃣ Turn on here (this device becomes the owner's device)<br>2️⃣ Add your staff and their PINs (👤 Users)<br>3️⃣ On the other phone/PC: login screen → <b>🔗 Join a shop</b> → Shop Code + PIN</div>
       <button type="button" class="mdBigBtn" onclick="enableMultiDevice()">📲 Turn on Multi-Device</button>`;
@@ -27232,6 +27263,10 @@ function renderStaffDevicesCard(){
     ${(() => { const bx = syncBiggestBox(), ls = syncLocalStorageBytes(), lsPct = Math.round(ls / (5 * 1024 * 1024) * 100);
       const col = p => p >= 80 ? '#dc2626' : p >= 60 ? '#d97706' : '#15803d';
       return `<div class="mdSteps" style="font-size:12px;">📦 Biggest cloud box: <b style="color:${col(bx.pct)}">${bx.pct}%</b>${bx.bytes ? ' (' + Math.round(bx.bytes / 1024) + ' KB)' : ''} &nbsp;•&nbsp; 📱 This device storage: <b style="color:${col(lsPct)}">${lsPct}%</b>${window.__syncBoxFull ? `<br><span style="color:#b91c1c; font-weight:800;">⚠️ ${mdEsc(window.__syncBoxFull.msg)}</span>` : (window.__cloudSyncError && cloudSyncStatus === 'error' ? `<br><span style="color:#b91c1c; font-weight:800;">⚠️ ${mdEsc(window.__cloudSyncError)}</span>` : '')}</div>`; })()}
+    ${(() => { const max = owner ? planMaxDevices() : (sh.maxDevices || 0); if(!max || max >= 99) return '';
+      const full = devs.length >= max;
+      return `<div class="mdPlan${full ? ' full' : ''}"><span>📦 Package <b>${planName(max)}</b></span><span>${devs.length} / ${max} devices${full ? ' — full' : ''}</span>${owner && max < PLAN_MAX_PACK ? `<button type="button" onclick="openPackagePlansModal(Math.min(PLAN_MAX_PACK, ${max} + 1))">⬆️ Upgrade</button>` : ''}</div>`; })()}
+    ${!owner && syncOverPlanLimit() ? `<div class="mdPlan full"><span>⚠️ The shop's package (${planName(sh.maxDevices)}) does not include this device — ask the owner to upgrade or remove another device.</span></div>` : ''}
     <div class="settingsSubLabel">Devices (${devs.length})</div>
     ${devHtml}
     <div class="mdRow2" style="margin-top:6px;"><button type="button" class="mdBigBtn ghost" onclick="syncNow(); showNavToast('🔄 Syncing…')">🔄 Sync now</button>
@@ -27239,6 +27274,11 @@ function renderStaffDevicesCard(){
 }
 async function enableMultiDevice(){
   if(AppState.currentRole && AppState.currentRole !== 'admin'){ alert('Only the owner can turn this on.'); return; }
+  if(planMaxDevices() < 2){
+    alert(`Your package is ${planName(1)} — owner only (1 device).\n\nTo add staff or more phones/PCs, upgrade to P1+1, P1+2 or P1+3.`);
+    try{ openPackagePlansModal(2); }catch(e){}
+    return;
+  }
   const admin = usersData.find(u => u.role === 'admin' && u.is_active);
   if(!admin || (admin.pin === DEFAULT_ADMIN_PIN_HASH && AppState.settings.pinLockUserSet !== true)){
     alert('First set your own Admin PIN — on every device each person logs in with a PIN.');
@@ -27936,6 +27976,13 @@ const PLAY_BILLING_PRODUCTS = [
   { sku: 'aio_user1plus0_3m',  days: 90,  label: '3 Months' },
   { sku: 'aio_user1plus0_6m',  days: 180, label: '6 Months' },
   { sku: 'aio_user1plus0_12m', days: 365, label: '1 Year'   },
+  // ---------- AIO2810WE113: ملازم والے پیکج (مالک + 1/2/3 ملازم) — ہر فون 500 روپے مہینہ؛ صرف 6 مہینے اور سال؛ devices = کل فون/PC (مالک سمیت) ----------
+  { sku: 'aio_user1plus1_6m',  days: 180, label: '6 Months', devices: 2 },
+  { sku: 'aio_user1plus1_12m', days: 365, label: '1 Year',   devices: 2 },
+  { sku: 'aio_user1plus2_6m',  days: 180, label: '6 Months', devices: 3 },
+  { sku: 'aio_user1plus2_12m', days: 365, label: '1 Year',   devices: 3 },
+  { sku: 'aio_user1plus3_6m',  days: 180, label: '6 Months', devices: 4 },
+  { sku: 'aio_user1plus3_12m', days: 365, label: '1 Year',   devices: 4 },
   // ---------- AIO1110SU017: ♾️ لائف ٹائم — ایک بار ادائیگی (Rs 25,000)، کبھی ختم نہیں۔ یہ سبسکرپشن نہیں بلکہ
   // Play Console → Monetize → Products → In-app products میں اسی Product ID سے "One-time product" بنانا ہے ----------
   { sku: 'aio_lifetime_onetime', days: 0, label: 'Lifetime', lifetime: true },
@@ -27943,6 +27990,18 @@ const PLAY_BILLING_PRODUCTS = [
 // ---------- ♾️ لائف ٹائم والے کی میعاد اتنی دور رکھی گئی ہے کہ کبھی ختم نہ ہو؛ باقی سارا نظام (تاریخ پر مبنی) ویسے ہی چلتا رہے ----------
 const LIFETIME_EXPIRY = '2099-12-31';
 function isLifetimeSku(sku){ return PLAY_BILLING_PRODUCTS.some(p => p.sku === sku && p.lifetime); }
+// ---------- AIO2810WE113: خریدے گئے پیکج سے کل فون (مالک سمیت) — پرانے/لائف ٹائم = 1 ----------
+function planDevicesFromSku(sku){ const p = PLAY_BILLING_PRODUCTS.find(x => x.sku === sku); return Math.min(PLAN_MAX_PACK, Math.max(1, (p && p.devices) || 1)); }
+// کئی خریداریاں ہوں تو جو ابھی چل رہی ہیں ان میں سب سے بڑا پیکج
+function applyPlanDevicesFromPurchases(list){
+  const today = toLocalDateStr(new Date());
+  let n = 1;
+  list.forEach(x => { if(x.exp && x.exp >= today) n = Math.max(n, planDevicesFromSku(x.sku)); });
+  if(n !== (parseInt(AppState.settings.planDevices) || 1)){
+    AppState.settings.planDevices = n;
+    try{ syncPushShopInfo(); renderStaffDevicesCard(); }catch(e){}
+  }
+}
 function isLifetimeLicense(){
   return AppState.settings.lifetimeLicense === true || String(AppState.settings.subscriptionExpiry || '') >= '2099-01-01';
 }
@@ -28079,6 +28138,8 @@ async function purchaseViaPlayBilling(sku, days){
     AppState.settings.subscriptionActivatedOn = toLocalDateStr(new Date());
     AppState.settings.isOnFreeTrial = false;
     AppState.settings.subscriptionViaPlayBilling = true;
+    AppState.settings.planDevices = planDevicesFromSku(sku); // AIO2810WE113: کتنے فون
+    try{ syncPushShopInfo(); }catch(e){}
     persistAllData();
     document.getElementById('packagePlansModal')?.classList.remove('show');
     refreshAllScreens();
@@ -28161,6 +28222,8 @@ async function syncPlayBillingRenewal(){
       if(exp > bestExpiry) bestExpiry = exp;
     });
     if(!bestExpiry) return;
+    applyPlanDevicesFromPurchases(versP.map((ver, i) => ({sku: mineP[i].itemId, exp: playPurchaseExpiry(mineP[i].itemId, ver)})));
+    persistAllData();
 
     const current = AppState.settings.subscriptionExpiry || '';
     if(bestExpiry > current || AppState.settings.isOnFreeTrial){
@@ -28204,6 +28267,8 @@ async function restorePurchaseCore(){
   });
   if(!anyReply) return { status: 'noserver' };
   if(!best) return { status: 'expired' };
+  applyPlanDevicesFromPurchases(vers.map((ver, i) => ({sku: mine[i].itemId, exp: playPurchaseExpiry(mine[i].itemId, ver)})));
+  persistAllData();
 
   const current = AppState.settings.subscriptionExpiry || '';
   // ---------- AIO610TU027: جس Gmail نے پہلے خریدا ہے اسے نیا ٹرائل نہیں ملنا — ٹرائل چل رہا ہو تو بھی خریداری کی اصل تاریخ ہی لاگو ہو ----------
@@ -28269,7 +28334,10 @@ async function restorePurchaseNow(btn){
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ syncPlayBillingRenewal(); }catch(e){} }, 1500); });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ syncPlayBillingRenewal(); }catch(e){} } });
 
-function openPackagePlansModal(){
+let ppPhones = 1; // AIO2810WE113: Package Plans میں چنے گئے فون (1 = صرف میں)
+function setPlanPhones(n){ ppPhones = Math.min(PLAN_MAX_PACK, Math.max(1, parseInt(n) || 1)); renderPackagePlansView(); }
+function openPackagePlansModal(phones){
+  ppPhones = Math.min(PLAN_MAX_PACK, Math.max(1, parseInt(phones) || parseInt(AppState.settings.planDevices) || 1));
   selectedPlanDays = null;
   selectedPlanPrice = null;
   playBillingLoadFailed = false; // ---------- ہر بار پاپ اپ کھلنے پر دوبارہ کوشش کا موقع دیں ----------
@@ -28315,9 +28383,12 @@ function renderPackagePlansView(){
     return;
   }
   // ---------- صرف وہی پیکج دکھائیں جو Play سے واقعی ملے — '—' والا بٹن کبھی نہ دکھے ----------
-  const availablePlans = PLAY_BILLING_PRODUCTS.filter(p => playBillingDetailsCache.some(d => d.itemId === p.sku));
+  const phonesBar = `<div class="ppPhones">${[[1, 'Only me'], [2, 'Me + 1 staff'], [3, 'Me + 2 staff'], [4, 'Me + 3 staff']].map(([n, l]) =>
+      `<button type="button" class="${ppPhones === n ? 'on' : ''}" onclick="setPlanPhones(${n})">${l}<small>${n} phone${n > 1 ? 's' : ''}/PC${n > 1 ? 's' : ''}</small></button>`).join('')}</div>
+    ${ppPhones > 1 ? `<div class="ppHint">👥 Your staff use the same shop data on their own phones (Settings → Staff &amp; Devices).</div>` : ''}`;
+  const availablePlans = PLAY_BILLING_PRODUCTS.filter(p => (p.devices || 1) === ppPhones && playBillingDetailsCache.some(d => d.itemId === p.sku));
   if(availablePlans.length === 0){
-    wrap.innerHTML = `<div style="text-align:center; padding:20px 10px; color:var(--danger); font-weight:700;">⚠️ No plans are available right now. Please try again later.</div>`;
+    wrap.innerHTML = phonesBar + `<div style="text-align:center; padding:20px 10px; color:var(--danger); font-weight:700;">⚠️ No plans are available right now. Please try again later.</div>`;
     return;
   }
   const planLook = {
@@ -28325,7 +28396,7 @@ function renderPackagePlansView(){
     180: {bg:'linear-gradient(135deg,#1d4ed8,#60a5fa)', tag:'180 days'},
     365: {bg:'linear-gradient(135deg,#b45309,#fbbf24)', tag:'365 days'}
   };
-  wrap.innerHTML = availablePlans.map(p => {
+  wrap.innerHTML = phonesBar + availablePlans.map(p => {
     const info = playBillingDetailsCache.find(d => d.itemId === p.sku);
     const priceLabel = `${info.price.currency} ${Number(info.price.value).toLocaleString('en-US', {maximumFractionDigits:2})}`;
     const look = p.lifetime ? {bg:'linear-gradient(135deg,#6d28d9,#a21caf 55%,#f59e0b)', tag:'♾️ One-time payment • never expires'} : (planLook[p.days] || planLook[90]);
@@ -28343,7 +28414,7 @@ function renderPackagePlansView(){
   // ---------- Google Play پالیسی کی لازمی شرط: خریداری سے پہلے، بغیر کسی اضافی کلک کے،
   // قیمت/billing cycle/auto-renewal کی صاف وضاحت نظر آنی چاہیے ----------
   `<div style="font-size:11px; color:var(--muted); line-height:1.6; margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px;">
-    ℹ️ Subscriptions (3 Months, 6 Months, 1 Year) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>.<br>♾️ <b>Lifetime</b> is a one-time payment — it never renews and never expires.
+    ℹ️ Subscriptions (${ppPhones > 1 ? '6 Months, 1 Year' : '3 Months, 6 Months, 1 Year'}) automatically renew at the price shown above until you cancel. You can cancel anytime from <b>Google Play → Payments &amp; subscriptions → Subscriptions</b>.${ppPhones > 1 ? '' : '<br>♾️ <b>Lifetime</b> is a one-time payment — it never renews and never expires.'}
   </div>`;
 }
 
@@ -32203,9 +32274,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2710TU112';
+  const APP_VERSION = 'AIO2810WE113';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Storage never fills: big lists packed 10x smaller and moved to device storage if needed; staff devices show no subscription — only the owner\'s';
+  const UPDATE_NOTE = 'Staff packages on Google Play: choose how many phones (me + 1, 2 or 3 staff) — 6 months or 1 year';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
