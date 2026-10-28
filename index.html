@@ -1808,6 +1808,17 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+  /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
+  .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
+  .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  .fltDrop{margin:6px 0 10px; border:1.5px solid #c7d2fe; border-radius:14px; background:#fff;}
+  .fltDrop > summary{list-style:none; cursor:pointer; padding:9px 12px; font-size:13.5px; font-weight:800; color:var(--primary-dark); display:flex; align-items:center; gap:6px;}
+  .fltDrop > summary::-webkit-details-marker{display:none;}
+  .fltDrop > summary::after{content:'▾'; margin-left:auto; font-size:14px;}
+  .fltDrop[open] > summary::after{content:'▴';}
+  .fltDrop .fltBody{padding:0 10px 10px; display:flex; flex-direction:column; gap:8px;}
+  .fltDrop .fltBody select, .fltDrop .fltBody input{width:100%; min-width:0; height:36px; padding:4px 8px; border:1px solid #dbe1ea; border-radius:10px; font-size:13px; background:#fff;}
+  .fltDrop .poStatusRail{margin:0;}
   /* ---------- AIO2810WE116: 📅 تاریخ کا ویل (آڑھت بک جیسا، ریڈیم سبز) — بائیں دن، درمیان مہینہ، دائیں سال؛ اوپر دن کا نام ---------- */
   .dwBox{--rad:#39ff14; --radTx:#eaffe4; --radDim:#8fc9a2; --radSoft:rgba(57,255,20,.6); --radBg1:#12324a; --radBg2:#06111a; --radCol:#10283a; --radBd:#1f6f5c;
     display:flex; flex-direction:row; align-items:center; justify-content:center; gap:10px; border-radius:14px; padding:3px 8px; margin:8px 0; background:radial-gradient(120% 120% at 50% 0%,var(--radBg1),var(--radBg2)); border:1.5px solid var(--radBd); box-shadow:inset 0 0 12px rgba(57,255,20,.08); direction:ltr;}
@@ -3093,7 +3104,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE120</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE121</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3312,7 +3323,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE120</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE121</span>
     </div>
   </div>
 
@@ -3663,6 +3674,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <div class="row" id="sumTaxRow" style="display:none;"><span id="sumTaxLabel">Tax</span><span id="sumTax">Rs. 0</span></div>
             <div class="row" id="sumThisBillRow" style="display:none;"><span>This Bill</span><span id="sumThisBill">Rs. 0</span></div>
             <div class="row" id="sumPrevBalanceRow" style="display:none; color:#c2410c;"><span>⚠️ Previous Balance</span><span id="sumPrevBalance">Rs. 0</span></div>
+            <div id="pendBillHint" class="pendBillHint" style="display:none;"></div>
             <div class="grand" id="sumGrandRow"><span id="sumGrandLabel">Grand Total</span><span id="sumGrand">Rs. 0</span></div>
             <div class="row" id="sumReceivedRow" style="display:none; color:var(--success);"><span>💵 Received Now</span><span id="sumReceived">Rs. 0</span></div>
             <div class="row" id="sumBalanceRow" style="display:none; font-weight:800;"><span id="sumBalanceLabel">📒 Balance Due</span><span id="sumBalance">Rs. 0</span></div>
@@ -4567,6 +4579,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <div class="totalsBox">
             <div class="grand"><span>Revised Total</span><span id="receiveShipmentTotal">Rs. 0</span></div>
           </div>
+          <input type="date" id="rsDate" class="dwWheel">
 
           <div id="rsDraftBanner" class="draftBanner" style="display:none; margin:10px 0 0;"></div>
           <button class="checkoutBtn" id="receiveShipmentConfirmBtn" style="margin-top:10px;" onclick="confirmShipmentReceipt()">✅ Confirm Receipt (Add to Stock)</button>
@@ -4617,13 +4630,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
         <div class="emptyCart" id="poEmptyMsg" style="padding:20px 0;">No items added — select from the list above</div>
 
+        <input type="date" id="poDate" class="dwWheel">
         <div class="totalsBox" style="margin-top:6px;">
           <div class="grand"><span>Grand Total</span><span id="poGrandTotal">Rs. 0</span></div>
         </div>
 
         <div class="modalBtns">
           <button class="cancelBtn" id="poCancelBtn" onclick="closePoModal()">Cancel</button>
-          <button class="saveBtn" onclick="savePurchaseOrder()">Save (will be added to stock)</button>
+          <button class="saveBtn" onclick="savePurchaseOrder()">Save Order</button>
         </div>
       </div>
     </div>
@@ -4973,17 +4987,18 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="pageTitle">📦 Purchase Orders</div>
 
       <!-- ---------- اسٹیٹس کیپسول: All / Pending Shipment / Received — ہر ایک کی گنتی کے ساتھ ---------- -->
+      <!-- ---------- سرچ: سپلائر کا نام/فون، آئٹم، تاریخ، رقم، pending/received — اور یہیں سے نیا PO ---------- -->
+      <div class="productToolbar">
+        <input type="text" id="poListSearchInput" placeholder="🔍 Supplier, item, date, Rs." oninput="renderPurchaseOrdersScreen()" autocomplete="off">
+        <button onclick="openPoSupplierPicker()">+ New PO</button>
+      </div>
+      <details class="fltDrop" id="poFltDrop"><summary id="poFltSum">🔽 Filters</summary><div class="fltBody">
       <div class="poStatusRail">
         <div class="categoryPill active" id="poFilterall" onclick="setPoListFilter('all')">All<span class="catCount" id="poCntall">0</span></div>
         <div class="categoryPill" id="poFilterpending" onclick="setPoListFilter('pending')">⏳ Pending<span class="catCount" id="poCntpending">0</span></div>
         <div class="categoryPill" id="poFilterreceived" onclick="setPoListFilter('received')">✅ Received<span class="catCount" id="poCntreceived">0</span></div>
       </div>
 
-      <!-- ---------- سرچ: سپلائر کا نام/فون، آئٹم، تاریخ، رقم، pending/received — اور یہیں سے نیا PO ---------- -->
-      <div class="productToolbar">
-        <input type="text" id="poListSearchInput" placeholder="🔍 Supplier, item, date, Rs." oninput="renderPurchaseOrdersScreen()" autocomplete="off">
-        <button onclick="openPoSupplierPicker()">+ New PO</button>
-      </div>
 
       <div class="poFilterRow">
         <select id="poDateFilterSelect" onchange="renderPurchaseOrdersScreen()">
@@ -4992,7 +5007,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <option value="week">Last 7 Days</option>
           <option value="month">This Month</option>
           <option value="lastmonth">Last Month</option>
+          <option value="year">This Year</option>
+          <option value="custom">📆 Dates…</option>
         </select>
+        <div class="stRange" id="poCustomRange" style="display:none; margin:0;"><input type="date" id="poFrom" onchange="renderPurchaseOrdersScreen()"><span style="font-size:12px; color:var(--muted);">to</span><input type="date" id="poTo" onchange="renderPurchaseOrdersScreen()"></div>
         <select id="poSupplierFilterSelect" onchange="renderPurchaseOrdersScreen()">
           <option value="all">🏭 All Suppliers</option>
         </select>
@@ -5004,6 +5022,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <option value="pendingLong">⏳ Longest Pending</option>
         </select>
       </div>
+      </div></details>
 
       <div class="billSummaryBar" id="poSummaryBar"></div>
 
@@ -13398,6 +13417,23 @@ function invoiceReceivableDelta(inv){
   const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
   return wasCounterCash ? 0 : ((inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0));
 }
+// ---------- AIO2810WE121: پرانے بقایہ میں اسی گاہک کا حالیہ ادھورا (ادھار) بل ہو تو بتائیں — نیا بل بنا کر رقم دوبارہ نہ جڑے، وہی بل کھولیں ----------
+function renderPendBillHint(customer){
+  const el = document.getElementById('pendBillHint'); if(!el) return;
+  const editId = editingInvoice()?.invoice_id;
+  const since = Date.now() - 3 * 86400000;
+  const inv = customer ? invoicesData.filter(i => i.customer_id === customer.customer_id && i.status !== 'voided' && i.invoice_id !== editId &&
+    getInvoiceAmountDue(i) > 0 && new Date(i.created_at).getTime() >= since).sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0] : null;
+  if(!inv){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = 'block';
+  el.innerHTML = `⏳ Previous balance includes unpaid <b>${String(inv.invoice_no).replace(/</g,'&lt;')}</b> (Rs. ${Math.round(getInvoiceAmountDue(inv)).toLocaleString()}, ${formatDateDMY(invLocalDate(inv))}). Same bill again? Open it instead — the amount will not be added twice.
+    <button type="button" onclick="pendBillContinue(${inv.invoice_id})">✏️ Continue that bill</button>`;
+}
+function pendBillContinue(invoiceId){
+  if(Billing.cart.length && !confirm('Replace the items in the cart with that bill, to continue it?')) return;
+  Billing.cart = [];
+  startEditBill(invoiceId);
+}
 function balanceExcludingEditedBill(customer){
   if(!customer) return 0;
   let bal = customer.total_receivable || 0;
@@ -13522,7 +13558,9 @@ function renderCart(){
     document.getElementById('sumPrevBalance').textContent = `Rs. ${previousBalance.toFixed(2).replace(/\.00$/, '')}`;
     document.getElementById('sumGrandLabel').textContent = 'Total Balance';
     document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due (Total)';
+    renderPendBillHint(customerForBalance);
   } else {
+    renderPendBillHint(null);
     document.getElementById('sumThisBillRow').style.display = 'none';
     document.getElementById('sumPrevBalanceRow').style.display = 'none';
     document.getElementById('sumGrandLabel').textContent = 'Grand Total';
@@ -19352,8 +19390,12 @@ function buildPartyStatement(type, id){
   } else {
     const s = suppliersData.find(x => x.supplier_id === id); if(!s) return null;
     current = Number(s.total_payable) || 0; name = s.name;
-    (s.purchaseHistory || []).forEach((po, idx) => rows.push({date: po.date, ts: (po.date || '') + 'T09:00', text: `📦 Purchase order — ${po.items.length} item(s)${po.status === 'received' ? '' : ' (not received yet)'}`,
-      dr: po.total || 0, cr: 0, open: `closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});`}));
+    (s.purchaseHistory || []).forEach((po, idx) => {
+      if(po.payableAdded === false) return; // ابھی وصول نہیں ہوا — کھاتے میں نہیں
+      const d = po.payableAdded === true && po.receivedDate ? po.receivedDate : po.date;
+      rows.push({date: d, ts: (d || '') + 'T09:00', text: `📦 ${po.status === 'received' ? 'Shipment received' : 'Purchase order (not received yet)'} — ${po.items.length} item(s)`,
+        dr: po.total || 0, cr: 0, open: `closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});`});
+    });
     const firstObS = (s.ledgerHistory || []).map(h => h.type).lastIndexOf('opening_balance');
     (s.ledgerHistory || []).forEach((h, i) => {
       const ts = (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0');
@@ -19644,6 +19686,8 @@ function poDateInRange(dateStr, key){
   if(key === 'week') return d >= new Date(today.getTime() - 6 * 86400000);
   if(key === 'month') return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   if(key === 'lastmonth'){ const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.getFullYear() === lm.getFullYear() && d.getMonth() === lm.getMonth(); }
+  if(key === 'year') return d.getFullYear() === now.getFullYear();
+  if(key === 'custom'){ const f = document.getElementById('poFrom')?.value, t = document.getElementById('poTo')?.value; return (!f || dateStr >= f) && (!t || dateStr <= t); }
   return true;
 }
 
@@ -19701,6 +19745,12 @@ function renderPurchaseOrdersScreen(){
   // ---------- سرچ، سپلائر اور تاریخ کا فلٹر (اسٹیٹس سے پہلے — تاکہ کیپسول کی گنتی درست رہے) ----------
   const query = (document.getElementById('poListSearchInput')?.value || '').trim();
   const dateKey = document.getElementById('poDateFilterSelect')?.value || 'all';
+  // ---------- ایک ڈراپ ڈاؤن کا خلاصہ (بند ہو تو بھی پتا چلے کون سا فلٹر لگا ہے) ----------
+  { const cr = document.getElementById('poCustomRange'); if(cr) cr.style.display = dateKey === 'custom' ? 'flex' : 'none';
+    const sel = id => { const e = document.getElementById(id); return e && e.selectedIndex >= 0 ? e.options[e.selectedIndex].text.replace(/^[^A-Za-z0-9\s]+\s/, '') : ''; };
+    const st = {all: 'All', pending: 'Pending', received: 'Received'}[poListFilter] || 'All';
+    const sum = document.getElementById('poFltSum');
+    if(sum) sum.textContent = `🔽 Filters: ${st} • ${dateKey === 'all' ? 'All time' : sel('poDateFilterSelect')}${(document.getElementById('poSupplierFilterSelect')?.value || 'all') !== 'all' ? ' • ' + sel('poSupplierFilterSelect') : ''}`; }
   const supplierFilterVal = supplierSelect.value;
   let base = allOrders.filter(po => poListMatches(po, query) && poDateInRange(po.date, dateKey) &&
     (supplierFilterVal === 'all' || String(po.supplier_id) === supplierFilterVal));
@@ -20384,6 +20434,7 @@ function openPoModal(supplierId){
   renderPoBrowseList();
   renderPoCart();
   document.getElementById('poModal').classList.add('show');
+  AIO_DW.set(document.getElementById('poDate'), localDateStr(new Date()));
   if(poDraft) showNavToast('📝 Draft restored — continue where you left off');
 }
 
@@ -20897,14 +20948,17 @@ function savePurchaseOrder(){
   // ---------- اہم: صرف آرڈر بنے، ابھی سٹاک میں کچھ شامل نہیں ہوتا ----------
   // مال حقیقت میں تو ابھی ملا ہی نہیں — سٹاک صرف "Receive Shipment" مکمل ہونے پر بڑھے گا۔
   // TODO: یہاں purchase_orders + purchase_order_items table میں INSERT ہوگا (status:'pending_receipt')
-  s.total_payable += total; // آرڈر کی مالیت طے ہو گئی، ادائیگی کا وعدہ بن گیا
+  // AIO2810WE121: آرڈر بنتے وقت سپلائر کے کھاتے میں کچھ نہیں جاتا — شپمنٹ وصول ہونے پر ہی (payableAdded:false)
+  const poDate = readPayDate('poDate');
+  if(payDateIsFuture(poDate)) return;
   s.purchaseHistory = s.purchaseHistory || [];
   s.purchaseHistory.unshift({
     po_id: Date.now(),
     items: JSON.parse(JSON.stringify(poCart)),
     total,
-    date: new Date().toISOString().split('T')[0],
-    status: 'pending_receipt' // 'pending_receipt' | 'received'
+    date: poDate,
+    status: 'pending_receipt', // 'pending_receipt' | 'received'
+    payableAdded: false
   });
 
   clearPoDraft(s.supplier_id); // ---------- محفوظ ہو گیا — اب ڈرافٹ نہیں ----------
@@ -22538,6 +22592,7 @@ function deletePendingPurchaseOrder(supplierId, poIdx){
   const po = s.purchaseHistory[poIdx];
   if(po.status === 'received'){ alert('Received orders cannot be deleted — only pending ones.'); return; }
   if(!confirm(`Delete this pending Purchase Order (${po.items.length} items, dated ${po.date})? This cannot be undone.`)) return;
+  if(po.payableAdded !== false) s.total_payable = moneyRound((Number(s.total_payable) || 0) - (Number(po.total) || 0)); // پرانا PO کھاتے میں جڑ چکا تھا — واپس
   s.purchaseHistory.splice(poIdx, 1);
   persistAllData();
   renderSupplierPoSection(supplierId);
@@ -22603,6 +22658,7 @@ function openReceiveShipmentModal(supplierId, poIdx){
   renderReceiveShipmentCart();
   updateReceiveShipmentBillPreview();
   document.getElementById('receiveShipmentModal').classList.add('show');
+  AIO_DW.set(document.getElementById('rsDate'), localDateStr(new Date()));
 }
 function closeReceiveShipmentModal(){
   const kept = !receiveEditMode && shipDraftFor(activeReceivePo());
@@ -22797,6 +22853,9 @@ function confirmShipmentReceipt(){
     alert('This shipment has no items. Please add at least one item or cancel.');
     return;
   }
+  const rsDate = readPayDate('rsDate');
+  if(payDateIsFuture(rsDate)) return;
+  if(rsDate < po.date){ alert(`The shipment date cannot be before the order date (${formatDateDMY(po.date)}).`); return; }
   if(!confirm('Confirm that you have physically received this shipment? Stock will be updated.')) return;
   clearShipDraft(po);
 
@@ -22813,13 +22872,15 @@ function confirmShipmentReceipt(){
   });
 
   // ---------- اگر مقدار/قیمت میں فرق آیا ہو تو سپلائر کا واجب الادا خودکار ایڈجسٹ ہو ----------
-  const diff = newTotal - oldTotal;
-  s.total_payable += diff; // TODO: suppliers.total_payable UPDATE
+  // نیا PO (payableAdded:false): پوری وصول شدہ رقم ابھی کھاتے میں؛ پرانا PO (بنتے وقت جڑ چکا): صرف فرق
+  const diff = po.payableAdded === false ? newTotal : newTotal - oldTotal;
+  s.total_payable = moneyRound((Number(s.total_payable) || 0) + diff); // TODO: suppliers.total_payable UPDATE
+  po.payableAdded = true;
 
   po.items = JSON.parse(JSON.stringify(receiveShipmentCart));
   po.total = newTotal;
   po.status = 'received';
-  po.receivedDate = new Date().toISOString().split('T')[0];
+  po.receivedDate = rsDate;
   if(receiveShipmentBillPhoto) po.billPhoto = receiveShipmentBillPhoto;
   // TODO: DB میں purchase_orders.status='received', receipt_photo_url اپڈیٹ ہوگا
 
@@ -32673,9 +32734,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE120';
+  const APP_VERSION = 'AIO2810WE121';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'The word Default no longer shows with item names (cart, bills, print)';
+  const UPDATE_NOTE = 'Supplier is charged only when a shipment is received; date wheel in PO and Receive; PO filters in one dropdown; unpaid bill reminder in cart';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
