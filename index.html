@@ -3093,7 +3093,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE119</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE120</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3312,7 +3312,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE119</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE120</span>
     </div>
   </div>
 
@@ -11545,6 +11545,11 @@ function downloadCsvFile(csvText, fileName){
   URL.revokeObjectURL(url);
 }
 
+// ---------- AIO2810WE120: «Default» ویرینٹ کا لفظ کہیں نہ دکھے — صرف اصل ویرینٹ (500 g، Red…) نام کے ساتھ ----------
+function vName(p, v){ const l = String((v && v.label) || '').trim(); return (/^default$/i.test(l) ? p.name : `${p.name} ${l}`).trim(); }
+function itemDisplayName(n){ return String(n ?? '').replace(/\s+Default$/i, ''); }
+// پرانے محفوظ بل (جن کے نام میں «Default» لگا ہے) دکھاتے/چھاپتے وقت صاف — اصل ڈیٹا نہیں بدلتا
+function cleanInvoiceNames(inv){ return inv && Array.isArray(inv.items) ? Object.assign({}, inv, {items: inv.items.map(it => Object.assign({}, it, {name: itemDisplayName(it.name)}))}) : inv; }
 function getFlatVariants(){
   const flat = [];
   productsData.forEach(p => {
@@ -11553,7 +11558,7 @@ function getFlatVariants(){
         variant_id: v.variant_id,
         product_id: p.product_id,
         label: v.label,
-        name: `${p.name} ${v.label}`.trim(),
+        name: vName(p, v),
         barcode: v.barcode,
         purchase: v.purchase,
         retail: v.retail,
@@ -13458,7 +13463,7 @@ function renderCart(){
     // ---------- AIO910FR009: Fruit Mandi طرز — باری باری سبز/نیلا ابھرا کارڈ، سرخ نمبر، قیمت/تعداد/کل الگ ڈبوں میں ----------
     body.innerHTML = Billing.cart.map((item, idx) => {
       const lineTotal = (item.qty * item.unitPrice).toLocaleString(undefined, {maximumFractionDigits:0});
-      const safeName = String(item.name).replace(/"/g,'&quot;');
+      const safeName = itemDisplayName(item.name).replace(/"/g,'&quot;');
       // ---------- یونٹ: قیمت کے نیچے "/kg"، "/pcs"، "/L" — کھلا وزن (گرام/ml) کا ریٹ فی کلو/لیٹر میں؛ وزن/مائع/لمبائی والی مقدار کے ساتھ چھوٹا یونٹ ----------
       const u = item.unit || 'pcs';
       const looseW = !!item.loose_product_id && (u === 'g' || u === 'ml');
@@ -13469,7 +13474,7 @@ function renderCart(){
       <div class="bcRow ${idx % 2 ? 'alt' : ''}">
         <div class="bcMain">
           <span class="bcSerial">${idx+1}</span>
-          <div class="bcName" title="${safeName}" onclick="openCartItemEdit(${item.variant_id})"><span class="bcNameTxt">${item.name}</span><span class="bcBtns"><button type="button" class="bcEdit" onclick="event.stopPropagation(); openCartItemEdit(${item.variant_id})" title="Edit weight / qty / rate / amount" aria-label="Edit">✏️</button><button type="button" class="bcDel" onclick="event.stopPropagation(); confirmRemoveFromCart(${item.variant_id})" title="Remove this item" aria-label="Remove">🗑️</button><button type="button" class="bcRec" onclick="event.stopPropagation(); showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button></span></div>
+          <div class="bcName" title="${safeName}" onclick="openCartItemEdit(${item.variant_id})"><span class="bcNameTxt">${itemDisplayName(item.name)}</span><span class="bcBtns"><button type="button" class="bcEdit" onclick="event.stopPropagation(); openCartItemEdit(${item.variant_id})" title="Edit weight / qty / rate / amount" aria-label="Edit">✏️</button><button type="button" class="bcDel" onclick="event.stopPropagation(); confirmRemoveFromCart(${item.variant_id})" title="Remove this item" aria-label="Remove">🗑️</button><button type="button" class="bcRec" onclick="event.stopPropagation(); showItemSaleRecord(${item.variant_id})" title="Past rates for this customer">🔁</button></span></div>
           <div class="bcPriceWrap"><input type="number" class="bcPrice ${Number(item.unitPrice) ? '' : 'bcZero'}" value="${Math.round(item.unitPrice * rf * 100) / 100}" min="0" onfocus="this.select()"
                  onchange="updateCartRate(${item.variant_id}, this.value / ${rf})" title="Rate per ${rateUnit}"><span class="bcPerUnit">/${rateUnit}</span></div>
           <div class="bcQty">
@@ -17398,14 +17403,14 @@ function getAllExpiringItems(){
         if(!b.expiryDate || b.qty <= 0) return;
         const exp = new Date(b.expiryDate);
         const daysLeft = Math.ceil((exp - today) / (1000*60*60*24));
-        items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: b.expiryDate, qty: b.qty});
+        items.push({product_id: p.product_id, product_name: vName(p, v), barcode: v.barcode, daysLeft, expiryDate: b.expiryDate, qty: b.qty});
       });
       return;
     }
     if(!v.expiryDate) return;
     const exp = new Date(v.expiryDate);
     const daysLeft = Math.ceil((exp - today) / (1000*60*60*24));
-    items.push({product_id: p.product_id, product_name: `${p.name} ${v.label}`.trim(), barcode: v.barcode, daysLeft, expiryDate: v.expiryDate, qty: v.stock});
+    items.push({product_id: p.product_id, product_name: vName(p, v), barcode: v.barcode, daysLeft, expiryDate: v.expiryDate, qty: v.stock});
   }));
   return items;
 }
@@ -17566,7 +17571,7 @@ function renderLowStockAlerts(){
   const badge = document.getElementById('lowStockCount');
   const lowItems = [];
   productsData.forEach(p => p.variants.forEach(v => {
-    if(v.stock <= v.lowStockAt) lowItems.push({product_id: p.product_id, name: `${p.name} ${v.label}`, stock: v.stock, threshold: v.lowStockAt});
+    if(v.stock <= v.lowStockAt) lowItems.push({product_id: p.product_id, name: vName(p, v), stock: v.stock, threshold: v.lowStockAt});
   }));
 
   badge.textContent = lowItems.length;
@@ -25281,6 +25286,7 @@ function getBillSummaryRows(invoice){
 }
 
 async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchKey = null){
+  invoice = cleanInvoiceNames(invoice);
   const pxWidth = paperWidthMM === 80 ? 576 : 384;
   const canvas = document.getElementById('invoiceCanvas');
   const scale = pxWidth / 576;
@@ -25795,6 +25801,7 @@ function hexToRgba(hex, alpha){
 
 // ---------- A4 رنگین بزنس انوائس — ایپ کے موجودہ تھیم رنگ اور فونٹ میں، دستخط کی لائن کے ساتھ (WhatsApp شیئرنگ/باضابطہ بلوں کے لیے) ----------
 async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
+  invoice = cleanInvoiceNames(invoice);
   const pxWidth = 850;
   const canvas = document.getElementById('invoiceCanvas');
   const theme = THEME_PRESETS.find(t => t.id === AppState.settings.themeId) || THEME_PRESETS[0];
@@ -26874,6 +26881,7 @@ function printPlainTextViaBrowser(text){
 }
 
 function buildInvoicePlainText(invoice){
+  invoice = cleanInvoiceNames(invoice);
   const cols = (AppState.settings.paperWidth || 80) === 80 ? 42 : 32;
   const lines = [];
   lines.push(centerMono(AppState.settings.businessName || 'AIO POS', cols));
@@ -30261,7 +30269,7 @@ function getReportFlatItems(){
     const cat = p.category && p.category.trim() ? p.category.trim() : 'Uncategorized';
     (p.variants || []).forEach(v => {
       flat.push({
-        name: `${p.name} ${v.label || ''}`.trim(),
+        name: vName(p, v),
         category: cat,
         purchase: v.purchase || 0,
         retail: v.retail || 0,
@@ -32665,9 +32673,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE119';
+  const APP_VERSION = 'AIO2810WE120';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Len Den: delete a wrong payment or adjustment (balance fixes itself); new 3D capsule buttons';
+  const UPDATE_NOTE = 'The word Default no longer shows with item names (cart, bills, print)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
