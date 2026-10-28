@@ -1808,6 +1808,46 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+  /* ---------- AIO2810WE116: 📅 تاریخ کا ویل (آڑھت بک جیسا، ریڈیم سبز) — بائیں دن، درمیان مہینہ، دائیں سال؛ اوپر دن کا نام ---------- */
+  .dwBox{--rad:#39ff14; --radTx:#eaffe4; --radDim:#8fc9a2; --radSoft:rgba(57,255,20,.6); --radBg1:#12324a; --radBg2:#06111a; --radCol:#10283a; --radBd:#1f6f5c;
+    display:flex; flex-direction:column; align-items:center; gap:4px; border-radius:14px; padding:6px 8px 8px; margin:8px 0; background:radial-gradient(120% 120% at 50% 0%,var(--radBg1),var(--radBg2)); border:1.5px solid var(--radBd); box-shadow:inset 0 0 12px rgba(57,255,20,.08); direction:ltr;}
+  .dwLbl{font-size:11px; font-weight:800; color:var(--radDim); letter-spacing:.3px; align-self:flex-start;}
+  .dwShow{text-align:center; line-height:1.2;}
+  .dwDay{font-size:19px; font-weight:900; color:var(--radTx); text-shadow:0 0 6px var(--rad),0 0 14px var(--radSoft);}
+  .dwFull{font-size:12.5px; font-weight:700; color:var(--radDim);}
+  .dwTag{display:inline-block; margin-left:6px; padding:0 8px; border-radius:9px; font-size:10.5px; line-height:1.7; background:#facc15; color:#1f2937; font-weight:900;}
+  .dwTag.old{background:var(--radBd); color:var(--radTx);}
+  .dwTag.bad{background:#ef4444; color:#fff;}
+  .dwWheels{position:relative; display:flex; justify-content:center; gap:4px; height:66px;}
+  .dwCol{height:66px; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; overscroll-behavior:contain; border-radius:12px; outline:none; background:linear-gradient(var(--radBg2),var(--radCol) 50%,var(--radBg2)); -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent); mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);}
+  .dwCol::-webkit-scrollbar{display:none}
+  .dwCol:focus-visible{box-shadow:0 0 0 2px var(--rad);}
+  .dwCol[data-k="d"]{width:48px} .dwCol[data-k="m"]{width:64px} .dwCol[data-k="y"]{width:66px}
+  .dwSp{height:22px}
+  .dwIt{height:22px; line-height:22px; text-align:center; scroll-snap-align:center; color:var(--radDim); font:900 16px Arial,sans-serif; cursor:pointer; user-select:none;}
+  .dwIt.on{color:var(--radTx); text-shadow:0 0 4px var(--rad),0 0 10px var(--rad),0 0 18px var(--radSoft);}
+  .dwBand{position:absolute; left:50%; transform:translateX(-50%); top:22px; height:22px; width:194px; border-top:1.5px solid var(--radSoft); border-bottom:1.5px solid var(--radSoft); border-radius:9px; pointer-events:none; box-shadow:0 0 10px rgba(57,255,20,.3),inset 0 0 10px rgba(57,255,20,.14);}
+  /* ---------- 📜 لین دین (کھاتہ) — ایک ڈراپ ڈاؤن فلٹر، چھوٹا خلاصہ، ہر قطار میں چلتا بیلنس ---------- */
+  .stBar{display:flex; gap:6px; align-items:center; margin:6px 0 8px;}
+  .stBar select{flex:1; min-width:0; height:36px; padding:4px 8px; border:1.5px solid #c7d2fe; border-radius:10px; font-size:13px; font-weight:800; background:#fff; color:var(--primary-dark);}
+  .stBar button{flex:0 0 auto; height:36px; padding:0 12px; border:none; border-radius:10px; font-size:13px; font-weight:800; cursor:pointer; background:#eef2ff; color:var(--primary-dark);}
+  .stRange{display:flex; gap:6px; align-items:center; margin:-2px 0 8px;}
+  .stRange input{flex:1; min-width:0; height:34px; padding:2px 6px; border:1px solid #dbe1ea; border-radius:8px; font-size:12.5px;}
+  .stSum{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:8px;}
+  .stSum div{background:#f8fafc; border:1px solid #eef1f6; border-radius:10px; padding:6px 8px; text-align:center;}
+  .stSum small{display:block; font-size:10.5px; font-weight:800; color:var(--muted);}
+  .stSum b{font-size:12.5px; white-space:nowrap; letter-spacing:-.2px;}
+  @media (min-width:700px){ .stSum b{font-size:14px;} }
+  .stSum .dr b{color:#b91c1c;} .stSum .cr b{color:#15803d;} .stSum .bal b{color:var(--primary-dark);}
+  .stRow{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 8px; padding:7px 4px; border-bottom:1px solid #eef1f6;}
+  .stRow.click{cursor:pointer;}
+  .stD{font-size:11.5px; color:var(--muted); font-weight:700;}
+  .stT{font-size:13px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis;}
+  .stAmt{text-align:right; font-weight:900; font-size:13.5px; white-space:nowrap;}
+  .stAmt.dr{color:#b91c1c;} .stAmt.cr{color:#15803d;}
+  .stBal{text-align:right; font-size:11px; color:var(--muted); font-weight:700; white-space:nowrap;}
+  .stOpen{background:#fffbeb; border-radius:8px;}
+  @media (min-width:700px){ .stRow{grid-template-columns:minmax(0,1fr) 200px; align-items:center;} .stT{font-size:13.5px;} }
   /* AIO2810WE113: 📦 پیکج (فون کتنے) — Staff & Devices اور Package Plans */
   .mdPlan{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:9px 12px; border-radius:14px; background:linear-gradient(135deg,#f5f3ff,#ede9fe); border:1.5px solid #c4b5fd; color:#5b21b6; font-size:13px; font-weight:700; margin:8px 0;}
   .mdPlan span:first-child{flex:1;}
@@ -3042,7 +3082,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE115</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE116</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3261,7 +3301,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE115</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE116</span>
     </div>
   </div>
 
@@ -4627,10 +4667,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <!-- ⚖️ OPENING / ADJUST BALANCE MODAL — بغیر کسی جعلی بل کے، کسی بھی وقت کسٹمر کا بقایہ سیدھا سیٹ/ایڈجسٹ کریں -->
     <div class="modalOverlay" id="openingBalanceModal" onclick="if(event.target===this) this.classList.remove('show')">
       <div class="modalBox">
-        <h3>⚖️ Set/Adjust Opening Balance</h3>
-        <div class="settingsHint" style="margin-top:0; margin-bottom:10px;">Already owed money before you started using this app? Add it here directly — no need to create a fake bill. This only changes their Receivable total; it does NOT touch stock or create any invoice.</div>
+        <h3 id="obTitle">⚖️ Opening Balance</h3>
+        <div class="settingsHint" id="obHint" style="margin-top:0; margin-bottom:10px;">Old balance from your register? Enter the last amount here — no need to enter old bills. It does not touch stock or bills.</div>
         <div class="txnTypeToggle">
-          <button id="obAdd" class="active" onclick="setOpeningBalanceType('add')">➕ Customer Owes This</button>
+          <button id="obAdd" class="active" onclick="setOpeningBalanceType('add')">➕ To be received</button>
           <button id="obReduce" onclick="setOpeningBalanceType('reduce')">➖ Reduce/Correct Balance</button>
         </div>
         <input type="number" id="obAmount" placeholder="Enter amount" onfocus="this.select()">
@@ -4707,6 +4747,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button id="collectWallet" onclick="setCollectMode('wallet')">💳 Deduct from Wallet</button>
         </div>
         <input type="number" id="collectAmount" placeholder="Enter collected amount" onfocus="this.select()" oninput="updateCollectRemainingHint()">
+        <input type="date" id="collectDate" class="dwWheel" data-label="📅 Payment date">
         <div id="collectRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);"></div>
         <textarea id="collectNote" placeholder="Note (e.g. received via EasyPaisa) — optional" style="width:100%; padding:8px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; min-height:44px;"></textarea>
         <button type="button" class="addBankAccBtn" onclick="attachPaymentSlipImage('collect')">📷 Attach Deposit Slip / Screenshot (optional)</button>
@@ -4727,6 +4768,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <h3>💵 Pay Supplier</h3>
         <div style="background:#fef2f2; color:var(--danger); padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:12px;" id="paySupplierPayableHint">Total Payable: Rs. 0</div>
         <input type="number" id="paySupplierAmount" placeholder="Enter amount paid" onfocus="this.select()" oninput="updatePaySupplierRemainingHint()">
+        <input type="date" id="paySupplierDate" class="dwWheel" data-label="📅 Payment date">
         <div id="paySupplierRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px; background:#eef2ff; color:var(--primary-dark);"></div>
         <select id="paySupplierAccountSelect" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
           <option value="">Cash / No specific account</option>
@@ -4782,6 +4824,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </select>
         <div id="rpBalanceHint" style="display:none; padding:10px 12px; border-radius:8px; font-size:13px; font-weight:700; margin-bottom:10px;"></div>
         <input type="number" id="rpAmount" placeholder="Amount" onfocus="this.select()" oninput="updateRpRemainingHint()">
+        <input type="date" id="rpDate" class="dwWheel" data-label="📅 Payment date">
         <div id="rpRemainingHint" style="display:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:700; margin-bottom:10px;"></div>
         <select id="rpMethod" style="width:100%; padding:10px; margin-top:8px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="onRecordPaymentMethodChange()">
           <option value="Cash">💵 Cash</option>
@@ -18636,6 +18679,119 @@ function resetAllNegativeStockToZero(){
   renderStockAdjustmentScreen();
 }
 
+// ===================== AIO2810WE116: 📅 تاریخ کا ویل — <input type="date" class="dwWheel"> خود ویل بنتا ہے (اصل خانہ چھپا، اسی کی قیمت بدلتی ہے)
+// بائیں دن، درمیان مہینہ (Jan…Dec)، دائیں سال؛ اوپر دن کا نام + پوری تاریخ + Today/Yesterday/Back date۔ انگلی، ماؤس پہیہ، کلک، ↑↓ سب سے =====================
+const AIO_DW = (() => {
+  const H = 22;
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const p2 = n => String(n).padStart(2, '0');
+  const today = () => localDateStr(new Date());
+  const ok = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '');
+  const fill = (col, items) => { col.innerHTML = '<div class="dwSp"></div>' + items.map(([v, t]) => `<div class="dwIt" data-v="${v}">${t}</div>`).join('') + '<div class="dwSp"></div>'; };
+  const idx = (col, v) => Math.max(0, [...col.querySelectorAll('.dwIt')].findIndex(e => +e.dataset.v === +v));
+  function paint(col){
+    const c = col.scrollTop / H;
+    col.querySelectorAll('.dwIt').forEach((e, i) => {
+      const d = Math.abs(i - c);
+      e.style.opacity = Math.max(.2, 1 - d * .4);
+      e.style.filter = d < .5 ? 'none' : `blur(${Math.min(2, d).toFixed(2)}px)`;
+      e.style.transform = `scale(${Math.max(.8, 1 - d * .1).toFixed(3)})`;
+      e.classList.toggle('on', d < .5);
+    });
+  }
+  function go(col, v, smooth){
+    if(col.__busy) return;
+    const t = idx(col, v) * H;
+    if(Math.abs(col.scrollTop - t) > 1){ if(smooth) col.scrollTo({top: t, behavior: 'smooth'}); else col.scrollTop = t; }
+    paint(col);
+  }
+  function apply(box, smooth, fire){
+    const v = box.__v, inp = box.__inp;
+    const dim = new Date(v.y, v.m, 0).getDate(); if(v.d > dim) v.d = dim;
+    const cy = box.querySelector('[data-k="y"]'), cm = box.querySelector('[data-k="m"]'), cd = box.querySelector('[data-k="d"]');
+    if(cd.querySelectorAll('.dwIt').length !== dim){ fill(cd, Array.from({length: dim}, (_, i) => [i + 1, i + 1])); cd.scrollTop = idx(cd, v.d) * H; }
+    go(cd, v.d, smooth); go(cm, v.m, smooth); go(cy, v.y, smooth);
+    const k = `${v.y}-${p2(v.m)}-${p2(v.d)}`, t = today();
+    const yd = new Date(); yd.setDate(yd.getDate() - 1);
+    box.querySelector('.dwDay').textContent = DAYS[new Date(v.y, v.m - 1, v.d).getDay()];
+    box.querySelector('.dwFull').innerHTML = `${v.d} ${MONTHS[v.m - 1]} ${v.y}` +
+      (k === t ? '<span class="dwTag">Today</span>' : k === localDateStr(yd) ? '<span class="dwTag">Yesterday</span>' : k < t ? '<span class="dwTag old">Back date</span>' : '<span class="dwTag bad">Future date</span>');
+    if(fire && inp.value !== k){
+      inp.value = k;
+      inp.dispatchEvent(new Event('input', {bubbles: true}));
+      inp.dispatchEvent(new Event('change', {bubbles: true}));
+    }
+  }
+  function years(box, val){
+    const ty = +today().slice(0, 4), vy = +val.slice(0, 4);
+    const ys = []; for(let y = Math.min(ty - 3, vy); y <= Math.max(ty + 1, vy); y++) ys.push([y, y]);
+    fill(box.querySelector('[data-k="y"]'), ys);
+  }
+  function enhance(inp){
+    if(inp.__dwBox) return inp.__dwBox;
+    const box = document.createElement('div');
+    box.className = 'dwBox';
+    box.innerHTML = `${inp.dataset.label ? `<div class="dwLbl">${inp.dataset.label}</div>` : ''}<div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div><div class="dwWheels"><div class="dwCol" data-k="d" tabindex="0" aria-label="Day"></div><div class="dwCol" data-k="m" tabindex="0" aria-label="Month"></div><div class="dwCol" data-k="y" tabindex="0" aria-label="Year"></div><div class="dwBand"></div></div>`;
+    inp.style.display = 'none';
+    inp.insertAdjacentElement('afterend', box);
+    inp.__dwBox = box; box.__inp = inp;
+    const val = ok(inp.value) ? inp.value : today();
+    years(box, val);
+    fill(box.querySelector('[data-k="m"]'), MONTHS.map((m, i) => [i + 1, m]));
+    box.__v = {y: +val.slice(0, 4), m: +val.slice(5, 7), d: +val.slice(8, 10)};
+    box.querySelectorAll('.dwCol').forEach(col => {
+      col.addEventListener('scroll', () => {
+        paint(col); clearTimeout(col.__t); col.__busy = true;
+        col.__t = setTimeout(() => {
+          col.__busy = false;
+          const its = col.querySelectorAll('.dwIt'); if(!its.length) return;
+          const i = Math.min(its.length - 1, Math.max(0, Math.round(col.scrollTop / H)));
+          const nv = +its[i].dataset.v;
+          if(box.__init || box.__v[col.dataset.k] === nv) return;
+          box.__v[col.dataset.k] = nv; apply(box, true, true);
+        }, 140);
+      }, {passive: true});
+      col.addEventListener('click', e => { const it = e.target.closest('.dwIt'); if(it) col.scrollTo({top: idx(col, it.dataset.v) * H, behavior: 'smooth'}); });
+      col.addEventListener('keydown', e => {
+        if(e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        e.preventDefault(); col.scrollBy({top: e.key === 'ArrowUp' ? -H : H, behavior: 'smooth'});
+      });
+    });
+    set(inp, val);
+    return box;
+  }
+  // نئی قیمت (مثلاً پاپ اپ کھلتے وقت آج کی تاریخ) — پاپ اپ ظاہر ہونے کے بعد بھی جگہ درست رہے
+  function set(inp, val){
+    if(!inp) return;
+    val = ok(val) ? val : today();
+    inp.value = val;
+    const box = inp.__dwBox || enhance(inp);
+    years(box, val);
+    box.__v = {y: +val.slice(0, 4), m: +val.slice(5, 7), d: +val.slice(8, 10)};
+    box.__init = true;
+    [0, 60, 200, 400].forEach(ms => setTimeout(() => { box.__init = true; apply(box, false, false); }, ms));
+    clearTimeout(box.__it); box.__it = setTimeout(() => { box.__init = false; }, 650);
+  }
+  function scan(root){ (root || document).querySelectorAll('input[type="date"].dwWheel').forEach(enhance); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => scan()); else setTimeout(scan, 0);
+  return {set, scan};
+})();
+// ---------- ادائیگی کی تاریخ: ویل والی تاریخ (آگے کی تاریخ نہیں چلے گی) ----------
+function readPayDate(id){
+  const v = (document.getElementById(id) || {}).value || '';
+  return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : localDateStr(new Date());
+}
+function payDateIsFuture(d){
+  if(d > localDateStr(new Date())){ alert('⚠️ This date is in the future. Please choose today or an earlier date.'); return true; }
+  return false;
+}
+// پچھلی تاریخ والی ادائیگی کا وقت بھی اسی دن کا ہو (رپورٹیں اور ترتیب درست رہیں)
+function payCreatedAt(d){
+  if(d === localDateStr(new Date())) return new Date().toISOString();
+  const n = new Date(); return new Date(`${d}T${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:00`).toISOString();
+}
+
 function recordPaymentEntry(entry){
   const payment = Object.assign({
     payment_id: nextPaymentId++,
@@ -18986,24 +19142,21 @@ let profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' 
 
 // ---------- فلٹر بار کا مشترکہ HTML (Bills اور Purchase Orders دونوں کے لیے استعمال ہوتا ہے) ----------
 function buildFilterBarHtml(prefix, statusOptions, filterState, onChangeFn){
+  // AIO2810WE116: سب فلٹر ایک قطار میں دو چھوٹے ڈراپ ڈاؤن — صفحہ ریکارڈ کے لیے خالی رہے
   const dateOptions = [
-    ['all','All Time'], ['today','Today'], ['week','This Week'], ['lastweek','Last Week'],
-    ['month','This Month'], ['lastmonth','Last Month'], ['year','This Year'], ['custom','Custom Range…']
+    ['all','📅 All time'], ['today','Today'], ['week','This week'], ['lastweek','Last week'],
+    ['month','This month'], ['lastmonth','Last month'], ['year','This year'], ['custom','📆 Dates…']
   ];
-  const tabsHtml = statusOptions.map(([key,label]) =>
-    `<button class="${filterState.status===key?'active':''}" onclick="${onChangeFn}('status','${key}')">${label}</button>`
-  ).join('');
-  const dateSelectHtml = `<select class="pfDateSelect" onchange="${onChangeFn}('dateKey', this.value)">
-    ${dateOptions.map(([k,l]) => `<option value="${k}" ${filterState.dateKey===k?'selected':''}>${l}</option>`).join('')}
-  </select>`;
+  const statusSel = `<select onchange="${onChangeFn}('status', this.value)" aria-label="Status">${statusOptions.map(([k,l]) => `<option value="${k}" ${filterState.status===k?'selected':''}>${l}</option>`).join('')}</select>`;
+  const dateSel = `<select onchange="${onChangeFn}('dateKey', this.value)" aria-label="Date">${dateOptions.map(([k,l]) => `<option value="${k}" ${filterState.dateKey===k?'selected':''}>${l}</option>`).join('')}</select>`;
   const customRangeHtml = filterState.dateKey === 'custom' ? `
-    <div class="pfCustomRange">
+    <div class="stRange">
       <input type="date" id="${prefix}CustomFrom" value="${filterState.customFrom||''}">
-      <span style="font-size:11px; color:var(--muted);">to</span>
+      <span style="font-size:12px; color:var(--muted);">to</span>
       <input type="date" id="${prefix}CustomTo" value="${filterState.customTo||''}">
-      <button onclick="${onChangeFn}('customApply', null)">Apply</button>
+      <button type="button" class="testPrintBtn" style="width:auto; margin:0; padding:6px 12px;" onclick="${onChangeFn}('customApply', null)">OK</button>
     </div>` : '';
-  return `<div class="pfFilterBar"><div class="pfStatusTabs">${tabsHtml}</div>${dateSelectHtml}${customRangeHtml}</div>`;
+  return `<div class="stBar">${statusSel}${dateSel}</div>${customRangeHtml}`;
 }
 
 
@@ -19030,6 +19183,7 @@ function openCustomerProfile(customerId){
   currentProfileId = c.customer_id;
   currentProfileType = 'customers';
   profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' }; // ---------- ہر بار نیا پروفائل کھلنے پر فلٹر ری سیٹ ----------
+  stFilter = {key: 'all', from: '', to: ''};
   profileMainMode = 'bills';
 
   const boxEl = document.getElementById('profileBoxEl');
@@ -19048,7 +19202,7 @@ function openCustomerProfile(customerId){
   figuresEl.className = 'profileFigures';
   figuresEl.innerHTML = `
     <div class="pfBox"><div class="pfLabel">💳 Wallet Balance</div><div class="pfValue wallet">Rs. ${c.wallet_balance.toLocaleString()}</div></div>
-    <div class="pfBox"><div class="pfLabel">📥 Receivable (Credit)</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
+    <div class="pfBox"><div class="pfLabel">📥 To be received</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
@@ -19147,17 +19301,139 @@ function renderCustomerBillsSection(customerId){
 }
 
 // ---------- کسٹمر کی Transactions ویو — Khatabook طرز: تاریخ+تفصیل، رقم سبز (وصول) یا سرخ (واپس/ادا)، ساتھ ریٹرن شدہ آئٹمز ----------
+// ===================== AIO2810WE116: 📜 لین دین (کھاتہ) — گاہک/سپلائر کی ہر حرکت تاریخ وار، چلتا بیلنس، ایک ڈراپ ڈاؤن فلٹر، پرنٹ =====================
+// بیلنس آخر سے پیچھے کی طرف: آخری بیلنس ہمیشہ موجودہ بقایہ کے برابر؛ شروع سے پہلے کا فرق «Earlier balance» قطار میں
+let stFilter = {key: 'all', from: '', to: ''};
+const ST_KEYS = [['all','📅 All time'],['today','Today'],['week','This week'],['lastweek','Last week'],['month','This month'],['lastmonth','Last month'],['year','This year'],['custom','📆 Dates…']];
+function stEsc(t){ return String(t ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+function stMoney(n){ return 'Rs. ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
+function buildPartyStatement(type, id){
+  const rows = [];
+  let current = 0, name = '';
+  if(type === 'customers'){
+    const c = customersData.find(x => x.customer_id === id); if(!c) return null;
+    current = Number(c.total_receivable) || 0; name = c.name;
+    invoicesData.filter(inv => inv.customer_id === id && inv.status !== 'voided').forEach(inv => {
+      const d = invoiceReceivableDelta(inv);
+      if(!d) return;
+      const paid = (inv.cash_received_now || 0) + (inv.wallet_applied || 0);
+      rows.push({date: invLocalDate(inv), ts: inv.created_at || '', text: `🧾 ${/^bill/i.test(inv.invoice_no || '') ? '' : 'Bill '}${inv.invoice_no} — Rs. ${(inv.grand_total || 0).toLocaleString()}${paid ? ` (paid ${paid.toLocaleString()})` : ''}`,
+        dr: d > 0 ? d : 0, cr: d < 0 ? -d : 0, open: `closeProfileModal(); openInvoicePreview(${inv.invoice_id});`});
+    });
+    (c.walletHistory || []).forEach((h, i) => {
+      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})`, dr: 0, cr: h.amount});
+      else if(h.type === 'opening_balance') rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: true, text: `⚖️ ${h.direction === 'add' ? 'Opening balance' : 'Balance corrected'}${h.note && !/^(Opening balance( set)?|Balance corrected)$/.test(h.note) ? ' — ' + h.note : ''}`, dr: h.direction === 'add' ? h.amount : 0, cr: h.direction === 'add' ? 0 : h.amount});
+    });
+  } else {
+    const s = suppliersData.find(x => x.supplier_id === id); if(!s) return null;
+    current = Number(s.total_payable) || 0; name = s.name;
+    (s.purchaseHistory || []).forEach((po, idx) => rows.push({date: po.date, ts: (po.date || '') + 'T09:00', text: `📦 Purchase order — ${po.items.length} item(s)${po.status === 'received' ? '' : ' (not received yet)'}`,
+      dr: po.total || 0, cr: 0, open: `closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});`}));
+    (s.ledgerHistory || []).forEach((h, i) => {
+      const ts = (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0');
+      if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}`, dr: 0, cr: h.amount});
+      else if(h.type === 'return') rows.push({date: h.date, ts, text: `↩️ ${h.note || 'Item return'}`, dr: 0, cr: h.amount});
+      else if(h.type === 'adjust') rows.push({date: h.date, ts, text: `✏️ Shipment edited${h.note ? ' — ' + h.note : ''}`, dr: h.amount > 0 ? h.amount : 0, cr: h.amount < 0 ? -h.amount : 0});
+      else if(h.type === 'opening_balance') rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: true, text: `⚖️ ${h.direction === 'add' ? 'Opening balance' : 'Balance corrected'}${h.note && !/^(Opening balance|Balance corrected)$/.test(h.note) ? ' — ' + h.note : ''}`, dr: h.direction === 'add' ? h.amount : 0, cr: h.direction === 'add' ? 0 : h.amount});
+    });
+  }
+  // اوپننگ بیلنس سب سے پہلے (رجسٹر کا پرانا بقایہ) — بعد میں ڈالا ہو تو بھی پہلی تاریخ پر، ساتھ اصل تاریخ لکھی
+  const firstDate = rows.filter(x => !x.ob).map(x => x.date).sort()[0];
+  rows.forEach(x => { if(x.ob && firstDate && firstDate < x.date){ x.text += ` (entered ${formatDateDMY(x.date)})`; x.date = firstDate; x.ts = ''; } });
+  rows.sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.ts).localeCompare(String(b.ts)));
+  let run = current;
+  for(let i = rows.length - 1; i >= 0; i--){ rows[i].bal = run; run = moneyRound(run - rows[i].dr + rows[i].cr); }
+  return {rows, current, earlier: moneyRound(run), name};
+}
+function stFiltered(st){
+  const r = getDateRangeForKey(stFilter.key, stFilter.from, stFilter.to);
+  if(!r) return {rows: st.rows, before: st.earlier, label: 'All time'};
+  const from = localDateStr(r.from), to = localDateStr(r.to);
+  const rows = st.rows.filter(x => x.date >= from && x.date <= to);
+  const prev = st.rows.filter(x => x.date < from);
+  const before = prev.length ? prev[prev.length - 1].bal : st.earlier;
+  return {rows, before, label: `${formatDateDMY(from)} to ${formatDateDMY(to)}`};
+}
+function setStatementFilter(key){
+  stFilter.key = key;
+  if(key === 'custom' && !stFilter.from){ const t = new Date(); stFilter.to = localDateStr(t); t.setDate(1); stFilter.from = localDateStr(t); }
+  renderPartyStatementInto(currentProfileType, currentProfileId);
+}
+function setStatementRange(){
+  stFilter.from = document.getElementById('stFrom').value; stFilter.to = document.getElementById('stTo').value;
+  renderPartyStatementInto(currentProfileType, currentProfileId);
+}
+function renderPartyStatementInto(type, id){
+  const el = document.getElementById('stWrap'); if(!el) return;
+  const st = buildPartyStatement(type, id); if(!st) return;
+  const f = stFiltered(st), sup = type === 'suppliers';
+  const totDr = f.rows.reduce((t, x) => t + x.dr, 0), totCr = f.rows.reduce((t, x) => t + x.cr, 0);
+  const closing = f.rows.length ? f.rows[f.rows.length - 1].bal : f.before;
+  const drLbl = sup ? '📦 Purchased' : '🧾 Billed', crLbl = sup ? '💵 Paid' : '📥 Received';
+  const balLbl = sup ? 'To be paid' : 'To be received';
+  el.innerHTML = `
+    <div class="stBar">
+      <select onchange="setStatementFilter(this.value)" aria-label="Filter">${ST_KEYS.map(([k, l]) => `<option value="${k}" ${stFilter.key === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <button type="button" onclick="printPartyStatement()" title="Print">🖨️ Print</button>
+      <button type="button" onclick="sharePartyStatement()" title="Share on WhatsApp">📤</button>
+    </div>
+    ${stFilter.key === 'custom' ? `<div class="stRange"><input type="date" id="stFrom" value="${stFilter.from}" onchange="setStatementRange()"><span style="font-size:12px; color:var(--muted);">to</span><input type="date" id="stTo" value="${stFilter.to}" onchange="setStatementRange()"></div>` : ''}
+    <div class="stSum"><div class="dr"><small>${drLbl}</small><b>${stMoney(totDr)}</b></div><div class="cr"><small>${crLbl}</small><b>${stMoney(totCr)}</b></div><div class="bal"><small>${balLbl}</small><b>${stMoney(closing)}</b></div></div>
+    ${f.before ? `<div class="stRow stOpen"><div><div class="stD">${stFilter.key === 'all' ? 'Before' : 'Before ' + f.label.split(' to ')[0]}</div><div class="stT">Earlier balance</div></div><div><div class="stAmt">${stMoney(f.before)}</div></div></div>` : ''}
+    ${f.rows.length ? f.rows.slice().reverse().map(x => `
+      <div class="stRow${x.open ? ' click' : ''}" ${x.open ? `onclick="${x.open}"` : ''}>
+        <div><div class="stD">${formatDateDMY(x.date)}</div><div class="stT">${stEsc(x.text)}</div></div>
+        <div><div class="stAmt ${x.dr ? 'dr' : 'cr'}">${x.dr ? '+ ' + stMoney(x.dr) : '− ' + stMoney(x.cr)}</div><div class="stBal">Bal. ${stMoney(x.bal)}</div></div>
+      </div>`).join('') : `<div class="profileEmpty">No transactions in this period</div>`}`;
+}
+function partyStatementLines(){
+  const st = buildPartyStatement(currentProfileType, currentProfileId); if(!st) return null;
+  return {st, f: stFiltered(st), sup: currentProfileType === 'suppliers'};
+}
+function printPartyStatement(){
+  const o = partyStatementLines(); if(!o) return;
+  const {st, f, sup} = o;
+  const shop = stEsc(AppState.settings.businessName || 'AIO POS');
+  const closing = f.rows.length ? f.rows[f.rows.length - 1].bal : f.before;
+  const rowsHtml = (f.before ? `<tr class="o"><td></td><td>Earlier balance</td><td></td><td></td><td>${stMoney(f.before)}</td></tr>` : '') +
+    f.rows.map(x => `<tr><td>${formatDateDMY(x.date)}</td><td>${stEsc(x.text)}</td><td class="r">${x.dr ? stMoney(x.dr) : ''}</td><td class="g">${x.cr ? stMoney(x.cr) : ''}</td><td>${stMoney(x.bal)}</td></tr>`).join('');
+  const w = window.open('', '_blank');
+  if(!w){ alert('Please allow pop-ups to print.'); return; }
+  w.document.write(`<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${stEsc(st.name)} — Statement</title><style>
+    body{font-family:Arial,sans-serif; padding:16px; color:#111;} h2{margin:0;} .m{color:#555; font-size:13px; margin:4px 0 12px;}
+    table{border-collapse:collapse; width:100%; font-size:13px;} th,td{border:1px solid #cbd5e1; padding:6px 8px; text-align:left;} th{background:#f1f5f9;}
+    td:nth-child(n+3), th:nth-child(n+3){text-align:right; white-space:nowrap;} .r{color:#b91c1c;} .g{color:#15803d;} tr.o td{background:#fffbeb; font-weight:bold;}
+    .t{margin-top:10px; font-size:15px; font-weight:bold; text-align:right;}</style></head><body>
+    <h2>${shop}</h2><div class="m">📜 ${sup ? 'Supplier' : 'Customer'}: <b>${stEsc(st.name)}</b> &nbsp;•&nbsp; ${f.label} &nbsp;•&nbsp; Printed ${formatDateDMY(localDateStr(new Date()))}</div>
+    <table><tr><th>Date</th><th>Detail</th><th>${sup ? 'Purchased (+)' : 'Billed (+)'}</th><th>${sup ? 'Paid (−)' : 'Received (−)'}</th><th>Balance</th></tr>${rowsHtml || '<tr><td colspan="5">No transactions</td></tr>'}</table>
+    <div class="t">${sup ? 'To be paid' : 'To be received'}: ${stMoney(closing)}</div>
+    <script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+  w.document.close();
+}
+function sharePartyStatement(){
+  const o = partyStatementLines(); if(!o) return;
+  const {st, f, sup} = o;
+  const closing = f.rows.length ? f.rows[f.rows.length - 1].bal : f.before;
+  const lines = [`📜 ${st.name} — ${f.label}`, ''];
+  if(f.before) lines.push(`Earlier balance: ${stMoney(f.before)}`);
+  f.rows.forEach(x => lines.push(`${formatDateDMY(x.date)} | ${x.text} | ${x.dr ? '+' + stMoney(x.dr) : '−' + stMoney(x.cr)} | Bal ${stMoney(x.bal)}`));
+  lines.push('', `${sup ? 'To be paid' : 'To be received'}: ${stMoney(closing)}`);
+  const text = brandMsg(lines.join('\n'));
+  if(navigator.share) navigator.share({title: st.name, text}).catch(() => {});
+  else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
 function renderCustomerTransactionsSection(customerId){
   const c = customersData.find(x => x.customer_id === customerId);
   if(!c) return;
 
-  const ledgerHtml = c.walletHistory.length === 0
-    ? `<div class="profileEmpty">No transactions yet</div>`
-    : c.walletHistory.map(h => {
+  const walletRows = (c.walletHistory || []).filter(h => h.type === 'deposit' || h.type === 'redeem');
+  const ledgerHtml = walletRows.length === 0
+    ? `<div class="profileEmpty">No wallet entries</div>`
+    : walletRows.map(h => {
         let label, isGot;
         if(h.type === 'deposit'){ label = '➕ Added to Wallet'; isGot = true; }
-        else if(h.type === 'redeem'){ label = '➖ Withdrawn from Wallet'; isGot = false; }
-        else { label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`; isGot = true; }
+        else { label = '➖ Withdrawn from Wallet'; isGot = false; }
         return `<div class="ledgerRow"><div class="lrTop">
             <div><div class="lrDate">${h.date ? new Date(h.date).toLocaleDateString('en-GB') : ''}</div><div class="lrDesc">${label}</div></div>
             <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${h.amount.toLocaleString()}</div>
@@ -19179,11 +19455,12 @@ function renderCustomerTransactionsSection(customerId){
         </div></div>`).join('');
 
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${c.walletHistory.length} entries</span></div>
-    <div>${ledgerHtml}</div>
-    <div class="profileSectionTitle"><span>↩️ Returned Items</span><span class="cnt">${returnedItems.length} item(s)</span></div>
-    <div>${returnsHtml}</div>
+    <div class="profileSectionTitle"><span>📜 Transactions (Len Den)</span></div>
+    <div id="stWrap"></div>
+    ${walletRows.length ? `<div class="profileSectionTitle"><span>💳 Wallet</span><span class="cnt">${walletRows.length} entries</span></div><div>${ledgerHtml}</div>` : ''}
+    ${returnedItems.length ? `<div class="profileSectionTitle"><span>↩️ Returned Items</span><span class="cnt">${returnedItems.length} item(s)</span></div><div>${returnsHtml}</div>` : ''}
   `;
+  renderPartyStatementInto('customers', customerId);
 }
 
 // ---------- Bills فلٹر بار سے کال ہوتا ہے (اسٹیٹس ٹیب یا تاریخ ڈراپ ڈاؤن بدلنے پر) ----------
@@ -19485,6 +19762,7 @@ function openSupplierProfile(supplierId){
   currentProfileId = s.supplier_id;
   currentProfileType = 'suppliers';
   profilePoFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' }; // ---------- ہر بار نیا پروفائل کھلنے پر فلٹر ری سیٹ ----------
+  stFilter = {key: 'all', from: '', to: ''};
   profileMainMode = 'bills';
 
   const boxEl = document.getElementById('profileBoxEl');
@@ -19509,13 +19787,14 @@ function openSupplierProfile(supplierId){
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures single';
   figuresEl.innerHTML = `
-    <div class="pfBox"><div class="pfLabel">📤 Payable (we owe)</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
+    <div class="pfBox"><div class="pfLabel">📤 To be paid</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
   document.getElementById('profileQuickActions').innerHTML = `
     <button style="background:linear-gradient(155deg,#3b82f6,#1e3a8a);" onclick="closeProfileModal(); openPoModal(${s.supplier_id});"><span class="sideIcon">📦</span><span class="sideLabel">New PO</span></button>
     <button style="background:linear-gradient(155deg,#ef4444,#b91c1c);" onclick="openPaySupplierModal(${s.supplier_id});"><span class="sideIcon">💵</span><span class="sideLabel">Pay Supplier</span></button>
+    <button style="background:linear-gradient(155deg,#f59e0b,#c2410c);" onclick="closeProfileModal(); openOpeningBalanceModal(${s.supplier_id}, 'suppliers');"><span class="sideIcon">⚖️</span><span class="sideLabel">Opening Bal.</span></button>
     <button style="background:linear-gradient(155deg,#8b5cf6,#5b21b6);" onclick="shareSupplierProfile(${s.supplier_id})"><span class="sideIcon">🪪</span><span class="sideLabel">Profile</span></button>
     <button id="profileModeBtn" style="background:linear-gradient(155deg,#475569,#1e293b);" onclick="toggleProfileMainMode()"><span class="sideIcon">📜</span><span class="sideLabel">Transactions</span></button>
     <button class="admin-only" style="background:linear-gradient(155deg,#7f1d1d,#450a0a); margin-top:10px;" onclick="secureDeleteParty('suppliers', ${s.supplier_id})"><span class="sideIcon">🗑️</span><span class="sideLabel">Delete</span></button>
@@ -19589,22 +19868,11 @@ function renderSupplierPoSection(supplierId){
 function renderSupplierTransactionsSection(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
-  const ledger = s.ledgerHistory || [];
-  const ledgerHtml = ledger.length === 0
-    ? `<div class="profileEmpty">No transactions yet</div>`
-    : ledger.map(h => {
-        const label = h.type === 'payment' ? '💵 Payment Sent' : h.type === 'return' ? '↩️ Item Return' : h.type === 'adjust' ? '✏️ Shipment Edited' : h.type;
-        const isGot = h.type === 'return' || (h.type === 'adjust' && h.amount < 0); // ریٹرن/کمی ہمارے حق میں — سبز، ادائیگی/اضافہ سرخ
-        return `<div class="ledgerRow"><div class="lrTop">
-            <div><div class="lrDate">${h.date}${h.note ? ' — ' + h.note : ''}</div><div class="lrDesc">${label}</div></div>
-            <div class="lrAmount ${isGot?'got':'gave'}">${isGot?'+':'-'} Rs. ${Math.abs(h.amount).toLocaleString()}</div>
-          </div></div>`;
-      }).join('');
-
   document.getElementById('profileSections').innerHTML = `
-    <div class="profileSectionTitle"><span>📜 Transaction History</span><span class="cnt">${ledger.length} entries</span></div>
-    <div>${ledgerHtml}</div>
+    <div class="profileSectionTitle"><span>📜 Transactions (Len Den)</span></div>
+    <div id="stWrap"></div>
   `;
+  renderPartyStatementInto('suppliers', supplierId);
 }
 
 // ---------- Purchase Orders فلٹر بار سے کال ہوتا ہے ----------
@@ -19872,7 +20140,7 @@ function openPaySupplierModal(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
   activePaySupplierId = supplierId;
-  document.getElementById('paySupplierPayableHint').textContent = `Total Payable: Rs. ${s.total_payable.toLocaleString()}`;
+  document.getElementById('paySupplierPayableHint').textContent = `To be paid: Rs. ${s.total_payable.toLocaleString()}`;
   document.getElementById('paySupplierAmount').value = '';
   document.getElementById('paySupplierNote').value = '';
   document.getElementById('paySupplierRemainingHint').style.display = 'none';
@@ -19884,6 +20152,7 @@ function openPaySupplierModal(supplierId){
     accounts.map((acc, idx) => `<option value="${idx}">${(acc.type||'Account')}${acc.number ? ' — '+acc.number : ''}</option>`).join('');
   accSel.value = '';
   document.getElementById('paySupplierModal').classList.add('show');
+  AIO_DW.set(document.getElementById('paySupplierDate'), localDateStr(new Date()));
 }
 function closePaySupplierModal(){
   document.getElementById('paySupplierModal').classList.remove('show');
@@ -19914,6 +20183,8 @@ function confirmPaySupplier(){
   if(amount > financeDummy.cashInHand && !confirm(`This exceeds your current Cash in Hand (Rs. ${financeDummy.cashInHand.toLocaleString()}). Continue anyway?`)){
     return;
   }
+  const payDate = readPayDate('paySupplierDate');
+  if(payDateIsFuture(payDate)) return;
 
   const note = document.getElementById('paySupplierNote').value.trim();
   const accIdx = document.getElementById('paySupplierAccountSelect').value;
@@ -19926,9 +20197,11 @@ function confirmPaySupplier(){
   financeDummy.cashInHand -= amount; // ---------- نقد ادائیگی — یہ رقم اب کیش میں سے نکل گئی ----------
 
   s.ledgerHistory = s.ledgerHistory || [];
-  s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
+  s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note});
 
   const savedPayment = recordPaymentEntry({
+    date: payDate,
+    created_at: payCreatedAt(payDate),
     direction: 'out',
     party_type: 'supplier',
     party_id: s.supplier_id,
@@ -23079,8 +23352,18 @@ function saveWalletTxn(){
 // ---------- ⚖️ Opening/Adjust Balance — بغیر جعلی بل بنائے، کسی بھی وقت کسٹمر کا بقایہ سیدھا سیٹ کریں ----------
 let activeOpeningBalanceCustomerId = null;
 let activeOpeningBalanceType = 'add';
-function openOpeningBalanceModal(customerId){
+let activeOpeningBalanceParty = 'customers'; // AIO2810WE116: سپلائر کا بھی اوپننگ بیلنس
+function openOpeningBalanceModal(customerId, party){
   activeOpeningBalanceCustomerId = customerId;
+  activeOpeningBalanceParty = party === 'suppliers' ? 'suppliers' : 'customers';
+  const sup = activeOpeningBalanceParty === 'suppliers';
+  const rec = sup ? suppliersData.find(x => x.supplier_id === customerId) : customersData.find(x => x.customer_id === customerId);
+  document.getElementById('obTitle').textContent = `⚖️ Opening Balance${rec ? ' — ' + rec.name : ''}`;
+  document.getElementById('obHint').textContent = sup
+    ? 'Old balance from your register? Enter the last amount you have to pay this supplier — no need to enter old bills.'
+    : 'Old balance from your register? Enter the last amount you have to receive from this customer — no need to enter old bills.';
+  document.getElementById('obAdd').textContent = sup ? '➕ To be paid' : '➕ To be received';
+  document.getElementById('obReduce').textContent = '➖ Reduce / Correct';
   activeOpeningBalanceType = 'add';
   setOpeningBalanceType('add');
   document.getElementById('obAmount').value = '';
@@ -23096,6 +23379,23 @@ function saveOpeningBalanceAdjustment(){
   const amount = parseFloat(document.getElementById('obAmount').value) || 0;
   if(amount <= 0){ alert('Please enter a valid amount.'); return; }
   const note = document.getElementById('obNote').value.trim();
+  if(activeOpeningBalanceParty === 'suppliers'){
+    const s = suppliersData.find(x => x.supplier_id === activeOpeningBalanceCustomerId);
+    if(!s) return;
+    if(activeOpeningBalanceType === 'reduce' && amount > (s.total_payable || 0)){
+      if(!confirm(`This would take the balance below zero (currently Rs. ${(s.total_payable || 0).toLocaleString()}). Continue anyway?`)) return;
+    }
+    s.total_payable = moneyRound((Number(s.total_payable) || 0) + (activeOpeningBalanceType === 'add' ? amount : -amount));
+    s.ledgerHistory = s.ledgerHistory || [];
+    s.ledgerHistory.unshift({type: 'opening_balance', amount, direction: activeOpeningBalanceType,
+      note: note || (activeOpeningBalanceType === 'add' ? 'Opening balance' : 'Balance corrected'), date: localDateStr(new Date())});
+    document.getElementById('openingBalanceModal').classList.remove('show');
+    persistAllData();
+    renderPartyList(document.getElementById('partySearchInput')?.value);
+    if(document.getElementById('profileModal')?.classList.contains('show')) openSupplierProfile(s.supplier_id);
+    alert(`✅ ${s.name}'s balance updated. To be paid: Rs. ${s.total_payable.toLocaleString()}`);
+    return;
+  }
   const c = customersData.find(x => x.customer_id === activeOpeningBalanceCustomerId);
   if(!c) return;
 
@@ -23111,13 +23411,13 @@ function saveOpeningBalanceAdjustment(){
     amount,
     direction: activeOpeningBalanceType,
     note: note || (activeOpeningBalanceType === 'add' ? 'Opening balance set' : 'Balance corrected'),
-    date: new Date().toISOString().split('T')[0]
+    date: localDateStr(new Date())
   });
 
   document.getElementById('openingBalanceModal').classList.remove('show');
   persistAllData();
   renderPartyList(document.getElementById('partySearchInput')?.value);
-  alert(`✅ ${c.name}'s balance updated. New Receivable: Rs. ${c.total_receivable.toLocaleString()}`);
+  alert(`✅ ${c.name}'s balance updated. To be received: Rs. ${c.total_receivable.toLocaleString()}`);
 }
 
 // ---------- Wallet History Modal ----------
@@ -23166,13 +23466,14 @@ function openCollectModal(customerId){
   activeCollectCustomerId = customerId;
   activeCollectMode = 'cash';
   document.getElementById('collectModalTitle').textContent = `💰 ${c.name} — Collect Payment`;
-  document.getElementById('collectReceivableHint').textContent = `Total Receivable: Rs. ${c.total_receivable.toLocaleString()}`;
+  document.getElementById('collectReceivableHint').textContent = `To be received: Rs. ${c.total_receivable.toLocaleString()}`;
   setCollectMode('cash');
   document.getElementById('collectAmount').value = '';
   document.getElementById('collectNote').value = '';
   document.getElementById('collectRemainingHint').style.display = 'none';
   removePaymentSlipImage('collect');
   document.getElementById('collectModal').classList.add('show');
+  AIO_DW.set(document.getElementById('collectDate'), localDateStr(new Date()));
 }
 function closeCollectModal(){
   document.getElementById('collectModal').classList.remove('show');
@@ -23207,6 +23508,8 @@ function saveCollectReceivable(){
     alert(`This amount exceeds the customer's total receivable (Rs. ${c.total_receivable.toLocaleString()}).`);
     return;
   }
+  const payDate = readPayDate('collectDate');
+  if(payDateIsFuture(payDate)) return;
   if(activeCollectMode === 'wallet' && amount > c.wallet_balance){
     alert("Customer's wallet doesn't have enough balance.");
     return;
@@ -23227,7 +23530,7 @@ function saveCollectReceivable(){
     type: 'receivable_collected',
     amount,
     via: activeCollectMode,
-    date: new Date().toISOString().split('T')[0]
+    date: payDate
   });
 
   const collectNote = document.getElementById('collectNote').value.trim();
@@ -23242,6 +23545,8 @@ function saveCollectReceivable(){
     method: activeCollectMode === 'wallet' ? 'Wallet' : 'Cash',
     slip_image: paymentSlipImages.collect,
     note: collectNote,
+    date: payDate,
+    created_at: payCreatedAt(payDate),
   });
 
   closeCollectModal();
@@ -23379,7 +23684,7 @@ function renderPaymentsScreen(){
     if(search && !p.party_name.toLowerCase().includes(search)) return false;
     if(dateVal && p.date !== dateVal) return false;
     return true;
-  });
+  }).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.created_at || '').localeCompare(String(a.created_at || ''))); // پچھلی تاریخ والی ادائیگی اپنی جگہ
 
   const totalIn = list.filter(p => p.direction === 'in').reduce((s,p) => s+p.amount, 0);
   const totalOut = list.filter(p => p.direction === 'out').reduce((s,p) => s+p.amount, 0);
@@ -23430,6 +23735,7 @@ function openRecordPaymentModal(){
   populateRecordPaymentPartyDropdown();
   onRecordPaymentMethodChange();
   document.getElementById('recordPaymentModal').classList.add('show');
+  AIO_DW.set(document.getElementById('rpDate'), localDateStr(new Date()));
 }
 function closeRecordPaymentModal(){
   document.getElementById('recordPaymentModal').classList.remove('show');
@@ -23531,6 +23837,8 @@ function saveRecordPaymentModal(){
   }
   const method = document.getElementById('rpMethod').value;
   const note = document.getElementById('rpNote').value.trim();
+  const payDate = readPayDate('rpDate');
+  if(payDateIsFuture(payDate)) return;
 
   let accountTitle = '', accountNumber = '', methodLabel = method;
   if(method !== 'Cash'){
@@ -23557,7 +23865,7 @@ function saveRecordPaymentModal(){
     balanceAfter = c.total_receivable;
     financeDummy.cashInHand += amount;
     c.walletHistory = c.walletHistory || [];
-    c.walletHistory.unshift({type:'receivable_collected', amount, via:method==='Cash'?'cash':'bank', date:new Date().toISOString().split('T')[0]});
+    c.walletHistory.unshift({type:'receivable_collected', amount, via:method==='Cash'?'cash':'bank', date: payDate});
   } else {
     const s = suppliersData.find(x => x.supplier_id === partyId);
     if(!s) return;
@@ -23567,10 +23875,12 @@ function saveRecordPaymentModal(){
     balanceAfter = s.total_payable;
     financeDummy.cashInHand -= amount;
     s.ledgerHistory = s.ledgerHistory || [];
-    s.ledgerHistory.unshift({type:'payment', amount, date:new Date().toISOString().split('T')[0], note});
+    s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note});
   }
 
   const savedPayment = recordPaymentEntry({
+    date: payDate,
+    created_at: payCreatedAt(payDate),
     direction: recordPaymentDirection,
     party_type: recordPaymentDirection === 'in' ? 'customer' : 'supplier',
     party_id: partyId,
@@ -32276,9 +32586,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE115';
+  const APP_VERSION = 'AIO2810WE116';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Future Plans now shows what is available: Admin + Salesman and Multi-Device are live';
+  const UPDATE_NOTE = 'Payments: choose the date on a wheel (back-dated too); supplier opening balance; Len Den statement with one filter, print and share';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
