@@ -1839,7 +1839,18 @@
   .stSum b{font-size:12.5px; white-space:nowrap; letter-spacing:-.2px;}
   @media (min-width:700px){ .stSum b{font-size:14px;} }
   .stSum .dr b{color:#b91c1c;} .stSum .cr b{color:#15803d;} .stSum .bal b{color:var(--primary-dark);}
-  .stRow{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 8px; padding:7px 4px; border-bottom:1px solid #eef1f6;}
+  .stRow{position:relative; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 8px; padding:9px 14px; margin:0 0 8px; border-radius:18px; background:linear-gradient(180deg,#ffffff,#f4f7fb); border:1px solid #e3e9f2; box-shadow:0 3px 0 rgba(15,23,42,.06), 0 6px 14px rgba(15,23,42,.07), inset 0 1px 0 #fff;}
+  .stRow.hasDel{grid-template-columns:minmax(0,1fr) auto 34px; align-items:center;}
+  .stDel{width:32px; height:32px; border:none; border-radius:50%; cursor:pointer; font-size:14px; line-height:1; background:linear-gradient(180deg,#fee2e2,#fecaca); box-shadow:0 2px 0 rgba(185,28,28,.25), 0 3px 8px rgba(185,28,28,.15), inset 0 1px 0 #fff;}
+  .stDel:active{transform:translateY(1px); box-shadow:0 1px 0 rgba(185,28,28,.25);}
+  /* AIO2810WE119: 3D کیپسول بٹن (پرانے ڈبہ نما بٹن کی جگہ) */
+  .capActs{display:flex; flex-wrap:wrap; gap:7px;}
+  .capActs button{border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:800; cursor:pointer; color:#1e293b; background:linear-gradient(180deg,#ffffff,#e2e8f0); box-shadow:0 3px 0 rgba(15,23,42,.16), 0 5px 12px rgba(15,23,42,.10), inset 0 1px 0 #fff; white-space:nowrap;}
+  .capActs button:active{transform:translateY(2px); box-shadow:0 1px 0 rgba(15,23,42,.16);}
+  .capActs .cGo{color:#fff; background:linear-gradient(180deg,#22c55e,#15803d); box-shadow:0 3px 0 #166534, 0 5px 12px rgba(21,128,61,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  .capActs .cBlue{color:#fff; background:linear-gradient(180deg,#3b82f6,#1d4ed8); box-shadow:0 3px 0 #1e3a8a, 0 5px 12px rgba(29,78,216,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  .capActs .cWarn{color:#9a3412; background:linear-gradient(180deg,#fff7ed,#fed7aa); box-shadow:0 3px 0 rgba(194,65,12,.3), 0 5px 12px rgba(194,65,12,.12), inset 0 1px 0 #fff;}
+  .capActs .cDel{color:#b91c1c; background:linear-gradient(180deg,#fff1f2,#fecaca); box-shadow:0 3px 0 rgba(185,28,28,.3), 0 5px 12px rgba(185,28,28,.12), inset 0 1px 0 #fff;}
   .stRow.click{cursor:pointer;}
   .stD{font-size:11.5px; color:var(--muted); font-weight:700;}
   .stT{font-size:13px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis;}
@@ -1847,7 +1858,7 @@
   .stAmt.dr{color:#b91c1c;} .stAmt.cr{color:#15803d;}
   .stBal{text-align:right; font-size:11px; color:var(--muted); font-weight:700; white-space:nowrap;}
   .stOpen{background:#fffbeb; border-radius:8px;}
-  @media (min-width:700px){ .stRow{grid-template-columns:minmax(0,1fr) 200px; align-items:center;} .stT{font-size:13.5px;} }
+  @media (min-width:700px){ .stRow{grid-template-columns:minmax(0,1fr) 200px; align-items:center;} .stRow.hasDel{grid-template-columns:minmax(0,1fr) 200px 34px;} .stT{font-size:13.5px;} }
   /* AIO2810WE113: 📦 پیکج (فون کتنے) — Staff & Devices اور Package Plans */
   .mdPlan{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:9px 12px; border-radius:14px; background:linear-gradient(135deg,#f5f3ff,#ede9fe); border:1.5px solid #c4b5fd; color:#5b21b6; font-size:13px; font-weight:700; margin:8px 0;}
   .mdPlan span:first-child{flex:1;}
@@ -3082,7 +3093,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE118</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE119</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3301,7 +3312,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE118</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE119</span>
     </div>
   </div>
 
@@ -19324,13 +19335,13 @@ function buildPartyStatement(type, id){
     });
     const firstObC = (c.walletHistory || []).map(h => h.type).lastIndexOf('opening_balance'); // سب سے پہلا = اوپننگ، باقی = ایڈجسٹمنٹ (اپنی تاریخ پر)
     (c.walletHistory || []).forEach((h, i) => {
-      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})`, dr: 0, cr: h.amount});
+      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})`, dr: 0, cr: h.amount, del: i});
       else if(h.type === 'opening_balance'){
         const first = i === firstObC, add = h.direction === 'add', cr = add ? 0 : (h.toReceivable != null ? h.toReceivable : h.amount);
         const legacyNote = /^(Opening balance( set)?|Balance corrected)$/.test(h.note || '');
         rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: first,
           text: `⚖️ ${first ? 'Opening balance' : 'Adjustment'} — ${add ? 'to be received' : 'to be paid'}${h.toWallet ? ` (Rs. ${h.toWallet.toLocaleString()} to wallet)` : ''}${h.note && !legacyNote ? ' — ' + h.note : ''}`,
-          dr: add ? h.amount : 0, cr});
+          dr: add ? h.amount : 0, cr, del: i});
       }
     });
   } else {
@@ -19341,7 +19352,7 @@ function buildPartyStatement(type, id){
     const firstObS = (s.ledgerHistory || []).map(h => h.type).lastIndexOf('opening_balance');
     (s.ledgerHistory || []).forEach((h, i) => {
       const ts = (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0');
-      if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}`, dr: 0, cr: h.amount});
+      if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}`, dr: 0, cr: h.amount, del: i});
       else if(h.type === 'return') rows.push({date: h.date, ts, text: `↩️ ${h.note || 'Item return'}`, dr: 0, cr: h.amount});
       else if(h.type === 'adjust') rows.push({date: h.date, ts, text: `✏️ Shipment edited${h.note ? ' — ' + h.note : ''}`, dr: h.amount > 0 ? h.amount : 0, cr: h.amount < 0 ? -h.amount : 0});
       else if(h.type === 'opening_balance'){
@@ -19349,7 +19360,7 @@ function buildPartyStatement(type, id){
         const legacyNote = /^(Opening balance|Balance corrected)$/.test(h.note || '');
         rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: first,
           text: `⚖️ ${first ? 'Opening balance' : 'Adjustment'} — ${add ? 'to be paid' : 'to be received'}${h.note && !legacyNote ? ' — ' + h.note : ''}`,
-          dr: add ? h.amount : 0, cr: add ? 0 : h.amount});
+          dr: add ? h.amount : 0, cr: add ? 0 : h.amount, del: i});
       }
     });
   }
@@ -19398,10 +19409,63 @@ function renderPartyStatementInto(type, id){
     <div class="stSum"><div class="dr"><small>${drLbl}</small><b>${stMoney(totDr)}</b></div><div class="cr"><small>${crLbl}</small><b>${stMoney(totCr)}</b></div><div class="bal"><small>${balLbl}</small><b>${stMoney(Math.abs(closing))}</b></div></div>
     ${f.before ? `<div class="stRow stOpen"><div><div class="stD">${stFilter.key === 'all' ? 'Before' : 'Before ' + f.label.split(' to ')[0]}</div><div class="stT">Earlier balance</div></div><div><div class="stAmt">${stBalTxt(sup, f.before)}</div></div></div>` : ''}
     ${f.rows.length ? f.rows.slice().reverse().map(x => `
-      <div class="stRow${x.open ? ' click' : ''}" ${x.open ? `onclick="${x.open}"` : ''}>
+      <div class="stRow${x.open ? ' click' : ''}${x.del != null ? ' hasDel' : ''}" ${x.open ? `onclick="${x.open}"` : ''}>
         <div><div class="stD">${formatDateDMY(x.date)}</div><div class="stT">${stEsc(x.text)}</div></div>
         <div><div class="stAmt ${x.dr ? 'dr' : 'cr'}">${x.dr ? '+ ' + stMoney(x.dr) : '− ' + stMoney(x.cr)}</div><div class="stBal">Bal. ${stBalTxt(sup, x.bal)}</div></div>
+        ${x.del != null ? `<button type="button" class="stDel" title="Delete this entry" aria-label="Delete" onclick="event.stopPropagation(); deletePartyTxn('${type}', ${id}, ${x.del})">🗑️</button>` : ''}
       </div>`).join('') : `<div class="profileEmpty">No transactions in this period</div>`}`;
+}
+// ---------- AIO2810WE119: 🗑️ لین دین سے غلط اندراج ہٹائیں — اثر بھی واپس (بقایہ، کیش، والٹ، Payments Record)؛ دو تنبیہ + PIN ----------
+// بل اور PO اپنی جگہ سے (بل کھول کر Void / PO میں Delete/Return) — یہاں صرف ادائیگی، وصولی، اوپننگ/ایڈجسٹمنٹ
+function stDropPaymentRecord(partyType, partyId, dir, amount, date){
+  const i = paymentsData.findIndex(p => p.party_type === partyType && p.party_id === partyId && p.direction === dir && Number(p.amount) === Number(amount) && (!date || p.date === date));
+  if(i >= 0) paymentsData.splice(i, 1);
+}
+async function deletePartyTxn(type, id, idx){
+  const sup = type === 'suppliers';
+  const rec = sup ? suppliersData.find(x => x.supplier_id === id) : customersData.find(x => x.customer_id === id);
+  const hist = rec && (sup ? rec.ledgerHistory : rec.walletHistory);
+  const h = hist && hist[idx];
+  if(!h) return;
+  const what = h.type === 'opening_balance' ? 'Opening / adjustment' : sup ? 'Payment sent' : 'Payment received';
+  if(!(await secureDeleteConfirm(`${rec.name} — ${what} ${stMoney(h.amount)} (${formatDateDMY(h.date)})`, 'entry',
+    '<span class="dcNote">The balance will be corrected automatically.</span>'))) return;
+  if(sup){
+    if(h.type === 'payment'){
+      rec.total_payable = moneyRound((Number(rec.total_payable) || 0) + h.amount);
+      financeDummy.cashInHand += h.amount;
+      stDropPaymentRecord('supplier', id, 'out', h.amount, h.date);
+    } else if(h.type === 'opening_balance'){
+      rec.total_payable = moneyRound((Number(rec.total_payable) || 0) + (h.direction === 'add' ? -h.amount : h.amount));
+    } else return;
+    hist.splice(idx, 1);
+  } else {
+    if(h.type === 'receivable_collected'){
+      rec.total_receivable = moneyRound((Number(rec.total_receivable) || 0) + h.amount);
+      if(h.via === 'wallet') rec.wallet_balance = moneyRound((Number(rec.wallet_balance) || 0) + h.amount);
+      else financeDummy.cashInHand -= h.amount;
+      stDropPaymentRecord('customer', id, 'in', h.amount, h.date);
+      hist.splice(idx, 1);
+    } else if(h.type === 'opening_balance'){
+      if(h.direction === 'add') rec.total_receivable = Math.max(0, moneyRound((Number(rec.total_receivable) || 0) - h.amount));
+      else {
+        rec.total_receivable = moneyRound((Number(rec.total_receivable) || 0) + (h.toReceivable != null ? h.toReceivable : h.amount));
+        if(h.toWallet > 0){
+          rec.wallet_balance = Math.max(0, moneyRound((Number(rec.wallet_balance) || 0) - h.toWallet));
+          const wi = hist.findIndex((x, j) => j > idx && x.type === 'deposit' && x.amount === h.toWallet && /^To be paid/.test(x.note || ''));
+          if(wi >= 0) hist.splice(wi, 1);
+        }
+      }
+      hist.splice(idx, 1);
+    } else return;
+  }
+  persistAllData();
+  renderPartyList(document.getElementById('partySearchInput')?.value);
+  if(sup) openSupplierProfile(id); else openCustomerProfile(id);
+  profileMainMode = 'transactions';
+  if(sup) renderSupplierMainContent(id); else renderCustomerMainContent(id);
+  try{ if(document.getElementById('screen-payments')?.classList.contains('active')) renderPaymentsScreen(); }catch(e){}
+  showNavToast('🗑️ Entry deleted — balance corrected');
 }
 function partyStatementLines(){
   const st = buildPartyStatement(currentProfileType, currentProfileId); if(!st) return null;
@@ -19852,13 +19916,13 @@ function renderSupplierPoSection(supplierId){
         const itemsDesc = po.items.slice(0,2).map(i => i.name).join(', ') + (po.items.length > 2 ? ` +${po.items.length-2} more` : '');
         const statusTxt = isPending ? `⏳ Pending • ${daysPending}d` : `✅ Received`;
         const actionBtn = isPending
-          ? `<button class="btnReceiveShipment" onclick="event.stopPropagation(); closeProfileModal(); openReceiveShipmentModal(${s.supplier_id}, ${idx});">🚚 Receive Shipment</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>
-             <button class="btnPrint" style="background:#fee2e2; color:#b91c1c;" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ Delete</button>`
-          : `<button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openEditReceivedShipment(${s.supplier_id}, ${idx});">✏️ Edit</button>
-             <button class="btnPrint" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
+          ? `<button type="button" class="cGo" onclick="event.stopPropagation(); closeProfileModal(); openReceiveShipmentModal(${s.supplier_id}, ${idx});">🚚 Receive</button>
+             <button type="button" class="cBlue" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button type="button" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>
+             <button type="button" class="cDel" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ Delete</button>`
+          : `<button type="button" class="cBlue" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button type="button" onclick="event.stopPropagation(); closeProfileModal(); openEditReceivedShipment(${s.supplier_id}, ${idx});">✏️ Edit</button>
+             <button type="button" class="cWarn" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
         return `
         <div class="billRow ${isPending?'pending':''}" style="flex-direction:column; align-items:stretch; gap:6px; cursor:default;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -19868,7 +19932,7 @@ function renderSupplierPoSection(supplierId){
             </div>
             <div class="brAmount">Rs. ${po.total.toLocaleString()}</div>
           </div>
-          <div style="display:flex; gap:6px;">${actionBtn}</div>
+          <div class="capActs">${actionBtn}</div>
         </div>`;
       }).join('');
 
@@ -32601,9 +32665,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE118';
+  const APP_VERSION = 'AIO2810WE119';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Opening balance / adjustment: To be received or To be paid — for customers and suppliers';
+  const UPDATE_NOTE = 'Len Den: delete a wrong payment or adjustment (balance fixes itself); new 3D capsule buttons';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
