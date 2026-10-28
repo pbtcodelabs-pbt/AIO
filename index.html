@@ -1808,7 +1808,7 @@
   .ilQty b{font-size:13.5px; color:#0f172a;}
   .ilEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:22px 8px;}
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
-  /* AIO2810WE122: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
+  /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
   .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
   .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
   .fltDrop{margin:6px 0 10px; border:1.5px solid #c7d2fe; border-radius:14px; background:#fff;}
@@ -13420,7 +13420,7 @@ function invoiceReceivableDelta(inv){
   const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
   return wasCounterCash ? 0 : ((inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0));
 }
-// ---------- AIO2810WE122: پرانے بقایہ میں اسی گاہک کا حالیہ ادھورا (ادھار) بل ہو تو بتائیں — نیا بل بنا کر رقم دوبارہ نہ جڑے، وہی بل کھولیں ----------
+// ---------- AIO2810WE121: پرانے بقایہ میں اسی گاہک کا حالیہ ادھورا (ادھار) بل ہو تو بتائیں — نیا بل بنا کر رقم دوبارہ نہ جڑے، وہی بل کھولیں ----------
 function renderPendBillHint(customer){
   const el = document.getElementById('pendBillHint'); if(!el) return;
   const editId = editingInvoice()?.invoice_id;
@@ -20975,7 +20975,7 @@ function savePurchaseOrder(){
   // ---------- اہم: صرف آرڈر بنے، ابھی سٹاک میں کچھ شامل نہیں ہوتا ----------
   // مال حقیقت میں تو ابھی ملا ہی نہیں — سٹاک صرف "Receive Shipment" مکمل ہونے پر بڑھے گا۔
   // TODO: یہاں purchase_orders + purchase_order_items table میں INSERT ہوگا (status:'pending_receipt')
-  // AIO2810WE122: آرڈر بنتے وقت سپلائر کے کھاتے میں کچھ نہیں جاتا — شپمنٹ وصول ہونے پر ہی (payableAdded:false)
+  // AIO2810WE121: آرڈر بنتے وقت سپلائر کے کھاتے میں کچھ نہیں جاتا — شپمنٹ وصول ہونے پر ہی (payableAdded:false)
   const poDate = readPayDate('poDate');
   if(payDateIsFuture(poDate)) return;
   s.purchaseHistory = s.purchaseHistory || [];
