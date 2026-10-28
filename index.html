@@ -1829,6 +1829,9 @@
   .dwTag{display:inline-block; margin-top:2px; padding:0 8px; border-radius:9px; font-size:10.5px; line-height:1.7; background:#facc15; color:#1f2937; font-weight:900;}
   .dwTag.old{background:var(--radBd); color:var(--radTx);}
   .dwTag.bad{background:#ef4444; color:#fff;}
+  .dwBox{width:max-content; max-width:100%; margin-left:auto; margin-right:auto; position:relative;}
+  .dwBox.dwEmpty .dwWheels{opacity:.45;}
+  .dwClr{width:26px; height:26px; flex:0 0 26px; border:none; border-radius:50%; cursor:pointer; font-size:12px; font-weight:900; color:#fff; background:rgba(239,68,68,.85); box-shadow:0 2px 6px rgba(0,0,0,.3);}
   .dwWheels{position:relative; display:flex; justify-content:center; gap:3px; height:60px;}
   .dwCol{height:60px; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; overscroll-behavior:contain; border-radius:12px; outline:none; background:linear-gradient(var(--radBg2),var(--radCol) 50%,var(--radBg2)); -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent); mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);}
   .dwCol::-webkit-scrollbar{display:none}
@@ -3104,7 +3107,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE121</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE122</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3323,7 +3326,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE121</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE122</span>
     </div>
   </div>
 
@@ -3844,9 +3847,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <span class="vcFieldLabel">Low Stock Alert At</span>
             <input type="number" id="npLowStockAt" value="5" onfocus="this.select()">
           </div>
-          <div class="vcFieldWrap npExtra">
+          <div class="vcFieldWrap npExtra" style="grid-column:1 / -1;">
             <span class="vcFieldLabel">Expiry Date (optional)</span>
-            <input type="date" id="npExpiry">
+            <input type="date" id="npExpiry" class="dwWheel" data-optional="1" data-range="future">
           </div>
         </div>
         <div class="vcFieldWrap vcFieldFull npExtra">
@@ -5185,7 +5188,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <input type="text" id="expNewName" placeholder="Item / expense name" list="expenseNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <datalist id="expenseNameSuggestions"></datalist>
         <input type="number" id="expNewAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
-        <input type="date" id="expNewDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="expNewDate" class="dwWheel" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input type="text" id="expNewNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('expenseAddModal').classList.remove('show')">Cancel</button>
@@ -5200,7 +5203,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <h3>✏️ Edit Expense</h3>
         <input type="text" id="expEditName" placeholder="Item / expense name" list="expenseNameSuggestions" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <input type="number" id="expEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
-        <input type="date" id="expEditDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="expEditDate" class="dwWheel" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input type="text" id="expEditNote" placeholder="Note (optional)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions">
           <button class="cancelBtn" onclick="document.getElementById('expenseEditModal').classList.remove('show')">Cancel</button>
@@ -5220,7 +5223,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <datalist id="diaryNameSuggestions"></datalist>
         <input type="number" id="diaryNewAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date (change for a back-dated entry)</label>
-        <input type="date" id="diaryNewDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="diaryNewDate" class="dwWheel" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
           <button type="button" id="diaryNewType-owe" class="active" onclick="setDiaryNewType('owe')" style="flex:1;">🔴 I Gave</button>
           <button type="button" id="diaryNewType-get" onclick="setDiaryNewType('get')" style="flex:1;">🟢 I Got</button>
@@ -5244,7 +5247,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         <input type="number" id="diaryAdjustAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date (change for a back-dated entry)</label>
-        <input type="date" id="diaryAdjustDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="diaryAdjustDate" class="dwWheel" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <input type="text" id="diaryAdjustNote" placeholder="What's this for? (optional, e.g. milk, rent)" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modalActions" style="margin-bottom:8px;">
           <button class="saveBtn" style="background:var(--danger);" onclick="diaryAdjustBalance(-1)">🔴 I Gave</button>
@@ -5273,7 +5276,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <h3>✏️ Edit This Entry</h3>
         <input type="number" id="diaryHistEditAmount" placeholder="Amount (Rs.)" onfocus="this.select()" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin:10px 0 8px; font-size:14px;">
         <label style="font-size:11.5px; color:var(--muted); font-weight:700; display:block; margin-bottom:3px;">📅 Date</label>
-        <input type="date" id="diaryHistEditDate" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
+        <input type="date" id="diaryHistEditDate" class="dwWheel" style="width:100%; padding:10px; border:1px solid #dbe1ea; border-radius:8px; margin-bottom:8px; font-size:14px;">
         <div class="modeToggle" style="width:100%; margin-bottom:8px;">
           <button type="button" id="diaryHistEditType-owe" class="active" onclick="setDiaryHistEditType('owe')" style="flex:1;">🔴 I Gave</button>
           <button type="button" id="diaryHistEditType-get" onclick="setDiaryHistEditType('get')" style="flex:1;">🟢 I Got</button>
@@ -15633,7 +15636,7 @@ function renderVariantCardSection(productId){
           ${mk ? `<div class="vlF">Markup %<input type="number" id="markupInput-${v.variant_id}" value="${v.markupPercent ?? AppState.settings.defaultMarkupPercent ?? 0}" onfocus="this.select()" oninput="liveMarkupSync(${productId},${v.variant_id},'markupPercent',this.value)" onchange="updateVariantField(${productId},${v.variant_id},'markupPercent',this.value)"></div>` : ''}
           <div class="vlF wsOnly">Wholesale<input type="number" value="${v.wholesale}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'wholesale',this.value)"></div>
           <div class="vlF">Low stock alert<input type="number" value="${v.lowStockAt ?? 0}" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'lowStockAt',this.value)"></div>
-          <div class="vlF">Expiry<input type="date" class="expiryInput ${tier || ''}" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)"></div>
+          <div class="vlF vlFull">Expiry<input type="date" class="expiryInput dwWheel ${tier || ''}" data-optional="1" data-range="future" value="${v.expiryDate || ''}" onchange="updateVariantField(${productId},${v.variant_id},'expiryDate',this.value,this)"></div>
           <div class="vlF vlLoc">Location<input value="${esc(v.location)}" placeholder="Shelf B" onfocus="this.select()" onchange="updateVariantField(${productId},${v.variant_id},'location',this.value)"></div>
         </div>
         <div class="vlActs">
@@ -16212,10 +16215,12 @@ function renderVariantBatchesModal(){
       return `
       <div class="productCard" style="padding:10px 12px; margin-bottom:8px;">
         <div style="display:flex; gap:8px; align-items:center;">
-          <input type="number" value="${b.qty}" min="0" style="width:70px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateVariantBatch(${b.batchId},'qty',this.value)">
-          <input type="date" class="expiryInput ${tier || ''}" value="${b.expiryDate || ''}" style="flex:1;" onchange="updateVariantBatch(${b.batchId},'expiryDate',this.value)">
+          <span style="font-size:12px; font-weight:800; color:var(--muted);">Qty</span>
+          <input type="number" value="${b.qty}" min="0" style="width:90px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="updateVariantBatch(${b.batchId},'qty',this.value)">
+          <span style="flex:1;"></span>
           <button title="Delete batch" onclick="deleteVariantBatch(${b.batchId})" style="border:none; background:#fef2f2; color:var(--danger); width:32px; height:32px; border-radius:8px; font-size:14px; cursor:pointer; flex:0 0 auto;">🗑️</button>
         </div>
+        <input type="date" class="expiryInput dwWheel ${tier || ''}" data-optional="1" data-range="future" value="${b.expiryDate || ''}" onchange="updateVariantBatch(${b.batchId},'expiryDate',this.value)">
         ${daysLeft !== null ? `<div style="font-size:11px; margin-top:5px; color:${tier==='exp-red'?'var(--danger)':tier==='exp-orange'?'#c2410c':tier==='exp-yellow'?'#92400e':'var(--muted)'};">${daysLeft < 0 ? '❌ Expired' : `⏳ ${daysLeft} days left`}</div>` : ''}
       </div>`;
     }).join('');
@@ -17804,7 +17809,7 @@ function getDiaryDateISO(inputId){
   return new Date(val + 'T12:00:00').toISOString();
 }
 function todayDateInputValue(){
-  return new Date().toISOString().split('T')[0];
+  return localDateStr(new Date()); // مقامی تاریخ (رات 12 سے 5 بجے تک UTC والا پچھلا دن نہیں)
 }
 
 function openDiaryAddModal(){
@@ -18736,12 +18741,15 @@ function resetAllNegativeStockToZero(){
 // ===================== AIO2810WE116: 📅 تاریخ کا ویل — <input type="date" class="dwWheel"> خود ویل بنتا ہے (اصل خانہ چھپا، اسی کی قیمت بدلتی ہے)
 // بائیں دن، درمیان مہینہ (Jan…Dec)، دائیں سال؛ اوپر دن کا نام + پوری تاریخ + Today/Yesterday/Back date۔ انگلی، ماؤس پہیہ، کلک، ↑↓ سب سے =====================
 const AIO_DW = (() => {
+  // AIO2810WE122: ہر جگہ کا ویل — خانے کی قیمت کہیں سے بھی بدلے (JS سے) تو ویل خود ہم آہنگ؛ نئے بنے خانے خود ویل بنتے ہیں؛
+  // data-optional = خالی بھی رہ سکتی ہے (✕ سے صاف)؛ data-range="future" = آگے کے 10 سال (ایکسپائری)
   const H = 20;
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const p2 = n => String(n).padStart(2, '0');
   const today = () => localDateStr(new Date());
   const ok = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '');
+  const VAL = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
   const fill = (col, items) => { col.innerHTML = '<div class="dwSp"></div>' + items.map(([v, t]) => `<div class="dwIt" data-v="${v}">${t}</div>`).join('') + '<div class="dwSp"></div>'; };
   const idx = (col, v) => Math.max(0, [...col.querySelectorAll('.dwIt')].findIndex(e => +e.dataset.v === +v));
   function paint(col){
@@ -18768,32 +18776,47 @@ const AIO_DW = (() => {
     go(cd, v.d, smooth); go(cm, v.m, smooth); go(cy, v.y, smooth);
     const k = `${v.y}-${p2(v.m)}-${p2(v.d)}`, t = today();
     const yd = new Date(); yd.setDate(yd.getDate() - 1);
-    box.querySelector('.dwDay').textContent = DAYS[new Date(v.y, v.m - 1, v.d).getDay()];
-    box.querySelector('.dwFull').innerHTML =
-      (k === t ? '<span class="dwTag">Today</span>' : k === localDateStr(yd) ? '<span class="dwTag">Yesterday</span>' : k < t ? '<span class="dwTag old">Back date</span>' : '<span class="dwTag bad">Future date</span>');
-    if(fire && inp.value !== k){
-      inp.value = k;
+    const fut = inp.dataset.range === 'future';
+    box.classList.toggle('dwEmpty', !box.__set);
+    box.querySelector('.dwDay').textContent = box.__set ? DAYS[new Date(v.y, v.m - 1, v.d).getDay()] : 'No date';
+    box.querySelector('.dwFull').innerHTML = !box.__set ? '<span class="dwTag old">Turn to set</span>' :
+      (k === t ? '<span class="dwTag">Today</span>' : k === localDateStr(yd) ? '<span class="dwTag">Yesterday</span>' :
+       k < t ? `<span class="dwTag ${fut ? 'bad' : 'old'}">${fut ? 'Past date' : 'Back date'}</span>` : `<span class="dwTag ${fut ? 'old' : 'bad'}">${fut ? 'Coming date' : 'Future date'}</span>`);
+    const clr = box.querySelector('.dwClr'); if(clr) clr.style.display = box.__set ? '' : 'none';
+    if(fire && box.__set && VAL.get.call(inp) !== k){
+      inp.__dwSetting = true; inp.value = k; inp.__dwSetting = false;
       inp.dispatchEvent(new Event('input', {bubbles: true}));
       inp.dispatchEvent(new Event('change', {bubbles: true}));
     }
   }
   function years(box, val){
-    const ty = +today().slice(0, 4), vy = +val.slice(0, 4);
-    const ys = []; for(let y = Math.min(ty - 3, vy); y <= Math.max(ty + 1, vy); y++) ys.push([y, y]);
+    const ty = +today().slice(0, 4), vy = +val.slice(0, 4), fut = box.__inp.dataset.range === 'future';
+    const ys = []; for(let y = Math.min(fut ? ty - 1 : ty - 3, vy); y <= Math.max(fut ? ty + 10 : ty + 1, vy); y++) ys.push([y, y]);
     fill(box.querySelector('[data-k="y"]'), ys);
+  }
+  // کہیں سے بھی قیمت لگے تو ویل اسی پر
+  function sync(inp, val){
+    const box = inp.__dwBox; if(!box) return;
+    const has = ok(val);
+    const use = has ? val : today();
+    box.__set = has || !inp.dataset.optional;
+    years(box, use);
+    box.__v = {y: +use.slice(0, 4), m: +use.slice(5, 7), d: +use.slice(8, 10)};
+    box.__init = true;
+    [0, 60, 200, 400].forEach(ms => setTimeout(() => { box.__init = true; apply(box, false, false); }, ms));
+    clearTimeout(box.__it); box.__it = setTimeout(() => { box.__init = false; }, 650);
   }
   function enhance(inp){
     if(inp.__dwBox) return inp.__dwBox;
     const box = document.createElement('div');
     box.className = 'dwBox';
-    box.innerHTML = `<div class="dwWheels"><div class="dwCol" data-k="d" tabindex="0" aria-label="Day"></div><div class="dwCol" data-k="m" tabindex="0" aria-label="Month"></div><div class="dwCol" data-k="y" tabindex="0" aria-label="Year"></div><div class="dwBand"></div></div><div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div>`;
+    box.innerHTML = `<div class="dwWheels"><div class="dwCol" data-k="d" tabindex="0" aria-label="Day"></div><div class="dwCol" data-k="m" tabindex="0" aria-label="Month"></div><div class="dwCol" data-k="y" tabindex="0" aria-label="Year"></div><div class="dwBand"></div></div><div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div>${inp.dataset.optional ? '<button type="button" class="dwClr" title="Clear date" aria-label="Clear date">✕</button>' : ''}`;
     inp.style.display = 'none';
     inp.insertAdjacentElement('afterend', box);
     inp.__dwBox = box; box.__inp = inp;
-    const val = ok(inp.value) ? inp.value : today();
-    years(box, val);
+    Object.defineProperty(inp, 'value', {configurable: true, get(){ return VAL.get.call(this); },
+      set(v){ VAL.set.call(this, v); if(!this.__dwSetting) sync(this, v); }});
     fill(box.querySelector('[data-k="m"]'), MONTHS.map((m, i) => [i + 1, m]));
-    box.__v = {y: +val.slice(0, 4), m: +val.slice(5, 7), d: +val.slice(8, 10)};
     box.querySelectorAll('.dwCol').forEach(col => {
       col.addEventListener('scroll', () => {
         paint(col); clearTimeout(col.__t); col.__busy = true;
@@ -18802,33 +18825,37 @@ const AIO_DW = (() => {
           const its = col.querySelectorAll('.dwIt'); if(!its.length) return;
           const i = Math.min(its.length - 1, Math.max(0, Math.round(col.scrollTop / H)));
           const nv = +its[i].dataset.v;
-          if(box.__init || box.__v[col.dataset.k] === nv) return;
-          box.__v[col.dataset.k] = nv; apply(box, true, true);
+          if(box.__init || (box.__v[col.dataset.k] === nv && box.__set)) return;
+          box.__v[col.dataset.k] = nv; box.__set = true; apply(box, true, true);
         }, 140);
       }, {passive: true});
-      col.addEventListener('click', e => { const it = e.target.closest('.dwIt'); if(it) col.scrollTo({top: idx(col, it.dataset.v) * H, behavior: 'smooth'}); });
+      col.addEventListener('click', e => { const it = e.target.closest('.dwIt'); if(!it) return; if(!box.__set){ box.__set = true; apply(box, false, true); } col.scrollTo({top: idx(col, it.dataset.v) * H, behavior: 'smooth'}); });
       col.addEventListener('keydown', e => {
         if(e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
         e.preventDefault(); col.scrollBy({top: e.key === 'ArrowUp' ? -H : H, behavior: 'smooth'});
       });
     });
-    set(inp, val);
+    const clr = box.querySelector('.dwClr');
+    if(clr) clr.addEventListener('click', () => {
+      inp.__dwSetting = true; inp.value = ''; inp.__dwSetting = false;
+      box.__set = false; apply(box, false, false);
+      inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true}));
+    });
+    // پوشیدہ جگہ (بند پاپ اپ) میں بنا ہو تو نظر آتے ہی صحیح جگہ پر
+    if('IntersectionObserver' in window) new IntersectionObserver(en => { if(en.some(x => x.isIntersecting)){ box.__init = true; apply(box, false, false); setTimeout(() => { box.__init = false; }, 300); } }).observe(box);
+    sync(inp, VAL.get.call(inp));
     return box;
   }
-  // نئی قیمت (مثلاً پاپ اپ کھلتے وقت آج کی تاریخ) — پاپ اپ ظاہر ہونے کے بعد بھی جگہ درست رہے
-  function set(inp, val){
-    if(!inp) return;
-    val = ok(val) ? val : today();
-    inp.value = val;
-    const box = inp.__dwBox || enhance(inp);
-    years(box, val);
-    box.__v = {y: +val.slice(0, 4), m: +val.slice(5, 7), d: +val.slice(8, 10)};
-    box.__init = true;
-    [0, 60, 200, 400].forEach(ms => setTimeout(() => { box.__init = true; apply(box, false, false); }, ms));
-    clearTimeout(box.__it); box.__it = setTimeout(() => { box.__init = false; }, 650);
-  }
+  function set(inp, val){ if(!inp) return; enhance(inp); inp.value = ok(val) ? val : (inp.dataset.optional ? '' : today()); }
   function scan(root){ (root || document).querySelectorAll('input[type="date"].dwWheel').forEach(enhance); }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => scan()); else setTimeout(scan, 0);
+  function start(){
+    scan();
+    new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
+      if(n.nodeType !== 1) return;
+      if(n.matches && n.matches('input[type="date"].dwWheel')) enhance(n); else if(n.querySelector && n.querySelector('input.dwWheel')) scan(n);
+    }))).observe(document.body, {childList: true, subtree: true});
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
   return {set, scan};
 })();
 // ---------- ادائیگی کی تاریخ: ویل والی تاریخ (آگے کی تاریخ نہیں چلے گی) ----------
@@ -32734,9 +32761,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE121';
+  const APP_VERSION = 'AIO2810WE122';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Supplier is charged only when a shipment is received; date wheel in PO and Receive; PO filters in one dropdown; unpaid bill reminder in cart';
+  const UPDATE_NOTE = 'Date wheel with weekday on all date entries: expiry, batches, expenses, diary';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
