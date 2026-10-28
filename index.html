@@ -3082,7 +3082,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE117</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE118</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3301,7 +3301,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE117</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE118</span>
     </div>
   </div>
 
@@ -4670,8 +4670,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <h3 id="obTitle">⚖️ Opening Balance</h3>
         <div class="settingsHint" id="obHint" style="margin-top:0; margin-bottom:10px;">Old balance from your register? Enter the last amount here — no need to enter old bills. It does not touch stock or bills.</div>
         <div class="txnTypeToggle">
-          <button id="obAdd" class="active" onclick="setOpeningBalanceType('add')">➕ To be received</button>
-          <button id="obReduce" onclick="setOpeningBalanceType('reduce')">➖ Reduce/Correct Balance</button>
+          <button id="obAdd" class="active" onclick="setOpeningBalanceType('recv')">📥 To be received</button>
+          <button id="obReduce" onclick="setOpeningBalanceType('pay')">📤 To be paid</button>
         </div>
         <input type="number" id="obAmount" placeholder="Enter amount" onfocus="this.select()">
         <input type="text" id="obNote" placeholder="Note (optional, e.g. 'Old balance before app')" style="margin-top:8px;">
@@ -19307,6 +19307,8 @@ let stFilter = {key: 'all', from: '', to: ''};
 const ST_KEYS = [['all','📅 All time'],['today','Today'],['week','This week'],['lastweek','Last week'],['month','This month'],['lastmonth','Last month'],['year','This year'],['custom','📆 Dates…']];
 function stEsc(t){ return String(t ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
 function stMoney(n){ return 'Rs. ' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
+// منفی بیلنس کو الٹے نام سے (سپلائر -10,000 = ہم نے 10,000 لینے ہیں)
+function stBalTxt(sup, b){ return b < 0 ? `${stMoney(-b)} (${sup ? 'to receive' : 'to pay'})` : stMoney(b); }
 function buildPartyStatement(type, id){
   const rows = [];
   let current = 0, name = '';
@@ -19320,26 +19322,40 @@ function buildPartyStatement(type, id){
       rows.push({date: invLocalDate(inv), ts: inv.created_at || '', text: `🧾 ${/^bill/i.test(inv.invoice_no || '') ? '' : 'Bill '}${inv.invoice_no} — Rs. ${(inv.grand_total || 0).toLocaleString()}${paid ? ` (paid ${paid.toLocaleString()})` : ''}`,
         dr: d > 0 ? d : 0, cr: d < 0 ? -d : 0, open: `closeProfileModal(); openInvoicePreview(${inv.invoice_id});`});
     });
+    const firstObC = (c.walletHistory || []).map(h => h.type).lastIndexOf('opening_balance'); // سب سے پہلا = اوپننگ، باقی = ایڈجسٹمنٹ (اپنی تاریخ پر)
     (c.walletHistory || []).forEach((h, i) => {
       if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})`, dr: 0, cr: h.amount});
-      else if(h.type === 'opening_balance') rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: true, text: `⚖️ ${h.direction === 'add' ? 'Opening balance' : 'Balance corrected'}${h.note && !/^(Opening balance( set)?|Balance corrected)$/.test(h.note) ? ' — ' + h.note : ''}`, dr: h.direction === 'add' ? h.amount : 0, cr: h.direction === 'add' ? 0 : h.amount});
+      else if(h.type === 'opening_balance'){
+        const first = i === firstObC, add = h.direction === 'add', cr = add ? 0 : (h.toReceivable != null ? h.toReceivable : h.amount);
+        const legacyNote = /^(Opening balance( set)?|Balance corrected)$/.test(h.note || '');
+        rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: first,
+          text: `⚖️ ${first ? 'Opening balance' : 'Adjustment'} — ${add ? 'to be received' : 'to be paid'}${h.toWallet ? ` (Rs. ${h.toWallet.toLocaleString()} to wallet)` : ''}${h.note && !legacyNote ? ' — ' + h.note : ''}`,
+          dr: add ? h.amount : 0, cr});
+      }
     });
   } else {
     const s = suppliersData.find(x => x.supplier_id === id); if(!s) return null;
     current = Number(s.total_payable) || 0; name = s.name;
     (s.purchaseHistory || []).forEach((po, idx) => rows.push({date: po.date, ts: (po.date || '') + 'T09:00', text: `📦 Purchase order — ${po.items.length} item(s)${po.status === 'received' ? '' : ' (not received yet)'}`,
       dr: po.total || 0, cr: 0, open: `closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});`}));
+    const firstObS = (s.ledgerHistory || []).map(h => h.type).lastIndexOf('opening_balance');
     (s.ledgerHistory || []).forEach((h, i) => {
       const ts = (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0');
       if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}`, dr: 0, cr: h.amount});
       else if(h.type === 'return') rows.push({date: h.date, ts, text: `↩️ ${h.note || 'Item return'}`, dr: 0, cr: h.amount});
       else if(h.type === 'adjust') rows.push({date: h.date, ts, text: `✏️ Shipment edited${h.note ? ' — ' + h.note : ''}`, dr: h.amount > 0 ? h.amount : 0, cr: h.amount < 0 ? -h.amount : 0});
-      else if(h.type === 'opening_balance') rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: true, text: `⚖️ ${h.direction === 'add' ? 'Opening balance' : 'Balance corrected'}${h.note && !/^(Opening balance|Balance corrected)$/.test(h.note) ? ' — ' + h.note : ''}`, dr: h.direction === 'add' ? h.amount : 0, cr: h.direction === 'add' ? 0 : h.amount});
+      else if(h.type === 'opening_balance'){
+        const first = i === firstObS, add = h.direction === 'add';
+        const legacyNote = /^(Opening balance|Balance corrected)$/.test(h.note || '');
+        rows.push({date: h.date, ts: (h.date || '') + 'T00:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), ob: first,
+          text: `⚖️ ${first ? 'Opening balance' : 'Adjustment'} — ${add ? 'to be paid' : 'to be received'}${h.note && !legacyNote ? ' — ' + h.note : ''}`,
+          dr: add ? h.amount : 0, cr: add ? 0 : h.amount});
+      }
     });
   }
   // اوپننگ بیلنس سب سے پہلے (رجسٹر کا پرانا بقایہ) — بعد میں ڈالا ہو تو بھی پہلی تاریخ پر، ساتھ اصل تاریخ لکھی
   const firstDate = rows.filter(x => !x.ob).map(x => x.date).sort()[0];
-  rows.forEach(x => { if(x.ob && firstDate && firstDate < x.date){ x.text += ` (entered ${formatDateDMY(x.date)})`; x.date = firstDate; x.ts = ''; } });
+  rows.forEach(x => { if(x.ob && firstDate && firstDate < x.date){ x.text += ` (entered ${formatDateDMY(x.date)})`; x.date = firstDate; x.ts = ''; } }); // صرف پہلا اوپننگ؛ ایڈجسٹمنٹ اپنی تاریخ پر
   rows.sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.ts).localeCompare(String(b.ts)));
   let run = current;
   for(let i = rows.length - 1; i >= 0; i--){ rows[i].bal = run; run = moneyRound(run - rows[i].dr + rows[i].cr); }
@@ -19367,10 +19383,11 @@ function renderPartyStatementInto(type, id){
   const el = document.getElementById('stWrap'); if(!el) return;
   const st = buildPartyStatement(type, id); if(!st) return;
   const f = stFiltered(st), sup = type === 'suppliers';
-  const totDr = f.rows.reduce((t, x) => t + x.dr, 0), totCr = f.rows.reduce((t, x) => t + x.cr, 0);
+  const main = f.rows.filter(x => !/^⚖️/.test(x.text)); // خلاصے میں صرف بل/PO اور وصولی/ادائیگی؛ اوپننگ/ایڈجسٹمنٹ بیلنس میں شامل
+  const totDr = main.reduce((t, x) => t + x.dr, 0), totCr = main.reduce((t, x) => t + x.cr, 0);
   const closing = f.rows.length ? f.rows[f.rows.length - 1].bal : f.before;
   const drLbl = sup ? '📦 Purchased' : '🧾 Billed', crLbl = sup ? '💵 Paid' : '📥 Received';
-  const balLbl = sup ? 'To be paid' : 'To be received';
+  const balLbl = sup ? (closing < 0 ? 'To be received' : 'To be paid') : (closing < 0 ? 'To be paid' : 'To be received');
   el.innerHTML = `
     <div class="stBar">
       <select onchange="setStatementFilter(this.value)" aria-label="Filter">${ST_KEYS.map(([k, l]) => `<option value="${k}" ${stFilter.key === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -19378,12 +19395,12 @@ function renderPartyStatementInto(type, id){
       <button type="button" onclick="sharePartyStatement()" title="Share on WhatsApp">📤</button>
     </div>
     ${stFilter.key === 'custom' ? `<div class="stRange"><input type="date" id="stFrom" value="${stFilter.from}" onchange="setStatementRange()"><span style="font-size:12px; color:var(--muted);">to</span><input type="date" id="stTo" value="${stFilter.to}" onchange="setStatementRange()"></div>` : ''}
-    <div class="stSum"><div class="dr"><small>${drLbl}</small><b>${stMoney(totDr)}</b></div><div class="cr"><small>${crLbl}</small><b>${stMoney(totCr)}</b></div><div class="bal"><small>${balLbl}</small><b>${stMoney(closing)}</b></div></div>
-    ${f.before ? `<div class="stRow stOpen"><div><div class="stD">${stFilter.key === 'all' ? 'Before' : 'Before ' + f.label.split(' to ')[0]}</div><div class="stT">Earlier balance</div></div><div><div class="stAmt">${stMoney(f.before)}</div></div></div>` : ''}
+    <div class="stSum"><div class="dr"><small>${drLbl}</small><b>${stMoney(totDr)}</b></div><div class="cr"><small>${crLbl}</small><b>${stMoney(totCr)}</b></div><div class="bal"><small>${balLbl}</small><b>${stMoney(Math.abs(closing))}</b></div></div>
+    ${f.before ? `<div class="stRow stOpen"><div><div class="stD">${stFilter.key === 'all' ? 'Before' : 'Before ' + f.label.split(' to ')[0]}</div><div class="stT">Earlier balance</div></div><div><div class="stAmt">${stBalTxt(sup, f.before)}</div></div></div>` : ''}
     ${f.rows.length ? f.rows.slice().reverse().map(x => `
       <div class="stRow${x.open ? ' click' : ''}" ${x.open ? `onclick="${x.open}"` : ''}>
         <div><div class="stD">${formatDateDMY(x.date)}</div><div class="stT">${stEsc(x.text)}</div></div>
-        <div><div class="stAmt ${x.dr ? 'dr' : 'cr'}">${x.dr ? '+ ' + stMoney(x.dr) : '− ' + stMoney(x.cr)}</div><div class="stBal">Bal. ${stMoney(x.bal)}</div></div>
+        <div><div class="stAmt ${x.dr ? 'dr' : 'cr'}">${x.dr ? '+ ' + stMoney(x.dr) : '− ' + stMoney(x.cr)}</div><div class="stBal">Bal. ${stBalTxt(sup, x.bal)}</div></div>
       </div>`).join('') : `<div class="profileEmpty">No transactions in this period</div>`}`;
 }
 function partyStatementLines(){
@@ -19395,8 +19412,8 @@ function printPartyStatement(){
   const {st, f, sup} = o;
   const shop = stEsc(AppState.settings.businessName || 'AIO POS');
   const closing = f.rows.length ? f.rows[f.rows.length - 1].bal : f.before;
-  const rowsHtml = (f.before ? `<tr class="o"><td></td><td>Earlier balance</td><td></td><td></td><td>${stMoney(f.before)}</td></tr>` : '') +
-    f.rows.map(x => `<tr><td>${formatDateDMY(x.date)}</td><td>${stEsc(x.text)}</td><td class="r">${x.dr ? stMoney(x.dr) : ''}</td><td class="g">${x.cr ? stMoney(x.cr) : ''}</td><td>${stMoney(x.bal)}</td></tr>`).join('');
+  const rowsHtml = (f.before ? `<tr class="o"><td></td><td>Earlier balance</td><td></td><td></td><td>${stBalTxt(sup, f.before)}</td></tr>` : '') +
+    f.rows.map(x => `<tr><td>${formatDateDMY(x.date)}</td><td>${stEsc(x.text)}</td><td class="r">${x.dr ? stMoney(x.dr) : ''}</td><td class="g">${x.cr ? stMoney(x.cr) : ''}</td><td>${stBalTxt(sup, x.bal)}</td></tr>`).join('');
   const w = window.open('', '_blank');
   if(!w){ alert('Please allow pop-ups to print.'); return; }
   w.document.write(`<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${stEsc(st.name)} — Statement</title><style>
@@ -19406,7 +19423,7 @@ function printPartyStatement(){
     .t{margin-top:10px; font-size:15px; font-weight:bold; text-align:right;}</style></head><body>
     <h2>${shop}</h2><div class="m">📜 ${sup ? 'Supplier' : 'Customer'}: <b>${stEsc(st.name)}</b> &nbsp;•&nbsp; ${f.label} &nbsp;•&nbsp; Printed ${formatDateDMY(localDateStr(new Date()))}</div>
     <table><tr><th>Date</th><th>Detail</th><th>${sup ? 'Purchased (+)' : 'Billed (+)'}</th><th>${sup ? 'Paid (−)' : 'Received (−)'}</th><th>Balance</th></tr>${rowsHtml || '<tr><td colspan="5">No transactions</td></tr>'}</table>
-    <div class="t">${sup ? 'To be paid' : 'To be received'}: ${stMoney(closing)}</div>
+    <div class="t">${(sup ? closing >= 0 : closing < 0) ? 'To be paid' : 'To be received'}: ${stMoney(Math.abs(closing))}</div>
     <script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
   w.document.close();
 }
@@ -19415,9 +19432,9 @@ function sharePartyStatement(){
   const {st, f, sup} = o;
   const closing = f.rows.length ? f.rows[f.rows.length - 1].bal : f.before;
   const lines = [`📜 ${st.name} — ${f.label}`, ''];
-  if(f.before) lines.push(`Earlier balance: ${stMoney(f.before)}`);
-  f.rows.forEach(x => lines.push(`${formatDateDMY(x.date)} | ${x.text} | ${x.dr ? '+' + stMoney(x.dr) : '−' + stMoney(x.cr)} | Bal ${stMoney(x.bal)}`));
-  lines.push('', `${sup ? 'To be paid' : 'To be received'}: ${stMoney(closing)}`);
+  if(f.before) lines.push(`Earlier balance: ${stBalTxt(sup, f.before)}`);
+  f.rows.forEach(x => lines.push(`${formatDateDMY(x.date)} | ${x.text} | ${x.dr ? '+' + stMoney(x.dr) : '−' + stMoney(x.cr)} | Bal ${stBalTxt(sup, x.bal)}`));
+  lines.push('', `${(sup ? closing >= 0 : closing < 0) ? 'To be paid' : 'To be received'}: ${stMoney(Math.abs(closing))}`);
   const text = brandMsg(lines.join('\n'));
   if(navigator.share) navigator.share({title: st.name, text}).catch(() => {});
   else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
@@ -19787,7 +19804,9 @@ function openSupplierProfile(supplierId){
   const figuresEl = document.getElementById('profileFigures');
   figuresEl.className = 'profileFigures single';
   figuresEl.innerHTML = `
-    <div class="pfBox"><div class="pfLabel">📤 To be paid</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>
+    ${s.total_payable < 0
+      ? `<div class="pfBox"><div class="pfLabel">📥 To be received (supplier owes us)</div><div class="pfValue wallet">Rs. ${Math.abs(s.total_payable).toLocaleString()}</div></div>`
+      : `<div class="pfBox"><div class="pfLabel">📤 To be paid</div><div class="pfValue payable">Rs. ${s.total_payable.toLocaleString()}</div></div>`}
   `;
 
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم؛ Transactions سب سے نیچے ---
@@ -20140,7 +20159,7 @@ function openPaySupplierModal(supplierId){
   const s = suppliersData.find(x => x.supplier_id === supplierId);
   if(!s) return;
   activePaySupplierId = supplierId;
-  document.getElementById('paySupplierPayableHint').textContent = `To be paid: Rs. ${s.total_payable.toLocaleString()}`;
+  document.getElementById('paySupplierPayableHint').textContent = s.total_payable < 0 ? `To be received from supplier: Rs. ${Math.abs(s.total_payable).toLocaleString()}` : `To be paid: Rs. ${s.total_payable.toLocaleString()}`;
   document.getElementById('paySupplierAmount').value = '';
   document.getElementById('paySupplierNote').value = '';
   document.getElementById('paySupplierRemainingHint').style.display = 'none';
@@ -23359,65 +23378,61 @@ function openOpeningBalanceModal(customerId, party){
   const sup = activeOpeningBalanceParty === 'suppliers';
   const rec = sup ? suppliersData.find(x => x.supplier_id === customerId) : customersData.find(x => x.customer_id === customerId);
   document.getElementById('obTitle').textContent = `⚖️ Opening Balance${rec ? ' — ' + rec.name : ''}`;
-  document.getElementById('obHint').textContent = sup
-    ? 'Old balance from your register? Enter the last amount you have to pay this supplier — no need to enter old bills.'
-    : 'Old balance from your register? Enter the last amount you have to receive from this customer — no need to enter old bills.';
-  document.getElementById('obAdd').textContent = sup ? '➕ To be paid' : '➕ To be received';
-  document.getElementById('obReduce').textContent = '➖ Reduce / Correct';
-  activeOpeningBalanceType = 'add';
-  setOpeningBalanceType('add');
+  // AIO2810WE118: دو خانے — «To be received» (ہم نے لینے ہیں) اور «To be paid» (ہم نے دینے ہیں)؛ اوپننگ بیلنس بھی، بعد میں کھاتا برابر کرنا بھی
+  document.getElementById('obHint').textContent = 'Opening balance from your register, or to settle a difference later. Choose: To be received (we take from them) or To be paid (we give to them).';
+  document.getElementById('obAdd').textContent = '📥 To be received';
+  document.getElementById('obReduce').textContent = '📤 To be paid';
+  setOpeningBalanceType(sup ? 'pay' : 'recv');
   document.getElementById('obAmount').value = '';
   document.getElementById('obNote').value = '';
   document.getElementById('openingBalanceModal').classList.add('show');
 }
 function setOpeningBalanceType(type){
-  activeOpeningBalanceType = type;
-  document.getElementById('obAdd').classList.toggle('active', type==='add');
-  document.getElementById('obReduce').classList.toggle('active', type==='reduce');
+  activeOpeningBalanceType = type === 'pay' ? 'pay' : 'recv';
+  document.getElementById('obAdd').classList.toggle('active', activeOpeningBalanceType === 'recv');
+  document.getElementById('obReduce').classList.toggle('active', activeOpeningBalanceType === 'pay');
 }
 function saveOpeningBalanceAdjustment(){
-  const amount = parseFloat(document.getElementById('obAmount').value) || 0;
+  const amount = moneyRound(parseFloat(document.getElementById('obAmount').value) || 0);
   if(amount <= 0){ alert('Please enter a valid amount.'); return; }
   const note = document.getElementById('obNote').value.trim();
+  const recv = activeOpeningBalanceType === 'recv';
   if(activeOpeningBalanceParty === 'suppliers'){
     const s = suppliersData.find(x => x.supplier_id === activeOpeningBalanceCustomerId);
     if(!s) return;
-    if(activeOpeningBalanceType === 'reduce' && amount > (s.total_payable || 0)){
-      if(!confirm(`This would take the balance below zero (currently Rs. ${(s.total_payable || 0).toLocaleString()}). Continue anyway?`)) return;
-    }
-    s.total_payable = moneyRound((Number(s.total_payable) || 0) + (activeOpeningBalanceType === 'add' ? amount : -amount));
+    // سپلائر: To be paid → واجب الادا بڑھے؛ To be received → کم ہو (منفی = سپلائر نے ہمیں دینے ہیں، آگے کے PO اسی میں سے کٹیں گے)
+    s.total_payable = moneyRound((Number(s.total_payable) || 0) + (recv ? -amount : amount));
     s.ledgerHistory = s.ledgerHistory || [];
-    s.ledgerHistory.unshift({type: 'opening_balance', amount, direction: activeOpeningBalanceType,
-      note: note || (activeOpeningBalanceType === 'add' ? 'Opening balance' : 'Balance corrected'), date: localDateStr(new Date())});
+    s.ledgerHistory.unshift({type: 'opening_balance', amount, direction: recv ? 'recv' : 'add', note, date: localDateStr(new Date())});
     document.getElementById('openingBalanceModal').classList.remove('show');
     persistAllData();
     renderPartyList(document.getElementById('partySearchInput')?.value);
     if(document.getElementById('profileModal')?.classList.contains('show')) openSupplierProfile(s.supplier_id);
-    alert(`✅ ${s.name}'s balance updated. To be paid: Rs. ${s.total_payable.toLocaleString()}`);
+    const bal = s.total_payable;
+    alert(`✅ ${s.name} — ${bal >= 0 ? 'To be paid' : 'To be received'}: Rs. ${Math.abs(bal).toLocaleString()}`);
     return;
   }
   const c = customersData.find(x => x.customer_id === activeOpeningBalanceCustomerId);
   if(!c) return;
-
-  if(activeOpeningBalanceType === 'reduce' && amount > c.total_receivable){
-    if(!confirm(`This would take the balance below zero (currently Rs. ${c.total_receivable.toLocaleString()}). Continue anyway?`)) return;
-  }
-
-  // TODO: یہ receivable_adjustments table میں INSERT ہوگا اور customers.total_receivable UPDATE ہوگا
-  c.total_receivable += (activeOpeningBalanceType === 'add' ? amount : -amount);
   c.walletHistory = c.walletHistory || [];
-  c.walletHistory.unshift({
-    type: 'opening_balance',
-    amount,
-    direction: activeOpeningBalanceType,
-    note: note || (activeOpeningBalanceType === 'add' ? 'Opening balance set' : 'Balance corrected'),
-    date: localDateStr(new Date())
-  });
-
+  if(recv){
+    c.total_receivable = moneyRound((Number(c.total_receivable) || 0) + amount);
+    c.walletHistory.unshift({type: 'opening_balance', amount, direction: 'add', note, date: localDateStr(new Date())});
+  } else {
+    // گاہک کو دینے ہیں: پہلے اس کا بقایہ کم ہو، باقی رقم اس کے والٹ (ایڈوانس) میں — آگے کے ادھار بل خود اسی میں سے کٹیں گے
+    const toRec = Math.min(amount, Math.max(0, Number(c.total_receivable) || 0)), toWallet = moneyRound(amount - toRec);
+    c.total_receivable = moneyRound((Number(c.total_receivable) || 0) - toRec);
+    if(toWallet > 0){
+      c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + toWallet);
+      c.walletHistory.unshift({type: 'deposit', amount: toWallet, note: 'To be paid (opening / adjustment)', date: localDateStr(new Date())});
+    }
+    c.walletHistory.unshift({type: 'opening_balance', amount, direction: 'pay', toReceivable: toRec, toWallet, note, date: localDateStr(new Date())});
+  }
   document.getElementById('openingBalanceModal').classList.remove('show');
   persistAllData();
   renderPartyList(document.getElementById('partySearchInput')?.value);
-  alert(`✅ ${c.name}'s balance updated. To be received: Rs. ${c.total_receivable.toLocaleString()}`);
+  if(document.getElementById('profileModal')?.classList.contains('show')) openCustomerProfile(c.customer_id);
+  alert(`✅ ${c.name} — To be received: Rs. ${c.total_receivable.toLocaleString()}${c.wallet_balance > 0 ? ` • Wallet (we owe): Rs. ${c.wallet_balance.toLocaleString()}` : ''}`);
 }
 
 // ---------- Wallet History Modal ----------
@@ -23433,7 +23448,7 @@ function openHistoryModal(customerId){
       let label;
       if(h.type === 'deposit') label = '➕ Add to Wallet';
       else if(h.type === 'redeem') label = '➖ Withdrawn from Wallet';
-      else if(h.type === 'opening_balance') label = h.direction === 'add' ? `⚖️ Opening Balance Added${h.note ? ' — ' + h.note : ''}` : `⚖️ Balance Reduced${h.note ? ' — ' + h.note : ''}`;
+      else if(h.type === 'opening_balance') label = `⚖️ ${h.direction === 'add' ? 'To be received' : 'To be paid'}${h.note ? ' — ' + h.note : ''}`;
       else label = `📥 Credit Collected (${h.via === 'wallet' ? 'via Wallet' : 'Cash'})`;
       return `
         <div class="walletHistoryRow">
@@ -32586,9 +32601,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE117';
+  const APP_VERSION = 'AIO2810WE118';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Payment date wheel is now slim: one line with day, month, year and the weekday';
+  const UPDATE_NOTE = 'Opening balance / adjustment: To be received or To be paid — for customers and suppliers';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
