@@ -1810,23 +1810,23 @@
   .vcBottomBtns{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
   /* ---------- AIO2810WE116: 📅 تاریخ کا ویل (آڑھت بک جیسا، ریڈیم سبز) — بائیں دن، درمیان مہینہ، دائیں سال؛ اوپر دن کا نام ---------- */
   .dwBox{--rad:#39ff14; --radTx:#eaffe4; --radDim:#8fc9a2; --radSoft:rgba(57,255,20,.6); --radBg1:#12324a; --radBg2:#06111a; --radCol:#10283a; --radBd:#1f6f5c;
-    display:flex; flex-direction:column; align-items:center; gap:4px; border-radius:14px; padding:6px 8px 8px; margin:8px 0; background:radial-gradient(120% 120% at 50% 0%,var(--radBg1),var(--radBg2)); border:1.5px solid var(--radBd); box-shadow:inset 0 0 12px rgba(57,255,20,.08); direction:ltr;}
+    display:flex; flex-direction:row; align-items:center; justify-content:center; gap:10px; border-radius:14px; padding:3px 8px; margin:8px 0; background:radial-gradient(120% 120% at 50% 0%,var(--radBg1),var(--radBg2)); border:1.5px solid var(--radBd); box-shadow:inset 0 0 12px rgba(57,255,20,.08); direction:ltr;}
   .dwLbl{font-size:11px; font-weight:800; color:var(--radDim); letter-spacing:.3px; align-self:flex-start;}
-  .dwShow{text-align:center; line-height:1.2;}
-  .dwDay{font-size:19px; font-weight:900; color:var(--radTx); text-shadow:0 0 6px var(--rad),0 0 14px var(--radSoft);}
+  .dwShow{text-align:center; line-height:1.15; min-width:78px;}
+  .dwDay{font-size:17px; font-weight:900; color:var(--radTx); text-shadow:0 0 6px var(--rad),0 0 14px var(--radSoft);}
   .dwFull{font-size:12.5px; font-weight:700; color:var(--radDim);}
-  .dwTag{display:inline-block; margin-left:6px; padding:0 8px; border-radius:9px; font-size:10.5px; line-height:1.7; background:#facc15; color:#1f2937; font-weight:900;}
+  .dwTag{display:inline-block; margin-top:2px; padding:0 8px; border-radius:9px; font-size:10.5px; line-height:1.7; background:#facc15; color:#1f2937; font-weight:900;}
   .dwTag.old{background:var(--radBd); color:var(--radTx);}
   .dwTag.bad{background:#ef4444; color:#fff;}
-  .dwWheels{position:relative; display:flex; justify-content:center; gap:4px; height:66px;}
-  .dwCol{height:66px; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; overscroll-behavior:contain; border-radius:12px; outline:none; background:linear-gradient(var(--radBg2),var(--radCol) 50%,var(--radBg2)); -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent); mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);}
+  .dwWheels{position:relative; display:flex; justify-content:center; gap:3px; height:60px;}
+  .dwCol{height:60px; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; overscroll-behavior:contain; border-radius:12px; outline:none; background:linear-gradient(var(--radBg2),var(--radCol) 50%,var(--radBg2)); -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent); mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);}
   .dwCol::-webkit-scrollbar{display:none}
   .dwCol:focus-visible{box-shadow:0 0 0 2px var(--rad);}
-  .dwCol[data-k="d"]{width:48px} .dwCol[data-k="m"]{width:64px} .dwCol[data-k="y"]{width:66px}
-  .dwSp{height:22px}
-  .dwIt{height:22px; line-height:22px; text-align:center; scroll-snap-align:center; color:var(--radDim); font:900 16px Arial,sans-serif; cursor:pointer; user-select:none;}
+  .dwCol[data-k="d"]{width:42px} .dwCol[data-k="m"]{width:56px} .dwCol[data-k="y"]{width:60px}
+  .dwSp{height:20px}
+  .dwIt{height:20px; line-height:20px; text-align:center; scroll-snap-align:center; color:var(--radDim); font:900 16px Arial,sans-serif; cursor:pointer; user-select:none;}
   .dwIt.on{color:var(--radTx); text-shadow:0 0 4px var(--rad),0 0 10px var(--rad),0 0 18px var(--radSoft);}
-  .dwBand{position:absolute; left:50%; transform:translateX(-50%); top:22px; height:22px; width:194px; border-top:1.5px solid var(--radSoft); border-bottom:1.5px solid var(--radSoft); border-radius:9px; pointer-events:none; box-shadow:0 0 10px rgba(57,255,20,.3),inset 0 0 10px rgba(57,255,20,.14);}
+  .dwBand{position:absolute; left:50%; transform:translateX(-50%); top:20px; height:20px; width:170px; border-top:1.5px solid var(--radSoft); border-bottom:1.5px solid var(--radSoft); border-radius:9px; pointer-events:none; box-shadow:0 0 10px rgba(57,255,20,.3),inset 0 0 10px rgba(57,255,20,.14);}
   /* ---------- 📜 لین دین (کھاتہ) — ایک ڈراپ ڈاؤن فلٹر، چھوٹا خلاصہ، ہر قطار میں چلتا بیلنس ---------- */
   .stBar{display:flex; gap:6px; align-items:center; margin:6px 0 8px;}
   .stBar select{flex:1; min-width:0; height:36px; padding:4px 8px; border:1.5px solid #c7d2fe; border-radius:10px; font-size:13px; font-weight:800; background:#fff; color:var(--primary-dark);}
@@ -3082,7 +3082,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE116</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE117</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3301,7 +3301,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE116</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE117</span>
     </div>
   </div>
 
@@ -18682,7 +18682,7 @@ function resetAllNegativeStockToZero(){
 // ===================== AIO2810WE116: 📅 تاریخ کا ویل — <input type="date" class="dwWheel"> خود ویل بنتا ہے (اصل خانہ چھپا، اسی کی قیمت بدلتی ہے)
 // بائیں دن، درمیان مہینہ (Jan…Dec)، دائیں سال؛ اوپر دن کا نام + پوری تاریخ + Today/Yesterday/Back date۔ انگلی، ماؤس پہیہ، کلک، ↑↓ سب سے =====================
 const AIO_DW = (() => {
-  const H = 22;
+  const H = 20;
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const p2 = n => String(n).padStart(2, '0');
@@ -18715,7 +18715,7 @@ const AIO_DW = (() => {
     const k = `${v.y}-${p2(v.m)}-${p2(v.d)}`, t = today();
     const yd = new Date(); yd.setDate(yd.getDate() - 1);
     box.querySelector('.dwDay').textContent = DAYS[new Date(v.y, v.m - 1, v.d).getDay()];
-    box.querySelector('.dwFull').innerHTML = `${v.d} ${MONTHS[v.m - 1]} ${v.y}` +
+    box.querySelector('.dwFull').innerHTML =
       (k === t ? '<span class="dwTag">Today</span>' : k === localDateStr(yd) ? '<span class="dwTag">Yesterday</span>' : k < t ? '<span class="dwTag old">Back date</span>' : '<span class="dwTag bad">Future date</span>');
     if(fire && inp.value !== k){
       inp.value = k;
@@ -18732,7 +18732,7 @@ const AIO_DW = (() => {
     if(inp.__dwBox) return inp.__dwBox;
     const box = document.createElement('div');
     box.className = 'dwBox';
-    box.innerHTML = `${inp.dataset.label ? `<div class="dwLbl">${inp.dataset.label}</div>` : ''}<div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div><div class="dwWheels"><div class="dwCol" data-k="d" tabindex="0" aria-label="Day"></div><div class="dwCol" data-k="m" tabindex="0" aria-label="Month"></div><div class="dwCol" data-k="y" tabindex="0" aria-label="Year"></div><div class="dwBand"></div></div>`;
+    box.innerHTML = `<div class="dwWheels"><div class="dwCol" data-k="d" tabindex="0" aria-label="Day"></div><div class="dwCol" data-k="m" tabindex="0" aria-label="Month"></div><div class="dwCol" data-k="y" tabindex="0" aria-label="Year"></div><div class="dwBand"></div></div><div class="dwShow"><div class="dwDay"></div><div class="dwFull"></div></div>`;
     inp.style.display = 'none';
     inp.insertAdjacentElement('afterend', box);
     inp.__dwBox = box; box.__inp = inp;
@@ -32586,9 +32586,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE116';
+  const APP_VERSION = 'AIO2810WE117';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Payments: choose the date on a wheel (back-dated too); supplier opening balance; Len Den statement with one filter, print and share';
+  const UPDATE_NOTE = 'Payment date wheel is now slim: one line with day, month, year and the weekday';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
