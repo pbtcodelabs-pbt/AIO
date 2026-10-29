@@ -1811,6 +1811,27 @@
   /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
   .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
   .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  /* AIO2910TH124: 📝 نوٹ — بل، PO اور شپمنٹ کی یادداشت */
+  .recNotes{margin:6px 0 0; padding:6px 9px; border-radius:10px; background:#fefce8; border:1.5px dashed #eab308; color:#713f12; font-size:12px; font-weight:700; line-height:1.4; text-align:left; white-space:normal; word-break:break-word;}
+  .recNotes > b{font-size:11.5px; color:#a16207;}
+  .recNotes > div + div{margin-top:3px; padding-top:3px; border-top:1px dotted #fde68a;}
+  .recNotes small{color:#a16207; font-weight:900; margin-right:5px;}
+  .recNoteInp{width:100%; box-sizing:border-box; margin:8px 0 2px; padding:9px 12px; border:1.5px dashed #eab308; border-radius:12px; background:#fefce8; color:#713f12; font-size:13px; font-weight:700; font-family:inherit; resize:vertical;}
+  .recNoteInp::placeholder{color:#ca8a04; font-weight:600;}
+  .noteChip{border:none; border-radius:999px; padding:6px 12px; font-weight:900; font-size:12.5px; cursor:pointer; color:#713f12; background:linear-gradient(180deg,#fef08a,#facc15); box-shadow:0 3px 0 #ca8a04, 0 4px 10px rgba(202,138,4,.25), inset 0 1px 0 rgba(255,255,255,.55);}
+  .noteChip:active{transform:translateY(2px); box-shadow:0 1px 0 #ca8a04;}
+  .invNotesStrip{padding:6px 12px 0;}
+  .invNotesStrip .recNotes{cursor:pointer; margin:0 0 4px;}
+  #recNoteModal{z-index:13000;}
+  .recNoteBox{width:min(420px, calc(100vw - 24px)) !important;}
+  .rnList{max-height:42vh; overflow-y:auto; margin:6px 0 8px;}
+  .rnItem{display:flex; align-items:flex-start; gap:8px; padding:7px 9px; margin-bottom:6px; border-radius:10px; background:#fefce8; border:1px solid #fde68a; color:#713f12; font-size:13px; font-weight:700; line-height:1.4; word-break:break-word;}
+  .rnItem > div{flex:1; min-width:0;}
+  .rnItem small{color:#a16207; font-weight:900; margin-right:5px;}
+  .rnItem i{color:#94a3b8; font-weight:600; font-size:11.5px;}
+  .rnItem button{flex:0 0 auto; border:none; width:28px; height:28px; border-radius:50%; background:#fee2e2; color:#b91c1c; font-weight:900; cursor:pointer;}
+  .rnEmpty{text-align:center; color:#94a3b8; font-size:13px; padding:10px;}
+  .rnHint{font-size:11.5px; color:var(--muted); margin:2px 0 4px;}
   .fltDrop{margin:6px 0 10px; border:1.5px solid #c7d2fe; border-radius:14px; background:#fff;}
   .fltDrop > summary{list-style:none; cursor:pointer; padding:9px 12px; font-size:13.5px; font-weight:800; color:var(--primary-dark); display:flex; align-items:center; gap:6px;}
   .fltDrop > summary::-webkit-details-marker{display:none;}
@@ -3210,7 +3231,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2810WE123</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2910TH124</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3429,7 +3450,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2810WE123</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2910TH124</span>
     </div>
   </div>
 
@@ -3795,6 +3816,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             </label>
           </div>
 
+          <input type="text" id="billNoteInput" class="recNoteInp" maxlength="500" placeholder="📝 Note (optional) — only for you, not printed">
           <button class="checkoutBtn" id="checkoutBtn" disabled onclick="finalizeInvoice()">✅ Complete Bill</button>
         </div>
       </div>
@@ -4685,6 +4707,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <div class="totalsBox">
             <div class="grand"><span>Revised Total</span><span id="receiveShipmentTotal">Rs. 0</span></div>
           </div>
+          <div id="rsNotesWrap"></div>
+          <input type="text" id="rsNoteInput" class="recNoteInp" maxlength="500" placeholder="📝 Shipment note (optional) — e.g. 2 cartons short">
           <input type="date" id="rsDate" class="dwWheel">
 
           <div id="rsDraftBanner" class="draftBanner" style="display:none; margin:10px 0 0;"></div>
@@ -4736,6 +4760,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         </div>
         <div class="emptyCart" id="poEmptyMsg" style="padding:20px 0;">No items added — select from the list above</div>
 
+        <input type="text" id="poNoteInput" class="recNoteInp" maxlength="500" placeholder="📝 Note (optional) — only for you">
         <input type="date" id="poDate" class="dwWheel">
         <div class="totalsBox" style="margin-top:6px;">
           <div class="grand"><span>Grand Total</span><span id="poGrandTotal">Rs. 0</span></div>
@@ -5439,6 +5464,21 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     </div>
 
     <!-- INVOICE PREVIEW MODAL (Canvas سے پریمیم انوائس رینڈر) -->
+    <!-- AIO2910TH124: 📝 نوٹ (بل / PO / شپمنٹ) -->
+    <div class="modalOverlay" id="recNoteModal" onclick="if(event.target===this) closeRecNotes()">
+      <div class="modalBox recNoteBox">
+        <h3 id="recNoteTitle" style="margin-top:0;">📝 Note</h3>
+        <div id="recNoteSub" class="rnHint"></div>
+        <div id="recNoteList" class="rnList"></div>
+        <textarea id="recNoteInput" class="recNoteInp" rows="3" maxlength="500" placeholder="e.g. Paid Rs. 2,000 cash, rest next Friday"></textarea>
+        <div class="rnHint">Only for you — not printed on the bill.</div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeRecNotes()">Close</button>
+          <button class="saveBtn" onclick="saveRecNote()">💾 Save Note</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modalOverlay" id="invoicePreviewModal" onclick="if(event.target===this) closeInvoicePreview()">
       <div class="invoicePreviewBox">
         <div class="previewHeader">
@@ -5452,6 +5492,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         <!-- ---------- لائیو پرنٹ سٹائل کنٹرولز — صرف ضروری چیزیں (Alignment + Decimals) ہمیشہ نظر آئیں،
              باقی سب (سائز، موٹائی، رنگ، فونٹ، A4) "More" کے نیچے دبی رہیں تاکہ بل زیادہ سے زیادہ نظر آئے ---------- -->
+        <div id="invNotesStrip" class="invNotesStrip"></div>
         <div class="previewStyleControls compactPsc">
           <div class="pscCompactRow pscEssentialRow">
             <button id="pscAlignLeftBtn" class="pscToggleBtn" onclick="setPreviewAlign('left')">⬅</button>
@@ -11721,6 +11762,8 @@ function resetBillingCart(){
   if(discountEl) discountEl.value = 0;
   const receivedEl = document.getElementById('amountReceivedInput');
   if(receivedEl) receivedEl.value = '';
+  const noteEl = document.getElementById('billNoteInput');
+  if(noteEl) noteEl.value = '';
   Billing.counterSale = true;
   syncCartModeControls();
   renderCart();
@@ -11752,6 +11795,7 @@ function currentBillSnapshot(){
     saleMode: Billing.saleMode,
     discount: document.getElementById('discountInput')?.value || 0,
     received: document.getElementById('amountReceivedInput')?.value || '',
+    note: document.getElementById('billNoteInput')?.value || '',
     heldAt: new Date().toISOString()
   };
 }
@@ -11787,6 +11831,7 @@ function resumeHeldBill(id){
   }
   const d = document.getElementById('discountInput'); if(d) d.value = h.discount || 0;
   const r = document.getElementById('amountReceivedInput'); if(r) r.value = h.received || '';
+  const bn = document.getElementById('billNoteInput'); if(bn) bn.value = h.note || '';
   onCustomerChange(); // کسٹمر/Walk-in حالت، بقایہ اور کارٹ دوبارہ بنائیں
   renderBillingProductGrid();
   renderHeldBills();
@@ -13504,6 +13549,100 @@ function invoiceReceivableDelta(inv){
   const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
   return wasCounterCash ? 0 : ((inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0));
 }
+// ===================== AIO2910TH124: 📝 نوٹ — بل (خاص کر ادھار)، پرچیز آرڈر اور شپمنٹ پر یادداشت؛ صرف اپنے لیے، پرنٹ میں نہیں =====================
+// rec.notes = [{ts, text, by, tag}] — tag 'ship' = شپمنٹ وصول/ایڈٹ کرتے وقت کا نوٹ
+let recNoteTarget = null;
+function recNoteRec(t){
+  if(!t) return null;
+  if(t.kind === 'inv') return invoicesData.find(i => i.invoice_id === t.id) || null;
+  const sp = suppliersData.find(x => x.supplier_id === t.sid);
+  return (sp?.purchaseHistory || [])[t.idx] || null;
+}
+function recNotesList(rec){ return Array.isArray(rec?.notes) ? rec.notes.filter(n => n && String(n.text || '').trim()) : []; }
+function recNoteAdd(rec, text, tag){
+  text = String(text || '').trim();
+  if(!rec || !text) return false;
+  rec.notes = recNotesList(rec);
+  const n = {ts: new Date().toISOString(), text: text.slice(0, 500), by: AppState.currentUser?.name || ''};
+  if(tag) n.tag = tag;
+  rec.notes.push(n);
+  return true;
+}
+function recNoteLine(n){
+  const d = new Date(n.ts);
+  const dt = isNaN(d) ? '' : d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+  return `<small>${n.tag === 'ship' ? '📥 ' : ''}${dt}</small>${stEsc(n.text)}`;
+}
+function recNotesHtml(rec, max){
+  const L = recNotesList(rec);
+  if(!L.length) return '';
+  const show = max ? L.slice(-max) : L;
+  return `<div class="recNotes"><b>📝 Note${L.length > show.length ? ` (+${L.length - show.length} more)` : ''}</b>${show.map(n => `<div>${recNoteLine(n)}</div>`).join('')}</div>`;
+}
+function openRecNotes(kind, a, b){
+  recNoteTarget = kind === 'inv' ? {kind, id: a} : {kind, sid: a, idx: b};
+  const rec = recNoteRec(recNoteTarget);
+  if(!rec){ recNoteTarget = null; return; }
+  if(kind === 'inv'){
+    document.getElementById('recNoteTitle').textContent = `📝 Note — ${rec.invoice_no || 'Bill'}`;
+    document.getElementById('recNoteSub').textContent = `${rec.customer_name || ''} • Rs. ${(rec.grand_total || 0).toLocaleString()}${getInvoiceAmountDue(rec) > 0 ? ` • Due Rs. ${Math.round(getInvoiceAmountDue(rec)).toLocaleString()}` : ''}`;
+  } else {
+    const sp = suppliersData.find(x => x.supplier_id === a) || {};
+    document.getElementById('recNoteTitle').textContent = rec.status === 'received' ? '📝 Note — Shipment' : '📝 Note — Purchase Order';
+    document.getElementById('recNoteSub').textContent = `${sp.name || ''} • ${formatDateDMY(rec.date)} • Rs. ${(rec.total || 0).toLocaleString()}`;
+  }
+  document.getElementById('recNoteInput').value = '';
+  renderRecNotesModal();
+  document.getElementById('recNoteModal').classList.add('show');
+}
+function renderRecNotesModal(){
+  const L = recNotesList(recNoteRec(recNoteTarget));
+  document.getElementById('recNoteList').innerHTML = L.length
+    ? L.map((n, i) => `<div class="rnItem"><div>${recNoteLine(n)}${n.by ? ` <i>— ${stEsc(n.by)}</i>` : ''}</div><button type="button" onclick="deleteRecNote(${i})" title="Delete note">✕</button></div>`).join('')
+    : '<div class="rnEmpty">No notes yet — write one below</div>';
+}
+function saveRecNote(){
+  const el = document.getElementById('recNoteInput');
+  if(!recNoteAdd(recNoteRec(recNoteTarget), el.value)){ el.focus(); return; }
+  el.value = '';
+  persistAllData();
+  renderRecNotesModal();
+  recNotesRefresh();
+  showNavToast('📝 Note saved');
+}
+function deleteRecNote(i){
+  const rec = recNoteRec(recNoteTarget);
+  if(!rec || !confirm('Delete this note?')) return;
+  rec.notes = recNotesList(rec);
+  rec.notes.splice(i, 1);
+  persistAllData();
+  renderRecNotesModal();
+  recNotesRefresh();
+}
+function closeRecNotes(){ document.getElementById('recNoteModal').classList.remove('show'); recNoteTarget = null; }
+function renderInvNotesStrip(){
+  const el = document.getElementById('invNotesStrip'); if(!el) return;
+  const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
+  if(!inv){ el.innerHTML = ''; return; }
+  const h = recNotesHtml(inv);
+  el.innerHTML = h ? h.replace('<div class="recNotes">', `<div class="recNotes" onclick="openRecNotes('inv', ${inv.invoice_id})" title="Tap to add or delete notes">`)
+    : `<button type="button" class="noteChip" onclick="openRecNotes('inv', ${inv.invoice_id})">📝 Add note</button>`;
+}
+// نوٹ بدلا — جو فہرست کھلی ہو وہ تازہ
+function recNotesRefresh(){
+  const shown = id => { const e = document.getElementById(id); return !!(e && e.offsetParent !== null); };
+  try{ renderInvNotesStrip(); }catch(e){}
+  try{ if(shown('billHistoryWrap')) renderBillHistory(); }catch(e){}
+  try{ if(shown('poListWrap')) renderPurchaseOrdersScreen(); }catch(e){}
+  try{
+    if(document.getElementById('profileModal')?.classList.contains('show') && profileMainMode === 'bills'){
+      if(currentProfileType === 'customers') renderCustomerBillsSection(currentProfileId);
+      else renderSupplierPoSection(currentProfileId);
+    }
+  }catch(e){}
+  try{ const c = customersData.find(x => x.customer_id == document.getElementById('customerSelect')?.value); renderPendBillHint(c || null); }catch(e){}
+}
+
 // ---------- AIO2810WE121: پرانے بقایہ میں اسی گاہک کا حالیہ ادھورا (ادھار) بل ہو تو بتائیں — نیا بل بنا کر رقم دوبارہ نہ جڑے، وہی بل کھولیں ----------
 function renderPendBillHint(customer){
   const el = document.getElementById('pendBillHint'); if(!el) return;
@@ -13514,7 +13653,7 @@ function renderPendBillHint(customer){
   if(!inv){ el.style.display = 'none'; el.innerHTML = ''; return; }
   el.style.display = 'block';
   el.innerHTML = `⏳ Previous balance includes unpaid <b>${String(inv.invoice_no).replace(/</g,'&lt;')}</b> (Rs. ${Math.round(getInvoiceAmountDue(inv)).toLocaleString()}, ${formatDateDMY(invLocalDate(inv))}). Same bill again? Open it instead — the amount will not be added twice.
-    <button type="button" onclick="pendBillContinue(${inv.invoice_id})">✏️ Continue that bill</button>`;
+    ${recNotesHtml(inv, 2)}<button type="button" onclick="pendBillContinue(${inv.invoice_id})">✏️ Continue that bill</button>`;
 }
 function pendBillContinue(invoiceId){
   if(Billing.cart.length && !confirm('Replace the items in the cart with that bill, to continue it?')) return;
@@ -14061,6 +14200,7 @@ function finalizeInvoice(){
     created_at: new Date().toISOString()
   };
   // TODO: یہاں invoices + invoice_items table میں اصل INSERT ہوگا
+  const billNoteEl = document.getElementById('billNoteInput');
   if(editInv){
     // ---------- وہی بل نمبر، وہی تاریخ؛ فہرست میں اسی جگہ پرانے کی جگہ نیا ----------
     Object.assign(invoice, {
@@ -14068,11 +14208,13 @@ function finalizeInvoice(){
       invoice_no: editInv.invoice_no, created_at: editInv.created_at, sold_by: editInv.sold_by || invoice.sold_by,
       edited_at: new Date().toISOString(), edited_by: AppState.currentUser?.name || 'Admin', edit_count: (editInv.edit_count || 0) + 1
     });
+    if(recNotesList(editInv).length) invoice.notes = recNotesList(editInv);
     const ix = invoicesData.indexOf(editInv);
     if(ix >= 0) invoicesData.splice(ix, 1, invoice); else invoicesData.unshift(invoice);
   } else {
     invoicesData.unshift(invoice);
   }
+  if(billNoteEl){ recNoteAdd(invoice, billNoteEl.value); billNoteEl.value = ''; }
 
   // ---------- اسٹاک کاٹیں (productsData میں اصل variant سے) ----------
   Billing.cart.forEach(item => deductStockForItem(item, item.qty, true)); // AIO1310TU035: کھلا وزن بھی اصل اسٹاک سے کٹے
@@ -14189,6 +14331,7 @@ function submitBillForApproval(customer, method, subtotal){
     items: withCostSnapshot(Billing.cart), // snapshot (AIO1310TU037: خرید قیمت بھی محفوظ)
     status: 'pending',
     admin_note: '',
+    note: (document.getElementById('billNoteInput')?.value || '').trim(),
     submitted_at: new Date().toISOString(),
     acknowledged: false
   };
@@ -14197,6 +14340,7 @@ function submitBillForApproval(customer, method, subtotal){
 
   Billing.cart = [];
   document.getElementById('discountInput').value = 0;
+  { const bn = document.getElementById('billNoteInput'); if(bn) bn.value = ''; }
   renderCart();
   renderBillingProductGrid();
   document.getElementById('customerSelect').value = '';
@@ -14380,6 +14524,7 @@ function approvePendingBill(){
     reviewed_by_admin: true, // بل ایڈمن کی نظر سے گزر چکا ہے (بیج کے لیے استعمال ہوگا)
     created_at: new Date().toISOString()
   };
+  if(p.note) recNoteAdd(invoice, p.note);
   invoicesData.unshift(invoice);
 
   // ---------- اسٹاک کاٹیں ----------
@@ -19436,6 +19581,7 @@ function renderCustomerBillsSection(customerId){
               <div class="brInfo">
                 <div class="brDate">📅 ${new Date(inv.created_at).toLocaleDateString('en-GB')} · ${inv.invoice_no}${statusTag}</div>
                 <div class="brDesc">${itemsDesc}</div>
+                ${recNotesHtml(inv, 2)}
               </div>
               <div class="brAmount">Rs. ${inv.grand_total.toLocaleString()}</div>
             </div>`;
@@ -19946,11 +20092,13 @@ function renderPurchaseOrdersScreen(){
         <div class="capBox capName"><b><bdi>${supName}</bdi></b><small>📅 ${dateTxt} • ${(po.items || []).length} item(s)</small>
           <span class="poItemsTxt">${itemsTxt.replace(/</g,'&lt;')}</span>
           <div class="cbTags">${statusTag}</div>
+          ${recNotesHtml(po, 2)}
         </div>
         <div class="capBox cbAmt ${isPending ? 'poPend' : ''}"><b>Rs. ${(po.total || 0).toLocaleString()}</b><small>${isPending ? '⏳ Pending' : '✅ Received'}</small></div>
       </div>
       <div class="billActions cbActs">
         <button class="btnPrint" onclick="openPoPreview(${po.supplier_id}, ${po.po_idx})">🖨️ Print</button>
+        <button class="btnPrint noteChip" onclick="openRecNotes('po', ${po.supplier_id}, ${po.po_idx})">📝 Note</button>
         ${isPending
           ? `<button class="btnReceiveShipment" onclick="openReceiveShipmentModal(${po.supplier_id}, ${po.po_idx})">🚚 Receive</button>
              <button class="btnPrint" onclick="openPoReminderModal(${po.supplier_id}, ${po.po_idx})">📢 Remind</button>
@@ -20084,9 +20232,11 @@ function renderSupplierPoSection(supplierId){
         const actionBtn = isPending
           ? `<button type="button" class="cGo" onclick="event.stopPropagation(); closeProfileModal(); openReceiveShipmentModal(${s.supplier_id}, ${idx});">🚚 Receive</button>
              <button type="button" class="cBlue" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button type="button" class="noteChip" onclick="event.stopPropagation(); openRecNotes('po', ${s.supplier_id}, ${idx});">📝 Note</button>
              <button type="button" onclick="event.stopPropagation(); openPoReminderModal(${s.supplier_id}, ${idx});">📢 Remind</button>
              <button type="button" class="cDel" onclick="event.stopPropagation(); deletePendingPurchaseOrder(${s.supplier_id}, ${idx});">🗑️ Delete</button>`
           : `<button type="button" class="cBlue" onclick="event.stopPropagation(); closeProfileModal(); openPoPreview(${s.supplier_id}, ${idx});">👁️ View</button>
+             <button type="button" class="noteChip" onclick="event.stopPropagation(); openRecNotes('po', ${s.supplier_id}, ${idx});">📝 Note</button>
              <button type="button" onclick="event.stopPropagation(); closeProfileModal(); openEditReceivedShipment(${s.supplier_id}, ${idx});">✏️ Edit</button>
              <button type="button" class="cWarn" onclick="event.stopPropagation(); closeProfileModal(); openSupplierReturnModal(${s.supplier_id}, ${idx});">↩️ Return</button>`;
         return `
@@ -20095,6 +20245,7 @@ function renderSupplierPoSection(supplierId){
             <div class="brInfo">
               <div class="brDate">📅 ${po.date} · ${po.items.length} items · ${statusTxt}</div>
               <div class="brDesc">${itemsDesc}</div>
+              ${recNotesHtml(po, 2)}
             </div>
             <div class="brAmount">Rs. ${po.total.toLocaleString()}</div>
           </div>
@@ -20546,6 +20697,7 @@ function openPoModal(supplierId){
   renderPoCart();
   document.getElementById('poModal').classList.add('show');
   AIO_DW.set(document.getElementById('poDate'), localDateStr(new Date()));
+  { const pn = document.getElementById('poNoteInput'); if(pn) pn.value = ''; }
   if(poDraft) showNavToast('📝 Draft restored — continue where you left off');
 }
 
@@ -21071,6 +21223,7 @@ function savePurchaseOrder(){
     status: 'pending_receipt', // 'pending_receipt' | 'received'
     payableAdded: false
   });
+  { const pn = document.getElementById('poNoteInput'); if(pn){ recNoteAdd(s.purchaseHistory[0], pn.value); pn.value = ''; } }
 
   clearPoDraft(s.supplier_id); // ---------- محفوظ ہو گیا — اب ڈرافٹ نہیں ----------
   poCart = [];
@@ -22770,6 +22923,7 @@ function openReceiveShipmentModal(supplierId, poIdx){
   updateReceiveShipmentBillPreview();
   document.getElementById('receiveShipmentModal').classList.add('show');
   AIO_DW.set(document.getElementById('rsDate'), localDateStr(new Date()));
+  { const w = document.getElementById('rsNotesWrap'); if(w) w.innerHTML = recNotesHtml(po); const ni = document.getElementById('rsNoteInput'); if(ni) ni.value = ''; }
 }
 function closeReceiveShipmentModal(){
   const kept = !receiveEditMode && shipDraftFor(activeReceivePo());
@@ -22944,6 +23098,7 @@ function saveEditedShipment(){
   s.ledgerHistory = s.ledgerHistory || [];
   if(diff !== 0) s.ledgerHistory.unshift({type:'adjust', amount: diff, date: po.editedDate, note: `Shipment of ${po.date} edited (Rs. ${oldTotal.toLocaleString()} → Rs. ${newTotal.toLocaleString()})`});
 
+  { const ni = document.getElementById('rsNoteInput'); if(ni){ recNoteAdd(po, ni.value, 'ship'); ni.value = ''; } }
   receiveEditMode = false;
   persistAllData();
   const sid = activeReceiveSupplierId, pidx = activeReceivePoIdx;
@@ -22993,6 +23148,7 @@ function confirmShipmentReceipt(){
   po.status = 'received';
   po.receivedDate = rsDate;
   if(receiveShipmentBillPhoto) po.billPhoto = receiveShipmentBillPhoto;
+  { const ni = document.getElementById('rsNoteInput'); if(ni && recNoteAdd(po, ni.value, 'ship')){ ni.value = ''; persistAllData(); } }
   // TODO: DB میں purchase_orders.status='received', receipt_photo_url اپڈیٹ ہوگا
 
   const receivedSupplierId = activeReceiveSupplierId, receivedPoIdx = activeReceivePoIdx;
@@ -25300,12 +25456,14 @@ function renderBillHistory(){
         ${capThumbHtml(inv.customer_name, '', String(inv.customer_name || '').length + (inv.invoice_id || 0))}
         <div class="capBox capName"><b>${inv.invoice_no}</b><small><bdi>${custName}</bdi>${dateTxt ? ' • ' + dateTxt : ''}</small>
           <div class="cbTags"><span class="billStatusTag ${inv.status}">${statusTxt}</span>${creatorBadge}${(inv.payment_modes || []).filter(x => x.amount > 0).map(x => { const m = payModeInfo(x.k); return `<span class="pendingStatusTag" style="background:${m.bg}; color:${m.c};">${m.k === 'cash' || m.k === 'bank' ? m.ico : '📱'} ${m.name}</span>`; }).join('')}${inv.reviewed_by_admin ? '<span class="pendingStatusTag approved">✔ REVIEWED</span>' : ''}${inv.edited_at ? '<span class="pendingStatusTag" style="background:#ffedd5; color:#c2410c;">✏️ Edited</span>' : ''}</div>
+          ${recNotesHtml(inv, 2)}
         </div>
         <div class="capBox cbAmt ${due > 0 ? 'due' : ''}"><b>Rs. ${inv.grand_total.toLocaleString()}</b><small>${due > 0 ? `⏳ Due ${due.toLocaleString()}` : '✅ Clear'}</small></div>
       </div>
       <div class="billActions cbActs">
         <button class="btnPrint" onclick="openInvoicePreview(${inv.invoice_id})">🖨️ Print</button>
         <button class="btnWhatsapp" onclick="openInvoicePreview(${inv.invoice_id})">📱 Share</button>
+        <button class="btnPrint noteChip" onclick="openRecNotes('inv', ${inv.invoice_id})">📝 Note</button>
         ${isAdmin ? (inv.status === 'voided' ? `
           <button class="btnRequestDelete" onclick="permanentlyDeleteBill(${inv.invoice_id})">🗑️ Permanently Delete</button>
         ` : `
@@ -26344,6 +26502,7 @@ function openInvoicePreview(invoiceId, highlightMatchKey){
   currentPreviewInvoiceId = invoiceId;
   currentPreviewHighlightKey = highlightMatchKey || null;
   syncPreviewStyleControls();
+  renderInvNotesStrip();
   // ---------- پہلے modal کو نظر آنے دیں (display:flex)، پھر canvas پر ڈرائنگ کریں ----------
   // وجہ: کچھ Android WebView ورژنز میں اگر canvas ابھی display:none والدین کے اندر ہو تو ڈرائنگ
   // صحیح طرح پینٹ نہیں ہوتی (خالی سفید نظر آتا ہے)۔ requestAnimationFrame کچھ WebViews میں کافی نہیں،
@@ -32845,9 +33004,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2810WE123';
+  const APP_VERSION = 'AIO2910TH124';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Share This App: picture goes with every button (WhatsApp, Facebook, Telegram…)';
+  const UPDATE_NOTE = 'Notes on bills, purchase orders and shipments (only for you, shown under the bill)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
