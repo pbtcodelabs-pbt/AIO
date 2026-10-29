@@ -42,3 +42,11 @@ jobs:
             curl -sS -m 90 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/ocr -H 'Content-Type: application/json' --data @/tmp/ocr.json
             echo
           done
+      # MCS: ریٹ والے راستے (/rates) کی جانچ
+      - name: Test /rates
+        if: env.HAS_TOKEN == 'true'
+        continue-on-error: true
+        run: |
+          sleep 3
+          curl -sS -m 40 https://aio-pos-verify.pbtcodelabs.workers.dev/rates; echo
+          curl -sS -m 20 -I https://aio-pos-verify.pbtcodelabs.workers.dev/rates | grep -i "access-control" || true

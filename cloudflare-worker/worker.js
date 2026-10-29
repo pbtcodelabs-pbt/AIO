@@ -108,7 +108,7 @@ var ACCESS_STATES = [
 
 var CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type"
 };
 
@@ -241,9 +241,33 @@ async function handleOcr(request, env) {
   return reply({ ok: false, error: lastErr }, 502);
 }
 
+
+// ---------- MCS: ہوم صفحے کے ریٹ — ڈالر (PKR) اور سونا (عالمی ریٹ سے فی تولہ / 10 گرام) — 30 منٹ کیش ----------
+async function handleRates(ctx) {
+  const cache = caches.default;
+  const key = new Request("https://aio-pos-verify/rates-cache-v1");
+  const hit = await cache.match(key);
+  if (hit) { const h = new Response(hit.body, hit); Object.entries(CORS).forEach(([k, v]) => h.headers.set(k, v)); return h; }
+  const out = { ts: Date.now() };
+  const j = async (u) => { const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 MCS" } }); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); };
+  try { const d = await j("https://open.er-api.com/v6/latest/USD"); out.usdPkr = d && d.rates && d.rates.PKR; } catch (e) { out.usdErr = String(e.message || e).slice(0, 120); }
+  try {
+    const d = await j("https://data-asg.goldprice.org/dbXRates/PKR");
+    const it = d && d.items && d.items[0]; if (it && it.xauPrice) out.xauPkrOz = it.xauPrice;
+  } catch (e) { out.goldErr1 = String(e.message || e).slice(0, 120); }
+  if (!out.xauPkrOz) {
+    try { const d = await j("https://api.gold-api.com/price/XAU"); if (d && d.price && out.usdPkr) out.xauPkrOz = d.price * out.usdPkr; } catch (e) { out.goldErr2 = String(e.message || e).slice(0, 120); }
+  }
+  if (out.xauPkrOz) { const perG = out.xauPkrOz / 31.1034768; out.gold10g = Math.round(perG * 10); out.goldTola = Math.round(perG * 11.6638); }
+  const res = new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=1800", ...CORS } });
+  if (out.usdPkr || out.goldTola) ctx && ctx.waitUntil ? ctx.waitUntil(cache.put(key, res.clone())) : await cache.put(key, res.clone());
+  return res;
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
+    if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx);
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
     if (new URL(request.url).pathname === "/ocr") return handleOcr(request, env);
 
