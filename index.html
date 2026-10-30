@@ -3248,7 +3248,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2910TH125</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR126</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3467,7 +3467,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2910TH125</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR126</span>
     </div>
   </div>
 
@@ -13688,7 +13688,7 @@ function balanceExcludingEditedBill(customer){
   if(!customer) return 0;
   let bal = customer.total_receivable || 0;
   const inv = editingInvoice();
-  if(inv && inv.customer_id === customer.customer_id) bal = Math.max(0, bal - invoiceReceivableDelta(inv));
+  if(inv && inv.customer_id === customer.customer_id) bal = moneyRound(bal - invoiceReceivableDelta(inv)); // منفی = اسی بل پر پہلے وصول
   return bal;
 }
 // ---------- ایڈٹ میں وصول رقم/ڈسکاؤنٹ واپس بھریں (ایپ دوبارہ کھلنے پر بھی) ----------
@@ -13708,7 +13708,8 @@ function reverseInvoiceForEdit(inv, why){
   if(wasCounterCash){ financeDummy.cashInHand -= (inv.grand_total || 0); return; }
   financeDummy.cashInHand -= (inv.cash_received_now || 0);
   if(customer){
-    customer.total_receivable = Math.max(0, (customer.total_receivable || 0) - invoiceReceivableDelta(inv));
+    // AIO3010FR126: پہلے Math.max(0) تھا — بل کے بعد وصول رقم (مثلاً 15,000) ایڈٹ پر ضائع ہو کر بقایا میں دوبارہ جڑ جاتی تھی
+    customer.total_receivable = moneyRound((customer.total_receivable || 0) - invoiceReceivableDelta(inv));
     const today = new Date().toISOString().split('T')[0];
     customer.walletHistory = customer.walletHistory || [];
     if(inv.wallet_applied > 0){
@@ -13719,7 +13720,17 @@ function reverseInvoiceForEdit(inv, why){
       customer.wallet_balance = Math.max(0, (customer.wallet_balance || 0) - inv.change_credited_to_wallet);
       customer.walletHistory.unshift({type:'redeem', amount:inv.change_credited_to_wallet, date:today, note:`Change taken back — ${inv.invoice_no} ${why || 'edited'}`});
     }
+    if(why === 'deleted') settleNegativeReceivable(customer, `Paid on ${inv.invoice_no} (deleted) — kept as advance`);
   }
+}
+// بقایا منفی ہو جائے (گاہک بل سے زیادہ دے چکا) تو وہ رقم ضائع نہ ہو — والٹ میں ایڈوانس
+function settleNegativeReceivable(c, why){
+  if(!c || !((Number(c.total_receivable) || 0) < -0.004)) return;
+  const adv = moneyRound(-c.total_receivable);
+  c.total_receivable = 0;
+  c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + adv);
+  c.walletHistory = c.walletHistory || [];
+  c.walletHistory.unshift({type:'deposit', amount: adv, via:'advance', date: localDateStr(new Date()), note: why});
 }
 
 function renderCart(){
@@ -13791,7 +13802,7 @@ function renderCart(){
   // ---------- منتخب کسٹمر کا پرانا بقایہ معلوم کریں — اگر ہو تو "This Bill" اور "Previous Balance" دونوں الگ دکھا کر Grand Total میں جمع کریں ----------
   const custIdForBalance = document.getElementById('customerSelect')?.value;
   const customerForBalance = custIdForBalance ? customersData.find(c => c.customer_id == custIdForBalance) : null;
-  const previousBalance = customerForBalance ? Math.max(0, balanceExcludingEditedBill(customerForBalance)) : 0; // ✏️ AIO2710TU111: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
+  const previousBalance = customerForBalance ? balanceExcludingEditedBill(customerForBalance) : 0; // ✏️ AIO2710TU111: ایڈٹ میں اسی بل کا بقایہ دوبارہ نہیں
   const combinedTotal = grandTotal + previousBalance; // ---------- یہی اصل رقم ہے جو کسٹمر پر واجب ہے، Received/Balance Due/Change اسی کے خلاف حساب ہوں گے ----------
 
   document.getElementById('sumSubtotal').textContent = `Rs. ${subtotal.toFixed(2).replace(/\.00$/, '')}`;
@@ -13800,7 +13811,8 @@ function renderCart(){
   document.getElementById('sumTaxLabel').textContent = `Tax (${AppState.settings.taxPercent || 0}%)`;
   document.getElementById('sumTax').textContent = `Rs. ${taxAmount.toFixed(2).replace(/\.00$/, '')}`;
 
-  if(previousBalance > 0){
+  { const lb = document.querySelector('#sumPrevBalanceRow span'); if(lb) lb.textContent = previousBalance < 0 ? '✅ Already paid on this bill' : '⚠️ Previous Balance'; const rw = document.getElementById('sumPrevBalanceRow'); if(rw) rw.style.color = previousBalance < 0 ? '#15803d' : '#c2410c'; }
+  if(previousBalance !== 0){
     // ---------- پرانا بقایہ موجود ہے — ٹیبل میں "This Bill" اور "Previous Balance" الگ دکھائیں، Grand Total دونوں کا مجموعہ ہو ----------
     document.getElementById('sumThisBillRow').style.display = 'flex';
     document.getElementById('sumThisBill').textContent = `Rs. ${grandTotal.toFixed(2).replace(/\.00$/, '')}`;
@@ -13808,7 +13820,7 @@ function renderCart(){
     document.getElementById('sumPrevBalance').textContent = `Rs. ${previousBalance.toFixed(2).replace(/\.00$/, '')}`;
     document.getElementById('sumGrandLabel').textContent = 'Total Balance';
     document.getElementById('sumBalanceLabel').textContent = '📒 Balance Due (Total)';
-    renderPendBillHint(customerForBalance);
+    renderPendBillHint(previousBalance > 0 ? customerForBalance : null);
   } else {
     renderPendBillHint(null);
     document.getElementById('sumThisBillRow').style.display = 'none';
@@ -14254,7 +14266,8 @@ function finalizeInvoice(){
   }
   // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو — یہ صرف اسی بل کے لیے نہیں بلکہ پرانے بقایہ سمیت پوری واجب الادا رقم کے خلاف لاگو ہوگی ----------
   const dueAfterWallet = Math.max(0, grandTotal - walletApplied);
-  const combinedDueForPayment = previousBalance + dueAfterWallet; // ---------- پرانا بقایہ + اسی بل کا بقایہ حصہ = کل واجب الادا ----------
+  const combinedRaw = previousBalance + dueAfterWallet; // ایڈٹ میں previousBalance منفی ہو سکتا ہے (اسی بل پر بعد میں وصول رقم)
+  const combinedDueForPayment = Math.max(0, combinedRaw); // ---------- پرانا بقایہ + اسی بل کا بقایہ حصہ = کل واجب الادا ----------
   let rawReceivedInput = (method === 'credit') ? Math.max(0, parseFloat(document.getElementById('amountReceivedInput')?.value) || 0) : 0;
   // ---------- آدھے روپے سے کم کمی (کھلے وزن کا اعشاریہ، مثلاً بل 170.40 اور وصول 170) = پوری ادائیگی، بقایہ نہ بنے ----------
   if(rawReceivedInput > 0 && rawReceivedInput < combinedDueForPayment && rawReceivedInput + 0.5 >= combinedDueForPayment) rawReceivedInput = combinedDueForPayment;
@@ -14283,7 +14296,7 @@ function finalizeInvoice(){
 
   if(customer && method === 'credit'){
     // ---------- کسٹمر کا نیا کل بقایہ سیدھا SET کریں (پرانا + یہ بل − وصولی) — increment نہیں، تاکہ پرانے بقایہ پر بھی ادائیگی درست جھلکے ----------
-    customer.total_receivable = Math.max(0, Math.round((combinedDueForPayment - cashReceivedNow) * 100) / 100); // 439.9200000001 نہیں، 439.92
+    customer.total_receivable = Math.max(0, Math.round((combinedDueForPayment - cashReceivedNow) * 100) / 100) + Math.min(0, combinedRaw); // 439.9200000001 نہیں، 439.92
     // TODO: customers.total_receivable UPDATE
   }
   invoice.wallet_applied = walletApplied;
@@ -14339,6 +14352,7 @@ function finalizeInvoice(){
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
+  if(editInv && customer) settleNegativeReceivable(customer, `Paid more than ${invoice.invoice_no} (edited) — kept as advance`);
   if(editInv){ billEdit = null; saveToStorage('billEditDraft', null); renderEditBillBanner(); showNavToast(`✅ ${invoice.invoice_no} updated`); }
   openInvoicePreview(invoice.invoice_id); // خودکار پریمیم پرنٹ پریویو کھل جائے
 }
@@ -19467,8 +19481,27 @@ function isDateInRange(dateVal, range){
   return d >= range.from && d <= range.to;
 }
 // ---------- کسی invoice پر ابھی کتنی رقم باقی ہے (نہ ہونے کی صورت میں credit سے اندازہ) — Pending/Cleared فلٹر کے لیے ----------
+// AIO3010FR126: بل کا «Due» اب اصل وقت میں — گاہک کی وصولی پہلے پرانے بل صاف کرتی ہے؛ باقی بقایا نئے بلوں پر
+function invStoredDue(inv){ return (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0); }
+let _invDueCache = new Map();
 function getInvoiceAmountDue(inv){
-  return (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
+  const stored = invStoredDue(inv);
+  if(!(stored > 0) || !inv.customer_id || inv.status === 'voided') return stored;
+  const c = customersData.find(x => x.customer_id === inv.customer_id);
+  if(!c) return stored;
+  const sig = (Number(c.total_receivable) || 0) + '|' + invoicesData.length;
+  let e = _invDueCache.get(c.customer_id);
+  if(!e || e.sig !== sig){
+    const m = new Map();
+    let rem = Math.max(0, Number(c.total_receivable) || 0);
+    invoicesData.filter(i => i.customer_id === c.customer_id && i.status !== 'voided' && invStoredDue(i) > 0)
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+      .forEach(i => { const d = Math.min(invStoredDue(i), rem); m.set(i.invoice_id, moneyRound(d)); rem -= d; });
+    e = {sig, m};
+    _invDueCache.set(c.customer_id, e);
+    if(_invDueCache.size === 1) setTimeout(() => _invDueCache.clear(), 0);
+  }
+  return e.m.has(inv.invoice_id) ? e.m.get(inv.invoice_id) : stored;
 }
 
 let profileBillFilter = { status:'all', dateKey:'all', customFrom:'', customTo:'' };
@@ -20145,9 +20178,9 @@ function openCustomerReminderModal(customerId){
   document.getElementById('customerReminderMeta').textContent = `${c.name} — Rs. ${c.total_receivable.toLocaleString()} outstanding`;
 
   // ---------- اس کسٹمر کے تمام Credit بل الگ الگ فہرست کریں (پورا خلاصہ پڑھنے میں آسان ہو) ----------
-  const creditBills = invoicesData.filter(inv => inv.customer_id === customerId && (inv.amount_due || 0) > 0);
+  const creditBills = invoicesData.filter(inv => inv.customer_id === customerId && getInvoiceAmountDue(inv) > 0);
   const billsListText = creditBills.length > 0
-    ? '\n\nOutstanding Invoices:\n' + creditBills.map(inv => `- ${inv.invoice_no}: Rs. ${inv.amount_due.toLocaleString()} due (${new Date(inv.created_at).toLocaleDateString('en-GB')})`).join('\n')
+    ? '\n\nOutstanding Invoices:\n' + creditBills.map(inv => `- ${inv.invoice_no}: Rs. ${getInvoiceAmountDue(inv).toLocaleString()} due (${new Date(inv.created_at).toLocaleDateString('en-GB')})`).join('\n')
     : '';
 
   document.getElementById('customerReminderText').value =
@@ -25350,8 +25383,8 @@ async function generateBillHistoryReport(){
   }
   const bills = lastFilteredBills;
   const totalAmount = bills.reduce((s, inv) => s + inv.grand_total, 0);
-  const totalSettled = bills.reduce((s, inv) => s + (inv.grand_total - (inv.amount_due || 0)), 0);
-  const totalPending = bills.reduce((s, inv) => s + (inv.amount_due || 0), 0);
+  const totalSettled = bills.reduce((s, inv) => s + (inv.grand_total - getInvoiceAmountDue(inv)), 0);
+  const totalPending = bills.reduce((s, inv) => s + getInvoiceAmountDue(inv), 0);
 
   const rowH = 26;
   const W = 800, headerH = 150, footerH = 110;
@@ -25391,8 +25424,8 @@ async function generateBillHistoryReport(){
     let name = inv.customer_name || 'Walk-in';
     if(name.length > 28) name = name.slice(0,27) + '…';
     ctx.fillText(name, cols[2].x, y+13);
-    ctx.fillStyle = (inv.amount_due || 0) > 0 ? '#c2410c' : '#15803d';
-    ctx.fillText((inv.amount_due || 0) > 0 ? `Pending Rs.${inv.amount_due}` : 'Clear', cols[3].x, y+13);
+    ctx.fillStyle = getInvoiceAmountDue(inv) > 0 ? '#c2410c' : '#15803d';
+    ctx.fillText(getInvoiceAmountDue(inv) > 0 ? `Pending Rs.${getInvoiceAmountDue(inv)}` : 'Clear', cols[3].x, y+13);
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'right';
     ctx.fillText('Rs. ' + inv.grand_total.toLocaleString(), cols[4].x + cols[4].w, y+13);
@@ -25459,9 +25492,9 @@ function renderBillHistory(){
     // ---------- عام حالت: Status Tab + Date + Day + Party Name سب آپس میں مل کر (AND) کام کریں ----------
     filtered = base;
     if(billStatusFilter === 'pending'){
-      filtered = filtered.filter(inv => (inv.amount_due || 0) > 0 && inv.status !== 'voided');
+      filtered = filtered.filter(inv => getInvoiceAmountDue(inv) > 0 && inv.status !== 'voided');
     } else if(billStatusFilter === 'clear'){
-      filtered = filtered.filter(inv => (inv.amount_due || 0) <= 0 && inv.status !== 'voided');
+      filtered = filtered.filter(inv => getInvoiceAmountDue(inv) <= 0 && inv.status !== 'voided');
     } else if(billStatusFilter === 'voided'){
       // ---------- صرف Voided بل — عام فہرست سے چھپے رہتے ہیں، یہاں چاہیں تو دیکھ لیں ----------
       filtered = filtered.filter(inv => inv.status === 'voided');
@@ -25520,13 +25553,13 @@ function renderBillHistory(){
     const creatorBadge = isAdminGenerated
       ? `<span class="creatorBadge admin">🛡️ Admin</span>`
       : `<span class="creatorBadge salesman">👤 ${inv.sold_by}</span>`;
-    const payTag = (inv.amount_due || 0) > 0
-      ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending (Rs. ${inv.amount_due.toLocaleString()})</span>`
+    const payTag = getInvoiceAmountDue(inv) > 0
+      ? `<span class="billStatusTag voided" style="text-decoration:none;">⏳ Pending (Rs. ${getInvoiceAmountDue(inv).toLocaleString()})</span>`
       : `<span class="billStatusTag completed">✅ Clear</span>`;
     const statusTxt = inv.status==='completed' ? 'Completed' : inv.status==='edited' ? 'Edited' : 'Voided';
     const d = new Date(inv.created_at || '');
     const dateTxt = isNaN(d) ? '' : d.toLocaleDateString('en-GB',{day:'2-digit', month:'short'}) + ' ' + d.toLocaleTimeString('en-GB',{hour:'2-digit', minute:'2-digit'});
-    const due = inv.amount_due || 0;
+    const due = inv.status === 'voided' ? 0 : getInvoiceAmountDue(inv);
     const custName = String(inv.customer_name || '').replace(/</g,'&lt;');
     return `
     <div class="billCard capRow capBill ${billIdx % 2 ? 'alt' : ''} ${inv.status === 'voided' ? 'capNeg' : ''}">
@@ -25601,7 +25634,7 @@ function executeVoidBill(inv){
   const customer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
   if(customer){
     const amountDue = (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
-    if(amountDue > 0) customer.total_receivable -= amountDue;
+    if(amountDue > 0){ customer.total_receivable -= amountDue; settleNegativeReceivable(customer, `Paid on ${inv.invoice_no} (deleted) — kept as advance`); }
 
     if(inv.wallet_applied > 0){
       customer.wallet_balance += inv.wallet_applied; // والٹ سے کاٹی گئی رقم واپس کر دیں
@@ -33083,9 +33116,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2910TH125';
+  const APP_VERSION = 'AIO3010FR126';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Payment: date on top, 3 big boxes (due, now, remaining), big Urdu message on receipt';
+  const UPDATE_NOTE = 'Fix: editing a bill no longer adds back payments received later; bill Due now shows the live remaining amount';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
