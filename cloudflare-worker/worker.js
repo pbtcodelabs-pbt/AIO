@@ -243,10 +243,40 @@ async function handleOcr(request, env) {
 
 
 // ---------- MCS: ہوم صفحے کے ریٹ — ڈالر (PKR) اور سونا (عالمی ریٹ سے فی تولہ / 10 گرام) — 30 منٹ کیش ----------
-async function handleRates(ctx) {
+/* MCS: پٹرول کا ریٹ — کئی ویب سائٹس سے پڑھ کر جو ریٹ زیادہ جگہ ملے وہی (غلط ہندسے سے بچاؤ) */
+const PETROL_SOURCES = [
+  "https://www.psopk.com/en/product-and-services/product-prices/pol",
+  "https://www.pakwheels.com/petroleum-prices-in-pakistan",
+  "https://hamariweb.com/finance/petrol_price/",
+  "https://www.urdupoint.com/business/petrol-prices-in-pakistan.html",
+  "https://propakistani.pk/petrol-price-in-pakistan/",
+];
+function petrolFromHtml(html) {
+  const t = String(html || "").replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/\s+/g, " ");
+  const rx = /(petrol|motor\s*spirit|motor\s*gasoline|super\s*petrol|premier|پٹرول|پیٹرول)[^0-9]{0,90}?(?:rs\.?|pkr|روپے)?\s*([2-4]\d{2}(?:\.\d{1,2})?)(?![\d])/gi;
+  const found = []; let m;
+  while ((m = rx.exec(t)) && found.length < 12) { const v = parseFloat(m[2]); if (v >= 200 && v <= 480) found.push(v); }
+  return found;
+}
+async function fetchPetrol() {
+  const per = {}, votes = {};
+  await Promise.all(PETROL_SOURCES.map(async (u) => {
+    try {
+      const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/124 Mobile Safari/537.36", "Accept": "text/html" }, cf: { cacheTtl: 3600 } });
+      if (!r.ok) { per[u] = "HTTP " + r.status; return; }
+      const vals = petrolFromHtml(await r.text());
+      per[u] = vals.slice(0, 4);
+      if (vals.length) { const v = vals[0].toFixed(2); votes[v] = (votes[v] || 0) + 1; }
+    } catch (e) { per[u] = String(e.message || e).slice(0, 80); }
+  }));
+  const best = Object.entries(votes).sort((a, b) => b[1] - a[1] || parseFloat(b[0]) - parseFloat(a[0]))[0];
+  return { petrol: best ? parseFloat(best[0]) : null, votes: best ? best[1] : 0, per };
+}
+
+async function handleRates(ctx, debug) {
   const cache = caches.default;
-  const key = new Request("https://aio-pos-verify/rates-cache-v1");
-  const hit = await cache.match(key);
+  const key = new Request("https://aio-pos-verify/rates-cache-v2");
+  const hit = debug ? null : await cache.match(key);
   if (hit) { const h = new Response(hit.body, hit); Object.entries(CORS).forEach(([k, v]) => h.headers.set(k, v)); return h; }
   const out = { ts: Date.now() };
   const j = async (u) => { const r = await fetch(u, { headers: { "User-Agent": "Mozilla/5.0 MCS" } }); if (!r.ok) throw new Error(u + " " + r.status); return r.json(); };
@@ -259,6 +289,7 @@ async function handleRates(ctx) {
     try { const d = await j("https://api.gold-api.com/price/XAU"); if (d && d.price && out.usdPkr) out.xauPkrOz = d.price * out.usdPkr; } catch (e) { out.goldErr2 = String(e.message || e).slice(0, 120); }
   }
   if (out.xauPkrOz) { const perG = out.xauPkrOz / 31.1034768; out.gold10g = Math.round(perG * 10); out.goldTola = Math.round(perG * 11.6638); }
+  try { const p = await fetchPetrol(); if (p.petrol) { out.petrol = p.petrol; out.petrolVotes = p.votes; } if (debug || !p.petrol) out.petrolSrc = p.per; } catch (e) { out.petrolErr = String(e.message || e).slice(0, 120); }
   const res = new Response(JSON.stringify(out), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=1800", ...CORS } });
   if (out.usdPkr || out.goldTola) ctx && ctx.waitUntil ? ctx.waitUntil(cache.put(key, res.clone())) : await cache.put(key, res.clone());
   return res;
@@ -267,7 +298,7 @@ async function handleRates(ctx) {
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
-    if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx);
+    if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
     if (new URL(request.url).pathname === "/ocr") return handleOcr(request, env);
 

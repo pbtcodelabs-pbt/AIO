@@ -49,4 +49,5 @@ jobs:
         run: |
           sleep 3
           curl -sS -m 40 https://aio-pos-verify.pbtcodelabs.workers.dev/rates; echo
+          curl -sS -m 60 "https://aio-pos-verify.pbtcodelabs.workers.dev/rates?debug=1"; echo
           curl -sS -m 20 -I https://aio-pos-verify.pbtcodelabs.workers.dev/rates | grep -i "access-control" || true
