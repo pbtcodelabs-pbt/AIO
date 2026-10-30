@@ -3279,7 +3279,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR130</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR131</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3498,7 +3498,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR130</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR131</span>
     </div>
   </div>
 
@@ -5032,6 +5032,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button id="rpDirIn" class="active" onclick="setRecordPaymentDirection('in')">💰 Received (Customer)</button>
           <button id="rpDirOut" onclick="setRecordPaymentDirection('out')">💸 Paid (Supplier)</button>
         </div>
+        <!-- AIO3010FR131: گاہک/سپلائر تلاش — نام، فون یا علاقہ -->
+        <input type="search" id="rpPartySearch" placeholder="🔍 Search name, phone or area…" autocomplete="off" oninput="populateRecordPaymentPartyDropdown(true)" style="width:100%; box-sizing:border-box; padding:11px 12px; margin-bottom:8px; border:1.5px solid #86efac; border-radius:12px; background:#f0fdf4; font-size:14px; font-weight:700;">
         <select id="rpPartySelect" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;" onchange="onRecordPaymentPartyChange()">
           <option value="">— Select Customer —</option>
         </select>
@@ -24429,15 +24431,23 @@ function setRecordPaymentDirection(dir){
   document.getElementById('rpDirOut').classList.toggle('active', dir === 'out');
   populateRecordPaymentPartyDropdown();
 }
-function populateRecordPaymentPartyDropdown(){
+function populateRecordPaymentPartyDropdown(fromSearch){
   const sel = document.getElementById('rpPartySelect');
-  if(recordPaymentDirection === 'in'){
-    sel.innerHTML = '<option value="">— Select Customer —</option>' +
-      customersData.filter(c => !c.name.includes('Walk-in')).map(c => `<option value="${c.customer_id}">${c.name}</option>`).join('');
-  } else {
-    sel.innerHTML = '<option value="">— Select Supplier —</option>' +
-      suppliersData.map(s => `<option value="${s.supplier_id}">${s.name}</option>`).join('');
-  }
+  const srch = document.getElementById('rpPartySearch');
+  if(!fromSearch && srch) srch.value = '';
+  const words = String(srch ? srch.value : '').toLowerCase().split(/\s+/).filter(Boolean);
+  // نمبر: صرف ہندسے، شروع کا 0 یا 92 برابر (0300… = 92300… = 300…)
+  const dg = t => { let d = String(t ?? '').replace(/\D/g, ''); if(d.startsWith('92')) d = d.slice(2); return d.replace(/^0+/, ''); };
+  const hit = x => !words.length || words.every(w => [x.name, x.phone, x.area, x.keywords].join(' ').toLowerCase().includes(w) || (/^[\d+\-\s]{3,}$/.test(w) && dg(w) && dg(x.phone).includes(dg(w))));
+  const esc = t => String(t ?? '').replace(/</g, '&lt;');
+  const prev = sel.value;
+  const isIn = recordPaymentDirection === 'in';
+  const list = isIn ? customersData.filter(c => !c.name.includes('Walk-in') && hit(c)) : suppliersData.filter(hit);
+  const idk = isIn ? 'customer_id' : 'supplier_id';
+  const label = words.length ? `— ${list.length} found — select ${isIn ? 'customer' : 'supplier'} —` : `— Select ${isIn ? 'Customer' : 'Supplier'} —`;
+  sel.innerHTML = `<option value="">${label}</option>` + list.map(x => `<option value="${x[idk]}">${esc(x.name)}${x.phone ? ' — ' + esc(x.phone) : ''}</option>`).join('');
+  if(list.length === 1 && words.length) sel.value = String(list[0][idk]);
+  else if(list.some(x => String(x[idk]) === prev)) sel.value = prev;
   onRecordPaymentPartyChange();
 }
 function onRecordPaymentPartyChange(){
@@ -33331,9 +33341,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR130';
+  const APP_VERSION = 'AIO3010FR131';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Erase Everything now clears payments, advance orders, expenses, diary and held bills; no Default word; payment rows show balance';
+  const UPDATE_NOTE = 'Record New Payment: search customer/supplier by name or mobile number';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
