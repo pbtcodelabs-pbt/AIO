@@ -3291,7 +3291,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR136</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR137</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3510,7 +3510,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR136</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR137</span>
     </div>
   </div>
 
@@ -25752,7 +25752,8 @@ function renderBillHistory(){
 
   // ---------- Role Scoping ہمیشہ لاگو رہتا ہے (سیکیورٹی): سیلزمین صرف اپنے بل دیکھے، ایڈمن سب/منتخب سیلزمین ----------
   let base = invoicesData.slice();
-  if(!isAdmin){
+  const staffSeeAll = !isAdmin && shopInfo().staffSeeAllBills === true; // AIO3010FR137: مالک کی اجازت سے ملازم کو سب بل
+  if(!isAdmin && !staffSeeAll){
     base = base.filter(inv => inv.sold_by === AppState.currentUser?.name);
   } else if(salesmanFilterVal && salesmanFilterVal !== 'all'){
     base = base.filter(inv => inv.sold_by === salesmanFilterVal);
@@ -25817,7 +25818,7 @@ function renderBillHistory(){
   // ---------- خلاصہ پٹی: کتنے بل، کل رقم کتنی — سیلزمین کے لیے "میرے آج کے بل" کا واضح جواب ----------
   lastFilteredBills = filtered; // ---------- 📄 Report بٹن اسی فہرست کو دوبارہ استعمال کرتا ہے ----------
   const totalAmount = filtered.reduce((s, inv) => s + inv.grand_total, 0);
-  const summaryLabel = isAdmin
+  const summaryLabel = staffSeeAll ? 'All Bills' : isAdmin
     ? (salesmanFilterVal !== 'all' ? `${salesmanFilterVal}'s Bills` : 'All Bills')
     : 'Your Bills';
   document.getElementById('billSummaryBar').innerHTML =
@@ -28377,6 +28378,7 @@ function renderStaffDevicesCard(){
     <div class="mdRow2"><button type="button" class="mdBigBtn ghost" onclick="copyShopCode()">📋 Copy</button><button type="button" class="mdBigBtn ghost" onclick="shareShopCode()">📤 WhatsApp</button></div>
     <div class="mdSteps">On the other phone: open the app → login screen → <b>🔗 Join a shop</b> → enter this code and the person's own PIN.</div>
     <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; margin:8px 0;"><input type="checkbox" ${sh.staffApproval ? 'checked' : ''} onchange="setStaffApproval(this.checked)" style="width:18px; height:18px; margin:0;"> Staff bills need my approval first</label>
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; margin:8px 0;"><input type="checkbox" ${sh.staffSeeAllBills ? 'checked' : ''} onchange="setStaffSeeAllBills(this.checked)" style="width:18px; height:18px; margin:0;"> Show Bill History of all bills to staff</label>
     <button type="button" class="mdBigBtn" onclick="goTo('users')">👤 Add / manage staff &amp; their screens</button>`
     : `<div class="settingsHint">This device is connected to <b>${mdEsc(sh.businessName || 'the shop')}</b> (${s.syncRole === 'owner2' ? 'owner — 2nd device' : 'staff'}).</div>`}
     ${(() => { const bx = syncBiggestBox(), ls = syncLocalStorageBytes(), lsPct = Math.round(ls / (5 * 1024 * 1024) * 100);
@@ -28434,6 +28436,12 @@ function removeShopDevice(uid){
   if(!confirm(`Remove "${d.name || 'this device'}" from your shop?\n\nIt will be disconnected and the shop data removed from it.`)) return;
   devicesData = devicesData.filter(x => x.uid !== uid); saveToStorage('syncDevices', devicesData);
   renderStaffDevicesCard(); scheduleSync(300);
+}
+// AIO3010FR137: ملازم بل ہسٹری میں صرف اپنے بل یا دکان کے سب بل
+function setStaffSeeAllBills(on){
+  const cur = shopInfo(); shopInfoData = [Object.assign({}, cur, {id:'shop', staffSeeAllBills: !!on})];
+  saveToStorage('syncShopInfo', shopInfoData); scheduleSync(300);
+  showNavToast(on ? 'Staff can now see all bills in Bill History' : 'Staff see only their own bills');
 }
 function setStaffApproval(on){
   const cur = shopInfo(); shopInfoData = [Object.assign({}, cur, {id:'shop', staffApproval: !!on})];
@@ -33773,9 +33781,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR136';
+  const APP_VERSION = 'AIO3010FR137';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Payments show who received or paid (owner or staff name)';
+  const UPDATE_NOTE = 'Owner option: show Bill History of all bills to staff';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
