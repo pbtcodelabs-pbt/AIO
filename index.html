@@ -1811,6 +1811,21 @@
   /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
   .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
   .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  /* AIO3010FR128: کارٹ کے نیچے والے حصے الگ ابھرے ڈبوں میں — وصولی (سبز)، ڈسکاؤنٹ (پیلا)، حساب (سفید کارڈ) */
+  .cartCard{margin:10px 0; padding:10px 12px; border-radius:16px; box-shadow:0 3px 0 rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.06);}
+  .cartCard label{color:#334155 !important; font-weight:800 !important; font-size:13px !important;}
+  .cartCard input[type=number]{background:#fff !important; border:1.5px solid #cbd5e1 !important; font-weight:800; font-size:15px !important;}
+  .cartPayCard{background:linear-gradient(180deg,#f0fdf4,#dcfce7); border:1.5px solid #86efac;}
+  .cartPayCard #amountReceivedHint{color:#166534 !important; font-weight:700;}
+  .cartDiscCard{background:linear-gradient(180deg,#fffbeb,#fef3c7); border:1.5px solid #fcd34d;}
+  .totalsBox.cartTotals{margin:12px 0 10px; padding:4px 0 0; border:1.5px solid #cbd5e1; border-radius:16px; background:#fff; overflow:hidden; box-shadow:0 3px 0 rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.06);}
+  .cartTotals .row{margin:0 !important; padding:7px 14px; border-bottom:1px solid #eef2f7; font-size:13px !important; font-weight:600;}
+  .cartTotals .row span:last-child{font-weight:800; color:#0f172a;}
+  .cartTotals .grand{margin:0 !important; padding:10px 14px; background:linear-gradient(180deg,#ecfdf5,#d1fae5); border-top:1.5px solid #86efac; border-bottom:1.5px solid #86efac;}
+  .cartTotals #sumReceivedRow span:last-child{color:#15803d;}
+  .cartTotals #sumBalanceRow{background:linear-gradient(180deg,#fef2f2,#fee2e2); border-bottom:none; font-size:14px !important;}
+  .cartTotals #sumBalanceRow span:last-child{color:#b91c1c;}
+  .cartTotals .pendBillHint{margin:6px 10px;}
   /* AIO2910TH125: وصولی/ادائیگی — تین ڈبے اور نستعلیق پیغام */
   .payTriBox{width:min(420px, calc(100vw - 16px)) !important; padding:18px 16px !important;}
   .payTriBox .dwBox{margin-bottom:10px;}
@@ -3248,7 +3263,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR127</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR128</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3467,7 +3482,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR127</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR128</span>
     </div>
   </div>
 
@@ -3791,13 +3806,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
           <!-- ---------- جزوی ادائیگی — کریڈٹ موڈ میں کسٹمر ابھی کچھ نقد دے رہا ہو تو یہاں درج کریں،
                باقی خودکار اس کے کھاتے میں بقایہ (Pending) چلا جائے گا ---------- -->
-          <div id="amountReceivedRow" style="display:none; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
+          <div class="cartCard cartPayCard">
+          <div id="amountReceivedRow" style="display:none; align-items:center; justify-content:space-between; gap:8px; margin:0;">
             <label style="font-size:12px; color:var(--muted); font-weight:600;">💵 Amount Received Now (Rs.)</label>
             <button type="button" class="fullCashBtn" onclick="fillFullCashReceived()" title="Customer paid this bill in full (cash)">💵 Full</button>
             <input type="number" id="amountReceivedInput" min="0" value="" placeholder="0" onfocus="this.select()" oninput="renderCart()"
                    style="width:110px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
           </div>
-          <div id="amountReceivedHint" style="display:none; font-size:11.5px; color:var(--muted); margin:-6px 0 10px;"></div>
+          <div id="amountReceivedHint" style="display:none; font-size:11.5px; color:var(--muted); margin:6px 0 0;"></div>
+          </div>
 
           <!-- ---------- 💳 ادائیگی کا طریقہ — Net Cash / EasyPaisa / JazzCash / Bank Transfer؛ ایک چنیں یا رقمیں لکھ کر تقسیم کریں (مثلاً 1000 نقد + 1000 JazzCash) — بل پرنٹ میں آتا ہے ---------- -->
           <div class="payModeBox" id="payModeBox">
@@ -3805,13 +3822,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <div class="pmGrid" id="pmGrid"></div>
           </div>
 
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:10px 0;">
+          <div class="cartCard cartDiscCard" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
             <label style="font-size:12px; color:var(--muted); font-weight:600;">🏷️ Discount (Rs.)</label>
             <input type="number" id="discountInput" min="0" value="0" onfocus="this.select()" oninput="renderCart()"
                    style="width:90px; padding:7px; border:1px solid #dbe1ea; border-radius:8px; text-align:center; font-size:13px;">
           </div>
 
-          <div class="totalsBox" style="position:relative;">
+          <div class="totalsBox cartTotals" style="position:relative;">
             <div id="profitWatermark" class="profitWatermark" style="display:none;"></div>
             <div class="row"><span>Subtotal</span><span id="sumSubtotal">Rs. 0</span></div>
             <div class="row"><span>Discount</span><span id="sumDiscount">Rs. 0</span></div>
@@ -33173,9 +33190,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR127';
+  const APP_VERSION = 'AIO3010FR128';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Accounts check-up: hold/edit/reload/payments/returns fixes, cash in hand saved, more cloud boxes';
+  const UPDATE_NOTE = 'Cart: received, discount and totals now in clear separate boxes';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
