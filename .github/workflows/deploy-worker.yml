@@ -51,3 +51,7 @@ jobs:
           curl -sS -m 40 https://aio-pos-verify.pbtcodelabs.workers.dev/rates; echo
           curl -sS -m 60 "https://aio-pos-verify.pbtcodelabs.workers.dev/rates?debug=1"; echo
           curl -sS -m 20 -I https://aio-pos-verify.pbtcodelabs.workers.dev/rates | grep -i "access-control" || true
+          echo "== /stat"
+          curl -sS -m 20 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/stat -H 'Content-Type: text/plain' -d '{"rec":"_test","kind":"call"}'; echo
+          curl -sS -m 20 "https://aio-pos-verify.pbtcodelabs.workers.dev/stat?recs=_test"; echo
+          curl -sS -m 20 "https://aio-pos-verify.pbtcodelabs.workers.dev/stat?mode=admin&days=7" | head -c 600; echo

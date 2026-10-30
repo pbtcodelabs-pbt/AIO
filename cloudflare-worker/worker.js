@@ -295,9 +295,65 @@ async function handleRates(ctx, debug) {
   return res;
 }
 
+/* ===== MCS: کالوں / واٹس ایپ / میسج کی گنتی — Durable Object (SQLite)، ہر دن ہر دکان (فون نمبر) کی گنتی ===== */
+const STAT_KINDS = ["call", "wa", "sms", "share", "open", "ad"];
+export class McsStats {
+  constructor(state) {
+    this.sql = state.storage.sql;
+    this.sql.exec("CREATE TABLE IF NOT EXISTS hits (day TEXT, rec TEXT, kind TEXT, n INTEGER, PRIMARY KEY (day, rec, kind))");
+  }
+  async fetch(request) {
+    const u = new URL(request.url);
+    if (request.method === "POST") {
+      const b = await request.json();
+      this.sql.exec("INSERT INTO hits (day, rec, kind, n) VALUES (?, ?, ?, 1) ON CONFLICT (day, rec, kind) DO UPDATE SET n = n + 1", b.day, b.rec, b.kind);
+      return new Response("ok");
+    }
+    const since = u.searchParams.get("since") || "00000000";
+    const today = u.searchParams.get("today") || "";
+    if (u.searchParams.get("mode") === "admin") {
+      const days = this.sql.exec("SELECT day, kind, SUM(n) AS n FROM hits WHERE day >= ? GROUP BY day, kind ORDER BY day DESC", since).toArray();
+      const topMonth = this.sql.exec("SELECT rec, SUM(CASE WHEN kind IN ('call','wa','sms') THEN n ELSE 0 END) AS c, SUM(CASE WHEN kind='call' THEN n ELSE 0 END) AS call, SUM(CASE WHEN kind='wa' THEN n ELSE 0 END) AS wa, SUM(CASE WHEN kind='sms' THEN n ELSE 0 END) AS sms FROM hits WHERE day >= ? AND rec != '_app' GROUP BY rec ORDER BY c DESC LIMIT 25", since).toArray();
+      const topToday = this.sql.exec("SELECT rec, SUM(CASE WHEN kind IN ('call','wa','sms') THEN n ELSE 0 END) AS c FROM hits WHERE day = ? AND rec != '_app' GROUP BY rec ORDER BY c DESC LIMIT 25", today).toArray();
+      return Response.json({ days, topMonth, topToday });
+    }
+    const recs = (u.searchParams.get("recs") || "").split(",").filter(Boolean).slice(0, 80);
+    const out = {};
+    for (const r of recs) {
+      const rows = this.sql.exec("SELECT kind, SUM(n) AS n, SUM(CASE WHEN day = ? THEN n ELSE 0 END) AS t FROM hits WHERE rec = ? AND day >= ? GROUP BY kind", today, r, since).toArray();
+      if (rows.length) { out[r] = {}; rows.forEach((x) => { out[r][x.kind] = x.n; if (x.t) out[r][x.kind + "Today"] = x.t; }); }
+    }
+    return Response.json(out);
+  }
+}
+function pkDay(d) { const t = new Date((d || Date.now()) + 5 * 3600e3); return t.toISOString().slice(0, 10).replace(/-/g, ""); }
+async function handleStat(request, env) {
+  if (!env.MCS_STATS) return reply({ error: "stats_not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const today = pkDay();
+  if (request.method === "POST") {
+    let b = {};
+    try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+    const rec = String(b.rec || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
+    const kind = String(b.kind || "");
+    if (!rec || !STAT_KINDS.includes(kind)) return reply({ error: "bad" }, 400);
+    await stub.fetch("https://s/hit", { method: "POST", body: JSON.stringify({ day: today, rec, kind }) });
+    return reply({ ok: true });
+  }
+  const u = new URL(request.url);
+  const days = Math.min(400, Math.max(1, parseInt(u.searchParams.get("days") || "30", 10)));
+  const since = pkDay(Date.now() - (days - 1) * 864e5);
+  const q = new URLSearchParams({ since, today });
+  if (u.searchParams.get("mode") === "admin") q.set("mode", "admin");
+  if (u.searchParams.get("recs")) q.set("recs", u.searchParams.get("recs"));
+  const r = await stub.fetch("https://s/q?" + q.toString());
+  return new Response(await r.text(), { headers: { "Content-Type": "application/json", ...CORS } });
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
+    if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
     if (new URL(request.url).pathname === "/ocr") return handleOcr(request, env);
