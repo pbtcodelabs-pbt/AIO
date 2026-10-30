@@ -55,3 +55,7 @@ jobs:
           curl -sS -m 20 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/stat -H 'Content-Type: text/plain' -d '{"rec":"_test","kind":"call"}'; echo
           curl -sS -m 20 "https://aio-pos-verify.pbtcodelabs.workers.dev/stat?recs=_test"; echo
           curl -sS -m 20 "https://aio-pos-verify.pbtcodelabs.workers.dev/stat?mode=admin&days=7" | head -c 600; echo
+          echo "== verify"
+          curl -sS -m 20 "https://aio-pos-verify.pbtcodelabs.workers.dev/vlist"; echo
+          curl -sS -m 20 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/vtoken -d '{"rec":"_test"}'; echo
+          curl -sS -m 20 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/vsubmit -d '{"rec":"_test","tok":"wrong"}'; echo

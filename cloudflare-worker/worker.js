@@ -109,7 +109,7 @@ var ACCESS_STATES = [
 var CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type"
+  "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
 
 function reply(obj, status = 200) {
@@ -301,9 +301,31 @@ export class McsStats {
   constructor(state) {
     this.sql = state.storage.sql;
     this.sql.exec("CREATE TABLE IF NOT EXISTS hits (day TEXT, rec TEXT, kind TEXT, n INTEGER, PRIMARY KEY (day, rec, kind))");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS vtok (rec TEXT PRIMARY KEY, tok TEXT, ts INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS verified (rec TEXT PRIMARY KEY, ts INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS edits (id INTEGER PRIMARY KEY AUTOINCREMENT, rec TEXT, ts INTEGER, body TEXT, done INTEGER DEFAULT 0)");
   }
   async fetch(request) {
     const u = new URL(request.url);
+    const op = u.pathname;
+    if (op === "/vtoken") {   /* ایڈمن: دکان کا خفیہ لنک کوڈ (پہلے سے ہو تو وہی) */
+      const { rec } = await request.json();
+      let row = this.sql.exec("SELECT tok FROM vtok WHERE rec = ?", rec).toArray()[0];
+      if (!row) { const tok = [...crypto.getRandomValues(new Uint8Array(9))].map((b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join(""); this.sql.exec("INSERT INTO vtok (rec, tok, ts) VALUES (?, ?, ?)", rec, tok, Date.now()); row = { tok }; }
+      return Response.json({ tok: row.tok });
+    }
+    if (op === "/vsubmit") {  /* دکاندار: تصدیق یا ترمیم کی درخواست */
+      const b = await request.json();
+      const row = this.sql.exec("SELECT tok FROM vtok WHERE rec = ?", b.rec).toArray()[0];
+      if (!row || row.tok !== b.tok) return Response.json({ error: "bad_token" }, { status: 403 });
+      if (b.edit) this.sql.exec("INSERT INTO edits (rec, ts, body) VALUES (?, ?, ?)", b.rec, Date.now(), JSON.stringify(b.edit).slice(0, 4000));
+      else this.sql.exec("INSERT INTO verified (rec, ts) VALUES (?, ?) ON CONFLICT (rec) DO UPDATE SET ts = excluded.ts", b.rec, Date.now());
+      return Response.json({ ok: true });
+    }
+    if (op === "/vlist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, ts FROM verified").toArray().map((r) => [r.rec, r.ts])));
+    if (op === "/vunset") { const { rec } = await request.json(); this.sql.exec("DELETE FROM verified WHERE rec = ?", rec); return Response.json({ ok: true }); }
+    if (op === "/edits") return Response.json(this.sql.exec("SELECT id, rec, ts, body, done FROM edits ORDER BY done ASC, id DESC LIMIT 200").toArray());
+    if (op === "/editdone") { const { id } = await request.json(); this.sql.exec("UPDATE edits SET done = 1 WHERE id = ?", id); return Response.json({ ok: true }); }
     if (request.method === "POST") {
       const b = await request.json();
       this.sql.exec("INSERT INTO hits (day, rec, kind, n) VALUES (?, ?, ?, 1) ON CONFLICT (day, rec, kind) DO UPDATE SET n = n + 1", b.day, b.rec, b.kind);
@@ -350,10 +372,47 @@ async function handleStat(request, env) {
   return new Response(await r.text(), { headers: { "Content-Type": "application/json", ...CORS } });
 }
 
+/* ایڈمن کی پہچان: Firebase لاگ ان کا ID ٹوکن (my-city-shines) — گوگل کی چابیوں سے دستخط کی جانچ */
+const MCS_ADMIN_EMAILS = ["pbtcodelabs@gmail.com"];
+let fbJwks = null, fbJwksAt = 0;
+function b64uToBytes(s) { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return Uint8Array.from(atob(s), (c) => c.charCodeAt(0)); }
+async function verifyFirebaseAdmin(request) {
+  try {
+    const h = request.headers.get("Authorization") || ""; const jwt = h.replace(/^Bearer\s+/i, ""); const parts = jwt.split(".");
+    if (parts.length !== 3) return false;
+    const head = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[0]))), pl = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[1])));
+    const now = Date.now() / 1000;
+    if (pl.aud !== "my-city-shines" || pl.iss !== "https://securetoken.google.com/my-city-shines" || pl.exp < now || !MCS_ADMIN_EMAILS.includes(String(pl.email || "").toLowerCase())) return false;
+    if (!fbJwks || Date.now() - fbJwksAt > 3600e3) { const r = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"); fbJwks = (await r.json()).keys || []; fbJwksAt = Date.now(); }
+    const jwk = fbJwks.find((k) => k.kid === head.kid); if (!jwk) return false;
+    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64uToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
+  } catch (e) { return false; }
+}
+async function handleVerify(request, env, path) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const clean = (v) => String(v || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
+  const fwd = async (op, body) => { const r = await stub.fetch("https://s" + op, { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS } }); };
+  if (path === "/vlist") return fwd("/vlist");
+  let b = {}; if (request.method === "POST") { try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); } }
+  if (path === "/vsubmit") {
+    const edit = b.edit && typeof b.edit === "object" ? Object.fromEntries(Object.entries(b.edit).slice(0, 10).map(([k, v]) => [String(k).slice(0, 30), String(v || "").slice(0, 400)])) : null;
+    return fwd("/vsubmit", { rec: clean(b.rec), tok: clean(b.tok), edit });
+  }
+  if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+  if (path === "/vtoken") return fwd("/vtoken", { rec: clean(b.rec) });
+  if (path === "/vunset") return fwd("/vunset", { rec: clean(b.rec) });
+  if (path === "/edits") return fwd("/edits");
+  if (path === "/editdone") return fwd("/editdone", { id: parseInt(b.id, 10) || 0 });
+  return reply({ error: "not_found" }, 404);
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
+    { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
     if (new URL(request.url).pathname === "/ocr") return handleOcr(request, env);
