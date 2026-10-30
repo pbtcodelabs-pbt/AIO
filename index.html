@@ -3289,7 +3289,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR133</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR134</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3508,7 +3508,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR133</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR134</span>
     </div>
   </div>
 
@@ -31943,11 +31943,12 @@ async function renderEodReportToCanvas(){
   gap();
   // 9) بقایا جات
   section('📒 BALANCES (now)');
-  kv('Customers owe us', D.rec, {color: '#b45309', bold: true});
-  if(D.custAdv) kv('Customer advances (we owe)', D.custAdv, {indent: true});
-  kv('We owe suppliers', D.pay, {color: '#b91c1c', bold: true});
-  if(D.supAdv) kv('Supplier advances (they owe us)', D.supAdv, {indent: true});
-  if(D.topDebtors.length) table([{t: 'Top customer balances', w: .66}, {t: 'Amount', w: .34, r: 1}], D.topDebtors.map(x => [x.name, money(x.amt)]));
+  // گاہکوں کی طرف گیا پیسہ (لینا ہے) = سرخ؛ سپلائر کا ہماری طرف آیا مال (دینا ہے) = سبز
+  kv('Customers — To be received', D.rec, {color: '#b91c1c', lcolor: '#b91c1c', bold: true});
+  if(D.custAdv) kv('Customer advances — To be paid', D.custAdv, {indent: true, color: '#15803d'});
+  kv('Suppliers — To be paid', D.pay, {color: '#15803d', lcolor: '#15803d', bold: true});
+  if(D.supAdv) kv('Supplier advances — To be received', D.supAdv, {indent: true, color: '#b91c1c'});
+  if(D.topDebtors.length) table([{t: 'Top customers — To be received', w: .66}, {t: 'Amount', w: .34, r: 1}], D.topDebtors.map(x => [x.name, money(x.amt)]));
   gap(10);
   add(fs(40), y => { ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([fs(4), fs(3)]); ctx.beginPath(); ctx.moveTo(M, y + fs(4)); ctx.lineTo(M + CW, y + fs(4)); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = '#334155'; ctx.textAlign = 'center'; ctx.font = font(700, 10); ctx.fillText('Counted cash: ____________     Signature: ____________', W / 2, y + fs(30)); });
@@ -33748,9 +33749,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR133';
+  const APP_VERSION = 'AIO3010FR134';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'End of the Day: item trend — best items and slowest items of the last 7 days';
+  const UPDATE_NOTE = 'End of the Day balances: Customers To be received (red), Suppliers To be paid (green)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
