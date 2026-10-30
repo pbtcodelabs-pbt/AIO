@@ -53,6 +53,9 @@ jobs:
             curl -sS -m 90 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/ocr -H 'Content-Type: application/json' --data @/tmp/card.json
             echo
           done
+          echo "== merged"
+          printf '{"mode":"card","image":"%s"}' "$IMG" > /tmp/card2.json
+          curl -sS -m 120 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/ocr -H 'Content-Type: application/json' --data @/tmp/card2.json; echo
       # MCS: ریٹ والے راستے (/rates) کی جانچ
       - name: Test /rates
         if: env.HAS_TOKEN == 'true'

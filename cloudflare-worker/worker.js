@@ -223,6 +223,38 @@ async function handleOcr(request, env) {
   if (typeof img !== "string" || !/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 2500000) {
     return reply({ error: "bad_image" }, 400);
   }
+  /* وزٹنگ کارڈ: دونوں ماڈل ایک ساتھ، جواب ملا کر — نمبر 11 ہندسے (03…)، جتنے ماڈل متفق اتنے ووٹ */
+  if (body.mode === "card" && !body.model) {
+    const runs = await Promise.allSettled(OCR_MODELS.map(async (model) => {
+      const out = await env.AI.run(model, { messages: [{ role: "user", content: [{ type: "text", text: CARD_PROMPT }, { type: "image_url", image_url: { url: img } }] }], max_tokens: 700, temperature: 0 });
+      const raw = out && (out.response !== undefined ? out.response : out);
+      return { model, data: typeof raw === "object" && raw ? raw : ocrParse(raw) };
+    }));
+    const ok = runs.filter((r) => r.status === "fulfilled" && r.value.data).map((r) => r.value);
+    if (!ok.length) return reply({ ok: false, error: "no_model" }, 502);
+    const digits = (v) => String(v || "").replace(/[^0-9]/g, "");
+    const fmt = (d) => d.slice(0, 4) + "-" + d.slice(4);
+    const contacts = new Map();
+    ok.forEach(({ data }) => {
+      const list = Array.isArray(data.contacts) ? data.contacts : (Array.isArray(data.phones) ? data.phones.map((p) => ({ phone: p })) : []);
+      list.forEach((c) => {
+        let d = digits(c && c.phone); if (d.startsWith("92") && d.length === 12) d = "0" + d.slice(2);
+        if (!/^03\d{9}$/.test(d)) return;
+        const e = contacts.get(d) || { phone: fmt(d), name: "", votes: 0 };
+        e.votes++; if (!e.name && c.name) e.name = String(c.name).trim();
+        contacts.set(d, e);
+      });
+    });
+    const first = ok[0].data, second = ok[1] ? ok[1].data : {};
+    const pick = (k) => String(first[k] || second[k] || "").trim();
+    const longer = (k) => { const a = String(first[k] || "").trim(), b = String(second[k] || "").trim(); return a.length >= b.length ? a : b; };
+    const nameA = String(first.name_ur || "").trim(), nameB = String(second.name_ur || "").trim();
+    return reply({ ok: true, merged: true, models: ok.map((x) => x.model), data: {
+      name_ur: nameA || nameB, name_alt: nameA && nameB && nameA !== nameB ? nameB : "", name_en: pick("name_en"),
+      tagline: longer("tagline"), address: longer("address"),
+      contacts: [...contacts.values()].sort((a, b) => b.votes - a.votes)
+    } });
+  }
   let lastErr = "";
   // جانچ کے لیے کسی ایک ماڈل کو چننا (صرف اوپر والی فہرست میں سے)
   const only = body && OCR_MODELS.includes(body.model) ? [body.model] : OCR_MODELS;
