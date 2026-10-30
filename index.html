@@ -3289,7 +3289,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR132</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR133</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3508,7 +3508,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR132</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR133</span>
     </div>
   </div>
 
@@ -31693,6 +31693,26 @@ function eodData(day){
   D.netProfit = r2(D.profit - D.expenses);
   ['sales','discount','paidAtBill','creditGiven','walletUsed','profit','returns','cashRefund','inCash','inOther','inWallet','outCash','outOther','expenses','purchases','cashSales','digitalSales','cashIn','cashOut'].forEach(k => D[k] = r2(D[k]));
   D.topItems = Object.values(D.items).sort((a, b) => b.amount - a.amount);
+  // AIO3010FR133: 7 دن کا آئٹم وار رجحان — سب سے زیادہ اور سب سے کم بکنے والے (نہ بکنے والے بھی)
+  const from7 = eodShift(day, -6), it7 = {};
+  (invoicesData || []).forEach(i => {
+    if(!i || i.status === 'voided') return; const d = invLocalDate(i); if(d < from7 || d > day) return;
+    (i.items || []).forEach(it => {
+      const q = (Number(it.qty) || 0) - (it.returned ? (Number(it.returnQty) || 0) : 0); if(q <= 0) return;
+      const k = it.variant_id != null ? 'v' + it.variant_id : 'n' + itemDisplayName(it.name);
+      const e = it7[k] || (it7[k] = {name: itemDisplayName(it.name) || 'Item', unit: it.unit || '', q7: 0, a7: 0, qT: 0, days: new Set()});
+      e.q7 += q; e.a7 += q * (Number(it.unitPrice) || 0); if(d === day) e.qT += q; e.days.add(d);
+    });
+  });
+  D.best7 = Object.values(it7).sort((a, b) => b.a7 - a.a7 || b.q7 - a.q7);
+  const slow = [];
+  (productsData || []).forEach(pp => (pp.variants || []).forEach(v => {
+    const e = it7['v' + v.variant_id];
+    if(!e && !((Number(v.stock) || 0) > 0)) return; // نہ بکا اور سٹاک بھی نہیں — چھوڑیں
+    slow.push({name: vName(pp, v), unit: v.unit || '', q7: e ? e.q7 : 0, a7: e ? e.a7 : 0, days: e ? e.days.size : 0, stock: Number(v.stock) || 0});
+  }));
+  D.slow7 = slow.sort((a, b) => a.q7 - b.q7 || a.a7 - b.a7 || b.stock - a.stock);
+  D.notSold7 = slow.filter(x => !x.q7).length;
   // 7 دن کا رجحان
   D.trend = [];
   for(let n = 6; n >= 0; n--){
@@ -31907,23 +31927,19 @@ async function renderEodReportToCanvas(){
   if(D.topItems.length > top.length) note(`+ ${D.topItems.length - top.length} more items`);
   gap();
   // 8) رجحان
-  section('📊 7-DAY TREND');
-  const mx = Math.max(1, ...D.trend.map(t => t.sales));
-  D.trend.forEach(t => add(fs(20), y => {
-    const isToday = t.day === eodDay, lw = fs(a4 ? 90 : 62), vw = fs(a4 ? 140 : 110);
-    const dl = new Date(t.day + 'T12:00:00').toLocaleDateString('en-GB', {weekday: 'short', day: '2-digit'});
-    ctx.textAlign = 'left'; ctx.fillStyle = isToday ? '#0f172a' : '#475569'; ctx.font = font(isToday ? 900 : 700, 10.5); ctx.fillText(dl, M + fs(4), y + fs(14.5));
-    const bw = (CW - lw - vw) * t.sales / mx;
-    if(bw >= fs(6)){ ctx.fillStyle = isToday ? ACC : '#94a3b8'; roundRectPath(ctx, M + lw, y + fs(4), bw, fs(12), fs(3)); ctx.fill(); }
-    else { ctx.fillStyle = '#cbd5e1'; ctx.fillRect(M + lw, y + fs(9), fs(6), fs(2)); }
-    ctx.textAlign = 'right'; ctx.fillStyle = '#0f172a'; ctx.font = font(isToday ? 900 : 700, 10.5); ctx.fillText(money(t.sales), M + CW - fs(4), y + fs(14.5));
-  }));
-  const pct = (a, b) => b > 0 ? ((a - b) / b * 100) : null;
-  const py = pct(D.sales, D.yesterday), pa = pct(D.sales, D.avg6);
-  kv('vs yesterday', py === null ? '—' : (py >= 0 ? '▲ ' : '▼ ') + Math.abs(py).toFixed(0) + '%', {color: py === null ? undefined : py >= 0 ? '#15803d' : '#b91c1c'});
-  kv('vs last 6-day average', pa === null ? '—' : (pa >= 0 ? '▲ ' : '▼ ') + Math.abs(pa).toFixed(0) + '%', {color: pa === null ? undefined : pa >= 0 ? '#15803d' : '#b91c1c'});
-  const hrs = Object.entries(D.hours).sort((a, b) => b[1] - a[1])[0];
-  if(hrs){ const h = +hrs[0], t12 = x => ((x % 12) || 12) + (x < 12 ? 'am' : 'pm'); kv('Busiest hour', `${t12(h)}–${t12((h + 1) % 24)}  (${money(hrs[1])})`); }
+  section('📈 BEST ITEMS — LAST 7 DAYS');
+  const b7 = D.best7.slice(0, a4 ? 15 : 10), u = x => x.unit && x.unit !== 'pcs' ? ' ' + x.unit : '';
+  if(b7.length){
+    const mxA = Math.max(1, ...b7.map(x => x.a7));
+    table([{t: '#  Item', w: .46}, {t: 'Today', w: .14, r: 1}, {t: '7 days', w: .16, r: 1}, {t: 'Amount', w: .24, r: 1}], b7.map((x, k) => [`${k + 1}. ${x.name}`, x.qT ? num(x.qT) : '–', num(x.q7) + u(x), money(x.a7)]));
+  } else note('No sales in the last 7 days.');
+  gap();
+  section('📉 SLOWEST ITEMS — LAST 7 DAYS');
+  const s7 = D.slow7.slice(0, a4 ? 15 : 10);
+  if(s7.length){
+    table([{t: 'Item', w: .48}, {t: 'Sold (7d)', w: .2, r: 1}, {t: 'Days', w: .12, r: 1}, {t: 'In stock', w: .2, r: 1}], s7.map(x => [x.name, x.q7 ? num(x.q7) + u(x) : 'Not sold', x.days ? x.days + '/7' : '0/7', num(x.stock)]));
+    if(D.notSold7) note(`⚠ ${D.notSold7} item(s) with stock did not sell at all in 7 days.`, '#b45309');
+  } else note('No items yet.');
   gap();
   // 9) بقایا جات
   section('📒 BALANCES (now)');
@@ -33732,9 +33748,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR132';
+  const APP_VERSION = 'AIO3010FR133';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'End of the Day Report (A4 + thermal): opening cash, cash in drawer, sales, profit, payments, expenses, trend; morning opening-cash prompt';
+  const UPDATE_NOTE = 'End of the Day: item trend — best items and slowest items of the last 7 days';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
