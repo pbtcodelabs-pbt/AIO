@@ -1811,6 +1811,22 @@
   /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
   .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
   .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  /* AIO3010FR130: ایڈوانس آرڈر کارڈ — فون پر بٹن نیچے پوری چوڑائی میں، نام/تفصیل تنگ کالم میں نہ پھنسے */
+  .billCard.advCard{flex-direction:column; align-items:stretch; gap:8px;}
+  .billCard.advCard .billActions{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-start;}
+  .billCard.advCard .billActions button{flex:1 1 auto;}
+  .billCard.advCard .billActions .removeBtn{flex:0 0 auto;}
+  @media (min-width:700px){ .billCard.advCard{flex-direction:row; align-items:center;} .billCard.advCard > div:first-child{flex:1; min-width:0;} .billCard.advCard .billActions button{flex:0 0 auto;} }
+  /* AIO3010FR130: Payments Record — ہر وصولی کے نیچے بقایا (سرخ/نیلا/سبز) اور پیغام */
+  .prBal{display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center; gap:4px; margin-top:8px;}
+  .prBal > span{border-radius:10px; padding:4px 4px 5px; text-align:center; color:#fff; font-weight:900; font-size:12.5px; line-height:1.2; min-width:0;}
+  .prBal > span small{display:block; font-size:9.5px; font-weight:800; opacity:.9;}
+  .prBal > span.due{background:linear-gradient(180deg,#ef4444,#b91c1c);}
+  .prBal > span.ok{background:linear-gradient(180deg,#22c55e,#15803d);}
+  .prBal > span.now{background:linear-gradient(180deg,#3b82f6,#1d4ed8);}
+  .prBal > b{color:#94a3b8; font-size:12px;}
+  .prNote{margin-top:7px; padding:5px 10px; border-radius:10px; background:#f0fdf4; border:1px solid #bbf7d0; color:#14532d; font-size:13px; font-weight:700; word-break:break-word;}
+  .prNote.ur{font-family:'Jameel Noori Nastaleeq Kasheeda','Noto Nastaliq Urdu',serif; font-size:19px; line-height:2; padding:2px 10px;}
   /* AIO3010FR128: کارٹ کے نیچے والے حصے الگ ابھرے ڈبوں میں — وصولی (سبز)، ڈسکاؤنٹ (پیلا)، حساب (سفید کارڈ) */
   .cartCard{margin:10px 0; padding:10px 12px; border-radius:16px; box-shadow:0 3px 0 rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.06);}
   .cartCard label{color:#334155 !important; font-weight:800 !important; font-size:13px !important;}
@@ -3263,7 +3279,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR129</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR130</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3482,7 +3498,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR129</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR130</span>
     </div>
   </div>
 
@@ -20892,7 +20908,7 @@ function draftAgo(ts){
   return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' hr ago' : Math.round(m / 1440) + ' day(s) ago';
 }
 function draftItemsTxt(items){
-  const names = (items || []).map(it => String(it.name || '').trim()).filter(Boolean);
+  const names = (items || []).map(it => itemDisplayName(String(it.name || '').trim())).filter(Boolean);
   return (names.slice(0, 3).join(', ') + (names.length > 3 ? ` +${names.length - 3}` : '')).replace(/</g,'&lt;');
 }
 function refreshDraftViews(){
@@ -22071,11 +22087,11 @@ function renderAdvanceOrdersScreen(){
     const statusTag = isPending
       ? `<span class="pendingStatusTag pending">⏳ PENDING BILL</span>`
       : `<span class="pendingStatusTag approved">✅ FULFILLED</span>`;
-    const itemsSummary = o.items.map(i => `${i.name} x${i.qty}`).join(', ');
+    const itemsSummary = o.items.map(i => `${itemDisplayName(i.name)} x${i.qty}`).join(', ');
     const when = new Date(o.createdAt).toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
     const orderTotal = advOrderTotal(o);
     return `
-      <div class="billCard">
+      <div class="billCard advCard">
         <div>
           <div class="bNo">🧑 ${o.customerName} ${statusTag}</div>
           <div class="bMeta">${when} | ${o.items.length} item(s): ${itemsSummary}</div>
@@ -22259,6 +22275,7 @@ async function shareAdvOrderPdf(){
 }
 
 async function renderAdvOrderToCanvas(order){
+  order = cleanInvoiceNames(order); // «Default» نہ چھپے
   const useA4 = AppState.settings.advOrderPrintStyle === 'a4';
   const paperWidthMM = AppState.settings.paperWidth || 80;
   const pxWidth = useA4 ? 850 : (paperWidthMM === 80 ? 576 : 384);
@@ -22999,7 +23016,7 @@ function printAdvanceOrdersList(){
   const customerBlocks = pending.map(o => `
     <div style="border-top:1px dashed #94a3b8; margin:10px 0; padding-top:8px;">
       <div style="font-weight:800; font-size:14px;">${o.customerName}${o.customerPhone ? ' — '+o.customerPhone : ''}</div>
-      ${o.items.map(i => `<div style="font-size:12.5px; display:flex; justify-content:space-between;"><span>• ${i.name} x${i.qty}</span><span>Rs. ${(i.qty*i.unitPrice).toLocaleString()}</span></div>`).join('')}
+      ${o.items.map(i => `<div style="font-size:12.5px; display:flex; justify-content:space-between;"><span>• ${itemDisplayName(i.name)} x${i.qty}</span><span>Rs. ${(i.qty*i.unitPrice).toLocaleString()}</span></div>`).join('')}
       <div style="font-size:12.5px; font-weight:700; text-align:right; margin-top:2px;">Order Approx. Total: Rs. ${advOrderTotal(o).toLocaleString()}</div>
       ${o.note ? `<div style="font-size:11.5px; font-style:italic; color:#64748b;">Note: ${o.note}</div>` : ''}
     </div>`).join('');
@@ -24379,7 +24396,8 @@ function renderPaymentsScreen(){
         </div>
         <div style="font-weight:800; font-size:16px; color:${p.direction === 'in' ? '#166534' : 'var(--danger)'};">Rs. ${p.amount.toLocaleString()}</div>
       </div>
-      ${p.note ? `<div class="bankAccMeta">📝 ${p.note}</div>` : ''}
+      ${p.balance_before !== undefined && p.balance_after !== undefined ? `<div class="prBal"><span class="${p.balance_before > 0 ? 'due' : 'ok'}"><small>Before</small>Rs. ${Math.round(Math.abs(p.balance_before)).toLocaleString()}</span><b>→</b><span class="now"><small>${p.direction === 'in' ? 'Received' : 'Paid'}</small>Rs. ${p.amount.toLocaleString()}</span><b>→</b><span class="${p.balance_after > 0 ? 'due' : 'ok'}"><small>${p.balance_after > 0 ? 'Remaining' : p.balance_after < 0 ? 'Advance' : 'Clear ✓'}</small>Rs. ${Math.round(Math.abs(p.balance_after)).toLocaleString()}</span></div>` : ''}
+      ${p.note ? `<div class="prNote${/[\u0600-\u06FF]/.test(p.note) ? ' ur' : ''}" dir="auto">📝 ${String(p.note).replace(/</g, '&lt;')}</div>` : ''}
       ${p.slip_image ? `<img src="${p.slip_image}" class="bankAccImg">` : ''}
     </div>
   `).join('');
@@ -27548,6 +27566,7 @@ async function printInvoiceFastText(){
 
 // ---------- ⚡ Advance Order کے لیے فاسٹ (سادہ متن) پرنٹ ---------- -->
 function buildAdvOrderPlainText(order){
+  order = cleanInvoiceNames(order);
   const cols = (AppState.settings.paperWidth || 80) === 80 ? 42 : 32;
   const lines = [];
   lines.push(centerMono(AppState.settings.businessName || 'AIO POS', cols));
@@ -30067,12 +30086,24 @@ async function confirmSoftReset(){
   goTo('home');
 }
 
+// AIO3010FR130: ری سیٹ میں رہ جانے والا ریکارڈ (Payments Record، Advance Orders، اخراجات، ڈائری، ہولڈ/ادھورے بل) بھی صاف
+function _resetClearList(arr){ try{ if(Array.isArray(arr)) arr.length = 0; }catch(e){} }
+function _resetDrafts(){
+  try{ heldBills = []; saveHeldBills(); }catch(e){}
+  try{ billEdit = null; }catch(e){}
+  try{ Billing.cart = []; }catch(e){}
+  ['billEditDraft','billingCartDraft','billingCustomerDraft','billingPayDraft','poDrafts','shipDrafts','advOrderDrafts','papDraft'].forEach(k => { try{ saveToStorage(k, k === 'billingCartDraft' ? [] : null); }catch(e){} });
+  try{ renderHeldBills(); }catch(e){}
+  try{ renderCart(); }catch(e){}
+}
 // ---------- صرف Bills/Transactions/Balances صاف کریں — Products/Categories/Stock/Users بالکل چھوئے بغیر ----------
 function performSoftReset(){
   invoicesData.length = 0;
   pendingBillsData.length = 0;
   customersData.forEach(c => { c.wallet_balance = 0; c.total_receivable = 0; c.walletHistory = []; });
-  suppliersData.forEach(s => { s.total_payable = 0; s.purchaseHistory = []; });
+  suppliersData.forEach(s => { s.total_payable = 0; s.purchaseHistory = []; s.ledgerHistory = []; });
+  _resetClearList(paymentsData); _resetClearList(approvalRequests); _resetClearList(expenseData);
+  _resetDrafts();
   financeDummy.cashInHand = 0;
   AppState.settings.openingCashBalance = 0;
   persistAllData();
@@ -30111,6 +30142,11 @@ function performMasterReset(){
   pendingBillsData.length = 0;
   nextCustomerId = 1;
   nextSupplierId = 1;
+  [paymentsData, advanceOrdersData, expenseData, diaryData, approvalRequests, customCategories].forEach(_resetClearList);
+  try{ _resetClearList(customerOrdersData); saveToStorage('customerOrders', customerOrdersData); }catch(e){}
+  try{ dailyStockSnapshot = {date: '', opening: {}, added: {}}; saveToStorage('dailyStockSnapshot', dailyStockSnapshot); }catch(e){}
+  try{ nextPaymentId = 1; nextAdvOrderId = 1; nextDiaryId = 1; nextExpenseId = 1; }catch(e){}
+  _resetDrafts();
   financeDummy.cashInHand = 0;
   AppState.settings.openingCashBalance = 0;
   persistAllData();
@@ -33295,9 +33331,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR129';
+  const APP_VERSION = 'AIO3010FR130';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Cloud archive: old records move to yearly archive boxes so live boxes never fill; sync race fix';
+  const UPDATE_NOTE = 'Erase Everything now clears payments, advance orders, expenses, diary and held bills; no Default word; payment rows show balance';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
