@@ -1811,6 +1811,8 @@
   /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
   .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
   .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  /* AIO3010FR136: وصول کرنے والے کا نام */
+  .payByTag{display:inline-block; margin-top:3px; padding:2px 9px; border-radius:999px; background:#eef2ff; color:#3730a3; font-size:11.5px; font-weight:700;}
   /* AIO3010FR132: 🌙 End of the Day Report */
   .eodBar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; padding:8px 10px; background:linear-gradient(180deg,#ecfdf5,#d1fae5); border-bottom:1.5px solid #99f6e4;}
   .eodRow{display:flex; align-items:center; gap:6px;}
@@ -3289,7 +3291,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR135</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR136</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3508,7 +3510,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR135</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR136</span>
     </div>
   </div>
 
@@ -19408,6 +19410,7 @@ function recordPaymentEntry(entry){
     account_number: '',
     slip_image: null,
     note: '',
+    by: AppState.currentUser?.name || '', // AIO3010FR136: کس نے وصول/ادا کی (مالک یا ملازم)
   }, entry);
   paymentsData.unshift(payment);
   persistAllData();
@@ -19950,7 +19953,7 @@ function buildPartyStatement(type, id){
     });
     const firstObC = (c.walletHistory || []).map(h => h.type).lastIndexOf('opening_balance'); // سب سے پہلا = اوپننگ، باقی = ایڈجسٹمنٹ (اپنی تاریخ پر)
     (c.walletHistory || []).forEach((h, i) => {
-      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})`, dr: 0, cr: h.amount, del: i});
+      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})${h.by ? ' — 👤 ' + h.by : ''}`, dr: 0, cr: h.amount, del: i});
       else if(h.type === 'opening_balance'){
         const first = i === firstObC, add = h.direction === 'add', cr = add ? 0 : (h.toReceivable != null ? h.toReceivable : h.amount);
         const legacyNote = /^(Opening balance( set)?|Balance corrected)$/.test(h.note || '');
@@ -19971,7 +19974,7 @@ function buildPartyStatement(type, id){
     const firstObS = (s.ledgerHistory || []).map(h => h.type).lastIndexOf('opening_balance');
     (s.ledgerHistory || []).forEach((h, i) => {
       const ts = (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0');
-      if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}`, dr: 0, cr: h.amount, del: i});
+      if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}${h.by ? ' — 👤 ' + h.by : ''}`, dr: 0, cr: h.amount, del: i});
       else if(h.type === 'return') rows.push({date: h.date, ts, text: `↩️ ${h.note || 'Item return'}`, dr: 0, cr: h.amount});
       else if(h.type === 'adjust') rows.push({date: h.date, ts, text: `✏️ Shipment edited${h.note ? ' — ' + h.note : ''}`, dr: h.amount > 0 ? h.amount : 0, cr: h.amount < 0 ? -h.amount : 0});
       else if(h.type === 'opening_balance'){
@@ -20914,7 +20917,7 @@ function confirmPaySupplier(){
   financeDummy.cashInHand -= amount; // ---------- نقد ادائیگی — یہ رقم اب کیش میں سے نکل گئی ----------
 
   s.ledgerHistory = s.ledgerHistory || [];
-  s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note});
+  s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note, by: AppState.currentUser?.name || ''});
 
   const savedPayment = recordPaymentEntry({
     date: payDate,
@@ -24275,7 +24278,8 @@ function saveCollectReceivable(){
     type: 'receivable_collected',
     amount: moneyRound(amount - excess),
     via: activeCollectMode,
-    date: payDate
+    date: payDate,
+    by: AppState.currentUser?.name || ''
   });
   if(excess > 0){
     c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + excess);
@@ -24460,6 +24464,7 @@ function renderPaymentsScreen(){
         <div style="min-width:0;">
           <div class="bankAccType">${p.direction === 'in' ? '💰 Received from' : '💸 Paid to'} ${p.party_name}</div>
           <div class="bankAccTitle">${p.date}${p.method ? ' • ' + p.method : ''}${p.account_number ? ' • ' + p.account_number : ''}</div>
+          ${p.by ? `<div class="payByTag">👤 ${p.direction === 'in' ? 'Received' : 'Paid'} by <b>${String(p.by).replace(/</g, '&lt;')}</b></div>` : ''}
         </div>
         <div style="font-weight:800; font-size:16px; color:${p.direction === 'in' ? '#166534' : 'var(--danger)'};">Rs. ${p.amount.toLocaleString()}</div>
       </div>
@@ -24625,7 +24630,7 @@ function saveRecordPaymentModal(){
     balanceAfter = moneyRound(c.total_receivable - extra);
     financeDummy.cashInHand += amount;
     c.walletHistory = c.walletHistory || [];
-    c.walletHistory.unshift({type:'receivable_collected', amount: toRec, via:method==='Cash'?'cash':'bank', date: payDate});
+    c.walletHistory.unshift({type:'receivable_collected', amount: toRec, via:method==='Cash'?'cash':'bank', date: payDate, by: AppState.currentUser?.name || ''});
     if(extra > 0){
       c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + extra);
       c.walletHistory.unshift({type:'deposit', amount: extra, via:'advance', date: payDate, note:'Advance — extra with payment'});
@@ -24639,7 +24644,7 @@ function saveRecordPaymentModal(){
     balanceAfter = s.total_payable;
     financeDummy.cashInHand -= amount;
     s.ledgerHistory = s.ledgerHistory || [];
-    s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note});
+    s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note, by: AppState.currentUser?.name || ''});
   }
 
   const savedPayment = recordPaymentEntry({
@@ -24695,6 +24700,7 @@ function viewPaymentDetail(paymentId){
     </div>` : ''}
     <div class="bankAccMeta">📅 Date: ${p.date}</div>
     <div class="bankAccMeta">💳 Method: ${p.method || 'Cash'}</div>
+    ${p.by ? `<div class="bankAccMeta">👤 ${p.direction === 'in' ? 'Received' : 'Paid'} by: <b>${String(p.by).replace(/</g, '&lt;')}</b></div>` : ''}
     ${p.account_title ? `<div class="bankAccMeta">🏦 Account: ${p.account_title}</div>` : ''}
     ${p.account_number ? `<div class="bankAccMeta">🔢 Account #: ${p.account_number}</div>` : ''}
     ${p.note ? `<div class="bankAccMeta">📝 Note: ${p.note}</div>` : ''}
@@ -24811,7 +24817,7 @@ async function renderPaymentReceiptToCanvas(p){
   y += 50;
   ctx.font = `500 14px Poppins, sans-serif`;
   ctx.fillStyle = '#475569';
-  ctx.fillText(`📅 ${p.date}   •   💳 ${p.method || 'Cash'}`, W/2, y);
+  ctx.fillText(`📅 ${p.date}   •   💳 ${p.method || 'Cash'}${p.by ? '   •   👤 ' + (p.direction === 'in' ? 'Received by ' : 'Paid by ') + p.by : ''}`, W/2, y);
 
   if(p.account_title || p.account_number){
     y += 34;
@@ -31921,7 +31927,7 @@ async function renderEodReportToCanvas(){
   if(D.inWallet) kv('• From customer wallets', D.inWallet, {indent: true});
   kv(`Paid to suppliers (${D.outList.length})`, r2s(D.outCash + D.outOther), {bold: true, color: '#b91c1c'});
   if(D.outOther) kv('• Bank / other', D.outOther, {indent: true});
-  const plist = [...D.inList.map(x => [x.party_name, 'In', money(x.amount)]), ...D.outList.map(x => [x.party_name, 'Out', money(x.amount)])];
+  const plist = [...D.inList.map(x => [x.party_name + (x.by ? ' (👤 ' + x.by + ')' : ''), 'In', money(x.amount)]), ...D.outList.map(x => [x.party_name + (x.by ? ' (👤 ' + x.by + ')' : ''), 'Out', money(x.amount)])];
   if(plist.length) table([{t: 'Party', w: .56}, {t: '', w: .12}, {t: 'Amount', w: .32, r: 1}], plist.slice(0, a4 ? 30 : 15));
   gap();
   // 5) اخراجات
@@ -33767,9 +33773,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR135';
+  const APP_VERSION = 'AIO3010FR136';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Salesman login only with a staff package (P1+1 or higher); trial still open';
+  const UPDATE_NOTE = 'Payments show who received or paid (owner or staff name)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
