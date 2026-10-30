@@ -3248,7 +3248,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR126</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR127</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3467,7 +3467,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR126</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR127</span>
     </div>
   </div>
 
@@ -7073,9 +7073,13 @@ function refreshMultiFlag(){
 // ---------- AIO2710TU111: کلاؤڈ کا ہر ڈبہ (دستاویز) زیادہ سے زیادہ 1MB — فروٹ/سبزی منڈی میں ڈبہ بھر کر بل رک گئے تھے۔
 // یہاں شروع سے ہی ہر بڑی فہرست کئی ڈبوں میں: بل ہر دن 8 ڈبے، پراڈکٹ/گاہک/سپلائر 8-8، باقی مہینہ وار۔
 // ڈبوں کے نام میں __v3_ — پرانے نام والے ڈبے نظرانداز ----------
-const SYNC_BUCKETS = {products: 8, customers: 8, suppliers: 8};
+// AIO3010FR127: گاہک (والٹ ہسٹری) اور سپلائر (پرچیز آرڈر + آئٹم) وقت کے ساتھ بھاری — 800 گاہک/30 سپلائر 2 سال میں سپلائر ڈبہ 105% تھا۔
+// اب زیادہ ڈبے: پراڈکٹ 16، گاہک 32، سپلائر 64 (وہی حساب اب 13% / 17%)۔ ڈبوں کے نام __v4_b — پرانے __v3_b والے نظرانداز (مٹائے نہیں جاتے)
+const SYNC_BUCKETS = {products: 16, customers: 32, suppliers: 64};
 const SYNC_SINGLE = ['users','devices','shopinfo'];
 function syncBucket(v, n){ let h = 0; for(const ch of String(v == null ? '' : v)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % n; }
+// v4 ڈبوں کے لیے بہتر بانٹ (FNV-1a) — پرانا syncBucket لگاتار آئی ڈیوں کو چند ڈبوں میں ہی ڈالتا تھا؛ بل/ادائیگی پرانے پر ہی رہیں
+function syncBucket4(v, n){ let h = 2166136261; for(const ch of String(v == null ? '' : v)){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h % n; }
 function syncChunkOf(docType, rec){
   const d = s => String(s || '').slice(0, 10).replace(/-/g, '_');
   const mon = s => d(s).slice(0, 7) || 'old';
@@ -7087,14 +7091,18 @@ function syncChunkOf(docType, rec){
   if(docType === 'approvalrequests') return 'approvalrequests__v3_' + mon(rec.date || rec.created_at);
   if(docType === 'advanceorders') return 'advanceorders__v3_' + mon(rec.createdAt);
   const n = SYNC_BUCKETS[docType] || 1;
-  return docType + '__v3_b' + syncBucket(rec[aioGetDocTypeMeta(docType).matchKey], n);
+  return docType + '__v4_b' + syncBucket4(rec[aioGetDocTypeMeta(docType).matchKey], n);
 }
-function syncChunkValid(c){ return SYNC_SINGLE.includes(c) || String(c).includes('__v3_'); }
+function syncChunkValid(c){
+  c = String(c);
+  if(SYNC_SINGLE.includes(c)) return true;
+  return SYNC_BUCKETS[c.split('__')[0]] ? c.includes('__v4_b') : c.includes('__v3_');
+}
 function syncDocTypeOfChunk(chunk){ return String(chunk).split('__')[0]; }
 // ---------- 📦 ڈبوں کا میٹر — ہر ڈبے کا سائز؛ 60% سے اوپر تو مالک کو تنبیہ؛ 95% پر لکھنا روک کر صاف پیغام ----------
 const SYNC_BOX_LIMIT = 1000000;
 const syncBoxSizes = loadFromStorage('syncBoxSizes', {});
-function syncBiggestBox(){ let best = ['', 0]; Object.entries(syncBoxSizes).forEach(([c, n]) => { if(n > best[1]) best = [c, n]; }); return {chunk: best[0], bytes: best[1], pct: Math.round(best[1] / SYNC_BOX_LIMIT * 100)}; }
+function syncBiggestBox(){ let best = ['', 0]; Object.entries(syncBoxSizes).forEach(([c, n]) => { if(syncChunkValid(c) && n > best[1]) best = [c, n]; }); return {chunk: best[0], bytes: best[1], pct: Math.round(best[1] / SYNC_BOX_LIMIT * 100)}; }
 let syncBoxWarned = false;
 function syncNoteBox(chunk, bytes){
   syncBoxSizes[chunk] = bytes; saveToStorage('syncBoxSizes', syncBoxSizes);
@@ -7954,6 +7962,7 @@ function persistAllData(){
   if(typeof nextDiaryId !== 'undefined') saveToStorage('nextDiaryId', nextDiaryId);
   if(typeof expenseData !== 'undefined'){ saveToStorage('expenses', expenseData); try{ pushDocTypeToCloud('expenses', expenseData); }catch(e){} }
   if(typeof nextExpenseId !== 'undefined') saveToStorage('nextExpenseId', nextExpenseId);
+  if(typeof financeDummy !== 'undefined') saveToStorage('cashInHand', Math.round(financeDummy.cashInHand * 100) / 100);
 }
 setInterval(persistAllData, 1500); // ---------- ہر 1.5 سیکنڈ بعد خودکار محفوظ (fail-safe) ----------
 
@@ -11763,11 +11772,18 @@ function saveBillingCartDraft(){
   saveToStorage('billingCounterSaleDraft', Billing.counterSale);
   const custSel = document.getElementById('customerSelect');
   saveToStorage('billingCustomerDraft', custSel ? custSel.value : '');
+  if(billingDraftCustomerRestored || !Billing.cart.length) saveToStorage('billingPayDraft', {
+    received: document.getElementById('amountReceivedInput')?.value || '',
+    discount: document.getElementById('discountInput')?.value || '',
+    toWallet: !!document.getElementById('changeToWalletChk')?.checked,
+    note: document.getElementById('billNoteInput')?.value || ''
+  });
 }
 // ---------- بل مکمل ہونے یا صارف کے خود ڈیلیٹ کرنے پر ڈرافٹ صاف کریں ----------
 function clearBillingCartDraft(){
   saveToStorage('billingCartDraft', []);
   saveToStorage('billingCustomerDraft', '');
+  saveToStorage('billingPayDraft', null);
 }
 // ---------- "🗑️ Delete Cart" بٹن — صارف خود چاہے تو پورا کارٹ صاف کر دے (صرف رفریش کرنے سے کبھی خالی نہیں ہونا چاہیے) ----------
 function deleteBillingCartDraft(){
@@ -11788,6 +11804,10 @@ function resetBillingCart(){
   if(receivedEl) receivedEl.value = '';
   const noteEl = document.getElementById('billNoteInput');
   if(noteEl) noteEl.value = '';
+  const twEl = document.getElementById('changeToWalletChk');
+  if(twEl) twEl.checked = false;
+  // AIO3010FR127: کارٹ خالی/ہولڈ ہو تو ترمیم بھی ختم — ورنہ اگلا نیا بل پرانے بل کی جگہ لے لیتا تھا
+  if(billEdit){ billEdit = null; saveToStorage('billEditDraft', null); billEditFieldsFilled = false; }
   Billing.counterSale = true;
   syncCartModeControls();
   renderCart();
@@ -11820,6 +11840,8 @@ function currentBillSnapshot(){
     discount: document.getElementById('discountInput')?.value || 0,
     received: document.getElementById('amountReceivedInput')?.value || '',
     note: document.getElementById('billNoteInput')?.value || '',
+    toWallet: !!document.getElementById('changeToWalletChk')?.checked,
+    edit: editingInvoice() ? billEdit : null, // ✏️ ترمیم والا بل ہولڈ ہو تو ترمیم بھی ساتھ
     heldAt: new Date().toISOString()
   };
 }
@@ -11856,6 +11878,10 @@ function resumeHeldBill(id){
   const d = document.getElementById('discountInput'); if(d) d.value = h.discount || 0;
   const r = document.getElementById('amountReceivedInput'); if(r) r.value = h.received || '';
   const bn = document.getElementById('billNoteInput'); if(bn) bn.value = h.note || '';
+  const tw = document.getElementById('changeToWalletChk'); if(tw) tw.checked = !!h.toWallet;
+  if(h.edit && invoicesData.some(i => i.invoice_id === h.edit.invoice_id && i.status !== 'voided')){
+    billEdit = h.edit; saveToStorage('billEditDraft', billEdit); billEditFieldsFilled = true;
+  }
   onCustomerChange(); // کسٹمر/Walk-in حالت، بقایہ اور کارٹ دوبارہ بنائیں
   renderBillingProductGrid();
   renderHeldBills();
@@ -13543,6 +13569,10 @@ function startEditBill(invoiceId){
       ['modeWholesale','cartModeWholesale'].forEach(id => document.getElementById(id)?.classList.toggle('active', inv.sale_mode === 'wholesale'));
     }
     const sel = document.getElementById('customerSelect');
+    // AIO3010FR127: گاہک کی فہرست پرانی ہو (مثلاً دوسرے فون سے آیا گاہک) تو پہلے تازہ — ورنہ بل خاموشی سے Walk-in نقد بن جاتا تھا
+    if(sel && inv.customer_id && !Array.from(sel.options).some(o => o.value == inv.customer_id)){
+      try{ const si = document.getElementById('custSearchInput'); if(si) si.value = ''; const af = document.getElementById('custAreaFilter'); if(af) af.value = ''; populateCustomerDropdown(); }catch(e){}
+    }
     if(sel){ sel.value = inv.customer_id || ''; try{ onCustomerChange(); }catch(e){} }
     fillEditPaymentFields(inv, true);
   } else fillEditPaymentFields(inv, false);
@@ -13571,7 +13601,8 @@ function renderEditBillBanner(){
 // ---------- اسی بل کے بغیر گاہک کا بقایہ — ایڈٹ میں Previous Balance اور پریویو کے لیے ----------
 function invoiceReceivableDelta(inv){
   const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
-  return wasCounterCash ? 0 : ((inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0));
+  // AIO3010FR127: زائد رقم جو والٹ میں گئی (change_credited_to_wallet) بقایا پر اثر نہیں — پہلے دو بار گنی جاتی تھی
+  return wasCounterCash ? 0 : ((inv.grand_total || 0) - (inv.wallet_applied || 0) - (inv.cash_received_now || 0) + (inv.change_credited_to_wallet || 0));
 }
 // ===================== AIO2910TH124: 📝 نوٹ — بل (خاص کر ادھار)، پرچیز آرڈر اور شپمنٹ پر یادداشت؛ صرف اپنے لیے، پرنٹ میں نہیں =====================
 // rec.notes = [{ts, text, by, tag}] — tag 'ship' = شپمنٹ وصول/ایڈٹ کرتے وقت کا نوٹ
@@ -13717,7 +13748,10 @@ function reverseInvoiceForEdit(inv, why){
       customer.walletHistory.unshift({type:'deposit', amount:inv.wallet_applied, date:today, note:`Returned — ${inv.invoice_no} ${why || 'edited'}`});
     }
     if(inv.change_credited_to_wallet > 0){
-      customer.wallet_balance = Math.max(0, (customer.wallet_balance || 0) - inv.change_credited_to_wallet);
+      // والٹ والی زائد رقم واپس — گاہک خرچ کر چکا ہو تو باقی اس کے بقایا میں (پہلے Math.max(0) سے مفت ہو جاتی تھی)
+      const take = Math.min(Math.max(0, customer.wallet_balance || 0), inv.change_credited_to_wallet);
+      customer.wallet_balance = moneyRound((customer.wallet_balance || 0) - take);
+      customer.total_receivable = moneyRound((customer.total_receivable || 0) + (inv.change_credited_to_wallet - take));
       customer.walletHistory.unshift({type:'redeem', amount:inv.change_credited_to_wallet, date:today, note:`Change taken back — ${inv.invoice_no} ${why || 'edited'}`});
     }
     if(why === 'deleted') settleNegativeReceivable(customer, `Paid on ${inv.invoice_no} (deleted) — kept as advance`);
@@ -13735,18 +13769,30 @@ function settleNegativeReceivable(c, why){
 
 function renderCart(){
   try{ renderEditBillBanner(); }catch(e){}
-  saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
-  renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
+  // ---------- پہلے ڈرافٹ واپس (گاہک + وصول رقم/ڈسکاؤنٹ)، پھر محفوظ — ورنہ خالی خانے پرانی رقم مٹا دیتے ----------
   if(!billingDraftCustomerRestored && Billing.cart.length > 0){
-    billingDraftCustomerRestored = true;
-    const savedCustId = loadFromStorage('billingCustomerDraft', '');
+    const savedCustId = String(loadFromStorage('billingCustomerDraft', '') || '');
     const custSel = document.getElementById('customerSelect');
-    if(savedCustId && custSel && Array.from(custSel.options).some(o => o.value === savedCustId)){
-      custSel.value = savedCustId;
-      Billing.counterSale = false;
-      syncCartModeControls();
+    if(savedCustId && custSel && !Array.from(custSel.options).some(o => o.value === savedCustId)){ try{ populateCustomerDropdown(); }catch(e){} }
+    if(!savedCustId || (custSel && Array.from(custSel.options).some(o => o.value === savedCustId)) || !customersData.some(c => String(c.customer_id) === savedCustId)){
+      billingDraftCustomerRestored = true;
+      if(savedCustId && custSel && Array.from(custSel.options).some(o => o.value === savedCustId)){
+        custSel.value = savedCustId;
+        Billing.counterSale = false;
+        try{ updateCustomerTriggerLabel(); }catch(e){}
+        syncCartModeControls();
+      }
+      const pd = loadFromStorage('billingPayDraft', null);
+      if(pd && typeof pd === 'object'){
+        const rv = document.getElementById('amountReceivedInput'); if(rv && rv.value === '' && pd.received) rv.value = pd.received;
+        const dv = document.getElementById('discountInput'); if(dv && !parseFloat(dv.value) && parseFloat(pd.discount)) dv.value = pd.discount;
+        const tw = document.getElementById('changeToWalletChk'); if(tw && pd.toWallet) tw.checked = true;
+        const nv = document.getElementById('billNoteInput'); if(nv && !nv.value && pd.note) nv.value = pd.note;
+      }
     }
   }
+  saveBillingCartDraft(); // ---------- ہر تبدیلی کے بعد خودکار محفوظ — رفریش سے کارٹ ضائع نہ ہو ----------
+  renderHomeUnfinishedCartCard(); // ---------- حفاظتی: ہوم پیج کا کارڈ بھی ہمیشہ اسی وقت تازہ ہو، چاہے ہوم پیج کا اپنا رینڈر کہیں نہ چلا ہو ----------
   const body = document.getElementById('cartBody');
   const emptyMsg = document.getElementById('emptyCartMsg');
   const flat = getFlatVariants();
@@ -14210,6 +14256,11 @@ function finalizeInvoice(){
     return;
   }
 
+  // ---------- ادھار والا بل ایڈٹ میں بغیر گاہک (Walk-in نقد) بن رہا ہو تو پوچھیں — غلطی سے گاہک کا بقایا غائب نہ ہو ----------
+  if(editInv && editInv.customer_id && !customer){
+    const oc = customersData.find(c => c.customer_id === editInv.customer_id);
+    if(!confirm(`${editInv.invoice_no} was on ${oc ? oc.name : 'a customer'}'s account.\nNo customer is selected now — it will become a walk-in CASH sale and leave their account.\n\nContinue?`)) return;
+  }
   // ---------- ✏️ ترمیم: پہلے پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس، پھر نیا بل اسی نمبر سے ----------
   if(editInv) reverseInvoiceForEdit(editInv);
 
@@ -14352,7 +14403,11 @@ function finalizeInvoice(){
   if(walletApplied > 0){
     alert(`💳 Rs. ${walletApplied.toLocaleString()} auto-deducted from ${customer.name}'s wallet.` + (remainingDue > 0 ? ` Remaining due: Rs. ${remainingDue.toLocaleString()}` : ` Bill fully paid — nothing outstanding.`));
   }
-  if(editInv && customer) settleNegativeReceivable(customer, `Paid more than ${invoice.invoice_no} (edited) — kept as advance`);
+  if(editInv){
+    if(customer) settleNegativeReceivable(customer, `Paid more than ${invoice.invoice_no} (edited) — kept as advance`);
+    const oldCust = editInv.customer_id ? customersData.find(c => c.customer_id === editInv.customer_id) : null;
+    if(oldCust && oldCust !== customer) settleNegativeReceivable(oldCust, `Paid on ${invoice.invoice_no} (moved to another customer) — kept as advance`);
+  }
   if(editInv){ billEdit = null; saveToStorage('billEditDraft', null); renderEditBillBanner(); showNavToast(`✅ ${invoice.invoice_no} updated`); }
   openInvoicePreview(invoice.invoice_id); // خودکار پریمیم پرنٹ پریویو کھل جائے
 }
@@ -17697,7 +17752,8 @@ const financeDummy = {
   // ---------- اہم: پہلے یہاں ہارڈ کوڈڈ 85000 لکھا ہوا تھا (کسی حقیقی ریکارڈ سے تعلق نہیں رکھتا تھا) —
   // اب یہ Settings > Opening Cash Balance سے آتا ہے (صارف خود مقرر کرے)، اور اس کے بعد ہر نقد
   // (Counter Sale) بل اور نقد Collection/Payment سے خودکار اپڈیٹ ہوتا ہے — مکمل طور پر شفاف ----------
-  cashInHand: AppState.settings.openingCashBalance || 0,
+  // AIO3010FR127: پہلے محفوظ نہیں ہوتا تھا — ایپ کھلتے ہی Cash in Hand صفر/اوپننگ پر واپس چلا جاتا تھا
+  cashInHand: (() => { const v = loadFromStorage('cashInHand', null); return (typeof v === 'number' && isFinite(v)) ? v : (AppState.settings.openingCashBalance || 0); })(),
 };
 
 // ---------- Expiry Data — اب Batches موجود ہوں تو ہر batch الگ الگ (اپنی qty/تاریخ کے ساتھ) دکھائی جاتی ہے،
@@ -23364,12 +23420,13 @@ function confirmBatchReturn(invoiceId){
   // ---------- AIO2710TU111: بل کی رقم ابھی باقی (ادھار) ہو تو واپسی پہلے اسی بقایہ سے کٹے — گاہک کو نقد نہ دیں جو اس نے دیا ہی نہیں ----------
   let offsetFromDue = 0;
   const dueCustomer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
-  if(dueCustomer && (inv.amount_due || 0) > 0){
-    offsetFromDue = Math.min(totalRefund, inv.amount_due, Math.max(0, dueCustomer.total_receivable || 0));
+  const liveDue = dueCustomer ? getInvoiceAmountDue(inv) : 0;
+  if(dueCustomer && liveDue > 0){
+    offsetFromDue = Math.min(totalRefund, liveDue, Math.max(0, dueCustomer.total_receivable || 0));
     offsetFromDue = Math.round(offsetFromDue * 100) / 100;
     if(offsetFromDue > 0){
       dueCustomer.total_receivable = Math.max(0, (dueCustomer.total_receivable || 0) - offsetFromDue);
-      inv.amount_due = Math.max(0, Math.round((inv.amount_due - offsetFromDue) * 100) / 100);
+      inv.amount_due = Math.max(0, Math.round(((inv.amount_due || 0) - offsetFromDue) * 100) / 100);
     }
   }
   const refundOut = Math.round((totalRefund - offsetFromDue) * 100) / 100;
@@ -24349,17 +24406,23 @@ function saveRecordPaymentModal(){
     partyName = c.name;
     balanceBefore = c.total_receivable || 0;
     // ---------- کسٹمر کے واجب الوصول اور کیش ان ہینڈ کو بھی اپڈیٹ کریں (Collect Payment کی طرح) ----------
-    c.total_receivable = Math.max(0, (c.total_receivable || 0) - amount);
-    balanceAfter = c.total_receivable;
+    // AIO3010FR127: بقایا سے زیادہ رقم پہلے Math.max(0) میں ضائع ہو جاتی تھی — اب زائد رقم گاہک کے والٹ میں (ایڈوانس)
+    const toRec = Math.min(amount, Math.max(0, c.total_receivable || 0)), extra = moneyRound(amount - toRec);
+    c.total_receivable = moneyRound((c.total_receivable || 0) - toRec);
+    balanceAfter = moneyRound(c.total_receivable - extra);
     financeDummy.cashInHand += amount;
     c.walletHistory = c.walletHistory || [];
-    c.walletHistory.unshift({type:'receivable_collected', amount, via:method==='Cash'?'cash':'bank', date: payDate});
+    c.walletHistory.unshift({type:'receivable_collected', amount: toRec, via:method==='Cash'?'cash':'bank', date: payDate});
+    if(extra > 0){
+      c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + extra);
+      c.walletHistory.unshift({type:'deposit', amount: extra, via:'advance', date: payDate, note:'Advance — extra with payment'});
+    }
   } else {
     const s = suppliersData.find(x => x.supplier_id === partyId);
     if(!s) return;
     partyName = s.name;
     balanceBefore = s.total_payable || 0;
-    s.total_payable = Math.max(0, (s.total_payable || 0) - amount);
+    s.total_payable = moneyRound((s.total_payable || 0) - amount); // منفی = سپلائر کو ایڈوانس (Pay Supplier جیسا)
     balanceAfter = s.total_payable;
     financeDummy.cashInHand -= amount;
     s.ledgerHistory = s.ledgerHistory || [];
@@ -25622,25 +25685,19 @@ function adminVoidBill(invoiceId){
 function executeVoidBill(inv){
   // ---------- AIO2710TU111: ایڈٹ والا درست حساب — اسٹاک، نقد (جزوی ادائیگی سمیت)، بقایہ، والٹ سب پہلے جیسا ----------
   if(!(inv.items || []).some(it => it.returned)){ reverseInvoiceForEdit(inv, 'deleted'); inv.status = 'voided'; return; }
-  // ---------- اسٹاک واپس کریں — بل کے ہر آئٹم کی مقدار اسٹاک میں دوبارہ شامل کریں ----------
-  inv.items.forEach(item => restoreStockForItem(item, item.qty)); // AIO1310TU035
-
-  // ---------- نقد اثر واپس کریں — اگر یہ نقد بل تھا تو Cash in Hand سے وہی رقم منہا کریں ----------
-  if(inv.payment_method === 'cash'){
-    financeDummy.cashInHand -= inv.grand_total;
-  }
-
-  // ---------- کسٹمر کا بقایہ/والٹ اثر واپس کریں ----------
+  // ---------- AIO3010FR127: کچھ مال پہلے واپس ہو چکا — صرف باقی مقدار اسٹاک میں (پہلے واپس شدہ دوبارہ جڑ جاتا تھا) ----------
+  inv.items.forEach(item => {
+    const left = Math.round(((Number(item.qty) || 0) - (item.returned ? (Number(item.returnQty) || 0) : 0)) * 1000) / 1000;
+    if(left > 0) restoreStockForItem(item, left);
+  });
+  const wasCounterCash = inv.payment_method === 'cash' && !(inv.cash_received_now > 0) && !(inv.wallet_applied > 0);
   const customer = inv.customer_id ? customersData.find(c => c.customer_id === inv.customer_id) : null;
-  if(customer){
-    const amountDue = (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0);
-    if(amountDue > 0){ customer.total_receivable -= amountDue; settleNegativeReceivable(customer, `Paid on ${inv.invoice_no} (deleted) — kept as advance`); }
-
-    if(inv.wallet_applied > 0){
-      customer.wallet_balance += inv.wallet_applied; // والٹ سے کاٹی گئی رقم واپس کر دیں
-      customer.walletHistory = customer.walletHistory || [];
-      customer.walletHistory.unshift({type:'deposit', amount:inv.wallet_applied, date:new Date().toISOString().split('T')[0], note:`Refund — ${inv.invoice_no} voided`});
-    }
+  if(wasCounterCash || !customer){
+    financeDummy.cashInHand -= (inv.grand_total || 0); // نقد بل: باقی رقم واپس
+  } else {
+    // ادھار/جزوی بل: باقی بل کی رقم گاہک کے کھاتے سے ہٹے؛ جو دے چکا وہ ضائع نہیں — بقایا منفی ہو تو والٹ میں ایڈوانس
+    customer.total_receivable = moneyRound((customer.total_receivable || 0) - (inv.grand_total || 0));
+    settleNegativeReceivable(customer, `Paid on ${inv.invoice_no} (deleted) — kept as advance`);
   }
 
   // TODO: یہاں invoices.status = 'voided' کا DB UPDATE ہوگا
@@ -33116,9 +33173,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR126';
+  const APP_VERSION = 'AIO3010FR127';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Fix: editing a bill no longer adds back payments received later; bill Due now shows the live remaining amount';
+  const UPDATE_NOTE = 'Accounts check-up: hold/edit/reload/payments/returns fixes, cash in hand saved, more cloud boxes';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
