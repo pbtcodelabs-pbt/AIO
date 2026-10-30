@@ -1811,6 +1811,16 @@
   /* AIO2810WE121: ادھورا بل یاد دہانی + ایک ڈراپ ڈاؤن میں سب فلٹر */
   .pendBillHint{margin:6px 0; padding:8px 10px; border-radius:12px; background:#fff7ed; border:1.5px solid #fdba74; color:#9a3412; font-size:12.5px; font-weight:700; line-height:1.45;}
   .pendBillHint button{display:block; margin-top:6px; border:none; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:900; cursor:pointer; color:#fff; background:linear-gradient(180deg,#f97316,#c2410c); box-shadow:0 3px 0 #9a3412, 0 5px 12px rgba(194,65,12,.25), inset 0 1px 0 rgba(255,255,255,.35);}
+  /* AIO3010FR132: 🌙 End of the Day Report */
+  .eodBar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; padding:8px 10px; background:linear-gradient(180deg,#ecfdf5,#d1fae5); border-bottom:1.5px solid #99f6e4;}
+  .eodRow{display:flex; align-items:center; gap:6px;}
+  .eodRow label{font-size:12.5px; font-weight:900; color:#065f46; white-space:nowrap;}
+  .eodRow input{width:110px; padding:7px 8px; border:1.5px solid #0f766e; border-radius:10px; font-size:15px; font-weight:900; text-align:center; background:#fff;}
+  .eodNav{border:none; width:34px; height:34px; border-radius:50%; background:#0f766e; color:#fff; font-size:14px; font-weight:900; cursor:pointer; box-shadow:0 2px 0 #134e4a;}
+  .eodDayLbl{min-width:150px; text-align:center; font-weight:900; font-size:14px; color:#064e3b;}
+  .eodSave{border:none; border-radius:999px; padding:7px 12px; font-weight:900; font-size:12.5px; color:#fff; background:linear-gradient(180deg,#14b8a6,#0f766e); box-shadow:0 2px 0 #134e4a; cursor:pointer;}
+  .eodFmt button{border:1.5px solid #0f766e; border-radius:999px; padding:6px 12px; font-weight:900; font-size:12.5px; background:#fff; color:#0f766e; cursor:pointer;}
+  .eodFmt button.on{background:#0f766e; color:#fff;}
   /* AIO3010FR130: ایڈوانس آرڈر کارڈ — فون پر بٹن نیچے پوری چوڑائی میں، نام/تفصیل تنگ کالم میں نہ پھنسے */
   .billCard.advCard{flex-direction:column; align-items:stretch; gap:8px;}
   .billCard.advCard .billActions{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-start;}
@@ -3279,7 +3289,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR131</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR132</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3498,7 +3508,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR131</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR132</span>
     </div>
   </div>
 
@@ -6343,6 +6353,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">⚠️ Low Stock Items</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Only items at or below their low-stock limit, category-wise</div>
       </button>
+      <button onclick="openEodReport()" style="text-align:left; padding:16px; border-radius:14px; border:2px solid #0f766e; background:linear-gradient(180deg,#ecfdf5,#d1fae5); box-shadow:0 3px 0 #99f6e4, 0 4px 10px rgba(15,23,42,.08); cursor:pointer;">
+        <div style="font-weight:900; font-size:15.5px; color:#065f46;">🌙 End of the Day Report</div>
+        <div style="font-size:12.5px; color:#047857; margin-top:3px;">Opening cash, sales, profit, expenses, payments in/out, cash in drawer, trend &amp; best-sellers — A4 or thermal</div>
+      </button>
       <button onclick="openTodaySaleReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📅 Today's Sale Report</div>
         <div style="font-size:12.5px; color:var(--muted); margin-top:3px;">Bills, sales, payments, expenses &amp; best-sellers for today</div>
@@ -6376,6 +6390,20 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 </div>
 
 <!-- ---------- رپورٹ پریویو — بالکل "Bill Ready To Print" جیسا سٹائل کنٹرول پیٹرن، مگر اپنی الگ سیٹنگز کے ساتھ ---------- -->
+<!-- AIO3010FR132: 🌅 صبح ایپ کھلتے ہی اوپننگ کیش -->
+<div class="modalOverlay" id="eodOpenModal" style="z-index:12500;" onclick="if(event.target===this) eodOpenLater()">
+  <div class="modalBox" style="width:min(380px, calc(100vw - 24px));">
+    <h3 style="margin-top:0;">🌅 Good morning!</h3>
+    <div class="settingsHint" style="font-size:13.5px;">How much <b>cash is in your drawer</b> to start today?<br><span id="eodOpenDay" style="font-weight:800;"></span></div>
+    <input type="number" id="eodOpenInput" inputmode="decimal" placeholder="Opening cash (Rs.)" onfocus="this.select()" onkeydown="if(event.key==='Enter') eodOpenSave()" style="width:100%; box-sizing:border-box; margin:10px 0 6px; padding:12px; font-size:22px; font-weight:900; text-align:center; border:2px solid #0f766e; border-radius:14px;">
+    <div id="eodOpenSuggest" style="font-size:12.5px; color:#475569; text-align:center; margin-bottom:6px;"></div>
+    <div class="modalBtns">
+      <button class="cancelBtn" onclick="eodOpenLater()">Later</button>
+      <button class="saveBtn" onclick="eodOpenSave()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="modalOverlay" id="reportPreviewModal" style="z-index:960;" onclick="if(event.target===this) closeReportPreview()">
   <div class="invoicePreviewBox">
     <div class="previewHeader">
@@ -6450,6 +6478,23 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <!-- ---------- ⚙️ Advanced formatting بٹن — عام صارف کو صرف پرنٹ/شیئر چاہیے، سٹائل کنٹرول چھپے رہیں جب تک نہ مانگیں ---------- -->
     <button type="button" onclick="const w=document.getElementById('reportStyleControlsWrap'); const open=w.style.display==='none'; w.style.display=open?'flex':'none'; this.textContent=open?'⚙️ Hide Formatting Options':'⚙️ Advanced Formatting Options';" style="width:100%; margin:8px 0; padding:9px; background:#eef2ff; color:var(--primary-dark); border:none; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer;">⚙️ Advanced Formatting Options</button>
 
+    <!-- AIO3010FR132: 🌙 End of the Day — دن، اوپننگ کیش، A4/تھرمل -->
+    <div id="eodBar" class="eodBar" style="display:none;">
+      <div class="eodRow">
+        <button type="button" class="eodNav" onclick="eodShiftDay(-1)" aria-label="Previous day">◀</button>
+        <span id="eodDayLbl" class="eodDayLbl"></span>
+        <button type="button" class="eodNav" onclick="eodShiftDay(1)" aria-label="Next day">▶</button>
+      </div>
+      <div class="eodRow">
+        <label for="eodOpenField">🌅 Opening Cash</label>
+        <input type="number" id="eodOpenField" inputmode="decimal" placeholder="Rs." onfocus="this.select()" onkeydown="if(event.key==='Enter') eodSetOpening(this.value)">
+        <button type="button" class="eodSave" onclick="eodSetOpening(document.getElementById('eodOpenField').value)">💾 Save</button>
+      </div>
+      <div class="eodRow eodFmt">
+        <button type="button" id="eodFmtThermal" onclick="eodSetFormat(false)">🧾 Thermal</button>
+        <button type="button" id="eodFmtA4" onclick="eodSetFormat(true)">📄 A4</button>
+      </div>
+    </div>
     <div id="reportCanvasScrollWrap" class="invoicePreviewScrollArea">
       <canvas id="reportCanvas"></canvas>
     </div>
@@ -10742,6 +10787,7 @@ function finishLogin(user, forceRemember){
   goTo('home'); // ہر role پہلے Home اسکرین پر جائے گا
   showRoleToast(user.role, user.name); // ---------- صاف صاف بتائیں کہ Admin کے طور پر لاگ ان ہوا یا Salesman کے طور پر ----------
   if(user.role === 'admin'){
+    setTimeout(eodMorningPrompt, 2600); // 🌅 آج کا اوپننگ کیش
     if(!AppState.settings.gdrivePromptShown) setTimeout(showGDriveFirstRunPrompt, 900); // ---------- پہلی بار ایپ استعمال ہو تو Google Drive اکاؤنٹ فوراً جوڑنے کی دعوت دیں ----------
     else{
       setTimeout(checkBackupReminder, 1800); // ---------- بیک اپ یاد دہانی صرف Admin کو، رول ٹوسٹ کے تھوڑی دیر بعد تاکہ آپس میں نہ ٹکرائیں ----------
@@ -23578,6 +23624,7 @@ function confirmBatchReturn(invoiceId){
     financeDummy.cashInHand -= refundOut; // TODO: نقدی لیجر (cash ledger) میں INSERT
   }
 
+  inv.returnLog = (inv.returnLog || []).concat([{date: localDateStr(new Date()), amount: totalRefund, cashOut: method === 'cash' ? refundOut : 0}]); // 🌙 دن کی رپورٹ: نقد واپسی
   // ---------- بل کی مجموعی رقم میں سے واپس شدہ رقم منہا کریں تاکہ آج کی سیل/آمدن خودکار درست ہو جائے ----------
   inv.grand_total = Math.max(0, (inv.grand_total || 0) - totalRefund);
   // TODO: یہاں sales_returns table میں INSERT ہوگا (invoice_id, items, qty, amount, method, date)
@@ -31058,6 +31105,8 @@ function syncReportStyleControls(){
 
   const stockSortRow = document.getElementById('rpscStockSortRow');
   if(stockSortRow) stockSortRow.style.display = currentReportType === 'stockprofit' ? 'flex' : 'none';
+  const eodBar = document.getElementById('eodBar');
+  if(eodBar) eodBar.style.display = currentReportType === 'eod' ? 'flex' : 'none';
   const stockSortSel = document.getElementById('rpscStockSortSelect');
   if(stockSortSel) stockSortSel.value = AppState.settings.reportStockSort || 'profitHigh';
 
@@ -31224,6 +31273,7 @@ function renderReportHeaderCells(ctx, cols, headerTop, headerRowH, colTextAlign,
 async function renderReportToCanvas(){
   const canvas = document.getElementById('reportCanvas');
   if(!canvas || !currentReportType) return;
+  if(currentReportType === 'eod'){ await renderEodReportToCanvas(); return; } // 🌙 End of the Day
   if(currentReportType === 'todaysale'){ await renderTodaySaleReportToCanvas(); return; } // ---------- یہ رپورٹ پراڈکٹ/کیٹگری بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'diarysummary'){ await renderDiarySummaryReportToCanvas(); return; } // ---------- یہ بھی پراڈکٹ بیسڈ نہیں، اپنا الگ لے آؤٹ ہے ----------
   if(currentReportType === 'stockprofit'){ await renderStockSaleProfitReportToCanvas(); return; } // ---------- 📊 روزانہ سٹاک سیل پرافٹ رپورٹ — اپنا الگ لے آؤٹ ----------
@@ -31571,6 +31621,344 @@ async function renderReportToCanvas(){
   });
   const scrollWrap = document.getElementById('reportCanvasScrollWrap');
   if(scrollWrap) scrollWrap.scrollTop = 0; // ---------- ہر دوبارہ ڈرائنگ کے بعد اوپر سے دکھائیں — عنوان کبھی نہ کٹے/چھپے، خاص طور پر A4 پر سوئچ کرنے پر ----------
+}
+
+
+// ===================== AIO3010FR132: 🌙 END OF THE DAY REPORT =====================
+// سارا دن: اوپننگ کیش، سیل (نقد/ادھار/ڈیجیٹل)، منافع، اخراجات، وصولیاں/ادائیگیاں، واپسیاں، خریداری،
+// دراز میں کتنا کیش ہونا چاہیے، 7 دن کا رجحان، سب سے زیادہ بکنے والے، بقایا جات — A4 اور تھرمل دونوں
+// اوپننگ کیش ہر دن کا الگ: AppState.settings.eodOpening[YYYY-MM-DD]؛ صبح لاگ اِن پر پوچھا جاتا ہے
+let eodDay = '';
+function eodOpeningMap(){ const s = AppState.settings; if(!s.eodOpening || typeof s.eodOpening !== 'object') s.eodOpening = {}; return s.eodOpening; }
+function eodGetOpening(day){ const v = eodOpeningMap()[day]; return (v === undefined || v === null || v === '') ? null : Number(v); }
+function eodShift(day, n){ const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() + n); return localDateStr(d); }
+function eodData(day){
+  const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
+  const isCashM = m => /^cash$/i.test(String(m || 'Cash').trim());
+  const inv = (invoicesData || []).filter(i => i && i.status !== 'voided' && invLocalDate(i) === day);
+  const D = {day, bills: inv.length, sales: 0, discount: 0, counterBills: 0, creditBills: 0, paidAtBill: 0, creditGiven: 0, walletUsed: 0, profit: 0, modes: {}, items: {}, hours: {}};
+  inv.forEach(i => {
+    const G = Number(i.grand_total) || 0;
+    D.sales += G; D.discount += Number(i.discount) || 0;
+    const counter = i.payment_method === 'cash' && !(i.cash_received_now > 0) && !(i.wallet_applied > 0);
+    if(counter) D.counterBills++; else D.creditBills++;
+    const paid = counter ? G : (Number(i.cash_received_now) || 0);
+    D.paidAtBill += paid;
+    if(!counter) D.creditGiven += Math.max(0, Number(i.amount_due) || 0);
+    D.walletUsed += Number(i.wallet_applied) || 0;
+    const pm = (Array.isArray(i.payment_modes) && i.payment_modes.length) ? i.payment_modes : (paid > 0 ? [{k: 'cash', amount: paid}] : []);
+    pm.forEach(m => { D.modes[m.k] = r2((D.modes[m.k] || 0) + (Number(m.amount) || 0)); });
+    let prof = -(Number(i.discount) || 0);
+    (i.items || []).forEach(it => {
+      const q = (Number(it.qty) || 0) - (it.returned ? (Number(it.returnQty) || 0) : 0);
+      if(q <= 0) return;
+      const price = Number(it.unitPrice) || 0, amt = q * price;
+      const k = itemDisplayName(it.name) || 'Item';
+      const e = D.items[k] || (D.items[k] = {name: k, qty: 0, amount: 0, unit: it.unit || ''});
+      e.qty += q; e.amount += amt;
+      prof += q * (price - (Number(it.costPerUnit) || 0));
+    });
+    D.profit += prof;
+    const h = new Date(i.created_at).getHours(); if(!isNaN(h)) D.hours[h] = (D.hours[h] || 0) + G;
+  });
+  // واپسیاں (کسی بھی دن کے بل کی، آج ہوئی)
+  D.returns = 0; D.cashRefund = 0;
+  (invoicesData || []).forEach(i => {
+    if(Array.isArray(i.returnLog)) i.returnLog.forEach(r => { if(r.date === day){ D.returns += Number(r.amount) || 0; D.cashRefund += Number(r.cashOut) || 0; } });
+    else (i.items || []).forEach(it => { if(it.returned && it.returnDate === day){ D.returns += Number(it.returnAmount) || 0; if(it.returnMethod === 'cash' && !i.customer_id) D.cashRefund += Number(it.returnAmount) || 0; } });
+  });
+  // وصولیاں / ادائیگیاں
+  const pays = (paymentsData || []).filter(x => x && x.date === day);
+  D.inList = pays.filter(x => x.direction === 'in'); D.outList = pays.filter(x => x.direction === 'out');
+  D.inCash = 0; D.inOther = 0; D.inWallet = 0; D.outCash = 0; D.outOther = 0;
+  D.inList.forEach(x => { const a = Number(x.amount) || 0; if(/wallet/i.test(x.method || '')) D.inWallet += a; else if(isCashM(x.method)) D.inCash += a; else D.inOther += a; });
+  D.outList.forEach(x => { const a = Number(x.amount) || 0; if(isCashM(x.method)) D.outCash += a; else D.outOther += a; });
+  // اخراجات
+  D.expList = (typeof expenseData !== 'undefined' ? expenseData : []).filter(e => e && e.date === day);
+  D.expenses = D.expList.reduce((t, e) => t + (Number(e.amount) || 0), 0);
+  // خریداری (سپلائر)
+  D.received = []; D.ordered = [];
+  (suppliersData || []).forEach(sp => (sp.purchaseHistory || []).forEach(po => {
+    if(po.status === 'received' && String(po.receivedDate || '').slice(0, 10) === day) D.received.push({name: sp.name, total: Number(po.total) || 0});
+    else if(po.status !== 'received' && String(po.date || '').slice(0, 10) === day) D.ordered.push({name: sp.name, total: Number(po.total) || 0});
+  }));
+  D.purchases = D.received.reduce((t, x) => t + x.total, 0);
+  // دراز کا کیش
+  D.opening = eodGetOpening(day);
+  D.cashSales = D.modes.cash || 0;
+  D.digitalSales = Object.entries(D.modes).filter(([k]) => k !== 'cash').reduce((t, [, v]) => t + v, 0);
+  D.cashIn = D.cashSales + D.inCash;
+  D.cashOut = D.outCash + D.expenses + D.cashRefund;
+  D.closing = r2((D.opening || 0) + D.cashIn - D.cashOut);
+  D.netProfit = r2(D.profit - D.expenses);
+  ['sales','discount','paidAtBill','creditGiven','walletUsed','profit','returns','cashRefund','inCash','inOther','inWallet','outCash','outOther','expenses','purchases','cashSales','digitalSales','cashIn','cashOut'].forEach(k => D[k] = r2(D[k]));
+  D.topItems = Object.values(D.items).sort((a, b) => b.amount - a.amount);
+  // 7 دن کا رجحان
+  D.trend = [];
+  for(let n = 6; n >= 0; n--){
+    const d = eodShift(day, -n);
+    const L = (invoicesData || []).filter(i => i && i.status !== 'voided' && invLocalDate(i) === d);
+    D.trend.push({day: d, bills: L.length, sales: r2(L.reduce((t, i) => t + (Number(i.grand_total) || 0), 0))});
+  }
+  const prev6 = D.trend.slice(0, 6);
+  D.yesterday = prev6[5] ? prev6[5].sales : 0;
+  D.avg6 = r2(prev6.reduce((t, x) => t + x.sales, 0) / 6);
+  // بقایا جات (ابھی کی حالت)
+  D.rec = r2((customersData || []).reduce((t, c) => t + Math.max(0, Number(c.total_receivable) || 0), 0));
+  D.custAdv = r2((customersData || []).reduce((t, c) => t + Math.max(0, Number(c.wallet_balance) || 0), 0));
+  D.pay = r2((suppliersData || []).reduce((t, x) => t + Math.max(0, Number(x.total_payable) || 0), 0));
+  D.supAdv = r2((suppliersData || []).reduce((t, x) => t + Math.max(0, -(Number(x.total_payable) || 0)), 0));
+  D.topDebtors = (customersData || []).filter(c => (Number(c.total_receivable) || 0) > 0).sort((a, b) => b.total_receivable - a.total_receivable).slice(0, 5).map(c => ({name: c.name, amt: r2(c.total_receivable)}));
+  return D;
+}
+// کل کی بند ہونے والی رقم — آج کے اوپننگ کیش کی تجویز
+function eodSuggestOpening(day){
+  const prev = eodShift(day, -1);
+  if(eodGetOpening(prev) === null) return null;
+  return eodData(prev).closing;
+}
+function eodDayText(day){ const d = new Date(day + 'T12:00:00'); return d.toLocaleDateString('en-GB', {weekday: 'long', day: '2-digit', month: 'short', year: 'numeric'}); }
+function openEodReport(day){
+  try{ closeReportCenterModal(); }catch(e){}
+  eodDay = day || localDateStr(new Date());
+  currentReportType = 'eod';
+  currentReportCategories = [];
+  document.getElementById('reportPreviewTitle').textContent = '🌙 End of the Day Report';
+  const showStockWrap = document.getElementById('rpscShowStockWrap');
+  if(showStockWrap) showStockWrap.style.display = 'none';
+  syncReportStyleControls();
+  eodSyncBar();
+  document.getElementById('reportPreviewModal').classList.add('show');
+  setTimeout(() => renderReportToCanvas(), 100);
+}
+function eodSyncBar(){
+  const lbl = document.getElementById('eodDayLbl'); if(lbl) lbl.textContent = eodDayText(eodDay) + (eodDay === localDateStr(new Date()) ? ' • Today' : '');
+  const f = document.getElementById('eodOpenField'); const o = eodGetOpening(eodDay);
+  if(f){ f.value = o === null ? '' : o; const sg = eodSuggestOpening(eodDay); f.placeholder = sg !== null ? String(Math.round(sg)) : 'Rs.'; }
+  const a4 = AppState.settings.reportPrintStyle === 'a4';
+  document.getElementById('eodFmtA4')?.classList.toggle('on', a4);
+  document.getElementById('eodFmtThermal')?.classList.toggle('on', !a4);
+}
+function eodShiftDay(n){
+  const nd = eodShift(eodDay, n);
+  if(nd > localDateStr(new Date())) return;
+  eodDay = nd; eodSyncBar(); renderReportToCanvas();
+}
+function eodSetOpening(v){
+  const s = String(v ?? '').trim();
+  if(s === ''){ delete eodOpeningMap()[eodDay]; }
+  else { const n = parseFloat(s); if(!(n >= 0)){ alert('Please enter a valid amount (0 or more).'); return false; } eodOpeningMap()[eodDay] = Math.round(n * 100) / 100; }
+  persistAllData(); eodSyncBar(); renderReportToCanvas();
+  try{ showNavToast('🌅 Opening cash saved'); }catch(e){}
+  return true;
+}
+function eodSetFormat(a4){
+  toggleReportPaperStyle(a4);
+  const chk = document.getElementById('rpscA4Chk'); if(chk) chk.checked = a4;
+  eodSyncBar(); renderReportToCanvas();
+}
+// پرنٹ/شیئر سے پہلے: اوپننگ کیش نہ ہو تو پوچھیں
+function eodEnsureOpening(){
+  const f = document.getElementById('eodOpenField');
+  if(f && f.value.trim() !== '' && eodGetOpening(eodDay) === null){ if(!eodSetOpening(f.value)) return false; }
+  if(eodGetOpening(eodDay) !== null) return true;
+  const sg = eodSuggestOpening(eodDay);
+  const v = prompt(`Opening cash for ${eodDayText(eodDay)}\n(cash in the drawer at the start of the day)`, sg !== null ? String(Math.round(sg)) : '0');
+  if(v === null) return false;
+  return eodSetOpening(v) !== false;
+}
+// 🌅 صبح ایپ کھلتے ہی (مالک) — آج کا اوپننگ کیش ابھی محفوظ ہو، شام کو یاد نہ رکھنا پڑے
+function eodMorningPrompt(){
+  try{
+    if(AppState.currentRole !== 'admin') return;
+    const today = localDateStr(new Date());
+    if(eodGetOpening(today) !== null || AppState.settings.eodAsked === today) return;
+    if(document.querySelector('.modalOverlay.show')){ setTimeout(eodMorningPrompt, 4000); return; }
+    AppState.settings.eodAsked = today; persistAllData();
+    document.getElementById('eodOpenDay').textContent = eodDayText(today);
+    const sg = eodSuggestOpening(today);
+    const inp = document.getElementById('eodOpenInput'); inp.value = '';
+    document.getElementById('eodOpenSuggest').innerHTML = sg !== null ? `Yesterday's closing cash: <b>Rs. ${Math.round(sg).toLocaleString()}</b> <button type="button" class="eodSave" style="margin-left:4px;" onclick="document.getElementById('eodOpenInput').value='${Math.round(sg)}'">Use</button>` : 'You can change it later in Reports → End of the Day.';
+    document.getElementById('eodOpenModal').classList.add('show');
+    setTimeout(() => inp.focus(), 200);
+  }catch(e){}
+}
+function eodOpenSave(){
+  const v = document.getElementById('eodOpenInput').value.trim();
+  const n = parseFloat(v);
+  if(v === '' || !(n >= 0)){ alert('Please enter the cash amount (0 if the drawer is empty).'); return; }
+  eodOpeningMap()[localDateStr(new Date())] = Math.round(n * 100) / 100;
+  persistAllData();
+  document.getElementById('eodOpenModal').classList.remove('show');
+  try{ showNavToast('🌅 Opening cash saved — Rs. ' + n.toLocaleString()); }catch(e){}
+}
+function eodOpenLater(){ document.getElementById('eodOpenModal').classList.remove('show'); }
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') setTimeout(eodMorningPrompt, 1500); });
+
+// ---------- کینوس پر رپورٹ ----------
+async function renderEodReportToCanvas(){
+  const canvas = document.getElementById('reportCanvas'); if(!canvas) return;
+  if(!eodDay) eodDay = localDateStr(new Date());
+  const D = eodData(eodDay);
+  const a4 = AppState.settings.reportPrintStyle === 'a4';
+  const W = a4 ? 1240 : ((AppState.settings.paperWidth || 80) === 80 ? 576 : 384);
+  const sc = (a4 ? 1.75 : W / 576) * ((AppState.settings.reportFontScale || 100) / 100);
+  const dec = AppState.settings.reportPriceDecimals ?? 0;
+  const FF = 'Arial, Helvetica, sans-serif';
+  const M = a4 ? 60 : 10, CW = W - M * 2;
+  const money = v => (v < 0 ? '-' : '') + 'Rs. ' + Math.abs(Number(v) || 0).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const num = v => (Math.round((Number(v) || 0) * 100) / 100).toLocaleString();
+  const ctx = canvas.getContext('2d');
+  const rc = getReceiptColor ? getReceiptColor() : {border: '#0f766e', bg: '#ecfdf5', text: '#064e3b'};
+  const ACC = rc.border || '#0f766e';
+  const ops = [];
+  const fs = n => Math.round(n * sc);
+  const add = (h, fn) => ops.push({h, fn});
+  const font = (w, n) => `${w} ${fs(n)}px ${FF}`;
+  const fitText = (t, maxW, w, n) => { let z = n; ctx.font = font(w, z); while(z > 8 && ctx.measureText(t).width > maxW){ z -= 0.5; ctx.font = font(w, z); } return z; };
+  // عنوان
+  const biz = AppState.settings.businessName || 'AIO POS';
+  add(fs(34), y => { ctx.fillStyle = '#0f172a'; ctx.textAlign = 'center'; const z = fitText(biz, CW, 900, 22); ctx.font = font(900, z); ctx.fillText(biz, W / 2, y + fs(25)); });
+  add(fs(40), y => { ctx.fillStyle = ACC; roundRectPath(ctx, M, y + fs(4), CW, fs(32), fs(8)); ctx.fill(); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = font(900, 15); ctx.fillText('END OF THE DAY REPORT', W / 2, y + fs(26)); });
+  add(fs(26), y => { ctx.fillStyle = '#334155'; ctx.textAlign = 'center'; ctx.font = font(800, 12.5); ctx.fillText(eodDayText(eodDay), W / 2, y + fs(18)); });
+  add(fs(20), y => { ctx.fillStyle = '#64748b'; ctx.textAlign = 'center'; ctx.font = font(400, 10); ctx.fillText('Printed ' + new Date().toLocaleString('en-GB', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'}) + (AppState.currentUser?.name ? ' • by ' + AppState.currentUser.name : ''), W / 2, y + fs(13)); });
+  const section = (title) => add(fs(36), y => { ctx.fillStyle = '#0f172a'; ctx.fillRect(M, y + fs(10), CW, fs(24)); ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.font = font(900, 12); ctx.fillText(title, M + fs(8), y + fs(27)); });
+  const kv = (label, val, o = {}) => {
+    const h = fs(o.big ? 28 : 21);
+    add(h, y => {
+      if(o.band){ ctx.fillStyle = o.band; ctx.fillRect(M, y, CW, h); }
+      ctx.fillStyle = o.color || '#0f172a';
+      const vz = o.big ? 14.5 : 11.5, lz = o.big ? 13 : 11;
+      ctx.font = font(o.bold || o.big ? 900 : 800, vz); ctx.textAlign = 'right';
+      const vt = typeof val === 'number' ? money(val) : String(val);
+      ctx.fillText(vt, M + CW - fs(6), y + h * 0.7);
+      const vw = ctx.measureText(vt).width;
+      ctx.textAlign = 'left'; ctx.fillStyle = o.lcolor || (o.bold || o.big ? '#0f172a' : '#334155');
+      const z = fitText(label, CW - vw - fs(22) - (o.indent ? fs(12) : 0), o.bold || o.big ? 900 : 600, lz); ctx.font = font(o.bold || o.big ? 900 : 600, z);
+      ctx.fillText(label, M + fs(6) + (o.indent ? fs(12) : 0), y + h * 0.7);
+      if(!o.band){ ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(M, y + h - 0.5); ctx.lineTo(M + CW, y + h - 0.5); ctx.stroke(); }
+    });
+  };
+  const note = (t, color) => add(fs(18), y => { ctx.fillStyle = color || '#64748b'; ctx.textAlign = 'left'; ctx.font = font(600, 9.5); const z = fitText(t, CW - fs(8), 600, 9.5); ctx.font = font(600, z); ctx.fillText(t, M + fs(6), y + fs(13)); });
+  const table = (cols, rows) => {
+    const hh = fs(22);
+    add(hh, y => { ctx.fillStyle = '#f1f5f9'; ctx.fillRect(M, y + fs(3), CW, hh - fs(3)); ctx.fillStyle = '#334155'; ctx.font = font(900, 10); let x = M; cols.forEach(c => { ctx.textAlign = c.r ? 'right' : 'left'; ctx.fillText(c.t, c.r ? x + c.w * CW - fs(5) : x + fs(5), y + fs(17)); x += c.w * CW; }); });
+    rows.forEach((r, i) => add(fs(20), y => { if(i % 2){ ctx.fillStyle = '#f8fafc'; ctx.fillRect(M, y, CW, fs(20)); } ctx.fillStyle = '#0f172a'; let x = M; cols.forEach((c, j) => { const t = String(r[j]); ctx.textAlign = c.r ? 'right' : 'left'; const z = fitText(t, c.w * CW - fs(10), j === 0 ? 700 : 800, 10.5); ctx.font = font(j === 0 ? 700 : 800, z); ctx.fillText(t, c.r ? x + c.w * CW - fs(5) : x + fs(5), y + fs(14.5)); x += c.w * CW; }); }));
+  };
+  const gap = (n) => add(fs(n || 6), () => {});
+
+  // 1) کیش دراز
+  section('💵 CASH DRAWER');
+  kv('Opening cash (morning)', D.opening === null ? 'Not entered' : D.opening, {color: D.opening === null ? '#b91c1c' : undefined});
+  kv('+ Cash sales', D.cashSales, {indent: true, color: '#15803d'});
+  kv('+ Cash collected from customers', D.inCash, {indent: true, color: '#15803d'});
+  kv('− Cash paid to suppliers', -D.outCash, {indent: true, color: '#b91c1c'});
+  kv('− Expenses', -D.expenses, {indent: true, color: '#b91c1c'});
+  if(D.cashRefund) kv('− Cash refunds (returns)', -D.cashRefund, {indent: true, color: '#b91c1c'});
+  kv('= CASH IN DRAWER (should be)', D.closing, {big: true, band: '#dcfce7', color: '#065f46'});
+  if(D.opening === null) note('⚠ Enter the opening cash for an exact drawer amount.', '#b91c1c');
+  gap();
+  // 2) سیل
+  section('🧾 SALES');
+  kv('Bills', `${D.bills}  (${D.counterBills} cash • ${D.creditBills} customer)`);
+  kv('Total sales', D.sales, {bold: true});
+  if(D.discount) kv('Discounts given', D.discount, {indent: true});
+  kv('Received at billing', D.paidAtBill, {indent: true});
+  kv('Given on credit (udhaar)', D.creditGiven, {indent: true, color: D.creditGiven ? '#b45309' : undefined});
+  if(D.walletUsed) kv('Paid from customer wallets', D.walletUsed, {indent: true});
+  if(D.returns) kv('Returns', -D.returns, {indent: true, color: '#b91c1c'});
+  const modeNames = {cash: 'Cash', easypaisa: 'EasyPaisa', jazzcash: 'JazzCash', bank: 'Bank Transfer'};
+  Object.entries(D.modes).filter(([, v]) => v > 0).forEach(([k, v]) => kv('• ' + (modeNames[k] || k), v, {indent: true}));
+  gap();
+  // 3) آمدن
+  section('📈 INCOME');
+  kv('Gross profit on sales', D.profit, {color: D.profit >= 0 ? '#15803d' : '#b91c1c'});
+  kv('− Expenses', -D.expenses, {indent: true, color: '#b91c1c'});
+  kv('= NET INCOME TODAY', D.netProfit, {big: true, band: D.netProfit >= 0 ? '#dcfce7' : '#fee2e2', color: D.netProfit >= 0 ? '#065f46' : '#991b1b'});
+  gap();
+  // 4) وصولیاں / ادائیگیاں
+  section('💳 PAYMENTS');
+  kv(`Received from customers (${D.inList.length})`, r2s(D.inCash + D.inOther + D.inWallet), {bold: true, color: '#15803d'});
+  if(D.inOther) kv('• Bank / EasyPaisa / other', D.inOther, {indent: true});
+  if(D.inWallet) kv('• From customer wallets', D.inWallet, {indent: true});
+  kv(`Paid to suppliers (${D.outList.length})`, r2s(D.outCash + D.outOther), {bold: true, color: '#b91c1c'});
+  if(D.outOther) kv('• Bank / other', D.outOther, {indent: true});
+  const plist = [...D.inList.map(x => [x.party_name, 'In', money(x.amount)]), ...D.outList.map(x => [x.party_name, 'Out', money(x.amount)])];
+  if(plist.length) table([{t: 'Party', w: .56}, {t: '', w: .12}, {t: 'Amount', w: .32, r: 1}], plist.slice(0, a4 ? 30 : 15));
+  gap();
+  // 5) اخراجات
+  section(`🧮 EXPENSES (${D.expList.length})`);
+  if(D.expList.length) table([{t: 'Expense', w: .66}, {t: 'Amount', w: .34, r: 1}], D.expList.map(e => [e.name || e.title || 'Expense', money(e.amount)]));
+  else note('No expenses today.');
+  kv('Total expenses', D.expenses, {bold: true});
+  gap();
+  // 6) خریداری
+  if(D.received.length || D.ordered.length){
+    section('🚚 PURCHASES');
+    if(D.received.length){ table([{t: 'Received from', w: .66}, {t: 'Amount', w: .34, r: 1}], D.received.map(x => [x.name, money(x.total)])); kv('Total stock received', D.purchases, {bold: true}); }
+    if(D.ordered.length) kv(`New purchase orders (${D.ordered.length})`, D.ordered.reduce((t, x) => t + x.total, 0));
+    gap();
+  }
+  // 7) سب سے زیادہ بکنے والے
+  section('🏆 BEST-SELLERS TODAY');
+  const top = D.topItems.slice(0, a4 ? 20 : 12);
+  if(top.length) table([{t: '#  Item', w: .52}, {t: 'Qty', w: .18, r: 1}, {t: 'Amount', w: .30, r: 1}], top.map((x, i) => [`${i + 1}. ${x.name}`, num(x.qty) + (x.unit && x.unit !== 'pcs' ? ' ' + x.unit : ''), money(x.amount)]));
+  else note('No items sold.');
+  if(D.topItems.length > top.length) note(`+ ${D.topItems.length - top.length} more items`);
+  gap();
+  // 8) رجحان
+  section('📊 7-DAY TREND');
+  const mx = Math.max(1, ...D.trend.map(t => t.sales));
+  D.trend.forEach(t => add(fs(20), y => {
+    const isToday = t.day === eodDay, lw = fs(a4 ? 90 : 62), vw = fs(a4 ? 140 : 110);
+    const dl = new Date(t.day + 'T12:00:00').toLocaleDateString('en-GB', {weekday: 'short', day: '2-digit'});
+    ctx.textAlign = 'left'; ctx.fillStyle = isToday ? '#0f172a' : '#475569'; ctx.font = font(isToday ? 900 : 700, 10.5); ctx.fillText(dl, M + fs(4), y + fs(14.5));
+    const bw = (CW - lw - vw) * t.sales / mx;
+    if(bw >= fs(6)){ ctx.fillStyle = isToday ? ACC : '#94a3b8'; roundRectPath(ctx, M + lw, y + fs(4), bw, fs(12), fs(3)); ctx.fill(); }
+    else { ctx.fillStyle = '#cbd5e1'; ctx.fillRect(M + lw, y + fs(9), fs(6), fs(2)); }
+    ctx.textAlign = 'right'; ctx.fillStyle = '#0f172a'; ctx.font = font(isToday ? 900 : 700, 10.5); ctx.fillText(money(t.sales), M + CW - fs(4), y + fs(14.5));
+  }));
+  const pct = (a, b) => b > 0 ? ((a - b) / b * 100) : null;
+  const py = pct(D.sales, D.yesterday), pa = pct(D.sales, D.avg6);
+  kv('vs yesterday', py === null ? '—' : (py >= 0 ? '▲ ' : '▼ ') + Math.abs(py).toFixed(0) + '%', {color: py === null ? undefined : py >= 0 ? '#15803d' : '#b91c1c'});
+  kv('vs last 6-day average', pa === null ? '—' : (pa >= 0 ? '▲ ' : '▼ ') + Math.abs(pa).toFixed(0) + '%', {color: pa === null ? undefined : pa >= 0 ? '#15803d' : '#b91c1c'});
+  const hrs = Object.entries(D.hours).sort((a, b) => b[1] - a[1])[0];
+  if(hrs){ const h = +hrs[0], t12 = x => ((x % 12) || 12) + (x < 12 ? 'am' : 'pm'); kv('Busiest hour', `${t12(h)}–${t12((h + 1) % 24)}  (${money(hrs[1])})`); }
+  gap();
+  // 9) بقایا جات
+  section('📒 BALANCES (now)');
+  kv('Customers owe us', D.rec, {color: '#b45309', bold: true});
+  if(D.custAdv) kv('Customer advances (we owe)', D.custAdv, {indent: true});
+  kv('We owe suppliers', D.pay, {color: '#b91c1c', bold: true});
+  if(D.supAdv) kv('Supplier advances (they owe us)', D.supAdv, {indent: true});
+  if(D.topDebtors.length) table([{t: 'Top customer balances', w: .66}, {t: 'Amount', w: .34, r: 1}], D.topDebtors.map(x => [x.name, money(x.amt)]));
+  gap(10);
+  add(fs(40), y => { ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([fs(4), fs(3)]); ctx.beginPath(); ctx.moveTo(M, y + fs(4)); ctx.lineTo(M + CW, y + fs(4)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#334155'; ctx.textAlign = 'center'; ctx.font = font(700, 10); ctx.fillText('Counted cash: ____________     Signature: ____________', W / 2, y + fs(30)); });
+
+  const H = ops.reduce((t, o) => t + o.h, 0) + fs(16);
+  canvas.width = W; canvas.height = H;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  let y = fs(8);
+  ops.forEach(o => { ctx.save(); o.fn(y); ctx.restore(); y += o.h; });
+  canvas.style.width = '100%'; canvas.style.height = 'auto';
+  const scrollWrap = document.getElementById('reportCanvasScrollWrap'); if(scrollWrap) scrollWrap.scrollTop = 0;
+}
+function r2s(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+// A4 PDF — کینوس کو صفحوں میں
+function buildEodPdf(orientation){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({orientation: 'portrait', unit: 'mm', format: 'a4'});
+  const canvas = document.getElementById('reportCanvas');
+  const mm = 190, pxPerMm = canvas.width / mm, pageH = Math.floor(277 * pxPerMm);
+  for(let top = 0, page = 0; top < canvas.height; top += pageH, page++){
+    const h = Math.min(pageH, canvas.height - top);
+    const c = document.createElement('canvas'); c.width = canvas.width; c.height = h;
+    const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, h); cx.drawImage(canvas, 0, top, canvas.width, h, 0, 0, canvas.width, h);
+    if(page) pdf.addPage();
+    pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 10, 10, mm, h / pxPerMm);
+  }
+  return pdf;
 }
 
 // ---------- 📅 Today's Sale Report — بلنگ، پیمنٹس، اخراجات اور ڈائری سے آج کا خلاصہ + سب سے زیادہ بکنے والے آئٹمز اوپر ----------
@@ -33001,10 +33389,11 @@ function buildDiarySummaryPdf(orientation){
 
 // ---------- رپورٹ کا A4 PDF براہ راست شیئر کریں — Android کی نیٹو شیئر شیٹ میں Print/WhatsApp/دیگر ایپس سب مل جاتی ہیں ----------
 async function shareReportPdf(){
+  if(currentReportType === 'eod' && !eodEnsureOpening()) return;
   if(!window.jspdf){ alert('PDF library not loaded — check your internet connection and try again.'); return; }
   await renderReportToCanvas();
   const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-  const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildStockSaleProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+  const pdf = currentReportType === 'eod' ? buildEodPdf(orientation) : currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildStockSaleProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
   const blob = pdf.output('blob');
   const file = new File([blob], 'Report.pdf', {type:'application/pdf'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
@@ -33016,6 +33405,7 @@ async function shareReportPdf(){
 }
 
 async function printCurrentReport(){
+  if(currentReportType === 'eod' && !eodEnsureOpening()) return;
   await renderReportToCanvas(); // ---------- حفاظتی وجہ: یقینی بنائیں کہ کینوس بالکل تازہ اور مکمل ڈرا ہو چکا ہے، خاص طور پر ابھی ابھی زوم/سٹائل بدلنے کے فوری بعد پرنٹ دبانے کی صورت میں ----------
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
@@ -33034,7 +33424,7 @@ async function printCurrentReport(){
       return;
     }
     const orientation = AppState.settings.reportOrientation === 'landscape' ? 'landscape' : 'portrait';
-    const pdf = currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildStockSaleProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
+    const pdf = currentReportType === 'eod' ? buildEodPdf(orientation) : currentReportType === 'todaysale' ? buildTodaySalePdf(orientation) : currentReportType === 'diarysummary' ? buildDiarySummaryPdf(orientation) : currentReportType === 'stockprofit' ? buildStockSaleProfitPdf(orientation) : buildMultiColumnReportPdf(orientation);
     window.open(pdf.output('bloburl'), '_blank');
     return;
   }
@@ -33048,6 +33438,7 @@ async function printCurrentReport(){
 
 // ---------- شیئر — فون کا نیٹو شیئر مینو کھلتا ہے (WhatsApp، WhatsApp Business، یا کوئی بھی ایپ منتخب کی جا سکتی ہے) ----------
 async function shareReportImage(){
+  if(currentReportType === 'eod' && !eodEnsureOpening()) return;
   await renderReportToCanvas(); // ---------- یہاں بھی وہی حفاظتی وجہ — کبھی پرانا/ادھورا کینوس شیئر نہ ہو ----------
   const canvas = document.getElementById('reportCanvas');
   if(!canvas) return;
@@ -33341,9 +33732,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR131';
+  const APP_VERSION = 'AIO3010FR132';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Record New Payment: search customer/supplier by name or mobile number';
+  const UPDATE_NOTE = 'End of the Day Report (A4 + thermal): opening cash, cash in drawer, sales, profit, payments, expenses, trend; morning opening-cash prompt';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
