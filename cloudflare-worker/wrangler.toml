@@ -11,3 +11,12 @@ keep_vars = true
 # MCS: دکان کے بورڈ کی تصویر پڑھنے کے لیے Workers AI (راستہ /ocr)
 [ai]
 binding = "AI"
+
+# MCS: کالوں/واٹس ایپ کی گنتی (راستہ /stat) — Durable Object، SQLite
+[[durable_objects.bindings]]
+name = "MCS_STATS"
+class_name = "McsStats"
+
+[[migrations]]
+tag = "v1-mcs-stats"
+new_sqlite_classes = ["McsStats"]
