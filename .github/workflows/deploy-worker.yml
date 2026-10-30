@@ -42,6 +42,17 @@ jobs:
             curl -sS -m 90 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/ocr -H 'Content-Type: application/json' --data @/tmp/ocr.json
             echo
           done
+      # MCS: وزٹنگ کارڈ پڑھنے کی جانچ (mode=card)
+      - name: Test /ocr card
+        if: env.HAS_TOKEN == 'true'
+        continue-on-error: true
+        run: |
+          IMG="data:image/jpeg;base64,$(base64 -w0 cloudflare-worker/test-card.jpg)"
+          for M in @cf/meta/llama-4-scout-17b-16e-instruct @cf/mistralai/mistral-small-3.1-24b-instruct; do
+            printf '{"mode":"card","model":"%s","image":"%s"}' "$M" "$IMG" > /tmp/card.json
+            curl -sS -m 90 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/ocr -H 'Content-Type: application/json' --data @/tmp/card.json
+            echo
+          done
       # MCS: ریٹ والے راستے (/rates) کی جانچ
       - name: Test /rates
         if: env.HAS_TOKEN == 'true'

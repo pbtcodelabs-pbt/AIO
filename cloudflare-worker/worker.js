@@ -209,6 +209,12 @@ function ocrParse(text) {
   try { return JSON.parse(m[0]); } catch (e) { return null; }
 }
 
+/* MCS: وزٹنگ کارڈ — الگ ہدایت: نام، تعارف کی لائن، ہر نمبر کے ساتھ نام، پتہ */
+const CARD_PROMPT = `This photo shows a Pakistani business VISITING CARD (mostly Urdu Nastaliq, maybe some English). It may be rotated or photographed at an angle — read it carefully in any orientation.
+Return ONLY one JSON object, no other text:
+{"name_ur":"business name in Urdu exactly as printed (usually the biggest text, keep words like اینڈ)","name_en":"business name in English letters only if printed, else empty","tagline":"the services / description sentence printed on the card, copied word for word in Urdu","contacts":[{"name":"person name printed next to the number (Urdu), or empty","phone":"number exactly as printed, e.g. 0320-6378201"}],"address":"address line exactly as printed"}
+Rules: copy every digit exactly — never guess or invent digits; Pakistani mobile numbers have 11 digits starting with 03. Include every phone number on the card. Use empty strings for anything you cannot read.`;
+
 async function handleOcr(request, env) {
   if (!env.AI) return reply({ error: "ai_not_configured" }, 500);
   let body;
@@ -224,10 +230,10 @@ async function handleOcr(request, env) {
     try {
       const out = await env.AI.run(model, {
         messages: [{ role: "user", content: [
-          { type: "text", text: OCR_PROMPT },
+          { type: "text", text: body.mode === "card" ? CARD_PROMPT : OCR_PROMPT },
           { type: "image_url", image_url: { url: img } }
         ] }],
-        max_tokens: 400,
+        max_tokens: body.mode === "card" ? 700 : 400,
         temperature: 0
       });
       const raw = out && (out.response !== undefined ? out.response : out);
