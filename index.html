@@ -3263,7 +3263,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR128</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3010FR129</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3482,7 +3482,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR128</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3010FR129</span>
     </div>
   </div>
 
@@ -7055,7 +7055,7 @@ const cloudPollTimers = {};
 //   • ہر فون کی اپنی "سلاٹ" — نئی آئی ڈیاں الگ رینج میں (دو فون آف لائن بھی ایک ہی نمبر نہ بنائیں)
 //   • تصویریں (data:) کلاؤڈ پر نہیں جاتیں — اسی فون پر رہتی ہیں
 // سب کچھ businesses/{shopCode}/store/{doc} میں (موجودہ Firestore رول کے اندر)۔
-const SYNC_TYPES = ['users','products','customers','suppliers','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses','devices','shopinfo'];
+const SYNC_TYPES = ['shopinfo','devices','users','products','customers','suppliers','invoices','pendingbills','approvalrequests','advanceorders','payments','expenses']; // AIO3010FR129: shopinfo پہلے (آرکائیو کی تاریخ)
 const SYNC_LOCAL_ONLY_KEYS = ['image','photo','slip_image','billPhoto','qr','qrImage','logo'];
 const SYNC_DELTA_KEYS = ['stock','qty','salesCount','total_receivable','wallet_balance','total_payable'];
 const SYNC_POLL_MS = 30000;
@@ -7262,8 +7262,110 @@ async function syncSetIndex(chunk, ms){
 // ---------- مقامی فہرست کو حصوں میں ----------
 function syncGroupLocal(docType, items){
   const g = new Map();
-  (items || []).forEach(rec => { const c = syncChunkOf(docType, rec); if(!g.has(c)) g.set(c, []); g.get(c).push(syncStrip(rec)); });
+  (items || []).forEach(rec => { const c = syncChunkOf(docType, rec); if(!g.has(c)) g.set(c, []); g.get(c).push(syncStripArch(docType, syncStrip(rec))); });
   return g;
+}
+
+// ===================== AIO3010FR129: 📦 پرانا ریکارڈ آرکائیو — کلاؤڈ کے ڈبے کبھی نہ بھریں =====================
+// گاہک کی پرانی لین دین (walletHistory) اور سپلائر کے پرانے مکمل آرڈر/ادائیگیاں (purchaseHistory, ledgerHistory) وقت کے ساتھ بھاری۔
+// کوئی لائیو ڈبہ 50% سے اوپر ہو تو مالک کا فون: (1) پہلے پرانا حصہ سال وار آرکائیو ڈبوں میں لکھے (archive__<type>__<سال>_bN)،
+// (2) پھر shopinfo.archiveBefore لگائے — اس تاریخ سے پرانی اندراجات لائیو ڈبوں میں نہیں جاتیں۔ ہر فون پر سارا ریکارڈ رہتا ہے
+// (ملاپ کے بعد واپس لگ جاتا ہے)؛ نیا فون «⬇️ Load old records» سے آرکائیو لے سکتا ہے۔ بقایا/والٹ ہمیشہ لائیو۔
+const SYNC_ARCH = {customers: ['walletHistory'], suppliers: ['purchaseHistory', 'ledgerHistory']};
+const SYNC_ARCH_BUCKETS = 16;
+function syncArchCut(){ return String(shopInfo().archiveBefore || ''); }
+function syncEntryDate(field, e){
+  if(!e || typeof e !== 'object') return '';
+  if(field === 'purchaseHistory'){ if(e.status !== 'received') return ''; return String(e.receivedDate || e.date || '').slice(0, 10); }
+  return String(e.date || '').slice(0, 10);
+}
+function syncIsArchived(field, e, cut){ const d = syncEntryDate(field, e); return !!(cut && /^\d{4}-\d\d-\d\d$/.test(d) && d < cut); }
+function syncStripArch(docType, rec){
+  const fields = SYNC_ARCH[docType], cut = syncArchCut();
+  if(!fields || !cut || !rec) return rec;
+  const out = Object.assign({}, rec);
+  fields.forEach(f => { if(Array.isArray(out[f])) out[f] = out[f].filter(e => !syncIsArchived(f, e, cut)); });
+  return out;
+}
+// ملاپ کے بعد اس فون کی پرانی (آرکائیو والی) اندراجات واپس — آخر میں (نئی اوپر والی ترتیب)
+function syncRestoreArch(docType, m, l){
+  const fields = SYNC_ARCH[docType], cut = syncArchCut();
+  if(!fields || !cut || !m || !l) return m;
+  fields.forEach(f => {
+    const keep = (l[f] || []).filter(e => syncIsArchived(f, e, cut));
+    if(!keep.length) return;
+    const have = new Set((m[f] || []).map(e => JSON.stringify(syncStrip(e))));
+    m[f] = (m[f] || []).concat(keep.filter(e => !have.has(JSON.stringify(syncStrip(e)))));
+  });
+  return m;
+}
+function syncArchDoc(type, year, id){ return `archive__${type}__${year}_b${syncBucket4(id, SYNC_ARCH_BUCKETS)}`; }
+// مالک کا فون: ڈبہ 50% سے اوپر → 1 سال، پھر 6 مہینے، پھر 3 مہینے سے پرانا ریکارڈ آرکائیو میں
+async function syncMaybeArchive(){
+  if(!aioMultiOn() || AppState.settings.syncJoined) return;
+  const big = Object.entries(syncBoxSizes).filter(([c]) => syncChunkValid(c) && SYNC_ARCH[syncDocTypeOfChunk(c)]).reduce((mx, [, n]) => Math.max(mx, n), 0);
+  if(big < SYNC_BOX_LIMIT * 0.5 && !window.__archForce) return;
+  const cur = syncArchCut(), now = Date.now();
+  let newCut = '';
+  for(const days of [365, 180, 90]){ const d = localDateStr(new Date(now - days * 86400000)); if(!cur || d > cur){ newCut = d; break; } }
+  if(!newCut) return;
+  const docs = new Map(), years = new Set(shopInfo().archiveYears || []);
+  Object.keys(SYNC_ARCH).forEach(type => {
+    const meta = aioGetDocTypeMeta(type); if(!meta) return; const key = meta.matchKey;
+    meta.data.forEach(rec => SYNC_ARCH[type].forEach(f => (rec[f] || []).forEach(e => {
+      if(!syncIsArchived(f, e, newCut)) return;
+      const y = syncEntryDate(f, e).slice(0, 4); years.add(y);
+      const name = syncArchDoc(type, y, rec[key]);
+      if(!docs.has(name)) docs.set(name, []);
+      docs.get(name).push({id: rec[key], f, e: syncStrip(e)});
+    })));
+  });
+  // پہلے آرکائیو پکا لکھا جائے — تبھی لائیو ڈبوں سے ہٹے (کوئی ریکارڈ کہیں سے غائب نہ ہو)
+  for(const [name, items] of docs){
+    const r = await syncGetChunk(name); if(r === null) return;
+    const seen = new Set(r.items.map(x => JSON.stringify(x)));
+    const add = items.filter(x => !seen.has(JSON.stringify(x)));
+    if(!add.length) continue;
+    const str = JSON.stringify(r.items.concat(add));
+    if(str.length > SYNC_BOX_LIMIT * 0.95){ window.__cloudSyncError = 'Archive box is full: ' + name; return; }
+    const put = await syncPutChunk(name, str, r.missing ? null : r.ut);
+    if(!put || put === 'error' || put === 'conflict') return;
+  }
+  shopInfoData = [Object.assign({}, shopInfo(), {id: 'shop', archiveBefore: newCut, archiveYears: [...years].sort()})];
+  saveToStorage('syncShopInfo', shopInfoData);
+  window.__archForce = false;
+}
+// کسی بھی فون پر: آرکائیو سے پرانا ریکارڈ واپس لائیں (نیا فون / دوبارہ انسٹال)
+async function loadArchivedRecords(){
+  const years = shopInfo().archiveYears || [];
+  if(!years.length){ alert('There are no old records in the cloud archive.'); return; }
+  showNavToast('⬇️ Loading old records…');
+  let added = 0, failed = 0;
+  const touched = new Set();
+  for(const type of Object.keys(SYNC_ARCH)){
+    const meta = aioGetDocTypeMeta(type); if(!meta) continue; const key = meta.matchKey;
+    for(const y of years) for(let b = 0; b < SYNC_ARCH_BUCKETS; b++){
+      const r = await syncGetChunk(`archive__${type}__${y}_b${b}`);
+      if(r === null){ failed++; continue; }
+      r.items.forEach(x => {
+        const rec = meta.data.find(z => String(z[key]) === String(x.id)); if(!rec || !x.f) return;
+        rec[x.f] = Array.isArray(rec[x.f]) ? rec[x.f] : [];
+        const sx = JSON.stringify(x.e);
+        if(rec[x.f].some(e => JSON.stringify(syncStrip(e)) === sx)) return;
+        rec[x.f].push(x.e); added++; touched.add(rec);
+      });
+    }
+  }
+  const cut = syncArchCut();
+  touched.forEach(rec => Object.values(SYNC_ARCH).flat().forEach(f => {
+    if(!Array.isArray(rec[f])) return;
+    const live = rec[f].filter(e => !syncIsArchived(f, e, cut)), old = rec[f].filter(e => syncIsArchived(f, e, cut));
+    old.sort((a, b) => syncEntryDate(f, b).localeCompare(syncEntryDate(f, a)));
+    rec[f] = live.concat(old);
+  }));
+  persistAllData();
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value || ''); }catch(e){}
+  alert(failed ? `Loaded ${added} old entries. Some parts could not be loaded (internet) — please try again.` : `✅ Loaded ${added} old entries from the archive.`);
 }
 const SYNC_NEWEST_FIRST = ['invoices','pendingbills','approvalrequests','payments','advanceorders'];
 function syncApplyChunk(docType, chunk, merged){
@@ -7275,7 +7377,7 @@ function syncApplyChunk(docType, chunk, merged){
   old.forEach(r => {
     if(syncChunkOf(docType, r) !== chunk){ result.push(r); return; }
     const m = mById.get(String(r[key]));
-    if(m) result.push(syncRestoreLocalOnly(JSON.parse(JSON.stringify(m)), r));
+    if(m) result.push(syncRestoreArch(docType, syncRestoreLocalOnly(JSON.parse(JSON.stringify(m)), r), r));
   });
   const added = merged.filter(m => !oldIds.has(String(m[key]))).map(m => JSON.parse(JSON.stringify(m)));
   if(SYNC_NEWEST_FIRST.includes(docType)){
@@ -7338,13 +7440,14 @@ async function syncNow(){
   try{
     const idx = await syncGetIndex();
     if(idx === null){ cloudSyncStatus = navigator.onLine === false ? 'offline' : 'error'; return; }
+    try{ await syncMaybeArchive(); }catch(e){}
     const known = loadFromStorage('syncKnown', {});
     for(const [c, v] of Object.entries(known)){ if(v && v.idxPending && v.ms){ if(await syncSetIndex(c, v.ms)) v.idxPending = false; } }
     for(const docType of SYNC_TYPES){
       const meta = aioGetDocTypeMeta(docType); if(!meta) continue;
       const remoteC = Object.keys(idx).filter(c => syncChunkValid(c) && syncDocTypeOfChunk(c) === docType);
       const remoteChangedAny = remoteC.some(c => (idx[c] || 0) > ((known[c] || {}).ms || 0));
-      let stamp = ''; try{ stamp = JSON.stringify(meta.data); }catch(e){}
+      let stamp = ''; try{ stamp = (SYNC_ARCH[docType] ? syncArchCut() + '|' : '') + JSON.stringify(meta.data); }catch(e){} // آرکائیو کی تاریخ بدلے تو دوبارہ
       if(!remoteChangedAny && syncDocStamp[docType] === stamp) continue; // نہ یہاں کچھ بدلا، نہ کلاؤڈ پر
       const groups = syncGroupLocal(docType, meta.data);
       const chunks = new Set([...groups.keys(), ...remoteC, ...Object.keys(known).filter(c => syncChunkValid(c) && syncDocTypeOfChunk(c) === docType)]);
@@ -7359,7 +7462,7 @@ async function syncNow(){
         touched.add(docType);
         saveToStorage('syncKnown', known);
       }
-      if(allOk){ try{ syncDocStamp[docType] = JSON.stringify(meta.data); }catch(e){} } else syncAgain = true;
+      if(allOk){ syncDocStamp[docType] = stamp; } // سنک شروع ہونے والی حالت — بیچ میں ہوئی نئی وصولی/بل اگلی بار ضرور جائے (پہلے یہاں نئی حالت لکھی جاتی تھی اور وہ تبدیلی رہ جاتی) else syncAgain = true;
     }
     if(cloudSyncStatus !== 'error') cloudSyncStatus = 'online';
     window.__cloudSyncError = cloudSyncStatus === 'online' ? null : window.__cloudSyncError;
@@ -28183,6 +28286,8 @@ function renderStaffDevicesCard(){
       const full = devs.length >= max;
       return `<div class="mdPlan${full ? ' full' : ''}"><span>📦 Package <b>${planName(max)}</b></span><span>${devs.length} / ${max} devices${full ? ' — full' : ''}</span>${owner && max < PLAN_MAX_PACK ? `<button type="button" onclick="openPackagePlansModal(Math.min(PLAN_MAX_PACK, ${max} + 1))">⬆️ Upgrade</button>` : ''}</div>`; })()}
     ${!owner && syncOverPlanLimit() ? `<div class="mdPlan full"><span>⚠️ The shop's package (${planName(sh.maxDevices)}) does not include this device — ask the owner to upgrade or remove another device.</span></div>` : ''}
+    ${sh.archiveBefore ? `<div class="mdSteps" style="font-size:12px;">🗄️ Records before <b>${formatDateDMY(sh.archiveBefore)}</b> are kept in the cloud archive (cloud boxes stay light). Every device keeps its own full record.
+      <button type="button" class="mdBigBtn ghost" style="margin-top:6px;" onclick="loadArchivedRecords()">⬇️ Load old records to this device</button></div>` : ''}
     <div class="settingsSubLabel">Devices (${devs.length})</div>
     ${devHtml}
     <div class="mdRow2" style="margin-top:6px;"><button type="button" class="mdBigBtn ghost" onclick="syncNow(); showNavToast('🔄 Syncing…')">🔄 Sync now</button>
@@ -33190,9 +33295,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3010FR128';
+  const APP_VERSION = 'AIO3010FR129';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Cart: received, discount and totals now in clear separate boxes';
+  const UPDATE_NOTE = 'Cloud archive: old records move to yearly archive boxes so live boxes never fill; sync race fix';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
