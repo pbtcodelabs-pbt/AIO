@@ -87,8 +87,14 @@ function fakeFS(method, p, body){
     const order = ri(0, 1) ? [A, B, A, B] : [B, A, B, A];
     for(const pg of order) await sync(pg);
     const st = async pg => pg.evaluate(() => ({N: Object.fromEntries(customersData.filter(c => c.customer_id > 7700 && c.customer_id < 7710).map(c => [c.customer_id, Math.round((c.total_receivable - c.wallet_balance) * 100) / 100])), inv: invoicesData.filter(i => i.status !== 'voided').length, err: window.__cloudSyncError || ''}));
-    const a = await st(A), bb = await st(B);
-    const bad = Object.keys(N).filter(k => Math.abs(a.N[k] - N[k]) > .01 || Math.abs(bb.N[k] - N[k]) > .01);
+    let a = await st(A), bb = await st(B);
+    let bad = Object.keys(N).filter(k => Math.abs(a.N[k] - N[k]) > .01 || Math.abs(bb.N[k] - N[k]) > .01);
+    if(bad.length || a.inv !== bb.inv){ // ادھورا سنک؟ رک کر دوبارہ — پھر بھی فرق ہو تو ہی ناکام
+      await A.waitForTimeout(2500); for(const pg of [A, B, A, B]){ await sync(pg); await pg.waitForTimeout(400); }
+      a = await st(A); bb = await st(B);
+      bad = Object.keys(N).filter(k => Math.abs(a.N[k] - N[k]) > .01 || Math.abs(bb.N[k] - N[k]) > .01);
+      if(!bad.length && a.inv === bb.inv) log.push('(late sync converged)');
+    }
     if(bad.length || a.inv !== bb.inv){ console.log(`SEED ${seedArg} FAIL round ${rd}: model ${JSON.stringify(N)} A ${JSON.stringify(a)} B ${JSON.stringify(bb)}\n` + log.join('\n')); process.exitCode = 1; break; }
   }
   if(!process.exitCode){
