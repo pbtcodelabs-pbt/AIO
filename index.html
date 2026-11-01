@@ -3299,7 +3299,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0111SU139</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0111SU140</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3518,7 +3518,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0111SU139</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0111SU140</span>
     </div>
   </div>
 
@@ -5283,7 +5283,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <option value="thisyear">This Year</option>
           <option value="custom">Custom Range…</option>
         </select>
-        <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 Name or phone" oninput="renderBillHistory()">
+        <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 Name, phone, bill# or amount" oninput="renderBillHistory()">
         <input type="date" id="billDateFilter" class="bcbItem bcbDate" onchange="onBillDateFilterChange()">
         <select id="billDayFilter" class="bcbItem bcbDay" onchange="onBillDayFilterChange()">
           <option value="">Day</option>
@@ -6867,11 +6867,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 // 3) پھر بھی جگہ ختم ہو تو وہ فہرست فون کی بڑی جگہ (IndexedDB <prefix>store_v1) میں، localStorage میں صرف نشان؛
 //    ایپ کھلتے ہی وہیں سے واپس — کچھ ضائع نہیں، کوئی ڈرانے والا پیغام نہیں ----------
 var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();"function"==typeof define&&define.amd?define(function(){return LZString}):"undefined"!=typeof module&&null!=module?module.exports=LZString:"undefined"!=typeof angular&&null!=angular&&angular.module("LZString",[]).factory("LZString",function(){return LZString});
-const STORE_LZ_MIN = 8192, STORE_LZ_TAG = '\u0001LZ1:', STORE_IDB_TAG = '\u0001IDB1:', STORE_PARTS_TAG = '\u0001PARTS1:';
+const STORE_LZ_MIN = 8192, STORE_LZ_AIO0111SU140 = '\u0001LZ1:', STORE_IDB_AIO0111SU140 = '\u0001IDB1:', STORE_PARTS_AIO0111SU140 = '\u0001PARTS1:';
 const STORE_PART = 400; // بڑی فہرست 400-400 کے حصوں میں — نیا بل بنے تو صرف آخری حصہ دوبارہ دبتا ہے (فون پر تیز)
 function storeRemoveParts(key, from){ try{ for(let i = from || 0; localStorage.getItem(STORAGE_PREFIX + key + '#' + i) !== null; i++){ localStorage.removeItem(STORAGE_PREFIX + key + '#' + i); _storeLast.delete(key + '#' + i); } }catch(e){} }
 function storeDecode(raw){
-  if(raw.startsWith(STORE_LZ_TAG)){ const dec = LZString.decompressFromUTF16(raw.slice(STORE_LZ_TAG.length)); if(dec == null || dec === '') throw new Error('LZ decode failed'); return [dec, true]; }
+  if(raw.startsWith(STORE_LZ_AIO0111SU140)){ const dec = LZString.decompressFromUTF16(raw.slice(STORE_LZ_AIO0111SU140.length)); if(dec == null || dec === '') throw new Error('LZ decode failed'); return [dec, true]; }
   return [raw, false];
 }
 // IndexedDB میں جا سکنے والی فہرستیں اور ان کے متغیر (ایپ کھلنے پر واپس لانے کے لیے)
@@ -6904,7 +6904,7 @@ function storeQueueIdb(key, json){
         await storeIdbPut(k, j);
         if(!_storeIdbKeys.has(k)){
           _storeIdbKeys.add(k);
-          try{ localStorage.removeItem(STORAGE_PREFIX + k); storeRemoveParts(k); localStorage.setItem(STORAGE_PREFIX + k, STORE_IDB_TAG + Date.now()); }catch(e){}
+          try{ localStorage.removeItem(STORAGE_PREFIX + k); storeRemoveParts(k); localStorage.setItem(STORAGE_PREFIX + k, STORE_IDB_AIO0111SU140 + Date.now()); }catch(e){}
           try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
         }
       }catch(e){ console.warn('IndexedDB save failed', k, e); _storeLast.delete(k); storeQuotaAlert(); }
@@ -6916,12 +6916,12 @@ function loadFromStorage(key, fallback){
   try{
     let raw = localStorage.getItem(STORAGE_PREFIX + key);
     if(raw === null || raw === undefined) return fallback;
-    if(raw.startsWith(STORE_IDB_TAG)){
+    if(raw.startsWith(STORE_IDB_AIO0111SU140)){
       _storeIdbKeys.add(key); _storePending.add(key); _storeHydrating = true;
       return fallback; // اصل ڈیٹا IndexedDB سے فوراً واپس آئے گا (storeHydrate)
     }
-    if(raw.startsWith(STORE_PARTS_TAG)){
-      const n = parseInt(raw.slice(STORE_PARTS_TAG.length)) || 0, out = [];
+    if(raw.startsWith(STORE_PARTS_AIO0111SU140)){
+      const n = parseInt(raw.slice(STORE_PARTS_AIO0111SU140.length)) || 0, out = [];
       for(let i = 0; i < n; i++){
         const pr = localStorage.getItem(STORAGE_PREFIX + key + '#' + i);
         if(pr == null) throw new Error('part missing ' + i);
@@ -6964,7 +6964,7 @@ function saveToStorage(key, value){
   if(json === undefined) json = 'null';
   if(_storeLast.get(key) === json) return true;
   if(_storeIdbKeys.has(key)){ _storeLast.set(key, json); storeQueueIdb(key, json); return true; }
-  const out = json.length >= STORE_LZ_MIN ? STORE_LZ_TAG + LZString.compressToUTF16(json) : json;
+  const out = json.length >= STORE_LZ_MIN ? STORE_LZ_AIO0111SU140 + LZString.compressToUTF16(json) : json;
   try{
     localStorage.setItem(STORAGE_PREFIX + key, out);
     _storeLast.set(key, json);
@@ -6984,10 +6984,10 @@ function storeSaveParts(key, arr){
     for(let i = 0; i < n; i++){
       const pk = key + '#' + i, j = JSON.stringify(arr.slice(i * STORE_PART, (i + 1) * STORE_PART));
       if(_storeLast.get(pk) === j) continue;
-      localStorage.setItem(STORAGE_PREFIX + pk, STORE_LZ_TAG + LZString.compressToUTF16(j));
+      localStorage.setItem(STORAGE_PREFIX + pk, STORE_LZ_AIO0111SU140 + LZString.compressToUTF16(j));
       _storeLast.set(pk, j);
     }
-    const man = STORE_PARTS_TAG + n;
+    const man = STORE_PARTS_AIO0111SU140 + n;
     if(_storeLast.get(key) !== man){ localStorage.setItem(STORAGE_PREFIX + key, man); _storeLast.set(key, man); }
     storeRemoveParts(key, n);
   }catch(e){ ok = false; console.warn('Problem saving data:', key, e); }
@@ -14517,6 +14517,19 @@ function getDayAbbrev(dateStr){
 // ---------- بل نمبر: دو حصے — آج کا (روزانہ، ہر دن 01 سے دوبارہ شروع) + اسی مہینے کا (ہر مہینے 0001 سے دوبارہ شروع) ----------
 // دونوں نمبر Bill History کی سادہ سرچ سے مل جاتے ہیں کیونکہ دونوں ایک ہی invoice_no سٹرنگ کا حصہ ہیں
 // ---------- AIO0111SU139: 🔢 بل نمبر صرف سادہ سیریل — 1، 2، 3… ہمیشہ آگے (بل حذف ہو تب بھی نمبر دوبارہ نہیں آتا) ----------
+// ---------- AIO0111SU140: 💲 ریٹ کی مرمت — Quick Add والی چیزوں کا خود سے 8% کم ہول سیل واپس اصل ریٹ؛ 36.800000000004 جیسے لمبے اعشاریے صاف ----------
+function cleanMoney(x){ const n = Number(x); if(typeof x !== 'number' || !isFinite(n)) return x; const r = Math.round(n * 100) / 100; return Math.abs(n - r) < 1e-6 ? r : n; }
+function repairPriceFloats(){
+  if(typeof storeIsHydrating === 'function' && storeIsHydrating()){ setTimeout(repairPriceFloats, 500); return; }
+  let ch = 0;
+  for(const p of productsData || []) for(const v of (p.variants || [])){
+    const r = Number(v.retail) || 0, w = Number(v.wholesale);
+    if(r > 0 && String(v.barcode || '').startsWith('NEW') && w !== r && Math.abs(w - r * 0.92) < 1e-6){ v.wholesale = r; ch++; }
+    for(const k of ['retail', 'wholesale', 'purchase']){ const c = cleanMoney(v[k]); if(c !== v[k]){ v[k] = c; ch++; } }
+  }
+  for(const it of (Billing && Billing.cart) || []){ const c = cleanMoney(it.unitPrice); if(c !== it.unitPrice){ it.unitPrice = c; ch++; } }
+  if(ch){ persistAllData(); try{ renderBillingProductGrid(); renderCart(); }catch(e){} }
+}
 function nextBillSerial(){
   let mx = parseInt(loadFromStorage('lastBillSerial', 0)) || 0;
   for(const inv of invoicesData){ const n = parseInt(inv.bill_serial) || 0; if(n > mx) mx = n; }
@@ -15210,7 +15223,8 @@ function saveQuickAddItem(){
     variants: [{
       variant_id: newVariantId, label:'Default', barcode:'NEW'+newVariantId,
       // AIO1310TU040: پرچیز آرڈر/شپمنٹ سے بنے آئٹم کا اسٹاک 0 سے شروع — مال "Confirm Receipt" پر ہی اسٹاک میں جائے (پہلے دو بار جمع ہو جاتا تھا)
-      purchase, retail: sale, wholesale: sale * 0.92, stock: isSupply ? 0 : stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
+      purchase, retail: sale, wholesale: sale, // AIO0111SU140: پہلے چھپ کر 8% کم (×0.92) — 40 کا ہول سیل 36.800000000004 بنتا تھا
+      stock: isSupply ? 0 : stock, lowStockAt:5, location:'', unit, expiryDate:'', image: qaPhotoDataUrl || null
     }]
   });
 
@@ -26008,7 +26022,16 @@ function renderBillHistory(){
       const qd = partyQuery.replace(/\D/g, '');
       const phoneOf = inv => { let p = inv.customer_phone || ''; if(!p && inv.customer_id != null){ const c = customersData.find(x => x.customer_id == inv.customer_id); if(c) p = c.phone || ''; } return String(p).replace(/\D/g, ''); };
       const tail = d => d.replace(/^(0092|92|0)/, '');
-      filtered = filtered.filter(inv => (inv.customer_name || '').toLowerCase().includes(partyQuery) || (qd.length >= 3 && tail(phoneOf(inv)).includes(tail(qd))));
+      // AIO0111SU140: ایک ہی خانے میں نام، فون، بل نمبر، پوری رقم یا تاریخ (31/10)
+      const numQ = partyQuery.replace(/^(rs\.?|bill\s*#?|#)\s*/, '').replace(/,/g, '').trim();
+      const isNum = /^\d+(\.\d+)?$/.test(numQ);
+      const dm = partyQuery.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?$/);
+      const dateHit = inv => { if(!dm) return false; const d = invLocalDate(inv); if(!d) return false; const [y, m, dd] = d.split('-').map(Number);
+        if(dd !== +dm[1] || m !== +dm[2]) return false; if(!dm[3]) return true; const yy = dm[3].length === 2 ? 2000 + +dm[3] : +dm[3]; return y === yy; };
+      filtered = filtered.filter(inv => (inv.customer_name || '').toLowerCase().includes(partyQuery)
+        || (qd.length >= 4 && tail(phoneOf(inv)).includes(tail(qd)))
+        || (isNum && (String(inv.bill_serial || '') === numQ || billNoText(inv).toLowerCase() === numQ || Math.abs((Number(inv.grand_total) || 0) - Number(numQ)) < 0.005))
+        || dateHit(inv));
     }
     // ---------- Date Range Preset (Today/This Week/.../Custom) — موجودہ Date/Day فلٹرز کے ساتھ مل کر کام کرتا ہے ----------
     const rangePreset = document.getElementById('billRangePreset')?.value || 'all';
@@ -33909,7 +33932,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // اب یہ ایپ کھلتے ہی، سب سے پہلے، براہ راست چلتا ہے ----------
   try{ getOrCreateDeviceUID(); }catch(e){}
   try{ initCloudSync(); }catch(e){}
-  setTimeout(migrateBillSerials, 1500); // AIO0111SU139: پرانے بل بھی سادہ نمبر
+  setTimeout(migrateBillSerials, 1500);
+  setTimeout(repairPriceFloats, 1200); // AIO0111SU140 // AIO0111SU139: پرانے بل بھی سادہ نمبر
 
   // ---------- 📦 اگر پہلے کسی سیشن میں تصویریں IndexedDB میں محفوظ ہو چکی ہیں، انہیں واپس میموری میں جوڑیں —
   // fire-and-forget، ایپ کے فوری کھلنے میں تاخیر نہیں کرنی (تصویریں چند لمحوں میں خودکار نمودار ہو جائیں گی) ----------
@@ -33997,9 +34021,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0111SU139';
+  const APP_VERSION = 'AIO0111SU140';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Simple bill numbers 1, 2, 3…; write a walk-in customer name/phone on the bill (tick to save to customer list); search bills by phone';
+  const UPDATE_NOTE = 'Rates fixed: Quick Add no longer sets wholesale 8% lower, long decimals (36.8000000004) cleaned; one bill search box: name, phone, bill#, amount or date';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
