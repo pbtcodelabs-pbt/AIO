@@ -787,6 +787,11 @@
     font-size:10px; font-weight:900; cursor:pointer; align-items:center; justify-content:center; padding:0;}
 
   /* ---------- AIO910FR009: بلنگ کارڈ — Fruit Mandi کا ڈیزائن اور رنگ، مکمل انگلش/LTR ---------- */
+  .walkinRow{display:flex; flex-wrap:wrap; gap:6px; padding:6px 10px; background:#fffbeb; border-bottom:1px solid #fde68a;}
+  .walkinRow input[type=text], .walkinRow input[type=tel]{flex:1 1 140px; min-width:0; padding:8px; border:1px solid #fcd34d; border-radius:8px; font-size:13px; background:#fff;}
+  .walkinRow .walkinSave{flex:1 1 100%; display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:800; color:#92400e; cursor:pointer; margin:0;}
+  .walkinRow .walkinSave input{width:18px; height:18px; margin:0;}
+  @media (min-width:700px){ .walkinRow .walkinSave{flex:0 0 auto;} }
   .bcCustBanner{position:relative; display:flex; flex-direction:column; align-items:center; margin:8px 12px 6px; padding:5px 40px 7px;
     border:2.5px solid var(--primary,#0f766e); border-radius:16px; background:linear-gradient(180deg,#ffffff,#e7f8f1);
     box-shadow:0 4px 0 var(--primary-dark,#0b4f4a), 0 6px 12px rgba(0,0,0,.12); cursor:pointer;}
@@ -3294,7 +3299,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO3110SA138</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0111SU139</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3513,7 +3518,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO3110SA138</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0111SU139</span>
     </div>
   </div>
 
@@ -3786,6 +3791,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <span class="bcCustLbl">CUSTOMER</span>
           <span class="bcCustName" id="cartCustomerStatusText">🚶 Walk-in Customer</span>
           <button type="button" id="cartEndCustomerBtn" onclick="event.stopPropagation(); endCustomerSelection();" title="Clear customer — back to Walk-in Customer" style="display:none;">✕</button>
+        </div>
+        <!-- AIO0111SU139: واک اِن گاہک کا نام/نمبر — صرف بل پر؛ چیک کریں تو کسٹمر لسٹ میں بھی -->
+        <div id="walkinRow" class="walkinRow">
+          <input type="text" id="walkinName" placeholder="✍️ Walk-in name (optional)" autocomplete="off">
+          <input type="tel" id="walkinPhone" inputmode="tel" placeholder="📱 Phone (optional)" autocomplete="off">
+          <label class="walkinSave"><input type="checkbox" id="walkinSave"> Save to customer list</label>
         </div>
         <div id="customerSelectRow" style="display:flex; flex-direction:column; gap:6px; padding:6px 10px 7px; background:#f8fafc; border-bottom:1px solid #e2e8f0;">
           <div style="display:flex; gap:6px; align-items:center;">
@@ -5272,7 +5283,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <option value="thisyear">This Year</option>
           <option value="custom">Custom Range…</option>
         </select>
-        <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 Party name" oninput="renderBillHistory()">
+        <input type="text" id="billSearchInput" class="bcbItem bcbName" placeholder="🔍 Name or phone" oninput="renderBillHistory()">
         <input type="date" id="billDateFilter" class="bcbItem bcbDate" onchange="onBillDateFilterChange()">
         <select id="billDayFilter" class="bcbItem bcbDay" onchange="onBillDayFilterChange()">
           <option value="">Day</option>
@@ -12136,6 +12147,7 @@ function deleteBillingCartDraft(){
 // ---------- کارٹ کو بالکل نئے بل کی حالت میں لائیں (Walk-in، کوئی رعایت/وصولی نہیں) ----------
 function resetBillingCart(){
   Billing.cart = [];
+  try{ clearWalkinFields(); }catch(e){}
   clearBillingCartDraft();
   const custSel = document.getElementById('customerSelect');
   if(custSel) custSel.value = '';
@@ -13860,6 +13872,7 @@ function renderCartCustomerStatus(){
   const custId = document.getElementById('customerSelect')?.value;
   const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
 
+  { const wr = document.getElementById('walkinRow'); if(wr) wr.style.display = customer ? 'none' : ''; }
   if(customer){
     statusText.textContent = customer.name;
     endBtn.style.display = 'inline-flex';
@@ -13871,6 +13884,30 @@ function renderCartCustomerStatus(){
   }
 }
 
+// ---------- AIO0111SU139: واک اِن گاہک کا لکھا ہوا نام/نمبر ----------
+function walkinInfo(){
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  return {name: v('walkinName'), phone: v('walkinPhone'), save: !!(document.getElementById('walkinSave') || {}).checked};
+}
+function walkinName(){ return walkinInfo().name || 'Walk-in Customer'; }
+function clearWalkinFields(){ ['walkinName','walkinPhone'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; }); const c = document.getElementById('walkinSave'); if(c) c.checked = false; }
+// «کسٹمر لسٹ میں محفوظ» چیک ہو تو کسٹمر بنائیں (اسی نمبر والا پہلے سے ہو تو وہی) — ورنہ null
+function walkinSavedCustomer(){
+  const w = walkinInfo();
+  if(!w.save) return null;
+  if(!w.name){ alert('Write the customer name to save them to the customer list.'); return false; }
+  const d = w.phone.replace(/\D/g, '');
+  let c = d ? customersData.find(x => x.phone && x.phone.replace(/\D/g, '') === d) : null;
+  if(!c){ c = {customer_id: nextCustomerId++, name: w.name, phone: w.phone, address:'', wallet_balance:0, total_receivable:0, walletHistory:[]}; customersData.push(c); }
+  const recEl = document.getElementById('amountReceivedInput');
+  const fullCash = Billing.counterSale && recEl && !(parseFloat(recEl.value) > 0); // واک اِن نقد تھا — گاہک بننے پر ادھار نہ بنے
+  populateCustomerDropdown();
+  const sel = document.getElementById('customerSelect'); if(sel) sel.value = c.customer_id;
+  try{ onCustomerChange(); }catch(e){}
+  if(fullCash && recEl) recEl.value = Math.round(Billing.thisBillTotal || 0);
+  clearWalkinFields();
+  return c;
+}
 // ---------- منتخب کسٹمر ہٹا کر واپس Walk-in پر — "✖ End" بٹن یا اوپر والا 🚶 سوئچ دونوں یہی کرتے ہیں ----------
 function endCustomerSelection(){
   Billing.counterSale = true;
@@ -13915,6 +13952,7 @@ function startEditBill(invoiceId){
       try{ const si = document.getElementById('custSearchInput'); if(si) si.value = ''; const af = document.getElementById('custAreaFilter'); if(af) af.value = ''; populateCustomerDropdown(); }catch(e){}
     }
     if(sel){ sel.value = inv.customer_id || ''; try{ onCustomerChange(); }catch(e){} }
+    if(!inv.customer_id){ const wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone'); if(wn) wn.value = inv.customer_name && inv.customer_name !== 'Walk-in Customer' ? inv.customer_name : ''; if(wp) wp.value = inv.customer_phone || ''; }
     fillEditPaymentFields(inv, true);
   } else fillEditPaymentFields(inv, false);
   try{ document.getElementById('invoicePreviewModal').classList.remove('show'); currentPreviewInvoiceId = null; }catch(e){}
@@ -14478,6 +14516,36 @@ function getDayAbbrev(dateStr){
 // ---------- Finalize Invoice (اسٹاک کاٹنا + والٹ/اُدھار سے جوڑنا + پرنٹ پریویو) ----------
 // ---------- بل نمبر: دو حصے — آج کا (روزانہ، ہر دن 01 سے دوبارہ شروع) + اسی مہینے کا (ہر مہینے 0001 سے دوبارہ شروع) ----------
 // دونوں نمبر Bill History کی سادہ سرچ سے مل جاتے ہیں کیونکہ دونوں ایک ہی invoice_no سٹرنگ کا حصہ ہیں
+// ---------- AIO0111SU139: 🔢 بل نمبر صرف سادہ سیریل — 1، 2، 3… ہمیشہ آگے (بل حذف ہو تب بھی نمبر دوبارہ نہیں آتا) ----------
+function nextBillSerial(){
+  let mx = parseInt(loadFromStorage('lastBillSerial', 0)) || 0;
+  for(const inv of invoicesData){ const n = parseInt(inv.bill_serial) || 0; if(n > mx) mx = n; }
+  return mx + 1;
+}
+function billNoText(inv){ return String((inv && inv.invoice_no) || '').replace(/^Bill#/, ''); }
+// پرانے بل (Bill#3/10 والے) ایک بار تاریخ کی ترتیب سے 1، 2، 3… — پرانا نمبر old_invoice_no میں (تلاش میں ملتا رہے)
+function migrateBillSerials(){
+  try{
+    if(typeof isLinkedDevice === 'function' && isLinkedDevice()) return; // جڑا فون نہیں — مالک کے فون سے سنک ہو کر آئیں گے
+    const todo = invoicesData.filter(inv => !inv.bill_serial);
+    if(!todo.length) return;
+    const ren = {};
+    let n = 0; for(const inv of invoicesData){ const x = parseInt(inv.bill_serial) || 0; if(x > n) n = x; }
+    n = Math.max(n, parseInt(loadFromStorage('lastBillSerial', 0)) || 0);
+    todo.sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')) || ((a.invoice_id || 0) - (b.invoice_id || 0)));
+    for(const inv of todo){
+      n++;
+      if(inv.invoice_no && !inv.old_invoice_no) inv.old_invoice_no = inv.invoice_no;
+      inv.bill_serial = n;
+      const nn = 'Bill#' + n;
+      if(inv.invoice_no) ren[inv.invoice_no] = nn;
+      inv.invoice_no = nn;
+    }
+    try{ (approvalRequests || []).forEach(r => { if(r && r.target && ren[r.target]) r.target = ren[r.target]; }); }catch(e){}
+    saveToStorage('lastBillSerial', n);
+    persistAllData();
+  }catch(e){ console.warn('bill serial migration', e); }
+}
 function generateBillNumbers(){
   const now = new Date();
   const todayStr = localDateStr(now); // YYYY-MM-DD (مقامی وقت)
@@ -14490,10 +14558,12 @@ function generateBillNumbers(){
   const daily_bill_no = String(dailyCount);
   const monthly_bill_no = String(monthlyCount);
 
+  const bill_serial = nextBillSerial(); // AIO0111SU139: سادہ سیریل 1، 2، 3… (دن/مہینے والا چکر ختم)
   return {
     daily_bill_no,
     monthly_bill_no,
-    invoice_no: `Bill#${daily_bill_no}/${monthly_bill_no}` + (aioMultiOn() && syncSlot() > 0 ? '-' + syncSlot() : '')
+    bill_serial,
+    invoice_no: `Bill#${bill_serial}` + (aioMultiOn() && syncSlot() > 0 ? '-' + syncSlot() : '')
   };
 }
 
@@ -14516,8 +14586,8 @@ async function openBillPreviewBeforeComplete(){
     ...generateBillNumbers(), // ---------- صرف پڑھتا ہے، کچھ بھی محفوظ/شمار نہیں بدلتا — پریویو کے لیے بے خطر ----------
     invoice_no: 'DRAFT PREVIEW — Not Yet Saved',
     customer_id: customer ? customer.customer_id : null,
-    customer_name: customer ? customer.name : 'Walk-in Customer',
-    customer_phone: customer ? customer.phone : '',
+    customer_name: customer ? customer.name : walkinName(),
+    customer_phone: customer ? customer.phone : walkinInfo().phone,
     sold_by: AppState.currentUser?.name || 'Unknown',
     sale_mode: Billing.saleMode,
     payment_method: Billing.counterSale ? 'cash' : 'credit',
@@ -14549,7 +14619,8 @@ function finalizeInvoice(){
   const editInv = editingInvoice(); // ✏️ بنے ہوئے بل کی ترمیم چل رہی ہے؟
 
   const custId = document.getElementById('customerSelect').value;
-  const customer = custId ? customersData.find(c => c.customer_id == custId) : null;
+  let customer = custId ? customersData.find(c => c.customer_id == custId) : null;
+  if(!customer){ const wc = walkinSavedCustomer(); if(wc === false) return; if(wc) customer = wc; }
 
   const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU111: 2939.919999 نہیں، 2939.92
   const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
@@ -14566,8 +14637,8 @@ function finalizeInvoice(){
   // ---------- کھلے وزن سے بل 170.40 جیسا بنتا ہے مگر دکھتا 170 ہے — آدھے روپے تک کا فرق "پوری ادائیگی" مانیں ----------
   const isWalkInPartial = Billing.counterSale && rawReceivedForCheck > 0 && (rawReceivedForCheck + 0.5) < grandTotal;
   if(!customer && (!Billing.counterSale || isWalkInPartial)){
-    document.getElementById('qccName').value = '';
-    document.getElementById('qccPhone').value = '';
+    document.getElementById('qccName').value = walkinInfo().name; // لکھا ہوا واک اِن نام/نمبر خود بھر جائے
+    document.getElementById('qccPhone').value = walkinInfo().phone;
     document.getElementById('quickCreditCustomerModal').classList.add('show');
     return;
   }
@@ -14613,8 +14684,8 @@ function finalizeInvoice(){
     invoice_id: Date.now(),
     ...generateBillNumbers(),
     customer_id: customer ? customer.customer_id : null,
-    customer_name: customer ? customer.name : 'Walk-in Customer',
-    customer_phone: customer ? customer.phone : '',
+    customer_name: customer ? customer.name : walkinName(),
+    customer_phone: customer ? customer.phone : walkinInfo().phone,
     sold_by: AppState.currentUser?.name || 'Unknown',
     sale_mode: Billing.saleMode,
     payment_method: method,
@@ -14632,7 +14703,7 @@ function finalizeInvoice(){
   if(editInv){
     // ---------- وہی بل نمبر، وہی تاریخ؛ فہرست میں اسی جگہ پرانے کی جگہ نیا ----------
     Object.assign(invoice, {
-      invoice_id: editInv.invoice_id, daily_bill_no: editInv.daily_bill_no, monthly_bill_no: editInv.monthly_bill_no,
+      invoice_id: editInv.invoice_id, daily_bill_no: editInv.daily_bill_no, monthly_bill_no: editInv.monthly_bill_no, bill_serial: editInv.bill_serial, old_invoice_no: editInv.old_invoice_no,
       invoice_no: editInv.invoice_no, created_at: editInv.created_at, sold_by: editInv.sold_by || invoice.sold_by,
       edited_at: new Date().toISOString(), edited_by: AppState.currentUser?.name || 'Admin', edit_count: (editInv.edit_count || 0) + 1
     });
@@ -14725,6 +14796,7 @@ function finalizeInvoice(){
   }
 
   Billing.cart = [];
+  clearWalkinFields();
   document.getElementById('discountInput').value = 0;
   document.getElementById('amountReceivedInput').value = '';
   document.getElementById('changeToWalletChk').checked = false;
@@ -14750,6 +14822,7 @@ function finalizeInvoice(){
     if(oldCust && oldCust !== customer) settleNegativeReceivable(oldCust, `Paid on ${invoice.invoice_no} (moved to another customer) — kept as advance`);
   }
   if(editInv){ billEdit = null; saveToStorage('billEditDraft', null); renderEditBillBanner(); showNavToast(`✅ ${invoice.invoice_no} updated`); }
+  if(invoice.bill_serial && invoice.bill_serial > (parseInt(loadFromStorage('lastBillSerial', 0)) || 0)) saveToStorage('lastBillSerial', invoice.bill_serial);
   openInvoicePreview(invoice.invoice_id); // خودکار پریمیم پرنٹ پریویو کھل جائے
 }
 
@@ -14759,7 +14832,8 @@ function submitBillForApproval(customer, method, subtotal){
     pending_id: nextPendingId++,
     salesman_name: AppState.currentUser?.name || 'Unknown',
     customer_id: customer ? customer.customer_id : null,
-    customer_name: customer ? customer.name : 'Walk-in Customer',
+    customer_name: customer ? customer.name : walkinName(),
+    customer_phone: customer ? customer.phone : walkinInfo().phone,
     sale_mode: Billing.saleMode,
     payment_method: method,
     items: withCostSnapshot(Billing.cart), // snapshot (AIO1310TU037: خرید قیمت بھی محفوظ)
@@ -14773,6 +14847,7 @@ function submitBillForApproval(customer, method, subtotal){
   pendingBillsData.unshift(pending);
 
   Billing.cart = [];
+  clearWalkinFields();
   document.getElementById('discountInput').value = 0;
   { const bn = document.getElementById('billNoteInput'); if(bn) bn.value = ''; }
   renderCart();
@@ -14911,7 +14986,7 @@ async function previewPendingBillBeforeApproval(){
     invoice_no: 'DRAFT PREVIEW — Not Yet Approved',
     customer_id: p.customer_id,
     customer_name: p.customer_name || (customer ? customer.name : 'Walk-in Customer'),
-    customer_phone: customer ? customer.phone : '',
+    customer_phone: customer ? customer.phone : (p.customer_phone || ''),
     sold_by: p.salesman_name,
     sale_mode: p.sale_mode || 'retail',
     payment_method: p.payment_method || 'cash',
@@ -14945,7 +15020,7 @@ function approvePendingBill(){
     ...generateBillNumbers(),
     customer_id: p.customer_id,
     customer_name: p.customer_name,
-    customer_phone: customer ? customer.phone : '',
+    customer_phone: customer ? customer.phone : (p.customer_phone || ''),
     sold_by: p.salesman_name,
     sale_mode: p.sale_mode,
     payment_method: p.payment_method,
@@ -25903,10 +25978,10 @@ function renderBillHistory(){
     filtered = isNaN(amt) ? [] : base.filter(inv => inv.grand_total === amt);
   } else if(billNumberQuery !== ''){
     // ---------- بل نمبر فلٹر: اپنے طور پر الگ کام کرتا ہے — باقی فلٹرز کو بائی پاس کرتا ہے ----------
-    filtered = base.filter(inv =>
-      (inv.invoice_no || '').toLowerCase().includes(billNumberQuery) ||
-      String(inv.daily_bill_no || '').toLowerCase().includes(billNumberQuery) ||
-      String(inv.monthly_bill_no || '').toLowerCase().includes(billNumberQuery)
+    const q = billNumberQuery.replace(/^bill\s*#?\s*/, '');
+    filtered = base.filter(inv => billNoText(inv).toLowerCase() === q || String(inv.bill_serial || '') === q);
+    if(!filtered.length) filtered = base.filter(inv =>
+      billNoText(inv).toLowerCase().includes(q) || (inv.old_invoice_no || '').toLowerCase().includes(q)
     );
   } else {
     // ---------- عام حالت: Status Tab + Date + Day + Party Name سب آپس میں مل کر (AND) کام کریں ----------
@@ -25930,7 +26005,10 @@ function renderBillHistory(){
       filtered = filtered.filter(inv => getDayAbbrev(inv.created_at) === dayFilterVal);
     }
     if(partyQuery){
-      filtered = filtered.filter(inv => (inv.customer_name || '').toLowerCase().includes(partyQuery));
+      const qd = partyQuery.replace(/\D/g, '');
+      const phoneOf = inv => { let p = inv.customer_phone || ''; if(!p && inv.customer_id != null){ const c = customersData.find(x => x.customer_id == inv.customer_id); if(c) p = c.phone || ''; } return String(p).replace(/\D/g, ''); };
+      const tail = d => d.replace(/^(0092|92|0)/, '');
+      filtered = filtered.filter(inv => (inv.customer_name || '').toLowerCase().includes(partyQuery) || (qd.length >= 3 && tail(phoneOf(inv)).includes(tail(qd))));
     }
     // ---------- Date Range Preset (Today/This Week/.../Custom) — موجودہ Date/Day فلٹرز کے ساتھ مل کر کام کرتا ہے ----------
     const rangePreset = document.getElementById('billRangePreset')?.value || 'all';
@@ -26263,7 +26341,7 @@ async function renderInvoiceToCanvas(invoice, paperWidthMM = 80, highlightMatchK
   const dd = String(billDateObj.getDate()).padStart(2, '0');
   const mm = String(billDateObj.getMonth() + 1).padStart(2, '0');
   const yy = String(billDateObj.getFullYear()).slice(-2);
-  const billLine = `Bill#${invoice.daily_bill_no || '—'}/${invoice.monthly_bill_no || '—'} ${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`;
+  const billLine = `Bill#${billNoText(invoice) || '—'} ${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`;
   ctx.fillText(billLine, pxWidth/2, y); y += 22;
 
   ctx.font = F('16px');
@@ -26752,7 +26830,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillStyle = '#1a1a1a';
   ctx.textAlign = 'left';
   ctx.font = F('bold 16px');
-  ctx.fillText(`Invoice #${invoice.daily_bill_no || '—'}/${invoice.monthly_bill_no || '—'}`, tableLeft + 16, y + Math.round(detailsBoxH*0.4));
+  ctx.fillText(`Invoice #${billNoText(invoice) || '—'}`, tableLeft + 16, y + Math.round(detailsBoxH*0.4));
   ctx.font = F('13px');
   ctx.fillText(`${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`, tableLeft + 16, y + Math.round(detailsBoxH*0.71));
 
@@ -27745,7 +27823,7 @@ function buildInvoicePlainText(invoice){
   if(AppState.settings.businessPhone) lines.push(centerMono(AppState.settings.businessPhone, cols));
   const d = new Date(invoice.created_at);
   const dd = String(d.getDate()).padStart(2,'0'), mm = String(d.getMonth()+1).padStart(2,'0'), yy = String(d.getFullYear()).slice(-2);
-  lines.push(centerMono(`Bill#${invoice.daily_bill_no || '—'}/${invoice.monthly_bill_no || '—'} ${dd}/${mm}/${yy}`, cols));
+  lines.push(centerMono(`Bill#${billNoText(invoice) || '—'} ${dd}/${mm}/${yy}`, cols));
   lines.push(centerMono('Customer: ' + (invoice.customer_name || 'Walk-in'), cols));
   lines.push('-'.repeat(cols));
   const qtyW = 4, totalW = 9, nameW = cols - qtyW - totalW;
@@ -33831,6 +33909,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // اب یہ ایپ کھلتے ہی، سب سے پہلے، براہ راست چلتا ہے ----------
   try{ getOrCreateDeviceUID(); }catch(e){}
   try{ initCloudSync(); }catch(e){}
+  setTimeout(migrateBillSerials, 1500); // AIO0111SU139: پرانے بل بھی سادہ نمبر
 
   // ---------- 📦 اگر پہلے کسی سیشن میں تصویریں IndexedDB میں محفوظ ہو چکی ہیں، انہیں واپس میموری میں جوڑیں —
   // fire-and-forget، ایپ کے فوری کھلنے میں تاخیر نہیں کرنی (تصویریں چند لمحوں میں خودکار نمودار ہو جائیں گی) ----------
@@ -33918,9 +33997,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO3110SA138';
+  const APP_VERSION = 'AIO0111SU139';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New announcement: Multi-Device poster shared with the app share';
+  const UPDATE_NOTE = 'Simple bill numbers 1, 2, 3…; write a walk-in customer name/phone on the bill (tick to save to customer list); search bills by phone';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
