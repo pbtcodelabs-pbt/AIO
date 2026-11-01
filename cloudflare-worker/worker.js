@@ -342,6 +342,9 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS vtok (rec TEXT PRIMARY KEY, tok TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS verified (rec TEXT PRIMARY KEY, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS edits (id INTEGER PRIMARY KEY AUTOINCREMENT, rec TEXT, ts INTEGER, body TEXT, done INTEGER DEFAULT 0)");
+    /* MCS پروفائل: دکاندار کا اپنا صفحہ (تصویریں، تفصیل، ریٹ، اوقات، نقشہ) — مالک فون کی خفیہ چابی سے */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS prof (rec TEXT PRIMARY KEY, data TEXT, key TEXT, since INTEGER, until INTEGER, ts INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS pimg (id TEXT PRIMARY KEY, rec TEXT, data TEXT, ts INTEGER)");
   }
   async fetch(request) {
     const u = new URL(request.url);
@@ -358,6 +361,48 @@ export class McsStats {
       if (!row || row.tok !== b.tok) return Response.json({ error: "bad_token" }, { status: 403 });
       if (b.edit) this.sql.exec("INSERT INTO edits (rec, ts, body) VALUES (?, ?, ?)", b.rec, Date.now(), JSON.stringify(b.edit).slice(0, 4000));
       else this.sql.exec("INSERT INTO verified (rec, ts) VALUES (?, ?) ON CONFLICT (rec) DO UPDATE SET ts = excluded.ts", b.rec, Date.now());
+      return Response.json({ ok: true });
+    }
+    if (op === "/plist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts FROM prof").toArray().map((r) => [r.rec, { since: r.since, until: r.until, ts: r.ts }])));
+    if (op === "/pget") {
+      const { rec } = await request.json();
+      const r = this.sql.exec("SELECT data, since, until, ts FROM prof WHERE rec = ?", rec).toArray()[0];
+      if (!r) return Response.json({ none: true });
+      const imgs = this.sql.exec("SELECT id, ts FROM pimg WHERE rec = ? ORDER BY id", rec).toArray();
+      let data = {}; try { data = JSON.parse(r.data || "{}"); } catch (e) {}
+      return Response.json({ rec, data, since: r.since, until: r.until, ts: r.ts, imgs });
+    }
+    if (op === "/pimg") { const { id } = await request.json(); const r = this.sql.exec("SELECT data FROM pimg WHERE id = ?", id).toArray()[0]; return Response.json({ data: r ? r.data : "" }); }
+    if (op === "/pclaim") {
+      const b = await request.json(); const now = Date.now();
+      const r = this.sql.exec("SELECT key, since, until FROM prof WHERE rec = ?", b.rec).toArray()[0];
+      if (r && r.key && !b.admin) return Response.json({ error: "taken" }, { status: 409 });
+      const key = [...crypto.getRandomValues(new Uint8Array(18))].map((x) => "abcdefghjkmnpqrstuvwxyz23456789"[x % 31]).join("");
+      if (r) this.sql.exec("UPDATE prof SET key = ? WHERE rec = ?", key, b.rec);
+      else this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts) VALUES (?, '{}', ?, ?, ?, ?)", b.rec, key, now, now + 60 * 864e5, now);
+      const x = this.sql.exec("SELECT since, until FROM prof WHERE rec = ?", b.rec).toArray()[0];
+      return Response.json({ key, since: x.since, until: x.until });
+    }
+    if (op === "/psave") {
+      const b = await request.json();
+      const r = this.sql.exec("SELECT key FROM prof WHERE rec = ?", b.rec).toArray()[0];
+      if (!r) return Response.json({ error: "no_profile" }, { status: 404 });
+      if (!b.admin && (!b.key || b.key !== r.key)) return Response.json({ error: "bad_key" }, { status: 403 });
+      const now = Date.now();
+      if (b.data) this.sql.exec("UPDATE prof SET data = ?, ts = ? WHERE rec = ?", JSON.stringify(b.data), now, b.rec);
+      for (const [slot, img] of Object.entries(b.imgs || {})) {
+        const id = b.rec + "_" + slot;
+        if (img) this.sql.exec("INSERT INTO pimg (id, rec, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", id, b.rec, img, now);
+        else this.sql.exec("DELETE FROM pimg WHERE id = ?", id);
+      }
+      this.sql.exec("UPDATE prof SET ts = ? WHERE rec = ?", now, b.rec);
+      return Response.json({ ok: true, ts: now });
+    }
+    if (op === "/padmin") {   /* ایڈمن: مدت بدلیں، فون سے آزاد کریں، یا پوری پروفائل ہٹائیں */
+      const b = await request.json();
+      if (b.act === "until") this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", b.until, b.rec);
+      else if (b.act === "free") this.sql.exec("UPDATE prof SET key = '' WHERE rec = ?", b.rec);
+      else if (b.act === "del") { this.sql.exec("DELETE FROM prof WHERE rec = ?", b.rec); this.sql.exec("DELETE FROM pimg WHERE rec = ?", b.rec); }
       return Response.json({ ok: true });
     }
     if (op === "/vlist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, ts FROM verified").toArray().map((r) => [r.rec, r.ts])));
@@ -446,10 +491,48 @@ async function handleVerify(request, env, path) {
   return reply({ error: "not_found" }, 404);
 }
 
+/* ===== MCS پروفائل کے راستے ===== */
+function profClean(d) {
+  const S = (v, n) => String(v == null ? "" : v).slice(0, n);
+  d = d && typeof d === "object" ? d : {};
+  const out = { about: S(d.about, 1500), hours: S(d.hours, 120), off: S(d.off, 60), addr: S(d.addr, 200) };
+  out.items = (Array.isArray(d.items) ? d.items : []).slice(0, 20).map((x) => ({ n: S(x && x.n, 60), p: S(x && x.p, 24) })).filter((x) => x.n);
+  out.phones = (Array.isArray(d.phones) ? d.phones : []).slice(0, 3).map((x) => S(x, 20).replace(/[^0-9+\- ]/g, "")).filter(Boolean);
+  out.links = (Array.isArray(d.links) ? d.links : []).slice(0, 3).map((x) => S(x, 200)).filter((x) => /^https?:\/\//i.test(x));
+  if (d.map && isFinite(+d.map.lat) && isFinite(+d.map.lon)) out.map = { lat: +(+d.map.lat).toFixed(6), lon: +(+d.map.lon).toFixed(6) };
+  return out;
+}
+async function handleProf(request, env, path) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const clean = (v) => String(v || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
+  const fwd = async (op, body, extra) => { const r = await stub.fetch("https://s" + op, { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS, ...(extra || {}) } }); };
+  if (path === "/plist") return fwd("/plist", {}, { "Cache-Control": "max-age=60" });
+  const u = new URL(request.url);
+  if (path === "/pimg") return fwd("/pimg", { id: clean(u.searchParams.get("id")) }, { "Cache-Control": "public, max-age=2592000" });
+  let b = {}; if (request.method === "POST") { try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); } }
+  const rec = clean(b.rec || u.searchParams.get("rec"));
+  if (!/^p\d{10}$/.test(rec)) return reply({ error: "bad_rec" }, 400);
+  if (path === "/pget") return fwd("/pget", { rec });
+  const admin = await verifyFirebaseAdmin(request);
+  if (path === "/pclaim") return fwd("/pclaim", { rec, admin });
+  if (path === "/psave") {
+    const imgs = {};
+    Object.entries(b.imgs && typeof b.imgs === "object" ? b.imgs : {}).forEach(([k, v]) => { const slot = parseInt(k, 10); if (slot >= 0 && slot < 6) imgs[slot] = (typeof v === "string" && /^data:image\/(jpeg|webp|png);base64,/.test(v) && v.length < 450000) ? v : null; });
+    return fwd("/psave", { rec, key: clean(b.key), admin, data: b.data ? profClean(b.data) : null, imgs });
+  }
+  if (path === "/padmin") {
+    if (!admin) return reply({ error: "admin_only" }, 403);
+    return fwd("/padmin", { rec, act: String(b.act || ""), until: parseInt(b.until, 10) || 0 });
+  }
+  return reply({ error: "not_found" }, 404);
+}
+
 export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
+    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
