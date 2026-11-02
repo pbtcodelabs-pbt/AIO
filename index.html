@@ -3300,7 +3300,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0211MO147</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU148</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3519,7 +3519,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0211MO147</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU148</span>
     </div>
   </div>
 
@@ -4490,6 +4490,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <span class="scanTools">
             <button type="button" class="scanToolBtn" id="scannerZoomBtn" onclick="toggleScannerZoom()" style="display:none;">🔍 2×</button>
             <button type="button" class="scanToolBtn" id="scannerTorchBtn" onclick="toggleScannerTorch()" style="display:none;">🔦</button>
+            <button type="button" class="scanToolBtn" id="scannerFlipBtn" onclick="switchScannerCamera()" title="Switch front / back camera">🔄 Front</button>
           </span>
           <span class="closeBtn" onclick="closeBarcodeScanner()">✖</span>
         </div>
@@ -12537,6 +12538,20 @@ function scanContDone(){
   if(Billing.cart.length && typeof openCartSheet === 'function') openCartSheet();
 }
 
+// ===================== AIO0311TU148 (ہیلپ ڈیسک #12): آگے / پیچھے کا کیمرہ — 🔄 بٹن، پسند یاد رہتی ہے =====================
+let scannerFacing = (() => { try{ return loadFromStorage('scannerFacing', 'environment') === 'user' ? 'user' : 'environment'; }catch(e){ return 'environment'; } })();
+function scannerFlipLabel(){
+  const b = document.getElementById('scannerFlipBtn'); if(b) b.textContent = scannerFacing === 'user' ? '🔄 Back camera' : '🔄 Front camera';
+  const v = document.getElementById('scannerVideo'); if(v) v.style.transform = scannerFacing === 'user' ? 'scaleX(-1)' : '';
+}
+function switchScannerCamera(){
+  scannerFacing = scannerFacing === 'user' ? 'environment' : 'user';
+  try{ saveToStorage('scannerFacing', scannerFacing); }catch(e){}
+  const target = scannerTargetInputId, cont = scannerContinuous;
+  if(scannerDetectorLoop){ clearTimeout(scannerDetectorLoop); scannerDetectorLoop = null; }
+  if(scannerStream){ try{ scannerStream.getTracks().forEach(t => t.stop()); }catch(e){} scannerStream = null; }
+  openBarcodeScanner(target, {continuous: cont, keepPanel: true});
+}
 async function openBarcodeScanner(targetInputId = null, opts = {}){
   scannerTargetInputId = targetInputId;
   scannerContinuous = !!(opts && opts.continuous) && !targetInputId;
@@ -12544,7 +12559,8 @@ async function openBarcodeScanner(targetInputId = null, opts = {}){
   document.getElementById('scannerModal').classList.toggle('scanCont', scannerContinuous);
   const panel = document.getElementById('scanContPanel');
   if(panel) panel.style.display = scannerContinuous ? 'block' : 'none';
-  if(scannerContinuous) scanContRenderPanel('Scan items one by one — each beep adds to the bill', '');
+  if(scannerContinuous && !(opts && opts.keepPanel)) scanContRenderPanel('Scan items one by one — each beep adds to the bill', '');
+  scannerFlipLabel();
   document.getElementById('scannerModal').classList.add('show');
   document.getElementById('manualBarcodeInput').value = '';
   document.getElementById('scannerHint').textContent = 'Starting camera…';
@@ -12555,16 +12571,17 @@ async function openBarcodeScanner(targetInputId = null, opts = {}){
     if(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices){
       const devs = await navigator.mediaDevices.enumerateDevices();
       if(!devs.some(d => d.kind === 'videoinput')){ scannerNoCameraMode(); return; }
+      { const fb = document.getElementById('scannerFlipBtn'); if(fb) fb.style.display = devs.filter(d => d.kind === 'videoinput').length > 1 ? '' : 'none'; } // ایک ہی کیمرہ (کروم بک) ہو تو بٹن نہیں
     }
   }catch(e){}
 
   try{
     try{
       scannerStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: {ideal:'environment'}, width: {ideal:1920}, height: {ideal:1080}, advanced: [{focusMode:'continuous'}] }, audio: false
+        video: { facingMode: {ideal: scannerFacing}, width: {ideal:1920}, height: {ideal:1080}, advanced: [{focusMode:'continuous'}] }, audio: false
       });
     }catch(e1){
-      scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: scannerFacing }, audio: false });
     }
     if(!document.getElementById('scannerModal').classList.contains('show')){ closeBarcodeScanner(); return; }
     const video = document.getElementById('scannerVideo');
@@ -34322,9 +34339,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0211MO147';
+  const APP_VERSION = 'AIO0311TU148';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Billing: a new bill always starts as Walk-in — the previous customer no longer comes back after reopening the app';
+  const UPDATE_NOTE = 'Barcode scanner: 🔄 switch between front and back camera — your choice is remembered';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
