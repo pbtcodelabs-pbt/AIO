@@ -888,6 +888,7 @@
   .pcVar{font-size:10.5px; font-weight:800; color:var(--primary-dark); background:#eef2ff; border-radius:6px; padding:2px 6px;}
   .pcDel{position:absolute; right:4px; top:50%; transform:translateY(-50%); width:24px; height:24px; border:none; border-radius:7px;
     background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:900; cursor:pointer; padding:0; line-height:1;}
+  .pcWeigh{border:1.5px solid #f59e0b; background:linear-gradient(180deg,#fffbeb,#fde68a); color:#92400e; border-radius:9px; font-size:11px; font-weight:900; padding:2px 7px; margin:0 4px; cursor:pointer; white-space:nowrap; vertical-align:middle; width:auto;}
   .pcQty{grid-area:q; display:flex; align-items:center; gap:2px; height:38px; padding:0 2px; background:#fff; border:1.5px solid #93c5fd; border-radius:11px; min-width:0;}
   .pcQty button{flex:0 0 auto; width:24px; height:30px; border:none; border-radius:9px; color:#fff; font-size:17px; font-weight:900; line-height:1; padding:0; cursor:pointer;
     background:linear-gradient(180deg,#60a5fa,#1d4ed8); box-shadow:0 3px 0 #1e3a8a, 0 4px 5px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.45);}
@@ -3299,7 +3300,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0211MO145</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0211MO146</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3518,7 +3519,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0211MO145</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0211MO146</span>
     </div>
   </div>
 
@@ -3959,6 +3960,40 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeCartItemEdit()">Cancel</button>
           <button class="saveBtn" onclick="saveCartItemEdit()">✅ Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⚖️ پرچیز آرڈر / شپمنٹ کا وزن والا آئٹم (ہیلپ ڈیسک #10): کلو + گرام، رقم سے وزن -->
+    <div class="modalOverlay" id="supplyWeighModal" style="z-index:900" onclick="if(event.target===this) closeSupplyWeigh()">
+      <div class="modalBox">
+        <h3>⚖️ Weight / Measure</h3>
+        <div class="ciEditName" id="swName"></div>
+        <div class="ciEditField" id="swKgRow" style="display:none">
+          <label id="swKgLabel">Weight</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="number" id="swKg" min="0" step="any" inputmode="decimal" onfocus="this.select()" oninput="supplyWeighChanged('kg')" style="flex:1"><b id="swKgU">kg</b>
+            <input type="number" id="swG" min="0" step="any" inputmode="decimal" onfocus="this.select()" oninput="supplyWeighChanged('kg')" style="flex:1"><b id="swGU">g</b>
+          </div>
+        </div>
+        <div class="ciEditField">
+          <label id="swQtyLabel">Quantity</label>
+          <input type="number" id="swQty" min="0" step="any" inputmode="decimal" onfocus="this.select()" oninput="supplyWeighChanged('qty')">
+          <small id="swQtyHint"></small>
+        </div>
+        <div class="ciQuick" id="swQuick"></div>
+        <div class="ciEditField">
+          <label id="swRateLabel">Purchase rate (Rs.)</label>
+          <input type="number" id="swRate" min="0" step="any" inputmode="decimal" onfocus="this.select()" oninput="supplyWeighChanged('rate')">
+        </div>
+        <div class="ciEditField">
+          <label>Total Amount (Rs.)</label>
+          <input type="number" id="swTotal" min="0" step="any" inputmode="decimal" onfocus="this.select()" oninput="supplyWeighChanged('total')">
+          <small>Change amount → weight / quantity is recalculated</small>
+        </div>
+        <div class="modalBtns">
+          <button class="cancelBtn" onclick="closeSupplyWeigh()">Cancel</button>
+          <button class="saveBtn" onclick="saveSupplyWeigh()">✅ Save</button>
         </div>
       </div>
     </div>
@@ -5264,7 +5299,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
     <!-- BILL HISTORY (دونوں roles کو نظر آتی ہے، لیکن salesman کو edit/delete پر approval درکار ہوگی) -->
     <div class="screen" id="screen-billhistory">
-      <div class="pageTitle">🧾 Bill History</div>
+      <div class="pageTitle" id="billHistoryTitle">🧾 Bill History</div>
       <!-- ---------- سب سے پہلے Status چنیں: All / Pending / Clear / Voided ---------- -->
       <div class="billStatusTabs">
         <button class="billTabBtn active" id="billTab-all" onclick="setBillStatusFilter('all')">📋 All</button>
@@ -21421,12 +21456,12 @@ function renderPoBrowseList(){
         : isLow ? `<div class="pgStockBadge lowBadge${stackedCls}">Low: ${v.stock}</div>`
         : `<div class="pgStockBadge normalBadge${stackedCls}">Qty: ${v.stock}</div>`;
       priceLabel = `Rs. ${v.purchase}`;
-      qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${qtyInCart}</div>` : '';
+      qtyBadgeHtml = qtyInCart > 0 ? `<div class="pgQtyBadge">${Math.round(qtyInCart * 1000) / 1000}</div>` : '';
       actionAreaHtml = `
         <button class="pgMinusBtn" onclick="event.stopPropagation(); changePoCartQty(${v.variant_id}, -1)">−</button>
         <button class="pgPlusBtn" onclick="event.stopPropagation(); addToPoCartGrid(${v.variant_id})">+</button>
       `;
-      cardOnClick = `onclick="addToPoCartGrid(${v.variant_id})"`;
+      cardOnClick = `onclick="poCardTap(${v.variant_id})"`;
     } else {
       const totalQtyInCart = p.variants.reduce((sum, v) => {
         const ci = poCart.find(c => c.variant_id === v.variant_id);
@@ -21478,15 +21513,24 @@ function addToPoCartGrid(variantId){
   if(!v) return;
   const existing = poCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
+  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', unit: v.unit, qty: 1, cost: v.purchase});
   renderPoBrowseList();
   renderPoCart();
+}
+
+// AIO0211MO146: کلو/لیٹر/میٹر والی چیز کا کارڈ دبائیں تو ترازو (⚖️) کھلے — سیل جیسا؛ باقی چیزیں پہلے کی طرح +1
+function poCardTap(variantId){
+  const v = getFlatVariants().find(f => f.variant_id === variantId);
+  if(!v) return;
+  if(!UNIT_TO_BASE[unitKey(v.unit)]){ addToPoCartGrid(variantId); return; }
+  if(!poCart.find(i => i.variant_id === variantId)) addToPoCartGrid(variantId);
+  openSupplyWeigh('po', variantId);
 }
 
 function changePoCartQty(variantId, delta){
   const item = poCart.find(i => i.variant_id === variantId);
   if(!item) return;
-  item.qty += delta;
+  item.qty = Math.round((item.qty + delta) * 1000) / 1000;
   if(item.qty <= 0) poCart = poCart.filter(i => i.variant_id !== variantId);
   renderPoBrowseList();
   renderPoCart();
@@ -21638,7 +21682,7 @@ function addToPoCart(variantId){
 
   const existing = poCart.find(i => i.variant_id === variantId);
   if(existing) existing.qty += 1;
-  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty: 1, cost: v.purchase});
+  else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', unit: v.unit, qty: 1, cost: v.purchase});
 
   document.getElementById('poSearchInput').value = '';
   activePoSearch = '';
@@ -21686,7 +21730,7 @@ function addSelectedLowStockToPo(){
     if(!v) return;
     const existing = poCart.find(i => i.variant_id === variantId);
     if(existing) existing.qty += qty;
-    else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', qty, cost: v.purchase});
+    else poCart.push({variant_id: variantId, name: v.name, label: v.label || '', unit: v.unit, qty, cost: v.purchase});
     addedCount++;
   });
   if(addedCount === 0){
@@ -21700,7 +21744,7 @@ function addSelectedLowStockToPo(){
 function updatePoQty(variantId, qty){
   const item = poCart.find(i => i.variant_id === variantId);
   if(!item) return;
-  item.qty = Math.max(1, qty);
+  item.qty = supplyIsMeasured(item) ? Math.max(0.001, Math.round((Number(qty) || 0) * 1000) / 1000) : Math.max(1, qty);
   renderPoCart();
 }
 function updatePoCost(variantId, cost){
@@ -21745,6 +21789,28 @@ function supplyCapsuleRow(item, idx, kind){
   if(item.label && baseName.endsWith(item.label)) baseName = baseName.slice(0, baseName.length - item.label.length).trim();
   const lineTotal = moneyRound(item.qty * item.cost);
   const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // AIO0211MO146 (ہیلپ ڈیسک #10): کلو/لیٹر/میٹر/گز والی چیز — اعشاریہ مقدار، ⚖️ بٹن، رقم لکھیں تو وزن نکلے (سیل جیسا)
+  const meas = supplyIsMeasured(item);
+  if(meas){
+    const uk = supplyUnitKey(item), ul = unitLabel(uk), mq = Math.round(item.qty * 1000) / 1000;
+    const totFn = kind === 'po' ? 'updatePoLineTotalMeasured' : 'updateReceiveLineTotalMeasured';
+    return `
+    <div class="bcRow ${idx % 2 ? 'alt' : ''}">
+      <div class="pcMain">
+        <span class="bcSerial">${idx+1}</span>
+        <div class="pcName">${esc(baseName)}${item.label && item.label !== 'Default' ? `<span class="pcVar">${esc(item.label)}</span>` : ''}
+          <button type="button" class="pcWeigh" onclick="openSupplyWeigh('${kind}', ${key})" title="Weight / scale">⚖️ ${esc(supplyQtyText(item))}</button>
+          <button type="button" class="pcDel" onclick="${fn.del}('${kind}', ${key})" title="Remove" aria-label="Remove">✖</button></div>
+        <div class="pcQty">
+          <button type="button" class="bcMinus" onclick="${fn.qty}(${key}, Math.max(0.001, ${mq} - 1))">−</button>
+          <input type="number" min="0" step="any" inputmode="decimal" value="${mq}" title="${esc(ul)} — fractions OK (10.7)" onfocus="this.select()" onchange="${fn.qty}(${key}, parseFloat(this.value)||${kind === 'po' ? 1 : 0})">
+          <button type="button" onclick="${fn.qty}(${key}, ${mq} + 1)">+</button>
+        </div>
+        <input type="number" class="pcPrice ${Number(item.cost) ? '' : 'bcZero'}" min="0" value="${fmtCost(item.cost)}" title="Price per ${esc(ul)}" onfocus="this.select()" onchange="${fn.cost}(${key}, parseFloat(this.value)||0)">
+        <input type="number" class="pcTotal" min="0" value="${lineTotal}" title="Type the amount — ${esc(ul)} is calculated from the rate" onfocus="this.select()" onchange="${totFn}(${key}, parseFloat(this.value)||0)">
+      </div>
+    </div>`;
+  }
   return `
     <div class="bcRow ${idx % 2 ? 'alt' : ''}">
       <div class="pcMain">
@@ -21761,6 +21827,129 @@ function supplyCapsuleRow(item, idx, kind){
       </div>
     </div>`;
 }
+// ===================== AIO0211MO146 (ہیلپ ڈیسک #10): ⚖️ پرچیز آرڈر / شپمنٹ میں ترازو — سیل والا وزن کا نظام =====================
+function supplyUnitKey(item){
+  if(!item) return '';
+  let u = item.unit;
+  if(!u){ const v = findVariantById(item.variant_id); u = v && v.unit; }
+  return unitKey(u || 'pcs');
+}
+function supplyIsMeasured(item){ return !!UNIT_TO_BASE[supplyUnitKey(item)]; }
+// 10.7 kg → "10 kg 700 g"؛ 2.5 L → "2 L 500 ml"؛ 3.25 m → "3.25 m"
+function supplyQtyText(item, q){
+  q = q == null ? (Number(item.qty) || 0) : q;
+  const uk = supplyUnitKey(item), ui = UNIT_TO_BASE[uk];
+  if(!ui) return String(q);
+  const base = q * ui.q;
+  if(ui.b === 'g' || ui.b === 'ml'){
+    const big = Math.floor(base / 1000 + 1e-9), small = Math.round(base - big * 1000);
+    const B = ui.b === 'g' ? 'kg' : 'L', S = ui.b;
+    if(small >= 1000) return `${big + 1} ${B}`;
+    return big ? `${big} ${B}${small ? ' ' + small + ' ' + S : ''}` : `${small} ${S}`;
+  }
+  return `${Math.round(q * 1000) / 1000} ${unitLabel(uk)}`;
+}
+function supplyItemRef(kind, key){ return kind === 'po' ? poCart.find(i => i.variant_id === key) : receiveShipmentCart[key]; }
+function supplyRerender(kind){ if(kind === 'po') renderPoCart(); else renderReceiveShipmentCart(); }
+function supplyQtyFromAmount(item, total){
+  const r = Number(item.cost) || 0;
+  return r > 0 ? Math.round((Math.max(0, total) / r) * 1000) / 1000 : null;
+}
+function updatePoLineTotalMeasured(variantId, total){
+  const item = poCart.find(i => i.variant_id === variantId);
+  if(!item) return;
+  const q = supplyQtyFromAmount(item, total);
+  if(q === null) item.cost = costFromTotal(Math.max(0, total), item.qty); // ریٹ نہ ہو تو پہلے جیسا: رقم سے ریٹ
+  else item.qty = Math.max(0.001, q);
+  renderPoCart();
+}
+function updateReceiveLineTotalMeasured(idx, total){
+  const item = receiveShipmentCart[idx];
+  if(!item) return;
+  const q = supplyQtyFromAmount(item, total);
+  if(q === null) item.cost = costFromTotal(Math.max(0, total), item.qty);
+  else if(q <= 0){ receiveShipmentCart.splice(idx, 1); }
+  else item.qty = q;
+  renderReceiveShipmentCart();
+}
+let swRef = null; // {kind, key}
+function openSupplyWeigh(kind, key){
+  const item = supplyItemRef(kind, key);
+  if(!item) return;
+  swRef = {kind, key};
+  const uk = supplyUnitKey(item), ui = UNIT_TO_BASE[uk], ul = unitLabel(uk);
+  const wb = ui && (ui.b === 'g' || ui.b === 'ml');
+  document.getElementById('swName').textContent = item.name;
+  document.getElementById('swKgRow').style.display = wb ? '' : 'none';
+  if(wb){
+    document.getElementById('swKgLabel').textContent = ui.b === 'g' ? 'Weight (kg + grams)' : 'Volume (litre + ml)';
+    document.getElementById('swKgU').textContent = ui.b === 'g' ? 'kg' : 'L';
+    document.getElementById('swGU').textContent = ui.b;
+  }
+  document.getElementById('swQtyLabel').textContent = `Quantity (${ul}) — fractions OK`;
+  document.getElementById('swRateLabel').textContent = `Purchase rate (Rs. per ${ul})`;
+  document.getElementById('swQty').value = Math.round(item.qty * 1000) / 1000;
+  document.getElementById('swRate').value = fmtCost(item.cost);
+  document.getElementById('swTotal').value = moneyRound(item.qty * item.cost);
+  const qk = wb ? [[250, '250' + ui.b], [500, '500' + ui.b], [1000, ui.b === 'g' ? '1 kg' : '1 L'], [5000, ui.b === 'g' ? '5 kg' : '5 L'], [10000, ui.b === 'g' ? '10 kg' : '10 L'], [40000, ui.b === 'g' ? '40 kg' : '40 L']].map(([b, l]) => [Math.round(b / ui.q * 1000) / 1000, l])
+    : [[0.25, '¼'], [0.5, '½'], [1, '1'], [2, '2'], [5, '5'], [10, '10']].map(([n, t]) => [n, `${t} ${ul}`]);
+  document.getElementById('swQuick').innerHTML = qk.map(([v, l]) => `<button type="button" onclick="document.getElementById('swQty').value=${v}; supplyWeighChanged('qty')">${l}</button>`).join('');
+  swSyncKg();
+  swHint();
+  document.getElementById('supplyWeighModal').classList.add('show');
+  setTimeout(() => { const el = document.getElementById(wb ? 'swKg' : 'swQty'); el.focus(); el.select(); }, 150);
+}
+function closeSupplyWeigh(){ document.getElementById('supplyWeighModal').classList.remove('show'); swRef = null; }
+function swItem(){ return swRef ? supplyItemRef(swRef.kind, swRef.key) : null; }
+function swSyncKg(){
+  const item = swItem(); if(!item) return;
+  const ui = UNIT_TO_BASE[supplyUnitKey(item)];
+  if(!ui || (ui.b !== 'g' && ui.b !== 'ml')) return;
+  const base = Math.round((parseFloat(document.getElementById('swQty').value) || 0) * ui.q * 1000) / 1000;
+  let big = Math.floor(base / 1000 + 1e-9), small = Math.round((base - big * 1000) * 100) / 100;
+  if(small >= 1000){ big += 1; small = 0; }
+  document.getElementById('swKg').value = big || '';
+  document.getElementById('swG').value = small || '';
+}
+function swHint(){
+  const item = swItem(); if(!item) return;
+  const q = parseFloat(document.getElementById('swQty').value) || 0;
+  document.getElementById('swQtyHint').textContent = q > 0 ? '= ' + supplyQtyText(item, q) : '';
+}
+function supplyWeighChanged(src){
+  const item = swItem(); if(!item) return;
+  const ui = UNIT_TO_BASE[supplyUnitKey(item)];
+  const qEl = document.getElementById('swQty'), rEl = document.getElementById('swRate'), tEl = document.getElementById('swTotal');
+  if(src === 'kg' && ui){
+    const base = (parseFloat(document.getElementById('swKg').value) || 0) * 1000 + (parseFloat(document.getElementById('swG').value) || 0);
+    qEl.value = Math.round(base / ui.q * 1000) / 1000;
+  }
+  const q = parseFloat(qEl.value) || 0, r = parseFloat(rEl.value) || 0, t = parseFloat(tEl.value) || 0;
+  if(src === 'total'){
+    if(r > 0) qEl.value = Math.round(t / r * 1000) / 1000;   // رقم سے وزن (سیل جیسا)
+    else if(q > 0) rEl.value = Math.round(t / q * 100) / 100;
+    swSyncKg();
+  } else {
+    tEl.value = moneyRound(q * r);
+    if(src === 'qty') swSyncKg();
+  }
+  swHint();
+}
+function saveSupplyWeigh(){
+  const item = swItem();
+  if(!item){ closeSupplyWeigh(); return; }
+  const q = Math.round((parseFloat(document.getElementById('swQty').value) || 0) * 1000) / 1000;
+  const r = parseFloat(document.getElementById('swRate').value) || 0;
+  if(q <= 0){ alert('Please enter a valid weight / quantity.'); return; }
+  if(r < 0){ alert('Please enter a valid rate.'); return; }
+  item.qty = q;
+  item.cost = Math.round(r * 10000) / 10000;
+  const kind = swRef.kind;
+  closeSupplyWeigh();
+  supplyRerender(kind);
+  if(kind === 'po') renderPoBrowseList();
+}
+
 function confirmRemoveSupplyItem(kind, key){
   const item = kind === 'po' ? poCart.find(i => i.variant_id === key) : receiveShipmentCart[key];
   if(!item) return;
@@ -23590,7 +23779,7 @@ function renderReceiveShipmentCart(){
 function updateReceiveQty(idx, qty){
   // ---------- مقدار 0 کر دیں تو مطلب یہ آئٹم شپمنٹ میں آیا ہی نہیں — خودکار ہٹا دیں ----------
   if(qty <= 0){ receiveShipmentCart.splice(idx, 1); }
-  else { receiveShipmentCart[idx].qty = qty; }
+  else { receiveShipmentCart[idx].qty = supplyIsMeasured(receiveShipmentCart[idx]) ? Math.round(qty * 1000) / 1000 : qty; }
   renderReceiveShipmentCart();
 }
 function updateReceiveCost(idx, cost){
@@ -25845,6 +26034,7 @@ function setBillStatusFilter(status){
   billStatusFilter = status;
   document.querySelectorAll('.billTabBtn').forEach(b => b.classList.remove('active'));
   document.getElementById(`billTab-${status}`)?.classList.add('active');
+  { const t = document.getElementById('billHistoryTitle'); if(t) t.textContent = status === 'voided' ? '🗑️ Voided Bills History' : '🧾 Bill History'; } // AIO0211MO146 (#9)
   if(bulkDeleteMode) toggleBulkDeleteMode(); // فلٹر بدلنے پر بلک موڈ بند کر دیں تاکہ سلیکشن الجھے نہیں
   renderBillHistory();
 }
@@ -25979,6 +26169,9 @@ async function generateBillHistoryReport(){
     return;
   }
   const bills = lastFilteredBills;
+  // AIO0211MO146 (ہیلپ ڈیسک #9): صرف مٹائے ہوئے (voided) بل ہوں تو عنوان «Voided Bills History»، حالت «Voided»
+  const allVoided = bills.every(inv => inv.status === 'voided');
+  const reportTitle = allVoided ? 'Voided Bills History' : 'Bill History Report';
   const totalAmount = bills.reduce((s, inv) => s + inv.grand_total, 0);
   const totalSettled = bills.reduce((s, inv) => s + (inv.grand_total - getInvoiceAmountDue(inv)), 0);
   const totalPending = bills.reduce((s, inv) => s + getInvoiceAmountDue(inv), 0);
@@ -25997,7 +26190,9 @@ async function generateBillHistoryReport(){
   ctx.fillText(AppState.settings.businessName || 'AIO POS', W/2, 40);
   ctx.font = `600 14px Poppins, sans-serif`;
   ctx.fillStyle = '#475569';
-  ctx.fillText('Bill History Report', W/2, 64);
+  if(allVoided){ ctx.font = `800 18px Poppins, sans-serif`; ctx.fillStyle = '#b91c1c'; }
+  ctx.fillText(reportTitle, W/2, 64);
+  ctx.font = `600 14px Poppins, sans-serif`; ctx.fillStyle = '#475569';
   ctx.font = `12px Poppins, sans-serif`;
   ctx.fillText(`Generated: ${new Date().toLocaleString('en-GB')}  •  ${bills.length} bill(s)`, W/2, 84);
 
@@ -26021,8 +26216,11 @@ async function generateBillHistoryReport(){
     let name = inv.customer_name || 'Walk-in';
     if(name.length > 28) name = name.slice(0,27) + '…';
     ctx.fillText(name, cols[2].x, y+13);
+    if(inv.status === 'voided'){ ctx.fillStyle = '#b91c1c'; ctx.fillText('Voided', cols[3].x, y+13); }
+    else {
     ctx.fillStyle = getInvoiceAmountDue(inv) > 0 ? '#c2410c' : '#15803d';
     ctx.fillText(getInvoiceAmountDue(inv) > 0 ? `Pending Rs.${getInvoiceAmountDue(inv)}` : 'Clear', cols[3].x, y+13);
+    }
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'right';
     ctx.fillText('Rs. ' + inv.grand_total.toLocaleString(), cols[4].x + cols[4].w, y+13);
@@ -26034,11 +26232,16 @@ async function generateBillHistoryReport(){
   y += 14;
   ctx.strokeStyle = '#dbe1ea'; ctx.beginPath(); ctx.moveTo(16, y-10); ctx.lineTo(W-16, y-10); ctx.stroke();
   ctx.font = `700 14px Poppins, sans-serif`;
+  if(allVoided){
+    ctx.fillStyle = '#b91c1c'; ctx.fillText(`Total Voided: Rs. ${totalAmount.toLocaleString()}`, 16, y+10);
+    ctx.font = `12px Poppins, sans-serif`; ctx.fillStyle = '#64748b'; ctx.fillText('These bills were cancelled — not counted in sales, stock or cash.', 16, y+34);
+  } else {
   ctx.fillStyle = '#1e293b'; ctx.fillText(`Total Billed: Rs. ${totalAmount.toLocaleString()}`, 16, y+10);
   ctx.fillStyle = '#15803d'; ctx.fillText(`Total Settled: Rs. ${totalSettled.toLocaleString()}`, 16, y+34);
   ctx.fillStyle = '#c2410c'; ctx.fillText(`Total Pending: Rs. ${totalPending.toLocaleString()}`, 16, y+58);
+  }
 
-  showImageSharePreview(canvas, 'Bill_History_Report.png', 'Bill History Report', `${bills.length} bill(s) — Rs. ${totalAmount.toLocaleString()}`);
+  showImageSharePreview(canvas, allVoided ? 'Voided_Bills_History.png' : 'Bill_History_Report.png', reportTitle, `${bills.length} bill(s) — Rs. ${totalAmount.toLocaleString()}`);
 }
 
 let lastFilteredBills = []; // ---------- Bill History کی سب سے تازہ فلٹر شدہ فہرست — Report Generator اسی کو استعمال کرتا ہے ----------
@@ -34116,9 +34319,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0211MO145';
+  const APP_VERSION = 'AIO0211MO146';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Multi-device: supplier shipments received by order ID (never the wrong order or twice); a staff bill cannot be approved twice; expenses tested on 3 phones';
+  const UPDATE_NOTE = 'Purchase order & shipment: ⚖️ weight items (kg/L/m/yard) — type 10 kg 700 g or the amount, weight is calculated; Voided Bills History title';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
