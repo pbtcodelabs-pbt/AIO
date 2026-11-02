@@ -3300,7 +3300,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0211MO146</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0211MO147</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3519,7 +3519,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0211MO146</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0211MO147</span>
     </div>
   </div>
 
@@ -12220,7 +12220,9 @@ function saveBillingCartDraft(){
   saveToStorage('billingPaymentMethodDraft', Billing.paymentMethod);
   saveToStorage('billingCounterSaleDraft', Billing.counterSale);
   const custSel = document.getElementById('customerSelect');
-  saveToStorage('billingCustomerDraft', custSel ? custSel.value : '');
+  // AIO0211MO147 (ہیلپ ڈیسک #13): خالی کارٹ کا گاہک کبھی محفوظ نہیں — بل مکمل ہوتے وقت پرانا گاہک یہاں لکھا رہ جاتا تھا
+  // اور ایپ دوبارہ کھلنے پر نئے بل کی پہلی چیز کے ساتھ وہی پرانا گاہک لوٹ آتا تھا (Walk-in کی جگہ)
+  saveToStorage('billingCustomerDraft', custSel && Billing.cart.length ? custSel.value : '');
   if(billingDraftCustomerRestored || !Billing.cart.length) saveToStorage('billingPayDraft', {
     received: document.getElementById('amountReceivedInput')?.value || '',
     discount: document.getElementById('discountInput')?.value || '',
@@ -14019,7 +14021,8 @@ function endCustomerSelection(){
 }
 
 // ---------- Render Cart Table + Totals ----------
-let billingDraftCustomerRestored = false;
+let billingDraftCustomerRestored = !Billing.cart.length; // AIO0211MO147: ایپ کھلتے وقت کارٹ خالی ہو تو پرانا گاہک واپس نہیں لانا
+if(!Billing.cart.length){ try{ saveToStorage('billingCustomerDraft', ''); }catch(e){} }
 // ===================== ✏️ AIO2710TU111: بنے/پرنٹ شدہ بل میں ترمیم =====================
 // بل بلنگ میں کھلتا ہے — آئٹم، ریٹ، مقدار، گاہک، ڈسکاؤنٹ ٹھیک کریں، پھر Complete۔ وہی بل نمبر رہتا ہے؛
 // پرانے بل کا اسٹاک/نقد/بقایہ/والٹ اثر واپس ہو کر نیا اثر لگتا ہے۔ Complete سے پہلے پرانا بل جوں کا توں رہتا ہے۔
@@ -34319,9 +34322,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0211MO146';
+  const APP_VERSION = 'AIO0211MO147';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Purchase order & shipment: ⚖️ weight items (kg/L/m/yard) — type 10 kg 700 g or the amount, weight is calculated; Voided Bills History title';
+  const UPDATE_NOTE = 'Billing: a new bill always starts as Walk-in — the previous customer no longer comes back after reopening the app';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
