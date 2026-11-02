@@ -3299,7 +3299,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0111SU142</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0211MO143</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3518,7 +3518,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0111SU142</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0211MO143</span>
     </div>
   </div>
 
@@ -7241,10 +7241,12 @@ function syncMergeArray(b, l, r){
     return out;
   }
   // ---------- بغیر شناخت والی فہرست (والٹ ہسٹری وغیرہ) — دوسرے کی + اس فون کی نئی اندراجات ----------
-  const bs = new Set(b.map(x => JSON.stringify(x))), rs = new Set(r.map(x => JSON.stringify(x)));
-  const removedHere = new Set(b.map(x => JSON.stringify(x)).filter(s => !l.some(x => JSON.stringify(x) === s)));
-  const fromLocal = l.filter(x => { const s = JSON.stringify(x); return !bs.has(s) && !rs.has(s); });
-  const remoteKept = r.filter(x => !removedHere.has(JSON.stringify(x)));
+  // AIO0211MO143: گنتی والا ملاپ — دو فونوں نے ایک ہی دن ایک جیسی رقم وصول کی تو دونوں لائنیں رہیں (پہلے ایک مٹ جاتی تھی)
+  const J = x => JSON.stringify(x), cnt = a => { const m = new Map(); a.forEach(x => { const k = J(x); m.set(k, (m.get(k) || 0) + 1); }); return m; };
+  const cB = cnt(b), cL = cnt(l), cR = cnt(r), want = k => Math.max(0, (cR.get(k) || 0) + (cL.get(k) || 0) - (cB.get(k) || 0));
+  const bs = new Set(cB.keys()), used = new Map(), take = k => { const u = used.get(k) || 0; if(u >= want(k)) return false; used.set(k, u + 1); return true; };
+  const remoteKept = r.filter(x => take(J(x)));
+  const fromLocal = l.filter(x => take(J(x)));
   // نئی اندراجات اوپر (unshift والا انداز) — مقامی ترتیب جیسی
   const localFirstIdx = l.findIndex(x => !bs.has(JSON.stringify(x)));
   return localFirstIdx === 0 ? [...fromLocal, ...remoteKept] : [...remoteKept, ...fromLocal];
@@ -7449,18 +7451,25 @@ async function loadArchivedRecords(){
   alert(failed ? `Loaded ${added} old entries. Some parts could not be loaded (internet) — please try again.` : `✅ Loaded ${added} old entries from the archive.`);
 }
 const SYNC_NEWEST_FIRST = ['invoices','pendingbills','approvalrequests','payments','advanceorders'];
-function syncApplyChunk(docType, chunk, merged){
+// AIO0211MO143: snap = ملاپ شروع ہوتے وقت کی مقامی کاپی۔ کلاؤڈ کے انتظار میں اس فون پر نیا بل بنا، سٹاک کٹا یا وصولی ہوئی
+// تو وہ «merged» میں نہیں — پہلے یہ مٹ جاتی تھی (تین فون ٹیسٹ: 48 میں سے 4 بل غائب، 17 کی کٹوتی ضائع)۔
+// اب: جو ریکارڈ بیچ میں بدلا/بنا اسے snap کو بنیاد مان کر merged سے دوبارہ ملاتے ہیں
+function syncApplyChunk(docType, chunk, merged, snap){
   const meta = aioGetDocTypeMeta(docType); const key = meta.matchKey;
   const old = meta.data.slice();
   const mById = new Map(merged.map(m => [String(m[key]), m]));
+  const sById = new Map((snap || []).map(x => [String(x[key]), x]));
   const oldIds = new Set(old.map(r => String(r[key])));
   const result = [];
   old.forEach(r => {
     if(syncChunkOf(docType, r) !== chunk){ result.push(r); return; }
-    const m = mById.get(String(r[key]));
-    if(m) result.push(syncRestoreArch(docType, syncRestoreLocalOnly(JSON.parse(JSON.stringify(m)), r), r));
+    const id = String(r[key]), m = mById.get(id), sv = sById.get(id);
+    let v = m;
+    if(snap){ const cur = syncStripArch(docType, syncStrip(r)); if(!sv || !syncEq(cur, sv)) v = syncMergeOne(sv, cur, m); }
+    if(v) result.push(syncRestoreArch(docType, syncRestoreLocalOnly(JSON.parse(JSON.stringify(v)), r), r));
   });
-  const added = merged.filter(m => !oldIds.has(String(m[key]))).map(m => JSON.parse(JSON.stringify(m)));
+  const added = merged.filter(m => !oldIds.has(String(m[key])) && !(snap && sById.has(String(m[key])) && syncEq(m, sById.get(String(m[key])))))
+    .map(m => JSON.parse(JSON.stringify(m)));
   if(SYNC_NEWEST_FIRST.includes(docType)){
     added.sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0));
     meta.data = [...added, ...result];
@@ -7481,7 +7490,7 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
   const merged = remoteItems === null ? localItems : syncMerge3(docType, base, localItems, remoteItems);
   const mergedStr = JSON.stringify(merged);
   const remoteStr = remoteItems === null ? baseStr : JSON.stringify(remoteItems);
-  if(mergedStr !== JSON.stringify(localItems)) syncApplyChunk(docType, chunk, merged);
+  if(mergedStr !== JSON.stringify(localItems)) syncApplyChunk(docType, chunk, merged, localItems);
   if(mergedStr === remoteStr){
     await syncBaseSet(chunk, mergedStr);
     known[chunk] = {ms: Math.max(idxMs || 0, k.ms || 0), ut};
@@ -7564,7 +7573,20 @@ function syncAfterApply(touched){
   try{ persistAllData(); }catch(e){}
   touched.forEach(t => { try{ applyCloudDocTypeUI(t); }catch(e){} });
   if(touched.has('devices')) syncCheckStillMember();
+  if(touched.has('products')){ try{ syncRepriceCart(); }catch(e){} }
   if(touched.has('products') || touched.has('invoices')){ try{ renderCart(); }catch(e){} }
+}
+// ---------- AIO0211MO143: مالک نے ریٹ بدلا اور سنک ہو کر آیا — کھلے کارٹ کی چیزیں نئے ریٹ پر (جن کا ریٹ کیشیئر نے خود نہیں بدلا) ----------
+// فروٹ منڈی میں «ریٹ بدلنے پر بل میں پرانا ریٹ» والی خرابی تھی؛ ترمیم والے پرانے بل کی چیزیں (listPrice نہیں) نہیں بدلتیں
+function syncRepriceCart(){
+  let n = 0;
+  for(const it of (Billing.cart || [])){
+    if(it.listPrice == null || it.unitPrice !== it.listPrice || it.loose_product_id) continue;
+    const p = getFlatVariants().find(x => x.variant_id === it.variant_id); if(!p) continue;
+    const np = getModePrice(p);
+    if(typeof np === 'number' && np !== it.unitPrice){ it.unitPrice = np; it.listPrice = np; n++; }
+  }
+  if(n){ try{ showNavToast(`💲 ${n} item rate${n > 1 ? 's' : ''} in the cart updated by the owner`); }catch(e){} }
 }
 function scheduleSync(delay){
   if(!aioMultiOn()) return;
@@ -13425,7 +13447,7 @@ function addToCart(variantId){
   if(existing){
     existing.qty += 1;
   } else {
-    Billing.cart.push({variant_id: variantId, name: product.name, label: product.label || '', qty: 1, unitPrice: price, unit: product.unit || 'pcs'});
+    Billing.cart.push({variant_id: variantId, name: product.name, label: product.label || '', qty: 1, unitPrice: price, listPrice: price, unit: product.unit || 'pcs'}); // AIO0211MO143: listPrice — ریٹ ہاتھ سے نہ بدلا ہو تو پہچان
     // ---------- پہلے یہاں خودکار پاپ اپ آتا تھا — اب یہ بل بنانے میں رکاوٹ نہیں بنے گا؛ کسٹمر کا پرانا ریکارڈ دیکھنا ہو تو کارٹ میں ہر آئٹم کے ساتھ 🔁 Sale Record بٹن سے مانگے پر دیکھا جا سکتا ہے ----------
   }
 
@@ -13869,7 +13891,7 @@ function setSaleMode(mode){
   // موجودہ cart میں موجود Itemز کی Priceیں بھی نئے mode کے مطابق اپڈیٹ کریں
   Billing.cart.forEach(item => {
     const product = getFlatVariants().find(p => p.variant_id === item.variant_id);
-    if(product) item.unitPrice = getModePrice(product, mode);
+    if(product){ item.unitPrice = getModePrice(product, mode); item.listPrice = item.unitPrice; }
   });
 
   renderCart();
@@ -14559,6 +14581,17 @@ function repairPriceFloats(){
   for(const it of (Billing && Billing.cart) || []){ const c = cleanMoney(it.unitPrice); if(c !== it.unitPrice){ it.unitPrice = c; ch++; } }
   if(ch){ persistAllData(); try{ renderBillingProductGrid(); renderCart(); }catch(e){} }
 }
+// ---------- AIO0211MO143: بل کی آئی ڈی ہر فون پر منفرد — پہلے Date.now() تھی؛ دو فون ایک ہی ملی سیکنڈ میں بل بنائیں تو ایک بل
+// دوسرے پر چڑھ کر غائب ہو جاتا تھا (تین فون ٹیسٹ: 103 میں سے 2)۔ اب آخری ہندسہ = فون کی سلاٹ، اور ہر فون پر ہمیشہ آگے ----------
+let _lastInvoiceId = 0;
+function newInvoiceId(){
+  const slot = (typeof syncSlot === 'function' ? syncSlot() : 0) % 10;
+  let id = Math.floor(Date.now() / 10) * 10 + slot;
+  let top = _lastInvoiceId; for(const i of invoicesData){ const x = Number(i.invoice_id) || 0; if(x > top && x % 10 === slot) top = x; }
+  if(id <= top) id = top - (top % 10) + 10 + slot;
+  _lastInvoiceId = id;
+  return id;
+}
 function nextBillSerial(){
   let mx = parseInt(loadFromStorage('lastBillSerial', 0)) || 0;
   for(const inv of invoicesData){ const n = parseInt(inv.bill_serial) || 0; if(n > mx) mx = n; }
@@ -14723,7 +14756,7 @@ function finalizeInvoice(){
 
   // ---------- Invoice بنائیں (صرف Admin یہاں تک پہنچتا ہے) ----------
   const invoice = {
-    invoice_id: Date.now(),
+    invoice_id: newInvoiceId(),
     ...generateBillNumbers(),
     customer_id: customer ? customer.customer_id : null,
     customer_name: customer ? customer.name : walkinName(),
@@ -15058,7 +15091,7 @@ function approvePendingBill(){
   const previousBalance = customer ? customer.total_receivable : 0;
 
   const invoice = {
-    invoice_id: Date.now(),
+    invoice_id: newInvoiceId(),
     ...generateBillNumbers(),
     customer_id: p.customer_id,
     customer_name: p.customer_name,
@@ -34055,9 +34088,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0111SU142';
+  const APP_VERSION = 'AIO0211MO143';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New 🆘 PBT Help Desk button: report a problem or suggestion with screenshot & voice, see our reply in the app';
+  const UPDATE_NOTE = 'Multi-device fixes: a bill, sale or payment made while syncing is never lost; unique bill IDs on every phone; same-amount ledger lines both kept; owner rate changes reach open carts';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
