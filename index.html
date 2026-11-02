@@ -2221,7 +2221,13 @@
   .noAlerts{text-align:center; color:var(--muted); padding:24px 10px; border:2px dashed #e2e8f0; border-radius:12px; font-size:13px;}
 
   /* ===================== Bills Awaiting Approval (بینر + لسٹ + ریویو) ===================== */
-  .pendingBillsBanner{display:none; align-items:center; gap:12px; background:linear-gradient(135deg,#fb923c,#ef4444); color:#fff; border-radius:12px; padding:12px 16px; margin-bottom:14px; cursor:pointer; box-shadow:0 4px 14px rgba(239,68,68,.3);}
+  .dashProfit{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 12px;}
+.dashProfit .dpBox{display:flex; flex-direction:column; align-items:center; gap:2px; padding:12px 8px; border-radius:14px; border:1.5px solid #bbf7d0; background:linear-gradient(180deg,#f0fdf4,#dcfce7); cursor:pointer; font:inherit; width:auto; margin:0; box-shadow:0 3px 10px rgba(21,128,61,.12);}
+.dashProfit .dpBox:active{transform:translateY(1px);}
+.dashProfit .dpL{font-size:12px; font-weight:800; color:#166534;}
+.dashProfit b{font-size:19px; font-weight:900; color:#15803d;}
+.dashProfit small{font-size:10.5px; color:#475569; font-weight:600; text-align:center;}
+.pendingBillsBanner{display:none; align-items:center; gap:12px; background:linear-gradient(135deg,#fb923c,#ef4444); color:#fff; border-radius:12px; padding:12px 16px; margin-bottom:14px; cursor:pointer; box-shadow:0 4px 14px rgba(239,68,68,.3);}
   .pendingBillsBanner.show{display:flex;}
   .pendingBillsBanner .pbIcon{font-size:22px;}
   .pendingBillsBanner .pbText{flex:1; font-weight:700; font-size:13px;}
@@ -3300,7 +3306,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU148</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU149</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3519,7 +3525,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU148</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU149</span>
     </div>
   </div>
 
@@ -4117,6 +4123,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <span class="pbText" id="pendingBillsBannerText">Bills Awaiting Approval</span>
         <span class="pbCount" id="pendingBillsBannerCount">0</span>
         <span class="pbArrow">›</span>
+      </div>
+
+      <!-- AIO0311TU149 (ہیلپ ڈیسک #14): 💹 آج اور اس مہینے کا منافع — ایک نظر میں؛ دبانے پر رپورٹ / Trend Profit -->
+      <div class="dashProfit" id="dashProfit">
+        <button type="button" class="dpBox" onclick="openStockSaleProfitReport()"><span class="dpL">💹 Today's Profit</span><b id="dpToday">—</b><small id="dpTodaySub">—</small></button>
+        <button type="button" class="dpBox" onclick="dashOpenMonthProfit()"><span class="dpL">📆 This Month's Profit</span><b id="dpMonth">—</b><small id="dpMonthSub">—</small></button>
       </div>
 
       <!-- ---------- بیک اپ اور تھیم اب صرف Settings میں ہیں — یہاں دہرائی ہٹا دی گئی تاکہ ڈیش بورڈ صاف/ہلکا رہے ---------- -->
@@ -18348,9 +18360,29 @@ function getAllExpiringItems(){
 }
 
 // ---------- Render Dashboard (ہر بار دیکھنے پر تازہ حساب) ----------
+// AIO0311TU149 (ہیلپ ڈیسک #14): وہی حساب جو Trend Analysis «💹 Profit» میں ہے (بکری − خرید، واپسی منہا) — ہمیشہ ایک جیسا نمبر
+function renderDashProfit(){
+  const box = document.getElementById('dashProfit'); if(!box) return;
+  const put = (key, vEl, sEl) => {
+    let d = null; try{ d = computeTrendData(getDateRangeForKey(key)); }catch(e){}
+    const v = document.getElementById(vEl), sub = document.getElementById(sEl);
+    if(!d){ v.textContent = '—'; sub.textContent = ''; return; }
+    const p = moneyRound((d.costedRevenue || 0) - (d.totalCost || 0));
+    v.textContent = 'Rs. ' + p.toLocaleString();
+    v.style.color = p < 0 ? '#b91c1c' : '#15803d';
+    sub.textContent = `${d.totalBills || 0} bill${d.totalBills === 1 ? '' : 's'} · Sale Rs. ${moneyRound(d.totalRevenue || 0).toLocaleString()}`;
+  };
+  put('today', 'dpToday', 'dpTodaySub');
+  put('month', 'dpMonth', 'dpMonthSub');
+}
+function dashOpenMonthProfit(){
+  goTo('trends');
+  try{ setTrendDateKey('month'); setTrendGroupBy('profit'); }catch(e){}
+}
 function renderDashboard(){
   renderDashDate();
   renderPendingBillsBanner();
+  try{ renderDashProfit(); }catch(e){}
   renderKpiCards();
   renderHealthBand();
   renderLowStockAlerts();
@@ -34339,9 +34371,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU148';
+  const APP_VERSION = 'AIO0311TU149';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Barcode scanner: 🔄 switch between front and back camera — your choice is remembered';
+  const UPDATE_NOTE = 'Dashboard: 💹 today\'s and this month\'s profit at a glance — tap to open the profit report';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
