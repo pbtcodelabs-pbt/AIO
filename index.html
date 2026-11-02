@@ -7566,7 +7566,19 @@ async function syncNow(){
     if(syncAgain){ syncAgain = false; setTimeout(syncNow, 600); }
   }
 }
+// ---------- AIO0211MO143: دو فونوں نے ایک ہی لمحے گاہک کا ایک ہی ایڈوانس (والٹ) بل میں لگا دیا تو ملاپ کے بعد والٹ منفی —
+// کل رقم درست رہتی ہے مگر منفی والٹ الجھن ہے؛ صرف مالک کا فون (ایک ہی ہاتھ، ورنہ کمی بیشی دوگنی) منفی والٹ بقایا میں ڈال دیتا ہے ----------
+function syncFixNegativeWallets(){
+  if(isLinkedDevice()) return false;
+  let n = 0;
+  for(const c of customersData){
+    const w = Number(c.wallet_balance) || 0;
+    if(w < -0.004){ c.total_receivable = moneyRound((Number(c.total_receivable) || 0) - w); c.wallet_balance = 0; n++; }
+  }
+  return n > 0;
+}
 function syncAfterApply(touched){
+  if(touched.has('customers') && syncFixNegativeWallets()) scheduleSync(800);
   syncFixCounters();
   saveToStorage('syncDevices', devicesData);
   saveToStorage('syncShopInfo', shopInfoData);
