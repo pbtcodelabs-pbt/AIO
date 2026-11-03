@@ -3306,7 +3306,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU151</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU152</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3525,7 +3525,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU151</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU152</span>
     </div>
   </div>
 
@@ -10016,7 +10016,7 @@ const APP_POSTER = {
   ],
   link: 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos',
   dev: 'عبدالحفیظ',
-  phone: '0320-6793793',
+  phone: '+92 320-6793793',
   email: 'pbtcodelabs@gmail.com',
   logo: 'icon-512.png',
   bg: ['#0b4f4a', '#0f766e', '#042f2e'],
@@ -31185,8 +31185,11 @@ let pendingShareCanvas = null, pendingShareFilename = '', pendingShareTitle = ''
 // ===================== 🏷️ PBT Code Labs برانڈنگ — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور واٹس ایپ پیغام کے نیچے (ہمیشہ) =====================
 const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & Android';
 function brandPhone(){
-  const d = String(AppState.settings.devSms || '03206793793').replace(/[^0-9]/g, '');
-  return d.length === 11 ? d.slice(0, 4) + '-' + d.slice(4) : (d || '0320-6793793');
+  // AIO0311TU152 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
+  let d = String(AppState.settings.devSms || '03206793793').replace(/[^0-9]/g, '');
+  if(d.length === 11 && d[0] === '0') d = '92' + d.slice(1);
+  if(d.length === 12 && d.startsWith('92')) return '+92 ' + d.slice(2, 5) + '-' + d.slice(5);
+  return d ? (d.startsWith('92') ? '+' + d : d) : '+92 320-6793793';
 }
 function brandLine2(){ return `All types of custom business software • PBT Code Labs • WhatsApp ${brandPhone()}`; }
 // ---------- کینوس کے نیچے برانڈنگ پٹی جوڑیں — ایک ہی کینوس پر دو بار نہیں (اونچائی/چوڑائی سے پہچان) ----------
@@ -32550,14 +32553,7 @@ async function renderEodReportToCanvas(){
     note(byQty.length + ' different item(s) sold this day.');
   } else note('No items sold this day.');
   gap();
-  // 9) بقایا جات
-  section('📒 BALANCES (now)');
-  // گاہکوں کی طرف گیا پیسہ (لینا ہے) = سرخ؛ سپلائر کا ہماری طرف آیا مال (دینا ہے) = سبز
-  kv('Customers — To be received', D.rec, {color: '#b91c1c', lcolor: '#b91c1c', bold: true});
-  if(D.custAdv) kv('Customer advances — To be paid', D.custAdv, {indent: true, color: '#15803d'});
-  kv('Suppliers — To be paid', D.pay, {color: '#15803d', lcolor: '#15803d', bold: true});
-  if(D.supAdv) kv('Supplier advances — To be received', D.supAdv, {indent: true, color: '#b91c1c'});
-  if(D.topDebtors.length) table([{t: 'Top customers — To be received', w: .66}, {t: 'Amount', w: .34, r: 1}], D.topDebtors.map(x => [x.name, money(x.amt)]));
+  // 9) AIO0311TU152 (ہیلپ ڈیسک #22، مالک کا حکم): «BALANCES (now)» ہٹایا — پرانی تاریخ کی رپورٹ میں آج کا بقایا الجھن بناتا تھا؛ بقایا صرف ڈیش بورڈ پر
   gap(10);
   add(fs(40), y => { ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([fs(4), fs(3)]); ctx.beginPath(); ctx.moveTo(M, y + fs(4)); ctx.lineTo(M + CW, y + fs(4)); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = '#334155'; ctx.textAlign = 'center'; ctx.font = font(700, 10); ctx.fillText('Counted cash: ____________     Signature: ____________', W / 2, y + fs(30)); });
@@ -34363,9 +34359,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU151';
+  const APP_VERSION = 'AIO0311TU152';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'End of the Day report: only the chosen day — 7-day trend removed; top & lowest seller of that day in two lines';
+  const UPDATE_NOTE = 'Footer number now +92 320-6793793 everywhere; End of the Day report no longer shows today\'s balances on old dates';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
