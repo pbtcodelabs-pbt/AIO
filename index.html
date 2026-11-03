@@ -3306,7 +3306,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU152</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU153</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3393,8 +3393,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   <input type="text" id="devChatNameInput" placeholder="Your Name" autocomplete="name" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
   <input type="text" id="devChatCityInput" placeholder="Your City" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:6px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
   <input type="email" id="devChatEmailInput" placeholder="Email / Gmail (optional)" inputmode="email" autocomplete="email" style="width:100%; box-sizing:border-box; padding:8px 10px; margin-bottom:10px; border:1px solid #dbe1ea; border-radius:8px; font-size:13px;">
-  <button class="devChatOption" onclick="sendDevChat('whatsapp')"><span class="devChatIcon">💬</span> WhatsApp</button>
-  <button class="devChatOption" onclick="sendDevChat('sms')"><span class="devChatIcon">✉️</span> SMS</button>
+  <button class="devChatOption devChatSupOnly" onclick="document.getElementById('devChatPanel').classList.remove('show'); openHelpDesk();"><span class="devChatIcon">🆘</span> Tell us your problem or suggestion</button>
+  <button class="devChatOption devChatSubOnly" onclick="sendDevChat('whatsapp')"><span class="devChatIcon">💬</span> WhatsApp</button>
+  <button class="devChatOption devChatSubOnly" onclick="sendDevChat('sms')"><span class="devChatIcon">✉️</span> SMS</button>
   <button class="devChatOption" onclick="sendDevChat('email')"><span class="devChatIcon">📧</span> Gmail</button>
 </div>
 
@@ -3525,7 +3526,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU152</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU153</span>
     </div>
   </div>
 
@@ -3546,7 +3547,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button class="gsbBtn gsbGear" id="hbcSettingsBtn" onclick="goTo('settings')" title="Settings">⚙️</button>
           <button class="gsbBtn" onclick="shareAppLink()" title="Share This App"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
           <button class="gsbBtn" onclick="openHelpDesk()" title="PBT Help Desk — report a problem or suggestion">🆘</button>
-          <button class="gsbBtn" onclick="openDevChat('support')" title="Chat with Developer">💬</button>
           <button class="gsbBtn" onclick="logout()" title="Logout" style="background:rgba(239,68,68,.9);">🚪</button>
           <button class="gsbBtn admin-only muOnly" onclick="openConnectHub()" title="Connect / Join / Contact">🔗</button>
       </div>
@@ -4592,8 +4592,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button class="testPrintBtn" style="margin-bottom:16px;" onclick="shareCatalogLink()">🔗 Share Catalog Link with Customers</button>
 
           <div class="settingsSubLabel">👨‍💻 Developer</div>
-          <button class="testPrintBtn" style="margin-bottom:8px; background:linear-gradient(135deg,#1e3a8a,#0f766e); color:#fff;" onclick="document.getElementById('connectHubModal').classList.remove('show'); openHelpDesk();">🆘 PBT Help Desk — Report a Problem / Suggestion</button>
-          <button class="testPrintBtn" onclick="document.getElementById('connectHubModal').classList.remove('show'); openDevChat('support');">💬 Contact Developer</button>
+          <button class="testPrintBtn" style="margin-bottom:8px; background:linear-gradient(135deg,#1e3a8a,#0f766e); color:#fff;" onclick="document.getElementById('connectHubModal').classList.remove('show'); openHelpDesk();">🆘 Tell us your problem or suggestion</button>
+          <button class="testPrintBtn" onclick="document.getElementById('connectHubModal').classList.remove('show'); emailDeveloper();">📧 Email the Developer (Gmail)</button>
 
         </div>
       </div>
@@ -9985,6 +9985,9 @@ function openDevChat(context){
   devChatContext = context;
   document.getElementById('devChatTitle').textContent = context === 'subscription' ? '💬 Ask About Subscription' : '💬 Chat with Developer';
   document.getElementById('devChatUidLine').textContent = '';
+  // AIO0311TU153 (ہیلپ ڈیسک #31، مالک کا حکم): عام مدد = Help Desk + Gmail؛ واٹس ایپ / SMS صرف سبسکرپشن کے سوال پر
+  document.querySelectorAll('#devChatPanel .devChatSubOnly').forEach(b=>{ b.style.display = context === 'subscription' ? '' : 'none'; });
+  document.querySelectorAll('#devChatPanel .devChatSupOnly').forEach(b=>{ b.style.display = context === 'subscription' ? 'none' : ''; });
   const s = AppState.settings || {};
   const nEl = document.getElementById('devChatNameInput');
   const cEl = document.getElementById('devChatCityInput');
@@ -10419,6 +10422,13 @@ function sendTroubleSubscribingMessage(){
 // "package plan" کا پرانا فرض شدہ حوالہ ہٹا دیا، چونکہ اب کوئی پیڈ پیکج پلان دکھایا نہیں جاتا ----------
 function buildAdInquiryMessage(){
   return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.`;
+}
+
+// AIO0311TU153: ڈویلپر کو ای میل (پلے اسٹور ایپ — باہر کے ملکوں کے لیے Gmail؛ فون / واٹس ایپ نہیں)
+function emailDeveloper(){
+  devChatContext = 'support';
+  const contact = getDeveloperContact();
+  window.open(`mailto:${contact.email}?subject=${encodeURIComponent('AIO POS - Support')}&body=${encodeURIComponent(buildDevChatMessage())}`, '_blank');
 }
 
 function saveDevChatContactFields(){
@@ -31185,7 +31195,7 @@ let pendingShareCanvas = null, pendingShareFilename = '', pendingShareTitle = ''
 // ===================== 🏷️ PBT Code Labs برانڈنگ — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور واٹس ایپ پیغام کے نیچے (ہمیشہ) =====================
 const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & Android';
 function brandPhone(){
-  // AIO0311TU152 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
+  // AIO0311TU153 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
   let d = String(AppState.settings.devSms || '03206793793').replace(/[^0-9]/g, '');
   if(d.length === 11 && d[0] === '0') d = '92' + d.slice(1);
   if(d.length === 12 && d.startsWith('92')) return '+92 ' + d.slice(2, 5) + '-' + d.slice(5);
@@ -32553,7 +32563,7 @@ async function renderEodReportToCanvas(){
     note(byQty.length + ' different item(s) sold this day.');
   } else note('No items sold this day.');
   gap();
-  // 9) AIO0311TU152 (ہیلپ ڈیسک #22، مالک کا حکم): «BALANCES (now)» ہٹایا — پرانی تاریخ کی رپورٹ میں آج کا بقایا الجھن بناتا تھا؛ بقایا صرف ڈیش بورڈ پر
+  // 9) AIO0311TU153 (ہیلپ ڈیسک #22، مالک کا حکم): «BALANCES (now)» ہٹایا — پرانی تاریخ کی رپورٹ میں آج کا بقایا الجھن بناتا تھا؛ بقایا صرف ڈیش بورڈ پر
   gap(10);
   add(fs(40), y => { ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([fs(4), fs(3)]); ctx.beginPath(); ctx.moveTo(M, y + fs(4)); ctx.lineTo(M + CW, y + fs(4)); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = '#334155'; ctx.textAlign = 'center'; ctx.font = font(700, 10); ctx.fillText('Counted cash: ____________     Signature: ____________', W / 2, y + fs(30)); });
@@ -34359,9 +34369,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU152';
+  const APP_VERSION = 'AIO0311TU153';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Footer number now +92 320-6793793 everywhere; End of the Day report no longer shows today\'s balances on old dates';
+  const UPDATE_NOTE = 'Help & contact: Help Desk (Report problems & issues) and Gmail — WhatsApp only for subscription questions';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
