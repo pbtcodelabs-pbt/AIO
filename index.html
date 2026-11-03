@@ -3306,7 +3306,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU149</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU150</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3525,7 +3525,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU149</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU150</span>
     </div>
   </div>
 
@@ -33358,12 +33358,15 @@ async function renderStockSaleProfitReportToCanvas(){
   const soldQtyMap = {};
   const profitMap = {}; // AIO1310TU037: ہر ویرینٹ کا اصل منافع — بل میں محفوظ خرید قیمت سے، کھلا وزن بھی شامل
   todayInvoices.forEach(inv => (inv.items || []).forEach(it => {
-    let vid = it.variant_id, units = it.qty || 0;
-    if(it.loose_product_id){ const t = resolveStockTarget(it, it.qty || 0); if(!t) return; vid = t.v.variant_id; units = t.units; }
+    // AIO0311TU150 (ہیلپ ڈیسک #17): واپس ہوا مال منہا — بکی مقدار اور منافع خالص (ڈیش بورڈ / Trend Profit جیسا حساب)
+    const nq = netSoldQty(it);
+    if(nq <= 0) return;
+    let vid = it.variant_id, units = nq;
+    if(it.loose_product_id){ const t = resolveStockTarget(it, nq); if(!t) return; vid = t.v.variant_id; units = t.units; }
     if(!vid) return;
     soldQtyMap[vid] = roundStock((soldQtyMap[vid] || 0) + units);
     const uc = itemUnitCost(it);
-    if(uc.known) profitMap[vid] = (profitMap[vid] || 0) + (it.qty || 0) * ((it.unitPrice || 0) - uc.cost);
+    if(uc.known) profitMap[vid] = (profitMap[vid] || 0) + netSoldRevenue(it) - nq * uc.cost;
   }));
   const rows = [];
   productsData.forEach(p => {
@@ -34371,9 +34374,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU149';
+  const APP_VERSION = 'AIO0311TU150';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Dashboard: 💹 today\'s and this month\'s profit at a glance — tap to open the profit report';
+  const UPDATE_NOTE = 'Daily Stock, Sale & Profit report: returned items are now subtracted — same profit as the Dashboard';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
