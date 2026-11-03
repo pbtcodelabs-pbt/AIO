@@ -3306,7 +3306,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU150</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU151</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3525,7 +3525,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU150</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU151</span>
     </div>
   </div>
 
@@ -6421,7 +6421,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </button>
       <button onclick="openEodReport()" style="text-align:left; padding:16px; border-radius:14px; border:2px solid #0f766e; background:linear-gradient(180deg,#ecfdf5,#d1fae5); box-shadow:0 3px 0 #99f6e4, 0 4px 10px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:900; font-size:15.5px; color:#065f46;">🌙 End of the Day Report</div>
-        <div style="font-size:12.5px; color:#047857; margin-top:3px;">Opening cash, sales, profit, expenses, payments in/out, cash in drawer, trend &amp; best-sellers — A4 or thermal</div>
+        <div style="font-size:12.5px; color:#047857; margin-top:3px;">Any single day: opening cash, sales, purchases, payments in/out, profit, cash in drawer, top &amp; lowest seller — A4 or thermal</div>
       </button>
       <button onclick="openTodaySaleReport()" style="text-align:left; padding:16px; border-radius:14px; border:none; background:#fff; box-shadow:0 2px 8px rgba(15,23,42,.08); cursor:pointer;">
         <div style="font-weight:800; font-size:15px; color:var(--primary-dark);">📅 Today's Sale Report</div>
@@ -32514,7 +32514,7 @@ async function renderEodReportToCanvas(){
   section('📈 INCOME');
   kv('Gross profit on sales', D.profit, {color: D.profit >= 0 ? '#15803d' : '#b91c1c'});
   kv('− Expenses', -D.expenses, {indent: true, color: '#b91c1c'});
-  kv('= NET INCOME TODAY', D.netProfit, {big: true, band: D.netProfit >= 0 ? '#dcfce7' : '#fee2e2', color: D.netProfit >= 0 ? '#065f46' : '#991b1b'});
+  kv('= NET INCOME (this day)', D.netProfit, {big: true, band: D.netProfit >= 0 ? '#dcfce7' : '#fee2e2', color: D.netProfit >= 0 ? '#065f46' : '#991b1b'});
   gap();
   // 4) وصولیاں / ادائیگیاں
   section('💳 PAYMENTS');
@@ -32529,37 +32529,26 @@ async function renderEodReportToCanvas(){
   // 5) اخراجات
   section(`🧮 EXPENSES (${D.expList.length})`);
   if(D.expList.length) table([{t: 'Expense', w: .66}, {t: 'Amount', w: .34, r: 1}], D.expList.map(e => [e.name || e.title || 'Expense', money(e.amount)]));
-  else note('No expenses today.');
+  else note('No expenses this day.');
   kv('Total expenses', D.expenses, {bold: true});
   gap();
-  // 6) خریداری
-  if(D.received.length || D.ordered.length){
-    section('🚚 PURCHASES');
-    if(D.received.length){ table([{t: 'Received from', w: .66}, {t: 'Amount', w: .34, r: 1}], D.received.map(x => [x.name, money(x.total)])); kv('Total stock received', D.purchases, {bold: true}); }
-    if(D.ordered.length) kv(`New purchase orders (${D.ordered.length})`, D.ordered.reduce((t, x) => t + x.total, 0));
-    gap();
-  }
-  // 7) سب سے زیادہ بکنے والے
-  section('🏆 BEST-SELLERS TODAY');
-  const top = D.topItems.slice(0, a4 ? 20 : 12);
-  if(top.length) table([{t: '#  Item', w: .52}, {t: 'Qty', w: .18, r: 1}, {t: 'Amount', w: .30, r: 1}], top.map((x, i) => [`${i + 1}. ${x.name}`, num(x.qty) + (x.unit && x.unit !== 'pcs' ? ' ' + x.unit : ''), money(x.amount)]));
-  else note('No items sold.');
-  if(D.topItems.length > top.length) note(`+ ${D.topItems.length - top.length} more items`);
+  // 6) خریداری — AIO0311TU151 (ہیلپ ڈیسک #20): ہمیشہ دکھے، صرف اسی دن کی
+  section('🚚 PURCHASES');
+  if(D.received.length){ table([{t: 'Received from', w: .66}, {t: 'Amount', w: .34, r: 1}], D.received.map(x => [x.name, money(x.total)])); }
+  else note('No stock received this day.');
+  kv('Total stock received', D.purchases, {bold: true});
+  if(D.ordered.length) kv(`New purchase orders (${D.ordered.length})`, D.ordered.reduce((t, x) => t + x.total, 0));
   gap();
-  // 8) رجحان
-  section('📈 BEST ITEMS — LAST 7 DAYS');
-  const b7 = D.best7.slice(0, a4 ? 15 : 10), u = x => x.unit && x.unit !== 'pcs' ? ' ' + x.unit : '';
-  if(b7.length){
-    const mxA = Math.max(1, ...b7.map(x => x.a7));
-    table([{t: '#  Item', w: .46}, {t: 'Today', w: .14, r: 1}, {t: '7 days', w: .16, r: 1}, {t: 'Amount', w: .24, r: 1}], b7.map((x, k) => [`${k + 1}. ${x.name}`, x.qT ? num(x.qT) : '–', num(x.q7) + u(x), money(x.a7)]));
-  } else note('No sales in the last 7 days.');
-  gap();
-  section('📉 SLOWEST ITEMS — LAST 7 DAYS');
-  const s7 = D.slow7.slice(0, a4 ? 15 : 10);
-  if(s7.length){
-    table([{t: 'Item', w: .48}, {t: 'Sold (7d)', w: .2, r: 1}, {t: 'Days', w: .12, r: 1}, {t: 'In stock', w: .2, r: 1}], s7.map(x => [x.name, x.q7 ? num(x.q7) + u(x) : 'Not sold', x.days ? x.days + '/7' : '0/7', num(x.stock)]));
-    if(D.notSold7) note(`⚠ ${D.notSold7} item(s) with stock did not sell at all in 7 days.`, '#b45309');
-  } else note('No items yet.');
+  // 7) AIO0311TU151: صرف اسی دن کی کہانی — سب سے زیادہ اور سب سے کم (کم از کم 1) بکنے والی چیز، دو لائنیں؛ 7 دن والے حصے ختم (مالک کا حکم)
+  section('🏆 THIS DAY — TOP & LOWEST SELLER');
+  const unitT = x => x.unit && x.unit !== 'pcs' ? ' ' + x.unit : '';
+  const byQty = Object.values(D.items).filter(x => x.qty > 0).sort((a, b) => b.qty - a.qty || b.amount - a.amount);
+  if(byQty.length){
+    const hi = byQty[0], lo = byQty[byQty.length - 1];
+    kv('🥇 Top seller: ' + hi.name + '  (' + num(hi.qty) + unitT(hi) + ')', hi.amount, {color: '#15803d', bold: true});
+    if(byQty.length > 1) kv('🐢 Lowest seller: ' + lo.name + '  (' + num(lo.qty) + unitT(lo) + ')', lo.amount, {color: '#b45309'});
+    note(byQty.length + ' different item(s) sold this day.');
+  } else note('No items sold this day.');
   gap();
   // 9) بقایا جات
   section('📒 BALANCES (now)');
@@ -34374,9 +34363,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU150';
+  const APP_VERSION = 'AIO0311TU151';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Daily Stock, Sale & Profit report: returned items are now subtracted — same profit as the Dashboard';
+  const UPDATE_NOTE = 'End of the Day report: only the chosen day — 7-day trend removed; top & lowest seller of that day in two lines';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
