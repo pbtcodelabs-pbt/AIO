@@ -345,10 +345,57 @@ export class McsStats {
     /* MCS پروفائل: دکاندار کا اپنا صفحہ (تصویریں، تفصیل، ریٹ، اوقات، نقشہ) — مالک فون کی خفیہ چابی سے */
     this.sql.exec("CREATE TABLE IF NOT EXISTS prof (rec TEXT PRIMARY KEY, data TEXT, key TEXT, since INTEGER, until INTEGER, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS pimg (id TEXT PRIMARY KEY, rec TEXT, data TEXT, ts INTEGER)");
+    /* 🔑 اکاؤنٹ سبسکرپشن (AIO وغیرہ، پلے اسٹور سے باہر خریدی): ریکارڈ + جی میل / موبائل کی چابیاں */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS ent (id TEXT PRIMARY KEY, app TEXT, data TEXT, ts INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS entkey (k TEXT PRIMARY KEY, id TEXT)");
   }
+  entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
+  entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
+  entOut(e) { const now = Date.now(); return { ok: true, id: e.id, name: e.name || "", life: !!e.life, exp: e.exp || 0, active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, devices: e.devices || 1, used: (e.claims || []).length, keys: e.keys || [] }; }
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
+    if (op === "/ent_claim") {   /* گاہک: اپنی چابی (جی میل / موبائل) سے اس فون پر کھولنا — فون کی حد تک */
+      const b = await request.json();
+      const row = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + b.key).toArray()[0];
+      if (!row) return Response.json({ ok: false, reason: "none" });
+      const e = this.entGet(row.id); if (!e) return Response.json({ ok: false, reason: "none" });
+      if (e.revoked) return Response.json({ ok: false, reason: "revoked" });
+      e.claims = e.claims || [];
+      const mine = e.claims.find((c) => c.dev === b.dev);
+      if (!mine) {
+        if (!b.bind) return Response.json({ ok: false, reason: "not_bound" });
+        if (e.claims.length >= (e.devices || 1)) return Response.json({ ok: false, reason: "devices_full", devices: e.devices || 1 });
+        e.claims.push({ dev: b.dev, at: Date.now(), via: b.key.slice(0, 1) });
+      } else mine.seen = Date.now();
+      this.entPut(e);
+      const o = this.entOut(e); delete o.keys; o.id = undefined; return Response.json(o);   /* گاہک کو دوسری چابیاں (جی میل / نمبر) نہیں */
+    }
+    if (op === "/ent_admin") {   /* ڈویلپر: دینا / بڑھانا، فہرست، بند، فون صاف، حذف */
+      const b = await request.json();
+      const now = Date.now();
+      if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [] }); }) });
+      if (b.op === "grant") {
+        let id = b.id || "";
+        if (!id) for (const k of b.keys) { const r = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + k).toArray()[0]; if (r) { id = r.id; break; } }
+        let e = id ? this.entGet(id) : null;
+        if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: [], claims: [], exp: 0, at: now };
+        b.keys.forEach((k) => { if (!e.keys.includes(k)) e.keys.push(k); });
+        if (b.name) e.name = b.name; if (b.note !== undefined) e.note = b.note;
+        if (b.devices) e.devices = b.devices; if (!e.devices) e.devices = 1;
+        if (b.life) e.life = true; else if (b.days) e.exp = Math.max(now, e.exp || 0) + b.days * 864e5;
+        if (b.setExp) e.exp = b.setExp;
+        e.revoked = false; e.by = "dev";
+        this.entPut(e);
+        return Response.json(this.entOut(e));
+      }
+      const e = this.entGet(b.id); if (!e) return Response.json({ ok: false, reason: "none" });
+      if (b.op === "revoke") { e.revoked = true; this.entPut(e); return Response.json(this.entOut(e)); }
+      if (b.op === "unrevoke") { e.revoked = false; this.entPut(e); return Response.json(this.entOut(e)); }
+      if (b.op === "reset") { e.claims = []; this.entPut(e); return Response.json(this.entOut(e)); }
+      if (b.op === "delete") { this.sql.exec("DELETE FROM ent WHERE id = ?", e.id); this.sql.exec("DELETE FROM entkey WHERE id = ?", e.id); return Response.json({ ok: true }); }
+      return Response.json({ ok: false, reason: "bad_op" }, { status: 400 });
+    }
     if (op === "/vtoken") {   /* ایڈمن: دکان کا خفیہ لنک کوڈ (پہلے سے ہو تو وہی) */
       const { rec } = await request.json();
       let row = this.sql.exec("SELECT tok FROM vtok WHERE rec = ?", rec).toArray()[0];
@@ -472,6 +519,61 @@ async function verifyFirebaseAdmin(request) {
     return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64uToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
   } catch (e) { return false; }
 }
+/* =====================================================================
+   🔑 اکاؤنٹ سبسکرپشن — جی میل (گوگل سائن اِن، ٹوکن یہاں جانچا جاتا ہے) یا موبائل نمبر؛ فون کی حد؛ صرف ڈویلپر دے سکتا ہے
+   /entclaim {app, kind:'g'|'p', idToken | phone, dev}  — نیا فون جوڑتا ہے (حد تک)
+   /entstatus {app, key, dev} — پہلے سے جڑا فون (تجدید / بند ہونے کی خبر)
+   /entadmin  (Authorization: MCS ایڈمن کا فائربیس ٹوکن) {op:'grant'|'list'|'revoke'|'unrevoke'|'reset'|'delete', ...}
+   ===================================================================== */
+const ENT_APPS = ["AIO"];
+const GOOGLE_CLIENT_IDS = ["954131537356-2be2rne30mje71l9qibosblvj3j0eqoj.apps.googleusercontent.com"];
+let gJwks = null, gJwksAt = 0;
+async function verifyGoogleIdToken(jwt) {
+  try {
+    const parts = String(jwt || "").split("."); if (parts.length !== 3) return "";
+    const head = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[0]))), pl = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[1])));
+    if (!GOOGLE_CLIENT_IDS.includes(pl.aud) || !["accounts.google.com", "https://accounts.google.com"].includes(pl.iss) || pl.exp < Date.now() / 1000 || !pl.email || pl.email_verified === false || pl.email_verified === "false") return "";
+    if (!gJwks || Date.now() - gJwksAt > 3600e3) { const r = await fetch("https://www.googleapis.com/oauth2/v3/certs"); gJwks = (await r.json()).keys; gJwksAt = Date.now(); }
+    const jwk = gJwks.find((k) => k.kid === head.kid); if (!jwk) return "";
+    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    return (await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64uToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]))) ? String(pl.email).toLowerCase() : "";
+  } catch (e) { return ""; }
+}
+function entPhone(v) { let d = String(v || "").replace(/[۰-۹]/g, (c) => "۰۱۲۳۴۵۶۷۸۹".indexOf(c)).replace(/\D/g, ""); if (d.startsWith("0092")) d = d.slice(2); if (d.startsWith("0")) d = "92" + d.slice(1); if (d.length === 10 && d.startsWith("3")) d = "92" + d; return /^92\d{10}$/.test(d) ? d : ""; }
+function entEmail(v) { const e = String(v || "").trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e) ? e : ""; }
+async function handleEnt(request, env, path) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const fwd = async (op, body) => { const r = await stub.fetch("https://s" + op, { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS } }); };
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const app = String(b.app || ""); if (!ENT_APPS.includes(app)) return reply({ error: "bad_app" }, 400);
+  if (path === "/entclaim" || path === "/entstatus") {
+    const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (dev.length < 6) return reply({ error: "bad_dev" }, 400);
+    let key = "";
+    if (path === "/entstatus") key = String(b.key || "").slice(0, 120);
+    else if (b.kind === "g") { const em = await verifyGoogleIdToken(b.idToken); if (!em) return reply({ ok: false, reason: "google_failed" }); key = "g:" + em; }
+    else if (b.kind === "p") { const ph = entPhone(b.phone); if (!ph) return reply({ ok: false, reason: "bad_phone" }); key = "p:" + ph; }
+    if (!/^[gp]:/.test(key)) return reply({ error: "bad_key" }, 400);
+    const r = await fwd("/ent_claim", { app, key, dev, bind: path === "/entclaim" });
+    const out = await r.json(); out.key = key;
+    return reply(out);
+  }
+  if (path === "/entadmin") {
+    if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    const op = String(b.op || "");
+    if (op === "grant") {
+      const keys = [].concat((b.emails || []).map(entEmail).filter(Boolean).map((e) => "g:" + e), (b.phones || []).map(entPhone).filter(Boolean).map((p) => "p:" + p));
+      if (!keys.length && !b.id) return reply({ ok: false, reason: "no_keys" });
+      const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), devices = Math.max(1, Math.min(20, parseInt(b.devices, 10) || 1));
+      if (!days && !b.life && !b.id) return reply({ ok: false, reason: "no_days" });
+      return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40), keys, days, life: !!b.life, devices, name: String(b.name || "").slice(0, 80), note: b.note === undefined ? undefined : String(b.note).slice(0, 300), setExp: parseInt(b.setExp, 10) || 0 });
+    }
+    if (op === "list") return fwd("/ent_admin", { op, app });
+    if (["revoke", "unrevoke", "reset", "delete"].includes(op)) return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40) });
+    return reply({ error: "bad_op" }, 400);
+  }
+  return reply({ error: "not_found" }, 404);
+}
 async function handleVerify(request, env, path) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -533,6 +635,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
+    { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);

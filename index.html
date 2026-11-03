@@ -3241,6 +3241,28 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 </div>
 <!-- ---------- 🔄 PWA: نیا اپڈیٹ دستیاب / آف لائن اسٹیٹس ٹوسٹ ---------- -->
 <!-- ---------- AIO910FR008: 🛠️ Developer Console — لاگ ان صفحے پر ورژن بیج پر 7 ٹیپ سے کھلتا ہے، صرف ڈویلپر کے لیے ---------- -->
+<!-- ---------- 🔑 AIO0311TU155: اکاؤنٹ سبسکرپشن — جی میل (گوگل) یا موبائل نمبر سے اس فون پر کھولیں ---------- -->
+<div class="modalOverlay" id="acctModal" style="z-index:9400;" onclick="if(event.target===this) acctClose()">
+  <div class="modalBox" style="max-width:400px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <h3 style="margin:0;">🔑 Sign in with your account</h3>
+      <span class="closeBtn" onclick="acctClose()" style="cursor:pointer;">✖</span>
+    </div>
+    <div id="acctState"></div>
+    <div id="acctForm">
+      <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin:0 0 10px;">Already have an AIO POS subscription on your account? Sign in with the same Google account or mobile number to unlock it on this phone.</p>
+      <div style="font-weight:800; font-size:13px; margin-bottom:6px;">1️⃣ Google account (Gmail)</div>
+      <div id="acctGoogleBtn" style="min-height:44px; display:flex; justify-content:center;"></div>
+      <div style="text-align:center; color:var(--muted); font-size:12px; margin:10px 0;">— or —</div>
+      <div style="font-weight:800; font-size:13px; margin-bottom:6px;">2️⃣ Mobile number</div>
+      <div style="display:flex; gap:6px;">
+        <input type="tel" id="acctPhone" inputmode="tel" autocomplete="tel" placeholder="03001234567" style="flex:1; min-width:0; padding:11px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:16px;" onkeydown="if(event.key==='Enter') acctClaimPhone()">
+        <button type="button" id="acctPhoneBtn" onclick="acctClaimPhone()" style="flex:0 0 auto; padding:0 16px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800;">Unlock</button>
+      </div>
+    </div>
+    <div id="acctMsg" style="margin-top:10px; font-size:13px; font-weight:700; text-align:center; line-height:1.6;"></div>
+  </div>
+</div>
 <div class="modalOverlay" id="devConsoleModal" style="z-index:9500;" onclick="if(event.target===this) closeDevConsole()">
   <div class="modalBox" style="max-width:420px;">
     <div class="modalHeader" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
@@ -3259,6 +3281,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
         <button type="button" class="devTab" data-sec="pass" role="tab" onclick="showDevSec('devConsoleOpen','pass')"><b>🔑 Change Password</b><small>New Developer Console password</small></button>
+        <button type="button" class="devTab" data-sec="acct" role="tab" onclick="showDevSec('devConsoleOpen','acct')"><b>👤 Account Subscriptions</b><small>Give / extend by Gmail or mobile number</small></button>
         <button type="button" class="devTab" data-sec="device" role="tab" onclick="showDevSec('devConsoleOpen','device')"><b>📱 This Device</b><small>Device ID, Play plan &amp; subscription status</small></button>
       </div>
       <div class="devSec" data-sec="unlock"><div class="devUnlockState"></div></div>
@@ -3270,6 +3293,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div id="devConsolePassMsg" class="devSecHint"></div>
       </div>
       <div class="devSec" data-sec="device" style="display:none;"><div class="devDeviceInfo"></div></div>
+      <div class="devSec" data-sec="acct" style="display:none;"><div id="devAcctBox"></div></div>
     </div>
   </div>
 </div>
@@ -3306,7 +3330,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU154</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU155</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3379,7 +3403,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginHint loginForgotHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
     <div id="turnOffTouchIdHint" class="loginHint" style="display:none;"><a href="javascript:void(0)" onclick="turnOffTouchId()" style="color:var(--muted); font-weight:700; text-decoration:none;">👆 Turn off Touch ID on this device</a></div>
     <!-- ---------- 📦 پیکج دیکھنے کا چھوٹا سا لنک — سب سے آخر میں، جو دیکھنا چاہے وہ دیکھ لے ---------- -->
-    <div class="loginHint" style="margin-top:6px;"><a href="javascript:void(0)" onclick="openPackagePlansModal()" style="color:var(--muted); font-weight:700; font-size:12px; text-decoration:underline;">📦 View Subscription Plans</a></div>
+    <div class="loginHint" style="margin-top:6px;"><a href="javascript:void(0)" onclick="openPackagePlansModal()" style="color:var(--muted); font-weight:700; font-size:12px; text-decoration:underline;">📦 View Subscription Plans</a> · <a href="javascript:void(0)" onclick="acctOpen()" style="color:var(--primary); font-weight:700; font-size:12px; text-decoration:underline;">🔑 Sign in with account</a></div>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
 </div>
@@ -3526,7 +3550,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU154</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU155</span>
     </div>
   </div>
 
@@ -6719,7 +6743,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
     </p>
     <button class="checkoutBtn" style="margin-top:8px; background:#fff; color:var(--primary-dark); border:1.5px solid #c7d2fe;" onclick="restorePurchaseNow(this)">🔄 Restore Purchase (new phone / reinstall)</button>
-    <button class="checkoutBtn" style="margin-top:8px; background:#c2410c;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
+    <button class="checkoutBtn" style="margin-top:8px; background:#0f766e;" onclick="acctOpen()">🔑 Have an account subscription? Sign in</button>
     <button class="cancelBtn" style="width:100%; margin-top:10px;" onclick="document.getElementById('packagePlansModal').classList.remove('show')">Close</button>
   </div>
 </div>
@@ -6893,7 +6917,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <p style="font-size:11.5px; color:var(--muted); line-height:1.6; margin-bottom:8px;">
         💳 Card not working? Try a different card, or buy a <b>Google Play Gift Card</b> from a local shop and redeem it in the Play Store.
       </p>
-      <button class="backupConfirmCloseBtn" style="background:#fff7ed; color:#c2410c; font-size:12.5px; padding:10px;" onclick="sendTroubleSubscribingMessage()">🆘 Still Stuck? Contact Us</button>
+      <button class="backupConfirmCloseBtn" style="background:#ecfdf5; color:#0f766e; font-size:12.5px; padding:10px;" onclick="dismissTrialUrgentModal(); acctOpen()">🔑 Have an account subscription? Sign in</button>
     </div>
   </div>
 </div>
@@ -9162,6 +9186,7 @@ function showDevSec(rootId, name){
   root.scrollTop = 0;
   if(name === 'unlock') renderDevUnlockSec(root);
   if(name === 'device') renderDevDeviceSec(root);
+  if(name === 'acct') devAcctRender();
 }
 // ---------- 🔓 مستقل ان لاک — صرف اسی فون پر؛ بیک اپ/ری اسٹور سے کسی اور فون پر کبھی نہیں جاتا (BACKUP_KEEP_LOCAL_SETTINGS) ----------
 function renderDevUnlockSec(root){
@@ -9986,8 +10011,9 @@ function openDevChat(context){
   document.getElementById('devChatTitle').textContent = context === 'subscription' ? '💬 Ask About Subscription' : '💬 Chat with Developer';
   document.getElementById('devChatUidLine').textContent = '';
   // AIO0311TU154 (ہیلپ ڈیسک #31، مالک کا حکم): عام مدد = Help Desk + Gmail؛ واٹس ایپ / SMS صرف سبسکرپشن کے سوال پر
-  document.querySelectorAll('#devChatPanel .devChatSubOnly').forEach(b=>{ b.style.display = context === 'subscription' ? '' : 'none'; });
-  document.querySelectorAll('#devChatPanel .devChatSupOnly').forEach(b=>{ b.style.display = context === 'subscription' ? 'none' : ''; });
+  // AIO0311TU155 (مالک کا حکم، گوگل پالیسی): پلے اسٹور ایپ میں سبسکرپشن کے لیے واٹس ایپ / SMS نہیں — ہر جگہ Help Desk + Gmail
+  document.querySelectorAll('#devChatPanel .devChatSubOnly').forEach(b=>{ b.style.display = 'none'; });
+  document.querySelectorAll('#devChatPanel .devChatSupOnly').forEach(b=>{ b.style.display = ''; });
   const s = AppState.settings || {};
   const nEl = document.getElementById('devChatNameInput');
   const cEl = document.getElementById('devChatCityInput');
@@ -10392,10 +10418,7 @@ function buildDevChatMessage(){
 function buildDevChatMessageBody(){
   if(devChatContext === 'subscription'){
     // ---------- اگر کیلکولیٹر سے دن/قیمت منتخب ہوں تو پیغام میں شامل کریں، ورنہ عام دلچسپی کا پیغام بھیجیں ----------
-    if(selectedPlanDays && selectedPlanPrice){
-      return `Sir, I want to subscribe your AIO POS application for ${selectedPlanDays} days at the price of Rs. ${selectedPlanPrice.toLocaleString()} in accordance with your package plan.`;
-    }
-    return buildAdInquiryMessage();
+    return `Dear Developer,\nI have a question about my AIO POS subscription:\n\n\n`;
   }
   // ---------- مسئلہ رپورٹ کرنے کا پیغام — خود بھرنے کے لیے خالی جگہ کے ساتھ ----------
   return `Dear Developer,\nI am using AIO POS. I noticed the following issue and my suggestion is:\n\n\n`;
@@ -30080,6 +30103,210 @@ async function restorePurchaseNow(btn){
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ syncPlayBillingRenewal(); }catch(e){} }, 1500); });
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ syncPlayBillingRenewal(); }catch(e){} } });
 
+/* =====================================================================
+   🔑 AIO0311TU155 (مالک کا حکم): اکاؤنٹ سبسکرپشن — جو گاہک پلے اسٹور سے نہیں خرید سکتا، ڈویلپر اس کا جی میل / موبائل نمبر
+   سرور (aio-pos-verify، /entclaim /entstatus /entadmin) کی فہرست میں ڈالتا ہے؛ گاہک یہاں «Sign in with account» سے اسی فون پر کھولتا ہے
+   (فون کی حد سرور پر)۔ ⚠️ گوگل پالیسی: پلے اسٹور ایپ کے اندر باہر ادائیگی (ایزی پیسہ / جاز کیش / واٹس ایپ پر خریدنا / قیمت) کا کوئی ذکر نہیں —
+   صرف «پہلے سے اکاؤنٹ ہے تو داخل ہوں»۔ پلے اسٹور کی خریداری ساتھ ساتھ ویسے ہی (تاریخ صرف آگے)۔
+   ===================================================================== */
+const ACCT_URL = PLAY_VERIFY_URL;
+const ACCT_APP = 'AIO';
+const ACCT_GOOGLE_CLIENT_ID = '954131537356-2be2rne30mje71l9qibosblvj3j0eqoj.apps.googleusercontent.com';
+const ACCT_ADMIN_API_KEY = 'AIzaSyAvu8ymIZAGEPaYwd_LBJzKS2lZ3Q4_Mog'; // ڈویلپر کی پہچان: My City Shines ایڈمن (pbtcodelabs@gmail.com) — سرور جانچتا ہے
+const acctEsc = v => String(v == null ? '' : v).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+let _acctGsi = null;
+function acctLoadGsi(){
+  if(window.google && google.accounts && google.accounts.id) return Promise.resolve();
+  if(_acctGsi) return _acctGsi;
+  _acctGsi = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = () => res(); sc.onerror = () => { _acctGsi = null; rej(new Error('gsi')); }; document.head.appendChild(sc); });
+  return _acctGsi;
+}
+function acctMsg(t, ok){ const m = document.getElementById('acctMsg'); if(!m) return; m.textContent = t || ''; m.style.color = ok === true ? 'var(--success,#15803d)' : (ok === false ? 'var(--danger,#dc2626)' : 'var(--muted,#64748b)'); }
+function acctLabel(key){ const k = String(key || ''); if(k.startsWith('g:')) return k.slice(2); if(k.startsWith('p:')) return '0' + k.slice(4); return k; }
+function acctRenderState(){
+  const st = document.getElementById('acctState'); if(!st) return;
+  const a = AppState.settings.acctSub;
+  st.innerHTML = a && a.key ? `<div style="background:#ecfdf5; border:1.5px solid #86efac; border-radius:12px; padding:8px 10px; margin-bottom:10px; font-size:12.5px; line-height:1.7;">✅ Signed in: <b>${acctEsc(acctLabel(a.key))}</b>${a.name ? ' — ' + acctEsc(a.name) : ''}<br>${a.life ? '♾️ Lifetime' : 'Valid till <b>' + acctEsc(formatDateDMY(a.expStr)) + '</b>'}<br><a href="javascript:void(0)" onclick="acctSignOut()" style="color:#b91c1c; font-weight:700;">Sign out from this phone</a></div>` : '';
+}
+async function acctOpen(){
+  if(typeof isLinkedDevice === 'function' && isLinkedDevice()){ showNavToast('This phone uses the shop owner\'s subscription'); return; }
+  document.getElementById('acctModal').classList.add('show');
+  acctMsg(''); acctRenderState();
+  const box = document.getElementById('acctGoogleBtn'); box.innerHTML = '<span style="font-size:12px; color:var(--muted);">Loading Google sign-in…</span>';
+  try{
+    await acctLoadGsi();
+    google.accounts.id.initialize({ client_id: ACCT_GOOGLE_CLIENT_ID, callback: r => acctClaim({ kind: 'g', idToken: r.credential }), auto_select: false, cancel_on_tap_outside: true, ux_mode: 'popup' });
+    box.innerHTML = ''; google.accounts.id.renderButton(box, { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', width: 260 });
+  }catch(e){ box.innerHTML = '<span style="font-size:12px; color:var(--muted);">Google sign-in is not available right now — use your mobile number below.</span>'; }
+}
+function acctClose(){ document.getElementById('acctModal').classList.remove('show'); }
+function acctClaimPhone(){
+  const v = (document.getElementById('acctPhone').value || '').trim();
+  if(v.replace(/\D/g, '').length < 10){ acctMsg('⚠️ Enter your mobile number, e.g. 03001234567', false); return; }
+  acctClaim({ kind: 'p', phone: v });
+}
+async function acctPost(path, body, tok){
+  const res = await fetch(ACCT_URL + path, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, tok ? { Authorization: 'Bearer ' + tok } : {}), body: JSON.stringify(Object.assign({ app: ACCT_APP }, body)) });
+  return res.json();
+}
+async function acctClaim(body){
+  acctMsg('⏳ Checking…');
+  const btn = document.getElementById('acctPhoneBtn'); if(btn) btn.disabled = true;
+  let r = null;
+  try{ r = await acctPost('/entclaim', Object.assign({ dev: getOrCreateDeviceUID() }, body)); }
+  catch(e){ acctMsg('📶 No internet — please connect and try again', false); }
+  if(btn) btn.disabled = false;
+  if(!r) return;
+  if(!r.ok){
+    const why = { none: 'No subscription found for this ' + (body.kind === 'g' ? 'Google account' : 'mobile number') + '. Please check it, or try the other option.',
+      devices_full: `This subscription is already in use on ${r.devices || 1} phone(s) — the limit is reached.`,
+      revoked: 'This subscription has been stopped.', google_failed: 'Google sign-in failed — please try again.', bad_phone: 'Please enter a valid mobile number, e.g. 03001234567' }[r.reason] || ('Could not sign in (' + (r.reason || r.error || 'error') + ')');
+    acctMsg('❌ ' + why, false); return;
+  }
+  if(!r.active){ acctMsg('⚠️ Subscription found, but it ended on ' + formatDateDMY(toLocalDateStr(new Date(r.exp))) + '.', false); acctApply(r, true); return; }
+  acctApply(r);
+  acctRenderState();
+  acctMsg('✅ Unlocked on this phone' + (r.life ? ' — Lifetime' : ' till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))), true);
+  setTimeout(() => { acctClose(); try{ document.getElementById('packagePlansModal').classList.remove('show'); }catch(e){} }, 1600);
+}
+// ---------- سرور کا جواب مقامی سبسکرپشن پر — صرف تب جب یہ اکاؤنٹ سے ہو یا پلے اسٹور والی تاریخ سے آگے ----------
+function acctApply(r, quiet){
+  const s = AppState.settings;
+  const expStr = r.life ? LIFETIME_EXPIRY : toLocalDateStr(new Date(r.exp));
+  s.acctSub = { key: r.key, name: r.name || '', life: !!r.life, exp: r.exp || 0, expStr, devices: r.devices || 1, at: Date.now() };
+  s.acctCheckedAt = Date.now();
+  const fromAcct = s.subscriptionVia === 'account';
+  const cur = s.isOnFreeTrial ? '' : (s.subscriptionExpiry || '');
+  if(r.active && (expStr > cur || fromAcct || s.isOnFreeTrial)){
+    s.subscriptionExpiry = expStr;
+    if(!fromAcct || !s.subscriptionActivatedOn) s.subscriptionActivatedOn = toLocalDateStr(new Date());
+    s.isOnFreeTrial = false; s.subscriptionVia = 'account'; s.subscriptionViaPlayBilling = false;
+    s.lifetimeLicense = !!r.life;
+  } else if(!r.active && fromAcct && !r.life){
+    s.subscriptionExpiry = expStr; // ڈویلپر نے مدت کم / ختم کی
+  }
+  persistAllData();
+  try{ renderSubscriptionBanner(); }catch(e){}
+  try{ afterSubscriptionChanged(); }catch(e){}
+  try{ setupLoginScreen(); }catch(e){}
+}
+function acctDrop(){
+  const s = AppState.settings;
+  if(s.subscriptionVia === 'account'){ s.subscriptionExpiry = toLocalDateStr(new Date(Date.now() - 864e5)); s.lifetimeLicense = false; s.subscriptionVia = ''; }
+  delete s.acctSub;
+  persistAllData();
+  try{ renderSubscriptionBanner(); }catch(e){}
+  try{ afterSubscriptionChanged(); }catch(e){}
+  try{ setupLoginScreen(); }catch(e){}
+}
+function acctSignOut(){
+  if(!confirm('Sign out this account from this phone? The subscription will stop on this phone.')) return;
+  acctDrop(); acctRenderState(); acctMsg('Signed out from this phone.');
+}
+// ---------- ایپ کھلنے پر (6 گھنٹے میں ایک بار) سرور سے تازہ حالت — ڈویلپر نے بڑھائی / بند کی تو یہاں بھی ----------
+async function acctRecheck(force){
+  const s = AppState.settings, a = s.acctSub;
+  if(!a || !a.key || !navigator.onLine) return;
+  if(!force && s.acctCheckedAt && Date.now() - s.acctCheckedAt < 6 * 3600e3) return;
+  try{
+    const r = await acctPost('/entstatus', { key: a.key, dev: getOrCreateDeviceUID() });
+    if(r && r.ok) acctApply(r, true);
+    else if(r && ['revoked', 'none', 'not_bound'].includes(r.reason)) acctDrop();
+  }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ acctRecheck(); }catch(e){} }, 2500); });
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ acctRecheck(); }catch(e){} } });
+
+/* ---------- 👤 ڈویلپر پینل: اکاؤنٹ سبسکرپشن دینا / بڑھانا / بند — My City Shines ایڈمن لاگ اِن (یاد صرف اس وقت تک) ---------- */
+let _devAcctTok = null, _devAcctTokExp = 0, _devAcctList = [], _devAcctQ = '';
+function devAcctRender(){
+  const box = document.getElementById('devAcctBox'); if(!box) return;
+  if(!_devAcctTok || Date.now() > _devAcctTokExp){
+    box.innerHTML = `<div class="settingsHint" style="margin:0 0 8px;">Developer sign-in (same as My City Shines admin).</div>
+      <input type="email" id="devAcctEmail" class="devInput" value="pbtcodelabs@gmail.com" autocomplete="username">
+      <input type="password" id="devAcctPass" class="devInput" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') devAcctLogin()">
+      <button type="button" class="devBigBtn go" onclick="devAcctLogin()">🔐 Sign in</button><div id="devAcctMsg" class="devSecHint"></div>`;
+    return;
+  }
+  const opt = [[30,'1 month'],[90,'3 months'],[180,'6 months'],[365,'1 year'],[0,'Lifetime']].map(([d,t]) => `<option value="${d}" ${d === 365 ? 'selected' : ''}>${t}</option>`).join('');
+  box.innerHTML = `<div style="font-weight:800; margin-bottom:6px;">➕ Give / extend a subscription</div>
+    <input type="email" id="devAcctG" class="devInput" placeholder="Customer Gmail (optional)" autocomplete="off">
+    <input type="tel" id="devAcctP" class="devInput" placeholder="Customer mobile, e.g. 03001234567 (optional)" autocomplete="off">
+    <input type="text" id="devAcctN" class="devInput" placeholder="Customer / shop name">
+    <div style="display:flex; gap:6px;"><select id="devAcctD" class="devInput" style="flex:1;">${opt}<option value="-1">Custom days…</option></select>
+      <select id="devAcctDev" class="devInput" style="flex:0 0 96px;">${[1,2,3,4,5].map(n => `<option value="${n}">${n} phone${n > 1 ? 's' : ''}</option>`).join('')}</select></div>
+    <input type="text" id="devAcctNote" class="devInput" placeholder="Note (agent, payment ref…) — only you see this">
+    <button type="button" class="devBigBtn go" onclick="devAcctGrant()">✅ Give / extend</button>
+    <div id="devAcctMsg" class="devSecHint"></div>
+    <div style="font-weight:800; margin:12px 0 6px; display:flex; justify-content:space-between; align-items:center;">📋 Customers <button type="button" class="devBigBtn" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctLoad()">🔄</button></div>
+    <input type="search" class="devInput" placeholder="Search name, Gmail or number" value="${acctEsc(_devAcctQ)}" oninput="_devAcctQ=this.value; devAcctListRender()">
+    <div id="devAcctList"><div class="devSecHint">Loading…</div></div>`;
+  devAcctLoad();
+}
+async function devAcctLogin(){
+  const msg = document.getElementById('devAcctMsg'); msg.textContent = '⏳ Signing in…';
+  try{
+    const r = await (await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + ACCT_ADMIN_API_KEY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('devAcctEmail').value.trim(), password: document.getElementById('devAcctPass').value, returnSecureToken: true }) })).json();
+    if(!r.idToken){ msg.textContent = '❌ Wrong email or password'; return; }
+    _devAcctTok = r.idToken; _devAcctTokExp = Date.now() + (parseInt(r.expiresIn || '3600', 10) - 120) * 1000;
+    devAcctRender();
+  }catch(e){ msg.textContent = '📶 No internet'; }
+}
+async function devAcctCall(body){
+  const r = await acctPost('/entadmin', body, _devAcctTok);
+  if(r && r.error === 'admin_only'){ _devAcctTok = null; devAcctRender(); throw new Error('Please sign in again'); }
+  return r;
+}
+async function devAcctLoad(){
+  try{ const r = await devAcctCall({ op: 'list' }); _devAcctList = (r && r.list) || []; devAcctListRender(); }
+  catch(e){ const l = document.getElementById('devAcctList'); if(l) l.innerHTML = '<div class="devSecHint">⚠️ ' + acctEsc(e.message) + '</div>'; }
+}
+function devAcctListRender(){
+  const el = document.getElementById('devAcctList'); if(!el) return;
+  const q = _devAcctQ.trim().toLowerCase().replace(/^0/, '');
+  const L = _devAcctList.filter(e => !q || [e.name, e.note, ...(e.keys || [])].join(' ').toLowerCase().includes(q));
+  if(!L.length){ el.innerHTML = '<div class="devSecHint">No customers yet.</div>'; return; }
+  el.innerHTML = L.map(e => {
+    const st = e.revoked ? '⛔ Stopped' : e.life ? '♾️ Lifetime' : (e.active ? '🟢 till ' : '🔴 ended ') + formatDateDMY(toLocalDateStr(new Date(e.exp)));
+    return `<div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:8px 10px; margin-bottom:8px; font-size:12.5px; line-height:1.7;">
+      <b>${acctEsc(e.name || '—')}</b> <span style="float:right;">${st}</span><br>
+      ${(e.keys || []).map(k => (k.startsWith('g:') ? '📧 ' : '📱 ') + acctEsc(acctLabel(k))).join('<br>')}<br>
+      📲 Phones: ${e.used}/${e.devices}${e.note ? '<br>📝 ' + acctEsc(e.note) : ''}
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;">
+        <button type="button" class="devBigBtn go" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','add',30)">+1 month</button>
+        <button type="button" class="devBigBtn go" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','add',365)">+1 year</button>
+        <button type="button" class="devBigBtn" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','reset')">🔄 Free phones</button>
+        <button type="button" class="devBigBtn ${e.revoked ? 'go' : 'stop'}" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','${e.revoked ? 'unrevoke' : 'revoke'}')">${e.revoked ? '▶️ Resume' : '⛔ Stop'}</button>
+        <button type="button" class="devBigBtn stop" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','delete')">🗑️</button>
+      </div></div>`;
+  }).join('');
+}
+async function devAcctGrant(){
+  const msg = document.getElementById('devAcctMsg');
+  const g = document.getElementById('devAcctG').value.trim(), p = document.getElementById('devAcctP').value.trim();
+  if(!g && !p){ msg.textContent = '⚠️ Enter Gmail or mobile number (or both)'; return; }
+  let days = parseInt(document.getElementById('devAcctD').value, 10), life = days === 0;
+  if(days === -1){ days = parseInt(prompt('How many days?', '30') || '0', 10); if(!(days > 0)) return; }
+  msg.textContent = '⏳ Saving…';
+  try{
+    const r = await devAcctCall({ op: 'grant', emails: g ? [g] : [], phones: p ? [p] : [], days: life ? 0 : days, life, devices: parseInt(document.getElementById('devAcctDev').value, 10) || 1, name: document.getElementById('devAcctN').value.trim(), note: document.getElementById('devAcctNote').value.trim() });
+    if(!r.ok){ msg.textContent = '❌ ' + ({ no_keys: 'Gmail or mobile number is not valid' }[r.reason] || r.reason || r.error); return; }
+    msg.textContent = '✅ Saved — ' + (r.life ? 'Lifetime' : 'till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))) + '. Customer: Sign in with account → same Gmail / number.';
+    ['devAcctG','devAcctP','devAcctN','devAcctNote'].forEach(id => { document.getElementById(id).value = ''; });
+    devAcctLoad();
+  }catch(e){ msg.textContent = '⚠️ ' + e.message; }
+}
+async function devAcctAct(id, act, days){
+  const e = _devAcctList.find(x => x.id === id) || {};
+  const ask = { add: `Add ${days} days to ${e.name || 'this customer'}?`, reset: 'Free all phones? The customer will sign in again on the phone(s) they want.', revoke: 'Stop this subscription now?', unrevoke: 'Resume this subscription?', delete: 'Delete this customer completely?' }[act];
+  if(!confirm(ask)) return;
+  try{
+    const r = act === 'add' ? await devAcctCall({ op: 'grant', id, days }) : await devAcctCall({ op: act, id });
+    if(r && r.ok === false) alert('❌ ' + (r.reason || 'error'));
+    devAcctLoad();
+  }catch(err){ alert('⚠️ ' + err.message); }
+}
+
 let ppPhones = 1; // AIO2810WE113: Package Plans میں چنے گئے فون (1 = صرف میں)
 function setPlanPhones(n){ ppPhones = Math.min(PLAN_MAX_PACK, Math.max(1, parseInt(n) || 1)); renderPackagePlansView(); }
 function openPackagePlansModal(phones){
@@ -34389,9 +34616,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU154';
+  const APP_VERSION = 'AIO0311TU155';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Held bill keeps its customer; a Walk-in name that matches a saved customer can go to their record';
+  const UPDATE_NOTE = 'New: Sign in with your account (Gmail or mobile number) to unlock your subscription';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
