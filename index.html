@@ -3330,7 +3330,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU155</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU156</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3550,7 +3550,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU155</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU156</span>
     </div>
   </div>
 
@@ -29766,6 +29766,7 @@ function applyPlanDevicesFromPurchases(list){
   const today = toLocalDateStr(new Date());
   let n = 1;
   list.forEach(x => { if(x.exp && x.exp >= today) n = Math.max(n, planDevicesFromSku(x.sku)); });
+  n = Math.max(n, acctPackDevices()); // AIO0311TU156: اکاؤنٹ سبسکرپشن کا پیکج (P1+N) بھی
   if(n !== (parseInt(AppState.settings.planDevices) || 1)){
     AppState.settings.planDevices = n;
     try{ syncPushShopInfo(); renderStaffDevicesCard(); }catch(e){}
@@ -30182,7 +30183,10 @@ function acctApply(r, quiet){
     if(!fromAcct || !s.subscriptionActivatedOn) s.subscriptionActivatedOn = toLocalDateStr(new Date());
     s.isOnFreeTrial = false; s.subscriptionVia = 'account'; s.subscriptionViaPlayBilling = false;
     s.lifetimeLicense = !!r.life;
-  } else if(!r.active && fromAcct && !r.life){
+  }
+  // AIO0311TU156: اکاؤنٹ کا پیکج = کل فون (مالک + ملازم، P1+0…P1+3) — ملٹی ڈیوائس کی حد (`planMaxDevices` → `shopinfo.maxDevices`)
+  const pk = r.active ? Math.min(PLAN_MAX_PACK, Math.max(1, r.devices || 1)) : 0;
+  if(pk && pk > (parseInt(s.planDevices) || 1) || (pk && s.subscriptionVia === 'account' && pk !== (parseInt(s.planDevices) || 1))){ s.planDevices = pk; try{ syncPushShopInfo(); renderStaffDevicesCard(); }catch(e){} } else if(!r.active && fromAcct && !r.life){
     s.subscriptionExpiry = expStr; // ڈویلپر نے مدت کم / ختم کی
   }
   persistAllData();
@@ -30190,9 +30194,10 @@ function acctApply(r, quiet){
   try{ afterSubscriptionChanged(); }catch(e){}
   try{ setupLoginScreen(); }catch(e){}
 }
+function acctPackDevices(){ const a = AppState.settings.acctSub; if(!a || !a.key) return 1; const live = a.life || (a.exp || 0) > Date.now(); return live ? Math.min(PLAN_MAX_PACK, Math.max(1, a.devices || 1)) : 1; }
 function acctDrop(){
   const s = AppState.settings;
-  if(s.subscriptionVia === 'account'){ s.subscriptionExpiry = toLocalDateStr(new Date(Date.now() - 864e5)); s.lifetimeLicense = false; s.subscriptionVia = ''; }
+  if(s.subscriptionVia === 'account'){ s.subscriptionExpiry = toLocalDateStr(new Date(Date.now() - 864e5)); s.lifetimeLicense = false; s.subscriptionVia = ''; s.planDevices = 1; try{ syncPushShopInfo(); renderStaffDevicesCard(); }catch(e){} }
   delete s.acctSub;
   persistAllData();
   try{ renderSubscriptionBanner(); }catch(e){}
@@ -30234,7 +30239,8 @@ function devAcctRender(){
     <input type="tel" id="devAcctP" class="devInput" placeholder="Customer mobile, e.g. 03001234567 (optional)" autocomplete="off">
     <input type="text" id="devAcctN" class="devInput" placeholder="Customer / shop name">
     <div style="display:flex; gap:6px;"><select id="devAcctD" class="devInput" style="flex:1;">${opt}<option value="-1">Custom days…</option></select>
-      <select id="devAcctDev" class="devInput" style="flex:0 0 96px;">${[1,2,3,4,5].map(n => `<option value="${n}">${n} phone${n > 1 ? 's' : ''}</option>`).join('')}</select></div>
+      <select id="devAcctDev" class="devInput" style="flex:0 0 150px;">${[1,2,3,4].map(n => `<option value="${n}">P1+${n - 1} — ${n} phone${n > 1 ? 's' : ''}</option>`).join('')}</select></div>
+    <div class="devSecHint" style="margin-top:-2px;">Package = total phones (owner + staff). Staff phones join with the Shop Code (Staff &amp; Devices), they don't sign in.</div>
     <input type="text" id="devAcctNote" class="devInput" placeholder="Note (agent, payment ref…) — only you see this">
     <button type="button" class="devBigBtn go" onclick="devAcctGrant()">✅ Give / extend</button>
     <div id="devAcctMsg" class="devSecHint"></div>
@@ -30271,7 +30277,7 @@ function devAcctListRender(){
     return `<div style="border:1.5px solid #e2e8f0; border-radius:12px; padding:8px 10px; margin-bottom:8px; font-size:12.5px; line-height:1.7;">
       <b>${acctEsc(e.name || '—')}</b> <span style="float:right;">${st}</span><br>
       ${(e.keys || []).map(k => (k.startsWith('g:') ? '📧 ' : '📱 ') + acctEsc(acctLabel(k))).join('<br>')}<br>
-      📲 Phones: ${e.used}/${e.devices}${e.note ? '<br>📝 ' + acctEsc(e.note) : ''}
+      📦 Package P1+${(e.devices || 1) - 1} (${e.devices} phone${e.devices > 1 ? 's' : ''}) · signed in on ${e.used}${e.note ? '<br>📝 ' + acctEsc(e.note) : ''}
       <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;">
         <button type="button" class="devBigBtn go" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','add',30)">+1 month</button>
         <button type="button" class="devBigBtn go" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','add',365)">+1 year</button>
@@ -34616,9 +34622,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU155';
+  const APP_VERSION = 'AIO0311TU156';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'New: Sign in with your account (Gmail or mobile number) to unlock your subscription';
+  const UPDATE_NOTE = 'Account subscriptions now include staff packages (P1+0 to P1+3) for multi-device';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
