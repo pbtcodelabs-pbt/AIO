@@ -334,7 +334,7 @@ async function handleRates(ctx, debug) {
 }
 
 /* ===== MCS: کالوں / واٹس ایپ / میسج کی گنتی — Durable Object (SQLite)، ہر دن ہر دکان (فون نمبر) کی گنتی ===== */
-const STAT_KINDS = ["call", "wa", "sms", "share", "open", "ad"];
+const STAT_KINDS = ["call", "wa", "sms", "share", "open", "ad", "view"];   /* view = پروفائل دیکھی گئی */
 export class McsStats {
   constructor(state) {
     this.sql = state.storage.sql;
@@ -512,13 +512,13 @@ async function handleProf(request, env, path) {
   if (path === "/pimg") return fwd("/pimg", { id: clean(u.searchParams.get("id")) }, { "Cache-Control": "public, max-age=2592000" });
   let b = {}; if (request.method === "POST") { try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); } }
   const rec = clean(b.rec || u.searchParams.get("rec"));
-  if (!/^p\d{10}$/.test(rec)) return reply({ error: "bad_rec" }, 400);
+  if (!/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec)) return reply({ error: "bad_rec" }, 400);   /* فون + کاروبار کی قسم — ایک نمبر کی کئی پروفائلیں */
   if (path === "/pget") return fwd("/pget", { rec });
   const admin = await verifyFirebaseAdmin(request);
   if (path === "/pclaim") return fwd("/pclaim", { rec, admin });
   if (path === "/psave") {
     const imgs = {};
-    Object.entries(b.imgs && typeof b.imgs === "object" ? b.imgs : {}).forEach(([k, v]) => { const slot = parseInt(k, 10); if (slot >= 0 && slot < 6) imgs[slot] = (typeof v === "string" && /^data:image\/(jpeg|webp|png);base64,/.test(v) && v.length < 450000) ? v : null; });
+    Object.entries(b.imgs && typeof b.imgs === "object" ? b.imgs : {}).forEach(([k, v]) => { const slot = parseInt(k, 10); if (slot >= 0 && slot < 4) imgs[slot] = (typeof v === "string" && /^data:image\/(jpeg|webp|png);base64,/.test(v) && v.length < 450000) ? v : null; });
     return fwd("/psave", { rec, key: clean(b.key), admin, data: b.data ? profClean(b.data) : null, imgs });
   }
   if (path === "/padmin") {
