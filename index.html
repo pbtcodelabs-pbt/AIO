@@ -3306,7 +3306,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU153</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU154</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3526,7 +3526,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU153</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU154</span>
     </div>
   </div>
 
@@ -9985,7 +9985,7 @@ function openDevChat(context){
   devChatContext = context;
   document.getElementById('devChatTitle').textContent = context === 'subscription' ? '💬 Ask About Subscription' : '💬 Chat with Developer';
   document.getElementById('devChatUidLine').textContent = '';
-  // AIO0311TU153 (ہیلپ ڈیسک #31، مالک کا حکم): عام مدد = Help Desk + Gmail؛ واٹس ایپ / SMS صرف سبسکرپشن کے سوال پر
+  // AIO0311TU154 (ہیلپ ڈیسک #31، مالک کا حکم): عام مدد = Help Desk + Gmail؛ واٹس ایپ / SMS صرف سبسکرپشن کے سوال پر
   document.querySelectorAll('#devChatPanel .devChatSubOnly').forEach(b=>{ b.style.display = context === 'subscription' ? '' : 'none'; });
   document.querySelectorAll('#devChatPanel .devChatSupOnly').forEach(b=>{ b.style.display = context === 'subscription' ? 'none' : ''; });
   const s = AppState.settings || {};
@@ -10424,7 +10424,7 @@ function buildAdInquiryMessage(){
   return `Sir, I saw your app's advertisement and I like it. Please guide me on how I can get this app and what the subscription charges are — I'd like to subscribe.`;
 }
 
-// AIO0311TU153: ڈویلپر کو ای میل (پلے اسٹور ایپ — باہر کے ملکوں کے لیے Gmail؛ فون / واٹس ایپ نہیں)
+// AIO0311TU154: ڈویلپر کو ای میل (پلے اسٹور ایپ — باہر کے ملکوں کے لیے Gmail؛ فون / واٹس ایپ نہیں)
 function emailDeveloper(){
   devChatContext = 'support';
   const contact = getDeveloperContact();
@@ -12308,7 +12308,7 @@ function currentBillSnapshot(){
   const cust = custId ? customersData.find(c => c.customer_id == custId) : null;
   return {
     id: Date.now(),
-    label: cust ? cust.name : nextWalkInHoldLabel(), // بغیر نام والے بل: Walk-in #1، #2 … تاکہ آپس میں پہچانے جائیں
+    label: cust ? cust.name : ((document.getElementById('walkinName')?.value || '').trim() || nextWalkInHoldLabel()), // بغیر نام والے بل: Walk-in #1، #2 … تاکہ آپس میں پہچانے جائیں
     customerId: custId,
     cart: JSON.parse(JSON.stringify(Billing.cart)),
     saleMode: Billing.saleMode,
@@ -12316,6 +12316,7 @@ function currentBillSnapshot(){
     received: document.getElementById('amountReceivedInput')?.value || '',
     note: document.getElementById('billNoteInput')?.value || '',
     toWallet: !!document.getElementById('changeToWalletChk')?.checked,
+    walkin: (() => { try{ return walkinInfo(); }catch(e){ return null; } })(), // ہیلپ ڈیسک #38: واک اِن نام/فون بھی ہولڈ کے ساتھ
     edit: editingInvoice() ? billEdit : null, // ✏️ ترمیم والا بل ہولڈ ہو تو ترمیم بھی ساتھ
     heldAt: new Date().toISOString()
   };
@@ -12347,9 +12348,13 @@ function resumeHeldBill(id){
   ['modeWholesale','cartModeWholesale'].forEach(i => document.getElementById(i)?.classList.toggle('active', Billing.saleMode === 'wholesale'));
   const custSel = document.getElementById('customerSelect');
   if(custSel){
+    // ہیلپ ڈیسک #38: تلاش / علاقے کا فلٹر لگا ہو تو گاہک فہرست میں نہیں ملتا تھا اور بل خاموشی سے Walk-in بن جاتا — پہلے فلٹر صاف
+    if(h.customerId){ try{ const si = document.getElementById('custSearchInput'); if(si) si.value = ''; const af = document.getElementById('custAreaFilter'); if(af) af.value = ''; }catch(e){} }
     if(typeof populateCustomerDropdown === 'function') populateCustomerDropdown();
     custSel.value = (h.customerId && Array.from(custSel.options).some(o => o.value == h.customerId)) ? h.customerId : '';
+    if(custSel.value) Billing.counterSale = false;
   }
+  if(h.walkin && !(custSel && custSel.value)){ const wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone'), ws = document.getElementById('walkinSave'); if(wn) wn.value = h.walkin.name || ''; if(wp) wp.value = h.walkin.phone || ''; if(ws) ws.checked = !!h.walkin.save; }
   const d = document.getElementById('discountInput'); if(d) d.value = h.discount || 0;
   const r = document.getElementById('amountReceivedInput'); if(r) r.value = h.received || '';
   const bn = document.getElementById('billNoteInput'); if(bn) bn.value = h.note || '';
@@ -14789,7 +14794,22 @@ function finalizeInvoice(){
 
   const custId = document.getElementById('customerSelect').value;
   let customer = custId ? customersData.find(c => c.customer_id == custId) : null;
-  if(!customer){ const wc = walkinSavedCustomer(); if(wc === false) return; if(wc) customer = wc; }
+  if(!customer){
+    // ہیلپ ڈیسک #38: Walk-in خانے میں لکھا نام / فون کسٹمر لسٹ کے کسی گاہک کا ہو تو پوچھیں — ورنہ پرنٹ پر نام آتا مگر گاہک کے ریکارڈ میں بل نہیں
+    const w = walkinInfo(), wd = (w.phone || '').replace(/\D/g, '').slice(-10), wnm = (w.name || '').toLowerCase().replace(/\s+/g, ' ');
+    const match = !w.save && (wd.length >= 7 || wnm) ? customersData.find(c => !String(c.name || '').includes('Walk-in') && ((wd.length >= 7 && String(c.phone || '').replace(/\D/g, '').slice(-10) === wd) || (wnm && String(c.name || '').toLowerCase().replace(/\s+/g, ' ').trim() === wnm))) : null;
+    if(match && confirm(`"${match.name}" is already in your customer list.\n\nSave this bill in ${match.name}'s customer record?\n\nOK = Yes, add to customer record\nCancel = No, keep as Walk-in`)){
+      const recEl = document.getElementById('amountReceivedInput');
+      const fullCash = Billing.counterSale && recEl && !(parseFloat(recEl.value) > 0);
+      try{ const si = document.getElementById('custSearchInput'); if(si) si.value = ''; const af = document.getElementById('custAreaFilter'); if(af) af.value = ''; }catch(e){}
+      populateCustomerDropdown();
+      const sel = document.getElementById('customerSelect'); if(sel) sel.value = match.customer_id;
+      try{ onCustomerChange(); }catch(e){}
+      if(fullCash && recEl) recEl.value = Math.round(Billing.thisBillTotal || 0);
+      clearWalkinFields();
+      customer = match;
+    } else { const wc = walkinSavedCustomer(); if(wc === false) return; if(wc) customer = wc; }
+  }
 
   const subtotal = Math.round(Billing.cart.reduce((sum,i) => sum + (i.qty*i.unitPrice), 0) * 100) / 100; // AIO2710TU111: 2939.919999 نہیں، 2939.92
   const discount = Math.min(parseFloat(document.getElementById('discountInput')?.value) || 0, subtotal);
@@ -31195,7 +31215,7 @@ let pendingShareCanvas = null, pendingShareFilename = '', pendingShareTitle = ''
 // ===================== 🏷️ PBT Code Labs برانڈنگ — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور واٹس ایپ پیغام کے نیچے (ہمیشہ) =====================
 const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & Android';
 function brandPhone(){
-  // AIO0311TU153 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
+  // AIO0311TU154 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
   let d = String(AppState.settings.devSms || '03206793793').replace(/[^0-9]/g, '');
   if(d.length === 11 && d[0] === '0') d = '92' + d.slice(1);
   if(d.length === 12 && d.startsWith('92')) return '+92 ' + d.slice(2, 5) + '-' + d.slice(5);
@@ -32563,7 +32583,7 @@ async function renderEodReportToCanvas(){
     note(byQty.length + ' different item(s) sold this day.');
   } else note('No items sold this day.');
   gap();
-  // 9) AIO0311TU153 (ہیلپ ڈیسک #22، مالک کا حکم): «BALANCES (now)» ہٹایا — پرانی تاریخ کی رپورٹ میں آج کا بقایا الجھن بناتا تھا؛ بقایا صرف ڈیش بورڈ پر
+  // 9) AIO0311TU154 (ہیلپ ڈیسک #22، مالک کا حکم): «BALANCES (now)» ہٹایا — پرانی تاریخ کی رپورٹ میں آج کا بقایا الجھن بناتا تھا؛ بقایا صرف ڈیش بورڈ پر
   gap(10);
   add(fs(40), y => { ctx.strokeStyle = '#94a3b8'; ctx.setLineDash([fs(4), fs(3)]); ctx.beginPath(); ctx.moveTo(M, y + fs(4)); ctx.lineTo(M + CW, y + fs(4)); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = '#334155'; ctx.textAlign = 'center'; ctx.font = font(700, 10); ctx.fillText('Counted cash: ____________     Signature: ____________', W / 2, y + fs(30)); });
@@ -34369,9 +34389,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU153';
+  const APP_VERSION = 'AIO0311TU154';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Help & contact: Help Desk (Report problems & issues) and Gmail — WhatsApp only for subscription questions';
+  const UPDATE_NOTE = 'Held bill keeps its customer; a Walk-in name that matches a saved customer can go to their record';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
