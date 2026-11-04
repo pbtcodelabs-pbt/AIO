@@ -3250,7 +3250,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     </div>
     <div id="acctState"></div>
     <div id="acctForm">
-      <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin:0 0 10px;">Already have an AIO POS subscription on your account? Sign in with the same Google account or mobile number to unlock it on this phone.</p>
+      <p style="font-size:12.5px; color:var(--muted); line-height:1.6; margin:0 0 10px;">Already have an AIO POS account? Sign in with the same Google account or mobile number to unlock this phone.</p>
       <div style="font-weight:800; font-size:13px; margin-bottom:6px;">1️⃣ Google account (Gmail)</div>
       <div id="acctGoogleBtn" style="min-height:44px; display:flex; justify-content:center;"></div>
       <div style="text-align:center; color:var(--muted); font-size:12px; margin:10px 0;">— or —</div>
@@ -3261,8 +3261,27 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
     </div>
     <div id="acctMsg" style="margin-top:10px; font-size:13px; font-weight:700; text-align:center; line-height:1.6;"></div>
+    <!-- AIO0411WE158: اکاؤنٹ کی تفصیل ہیلپ ڈیسک سے ڈویلپر کو (UID، نام، موبائل، Gmail) -->
+    <button type="button" class="acctSendBtn" onclick="acctSendToggle()">📨 Send account details to developer</button>
+    <div id="acctSendBox" style="display:none;">
+      <div class="acctSendUid">UID: <b id="acctSendUid"></b></div>
+      <input type="text" id="acctSendName" placeholder="Name (shop / your name)" autocomplete="name">
+      <input type="tel" id="acctSendPhone" inputmode="tel" placeholder="Mobile no. — 03001234567" autocomplete="tel">
+      <input type="email" id="acctSendMail" placeholder="Gmail — name@gmail.com" autocomplete="email">
+      <button type="button" class="acctSendGo" onclick="acctSendGo()">📨 Send to developer</button>
+      <div class="acctSendHint">Your details open in PBT Help Desk — just press Send there. The developer will set up your account and reply.</div>
+    </div>
   </div>
 </div>
+<style>
+.loginAcctSend{display:block;margin:8px auto 0;padding:7px 14px;border-radius:999px;border:1.5px dashed #0f766e;background:#f0fdfa;color:#0f766e;font-weight:800;font-size:12.5px;cursor:pointer}
+.acctSendBtn{display:block;width:100%;margin-top:12px;padding:10px;border-radius:12px;border:1.5px dashed #0f766e;background:#f0fdfa;color:#0f766e;font-weight:800;font-size:13.5px;cursor:pointer}
+#acctSendBox{margin-top:8px;border:1.5px solid #cbd5e1;border-radius:12px;padding:10px;background:#f8fafc}
+#acctSendBox input{display:block;width:100%;box-sizing:border-box;margin:0 0 6px;padding:10px;border:1.5px solid #dbe1ea;border-radius:10px;font-size:15px}
+.acctSendUid{font-size:12.5px;margin-bottom:6px;color:#334155;direction:ltr;text-align:left}
+.acctSendGo{display:block;width:100%;padding:11px;border:none;border-radius:10px;background:var(--primary,#0f766e);color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+.acctSendHint{font-size:11.5px;color:var(--muted,#64748b);margin-top:6px;line-height:1.5}
+</style>
 <div class="modalOverlay" id="devConsoleModal" style="z-index:9500;" onclick="if(event.target===this) closeDevConsole()">
   <div class="modalBox" style="max-width:420px;">
     <div class="modalHeader" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
@@ -3330,7 +3349,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0311TU157</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE158</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3404,6 +3423,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div id="turnOffTouchIdHint" class="loginHint" style="display:none;"><a href="javascript:void(0)" onclick="turnOffTouchId()" style="color:var(--muted); font-weight:700; text-decoration:none;">👆 Turn off Touch ID on this device</a></div>
     <!-- ---------- 📦 پیکج دیکھنے کا چھوٹا سا لنک — سب سے آخر میں، جو دیکھنا چاہے وہ دیکھ لے ---------- -->
     <div class="loginHint" style="margin-top:6px;"><a href="javascript:void(0)" onclick="openPackagePlansModal()" style="color:var(--muted); font-weight:700; font-size:12px; text-decoration:underline;">📦 View Subscription Plans</a> · <a href="javascript:void(0)" onclick="acctOpen()" style="color:var(--primary); font-weight:700; font-size:12px; text-decoration:underline;">🔑 Sign in with account</a></div>
+    <button type="button" class="loginAcctSend" onclick="acctSendFromLogin()">📨 Send account details to developer</button>
   </div>
   <button class="devChatBubble" onclick="openDevChat('subscription')" title="Chat with Developer">💬</button>
 </div>
@@ -3550,7 +3570,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0311TU157</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE158</span>
     </div>
   </div>
 
@@ -9424,13 +9444,13 @@ function renderHomeUnfinishedCartCard(){
 const NAV_PALETTE = ['#6366f1','#10b981','#f43f5e','#f97316','#14b8a6','#8b5cf6','#0ea5e9','#d946ef','#06b6d4','#eab308','#ec4899','#84cc16','#3b82f6','#22c55e','#f59e0b','#a855f7'];
 // ---------- AIO1210MO024: نمبر A سے Z کی ترتیب میں — Advance Orders = 1، Bill & Print Settings = 2 ... ----------
 // ---------- AIO0111SU142: 🆘 PBT Help Desk — مسئلہ / مشورہ ایپ کے اندر پاپ اپ میں (pbtcodelabs-pbt.github.io/help) ----------
-function openHelpDesk(){
+function openHelpDesk(extra){
   const s = (typeof AppState !== 'undefined' && AppState.settings) || {};
   const ver = (document.getElementById('topVersionBadge')?.textContent || '').trim();
-  const o = { app: 'AIO', ver, phone: s.businessPhone || '', name: s.businessName || '' };
+  const o = Object.assign({ app: 'AIO', ver, phone: s.businessPhone || '', name: s.businessName || '' }, (extra && typeof extra === 'object' && !extra.target) ? extra : {});
   if(window.PBTHelp){ window.PBTHelp.open(o); return; }
-  const q = 'app=' + o.app + '&v=' + encodeURIComponent(ver) + '&phone=' + encodeURIComponent(o.phone) + '&name=' + encodeURIComponent(o.name);
-  window.open('https://pbtcodelabs-pbt.github.io/help/?' + q + '#/app/' + o.app, '_blank');
+  const q = 'app=' + o.app + '&v=' + encodeURIComponent(ver) + '&phone=' + encodeURIComponent(o.phone) + '&name=' + encodeURIComponent(o.name) + (o.text ? '&type=' + (o.type || 'ask') + '&text=' + encodeURIComponent(o.text) : '');
+  window.open('https://pbtcodelabs-pbt.github.io/help/?' + q + (o.text ? '#/new/' : '#/app/') + o.app, '_blank');
 }
 window.openHelpDesk = openHelpDesk;
 
@@ -30128,6 +30148,28 @@ async function acctOpen(){
   }catch(e){ box.innerHTML = '<span style="font-size:12px; color:var(--muted);">Google sign-in is not available right now — use your mobile number below.</span>'; }
 }
 function acctClose(){ document.getElementById('acctModal').classList.remove('show'); }
+// ---------- AIO0411WE158 (مالک کا حکم): «Send account details to developer» — UID، Name، Mobile no.، Gmail ہیلپ ڈیسک میں خود بھرے ----------
+function acctSendToggle(){
+  const b = document.getElementById('acctSendBox'), on = b.style.display === 'none';
+  b.style.display = on ? 'block' : 'none'; if(!on) return;
+  const s = AppState.settings || {}, a = s.acctSub || {};
+  document.getElementById('acctSendUid').textContent = getOrCreateDeviceUID();
+  const n = document.getElementById('acctSendName'), p = document.getElementById('acctSendPhone'), m = document.getElementById('acctSendMail');
+  if(!n.value) n.value = s.businessName || '';
+  if(!p.value) p.value = s.businessPhone || (String(a.key || '').startsWith('p:') ? acctLabel(a.key) : '') || (document.getElementById('acctPhone').value || '');
+  if(!m.value && String(a.key || '').startsWith('g:')) m.value = acctLabel(a.key);
+  setTimeout(() => { try{ (n.value ? (p.value ? m : p) : n).focus(); }catch(e){} }, 80);
+}
+function acctSendFromLogin(){ acctOpen(); const b = document.getElementById('acctSendBox'); if(b.style.display === 'none') acctSendToggle(); setTimeout(() => { try{ b.scrollIntoView({ block: 'center' }); }catch(e){} }, 100); }
+function acctSendGo(){
+  const n = document.getElementById('acctSendName').value.trim(), p = document.getElementById('acctSendPhone').value.trim(), m = document.getElementById('acctSendMail').value.trim().toLowerCase();
+  if(n.length < 2){ acctMsg('⚠️ Please write your name', false); return; }
+  if(p.replace(/\D/g, '').length < 10){ acctMsg('⚠️ Please write your mobile number, e.g. 03001234567', false); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)){ acctMsg('⚠️ Please write your Gmail, e.g. name@gmail.com', false); return; }
+  const text = '🔑 Account sign-in request — AIO POS\nUID: ' + getOrCreateDeviceUID() + '\nName: ' + n + '\nMobile no.: ' + p + '\nGmail: ' + m;
+  acctClose();
+  openHelpDesk({ text, type: 'ask', phone: p, name: n });
+}
 function acctClaimPhone(){
   const v = (document.getElementById('acctPhone').value || '').trim();
   if(v.replace(/\D/g, '').length < 10){ acctMsg('⚠️ Enter your mobile number, e.g. 03001234567', false); return; }
@@ -30222,6 +30264,7 @@ function devAcctRender(){
   }
   const opt = [[30,'1 month'],[90,'3 months'],[180,'6 months'],[365,'1 year'],[0,'Lifetime']].map(([d,t]) => `<option value="${d}" ${d === 365 ? 'selected' : ''}>${t}</option>`).join('');
   box.innerHTML = `<div style="font-weight:800; margin-bottom:6px;">➕ Give / extend a subscription</div>
+    <textarea id="devAcctPaste" class="devInput" rows="2" placeholder="📋 Paste the customer's account details here (from Help Desk) — Name, Mobile, Gmail, UID fill automatically" oninput="devAcctPasteFill(this.value)" style="min-height:52px;"></textarea>
     <input type="email" id="devAcctG" class="devInput" placeholder="Customer Gmail (optional)" autocomplete="off">
     <input type="tel" id="devAcctP" class="devInput" placeholder="Customer mobile, e.g. 03001234567 (optional)" autocomplete="off">
     <input type="text" id="devAcctN" class="devInput" placeholder="Customer / shop name">
@@ -30274,12 +30317,29 @@ function devAcctListRender(){
       </div></div>`;
   }).join('');
 }
+// AIO0411WE158: ہیلپ ڈیسک والا پیغام پیسٹ → خانے خود
+function devAcctPasteFill(t){
+  t = String(t || ''); if(!t.trim()) return;
+  const get = re => { const m = t.match(re); return m ? m[1].trim() : ''; };
+  const uid = get(/UID\s*[:：]\s*([^\n]+)/i), name = get(/Name\s*[:：]\s*([^\n]+)/i);
+  let mob = get(/Mobile(?:\s*no\.?)?\s*[:：]\s*([^\n]+)/i), mail = get(/Gmail\s*[:：]\s*([^\n]+)/i);
+  if(!mail){ const m = t.match(/[^\s@:]+@[^\s@]+\.[a-z]{2,}/i); if(m) mail = m[0]; }
+  if(!mob){ const m = t.match(/(?:\+?92|0)3\d{2}[\s-]?\d{7}/); if(m) mob = m[0]; }
+  if(mail) document.getElementById('devAcctG').value = mail.toLowerCase();
+  if(mob) document.getElementById('devAcctP').value = mob.replace(/[^\d+]/g, '');
+  if(name) document.getElementById('devAcctN').value = name;
+  if(uid){ const nt = document.getElementById('devAcctNote'); if(!/UID:/.test(nt.value)) nt.value = ('UID: ' + uid + (nt.value ? ' · ' + nt.value : '')); }
+  const msg = document.getElementById('devAcctMsg'); if(msg) msg.textContent = (name || mob || mail) ? '✅ Filled from pasted details — check, choose package, then Give' : '';
+}
 async function devAcctGrant(){
   const msg = document.getElementById('devAcctMsg');
   const g = document.getElementById('devAcctG').value.trim(), p = document.getElementById('devAcctP').value.trim();
   if(!g && !p){ msg.textContent = '⚠️ Enter Gmail or mobile number (or both)'; return; }
   let days = parseInt(document.getElementById('devAcctD').value, 10), life = days === 0;
   if(days === -1){ days = parseInt(prompt('How many days?', '30') || '0', 10); if(!(days > 0)) return; }
+  // AIO0411WE158 (مالک کا حکم): دینے سے پہلے تفصیلات کی پکی جانچ
+  const dv = parseInt(document.getElementById('devAcctDev').value, 10) || 1;
+  if(!confirm('کیا آپ نے اکاؤنٹ کی تمام تفصیلات مکمل طور پر چیک کر لی ہیں؟ ان میں کوئی غلطی تو نہیں، اور کوئی بات باقی تو نہیں رہ گئی؟\n\n👤 ' + (document.getElementById('devAcctN').value.trim() || '—') + '\n📱 ' + (p || '—') + '\n📧 ' + (g || '—') + '\n📦 P1+' + (dv - 1) + ' (' + dv + ' phone' + (dv > 1 ? 's' : '') + ') · ' + (life ? 'Lifetime' : days + ' days') + '\n\nOK = سب مکمل ہے، اکاؤنٹ کھول دیں')) return;
   msg.textContent = '⏳ Saving…';
   try{
     const r = await devAcctCall({ op: 'grant', emails: g ? [g] : [], phones: p ? [p] : [], days: life ? 0 : days, life, devices: parseInt(document.getElementById('devAcctDev').value, 10) || 1, name: document.getElementById('devAcctN').value.trim(), note: document.getElementById('devAcctNote').value.trim() });
@@ -34609,9 +34669,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0311TU157';
+  const APP_VERSION = 'AIO0411WE158';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Walk-in bills stay separate — no prompt to attach them to a saved customer';
+  const UPDATE_NOTE = 'Sign in with account: “Send account details to developer” — UID, name, mobile and Gmail go ready-filled to Help Desk';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
