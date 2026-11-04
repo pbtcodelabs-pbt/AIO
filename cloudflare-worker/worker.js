@@ -348,6 +348,9 @@ export class McsStats {
     /* 🔑 اکاؤنٹ سبسکرپشن (AIO وغیرہ، پلے اسٹور سے باہر خریدی): ریکارڈ + جی میل / موبائل کی چابیاں */
     this.sql.exec("CREATE TABLE IF NOT EXISTS ent (id TEXT PRIMARY KEY, app TEXT, data TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS entkey (k TEXT PRIMARY KEY, id TEXT)");
+    /* 🤝 MCS کمیشن ایجنٹ (MCS0411WE131): درخواست + شناختی کارڈ / سیلفی کی تصویریں — صرف ایڈمن پڑھے */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS agent (id TEXT PRIMARY KEY, phone TEXT, data TEXT, ts INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS agimg (id TEXT, kind TEXT, data TEXT, PRIMARY KEY (id, kind))");
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
@@ -372,6 +375,39 @@ export class McsStats {
         this.entPut(e);
       } else if (Date.now() - (mine.seen || mine.at || 0) > 864e5) { mine.seen = Date.now(); this.entPut(e); }   /* AIO0411WE162: ہر جانچ پر لکھنا نہیں — دن میں ایک بار */
       const o = this.entOut(e); delete o.keys; o.id = undefined; return Response.json(o);   /* گاہک کو دوسری چابیاں (جی میل / نمبر) نہیں */
+    }
+    if (op === "/ag_apply") {   /* ایجنٹ کی درخواست — ایک نمبر کی ایک (دوبارہ بھیجے تو تازہ، منظور شدہ کا کوڈ برقرار) */
+      const b = await request.json(); const now = Date.now();
+      const old = this.sql.exec("SELECT id, data FROM agent WHERE phone = ?", b.d.phone).toArray()[0];
+      const prev = old ? JSON.parse(old.data) : null;
+      const id = old ? old.id : "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
+      const d = Object.assign({}, b.d, { id, at: prev ? prev.at : now, upd: now, status: prev && prev.status === "approved" ? "approved" : "pending", code: prev ? prev.code || "" : "", note: prev ? prev.note || "" : "" });
+      this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET phone = excluded.phone, data = excluded.data, ts = excluded.ts", id, d.phone, JSON.stringify(d), now);
+      for (const k of ["front", "back", "selfie"]) if (b.img && b.img[k]) this.sql.exec("INSERT INTO agimg (id, kind, data) VALUES (?, ?, ?) ON CONFLICT (id, kind) DO UPDATE SET data = excluded.data", id, k, b.img[k]);
+      return Response.json({ ok: true, id, status: d.status, code: d.code });
+    }
+    if (op === "/ag_status") {   /* درخواست دینے والا: اپنے نمبر + فون (dev) سے حالت */
+      const b = await request.json();
+      const r = this.sql.exec("SELECT data FROM agent WHERE phone = ?", b.phone).toArray()[0];
+      if (!r) return Response.json({ ok: false, reason: "none" });
+      const d = JSON.parse(r.data); if (d.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
+      return Response.json({ ok: true, status: d.status, code: d.code || "", note: d.note || "", name: d.name });
+    }
+    if (op === "/ag_admin") {   /* ایڈمن: فہرست، تصویریں، منظور (کوڈ MCS-AG-0001…)، رد، حذف */
+      const b = await request.json();
+      if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM agent ORDER BY ts DESC LIMIT 1000").toArray().map((r) => JSON.parse(r.data)) });
+      const r = this.sql.exec("SELECT data FROM agent WHERE id = ?", b.id).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "none" });
+      const d = JSON.parse(r.data);
+      if (b.op === "imgs") return Response.json({ ok: true, img: Object.fromEntries(this.sql.exec("SELECT kind, data FROM agimg WHERE id = ?", b.id).toArray().map((x) => [x.kind, x.data])) });
+      if (b.op === "delete") { this.sql.exec("DELETE FROM agent WHERE id = ?", b.id); this.sql.exec("DELETE FROM agimg WHERE id = ?", b.id); return Response.json({ ok: true }); }
+      if (b.op === "approve") {
+        if (!d.code) { let n = 0; for (const x of this.sql.exec("SELECT data FROM agent").toArray()) { const m = /MCS-AG-(\d+)/.exec(JSON.parse(x.data).code || ""); if (m) n = Math.max(n, parseInt(m[1], 10)); } d.code = "MCS-AG-" + String(n + 1).padStart(4, "0"); }
+        d.status = "approved"; d.okAt = Date.now();
+      } else if (b.op === "reject") { d.status = "rejected"; d.note = String(b.note || "").slice(0, 300); }
+      else if (b.op === "pending") d.status = "pending";
+      else return Response.json({ ok: false, reason: "bad_op" }, { status: 400 });
+      this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), b.id);
+      return Response.json({ ok: true, agent: d });
     }
     if (op === "/ent_dev") {   /* AIO0411WE161: ڈویلپر نے یہ فون (UID) جوڑا ہے؟ — گاہک کا فون خود کھلے */
       const b = await request.json();
@@ -555,6 +591,31 @@ async function verifyGoogleIdToken(jwt) {
 }
 function entPhone(v) { let d = String(v || "").replace(/[۰-۹]/g, (c) => "۰۱۲۳۴۵۶۷۸۹".indexOf(c)).replace(/\D/g, ""); if (d.startsWith("0092")) d = d.slice(2); if (d.startsWith("0")) d = "92" + d.slice(1); if (d.length === 10 && d.startsWith("3")) d = "92" + d; return /^92\d{10}$/.test(d) ? d : ""; }
 function entEmail(v) { const e = String(v || "").trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e) ? e : ""; }
+/* ===== 🤝 MCS کمیشن ایجنٹ (MCS0411WE131) ===== */
+async function handleAgent(request, env, path) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const fwd = async (op, body) => { const r = await stub.fetch("https://s" + op, { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS } }); };
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const S = (v, n) => String(v == null ? "" : v).replace(/[<>]/g, "").slice(0, n).trim();
+  const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
+  if (path === "/agapply") {
+    const phone = entPhone(b.phone); if (!phone) return reply({ ok: false, reason: "bad_phone" });
+    const cnic = String(b.cnic || "").replace(/\D/g, ""); if (cnic.length !== 13) return reply({ ok: false, reason: "bad_cnic" });
+    if (dev.length < 6) return reply({ error: "bad_dev" }, 400);
+    const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
+    const d = { name: S(b.name, 80), father: S(b.father, 80), cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), phone, wa: entPhone(b.wa) || "", email: S(b.email, 80), city: S(b.city, 60), address: S(b.address, 200), biz: S(b.biz, 120), bizRk: S(b.bizRk, 60), exp: S(b.exp, 400), dev };
+    if (!d.name || !d.father || !d.city || !d.address) return reply({ ok: false, reason: "missing" });
+    return fwd("/ag_apply", { d, img });
+  }
+  if (path === "/agstatus") { const phone = entPhone(b.phone); if (!phone || dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/ag_status", { phone, dev }); }
+  if (path === "/agadmin") {
+    if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete"].includes(op)) return reply({ error: "bad_op" }, 400);
+    return fwd("/ag_admin", { op, id: String(b.id || "").slice(0, 40), note: b.note });
+  }
+  return reply({ error: "not_found" }, 404);
+}
 async function handleEnt(request, env, path) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -653,6 +714,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
