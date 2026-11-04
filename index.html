@@ -12326,6 +12326,7 @@ function deleteBillingCartDraft(){
 function resetBillingCart(){
   Billing.cart = [];
   try{ clearWalkinFields(); }catch(e){}
+  try{ advOrderBilling = null; saveToStorage('advOrderBilling', null); }catch(e){}
   clearBillingCartDraft();
   const custSel = document.getElementById('customerSelect');
   if(custSel) custSel.value = '';
@@ -15078,6 +15079,7 @@ function finalizeInvoice(){
     if(oldCust && oldCust !== customer) settleNegativeReceivable(oldCust, `Paid on ${invoice.invoice_no} (moved to another customer) — kept as advance`);
   }
   if(editInv){ billEdit = null; saveToStorage('billEditDraft', null); renderEditBillBanner(); showNavToast(`✅ ${invoice.invoice_no} updated`); }
+  advOrderBilled(invoice); // ہیلپ ڈیسک #74
   if(invoice.bill_serial && invoice.bill_serial > (parseInt(loadFromStorage('lastBillSerial', 0)) || 0)) saveToStorage('lastBillSerial', invoice.bill_serial);
   openInvoicePreview(invoice.invoice_id); // خودکار پریمیم پرنٹ پریویو کھل جائے
 }
@@ -22722,6 +22724,18 @@ function advOrderTotal(order){
 }
 
 // ---------- اگلے سیل راؤنڈ پر: یہ آرڈر اصل Billing کارٹ میں لوڈ کر دیں تاکہ فوری بل بنایا جا سکے ----------
+let advOrderBilling = loadFromStorage('advOrderBilling', null);
+function advOrderBilled(invoice){ // ہیلپ ڈیسک #74: اسی آرڈر کا اصل بل بن گیا → آرڈر فہرست سے صاف (نئے آرڈر کی جگہ)
+  if(advOrderBilling == null) return;
+  const i = advanceOrdersData.findIndex(o => o.id === advOrderBilling);
+  advOrderBilling = null; saveToStorage('advOrderBilling', null);
+  if(i < 0) return;
+  const o = advanceOrdersData[i]; advanceOrdersData.splice(i, 1);
+  persistAllData(); try{ renderAdvanceOrdersScreen(); }catch(e){}
+  try{ showNavToast(`📝 Advance order of ${o.customerName} billed (${invoice.invoice_no}) — removed from the list`); }catch(e){}
+}
+// پرانے «fulfilled» (کارٹ میں بھیجے جا چکے) آرڈر ایک بار صاف — ان کے بل بن چکے
+setTimeout(() => { try{ if(!loadFromStorage('advFulfilledPurged', false) && typeof advanceOrdersData !== 'undefined'){ const n = advanceOrdersData.length; for(let k = advanceOrdersData.length - 1; k >= 0; k--) if(advanceOrdersData[k].status === 'fulfilled') advanceOrdersData.splice(k, 1); saveToStorage('advFulfilledPurged', true); if(advanceOrdersData.length !== n){ persistAllData(); try{ renderAdvanceOrdersScreen(); }catch(e){} } } }catch(e){} }, 2500);
 function fulfillAdvanceOrder(orderId){
   const order = advanceOrdersData.find(o => o.id === orderId);
   if(!order) return;
@@ -22738,10 +22752,8 @@ function fulfillAdvanceOrder(orderId){
 
   const matchedCustomer = customersData.find(c => c.name.toLowerCase() === order.customerName.toLowerCase());
 
-  order.status = 'fulfilled';
-  order.fulfilledAt = new Date().toISOString();
-  persistAllData();
-  renderAdvanceOrdersScreen();
+  // ہیلپ ڈیسک #74: آرڈر ابھی «fulfilled» نہیں — اصل بل مکمل ہونے پر ہی فہرست سے ہٹے گا (advOrderBilled)
+  advOrderBilling = order.id; saveToStorage('advOrderBilling', advOrderBilling);
 
   goTo('billing');
   document.getElementById('custSearchInput') && (document.getElementById('custSearchInput').value = '');
@@ -22750,6 +22762,8 @@ function fulfillAdvanceOrder(orderId){
   const custSel = document.getElementById('customerSelect');
   if(custSel){ custSel.value = matchedCustomer ? matchedCustomer.customer_id : ''; }
   Billing.counterSale = !matchedCustomer;
+  // ہیلپ ڈیسک #74: گاہک فہرست میں نہ ہو تو آرڈر والا نام / فون Walk-in خانوں میں — بل پر یہی نام
+  try{ clearWalkinFields(); if(!matchedCustomer){ const wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone'); if(wn) wn.value = order.customerName || ''; if(wp) wp.value = order.customerPhone || ''; walkinDraftSave(); } }catch(e){}
   syncCartModeControls();
   renderCart();
 
@@ -34737,9 +34751,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0511TH164';
+  const APP_VERSION = 'AIO0511TH165';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Editing a walk-in bill keeps its name & phone; customer search can use the typed name as walk-in';
+  const UPDATE_NOTE = 'Advance order: name goes to the bill, and the order leaves the list once its bill is made';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
