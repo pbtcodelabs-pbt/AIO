@@ -373,6 +373,16 @@ export class McsStats {
       this.entPut(e);
       const o = this.entOut(e); delete o.keys; o.id = undefined; return Response.json(o);   /* گاہک کو دوسری چابیاں (جی میل / نمبر) نہیں */
     }
+    if (op === "/ent_dev") {   /* AIO0411WE161: ڈویلپر نے یہ فون (UID) جوڑا ہے؟ — گاہک کا فون خود کھلے */
+      const b = await request.json();
+      for (const r of this.sql.exec("SELECT data FROM ent WHERE app = ?", b.app).toArray()) {
+        const e = JSON.parse(r.data); const c = (e.claims || []).find((x) => x.dev === b.dev);
+        if (!c || e.revoked) continue;
+        c.seen = Date.now(); this.entPut(e);
+        const o = this.entOut(e); const key = (e.keys || []).find((k) => k.startsWith("p:")) || (e.keys || [])[0] || ""; delete o.keys; o.id = undefined; o.key = key; return Response.json(o);
+      }
+      return Response.json({ ok: false, reason: "none" });
+    }
     if (op === "/ent_admin") {   /* ڈویلپر: دینا / بڑھانا، فہرست، بند، فون صاف، حذف */
       const b = await request.json();
       const now = Date.now();
@@ -551,6 +561,10 @@ async function handleEnt(request, env, path) {
   const fwd = async (op, body) => { const r = await stub.fetch("https://s" + op, { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS } }); };
   let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
   const app = String(b.app || ""); if (!ENT_APPS.includes(app)) return reply({ error: "bad_app" }, 400);
+  if (path === "/entdev") {
+    const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (dev.length < 6) return reply({ error: "bad_dev" }, 400);
+    return fwd("/ent_dev", { app, dev });
+  }
   if (path === "/entclaim" || path === "/entstatus") {
     const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (dev.length < 6) return reply({ error: "bad_dev" }, 400);
     let key = "";
@@ -639,7 +653,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
+    { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
