@@ -476,7 +476,11 @@ export class McsStats {
       if (r && r.key && !b.admin) return Response.json({ error: "taken" }, { status: 409 });
       const key = [...crypto.getRandomValues(new Uint8Array(18))].map((x) => "abcdefghjkmnpqrstuvwxyz23456789"[x % 31]).join("");
       if (r) this.sql.exec("UPDATE prof SET key = ? WHERE rec = ?", key, b.rec);
-      else this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts) VALUES (?, '{}', ?, ?, ?, ?)", b.rec, key, now, now + 15 * 864e5, now);   /* MCS: مفت آزمائش 15 دن */
+      else {
+        /* MCS0411WE133 (مالک کا حکم): 15 دن مفت صرف اس نمبر کی پہلی پروفائل پر (rec = نمبر_قسم)؛ اگلی پروفائل بند حالت میں — ایک سال جاری کرنے پر چالو */
+        const pfx = String(b.rec).split("_")[0], first = !this.sql.exec("SELECT rec FROM prof WHERE substr(rec, 1, ?) = ? AND rec != ? LIMIT 1", pfx.length + 1, pfx + "_", b.rec).toArray().length;
+        this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts) VALUES (?, '{}', ?, ?, ?, ?)", b.rec, key, now, first || b.admin ? now + 15 * 864e5 : now, now);
+      }
       const x = this.sql.exec("SELECT since, until FROM prof WHERE rec = ?", b.rec).toArray()[0];
       return Response.json({ key, since: x.since, until: x.until });
     }
