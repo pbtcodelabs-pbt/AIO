@@ -397,12 +397,15 @@ export class McsStats {
       for (const k of ["front", "back", "selfie"]) if (b.img && b.img[k]) this.sql.exec("INSERT INTO agimg (id, kind, data) VALUES (?, ?, ?) ON CONFLICT (id, kind) DO UPDATE SET data = excluded.data", id, k, b.img[k]);
       return Response.json({ ok: true, id, status: d.status, code: d.code });
     }
-    if (op === "/ag_status") {   /* درخواست دینے والا: اپنے نمبر + فون (dev) سے حالت */
+    if (op === "/ag_status") {   /* درخواست دینے والا: اپنے نمبر + فون (dev) سے حالت؛ MCS0511TH139: یا نمبر + PIN (مالک کا بنایا ایجنٹ — یہ فون جڑ جاتا ہے) */
       const b = await request.json();
       const r = this.sql.exec("SELECT data FROM agent WHERE phone = ?", b.phone).toArray()[0];
       if (!r) return Response.json({ ok: false, reason: "none" });
-      const d = JSON.parse(r.data); if (d.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
-      return Response.json({ ok: true, status: d.status, code: d.code || "", pin: d.status === "approved" ? d.pin || "" : "", note: d.note || "", name: d.name, refs: d.code ? this.sql.exec("SELECT COUNT(*) AS n FROM agref WHERE code = ?", d.code).toArray()[0].n : 0 });
+      const d = JSON.parse(r.data);
+      if (b.pin) { if (d.status !== "approved" || !d.pin || d.pin !== b.pin) return Response.json({ ok: false, reason: "login" }); if (d.dev !== b.dev) { d.dev = b.dev; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), d.id); } }
+      else if (d.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
+      d.docs = this.sql.exec("SELECT COUNT(*) AS n FROM agimg WHERE id = ?", d.id).toArray()[0].n >= 3;
+      return Response.json({ ok: true, status: d.status, code: d.code || "", pin: d.status === "approved" ? d.pin || "" : "", note: d.note || "", name: d.name, docs: !!d.docs, refs: d.code ? this.sql.exec("SELECT COUNT(*) AS n FROM agref WHERE code = ?", d.code).toArray()[0].n : 0 });
     }
     if (op === "/ag_ref") {   /* ایپ: اس کاروبار کو اس ایجنٹ کے نام لکھیں (صرف منظور ایجنٹ کا کوڈ) */
       const b = await request.json();
@@ -443,12 +446,41 @@ export class McsStats {
       if (b.op === "del") this.sql.exec("DELETE FROM codev WHERE phone = ?", b.phone);
       return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen FROM codev ORDER BY ts DESC").toArray() });
     }
+    if (op === "/ag_propose") {   /* MCS0511TH139: کو-ڈویلپر ایجنٹ تجویز کرے → ⏳ نئی درخواست، منظوری صرف مالک */
+      const b = await request.json(); const c = b.c || {};
+      const cd = this.sql.exec("SELECT name, pin FROM codev WHERE phone = ?", b.cphone).toArray()[0];
+      if (!cd || !b.cpin || cd.pin !== b.cpin) return Response.json({ ok: false, reason: "login" });
+      if (this.sql.exec("SELECT id FROM agent WHERE phone = ?", c.phone).toArray().length) return Response.json({ ok: false, reason: "exists" });
+      for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === c.code || x.bizRk === c.code) return Response.json({ ok: false, reason: "code_taken" }); }
+      const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
+      const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: "", pin: "", status: "pending", at: now, upd: now, byCodev: cd.name, dev: "", cnic: "", father: "", address: "", wa: "", email: "", exp: "👥 کو-ڈویلپر " + cd.name + " نے تجویز کیا", note: "" };
+      this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
+      return Response.json({ ok: true });
+    }
+    if (op === "/ag_docs") {   /* MCS0511TH139: ایجنٹ خود (نمبر + PIN + اسی فون) شناختی کارڈ نمبر اور تین تصویریں لگائے */
+      const b = await request.json();
+      const r = this.sql.exec("SELECT data FROM agent WHERE phone = ?", b.phone).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "login" });
+      const d = JSON.parse(r.data); if (!d.pin || d.pin !== b.pin || d.dev !== b.dev) return Response.json({ ok: false, reason: "login" });
+      d.cnic = b.cnic; if (b.father) d.father = b.father; d.docsAt = Date.now();
+      this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), d.id);
+      for (const k of ["front", "back", "selfie"]) this.sql.exec("INSERT INTO agimg (id, kind, data) VALUES (?, ?, ?) ON CONFLICT (id, kind) DO UPDATE SET data = excluded.data", d.id, k, b.img[k]);
+      return Response.json({ ok: true });
+    }
     if (op === "/ag_admin") {   /* ایڈمن: فہرست، تصویریں، منظور (کوڈ MCS-AG-0001…)، رد، حذف */
       const b = await request.json();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM agent ORDER BY ts DESC LIMIT 1000").toArray().map((r) => { const d = JSON.parse(r.data); if (d.code) { d.refs = this.sql.exec("SELECT COUNT(*) AS n FROM agref WHERE code = ?", d.code).toArray()[0].n; d.newProofs = this.sql.exec("SELECT COUNT(*) AS n FROM agproof WHERE code = ? AND done = 0", d.code).toArray()[0].n; } return d; }), rate: parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'rate'").toArray()[0] || {}).v || "0", 10) || 0 });
       if (b.op === "rate") { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('rate', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(Math.max(0, parseInt(b.amount, 10) || 0))); return Response.json({ ok: true }); }
       if (b.op === "pay") { this.sql.exec("INSERT INTO agpay (code, amount, note, ts) VALUES (?, ?, ?, ?)", String(b.code || ""), parseInt(b.amount, 10) || 0, String(b.note || "").slice(0, 200), Date.now()); return Response.json({ ok: true }); }
       if (b.op === "unpay") { this.sql.exec("DELETE FROM agpay WHERE id = ?", parseInt(b.pid, 10) || 0); return Response.json({ ok: true }); }
+      if (b.op === "create") {   /* MCS0511TH139: مالک خود ایجنٹ بنائے — نام، موبائل، پروفائل ID، شہر؛ فوراً منظور + PIN؛ تصویریں بعد میں ایجنٹ خود */
+        const c = b.c || {};
+        if (this.sql.exec("SELECT id FROM agent WHERE phone = ?", c.phone).toArray().length) return Response.json({ ok: false, reason: "exists" });
+        for (const r of this.sql.exec("SELECT data FROM agent").toArray()) if (JSON.parse(r.data).code === c.code) return Response.json({ ok: false, reason: "code_taken" });
+        const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
+        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: c.code, pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: "", father: "", address: "", wa: "", email: "", exp: "", note: "" };
+        this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
+        return Response.json({ ok: true, agent: d });
+      }
       if (b.op === "proofdone") { this.sql.exec("UPDATE agproof SET done = 1 WHERE id = ?", parseInt(b.pid, 10) || 0); return Response.json({ ok: true }); }
       const r = this.sql.exec("SELECT data FROM agent WHERE id = ?", b.id).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "none" });
       const d = JSON.parse(r.data);
@@ -669,7 +701,7 @@ async function handleAgent(request, env, path) {
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     if (!S(b.bizRk, 60)) return reply({ ok: false, reason: "not_paid" });
     const d = { name: S(b.name, 80), father: S(b.father, 80), cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), phone, wa: entPhone(b.wa) || "", email: S(b.email, 80), city: S(b.city, 60), address: S(b.address, 200), biz: S(b.biz, 120), bizRk: S(b.bizRk, 60), exp: S(b.exp, 400), dev };
-    if (!d.name || !d.father || !d.city || !d.address) return reply({ ok: false, reason: "missing" });
+    if (!d.name || !d.city) return reply({ ok: false, reason: "missing" });   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
     return fwd("/ag_apply", { d, img });
   }
   if (path === "/agref") { const code = S(b.code, 60), rk = S(b.rk, 60); if (!code || !rk) return reply({ ok: false, reason: "missing" }); return fwd("/ag_ref", { code, phone: /^0?3\d{9}$/.test(code.replace(/\D/g, "").slice(-11)) ? entPhone(code) : "", rk, d: { name: S(b.name, 80), phone: S(b.phone, 20), cat: S(b.cat, 60), city: S(b.city, 60) } }); }
@@ -688,11 +720,24 @@ async function handleAgent(request, env, path) {
     if (op === "add" && !S(b.name, 60)) return reply({ ok: false, reason: "missing" });
     return fwd("/cd_admin", { op, phone, name: S(b.name, 60) });
   }
-  if (path === "/agstatus") { const phone = entPhone(b.phone); if (!phone || dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/ag_status", { phone, dev }); }
+  if (path === "/agstatus") { const phone = entPhone(b.phone); if (!phone || dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/ag_status", { phone, dev, pin: S(b.pin, 10) }); }
+  if (path === "/agpropose") {
+    const cc = b.c || {}, c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120) };
+    if (!c.name || !c.phone || !/^p\d{10}/.test(c.code)) return reply({ ok: false, reason: "missing" });
+    return fwd("/ag_propose", { cphone: entPhone(b.cphone), cpin: S(b.cpin, 10), c });
+  }
+  if (path === "/agdocs") {
+    const phone = entPhone(b.phone); if (!phone || !b.pin || dev.length < 6) return reply({ ok: false, reason: "login" });
+    const cnic = String(b.cnic || "").replace(/\D/g, ""); if (cnic.length !== 13) return reply({ ok: false, reason: "bad_cnic" });
+    const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
+    return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
+  }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
-    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone"].includes(op)) return reply({ error: "bad_op" }, 400);
-    return fwd("/ag_admin", { op, id: String(b.id || "").slice(0, 40), note: b.note, code: S(b.code, 60), amount: b.amount, pid: b.pid });
+    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create"].includes(op)) return reply({ error: "bad_op" }, 400);
+    let c;
+    if (op === "create") { const cc = b.c || {}; c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120) }; if (!c.name || !c.phone || !c.code) return reply({ ok: false, reason: "missing" }); }
+    return fwd("/ag_admin", { op, id: String(b.id || "").slice(0, 40), note: b.note, code: S(b.code, 60), amount: b.amount, pid: b.pid, c });
   }
   return reply({ error: "not_found" }, 404);
 }
@@ -794,7 +839,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
