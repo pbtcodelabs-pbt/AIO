@@ -18,6 +18,11 @@ var ONETIME = {
 };
 var LIFETIME_EXPIRY = "2099-12-31";
 
+/* MCS0411WE147 (مالک کا حکم): My City Shines — ہر ممبرشپ (کاروبار / پروفیشن) کی ایک سال کی سبسکرپشن؛ 5 ہی پیکج دونوں کے لیے
+   (ایک گوگل اکاؤنٹ پر ایک وقت میں ایک پیکج ایک ہی بار — اس لیے ایپ پہلا خالی پیکج چنتی ہے)؛ خریداری کا ٹوکن جس ممبرشپ (rec) سے جڑا، ہمیشہ اسی کی مدت بڑھاتا ہے */
+var MCS_PKG = "com.pbtcodelabs.mycityshines";
+var MCS_SKUS = ["mcs_mem_default", "mcs_mem_1", "mcs_mem_2", "mcs_mem_3", "mcs_mem_4"];
+
 // ---------- 🔔 نئی خریداری پر مالک کے فون پر پیغام (ntfy ایپ) ----------
 // مالک فون میں «ntfy» ایپ میں یہی topic سبسکرائب کرے۔ صرف پہلی تصدیق (acknowledge) پر پیغام، تجدید پر نہیں۔
 var NTFY_TOPIC = "aio-sales-7bg2fo5j6vist8funtq7jk";
@@ -25,7 +30,8 @@ var APP_NAMES = {
   "com.pbtcodelabs.aiopos": "AIO POS",
   "com.pbtcodelabs.ffpos": "FFPOS",
   "com.pbtcodelabs.dgkhata": "DG Khata",
-  "com.pbtcodelabs.ggkhatabook": "GG Khatabook"
+  "com.pbtcodelabs.ggkhatabook": "GG Khatabook",
+  "com.pbtcodelabs.mycityshines": "My City Shines"
 };
 
 function planName(sku) {
@@ -367,6 +373,7 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS codev (phone TEXT PRIMARY KEY, name TEXT, pin TEXT, ts INTEGER, seen INTEGER)");   /* MCS0511TH136: کو-ڈویلپر (صرف جانچ موڈ — کچھ محفوظ / منظور نہیں) */
     if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN paid INTEGER DEFAULT 0"); } catch (e) {}
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mbuy (tok TEXT PRIMARY KEY, rec TEXT, sku TEXT, exp INTEGER, ts INTEGER)");   /* MCS0411WE147: پلے اسٹور کی ممبرشپ — ٹوکن ← ممبرشپ */
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
@@ -616,6 +623,25 @@ export class McsStats {
       return Response.json({ rec, data, since: r.since, until: r.until, ts: r.ts, imgs });
     }
     if (op === "/pimg") { const { id } = await request.json(); const r = this.sql.exec("SELECT data FROM pimg WHERE id = ?", id).toArray()[0]; return Response.json({ data: r ? r.data : "" }); }
+    if (op === "/pbuy") {   /* MCS0411WE147: گوگل سے تصدیق شدہ خریداری → اسی ممبرشپ کی مدت؛ ٹوکن ایک بار جس ممبرشپ سے جڑا، ہمیشہ اسی کا */
+      const b = await request.json();
+      const row = this.sql.exec("SELECT rec, exp FROM mbuy WHERE tok = ?", b.tok).toArray()[0];
+      const rec = row ? row.rec : b.rec;
+      if (!rec) return Response.json({ ok: false, error: "no_rec" });
+      const o = this.sql.exec("SELECT until, paid FROM prof WHERE rec = ?", rec).toArray()[0];
+      if (!o) return Response.json({ ok: false, error: "no_prof" });
+      const now = Date.now(), prevExp = row ? (row.exp || 0) : 0;
+      if (!row) this.sql.exec("INSERT INTO mbuy (tok, rec, sku, exp, ts) VALUES (?, ?, ?, ?, ?)", b.tok, rec, b.sku, b.exp, now);
+      let until = o.until || 0;
+      if (b.exp > prevExp) {
+        const yrs = Math.max(row ? 0 : 1, Math.round((b.exp - Math.max(prevExp, now)) / (365 * 864e5)));
+        /* پہلی بار: باقی دن ضائع نہیں — پرانی مدت (یا آج) سے آگے خریدی مدت؛ تجدید پر گوگل کی نئی تاریخ جتنا فرق */
+        until = row ? until + (b.exp - prevExp) : Math.max(until, now) + (b.exp - now);
+        this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", until, b.access ? yrs : 0, rec);
+        if (row) this.sql.exec("UPDATE mbuy SET exp = ?, ts = ? WHERE tok = ?", b.exp, now, b.tok);
+      }
+      return Response.json({ ok: true, rec, until, sku: row ? row.sku : b.sku });
+    }
     if (op === "/pclaim") {
       const b = await request.json(); const now = Date.now();
       const r = this.sql.exec("SELECT key, since, until FROM prof WHERE rec = ?", b.rec).toArray()[0];
@@ -869,6 +895,39 @@ function profClean(d) {
   if (d.map && isFinite(+d.map.lat) && isFinite(+d.map.lon)) out.map = { lat: +(+d.map.lat).toFixed(6), lon: +(+d.map.lon).toFixed(6) };
   return out;
 }
+/* MCS0411WE147: My City Shines کی پلے اسٹور ممبرشپ — ایپ ٹوکن + sku (+ نئی خریداری پر rec) بھیجتی ہے؛ گوگل سے تصدیق، acknowledge، پھر ممبرشپ کی مدت */
+async function handleMcsBuy(request, env, ctx) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const token = b.purchaseToken;
+  if (typeof token !== "string" || token.length < 10 || token.length > 1000) return reply({ ok: false, error: "bad_token" }, 400);
+  const rec = String(b.rec || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
+  if (rec && !/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec)) return reply({ ok: false, error: "bad_rec" }, 400);
+  try {
+    const accessToken = await getAccessToken(env);
+    const base = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/" + MCS_PKG;
+    const res = await fetch(base + "/purchases/subscriptionsv2/tokens/" + encodeURIComponent(token), { headers: { Authorization: "Bearer " + accessToken } });
+    if (!res.ok) return reply({ ok: false, error: "google_" + res.status });
+    const d = await res.json();
+    const line = (d.lineItems || []).find((l) => MCS_SKUS.includes(l.productId));
+    if (!line) return reply({ ok: false, error: "unknown_product" });
+    if (d.acknowledgementState !== "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED") {
+      try {
+        const ack = await fetch(base + "/purchases/subscriptions/" + line.productId + "/tokens/" + encodeURIComponent(token) + ":acknowledge", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: "{}" });
+        if (ack.ok) { const pi = await subPriceInfo(base, accessToken, line.productId, token); notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: pi.test || !!d.testPurchase, trial: false }); }
+      } catch (e) {}
+    }
+    const exp = Date.parse(line.expiryTime) || 0;
+    const access = ACCESS_STATES.includes(d.subscriptionState) && exp > Date.now();
+    const tok = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)))).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 40);
+    const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+    const r = await stub.fetch("https://s/pbuy", { method: "POST", body: JSON.stringify({ tok, rec, sku: line.productId, exp, access }) });
+    const j = await r.json();
+    return reply(Object.assign(j, { access, state: d.subscriptionState, expiry: exp ? new Date(exp).toISOString().slice(0, 10) : "" }));
+  } catch (e) {
+    return reply({ ok: false, error: "server_error" }, 500);
+  }
+}
 async function handleProf(request, env, path) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -899,6 +958,7 @@ export default {
   async fetch(request, env, ctx) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
+    if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
