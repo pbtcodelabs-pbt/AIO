@@ -28422,20 +28422,35 @@ async function printPoFastText(){
 }
 
 function shareInvoiceWhatsapp(){
+  // ہیلپ ڈیسک #75: بل پر جو نمبر لکھا (گاہک یا Walk-in) — اسی کی واٹس ایپ چیٹ؛ بل کی تصویر ساتھ تیار
   const inv = invoicesData.find(i => i.invoice_id === currentPreviewInvoiceId);
   if(!inv) return;
-
-  if(!inv.customer_phone){
-    alert("This customer's phone number isn't saved. Use 'Share More' to pick any app to send this to.");
-    return;
+  let phone = invoicePhone(inv);
+  if(!phone){
+    phone = (prompt("No phone number on this bill.\nType the customer's WhatsApp number to send the bill:", '') || '').trim();
+    if(!phone) return;
+    if(!inv.customer_id){ inv.customer_phone = phone; try{ persistAllData(); }catch(e){} }   // واک اِن بل پر نمبر یاد رہے
   }
-
-  // ---------- سیدھا اسی محفوظ شدہ نمبر کی WhatsApp چیٹ کھولیں ----------
-  // نوٹ: کوئی بھی ویب لنک تصویر خودکار منسلک نہیں کر سکتا (یہ WhatsApp کی اپنی حفاظتی پابندی ہے) —
-  // اسی لیے یہاں سے صرف صحیح چیٹ کھلے گی، تصویر خود Print/Share بٹن سے لے کر یہاں بھیجیں۔
-  const digits = formatPhoneForWhatsApp(inv.customer_phone);
-  const text = `${inv.invoice_no} — Grand Total: Rs. ${inv.grand_total.toLocaleString()}`;
-  window.open(`https://wa.me/${digits}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
+  const digits = formatPhoneForWhatsApp(phone);
+  const text = brandMsg(`${inv.invoice_no} — Grand Total: Rs. ${Number(inv.grand_total || 0).toLocaleString()}`);
+  const openChat = () => { window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, '_blank'); };
+  const canvas = document.getElementById('invoiceCanvas');
+  if(!canvas || !canvas.toBlob){ openChat(); return; }
+  canvas.toBlob(async (blob) => {
+    let copied = false;
+    try{ if(blob && navigator.clipboard && window.ClipboardItem){ await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]); copied = true; } }catch(e){}
+    if(copied){
+      try{ showNavToast('📋 Bill image copied — in the chat, long-press the box → Paste → Send'); }catch(e){}
+      setTimeout(openChat, 350);
+      return;
+    }
+    // تصویر کاپی نہ ہو سکے (کچھ فون) — فون کا شیئر: پہلے بل کی تصویر، پھر وہی چیٹ
+    const file = blob ? new File([blob], `${inv.invoice_no}.png`, {type:'image/png'}) : null;
+    if(file && navigator.canShare && navigator.canShare({files:[file]}) && confirm(`Send the bill image now?\n\nOK = choose WhatsApp → ${phone}\nCancel = only open ${phone}'s chat`)){
+      try{ await navigator.share({files:[file], text}); return; }catch(e){}
+    }
+    openChat();
+  }, 'image/png');
 }
 
 // ---------- یونیورسل شیئر (Web Share API — واٹس ایپ کے علاوہ کسی بھی ایپ کو bills کی تصویر بھیجیں) ----------
@@ -34751,9 +34766,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0511TH165';
+  const APP_VERSION = 'AIO0511TH166';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Advance order: name goes to the bill, and the order leaves the list once its bill is made';
+  const UPDATE_NOTE = 'WhatsApp button sends the bill to the number written on it (image copied, chat opens)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
