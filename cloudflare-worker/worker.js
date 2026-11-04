@@ -477,7 +477,7 @@ export class McsStats {
         if (this.sql.exec("SELECT id FROM agent WHERE phone = ?", c.phone).toArray().length) return Response.json({ ok: false, reason: "exists" });
         for (const r of this.sql.exec("SELECT data FROM agent").toArray()) if (JSON.parse(r.data).code === c.code) return Response.json({ ok: false, reason: "code_taken" });
         const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
-        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: c.code, pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: "", father: "", address: "", wa: "", email: "", exp: "", note: "" };
+        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: c.code, pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: c.cnic || "", father: "", address: "", wa: "", email: "", exp: "", note: "" };
         this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
         return Response.json({ ok: true, agent: d });
       }
@@ -736,7 +736,7 @@ async function handleAgent(request, env, path) {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
     const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create"].includes(op)) return reply({ error: "bad_op" }, 400);
     let c;
-    if (op === "create") { const cc = b.c || {}; c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120) }; if (!c.name || !c.phone || !c.code) return reply({ ok: false, reason: "missing" }); }
+    if (op === "create") { const cc = b.c || {}; c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120), cnic: S(cc.cnic, 15) }; if (!c.name || !c.phone || !c.code) return reply({ ok: false, reason: "missing" }); }
     return fwd("/ag_admin", { op, id: String(b.id || "").slice(0, 40), note: b.note, code: S(b.code, 60), amount: b.amount, pid: b.pid, c });
   }
   return reply({ error: "not_found" }, 404);
