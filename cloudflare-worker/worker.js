@@ -335,6 +335,12 @@ async function handleRates(ctx, debug) {
 
 /* ===== MCS: کالوں / واٹس ایپ / میسج کی گنتی — Durable Object (SQLite)، ہر دن ہر دکان (فون نمبر) کی گنتی ===== */
 const STAT_KINDS = ["call", "wa", "sms", "share", "open", "ad", "view"];   /* view = پروفائل دیکھی گئی */
+/* MCS0511TH142 (مالک کا حکم): ایجنٹ کا ریفرل کوڈ = کاروبار کی قسم کے دو حروف + ترتیب وار نمبر (MS-001) — ہر قسم کا الگ، کبھی دوہرا نہیں */
+const AG_ABBR = { medicalStore: "MS", homeopathic: "HM", testingLab: "TL", plumberElectrician: "PE", tuitionTeacher: "TT", groceryStore: "GS", clothesShop: "CS", mobileElectronics: "ME", hardwareStore: "HW", bakery: "BK", jewelryShop: "JS", furnitureShop: "FS", autoParts: "AP", beautyParlor: "BP", restaurant: "RS", otherShop: "OS", doctor: "DR", emergencyNumbers: "EN", govOffices: "GO" };
+function agCatTag(c) { let h = 0; for (let i = 0; i < c.length; i++) h = (h * 31 + c.charCodeAt(i)) >>> 0; return h.toString(36).slice(0, 7); }   /* ایپ کے pfCatTag جیسا */
+const AG_TAG = Object.fromEntries(Object.keys(AG_ABBR).map((k) => [agCatTag(k), AG_ABBR[k]]));
+function agAbbrOfRk(rk) { return AG_TAG[String(rk || "").split("_")[1] || ""] || "BZ"; }   /* نئی (ایڈمن کی بنائی) قسم = BZ */
+function agNormRef(v) { const t = String(v || "").trim().toUpperCase().replace(/\s+/g, ""); const m = /^([A-Z]{2})[-.]?0*(\d{1,5})$/.exec(t); return m ? m[1] + "-" + m[2].padStart(3, "0") : String(v || "").trim(); }
 export class McsStats {
   constructor(state) {
     this.sql = state.storage.sql;
@@ -364,6 +370,28 @@ export class McsStats {
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
   entOut(e) { const now = Date.now(); return { ok: true, id: e.id, name: e.name || "", life: !!e.life, exp: e.exp || 0, active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, devices: e.devices || 1, used: (e.claims || []).length, keys: e.keys || [] }; }
+  agNextCode(ab) {   /* MCS0511TH142: ہر قسم کی الگ گنتی agcfg seq_XX */
+    const r = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", "seq_" + ab).toArray()[0]; let n = (parseInt((r || {}).v || "0", 10) || 0) + 1;
+    const used = new Set(this.sql.exec("SELECT data FROM agent").toArray().map((x) => JSON.parse(x.data).code));
+    while (used.has(ab + "-" + String(n).padStart(3, "0"))) n++;
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "seq_" + ab, String(n));
+    return ab + "-" + String(n).padStart(3, "0");
+  }
+  agResolve(code, phone) {   /* نیا کوڈ (ms1 / MS-001)، پرانا p… کوڈ یا ایجنٹ کا موبائل → منظور ایجنٹ */
+    const nc = agNormRef(code);
+    for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.status === "approved" && (d.code === nc || (code && (d.bizRk === code || (d.oldCodes || []).includes(code))) || (phone && d.phone === phone))) return d; }
+    return null;
+  }
+  agMigrate() {   /* پرانے p… کوڈ ایک بار نئے انداز میں — ریفرل / ادائیگیاں / ثبوت / چیٹ ساتھ */
+    if (this.sql.exec("SELECT v FROM agcfg WHERE k = 'agmig2'").toArray().length) return;
+    for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) {
+      const d = JSON.parse(r.data); if (!d.code || !/^p\d/.test(d.code)) continue;
+      const old = d.code; d.code = this.agNextCode(agAbbrOfRk(d.bizRk || old)); d.oldCodes = (d.oldCodes || []).concat(old);
+      this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), r.id);
+      for (const t of ["agref", "agpay", "agproof", "agmsg"]) this.sql.exec("UPDATE " + t + " SET code = ? WHERE code = ?", d.code, old);
+    }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agmig2', '1')");
+  }
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
@@ -409,13 +437,13 @@ export class McsStats {
     }
     if (op === "/ag_ref") {   /* ایپ: اس کاروبار کو اس ایجنٹ کے نام لکھیں (صرف منظور ایجنٹ کا کوڈ) */
       const b = await request.json();
-      let ag = null; for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.status === "approved" && (d.code === b.code || (b.phone && d.phone === b.phone))) { ag = d; break; } }
+      const ag = this.agResolve(b.code, b.phone);
       if (!ag) return Response.json({ ok: false, reason: "bad_code" });
       b.code = ag.code;   /* ایجنٹ کا موبائل لکھا ہو تو بھی اسی کا ریفرل نمبر */
       const old = this.sql.exec("SELECT code FROM agref WHERE rk = ?", b.rk).toArray()[0];
       if (old && old.code !== b.code) return Response.json({ ok: false, reason: "taken" });   /* ایک کاروبار ایک ہی ایجنٹ کا */
       this.sql.exec("INSERT INTO agref (rk, code, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (rk) DO UPDATE SET data = excluded.data", b.rk, b.code, JSON.stringify(b.d || {}), Date.now());
-      return Response.json({ ok: true });
+      return Response.json({ ok: true, code: ag.code, name: ag.name });
     }
     if (op === "/ag_portal") {   /* ایجنٹ پورٹل (موبائل + PIN) اور ایڈمن دونوں کا خلاصہ */
       const b = await request.json();
@@ -446,6 +474,11 @@ export class McsStats {
       if (b.op === "del") this.sql.exec("DELETE FROM codev WHERE phone = ?", b.phone);
       return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen FROM codev ORDER BY ts DESC").toArray() });
     }
+    if (!this._agMig) { this._agMig = 1; try { this.agMigrate(); } catch (e) {} }
+    if (op === "/ag_find") {   /* MCS0511TH142: کوڈ / پرانا کوڈ / موبائل → ایجنٹ کا اصل کوڈ اور نام (لکھنا کچھ نہیں) */
+      const b = await request.json(); const ag = this.agResolve(b.code, b.phone);
+      return Response.json(ag ? { ok: true, code: ag.code, name: ag.name } : { ok: false, reason: "bad_code" });
+    }
     if (op === "/ag_propose") {   /* MCS0511TH139: کو-ڈویلپر ایجنٹ تجویز کرے → ⏳ نئی درخواست، منظوری صرف مالک */
       const b = await request.json(); const c = b.c || {};
       const cd = this.sql.exec("SELECT name, pin FROM codev WHERE phone = ?", b.cphone).toArray()[0];
@@ -475,9 +508,9 @@ export class McsStats {
       if (b.op === "create") {   /* MCS0511TH139: مالک خود ایجنٹ بنائے — نام، موبائل، پروفائل ID، شہر؛ فوراً منظور + PIN؛ تصویریں بعد میں ایجنٹ خود */
         const c = b.c || {};
         if (this.sql.exec("SELECT id FROM agent WHERE phone = ?", c.phone).toArray().length) return Response.json({ ok: false, reason: "exists" });
-        for (const r of this.sql.exec("SELECT data FROM agent").toArray()) if (JSON.parse(r.data).code === c.code) return Response.json({ ok: false, reason: "code_taken" });
+        for (const r of this.sql.exec("SELECT data FROM agent").toArray()) if (JSON.parse(r.data).bizRk === c.code) return Response.json({ ok: false, reason: "code_taken" });
         const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
-        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: c.code, pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: c.cnic || "", father: "", address: "", wa: "", email: "", exp: "", note: "" };
+        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: this.agNextCode(agAbbrOfRk(c.code)), pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: c.cnic || "", father: "", address: "", wa: "", email: "", exp: "", note: "" };
         this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
         return Response.json({ ok: true, agent: d });
       }
@@ -487,7 +520,7 @@ export class McsStats {
       if (b.op === "imgs") return Response.json({ ok: true, img: Object.fromEntries(this.sql.exec("SELECT kind, data FROM agimg WHERE id = ?", b.id).toArray().map((x) => [x.kind, x.data])) });
       if (b.op === "delete") { this.sql.exec("DELETE FROM agent WHERE id = ?", b.id); this.sql.exec("DELETE FROM agimg WHERE id = ?", b.id); return Response.json({ ok: true }); }
       if (b.op === "approve") {
-        if (!d.code) d.code = d.bizRk || ("AG" + Date.now().toString(36));   /* MCS0511TH134: ریفرل نمبر = ایجنٹ کی اپنی پروفائل ID */
+        if (!d.code || /^p\d/.test(d.code)) d.code = this.agNextCode(agAbbrOfRk(d.bizRk));   /* MCS0511TH142: MS-001 */
         if (!d.pin) d.pin = String(100000 + Math.floor(Math.random() * 900000));
         d.status = "approved"; d.okAt = Date.now();
       } else if (b.op === "reject") { d.status = "rejected"; d.note = String(b.note || "").slice(0, 300); }
@@ -704,6 +737,7 @@ async function handleAgent(request, env, path) {
     if (!d.name || !d.city) return reply({ ok: false, reason: "missing" });   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
     return fwd("/ag_apply", { d, img });
   }
+  if (path === "/agfind") { const code = S(b.code, 60); if (!code) return reply({ ok: false, reason: "bad_code" }); return fwd("/ag_find", { code, phone: /^0?3\d{9}$/.test(code.replace(/\D/g, "").slice(-11)) && code.replace(/\D/g, "").length >= 10 ? entPhone(code) : "" }); }
   if (path === "/agref") { const code = S(b.code, 60), rk = S(b.rk, 60); if (!code || !rk) return reply({ ok: false, reason: "missing" }); return fwd("/ag_ref", { code, phone: /^0?3\d{9}$/.test(code.replace(/\D/g, "").slice(-11)) ? entPhone(code) : "", rk, d: { name: S(b.name, 80), phone: S(b.phone, 20), cat: S(b.cat, 60), city: S(b.city, 60) } }); }
   if (path === "/agportal") {
     const admin = b.admin ? await verifyFirebaseAdmin(request) : false;
@@ -839,7 +873,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
