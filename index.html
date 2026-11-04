@@ -2902,6 +2902,8 @@
     #globalSearchBar .gsbHomeIcons{display:none; align-items:center; gap:5px;}
     body.home-active #globalSearchBar .gsbHomeIcons{display:flex;}
     #globalSearchBar .gsbBtn{width:30px; height:30px; border-radius:50%; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.18); color:#fff; font-size:14px; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;}
+    /* AIO0411WE170 (ہیلپ ڈیسک #82): پیلا Help Desk گول 30px خانے میں پھنس کر ساتھ والے بٹن کے نیچے کٹ رہا تھا — اپنی پوری چوڑائی */
+    #globalSearchBar .gsbBtn.gsbHelp{width:auto; min-width:0; height:30px; border:0; background:none; border-radius:999px; padding:0 2px; margin:0 2px; overflow:visible;}
     #globalSearchBar .gsbBtn.gsbGear{background:#fff; color:var(--primary-dark);}
     #globalSearchBar .gsbBtn:active{transform:scale(.9);}
     #globalSearchBar .uiZoomStepper{background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35);}
@@ -3362,7 +3364,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE169</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE170</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3584,7 +3586,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE169</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE170</span>
     </div>
   </div>
 
@@ -3604,7 +3606,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="gsbHomeIcons">
           <button class="gsbBtn gsbGear" id="hbcSettingsBtn" onclick="goTo('settings')" title="Settings">⚙️</button>
           <button class="gsbBtn" onclick="shareAppLink()" title="Share This App"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display:block;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
-          <button class="gsbBtn" onclick="openHelpDesk()" title="PBT Help Desk — report a problem or suggestion"><span class="pbthd-sos" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(#fde047,#facc15);color:#111;border-radius:999px;padding:2px 9px;font:800 12px/1.35 Arial,sans-serif;box-shadow:0 2px 0 #ca8a04;white-space:nowrap;vertical-align:middle;direction:ltr"><b style="background:#111;color:#facc15;border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;font-size:11px">?</b>Help Desk</span></button>
+          <button class="gsbBtn gsbHelp" onclick="openHelpDesk()" title="PBT Help Desk — report a problem or suggestion"><span class="pbthd-sos" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(#fde047,#facc15);color:#111;border-radius:999px;padding:2px 9px;font:800 12px/1.35 Arial,sans-serif;box-shadow:0 2px 0 #ca8a04;white-space:nowrap;vertical-align:middle;direction:ltr"><b style="background:#111;color:#facc15;border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;font-size:11px">?</b>Help Desk</span></button>
           <button class="gsbBtn" onclick="logout()" title="Logout" style="background:rgba(239,68,68,.9);">🚪</button>
           <button class="gsbBtn admin-only muOnly" onclick="openConnectHub()" title="Connect / Join / Contact">🔗</button>
       </div>
@@ -34767,9 +34769,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0411WE169';
+  const APP_VERSION = 'AIO0411WE170';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Intro video: Google Play badge + QR, no phone number';
+  const UPDATE_NOTE = 'Help Desk button no longer hidden under the next button';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
