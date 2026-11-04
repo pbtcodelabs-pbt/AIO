@@ -3359,7 +3359,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE161</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE162</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3580,7 +3580,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE161</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE162</span>
     </div>
   </div>
 
@@ -30277,7 +30277,7 @@ function acctSignOut(){
 async function acctRecheck(force){
   const s = AppState.settings, a = s.acctSub;
   if(!a || !a.key || !navigator.onLine) return;
-  if(!force && s.acctCheckedAt && Date.now() - s.acctCheckedAt < 6 * 3600e3) return;
+  if(!force && s.acctCheckedAt && Date.now() - s.acctCheckedAt < 30 * 60e3) return;   // AIO0411WE162 (مالک کا حکم): 6 گھنٹے کی جگہ 30 منٹ — بند / بڑھایا ہوا اکاؤنٹ آدھے گھنٹے میں
   try{
     const r = await acctPost('/entstatus', { key: a.key, dev: getOrCreateDeviceUID() });
     if(r && r.ok) acctApply(r, true);
@@ -30287,6 +30287,7 @@ async function acctRecheck(force){
 // AIO0411WE161: تفصیل بھیج چکا ہو اور ابھی اکاؤنٹ نہ ہو → ایپ کھلنے / واپس آنے پر خود پوچھے (ڈویلپر نے دے دیا تو خود کھل جائے)
 function acctAutoDev(){ const s = AppState.settings || {}; if(s.acctSentAt && !(s.acctSub && s.acctSub.key) && Date.now() - s.acctSentAt < 60 * 864e5) acctDevCheck(false); }
 document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ acctRecheck(); acctAutoDev(); }catch(e){} }, 2500); });
+setInterval(() => { try{ acctRecheck(); }catch(e){} }, 5 * 60e3);   // AIO0411WE162: ایپ سارا دن کھلی رہے تب بھی (صرف اکاؤنٹ والے فون پوچھتے ہیں، 30 منٹ میں ایک بار)
 document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible'){ try{ acctRecheck(); acctAutoDev(); }catch(e){} } });
 
 /* ---------- 👤 ڈویلپر پینل: اکاؤنٹ سبسکرپشن دینا / بڑھانا / بند — My City Shines ایڈمن لاگ اِن (یاد صرف اس وقت تک) ---------- */
@@ -34708,9 +34709,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0411WE161';
+  const APP_VERSION = 'AIO0411WE162';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Account: send details first; sign-in stays locked until set up — and this phone opens by itself once the developer sets it up';
+  const UPDATE_NOTE = 'Account access: changes by the developer (extend / stop) reach this phone within 30 minutes';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }

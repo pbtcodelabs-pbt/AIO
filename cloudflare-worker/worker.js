@@ -369,8 +369,8 @@ export class McsStats {
         if (e.uidLock && b.key.startsWith("p:")) return Response.json({ ok: false, reason: "phone_locked" });
         if (e.claims.length >= (e.devices || 1)) return Response.json({ ok: false, reason: "devices_full", devices: e.devices || 1 });
         e.claims.push({ dev: b.dev, at: Date.now(), via: b.key.slice(0, 1) });
-      } else mine.seen = Date.now();
-      this.entPut(e);
+        this.entPut(e);
+      } else if (Date.now() - (mine.seen || mine.at || 0) > 864e5) { mine.seen = Date.now(); this.entPut(e); }   /* AIO0411WE162: ہر جانچ پر لکھنا نہیں — دن میں ایک بار */
       const o = this.entOut(e); delete o.keys; o.id = undefined; return Response.json(o);   /* گاہک کو دوسری چابیاں (جی میل / نمبر) نہیں */
     }
     if (op === "/ent_dev") {   /* AIO0411WE161: ڈویلپر نے یہ فون (UID) جوڑا ہے؟ — گاہک کا فون خود کھلے */
@@ -378,7 +378,7 @@ export class McsStats {
       for (const r of this.sql.exec("SELECT data FROM ent WHERE app = ?", b.app).toArray()) {
         const e = JSON.parse(r.data); const c = (e.claims || []).find((x) => x.dev === b.dev);
         if (!c || e.revoked) continue;
-        c.seen = Date.now(); this.entPut(e);
+        if (Date.now() - (c.seen || c.at || 0) > 864e5) { c.seen = Date.now(); this.entPut(e); }
         const o = this.entOut(e); const key = (e.keys || []).find((k) => k.startsWith("p:")) || (e.keys || [])[0] || ""; delete o.keys; o.id = undefined; o.key = key; return Response.json(o);
       }
       return Response.json({ ok: false, reason: "none" });
