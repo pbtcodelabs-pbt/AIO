@@ -377,8 +377,9 @@ export class McsStats {
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "seq_" + ab, String(n));
     return ab + "-" + String(n).padStart(3, "0");
   }
-  agResolve(code, phone) {   /* نیا کوڈ (ms1 / MS-001)، پرانا p… کوڈ یا ایجنٹ کا موبائل → منظور ایجنٹ */
-    const nc = agNormRef(code);
+  agResolve(code, phone) {   /* نیا کوڈ (ms1 / MS-001)، پرانا p… کوڈ، ایجنٹ کا موبائل یا شناختی کارڈ نمبر (MCS0511TH143) → منظور ایجنٹ */
+    const nc = agNormRef(code), cn = String(code || "").replace(/\D/g, "");
+    if (cn.length === 13) { for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.status === "approved" && String(d.cnic || "").replace(/\D/g, "") === cn) return d; } return null; }
     for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.status === "approved" && (d.code === nc || (code && (d.bizRk === code || (d.oldCodes || []).includes(code))) || (phone && d.phone === phone))) return d; }
     return null;
   }
@@ -439,10 +440,11 @@ export class McsStats {
       const b = await request.json();
       const ag = this.agResolve(b.code, b.phone);
       if (!ag) return Response.json({ ok: false, reason: "bad_code" });
-      b.code = ag.code;   /* ایجنٹ کا موبائل لکھا ہو تو بھی اسی کا ریفرل نمبر */
+      b.code0 = b.code; b.code = ag.code;   /* ایجنٹ کا موبائل لکھا ہو تو بھی اسی کا ریفرل نمبر */
       const old = this.sql.exec("SELECT code FROM agref WHERE rk = ?", b.rk).toArray()[0];
       if (old && old.code !== b.code) return Response.json({ ok: false, reason: "taken" });   /* ایک کاروبار ایک ہی ایجنٹ کا */
-      this.sql.exec("INSERT INTO agref (rk, code, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (rk) DO UPDATE SET data = excluded.data", b.rk, b.code, JSON.stringify(b.d || {}), Date.now());
+      const via = String(b.code0 || "").replace(/\D/g, "").length === 13 ? "cnic" : b.phone ? "mobile" : "code";
+      this.sql.exec("INSERT INTO agref (rk, code, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (rk) DO UPDATE SET data = excluded.data", b.rk, b.code, JSON.stringify(Object.assign({}, b.d || {}, { via })), Date.now());
       return Response.json({ ok: true, code: ag.code, name: ag.name });
     }
     if (op === "/ag_portal") {   /* ایجنٹ پورٹل (موبائل + PIN) اور ایڈمن دونوں کا خلاصہ */
@@ -737,8 +739,8 @@ async function handleAgent(request, env, path) {
     if (!d.name || !d.city) return reply({ ok: false, reason: "missing" });   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
     return fwd("/ag_apply", { d, img });
   }
-  if (path === "/agfind") { const code = S(b.code, 60); if (!code) return reply({ ok: false, reason: "bad_code" }); return fwd("/ag_find", { code, phone: /^0?3\d{9}$/.test(code.replace(/\D/g, "").slice(-11)) && code.replace(/\D/g, "").length >= 10 ? entPhone(code) : "" }); }
-  if (path === "/agref") { const code = S(b.code, 60), rk = S(b.rk, 60); if (!code || !rk) return reply({ ok: false, reason: "missing" }); return fwd("/ag_ref", { code, phone: /^0?3\d{9}$/.test(code.replace(/\D/g, "").slice(-11)) ? entPhone(code) : "", rk, d: { name: S(b.name, 80), phone: S(b.phone, 20), cat: S(b.cat, 60), city: S(b.city, 60) } }); }
+  if (path === "/agfind") { const code = S(b.code, 60); if (!code) return reply({ ok: false, reason: "bad_code" }); return fwd("/ag_find", { code, phone: (() => { const dd = code.replace(/\D/g, ""); return dd.length >= 10 && dd.length <= 12 && /^0?3\d{9}$/.test(dd.slice(-11)) ? entPhone(code) : ""; })() }); }
+  if (path === "/agref") { const code = S(b.code, 60), rk = S(b.rk, 60); if (!code || !rk) return reply({ ok: false, reason: "missing" }); return fwd("/ag_ref", { code, phone: (() => { const dd = code.replace(/\D/g, ""); return dd.length >= 10 && dd.length <= 12 && /^0?3\d{9}$/.test(dd.slice(-11)) ? entPhone(code) : ""; })(), rk, d: { name: S(b.name, 80), phone: S(b.phone, 20), cat: S(b.cat, 60), city: S(b.city, 60) } }); }
   if (path === "/agportal") {
     const admin = b.admin ? await verifyFirebaseAdmin(request) : false;
     if (b.admin && !admin) return reply({ error: "admin_only" }, 403);
