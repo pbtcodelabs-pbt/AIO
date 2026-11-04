@@ -3300,7 +3300,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="devTabs" role="tablist">
         <button type="button" class="devTab" data-sec="unlock" role="tab" onclick="showDevSec('devConsoleOpen','unlock')"><b>🔓 Developer Unlock</b><small>Permanently unlock this app on this phone</small></button>
         <button type="button" class="devTab" data-sec="pass" role="tab" onclick="showDevSec('devConsoleOpen','pass')"><b>🔑 Change Password</b><small>New Developer Console password</small></button>
-        <button type="button" class="devTab" data-sec="acct" role="tab" onclick="showDevSec('devConsoleOpen','acct')"><b>👤 Account Subscriptions</b><small>Give / extend by Gmail or mobile number</small></button>
+        <button type="button" class="devTab" data-sec="acct" role="tab" onclick="showDevSec('devConsoleOpen','acct')"><b>👤 Account Access</b><small>Give / extend by Gmail or mobile number</small></button>
         <button type="button" class="devTab" data-sec="device" role="tab" onclick="showDevSec('devConsoleOpen','device')"><b>📱 This Device</b><small>Device ID, Play plan &amp; subscription status</small></button>
       </div>
       <div class="devSec" data-sec="unlock"><div class="devUnlockState"></div></div>
@@ -3349,7 +3349,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE158</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE159</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3570,7 +3570,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE158</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE159</span>
     </div>
   </div>
 
@@ -30263,7 +30263,7 @@ function devAcctRender(){
     return;
   }
   const opt = [[30,'1 month'],[90,'3 months'],[180,'6 months'],[365,'1 year'],[0,'Lifetime']].map(([d,t]) => `<option value="${d}" ${d === 365 ? 'selected' : ''}>${t}</option>`).join('');
-  box.innerHTML = `<div style="font-weight:800; margin-bottom:6px;">➕ Give / extend a subscription</div>
+  box.innerHTML = `<div style="font-weight:800; margin-bottom:6px;">➕ Give / extend account access</div>
     <textarea id="devAcctPaste" class="devInput" rows="2" placeholder="📋 Paste the customer's account details here (from Help Desk) — Name, Mobile, Gmail, UID fill automatically" oninput="devAcctPasteFill(this.value)" style="min-height:52px;"></textarea>
     <input type="email" id="devAcctG" class="devInput" placeholder="Customer Gmail (optional)" autocomplete="off">
     <input type="tel" id="devAcctP" class="devInput" placeholder="Customer mobile, e.g. 03001234567 (optional)" autocomplete="off">
@@ -30351,7 +30351,7 @@ async function devAcctGrant(){
 }
 async function devAcctAct(id, act, days){
   const e = _devAcctList.find(x => x.id === id) || {};
-  const ask = { add: `Add ${days} days to ${e.name || 'this customer'}?`, reset: 'Free all phones? The customer will sign in again on the phone(s) they want.', revoke: 'Stop this subscription now?', unrevoke: 'Resume this subscription?', delete: 'Delete this customer completely?' }[act];
+  const ask = { add: `Add ${days} days to ${e.name || 'this customer'}?`, reset: 'Free all phones? The customer will sign in again on the phone(s) they want.', revoke: 'Stop this account access now?', unrevoke: 'Resume this account access?', delete: 'Delete this customer completely?' }[act];
   if(!confirm(ask)) return;
   try{
     const r = act === 'add' ? await devAcctCall({ op: 'grant', id, days }) : await devAcctCall({ op: act, id });
@@ -34669,9 +34669,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0411WE158';
+  const APP_VERSION = 'AIO0411WE159';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Sign in with account: “Send account details to developer” — UID, name, mobile and Gmail go ready-filled to Help Desk';
+  const UPDATE_NOTE = 'Developer panel: “Account Subscriptions” is now “Account Access”';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
