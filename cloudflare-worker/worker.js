@@ -357,6 +357,8 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS agproof (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT, rk TEXT, note TEXT, img TEXT, done INTEGER DEFAULT 0, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS agmsg (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT, who TEXT, text TEXT, img TEXT, audio TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS agcfg (k TEXT PRIMARY KEY, v TEXT)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS codev (phone TEXT PRIMARY KEY, name TEXT, pin TEXT, ts INTEGER, seen INTEGER)");   /* MCS0511TH136: کو-ڈویلپر (صرف جانچ موڈ — کچھ محفوظ / منظور نہیں) */
+    if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN paid INTEGER DEFAULT 0"); } catch (e) {}
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
@@ -427,6 +429,19 @@ export class McsStats {
       const proofs = this.sql.exec("SELECT id, rk, note, done, ts" + (b.admin ? ", img" : "") + " FROM agproof WHERE code = ? ORDER BY ts DESC LIMIT 100", code).toArray();
       const msgs = this.sql.exec("SELECT id, who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC LIMIT 200", code).toArray().reverse();
       return Response.json({ ok: true, agent: { name: d.name, phone: d.phone, code, biz: d.biz, city: d.city, okAt: d.okAt || 0 }, rate, refs, years, due: years * rate, paidOut, balance: years * rate - paidOut, pays, proofs, msgs });
+    }
+    if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
+      const b = await request.json();
+      const r = this.sql.exec("SELECT name, pin, seen FROM codev WHERE phone = ?", b.phone).toArray()[0];
+      if (!r || !b.pin || r.pin !== b.pin) return Response.json({ ok: false, reason: "login" });
+      const day = Math.floor(Date.now() / 864e5); if (r.seen !== day) this.sql.exec("UPDATE codev SET seen = ? WHERE phone = ?", day, b.phone);
+      return Response.json({ ok: true, name: r.name });
+    }
+    if (op === "/cd_admin") {   /* مالک (MCS ایڈمن): فہرست / شامل (نیا PIN) / ہٹائیں */
+      const b = await request.json();
+      if (b.op === "add") { const pin = String(100000 + Math.floor(Math.random() * 900000)); this.sql.exec("INSERT INTO codev (phone, name, pin, ts, seen) VALUES (?, ?, ?, ?, 0) ON CONFLICT (phone) DO UPDATE SET name = excluded.name, pin = excluded.pin, ts = excluded.ts", b.phone, b.name, pin, Date.now()); }
+      if (b.op === "del") this.sql.exec("DELETE FROM codev WHERE phone = ?", b.phone);
+      return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen FROM codev ORDER BY ts DESC").toArray() });
     }
     if (op === "/ag_admin") {   /* ایڈمن: فہرست، تصویریں، منظور (کوڈ MCS-AG-0001…)، رد، حذف */
       const b = await request.json();
@@ -665,6 +680,14 @@ async function handleAgent(request, env, path) {
     const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
     return fwd("/ag_portal", { admin: !!admin, code: S(b.code, 60), phone, pin: S(b.pin, 10), act: S(b.act, 10), rk: S(b.rk, 60), note: S(b.note, 400), text: S(b.text, 2000), img: media(b.img, 700000), audio: media(b.audio, 900000) });
   }
+  if (path === "/codev") { const phone = entPhone(b.phone); if (!phone || !b.pin) return reply({ ok: false, reason: "login" }); return fwd("/cd_login", { phone, pin: S(b.pin, 10) }); }
+  if (path === "/codevadmin") {
+    if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    const op = String(b.op || "list"); if (!["list", "add", "del"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const phone = op === "list" ? "" : entPhone(b.phone); if (op !== "list" && !phone) return reply({ ok: false, reason: "bad_phone" });
+    if (op === "add" && !S(b.name, 60)) return reply({ ok: false, reason: "missing" });
+    return fwd("/cd_admin", { op, phone, name: S(b.name, 60) });
+  }
   if (path === "/agstatus") { const phone = entPhone(b.phone); if (!phone || dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/ag_status", { phone, dev }); }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
@@ -771,7 +794,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
