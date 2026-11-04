@@ -3349,7 +3349,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE159</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE160</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3570,7 +3570,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE159</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE160</span>
     </div>
   </div>
 
@@ -30188,12 +30188,12 @@ async function acctClaim(body){
   if(btn) btn.disabled = false;
   if(!r) return;
   if(!r.ok){
-    const why = { none: 'No subscription found for this ' + (body.kind === 'g' ? 'Google account' : 'mobile number') + '. Please check it, or try the other option.',
-      devices_full: `This subscription is already in use on ${r.devices || 1} phone(s) — the limit is reached.`,
-      revoked: 'This subscription has been stopped.', google_failed: 'Google sign-in failed — please try again.', bad_phone: 'Please enter a valid mobile number, e.g. 03001234567' }[r.reason] || ('Could not sign in (' + (r.reason || r.error || 'error') + ')');
+    const why = { none: 'No account access found for this ' + (body.kind === 'g' ? 'Google account' : 'mobile number') + '. Please check it, or try the other option.',
+      devices_full: `This account is already in use on ${r.devices || 1} phone(s) — the limit is reached.`,
+      revoked: 'Access for this account has been stopped.', phone_locked: 'This mobile number is set up for another phone. Please sign in with Google (Gmail), or send your account details again from this phone.', google_failed: 'Google sign-in failed — please try again.', bad_phone: 'Please enter a valid mobile number, e.g. 03001234567' }[r.reason] || ('Could not sign in (' + (r.reason || r.error || 'error') + ')');
     acctMsg('❌ ' + why, false); return;
   }
-  if(!r.active){ acctMsg('⚠️ Subscription found, but it ended on ' + formatDateDMY(toLocalDateStr(new Date(r.exp))) + '.', false); acctApply(r, true); return; }
+  if(!r.active){ acctMsg('⚠️ Account found, but its access ended on ' + formatDateDMY(toLocalDateStr(new Date(r.exp))) + '.', false); acctApply(r, true); return; }
   acctApply(r);
   acctRenderState();
   acctMsg('✅ Unlocked on this phone' + (r.life ? ' — Lifetime' : ' till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))), true);
@@ -30342,7 +30342,8 @@ async function devAcctGrant(){
   if(!confirm('کیا آپ نے اکاؤنٹ کی تمام تفصیلات مکمل طور پر چیک کر لی ہیں؟ ان میں کوئی غلطی تو نہیں، اور کوئی بات باقی تو نہیں رہ گئی؟\n\n👤 ' + (document.getElementById('devAcctN').value.trim() || '—') + '\n📱 ' + (p || '—') + '\n📧 ' + (g || '—') + '\n📦 P1+' + (dv - 1) + ' (' + dv + ' phone' + (dv > 1 ? 's' : '') + ') · ' + (life ? 'Lifetime' : days + ' days') + '\n\nOK = سب مکمل ہے، اکاؤنٹ کھول دیں')) return;
   msg.textContent = '⏳ Saving…';
   try{
-    const r = await devAcctCall({ op: 'grant', emails: g ? [g] : [], phones: p ? [p] : [], days: life ? 0 : days, life, devices: parseInt(document.getElementById('devAcctDev').value, 10) || 1, name: document.getElementById('devAcctN').value.trim(), note: document.getElementById('devAcctNote').value.trim() });
+    const uidM = (document.getElementById('devAcctNote').value || '').match(/UID:\s*([A-Za-z0-9_-]{6,64})/);
+    const r = await devAcctCall({ op: 'grant', uid: uidM ? uidM[1] : '', emails: g ? [g] : [], phones: p ? [p] : [], days: life ? 0 : days, life, devices: parseInt(document.getElementById('devAcctDev').value, 10) || 1, name: document.getElementById('devAcctN').value.trim(), note: document.getElementById('devAcctNote').value.trim() });
     if(!r.ok){ msg.textContent = '❌ ' + ({ no_keys: 'Gmail or mobile number is not valid' }[r.reason] || r.reason || r.error); return; }
     msg.textContent = '✅ Saved — ' + (r.life ? 'Lifetime' : 'till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))) + '. Customer: Sign in with account → same Gmail / number.';
     ['devAcctG','devAcctP','devAcctN','devAcctNote'].forEach(id => { document.getElementById(id).value = ''; });
@@ -34669,9 +34670,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0411WE159';
+  const APP_VERSION = 'AIO0411WE160';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Developer panel: “Account Subscriptions” is now “Account Access”';
+  const UPDATE_NOTE = 'Account access: the customer’s own phone (UID) is linked when access is given; mobile-number sign-in works only on that phone';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
