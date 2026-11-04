@@ -3018,6 +3018,9 @@
   body.nastaleeq-active .kpiLabel,
   body.nastaleeq-active .statLabel,
   body.nastaleeq-active .hLabel{ font-size:12.5px; line-height:1.9; }
+
+  .custUseWalkin{display:block; width:100%; margin-top:6px; border:1.5px dashed #f59e0b; background:#fffbeb; color:#92400e; border-radius:12px; padding:9px 10px; font-weight:800; font-size:13.5px; cursor:pointer; text-align:left}
+  .custUseWalkin small{display:block; font-weight:600; font-size:11px; color:#a16207; margin-top:2px}
 </style>
   <!-- ---------- یہ الگ style ٹیگ خاص طور پر پرنٹ کے وقت اصل کاغذ کی چوڑائی (58mm/80mm) بتانے کے لیے ہے —
        بغیر اس کے، پرنٹ سسٹم صفحے کا سائز A4/Letter سمجھ کر رسید کو چھوٹا کر کے سکیڑ دیتا تھا،
@@ -12323,6 +12326,7 @@ function deleteBillingCartDraft(){
 function resetBillingCart(){
   Billing.cart = [];
   try{ clearWalkinFields(); }catch(e){}
+  try{ advOrderBilling = null; saveToStorage('advOrderBilling', null); }catch(e){}
   clearBillingCartDraft();
   const custSel = document.getElementById('customerSelect');
   if(custSel) custSel.value = '';
@@ -14085,8 +14089,26 @@ function walkinInfo(){
   const v = id => ((document.getElementById(id) || {}).value || '').trim();
   return {name: v('walkinName'), phone: v('walkinPhone'), save: !!(document.getElementById('walkinSave') || {}).checked};
 }
+function useSearchAsWalkin(){ // ہیلپ ڈیسک #73
+  const si = document.getElementById('custSearchInput'), t = (si?.value || '').trim(); if(!t) return;
+  const sel = document.getElementById('customerSelect'); if(sel && sel.value){ try{ endCustomerSelection(); }catch(e){} }
+  const d = t.replace(/\D/g, ''), wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone');
+  if(d.length >= 10 && d.length === t.replace(/[\s+-]/g, '').length){ if(wp) wp.value = t; } else if(wn) wn.value = t;
+  if(si) si.value = ''; try{ filterCustomerSelectOptions(); closeCustomerList(); }catch(e){}
+  walkinDraftSave(); renderCart(); (wn && !wn.value ? wn : wp)?.focus();
+}
 function walkinName(){ return walkinInfo().name || 'Walk-in Customer'; }
-function clearWalkinFields(){ ['walkinName','walkinPhone'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; }); const c = document.getElementById('walkinSave'); if(c) c.checked = false; }
+function clearWalkinFields(){ ['walkinName','walkinPhone'].forEach(id => { const e = document.getElementById(id); if(e) e.value = ''; }); const c = document.getElementById('walkinSave'); if(c) c.checked = false; try{ saveToStorage('walkinDraft', null); }catch(e){} }
+// ہیلپ ڈیسک #73: لکھا ہوا Walk-in نام / فون ایپ بند ہو کر کھلے تب بھی (کارٹ میں چیزیں ہوں تو) واپس
+function walkinDraftSave(){ try{ const w = walkinInfo(); saveToStorage('walkinDraft', (w.name || w.phone || w.save) ? w : null); }catch(e){} }
+setTimeout(() => { try{
+  ['walkinName','walkinPhone','walkinSave'].forEach(id => { const e = document.getElementById(id); if(e) e.addEventListener(id === 'walkinSave' ? 'change' : 'input', walkinDraftSave); });
+  const w = loadFromStorage('walkinDraft', null), sel = document.getElementById('customerSelect');
+  if(w && Billing.cart.length && !(sel && sel.value)){ const wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone'), ws = document.getElementById('walkinSave');
+    if(wn && !wn.value) wn.value = w.name || ''; if(wp && !wp.value) wp.value = w.phone || ''; if(ws) ws.checked = !!w.save; }
+  else if(w && !Billing.cart.length) saveToStorage('walkinDraft', null);
+  const ei = editingInvoice(); if(ei) fillEditPaymentFields(ei, false);   // ترمیم جاری ہو تو Walk-in نام / فون فوراً واپس
+}catch(e){} }, 900);
 // «کسٹمر لسٹ میں محفوظ» چیک ہو تو کسٹمر بنائیں (اسی نمبر والا پہلے سے ہو تو وہی) — ورنہ null
 function walkinSavedCustomer(){
   const w = walkinInfo();
@@ -14306,6 +14328,12 @@ function fillEditPaymentFields(inv, force){
   if(r && (force || r.value === '')) r.value = inv.cash_received_now > 0 ? Math.round(inv.cash_received_now * 100) / 100 : '';
   const d = document.getElementById('discountInput');
   if(d && (force || !parseFloat(d.value))) d.value = inv.discount || 0;
+  // ہیلپ ڈیسک #73: Walk-in بل کی ترمیم میں لکھا نام / فون ہمیشہ واپس (ایپ دوبارہ کھلنے یا وہی بل دوبارہ کھولنے پر بھی)
+  if(!inv.customer_id && !((document.getElementById('customerSelect') || {}).value)){
+    const wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone');
+    if(wn && (force || !wn.value.trim()) && inv.customer_name && inv.customer_name !== 'Walk-in Customer') wn.value = inv.customer_name;
+    if(wp && (force || !wp.value.trim()) && inv.customer_phone) wp.value = inv.customer_phone;
+  }
   billEditFieldsFilled = true;
 }
 function reverseInvoiceForEdit(inv, why){
@@ -15051,6 +15079,7 @@ function finalizeInvoice(){
     if(oldCust && oldCust !== customer) settleNegativeReceivable(oldCust, `Paid on ${invoice.invoice_no} (moved to another customer) — kept as advance`);
   }
   if(editInv){ billEdit = null; saveToStorage('billEditDraft', null); renderEditBillBanner(); showNavToast(`✅ ${invoice.invoice_no} updated`); }
+  advOrderBilled(invoice); // ہیلپ ڈیسک #74
   if(invoice.bill_serial && invoice.bill_serial > (parseInt(loadFromStorage('lastBillSerial', 0)) || 0)) saveToStorage('lastBillSerial', invoice.bill_serial);
   openInvoicePreview(invoice.invoice_id); // خودکار پریمیم پرنٹ پریویو کھل جائے
 }
@@ -22695,6 +22724,18 @@ function advOrderTotal(order){
 }
 
 // ---------- اگلے سیل راؤنڈ پر: یہ آرڈر اصل Billing کارٹ میں لوڈ کر دیں تاکہ فوری بل بنایا جا سکے ----------
+let advOrderBilling = loadFromStorage('advOrderBilling', null);
+function advOrderBilled(invoice){ // ہیلپ ڈیسک #74: اسی آرڈر کا اصل بل بن گیا → آرڈر فہرست سے صاف (نئے آرڈر کی جگہ)
+  if(advOrderBilling == null) return;
+  const i = advanceOrdersData.findIndex(o => o.id === advOrderBilling);
+  advOrderBilling = null; saveToStorage('advOrderBilling', null);
+  if(i < 0) return;
+  const o = advanceOrdersData[i]; advanceOrdersData.splice(i, 1);
+  persistAllData(); try{ renderAdvanceOrdersScreen(); }catch(e){}
+  try{ showNavToast(`📝 Advance order of ${o.customerName} billed (${invoice.invoice_no}) — removed from the list`); }catch(e){}
+}
+// پرانے «fulfilled» (کارٹ میں بھیجے جا چکے) آرڈر ایک بار صاف — ان کے بل بن چکے
+setTimeout(() => { try{ if(!loadFromStorage('advFulfilledPurged', false) && typeof advanceOrdersData !== 'undefined'){ const n = advanceOrdersData.length; for(let k = advanceOrdersData.length - 1; k >= 0; k--) if(advanceOrdersData[k].status === 'fulfilled') advanceOrdersData.splice(k, 1); saveToStorage('advFulfilledPurged', true); if(advanceOrdersData.length !== n){ persistAllData(); try{ renderAdvanceOrdersScreen(); }catch(e){} } } }catch(e){} }, 2500);
 function fulfillAdvanceOrder(orderId){
   const order = advanceOrdersData.find(o => o.id === orderId);
   if(!order) return;
@@ -22711,10 +22752,8 @@ function fulfillAdvanceOrder(orderId){
 
   const matchedCustomer = customersData.find(c => c.name.toLowerCase() === order.customerName.toLowerCase());
 
-  order.status = 'fulfilled';
-  order.fulfilledAt = new Date().toISOString();
-  persistAllData();
-  renderAdvanceOrdersScreen();
+  // ہیلپ ڈیسک #74: آرڈر ابھی «fulfilled» نہیں — اصل بل مکمل ہونے پر ہی فہرست سے ہٹے گا (advOrderBilled)
+  advOrderBilling = order.id; saveToStorage('advOrderBilling', advOrderBilling);
 
   goTo('billing');
   document.getElementById('custSearchInput') && (document.getElementById('custSearchInput').value = '');
@@ -22723,6 +22762,8 @@ function fulfillAdvanceOrder(orderId){
   const custSel = document.getElementById('customerSelect');
   if(custSel){ custSel.value = matchedCustomer ? matchedCustomer.customer_id : ''; }
   Billing.counterSale = !matchedCustomer;
+  // ہیلپ ڈیسک #74: گاہک فہرست میں نہ ہو تو آرڈر والا نام / فون Walk-in خانوں میں — بل پر یہی نام
+  try{ clearWalkinFields(); if(!matchedCustomer){ const wn = document.getElementById('walkinName'), wp = document.getElementById('walkinPhone'); if(wn) wn.value = order.customerName || ''; if(wp) wp.value = order.customerPhone || ''; walkinDraftSave(); } }catch(e){}
   syncCartModeControls();
   renderCart();
 
@@ -25003,7 +25044,8 @@ function filterCustomerSelectOptions(){
   // ---------- نئی، باریک نام والی لسٹ — سبز گولی (والٹ ہمارے پاس، ہم نے دینے ہیں) اور سرخ گولی (بقایہ، ہم نے لینے ہیں)، دونوں ایک ساتھ بھی نظر آ سکتی ہیں ----------
   if(listWrap){
     if(list.length === 0){
-      listWrap.innerHTML = '<div class="custPickEmpty">No customers found</div>';
+      const typed = (document.getElementById('custSearchInput')?.value || '').trim();
+      listWrap.innerHTML = '<div class="custPickEmpty">No customers found</div>' + (typed ? `<button type="button" class="custUseWalkin" onclick="useSearchAsWalkin()">✍️ Use «${typed.replace(/[<>&"]/g,'')}» as Walk-in name<small>Printed on the bill only — tick «Save to customer list» to keep them</small></button>` : '');
     } else {
       listWrap.innerHTML = list.map(c => {
         const isSelected = String(c.customer_id) === String(sel.value);
@@ -34709,9 +34751,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0511TH163';
+  const APP_VERSION = 'AIO0511TH165';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'The SOS label is gone everywhere: Help Desk for help, a key icon for PIN recovery';
+  const UPDATE_NOTE = 'Advance order: name goes to the bill, and the order leaves the list once its bill is made';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
