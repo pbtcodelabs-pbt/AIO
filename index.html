@@ -3362,7 +3362,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE162</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE168</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3431,6 +3431,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     </div>
 
     <button onclick="shareAppLink()" style="background:#dcfce7; color:var(--success); margin-top:10px; display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="flex:0 0 auto; vertical-align:-3px; margin-right:5px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>Share This App</button>
+    <button type="button" onclick="openIntroVideo()" style="background:linear-gradient(135deg,#0f766e,#115e59); color:#fff; margin-top:10px; font-weight:800;">🎬 Watch intro video — what AIO POS can do</button>
 
     <div class="loginHint loginForgotHint"><a href="javascript:void(0)" onclick="openPinRecoveryModal()" style="color:var(--primary); font-weight:700; text-decoration:none;">Forgot your PIN? Recover it here.</a></div>
     <div id="turnOffTouchIdHint" class="loginHint" style="display:none;"><a href="javascript:void(0)" onclick="turnOffTouchId()" style="color:var(--muted); font-weight:700; text-decoration:none;">👆 Turn off Touch ID on this device</a></div>
@@ -3583,7 +3584,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE162</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE168</span>
     </div>
   </div>
 
@@ -34766,9 +34767,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0511TH167';
+  const APP_VERSION = 'AIO0411WE168';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Help Desk button is yellow everywhere — no SOS mark';
+  const UPDATE_NOTE = 'Intro video on the login screen (English + Urdu)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -34965,5 +34966,57 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     </div>
 
 <script src="https://pbtcodelabs-pbt.github.io/help/widget.js" data-app="AIO" defer></script>
+<!-- 🎬 AIO POS تعارفی ویڈیو (ہیلپ ڈیسک #76) — ویڈیو ہیلپ ڈیسک کے media فولڈر سے (sw کیش نہیں کرتا) -->
+<style>
+#introVidOv{position:fixed;inset:0;z-index:100000;background:rgba(2,6,23,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:10px}
+#introVidOv video{max-width:100%;max-height:calc(100vh - 130px);aspect-ratio:9/16;border-radius:16px;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#introVidOv .ivBar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#introVidOv .ivBar button,#introVidOv .ivBar a{border:0;border-radius:999px;padding:9px 16px;font-weight:800;font-size:14px;cursor:pointer;background:#e2e8f0;color:#0f172a;text-decoration:none;width:auto;margin:0}
+#introVidOv .ivBar .on{background:#0f766e;color:#fff}
+#introVidOv .ivX{position:absolute;top:10px;right:12px;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:#0f172a;font-size:20px;font-weight:900;cursor:pointer;margin:0;padding:0}
+</style>
+<script>
+(function(){
+  var BASE = 'https://pbtcodelabs-pbt.github.io/help/media/';
+  function src(l){ return BASE + 'aio-pos-' + l + '.mp4'; }
+  window.openIntroVideo = function(lang){
+    var l = lang || (function(){ try { return localStorage.getItem('aioIntroVidLang') || 'en'; } catch(_) { return 'en'; } })();
+    var ov = document.getElementById('introVidOv');
+    if (!ov) {
+      ov = document.createElement('div'); ov.id = 'introVidOv';
+      ov.innerHTML = '<button class="ivX" type="button" aria-label="Close">✕</button>' +
+        '<div class="ivBar"><button type="button" data-l="en">English</button><button type="button" data-l="ur">اردو</button></div>' +
+        '<video controls playsinline preload="metadata"></video>' +
+        '<div class="ivBar"><a class="ivDl" download>⬇️ Download</a><button type="button" class="ivSh">📤 Share</button></div>';
+      document.body.appendChild(ov);
+      ov.querySelector('.ivX').onclick = closeIntroVideo;
+      ov.addEventListener('click', function(e){ if (e.target === ov) closeIntroVideo(); });
+      ov.querySelectorAll('[data-l]').forEach(function(b){ b.onclick = function(){ openIntroVideo(b.getAttribute('data-l')); }; });
+      ov.querySelector('.ivSh').onclick = shareIntroVideo;
+    }
+    try { localStorage.setItem('aioIntroVidLang', l); } catch(_) {}
+    ov.setAttribute('data-l', l);
+    ov.querySelectorAll('[data-l]').forEach(function(b){ if (b.tagName === 'BUTTON') b.classList.toggle('on', b.getAttribute('data-l') === l); });
+    var v = ov.querySelector('video');
+    if (v.getAttribute('src') !== src(l)) { v.src = src(l); v.poster = BASE + 'aio-' + l + '.jpg'; }
+    var a = ov.querySelector('.ivDl'); a.href = src(l); a.setAttribute('download', 'AIO-POS-' + (l === 'ur' ? 'Urdu' : 'English') + '.mp4');
+    ov.style.display = 'flex';
+    var pr = v.play(); if (pr && pr.catch) pr.catch(function(){});
+  };
+  window.closeIntroVideo = function(){ var ov = document.getElementById('introVidOv'); if (!ov) return; var v = ov.querySelector('video'); try { v.pause(); } catch(_) {} ov.style.display = 'none'; };
+  async function shareIntroVideo(){
+    var ov = document.getElementById('introVidOv'), l = ov.getAttribute('data-l') || 'en';
+    var txt = 'AIO POS — all-in-one software for your shop 🧾📱\nPBT Code Labs · +92 320-6793793';
+    try {
+      var blob = await (await fetch(src(l))).blob();
+      var f = new File([blob], 'AIO-POS-' + (l === 'ur' ? 'Urdu' : 'English') + '.mp4', { type: 'video/mp4' });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: txt }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { if (navigator.share) { await navigator.share({ text: txt + '\n' + src(l) }); return; } } catch (_) { return; }
+    ov.querySelector('.ivDl').click();
+  }
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeIntroVideo(); });
+})();
+</script>
 </body>
 </html>
