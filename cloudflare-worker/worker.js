@@ -365,6 +365,8 @@ export class McsStats {
       const mine = e.claims.find((c) => c.dev === b.dev);
       if (!mine) {
         if (!b.bind) return Response.json({ ok: false, reason: "not_bound" });
+        /* AIO0411WE160: گاہک نے اپنے فون کا UID بھیجا ہو تو موبائل نمبر سے صرف وہی فون کھلے (نمبر کسی اور کو معلوم ہو تو جگہ نہ لے)؛ جی میل (گوگل سے تصدیق شدہ) کسی بھی فون پر */
+        if (e.uidLock && b.key.startsWith("p:")) return Response.json({ ok: false, reason: "phone_locked" });
         if (e.claims.length >= (e.devices || 1)) return Response.json({ ok: false, reason: "devices_full", devices: e.devices || 1 });
         e.claims.push({ dev: b.dev, at: Date.now(), via: b.key.slice(0, 1) });
       } else mine.seen = Date.now();
@@ -385,6 +387,8 @@ export class McsStats {
         if (b.devices) e.devices = b.devices; if (!e.devices) e.devices = 1;
         if (b.life) e.life = true; else if (b.days) e.exp = Math.max(now, e.exp || 0) + b.days * 864e5;
         if (b.setExp) e.exp = b.setExp;
+        /* AIO0411WE160: گاہک کے فون کا UID — پہلے سے جوڑ دو (اسی فون پر فوراً کھلے) */
+        if (b.bindDev) { e.claims = e.claims || []; e.uidLock = true; if (!e.claims.some((c) => c.dev === b.bindDev)) { if (e.claims.length >= (e.devices || 1)) e.claims.shift(); e.claims.push({ dev: b.bindDev, at: now, via: "u" }); } }
         e.revoked = false; e.by = "dev";
         this.entPut(e);
         return Response.json(this.entOut(e));
@@ -566,7 +570,7 @@ async function handleEnt(request, env, path) {
       if (!keys.length && !b.id) return reply({ ok: false, reason: "no_keys" });
       const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), devices = Math.max(1, Math.min(20, parseInt(b.devices, 10) || 1));
       if (!days && !b.life && !b.id) return reply({ ok: false, reason: "no_days" });
-      return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40), keys, days, life: !!b.life, devices, name: String(b.name || "").slice(0, 80), note: b.note === undefined ? undefined : String(b.note).slice(0, 300), setExp: parseInt(b.setExp, 10) || 0 });
+      return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40), keys, days, life: !!b.life, devices, name: String(b.name || "").slice(0, 80), note: b.note === undefined ? undefined : String(b.note).slice(0, 300), setExp: parseInt(b.setExp, 10) || 0, bindDev: String(b.uid || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64).replace(/^(.{0,5})$/, "") });
     }
     if (op === "list") return fwd("/ent_admin", { op, app });
     if (["revoke", "unrevoke", "reset", "delete"].includes(op)) return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40) });
