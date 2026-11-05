@@ -416,6 +416,13 @@ export class McsStats {
     }
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agmig2', '1')");
   }
+  finData(mon0) {
+    const mon = String(mon0 || "").replace(/[^0-9_]/g, "").slice(0, 7);
+    const sales = this.sql.exec("SELECT id, rec, ts, src, units FROM sale WHERE mon = ? ORDER BY ts", mon).toArray().map((x) => Object.assign(x, this.saleWho(x.rec)));
+    const g = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", "gcut_" + mon).toArray()[0];
+    const mons = this.sql.exec("SELECT mon, SUM(units) AS u FROM sale GROUP BY mon ORDER BY mon DESC LIMIT 24").toArray();
+    return { ok: true, mon, sales, gcut: g ? parseInt(g.v, 10) : null, mons };
+  }
   saleAdd(rec, src, units) {
     const t = new Date(Date.now() + 5 * 3600e3);
     this.sql.exec("INSERT INTO sale (rec, ts, src, units, mon) VALUES (?, ?, ?, ?, ?)", rec, Date.now(), src, units, t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"));
@@ -509,6 +516,12 @@ export class McsStats {
       const day = Math.floor(Date.now() / 864e5); if (r.seen !== day) this.sql.exec("UPDATE codev SET seen = ? WHERE phone = ?", day, b.phone);
       return Response.json({ ok: true, name: r.name });
     }
+    if (op === "/cd_fin") {   /* AGP0511TH005 (مالک کا حکم): کو-ڈویلپر — کمپنی کا حساب صرف دیکھنا (کچھ بدل نہیں سکتا) */
+      const b = await request.json();
+      const r = this.sql.exec("SELECT name, pin FROM codev WHERE phone = ?", b.phone).toArray()[0];
+      if (!r || !b.pin || r.pin !== b.pin) return Response.json({ ok: false, reason: "login" });
+      return Response.json(Object.assign(this.finData(b.mon), { name: r.name }));
+    }
     if (op === "/cd_admin") {   /* مالک (MCS ایڈمن): فہرست / شامل (نیا PIN) / ہٹائیں */
       const b = await request.json();
       if (b.op === "add") { const pin = String(100000 + Math.floor(Math.random() * 900000)); this.sql.exec("INSERT INTO codev (phone, name, pin, ts, seen) VALUES (?, ?, ?, ?, 0) ON CONFLICT (phone) DO UPDATE SET name = excluded.name, pin = excluded.pin, ts = excluded.ts", b.phone, b.name, pin, Date.now()); }
@@ -546,13 +559,7 @@ export class McsStats {
     if (op === "/ag_admin") {   /* ایڈمن: فہرست، تصویریں، منظور (کوڈ MCS-AG-0001…)، رد، حذف */
       const b = await request.json();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM agent ORDER BY ts DESC LIMIT 1000").toArray().map((r) => { const d = JSON.parse(r.data); if (d.code) { d.refs = this.sql.exec("SELECT COUNT(*) AS n FROM agref WHERE code = ?", d.code).toArray()[0].n; d.newProofs = this.sql.exec("SELECT COUNT(*) AS n FROM agproof WHERE code = ? AND done = 0", d.code).toArray()[0].n; } return d; }), rate: parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'rate'").toArray()[0] || {}).v || "0", 10) || 0 });
-      if (b.op === "fin") {   /* MCS0511TH158: مہینے کا کمپنی حساب */
-        const mon = String(b.mon || "").replace(/[^0-9_]/g, "").slice(0, 7);
-        const sales = this.sql.exec("SELECT id, rec, ts, src, units FROM sale WHERE mon = ? ORDER BY ts", mon).toArray().map((x) => Object.assign(x, this.saleWho(x.rec)));
-        const g = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", "gcut_" + mon).toArray()[0];
-        const mons = this.sql.exec("SELECT mon, SUM(units) AS u FROM sale GROUP BY mon ORDER BY mon DESC LIMIT 24").toArray();
-        return Response.json({ ok: true, mon, sales, gcut: g ? parseInt(g.v, 10) : null, mons });
-      }
+      if (b.op === "fin") return Response.json(this.finData(b.mon));   /* MCS0511TH158: مہینے کا کمپنی حساب */
       if (b.op === "gcut") { const mon = String(b.mon || "").replace(/[^0-9_]/g, "").slice(0, 7); if (b.amount === "" || b.amount == null) this.sql.exec("DELETE FROM agcfg WHERE k = ?", "gcut_" + mon); else this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "gcut_" + mon, String(Math.max(0, parseInt(b.amount, 10) || 0))); return Response.json({ ok: true }); }
       if (b.op === "rate") { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('rate', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(Math.max(0, parseInt(b.amount, 10) || 0))); return Response.json({ ok: true }); }
       if (b.op === "pay") { this.sql.exec("INSERT INTO agpay (code, amount, note, ts) VALUES (?, ?, ?, ?)", String(b.code || ""), parseInt(b.amount, 10) || 0, String(b.note || "").slice(0, 200), Date.now()); return Response.json({ ok: true }); }
@@ -825,6 +832,7 @@ async function handleAgent(request, env, path) {
     const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
     return fwd("/ag_portal", { admin: !!admin, code: S(b.code, 60), phone, pin: S(b.pin, 10), act: S(b.act, 10), rk: S(b.rk, 60), note: S(b.note, 400), text: S(b.text, 2000), img: media(b.img, 700000), audio: media(b.audio, 900000) });
   }
+  if (path === "/cdfin") { const phone = entPhone(b.phone); if (!phone || !b.pin) return reply({ ok: false, reason: "login" }); return fwd("/cd_fin", { phone, pin: S(b.pin, 10), mon: S(b.mon, 7) }); }
   if (path === "/codev") { const phone = entPhone(b.phone); if (!phone || !b.pin) return reply({ ok: false, reason: "login" }); return fwd("/cd_login", { phone, pin: S(b.pin, 10) }); }
   if (path === "/codevadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
@@ -988,7 +996,7 @@ export default {
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
