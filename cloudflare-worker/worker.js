@@ -369,6 +369,8 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS agproof (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT, rk TEXT, note TEXT, img TEXT, done INTEGER DEFAULT 0, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS agmsg (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT, who TEXT, text TEXT, img TEXT, audio TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS agcfg (k TEXT PRIMARY KEY, v TEXT)");
+    /* MCS0511TH158 (مالک کا حکم): ہر فروخت کا کھاتہ — 1000 = گوگل 150 (اصل، فرق مینٹیننس سے) + مینٹیننس 150 + لانے والا 170 + ڈویلپر 265 + کو-ڈویلپر 265 */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS sale (id INTEGER PRIMARY KEY AUTOINCREMENT, rec TEXT, ts INTEGER, src TEXT, units INTEGER, mon TEXT)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS agcnic (cnic TEXT PRIMARY KEY, code TEXT, id TEXT, ts INTEGER)");   /* MCS0511TH145: ایک شناختی کارڈ = ایک ایجنٹ = ایک کوڈ، ہمیشہ کے لیے (حذف کے بعد بھی) */
     this.sql.exec("CREATE TABLE IF NOT EXISTS codev (phone TEXT PRIMARY KEY, name TEXT, pin TEXT, ts INTEGER, seen INTEGER)");   /* MCS0511TH136: کو-ڈویلپر (صرف جانچ موڈ — کچھ محفوظ / منظور نہیں) */
     if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
@@ -413,6 +415,16 @@ export class McsStats {
       for (const t of ["agref", "agpay", "agproof", "agmsg"]) this.sql.exec("UPDATE " + t + " SET code = ? WHERE code = ?", d.code, old);
     }
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agmig2', '1')");
+  }
+  saleAdd(rec, src, units) {
+    const t = new Date(Date.now() + 5 * 3600e3);
+    this.sql.exec("INSERT INTO sale (rec, ts, src, units, mon) VALUES (?, ?, ?, ?, ?)", rec, Date.now(), src, units, t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"));
+  }
+  saleWho(rec) {   /* لانے والا: ایجنٹ (agref) / PBT-D ڈویلپر / PBT-C کو-ڈویلپر / PBT */
+    const a = this.sql.exec("SELECT code, data FROM agref WHERE rk = ?", rec).toArray()[0];
+    if (a) { let n = ""; for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === a.code) { n = x.name; break; } } let biz = ""; try { biz = JSON.parse(a.data || "{}").name || ""; } catch (e) {} return { by: "agent", code: a.code, agent: n, biz }; }
+    const p = this.sql.exec("SELECT data FROM prof WHERE rec = ?", rec).toArray()[0]; let ref = "PBT"; try { ref = (JSON.parse((p && p.data) || "{}").ref || "PBT").toUpperCase(); } catch (e) {}
+    return { by: ref === "PBT-D" ? "dev" : ref === "PBT-C" ? "codev" : "pbt", code: ref };
   }
   agMigrate3() {   /* MCS0511TH145: پہلے سے بنے ایجنٹوں کا شناختی کارڈ → کوڈ ایک بار محفوظ */
     if (this.sql.exec("SELECT v FROM agcfg WHERE k = 'agmig3'").toArray().length) return;
@@ -534,6 +546,14 @@ export class McsStats {
     if (op === "/ag_admin") {   /* ایڈمن: فہرست، تصویریں، منظور (کوڈ MCS-AG-0001…)، رد، حذف */
       const b = await request.json();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM agent ORDER BY ts DESC LIMIT 1000").toArray().map((r) => { const d = JSON.parse(r.data); if (d.code) { d.refs = this.sql.exec("SELECT COUNT(*) AS n FROM agref WHERE code = ?", d.code).toArray()[0].n; d.newProofs = this.sql.exec("SELECT COUNT(*) AS n FROM agproof WHERE code = ? AND done = 0", d.code).toArray()[0].n; } return d; }), rate: parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'rate'").toArray()[0] || {}).v || "0", 10) || 0 });
+      if (b.op === "fin") {   /* MCS0511TH158: مہینے کا کمپنی حساب */
+        const mon = String(b.mon || "").replace(/[^0-9_]/g, "").slice(0, 7);
+        const sales = this.sql.exec("SELECT id, rec, ts, src, units FROM sale WHERE mon = ? ORDER BY ts", mon).toArray().map((x) => Object.assign(x, this.saleWho(x.rec)));
+        const g = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", "gcut_" + mon).toArray()[0];
+        const mons = this.sql.exec("SELECT mon, SUM(units) AS u FROM sale GROUP BY mon ORDER BY mon DESC LIMIT 24").toArray();
+        return Response.json({ ok: true, mon, sales, gcut: g ? parseInt(g.v, 10) : null, mons });
+      }
+      if (b.op === "gcut") { const mon = String(b.mon || "").replace(/[^0-9_]/g, "").slice(0, 7); if (b.amount === "" || b.amount == null) this.sql.exec("DELETE FROM agcfg WHERE k = ?", "gcut_" + mon); else this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "gcut_" + mon, String(Math.max(0, parseInt(b.amount, 10) || 0))); return Response.json({ ok: true }); }
       if (b.op === "rate") { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('rate', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(Math.max(0, parseInt(b.amount, 10) || 0))); return Response.json({ ok: true }); }
       if (b.op === "pay") { this.sql.exec("INSERT INTO agpay (code, amount, note, ts) VALUES (?, ?, ?, ?)", String(b.code || ""), parseInt(b.amount, 10) || 0, String(b.note || "").slice(0, 200), Date.now()); return Response.json({ ok: true }); }
       if (b.op === "unpay") { this.sql.exec("DELETE FROM agpay WHERE id = ?", parseInt(b.pid, 10) || 0); return Response.json({ ok: true }); }
@@ -639,6 +659,7 @@ export class McsStats {
         /* پہلی بار: باقی دن ضائع نہیں — پرانی مدت (یا آج) سے آگے خریدی مدت؛ تجدید پر گوگل کی نئی تاریخ جتنا فرق */
         until = row ? until + (b.exp - prevExp) : Math.max(until, now) + (b.exp - now);
         this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", until, b.access ? yrs : 0, rec);
+        if (b.access && yrs > 0) this.saleAdd(rec, "play", yrs);
         if (row) this.sql.exec("UPDATE mbuy SET exp = ?, ts = ? WHERE tok = ?", b.exp, now, b.tok);
       }
       return Response.json({ ok: true, rec, until, sku: row ? row.sku : b.sku });
@@ -680,6 +701,7 @@ export class McsStats {
         const o = this.sql.exec("SELECT until FROM prof WHERE rec = ?", b.rec).toArray()[0];
         const yrs = o ? Math.max(0, Math.round((b.until - Math.max(o.until || 0, Date.now())) / (365 * 864e5))) : 0;
         this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", b.until, yrs, b.rec);
+        if (yrs > 0) this.saleAdd(b.rec, "manual", yrs);
       }
       else if (b.act === "approve") { const now = Date.now(); this.sql.exec("UPDATE prof SET since = ?, until = MAX(COALESCE(until, 0), ?), pend = 0 WHERE rec = ?", now, now + 15 * 864e5, b.rec); }   /* MCS0511TH157: منظوری = 15 دن مفت شروع */
       else if (b.act === "reject") this.sql.exec("UPDATE prof SET pend = 0 WHERE rec = ?", b.rec);
@@ -826,10 +848,10 @@ async function handleAgent(request, env, path) {
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
-    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut"].includes(op)) return reply({ error: "bad_op" }, 400);
     let c;
     if (op === "create") { const cc = b.c || {}, cn = String(cc.cnic || "").replace(/\D/g, ""); c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120), cnic: cn.length === 13 ? cn.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3") : "" }; if (!c.name || !c.phone || !c.code) return reply({ ok: false, reason: "missing" }); if (!c.cnic) return reply({ ok: false, reason: "bad_cnic" }); }
-    return fwd("/ag_admin", { op, id: String(b.id || "").slice(0, 40), note: b.note, code: S(b.code, 60), amount: b.amount, pid: b.pid, c });
+    return fwd("/ag_admin", { op, id: String(b.id || "").slice(0, 40), note: b.note, code: S(b.code, 60), amount: b.amount, pid: b.pid, c, mon: S(b.mon, 7) });
   }
   return reply({ error: "not_found" }, 404);
 }
