@@ -377,6 +377,11 @@ export class McsStats {
     if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN paid INTEGER DEFAULT 0"); } catch (e) {}
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN pend INTEGER DEFAULT 0"); } catch (e) {}   /* MCS0511TH157: دکاندار نے خود بنائی — ایڈمن کی منظوری پر 15 دن */
+    /* MCS0511TH161 (مالک کا حکم، ہیلپ ڈیسک #95): ایپ کا لاگ اِن — اکاؤنٹ (موبائل ایک ہی بار)، چابیاں m:/e:/g:/a:، سیشن (ٹوکن کا SHA-256)، غلط پاس ورڈ کی حد */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mcsuser (id TEXT PRIMARY KEY, data TEXT, pwh TEXT, ts INTEGER, seen INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mcsukey (k TEXT PRIMARY KEY, id TEXT)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mcssess (tok TEXT PRIMARY KEY, id TEXT, via TEXT, ts INTEGER, last INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mcsfail (k TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS mbuy (tok TEXT PRIMARY KEY, rec TEXT, sku TEXT, exp INTEGER, ts INTEGER)");   /* MCS0411WE147: پلے اسٹور کی ممبرشپ — ٹوکن ← ممبرشپ */
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
@@ -513,6 +518,67 @@ export class McsStats {
       const proofs = this.sql.exec("SELECT id, rk, note, done, ts" + (b.admin ? ", img" : "") + " FROM agproof WHERE code = ? ORDER BY ts DESC LIMIT 100", code).toArray();
       const msgs = this.sql.exec("SELECT id, who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC LIMIT 200", code).toArray().reverse();
       return Response.json({ ok: true, agent: { name: d.name, phone: d.phone, code, biz: d.biz, city: d.city, okAt: d.okAt || 0, off: !!d.off }, rate, refs, years, due: years * rate, paidOut, balance: years * rate - paidOut, pays, proofs, msgs });
+    }
+    if (op === "/ua") {   /* MCS0511TH161: اکاؤنٹ — ورکر نے ان پٹ صاف / پاس ورڈ ہیش / گوگل تصدیق کر دی */
+      const b = await request.json(), now = Date.now();
+      const key = (k) => (this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", k).toArray()[0] || {}).id || "";
+      const get = (id) => { const r = this.sql.exec("SELECT data, pwh FROM mcsuser WHERE id = ?", id).toArray()[0]; if (!r) return null; const u = JSON.parse(r.data); u._pwh = r.pwh || ""; return u; };
+      const out = (u) => ({ id: u.id, name: u.name, mobile: u.mobile, email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, ts: u.ts });
+      const sess = async (id, via) => { const raw = crypto.getRandomValues(new Uint8Array(24)); const tok = Array.from(raw).map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcssess (tok, id, via, ts, last) VALUES (?, ?, ?, ?, ?)", await uaTokHash(tok), id, via, now, now); return tok; };
+      const failK = "f:" + (b.fk || ""), failR = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", failK).toArray()[0];
+      const fails = failR && now - failR.ts < 15 * 60e3 ? failR.n : 0;
+      const fail = () => { this.sql.exec("INSERT INTO mcsfail (k, n, ts) VALUES (?, 1, ?) ON CONFLICT (k) DO UPDATE SET n = CASE WHEN ? - mcsfail.ts < 900000 THEN mcsfail.n + 1 ELSE 1 END, ts = excluded.ts", failK, now, now); };
+      const bySess = () => { if (!b.th) return null; const r = this.sql.exec("SELECT id, via, ts FROM mcssess WHERE tok = ?", b.th).toArray()[0]; if (!r) return null; const u = get(r.id); if (!u || u.del) return null; if (now - (r.last || 0) > 864e5) this.sql.exec("UPDATE mcssess SET last = ? WHERE tok = ?", now, b.th); return { u, via: r.via, at: r.ts }; };
+      if (b.act === "signup") {
+        if (key("m:" + b.mobile)) return Response.json({ ok: false, reason: "mobile_taken" });
+        if (b.email && key("e:" + b.email)) return Response.json({ ok: false, reason: "email_taken" });
+        if (b.gmail && (key("g:" + b.gmail) || key("e:" + b.gmail))) return Response.json({ ok: false, reason: "gmail_taken" });
+        let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
+        while (get("MCS-" + n)) n++;
+        this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('useq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
+        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "" };
+        this.sql.exec("INSERT INTO mcsuser (id, data, pwh, ts, seen) VALUES (?, ?, ?, ?, ?)", u.id, JSON.stringify(u), b.pwh || "", now, now);
+        this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "m:" + u.mobile, u.id);
+        this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
+        if (u.email) this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "e:" + u.email, u.id);
+        if (u.gmail) this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "g:" + u.gmail, u.id);
+        u._pwh = b.pwh || "";
+        return Response.json({ ok: true, tok: await sess(u.id, u.gmail ? "g" : "p"), user: out(u) });
+      }
+      if (b.act === "find") {   /* لاگ اِن: Account ID / موبائل / ای میل → ہیش واپس (ورکر جانچے) */
+        if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
+        const id = b.ids.map((k) => key(k)).find(Boolean) || "";
+        const u = id && get(id);
+        if (!u || u.del) { fail(); return Response.json({ ok: false, reason: "login" }); }
+        if (!u._pwh) return Response.json({ ok: false, reason: "no_pw", gmail: !!u.gmail });
+        return Response.json({ ok: true, id: u.id, pwh: u._pwh });
+      }
+      if (b.act === "pwok") { const u = get(b.id); if (!u || u.del) return Response.json({ ok: false, reason: "login" }); this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK); this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id); return Response.json({ ok: true, tok: await sess(u.id, "p"), user: out(u) }); }
+      if (b.act === "pwbad") { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "login" }); }
+      if (b.act === "google") {
+        const id = key("g:" + b.gmail) || key("e:" + b.gmail);
+        const u = id && get(id);
+        if (!u || u.del) return Response.json({ ok: false, reason: "new", gmail: b.gmail });
+        if (!u.gmail) { u.gmail = b.gmail; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(Object.assign({}, u, { _pwh: undefined })), u.id); this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "g:" + b.gmail, u.id); }
+        this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
+        return Response.json({ ok: true, tok: await sess(u.id, "g"), user: out(u) });
+      }
+      const S = bySess();
+      if (!S) return Response.json({ ok: false, reason: "session" });
+      if (b.act === "me") return Response.json({ ok: true, user: out(S.u) });
+      if (b.act === "logout") { this.sql.exec("DELETE FROM mcssess WHERE tok = ?", b.th); return Response.json({ ok: true }); }
+      if (b.act === "setpw") {   /* پاس ورڈ بدلیں — پرانا ٹھیک ہو، یا گوگل سے 15 منٹ کے اندر لاگ اِن ہوا ہو (پاس ورڈ بھول گئے) */
+        if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
+        this.sql.exec("UPDATE mcsuser SET pwh = ? WHERE id = ?", b.pwh, S.u.id);
+        this.sql.exec("DELETE FROM mcssess WHERE id = ? AND tok != ?", S.u.id, b.th);
+        return Response.json({ ok: true });
+      }
+      if (b.act === "delete") {   /* پلے اسٹور کا اصول: اکاؤنٹ اور اس کی سب چابیاں / سیشن ختم */
+        if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
+        this.sql.exec("DELETE FROM mcsukey WHERE id = ?", S.u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", S.u.id); this.sql.exec("DELETE FROM mcsuser WHERE id = ?", S.u.id);
+        return Response.json({ ok: true });
+      }
+      return Response.json({ ok: false, reason: "bad_act" });
     }
     if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
       const b = await request.json();
@@ -844,6 +910,67 @@ async function verifyGoogleIdToken(jwt) {
 }
 function entPhone(v) { let d = String(v || "").replace(/[۰-۹]/g, (c) => "۰۱۲۳۴۵۶۷۸۹".indexOf(c)).replace(/\D/g, ""); if (d.startsWith("0092")) d = d.slice(2); if (d.startsWith("0")) d = "92" + d.slice(1); if (d.length === 10 && d.startsWith("3")) d = "92" + d; return /^92\d{10}$/.test(d) ? d : ""; }
 function entEmail(v) { const e = String(v || "").trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e) ? e : ""; }
+/* ===== 🔐 MCS ایپ کا لاگ اِن (MCS0511TH161، ہیلپ ڈیسک #95) — پاس ورڈ PBKDF2-SHA256 (p2$iter$salt$hash)، گوگل ID ٹوکن یہیں جانچا، SMS OTP نہیں (مالک کا فیصلہ) ===== */
+const UA_ITER = 30000;
+const hex = (u8) => Array.from(u8).map((x) => x.toString(16).padStart(2, "0")).join("");
+const unhex = (h) => new Uint8Array((String(h).match(/../g) || []).map((x) => parseInt(x, 16)));
+async function uaHash(pw, saltHex, iter) {
+  const salt = saltHex ? unhex(saltHex) : crypto.getRandomValues(new Uint8Array(16)), it = iter || UA_ITER;
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: it }, k, 256);
+  return "p2$" + it + "$" + hex(salt) + "$" + hex(new Uint8Array(bits));
+}
+async function uaCheck(pw, stored) {
+  const p = String(stored || "").split("$"); if (p[0] !== "p2" || p.length !== 4) return false;
+  const h = await uaHash(pw, p[2], parseInt(p[1], 10)); const a = h.split("$")[3], b = p[3];
+  if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0;
+}
+async function uaTokHash(tok) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("ua:" + tok)))).slice(0, 48); }
+async function handleMcsAuth(request, env) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const call = async (body) => (await stub.fetch("https://s/ua", { method: "POST", body: JSON.stringify(body) })).json();
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const S = (v, n) => String(v == null ? "" : v).replace(/[<>"]/g, "").replace(/\s+/g, " ").slice(0, n).trim();
+  const pw = String(b.pw || ""), op = String(b.op || "");
+  const pwOk = (p) => p.length >= 6 && p.length <= 64;
+  const ip = request.headers.get("CF-Connecting-IP") || "";
+  const th = b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "";
+  const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
+  let r;
+  if (op === "signup") {
+    const name = S(b.name, 60), mobile = entPhone(b.mobile), email = b.email ? entEmail(b.email) : "";
+    if (name.length < 2) return reply({ ok: false, reason: "name" });
+    if (!mobile) return reply({ ok: false, reason: "mobile" });
+    if (b.email && !email) return reply({ ok: false, reason: "email" });
+    let gmail = "";
+    if (b.gtoken) { gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" }); }
+    if (!gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
+    if (gmail && pw && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
+    r = await call({ act: "signup", name, mobile, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev });
+  } else if (op === "login") {
+    const id = S(b.id, 80).toLowerCase(), ids = [];
+    if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
+    if (entPhone(id)) ids.push("m:" + entPhone(id));
+    if (entEmail(id)) ids.push("e:" + entEmail(id), "g:" + entEmail(id));
+    if (!ids.length || !pw) return reply({ ok: false, reason: "login" });
+    const fk = ip + "|" + ids[0];
+    r = await call({ act: "find", ids, fk });
+    if (r.ok) r = (await uaCheck(pw, r.pwh)) ? await call({ act: "pwok", id: r.id, fk }) : await call({ act: "pwbad", fk });
+  } else if (op === "google") {
+    const gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" });
+    r = await call({ act: "google", gmail });
+  } else if (["me", "logout"].includes(op)) {
+    r = await call({ act: op, th });
+  } else if (op === "setpw" || op === "delete") {
+    if (op === "setpw" && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
+    const body = { act: op, th, pwh: op === "setpw" ? await uaHash(pw) : "" };
+    r = await call(body);
+    if (!r.ok && r.reason === "old") { r = (b.old && await uaCheck(String(b.old), r.pwh)) ? await call(Object.assign(body, { oldOk: 1 })) : { ok: false, reason: "old" }; }
+  } else return reply({ ok: false, reason: "bad_op" }, 400);
+  if (r && r.pwh) delete r.pwh;
+  return reply(r);
+}
 /* ===== 🤝 MCS کمیشن ایجنٹ (MCS0411WE131) ===== */
 async function handleAgent(request, env, path) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
@@ -1038,6 +1165,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
