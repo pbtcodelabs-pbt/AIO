@@ -459,10 +459,26 @@ export class McsStats {
       if (!mine) {
         if (!b.bind) return Response.json({ ok: false, reason: "not_bound" });
         /* AIO0411WE160: گاہک نے اپنے فون کا UID بھیجا ہو تو موبائل نمبر سے صرف وہی فون کھلے (نمبر کسی اور کو معلوم ہو تو جگہ نہ لے)؛ جی میل (گوگل سے تصدیق شدہ) کسی بھی فون پر */
-        if (e.uidLock && b.key.startsWith("p:")) return Response.json({ ok: false, reason: "phone_locked" });
-        if (e.claims.length >= (e.devices || 1)) return Response.json({ ok: false, reason: "devices_full", devices: e.devices || 1 });
-        e.claims.push({ dev: b.dev, at: Date.now(), via: b.key.slice(0, 1) });
+        /* AIO0511TH173 (مالک کا حکم): نیا فون / دوبارہ انسٹال — جی میل (گوگل سے تصدیق شدہ) یا موبائل + اکاؤنٹ PIN ہو تو سب سے پرانے فون کی جگہ یہ فون (باقی دن وہی)؛ پرانا فون اگلی جانچ (30 منٹ) پر خود بند */
+        const pinOk = !!(b.key.startsWith("p:") && e.pin && b.pin && String(b.pin) === String(e.pin));
+        const trusted = b.key.startsWith("g:") || pinOk;
+        if (b.key.startsWith("p:") && b.pin) {   /* غلط PIN: 15 منٹ میں 8 بار کے بعد روک */
+          const pf = e.pf && Date.now() - e.pf.ts < 9e5 ? e.pf : { n: 0, ts: Date.now() };
+          if (pf.n >= 8) return Response.json({ ok: false, reason: "pin_wait" });
+          if (!pinOk) { pf.n++; e.pf = pf; this.entPut(e); return Response.json({ ok: false, reason: "bad_pin" }); }
+          if (e.pf) delete e.pf;
+        }
+        if (e.uidLock && b.key.startsWith("p:") && !pinOk) return Response.json({ ok: false, reason: "phone_locked" });
+        let moved = false;
+        if (e.claims.length >= (e.devices || 1)) {
+          if (!trusted) return Response.json({ ok: false, reason: "devices_full", devices: e.devices || 1 });
+          e.claims.sort((x, y) => (x.seen || x.at || 0) - (y.seen || y.at || 0));
+          while (e.claims.length >= (e.devices || 1)) e.claims.shift();
+          moved = true;
+        }
+        e.claims.push({ dev: b.dev, at: Date.now(), via: pinOk ? "k" : b.key.slice(0, 1) });
         this.entPut(e);
+        if (moved) { const o = this.entOut(e); delete o.keys; o.id = undefined; o.moved = true; return Response.json(o); }
       } else if (Date.now() - (mine.seen || mine.at || 0) > 864e5) { mine.seen = Date.now(); this.entPut(e); }   /* AIO0411WE162: ہر جانچ پر لکھنا نہیں — دن میں ایک بار */
       const o = this.entOut(e); delete o.keys; o.id = undefined; return Response.json(o);   /* گاہک کو دوسری چابیاں (جی میل / نمبر) نہیں */
     }
@@ -708,7 +724,7 @@ export class McsStats {
     if (op === "/ent_admin") {   /* ڈویلپر: دینا / بڑھانا، فہرست، بند، فون صاف، حذف */
       const b = await request.json();
       const now = Date.now();
-      if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [] }); }) });
+      if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [], pin: e.pin || "" }); }) });
       if (b.op === "grant") {
         let id = b.id || "";
         if (!id) for (const k of b.keys) { const r = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + k).toArray()[0]; if (r) { id = r.id; break; } }
@@ -722,13 +738,15 @@ export class McsStats {
         /* AIO0411WE160: گاہک کے فون کا UID — پہلے سے جوڑ دو (اسی فون پر فوراً کھلے) */
         if (b.bindDev) { e.claims = e.claims || []; e.uidLock = true; if (!e.claims.some((c) => c.dev === b.bindDev)) { if (e.claims.length >= (e.devices || 1)) e.claims.shift(); e.claims.push({ dev: b.bindDev, at: now, via: "u" }); } }
         e.revoked = false; e.by = "dev";
+        if (!e.pin) e.pin = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));   /* AIO0511TH173: اکاؤنٹ PIN — موبائل نمبر + PIN سے نیا فون */
         this.entPut(e);
-        return Response.json(this.entOut(e));
+        return Response.json(Object.assign(this.entOut(e), { pin: e.pin }));
       }
       const e = this.entGet(b.id); if (!e) return Response.json({ ok: false, reason: "none" });
       if (b.op === "revoke") { e.revoked = true; this.entPut(e); return Response.json(this.entOut(e)); }
       if (b.op === "unrevoke") { e.revoked = false; this.entPut(e); return Response.json(this.entOut(e)); }
       if (b.op === "reset") { e.claims = []; this.entPut(e); return Response.json(this.entOut(e)); }
+      if (b.op === "newpin") { e.pin = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)); this.entPut(e); return Response.json(Object.assign(this.entOut(e), { pin: e.pin })); }
       if (b.op === "delete") { this.sql.exec("DELETE FROM ent WHERE id = ?", e.id); this.sql.exec("DELETE FROM entkey WHERE id = ?", e.id); return Response.json({ ok: true }); }
       return Response.json({ ok: false, reason: "bad_op" }, { status: 400 });
     }
@@ -1048,7 +1066,8 @@ async function handleEnt(request, env, path) {
     else if (b.kind === "g") { const em = await verifyGoogleIdToken(b.idToken); if (!em) return reply({ ok: false, reason: "google_failed" }); key = "g:" + em; }
     else if (b.kind === "p") { const ph = entPhone(b.phone); if (!ph) return reply({ ok: false, reason: "bad_phone" }); key = "p:" + ph; }
     if (!/^[gp]:/.test(key)) return reply({ error: "bad_key" }, 400);
-    const r = await fwd("/ent_claim", { app, key, dev, bind: path === "/entclaim" });
+    const pin = b.kind === "p" ? String(b.pin || "").replace(/[^0-9]/g, "").slice(0, 8) : "";
+    const r = await fwd("/ent_claim", { app, key, dev, bind: path === "/entclaim", pin });
     const out = await r.json(); out.key = key;
     return reply(out);
   }
@@ -1063,7 +1082,7 @@ async function handleEnt(request, env, path) {
       return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40), keys, days, life: !!b.life, devices, name: String(b.name || "").slice(0, 80), note: b.note === undefined ? undefined : String(b.note).slice(0, 300), setExp: parseInt(b.setExp, 10) || 0, bindDev: String(b.uid || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64).replace(/^(.{0,5})$/, "") });
     }
     if (op === "list") return fwd("/ent_admin", { op, app });
-    if (["revoke", "unrevoke", "reset", "delete"].includes(op)) return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40) });
+    if (["revoke", "unrevoke", "reset", "delete", "newpin"].includes(op)) return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40) });
     return reply({ error: "bad_op" }, 400);
   }
   return reply({ error: "not_found" }, 404);
