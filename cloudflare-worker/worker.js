@@ -605,6 +605,10 @@ export class McsStats {
         this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
         return Response.json({ ok: true, agent: d });
       }
+      if (b.op === "agpin") {   /* AGP0511TH012: ڈویلپر — ایجنٹ کا PIN دیکھیں یا نیا بنائیں (ایجنٹ بھول جائے) */
+        for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code && x.code === b.code) { if (b.note === "new" || !x.pin) { x.pin = String(100000 + Math.floor(Math.random() * 900000)); this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(x), r.id); } return Response.json({ ok: true, pin: x.pin, phone: x.phone, name: x.name }); } }
+        return Response.json({ ok: false, reason: "none" });
+      }
       if (b.op === "deact" || b.op === "react") {   /* AGP0511TH011: ایجنٹ غیر فعال / دوبارہ فعال (کوڈ اور پرانا حساب ویسا) */
         for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code && x.code === b.code) { x.off = b.op === "deact"; x.offAt = x.off ? Date.now() : 0; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(x), r.id); return Response.json({ ok: true, off: x.off }); } }
         return Response.json({ ok: false, reason: "none" });
@@ -892,7 +896,7 @@ async function handleAgent(request, env, path) {
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
-    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react", "agpin"].includes(op)) return reply({ error: "bad_op" }, 400);
     let c;
     if (op === "create") { const cc = b.c || {}, cn = String(cc.cnic || "").replace(/\D/g, ""); c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120), cnic: cn.length === 13 ? cn.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3") : "" }; if (!c.name || !c.phone || !c.code) return reply({ ok: false, reason: "missing" }); if (!c.cnic) return reply({ ok: false, reason: "bad_cnic" }); }
     const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
