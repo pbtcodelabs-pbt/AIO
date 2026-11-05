@@ -897,6 +897,7 @@ function profClean(d) {
   out.items = (Array.isArray(d.items) ? d.items : []).slice(0, 20).map((x) => ({ n: S(x && x.n, 60), p: S(x && x.p, 24) })).filter((x) => x.n);
   out.phones = (Array.isArray(d.phones) ? d.phones : []).slice(0, 3).map((x) => S(x, 20).replace(/[^0-9+\- ]/g, "")).filter(Boolean);
   out.links = (Array.isArray(d.links) ? d.links : []).slice(0, 3).map((x) => S(x, 200)).filter((x) => /^https?:\/\//i.test(x));
+  out.ref = S(d.ref, 40).replace(/[^A-Za-z0-9_\-]/g, "") || "PBT";   /* MCS0511TH157: ایجنٹ کا ریفرل کوڈ، نہ ہو تو PBT (ہمارا اپنا گاہک) */
   if (d.map && isFinite(+d.map.lat) && isFinite(+d.map.lon)) out.map = { lat: +(+d.map.lat).toFixed(6), lon: +(+d.map.lon).toFixed(6) };
   return out;
 }
