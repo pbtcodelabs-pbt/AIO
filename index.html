@@ -2902,7 +2902,7 @@
     #globalSearchBar .gsbHomeIcons{display:none; align-items:center; gap:5px;}
     body.home-active #globalSearchBar .gsbHomeIcons{display:flex;}
     #globalSearchBar .gsbBtn{width:30px; height:30px; border-radius:50%; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.18); color:#fff; font-size:14px; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;}
-    /* AIO0411WE170 (ہیلپ ڈیسک #82): پیلا Help Desk گول 30px خانے میں پھنس کر ساتھ والے بٹن کے نیچے کٹ رہا تھا — اپنی پوری چوڑائی */
+    /* AIO0511TH171 (ہیلپ ڈیسک #82): پیلا Help Desk گول 30px خانے میں پھنس کر ساتھ والے بٹن کے نیچے کٹ رہا تھا — اپنی پوری چوڑائی */
     #globalSearchBar .gsbBtn.gsbHelp{width:auto; min-width:0; height:30px; border:0; background:none; border-radius:999px; padding:0 2px; margin:0 2px; overflow:visible;}
     #globalSearchBar .gsbBtn.gsbGear{background:#fff; color:var(--primary-dark);}
     #globalSearchBar .gsbBtn:active{transform:scale(.9);}
@@ -3364,7 +3364,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0411WE170</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0511TH171</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3586,7 +3586,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0411WE170</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0511TH171</span>
     </div>
   </div>
 
@@ -10232,21 +10232,13 @@ async function buildAppPosterCanvas(){
   ctx.fillStyle = 'rgba(0,0,0,.35)'; _pRound(ctx, W/2-lw/2, ly2, lw, 52, 26); ctx.fill();
   ctx.fillStyle = '#f4d58d'; ctx.fillText(P.link, W/2, ly2+35);
 
-  // ڈویلپر
+  // ڈویلپر کا نام / ذاتی نمبر نہیں (مالک کا حکم، 5 نومبر) — صرف Google Play پر تلاش
   const fy = ly2 + 85;
-  const fg = ctx.createLinearGradient(0,fy,0,fy+180); fg.addColorStop(0,'#f7dd9c'); fg.addColorStop(1,'#c99a34');
+  const fg = ctx.createLinearGradient(0,fy,0,fy+120); fg.addColorStop(0,'#f7dd9c'); fg.addColorStop(1,'#c99a34');
   ctx.save(); ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=16; ctx.shadowOffsetY=6;
-  ctx.fillStyle = fg; _pRound(ctx,70,fy,W-140,215,30); ctx.fill(); ctx.restore();
+  ctx.fillStyle = fg; _pRound(ctx,70,fy,W-140,120,30); ctx.fill(); ctx.restore();
   ctx.direction='rtl'; ctx.fillStyle = '#3a2600'; ctx.font = `700 36px ${FF}`;
-  ctx.fillText('ڈویلپر: ' + P.dev + '  —  رابطہ / مدد', W/2, fy+58);
-  ctx.direction='ltr'; ctx.font = '800 38px Arial, sans-serif';
-  const nw = ctx.measureText(P.phone).width, pw2 = nw + 120, pX = W/2-pw2/2, pY = fy+82, pH = 66;
-  const pg = ctx.createLinearGradient(0,pY,0,pY+pH); pg.addColorStop(0,'#2fd66b'); pg.addColorStop(1,'#1aa851');
-  ctx.fillStyle = pg; _pRound(ctx,pX,pY,pw2,pH,pH/2); ctx.fill();
-  _pWaIcon(ctx, pX+42, pY+pH/2, 22);
-  ctx.fillStyle = '#fff'; ctx.fillText(P.phone, pX+pw2/2+26, pY+47);
-  ctx.fillStyle = '#3a2600'; ctx.font = '600 26px Arial, sans-serif';
-  ctx.fillText(P.email, W/2, pY+pH+42);
+  ctx.fillText('🔍 Google Play پر «' + P.name + '» سرچ کریں', W/2, fy+72);
   return c;
 }
 
@@ -10366,15 +10358,9 @@ async function buildMultiPosterCanvas(){
   const lw = Math.min(ctx.measureText(P.link).width + 50, W - 120);
   ctx.fillStyle = 'rgba(0,0,0,.35)'; _pRound(ctx, W / 2 - lw / 2, ly2, lw, 52, 26); ctx.fill();
   ctx.fillStyle = '#f4d58d'; ctx.fillText(P.link, W / 2, ly2 + 35);
-  // رابطہ
+  // رابطہ: ڈویلپر کا نام / ذاتی نمبر نہیں (مالک کا حکم، 5 نومبر)
   const fy = ly2 + 80;
-  ctx.direction = 'ltr'; ctx.font = '800 38px Arial, sans-serif';
-  const nw = ctx.measureText(P.phone).width, pw2 = nw + 120, pX = W / 2 - pw2 / 2, pH = 66;
-  const pg = ctx.createLinearGradient(0, fy, 0, fy + pH); pg.addColorStop(0, '#2fd66b'); pg.addColorStop(1, '#1aa851');
-  ctx.fillStyle = pg; _pRound(ctx, pX, fy, pw2, pH, pH / 2); ctx.fill();
-  _pWaIcon(ctx, pX + 42, fy + pH / 2, 22);
-  ctx.fillStyle = '#fff'; ctx.fillText(P.phone, pX + pw2 / 2 + 26, fy + 47);
-  ctx.direction = 'rtl'; ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.font = `700 30px ${FF}`; ctx.fillText('ڈویلپر: ' + P.dev + ' — PBT Code Labs', W / 2, fy + pH + 52);
+  ctx.direction = 'rtl'; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.font = `700 32px ${FF}`; ctx.fillText('🔍 Google Play پر «' + P.name + '» سرچ کریں', W / 2, fy + 44);
   return c;
 }
 
@@ -10394,9 +10380,7 @@ function appPosterCaption(){
     '📲 *Google Play سے ڈاؤن لوڈ کریں:*',
     P.link,
     '',
-    `👨‍💻 ڈویلپر: ${P.dev}`,
-    `📞 WhatsApp: ${P.phone}`,
-    `📧 ${P.email}`
+    `🔍 Google Play پر «${P.name}» سرچ کریں`
   ].filter((l,i,a)=>!(l==='' && a[i-1]==='')).join('\n');
 }
 let _posterBusy = false;
@@ -31593,7 +31577,11 @@ async function renderAccountPosterToCanvas(acc){
 // ---------- کارڈ/پوسٹر بننے کے بعد سیدھا شیئر شیٹ پر نہیں جاتے — پہلے تصویر دکھاتے ہیں تاکہ صارف دیکھ لے یہ کیسی بنی ہے، پھر خود فیصلہ کرے شیئر کرنی ہے یا نہیں ----------
 let pendingShareCanvas = null, pendingShareFilename = '', pendingShareTitle = '', pendingShareText = '';
 // ===================== 🏷️ PBT Code Labs برانڈنگ — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور واٹس ایپ پیغام کے نیچے (ہمیشہ) =====================
-const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & Android';
+const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & Android'; // پرانا (اب استعمال نہیں)
+/* مالک کا حکم (5 نومبر): بل / رپورٹ / رسید / پرنٹ / پیغام کے نیچے PBT Code Labs + ڈویلپر کا نمبر نہیں — اسی دکان کا نام + موبائل (جس کی ایپ ہے) */
+function bizFootName(){ return String((AppState.settings && AppState.settings.businessName) || '').trim(); }
+function bizFootPhone(){ return String((AppState.settings && AppState.settings.businessPhone) || '').trim(); }
+function bizFootLine(){ return [bizFootName(), bizFootPhone() ? '📞 ' + bizFootPhone() : ''].filter(Boolean).join('  •  '); }
 function brandPhone(){
   // AIO0311TU154 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
   let d = String(AppState.settings.devSms || '03206793793').replace(/[^0-9]/g, '');
@@ -31601,11 +31589,12 @@ function brandPhone(){
   if(d.length === 12 && d.startsWith('92')) return '+92 ' + d.slice(2, 5) + '-' + d.slice(5);
   return d ? (d.startsWith('92') ? '+' + d : d) : '+92 320-6793793';
 }
-function brandLine2(){ return `All types of custom business software • PBT Code Labs • WhatsApp ${brandPhone()}`; }
+function brandLine2(){ return bizFootPhone() ? '📞 ' + bizFootPhone() : ''; }
 // ---------- کینوس کے نیچے برانڈنگ پٹی جوڑیں — ایک ہی کینوس پر دو بار نہیں (اونچائی/چوڑائی سے پہچان) ----------
 function appendBrandFooter(canvas){
   if(!canvas || !canvas.getContext || !canvas.width || !canvas.height) return canvas;
   if(canvas._brandSig === canvas.width + 'x' + canvas.height) return canvas;
+  if(!bizFootName() && !bizFootPhone()) return canvas;   // دکان کا نام / نمبر نہیں تو کچھ نہیں
   const w = canvas.width, h = canvas.height;
   const fs = Math.max(11, Math.min(24, Math.round(w / 34)));
   const band = Math.round(fs * 3.6);
@@ -31626,24 +31615,25 @@ function appendBrandFooter(canvas){
     let p = px; ctx.font = `${weight} ${p}px ${fam}`;
     while(ctx.measureText(txt).width > w * 0.92 && p > 7){ p -= 0.5; ctx.font = `${weight} ${p}px ${fam}`; }
   };
-  ctx.fillStyle = '#0f172a'; fit('💻 ' + BRAND_LINE_1, fs, '800');
-  ctx.fillText('💻 ' + BRAND_LINE_1, w / 2, h + Math.round(fs * 1.75));
-  ctx.fillStyle = '#475569'; fit(brandLine2(), Math.round(fs * 0.86), '600');
-  ctx.fillText(brandLine2(), w / 2, h + Math.round(fs * 2.95));
+  const l1 = bizFootName() ? '🏪 ' + bizFootName() : '', l2 = brandLine2();
+  ctx.fillStyle = '#0f172a'; fit(l1 || l2, fs, '800');
+  ctx.fillText(l1 || l2, w / 2, h + Math.round(fs * 1.75));
+  if(l1 && l2){ ctx.fillStyle = '#475569'; fit(l2, Math.round(fs * 0.86), '600'); ctx.fillText(l2, w / 2, h + Math.round(fs * 2.95)); }
   ctx.restore();
   canvas._brandSig = canvas.width + 'x' + canvas.height;
   return canvas;
 }
 // ---------- سادہ لکھائی (Fast Print / USB / واٹس ایپ) کے نیچے برانڈنگ ----------
-function brandTextLines(){ return ['Reach us for the best software', 'PC, Mobile & Android apps', 'PBT Code Labs ' + brandPhone()]; }
+function brandTextLines(){ return [bizFootName(), bizFootPhone()].filter(Boolean); }
 function brandPlainText(text, cols){
   const c = cols || Math.max(32, ...String(text || '').split('\n').map(l => l.length).filter(n => n <= 64));
   const ctr = t => { const pad = Math.max(0, Math.floor((c - t.length) / 2)); return ' '.repeat(pad) + t; };
   const body = String(text || '').replace(/\s+$/, '');
-  return body + '\n' + '-'.repeat(Math.min(c, 48)) + '\n' + brandTextLines().map(ctr).join('\n') + '\n\n\n';
+  const bl = brandTextLines(); if(!bl.length) return body + '\n\n\n';
+  return body + '\n' + '-'.repeat(Math.min(c, 48)) + '\n' + bl.map(ctr).join('\n') + '\n\n\n';
 }
 function brandMsg(text){
-  return String(text || '') + `\n\n💻 ${BRAND_LINE_1}\nPBT Code Labs • WhatsApp ${brandPhone()}`;
+  const f = bizFootLine(); return String(text || '') + (f ? `\n\n— ${f}` : '');
 }
 // ---------- سب رینڈر فنکشنز کو لپیٹ دیں — جو بھی کینوس بنے، اس کے نیچے برانڈنگ خود لگے ----------
 (function wrapBrandedRenderers(){
@@ -34769,9 +34759,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0411WE170';
+  const APP_VERSION = 'AIO0511TH171';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Help Desk button no longer hidden under the next button';
+  const UPDATE_NOTE = 'Bills, reports and messages now show your own shop name and phone at the bottom';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
