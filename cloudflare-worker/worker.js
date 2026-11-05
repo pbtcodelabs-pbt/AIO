@@ -373,6 +373,7 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS codev (phone TEXT PRIMARY KEY, name TEXT, pin TEXT, ts INTEGER, seen INTEGER)");   /* MCS0511TH136: کو-ڈویلپر (صرف جانچ موڈ — کچھ محفوظ / منظور نہیں) */
     if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN paid INTEGER DEFAULT 0"); } catch (e) {}
+    try { this.sql.exec("ALTER TABLE prof ADD COLUMN pend INTEGER DEFAULT 0"); } catch (e) {}   /* MCS0511TH157: دکاندار نے خود بنائی — ایڈمن کی منظوری پر 15 دن */
     this.sql.exec("CREATE TABLE IF NOT EXISTS mbuy (tok TEXT PRIMARY KEY, rec TEXT, sku TEXT, exp INTEGER, ts INTEGER)");   /* MCS0411WE147: پلے اسٹور کی ممبرشپ — ٹوکن ← ممبرشپ */
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
@@ -613,14 +614,14 @@ export class McsStats {
       else this.sql.exec("INSERT INTO verified (rec, ts) VALUES (?, ?) ON CONFLICT (rec) DO UPDATE SET ts = excluded.ts", b.rec, Date.now());
       return Response.json({ ok: true });
     }
-    if (op === "/plist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts FROM prof").toArray().map((r) => [r.rec, { since: r.since, until: r.until, ts: r.ts }])));
+    if (op === "/plist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts, pend FROM prof").toArray().map((r) => [r.rec, Object.assign({ since: r.since, until: r.until, ts: r.ts }, r.pend ? { pend: 1 } : {})])));
     if (op === "/pget") {
       const { rec } = await request.json();
-      const r = this.sql.exec("SELECT data, since, until, ts FROM prof WHERE rec = ?", rec).toArray()[0];
+      const r = this.sql.exec("SELECT data, since, until, ts, pend FROM prof WHERE rec = ?", rec).toArray()[0];
       if (!r) return Response.json({ none: true });
       const imgs = this.sql.exec("SELECT id, ts FROM pimg WHERE rec = ? ORDER BY id", rec).toArray();
       let data = {}; try { data = JSON.parse(r.data || "{}"); } catch (e) {}
-      return Response.json({ rec, data, since: r.since, until: r.until, ts: r.ts, imgs });
+      return Response.json({ rec, data, since: r.since, until: r.until, ts: r.ts, imgs, pend: r.pend ? 1 : 0 });
     }
     if (op === "/pimg") { const { id } = await request.json(); const r = this.sql.exec("SELECT data FROM pimg WHERE id = ?", id).toArray()[0]; return Response.json({ data: r ? r.data : "" }); }
     if (op === "/pbuy") {   /* MCS0411WE147: گوگل سے تصدیق شدہ خریداری → اسی ممبرشپ کی مدت؛ ٹوکن ایک بار جس ممبرشپ سے جڑا، ہمیشہ اسی کا */
@@ -651,10 +652,12 @@ export class McsStats {
       else {
         /* MCS0411WE133 (مالک کا حکم): 15 دن مفت صرف اس نمبر کی پہلی پروفائل پر (rec = نمبر_قسم)؛ اگلی پروفائل بند حالت میں — ایک سال جاری کرنے پر چالو */
         const pfx = String(b.rec).split("_")[0], first = !this.sql.exec("SELECT rec FROM prof WHERE substr(rec, 1, ?) = ? AND rec != ? LIMIT 1", pfx.length + 1, pfx + "_", b.rec).toArray().length;
-        this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts) VALUES (?, '{}', ?, ?, ?, ?)", b.rec, key, now, first || b.admin ? now + 15 * 864e5 : now, now);
+        /* MCS0511TH157 (مالک کا حکم): دکاندار خود بنائے تو 15 دن ابھی نہیں — ایڈمن کی منظوری (padmin approve) پر شروع؛ ایڈمن خود بنائے تو فوراً */
+        const pend = first && !b.admin ? 1 : 0;
+        this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts, pend) VALUES (?, '{}', ?, ?, ?, ?, ?)", b.rec, key, now, b.admin ? now + 15 * 864e5 : now, now, pend);
       }
-      const x = this.sql.exec("SELECT since, until FROM prof WHERE rec = ?", b.rec).toArray()[0];
-      return Response.json({ key, since: x.since, until: x.until });
+      const x = this.sql.exec("SELECT since, until, pend FROM prof WHERE rec = ?", b.rec).toArray()[0];
+      return Response.json({ key, since: x.since, until: x.until, pend: x.pend ? 1 : 0 });
     }
     if (op === "/psave") {
       const b = await request.json();
@@ -678,6 +681,8 @@ export class McsStats {
         const yrs = o ? Math.max(0, Math.round((b.until - Math.max(o.until || 0, Date.now())) / (365 * 864e5))) : 0;
         this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", b.until, yrs, b.rec);
       }
+      else if (b.act === "approve") { const now = Date.now(); this.sql.exec("UPDATE prof SET since = ?, until = MAX(COALESCE(until, 0), ?), pend = 0 WHERE rec = ?", now, now + 15 * 864e5, b.rec); }   /* MCS0511TH157: منظوری = 15 دن مفت شروع */
+      else if (b.act === "reject") this.sql.exec("UPDATE prof SET pend = 0 WHERE rec = ?", b.rec);
       else if (b.act === "free") this.sql.exec("UPDATE prof SET key = '' WHERE rec = ?", b.rec);
       else if (b.act === "del") { this.sql.exec("DELETE FROM prof WHERE rec = ?", b.rec); this.sql.exec("DELETE FROM pimg WHERE rec = ?", b.rec); }
       return Response.json({ ok: true });
@@ -892,6 +897,7 @@ function profClean(d) {
   out.items = (Array.isArray(d.items) ? d.items : []).slice(0, 20).map((x) => ({ n: S(x && x.n, 60), p: S(x && x.p, 24) })).filter((x) => x.n);
   out.phones = (Array.isArray(d.phones) ? d.phones : []).slice(0, 3).map((x) => S(x, 20).replace(/[^0-9+\- ]/g, "")).filter(Boolean);
   out.links = (Array.isArray(d.links) ? d.links : []).slice(0, 3).map((x) => S(x, 200)).filter((x) => /^https?:\/\//i.test(x));
+  out.ref = S(d.ref, 40).replace(/[^A-Za-z0-9_\-]/g, "") || "PBT";   /* MCS0511TH157: ایجنٹ کا ریفرل کوڈ، نہ ہو تو PBT (ہمارا اپنا گاہک) */
   if (d.map && isFinite(+d.map.lat) && isFinite(+d.map.lon)) out.map = { lat: +(+d.map.lat).toFixed(6), lon: +(+d.map.lon).toFixed(6) };
   return out;
 }
