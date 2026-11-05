@@ -2902,7 +2902,7 @@
     #globalSearchBar .gsbHomeIcons{display:none; align-items:center; gap:5px;}
     body.home-active #globalSearchBar .gsbHomeIcons{display:flex;}
     #globalSearchBar .gsbBtn{width:30px; height:30px; border-radius:50%; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.18); color:#fff; font-size:14px; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;}
-    /* AIO0511TH172 (ہیلپ ڈیسک #82): پیلا Help Desk گول 30px خانے میں پھنس کر ساتھ والے بٹن کے نیچے کٹ رہا تھا — اپنی پوری چوڑائی */
+    /* AIO0511TH173 (ہیلپ ڈیسک #82): پیلا Help Desk گول 30px خانے میں پھنس کر ساتھ والے بٹن کے نیچے کٹ رہا تھا — اپنی پوری چوڑائی */
     #globalSearchBar .gsbBtn.gsbHelp{width:auto; min-width:0; height:30px; border:0; background:none; border-radius:999px; padding:0 2px; margin:0 2px; overflow:visible;}
     #globalSearchBar .gsbBtn.gsbGear{background:#fff; color:var(--primary-dark);}
     #globalSearchBar .gsbBtn:active{transform:scale(.9);}
@@ -3277,6 +3277,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <input type="tel" id="acctPhone" inputmode="tel" autocomplete="tel" placeholder="03001234567" style="flex:1; min-width:0; padding:11px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:16px;" onkeydown="if(event.key==='Enter') acctClaimPhone()">
           <button type="button" id="acctPhoneBtn" onclick="acctClaimPhone()" style="flex:0 0 auto; padding:0 16px; border:none; border-radius:10px; background:var(--primary,#0f766e); color:#fff; font-weight:800;">Unlock</button>
         </div>
+        <input type="tel" id="acctPin" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="🔑 Account PIN (6 digits — from the developer)" style="width:100%; box-sizing:border-box; margin-top:6px; padding:11px; border:1.5px solid #dbe1ea; border-radius:10px; font-size:15px; letter-spacing:1px;" onkeydown="if(event.key==='Enter') acctClaimPhone()">
+        <div style="font-size:11.5px; color:var(--muted); line-height:1.6; margin-top:4px;">♻️ New phone, reset phone or reinstalled app? Sign in with the same Gmail — or mobile number + PIN — and your remaining days come back on this phone.</div>
       </div>
       <button type="button" id="acctUnlockStep2" class="acctUnlock2" onclick="acctStep2Open()">🔓 The developer has already set up my account</button>
     </div>
@@ -3364,7 +3366,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0511TH172</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0511TH173</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3586,7 +3588,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0511TH172</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0511TH173</span>
     </div>
   </div>
 
@@ -30260,7 +30262,8 @@ function acctSendGo(){
 function acctClaimPhone(){
   const v = (document.getElementById('acctPhone').value || '').trim();
   if(v.replace(/\D/g, '').length < 10){ acctMsg('⚠️ Enter your mobile number, e.g. 03001234567', false); return; }
-  acctClaim({ kind: 'p', phone: v });
+  const pin = (document.getElementById('acctPin') || {}).value || '';
+  acctClaim({ kind: 'p', phone: v, pin: pin.replace(/[^0-9۰-۹]/g, '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)) });
 }
 async function acctPost(path, body, tok){
   const res = await fetch(ACCT_URL + path, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, tok ? { Authorization: 'Bearer ' + tok } : {}), body: JSON.stringify(Object.assign({ app: ACCT_APP }, body)) });
@@ -30276,14 +30279,15 @@ async function acctClaim(body){
   if(!r) return;
   if(!r.ok){
     const why = { none: 'No account access found for this ' + (body.kind === 'g' ? 'Google account' : 'mobile number') + '. Please check it, or try the other option.',
-      devices_full: `This account is already in use on ${r.devices || 1} phone(s) — the limit is reached.`,
-      revoked: 'Access for this account has been stopped.', phone_locked: 'This mobile number is set up for another phone. Please sign in with Google (Gmail), or send your account details again from this phone.', google_failed: 'Google sign-in failed — please try again.', bad_phone: 'Please enter a valid mobile number, e.g. 03001234567' }[r.reason] || ('Could not sign in (' + (r.reason || r.error || 'error') + ')');
+      devices_full: `This account is already in use on ${r.devices || 1} phone(s). To move it to this phone, sign in with your Gmail — or enter your mobile number with your 🔑 Account PIN.`,
+      bad_pin: 'Wrong Account PIN — please check it (ask the developer on Help Desk if you lost it).', pin_wait: 'Too many wrong PINs — please try again after 15 minutes.',
+      revoked: 'Access for this account has been stopped.', phone_locked: 'This mobile number is set up for another phone. Enter your 🔑 Account PIN with the number, or sign in with Google (Gmail).', google_failed: 'Google sign-in failed — please try again.', bad_phone: 'Please enter a valid mobile number, e.g. 03001234567' }[r.reason] || ('Could not sign in (' + (r.reason || r.error || 'error') + ')');
     acctMsg('❌ ' + why, false); return;
   }
   if(!r.active){ acctMsg('⚠️ Account found, but its access ended on ' + formatDateDMY(toLocalDateStr(new Date(r.exp))) + '.', false); acctApply(r, true); return; }
   acctApply(r);
   acctRenderState();
-  acctMsg('✅ Unlocked on this phone' + (r.life ? ' — Lifetime' : ' till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))), true);
+  acctMsg('✅ ' + (r.moved ? 'Moved to this phone — your remaining days are back' : 'Unlocked on this phone') + (r.life ? ' — Lifetime' : ' till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))), true);
   setTimeout(() => { acctClose(); try{ document.getElementById('packagePlansModal').classList.remove('show'); }catch(e){} }, 1600);
 }
 // ---------- سرور کا جواب مقامی سبسکرپشن پر — صرف تب جب یہ اکاؤنٹ سے ہو یا پلے اسٹور والی تاریخ سے آگے ----------
@@ -30398,6 +30402,7 @@ function devAcctListRender(){
       <b>${acctEsc(e.name || '—')}</b> <span style="float:right;">${st}</span><br>
       ${(e.keys || []).map(k => (k.startsWith('g:') ? '📧 ' : '📱 ') + acctEsc(acctLabel(k))).join('<br>')}<br>
       📦 Package P1+${(e.devices || 1) - 1} (${e.devices} phone${e.devices > 1 ? 's' : ''}) · signed in on ${e.used}${e.note ? '<br>📝 ' + acctEsc(e.note) : ''}
+      <br>🔑 Account PIN: ${e.pin ? `<b style="font-size:15px; letter-spacing:2px; cursor:pointer;" onclick="devAcctCopyPin('${e.id}')">${acctEsc(e.pin)}</b> <a href="javascript:void(0)" onclick="devAcctCopyPin('${e.id}')">📋 copy</a>` : '<i>none yet</i>'} · <a href="javascript:void(0)" onclick="devAcctAct('${e.id}','newpin')">${e.pin ? '🔄 new PIN' : '➕ make PIN'}</a>
       <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;">
         <button type="button" class="devBigBtn go" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','add',30)">+1 month</button>
         <button type="button" class="devBigBtn go" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','add',365)">+1 year</button>
@@ -30406,6 +30411,14 @@ function devAcctListRender(){
         <button type="button" class="devBigBtn stop" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctAct('${e.id}','delete')">🗑️</button>
       </div></div>`;
   }).join('');
+}
+// AIO0511TH173: اکاؤنٹ PIN — گاہک کو بھیجنے کے لیے کاپی (نیا فون: موبائل نمبر + PIN)
+function devAcctCopyPin(id){
+  const e = _devAcctList.find(x => x.id === id) || {}; if(!e.pin) return;
+  const ph = (e.keys || []).find(k => k.startsWith('p:')), gm = (e.keys || []).find(k => k.startsWith('g:'));
+  const t = 'AIO POS — your account\n' + (ph ? 'Mobile no.: ' + acctLabel(ph) + '\n' : '') + (gm ? 'Gmail: ' + acctLabel(gm) + '\n' : '') + 'Account PIN: ' + e.pin + '\n\nNew phone / reinstalled app: open AIO POS → 🔑 Sign in with account → Google (same Gmail) or Mobile number + this PIN. Your remaining days come back automatically.';
+  const done = () => showNavToast('📋 PIN + instructions copied');
+  try{ navigator.clipboard.writeText(t).then(done, () => prompt('Copy', t)); }catch(x){ prompt('Copy', t); }
 }
 // AIO0411WE158: ہیلپ ڈیسک والا پیغام پیسٹ → خانے خود
 function devAcctPasteFill(t){
@@ -30435,14 +30448,14 @@ async function devAcctGrant(){
     const uidM = (document.getElementById('devAcctNote').value || '').match(/UID:\s*([A-Za-z0-9_-]{6,64})/);
     const r = await devAcctCall({ op: 'grant', uid: uidM ? uidM[1] : '', emails: g ? [g] : [], phones: p ? [p] : [], days: life ? 0 : days, life, devices: parseInt(document.getElementById('devAcctDev').value, 10) || 1, name: document.getElementById('devAcctN').value.trim(), note: document.getElementById('devAcctNote').value.trim() });
     if(!r.ok){ msg.textContent = '❌ ' + ({ no_keys: 'Gmail or mobile number is not valid' }[r.reason] || r.reason || r.error); return; }
-    msg.textContent = '✅ Saved — ' + (r.life ? 'Lifetime' : 'till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))) + '. Customer: Sign in with account → same Gmail / number.';
+    msg.textContent = '✅ Saved — ' + (r.life ? 'Lifetime' : 'till ' + formatDateDMY(toLocalDateStr(new Date(r.exp)))) + '. Account PIN: ' + (r.pin || '—') + ' (copy it from the list below and send to the customer).';
     ['devAcctG','devAcctP','devAcctN','devAcctNote'].forEach(id => { document.getElementById(id).value = ''; });
     devAcctLoad();
   }catch(e){ msg.textContent = '⚠️ ' + e.message; }
 }
 async function devAcctAct(id, act, days){
   const e = _devAcctList.find(x => x.id === id) || {};
-  const ask = { add: `Add ${days} days to ${e.name || 'this customer'}?`, reset: 'Free all phones? The customer will sign in again on the phone(s) they want.', revoke: 'Stop this account access now?', unrevoke: 'Resume this account access?', delete: 'Delete this customer completely?' }[act];
+  const ask = { add: `Add ${days} days to ${e.name || 'this customer'}?`, reset: 'Free all phones? The customer will sign in again on the phone(s) they want.', newpin: 'Make a new Account PIN? The old PIN will stop working.', revoke: 'Stop this account access now?', unrevoke: 'Resume this account access?', delete: 'Delete this customer completely?' }[act];
   if(!confirm(ask)) return;
   try{
     const r = act === 'add' ? await devAcctCall({ op: 'grant', id, days }) : await devAcctCall({ op: act, id });
@@ -34766,9 +34779,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0511TH172';
+  const APP_VERSION = 'AIO0511TH173';
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Walk-in bill saved to customer list now asks if paid — unpaid amount goes to the customer balance';
+  const UPDATE_NOTE = 'New phone or reinstall: sign in with the same Gmail or mobile number + Account PIN to get your remaining days back';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
