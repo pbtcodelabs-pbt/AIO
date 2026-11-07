@@ -3,7 +3,7 @@
 // ہر نئی فائل نمبر کے ساتھ CACHE_NAME بھی بدل دیں (نیچے v43 کو v44 وغیرہ کر دیں)
 // تاکہ صارف کے فون پر پرانا ورژن کیش سے نہ چپکا رہے۔
 // ======================================================================
-const CACHE_NAME = 'AIO0511TH173';
+const CACHE_NAME = 'AIO0711SA174';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -60,6 +60,9 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
   const sameOrigin = new URL(req.url).origin === self.location.origin;
+  /* AIO0711SA174: Firebase / Google کی ڈیٹا درخواستیں (دکان کا کوڈ، ملازم، فون کی فہرست، لاگ اِن) کبھی کیش نہیں —
+     پہلے آف لائن / سست نیٹ پر پرانا جواب مل جاتا تھا اور فون جڑتے ہوئے «دکان نہیں ملی / پن غلط» آتا تھا */
+  try { const _h = new URL(req.url).hostname; if (/(^|\.)(firestore|identitytoolkit|securetoken|firebaseio|googleapis)\.com$/.test(_h) && !/^fonts\./.test(_h)) return; } catch (_e) {}
 
   // ---------- دوسری ویب سائٹس (فونٹس وغیرہ): پہلے جیسا — نیٹ ورک، ناکامی پر کیش ----------
   if (!sameOrigin) {
