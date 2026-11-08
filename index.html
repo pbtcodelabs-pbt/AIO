@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU179</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU180</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU179</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU180</span>
     </div>
   </div>
 
@@ -29259,7 +29259,7 @@ async function doJoinShop(){
   const name = document.getElementById('joinShopDevName').value.trim();
   if(!/^BIZ-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)){ joinMsg('Please check the Shop Code (BIZ-XXXX-XXXX-XXXX)'); return; }
   if(pin.length < 4){ joinMsg('Please enter your PIN'); return; }
-  const hasData = (invoicesData || []).length > 0 || (productsData || []).length > 0;
+  const hasData = (invoicesData || []).length > 0; /* ہیلپ ڈیسک #150: نیا فون (صرف نمونے کی چیزیں) — سوال نہیں */
   if(hasData && !confirm('This device already has its own data.\nJoining will REPLACE it with the shop\'s data (take a backup first if you need it).\n\nContinue?')) return;
   const btn = document.getElementById('joinShopBtn'); btn.disabled = true; joinMsg('⏳ Connecting…', true);
   const s = AppState.settings, prev = {businessId: s.businessId, syncOn: s.syncOn};
@@ -29271,7 +29271,7 @@ async function doJoinShop(){
     if(u === null) return revert('No internet — could not connect');
     if(u.missing || !u.items.length) return revert('Shop not found — please check the code with the owner');
     const h = await hashPin(pin);
-    const user = u.items.find(x => x.pin === h && x.is_active !== false && !(x.role !== 'admin' && SYNC_SEED_STAFF_PINS.includes(x.pin)));
+    const user = u.items.find(x => x.pin === h && x.is_active !== false && !(x.role !== 'admin' && SYNC_SEED_STAFF_PINS.includes(x.pin) && ['Aslam Bhai','Bilal'].includes(x.name))); /* ہیلپ ڈیسک #150: صرف نمونے کے ملازم رد — مالک کا اپنا ملازم 1111 / 2222 کے ساتھ بھی جڑے */
     if(!user) return revert('PIN not matched — use your own PIN set by the owner');
     const dv = await syncGetChunk('devices'); const devs = (dv && dv.items) || [];
     const sh = await syncGetChunk('shopinfo'); const shop = ((sh && sh.items) || []).find(x => x.id === 'shop') || {};
@@ -29288,7 +29288,8 @@ async function doJoinShop(){
     syncTouchMyDevice(true); await syncNow();
     syncFixCounters(); persistAllData();
     joinMsg('✅ Connected!', true);
-    setTimeout(() => { alert(`✅ Connected to ${shop.businessName || 'the shop'}.\nLog in with your PIN.`); location.reload(); }, 300);
+    if(window._mdJoinPin){ try{ mdAfterJoin(window._mdJoinPin); }catch(e){} } else { try{ mdAfterJoin(pin); }catch(e){} }
+    setTimeout(() => { alert(`✅ Connected to ${shop.businessName || 'the shop'}.` + (window._mdJoinPin ? '\nLogging you in…' : '\nLog in with your PIN.')); location.reload(); }, 300);
   }catch(e){ revert('Could not connect — ' + (e && e.message || e)); }
 }
 
@@ -34906,9 +34907,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU179'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU180'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Developer console: Note field no longer mentions payment';
+  const UPDATE_NOTE = 'Staff phone: owner makes a ready message, staff pastes it on login - connected and logged in';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35157,5 +35158,174 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeIntroVideo(); });
 })();
 </script>
+<!-- ===== AIO0811SU180 / AIODR0811SU145 (ہیلپ ڈیسک #150، مالک کا حکم): ملازم کا فون ایک پیسٹ سے — مالک تیار پیغام بناتا ہے (نام، موبائل، PIN + دکان کا چھپا کوڈ)، ملازم لاگ اِن پر پیسٹ کرتا ہے ===== -->
+<div class="modalOverlay" id="mdInvModal" style="z-index:100060;" onclick="if(event.target===this) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:440px;" id="mdInvBox"></div>
+</div>
+<style>
+#mdInvBox .ivH{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+#mdInvBox .ivH h3{margin:0;font-size:18px}
+#mdInvBox .ivX{cursor:pointer;font-size:18px;font-weight:900}
+#mdInvBox .ivMsg{white-space:pre-wrap;background:#f8fafc;border:1.5px dashed #94a3b8;border-radius:12px;padding:10px;font-size:13px;line-height:1.55;max-height:240px;overflow:auto;direction:ltr;text-align:left}
+#mdInvBox .ivOk{background:#dcfce7;color:#166534;border-radius:10px;padding:8px 10px;font-weight:800;font-size:13px;margin:6px 0}
+#mdInvBox .ivErr{color:#b91c1c;font-weight:800;font-size:13px;min-height:18px;text-align:center;margin:6px 0}
+#mdInvBox textarea{width:100%;box-sizing:border-box;min-height:120px;border:1.5px solid #cbd5e1;border-radius:12px;padding:10px;font-size:14px}
+#mdInvBox .ivPin{font-size:30px;font-weight:900;letter-spacing:8px;text-align:center;color:#0f766e;margin:4px 0}
+.mdStaffRow{display:flex;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:12px;padding:8px 10px;margin:6px 0;background:#fff}
+.mdStaffRow .t{flex:1;min-width:0;font-weight:800;font-size:14px}
+.mdStaffRow .t small{display:block;font-weight:600;color:#64748b;font-size:12px}
+.mdStaffRow button{width:auto;margin:0;padding:6px 10px;border-radius:9px;font-size:12.5px;font-weight:800}
+.loginInvBtn{width:100%;margin-top:10px;background:linear-gradient(135deg,#16a34a,#0f766e)!important;color:#fff!important;border:0!important;font-weight:900!important;font-size:15px!important;padding:13px!important;border-radius:14px!important}
+</style>
+<script>
+(function(){
+  const INV_TAG = 'AIO-JOIN:', INV_DAYS = 7;
+  const esc = v => String(v == null ? '' : v).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const b64e = s => btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const b64d = s => decodeURIComponent(escape(atob(String(s).replace(/-/g,'+').replace(/_/g,'/'))));
+  const chk = s => { let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  const mob = v => { const d = String(v || '').replace(/[۰-۹]/g, x => '۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g, ''); return d.startsWith('92') ? '0' + d.slice(2) : d; };
+  const box = () => document.getElementById('mdInvBox');
+  const open = html => { box().innerHTML = html; document.getElementById('mdInvModal').classList.add('show'); };
+  window.mdInvClose = () => document.getElementById('mdInvModal').classList.remove('show');
+  function myPins(){ const s = AppState.settings; s.staffPins = s.staffPins || {}; return s.staffPins; }
+  async function freePin(){ const used = new Set(usersData.map(u => u.pin)); for(let t = 0; t < 50; t++){ const p = String(1000 + Math.floor(Math.random() * 9000)); if(/^(\d)\1{3}$/.test(p) || p === '1234') continue; if(!used.has(await hashPin(p))) return p; } return String(Date.now()).slice(-4); }
+  /* ---- مالک: ملازم بنائیں / نیا PIN ---- */
+  window.mdInvOpen = async function(userId){
+    if(AppState.currentRole && AppState.currentRole !== 'admin'){ alert('Only the owner can add staff phones.'); return; }
+    if(!aioMultiOn()){ alert('First turn on Multi-Device (Settings → 👥 Staff & Devices).'); return; }
+    const u = userId ? usersData.find(x => x.user_id === userId) : null;
+    const pin = await freePin(), mobile = u ? (u.mobile || '') : '';
+    open(`<div class="ivH"><h3>${u ? '🔄 New PIN for ' + esc(u.name) : '➕ Add a staff phone'}</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
+      <div class="settingsHint" style="margin:0 0 8px">The app makes a ready message. Send it on WhatsApp — your staff only <b>pastes it</b> on the login screen and is connected.</div>
+      ${u ? '' : `<label class="mdLbl">Staff name</label><input id="ivName" class="mdInput" placeholder="e.g. Ali" maxlength="40">`}
+      <label class="mdLbl">Staff mobile (WhatsApp)</label><input id="ivMob" class="mdInput" inputmode="tel" placeholder="03XXXXXXXXX" value="${esc(mobile)}">
+      <label class="mdLbl">PIN (4 digits — made for you, you can change it)</label><input id="ivPin" class="mdInput" inputmode="numeric" maxlength="6" value="${pin}" style="text-align:center;letter-spacing:6px;font-weight:900;font-size:20px">
+      ${u ? '' : `<label class="mdLbl">Access</label><select id="ivRole" class="mdInput"><option value="salesman">🧑‍💼 Staff — Billing, Bill History, Customers (change later in 👤 Users)</option><option value="admin">👑 Owner's 2nd phone (full access)</option></select>`}
+      <div class="ivErr" id="ivErr"></div>
+      <button type="button" class="mdBigBtn" id="ivGo" onclick="mdInvSave(${u ? u.user_id : 0})">✅ Save &amp; make the message</button>`);
+  };
+  window.mdInvSave = async function(userId){
+    const err = t => { document.getElementById('ivErr').textContent = t; }, btn = document.getElementById('ivGo');
+    const u0 = userId ? usersData.find(x => x.user_id === userId) : null;
+    const name = u0 ? u0.name : (document.getElementById('ivName').value || '').trim();
+    const mobile = mob(document.getElementById('ivMob').value), pin = (document.getElementById('ivPin').value || '').replace(/\D/g, '');
+    const role = u0 ? u0.role : document.getElementById('ivRole').value;
+    if(name.length < 2) return err('Please write the staff name');
+    if(mobile && mobile.length !== 11) return err('Mobile number should be 11 digits (03XXXXXXXXX)');
+    if(pin.length < 4) return err('PIN must be at least 4 digits');
+    const h = await hashPin(pin);
+    if(SYNC_SEED_STAFF_PINS.includes(h)) return err('1111 / 2222 are sample PINs — please choose another');
+    if(usersData.some(x => x.pin === h && x.user_id !== userId)) return err('This PIN is already used by someone else — choose another');
+    if(!u0 && role === 'salesman'){ const lim = AppState.settings.staffLimit; if(typeof lim === 'number' && usersData.filter(x => x.role === 'salesman').length >= lim) return err(`Your package allows ${lim} staff — upgrade to add more`); }
+    const max = planMaxDevices(), devs = (typeof syncLiveDevices === 'function' ? syncLiveDevices(devicesData) : devicesData).length;
+    if(!u0 && max && max < 99 && devs >= max) return err(`Your package allows ${max} phones (owner included) and all are in use — remove an old phone or upgrade first`);
+    btn.disabled = true; err('');
+    let u = u0;
+    if(u){ u.pin = h; u.mobile = mobile || u.mobile || ''; u.is_active = true; }
+    else { u = {user_id: nextUserId++, name, username: name.toLowerCase().replace(/[^a-z0-9]+/g, '') + String(Date.now()).slice(-3), pin: h, role, is_active: true, screens: role === 'admin' ? [] : ['home','billing','billhistory','customers'], mobile}; usersData.push(u); }
+    myPins()[u.user_id] = pin; saveToStorage('settings', AppState.settings);
+    try{ renderUserList(); }catch(e){}
+    document.getElementById('ivErr').style.color = '#0f766e'; err('⏳ Sending to the cloud…');
+    persistAllData();
+    let ok = false;
+    for(let t = 0; t < 4 && !ok; t++){
+      try{ await syncNow(); }catch(e){}
+      try{ const c = await syncGetChunk('users'); ok = !!(c && c.items && c.items.some(x => x.pin === h && x.is_active !== false)); }catch(e){}
+      if(!ok) await new Promise(r => setTimeout(r, 1500));
+    }
+    btn.disabled = false; document.getElementById('ivErr').style.color = '';
+    if(!ok) return err('⚠️ Could not reach the cloud — check the internet and press again');
+    mdInvShow(u.user_id);
+  };
+  function invText(u, pin){
+    const sh = shopInfo(), code = AppState.settings.businessId;
+    const tok = JSON.stringify({c: code, p: pin, n: u.name, x: Date.now() + INV_DAYS * 864e5});
+    const t = b64e(tok);
+    return `🔗 ${sh.businessName || AppState.settings.businessName || 'Our shop'} — AIO POS\n\nAssalam-o-Alaikum ${u.name}!\nYou are added as ${u.role === 'admin' ? "owner's 2nd phone" : 'staff'}.\n🔑 Your PIN: ${pin}\n\n1️⃣ Install / open the AIO POS app\n2️⃣ On the login screen press «📋 Paste owner's message»\n3️⃣ Paste this whole message — you are connected ✅\n\n(Valid for ${INV_DAYS} days — keep the last line)\n${INV_TAG}${t}.${chk(t)}`;
+  }
+  window.mdInvShow = function(userId){
+    const u = usersData.find(x => x.user_id === userId); if(!u) return;
+    const pin = myPins()[userId];
+    if(!pin){ return mdInvOpen(userId); }
+    const msg = invText(u, pin); window._mdInvMsg = msg;
+    const wa = mob(u.mobile || ''), waUrl = 'https://wa.me/' + (wa.length === 11 ? '92' + wa.slice(1) : '') + '?text=' + encodeURIComponent(msg);
+    open(`<div class="ivH"><h3>✅ Message ready — ${esc(u.name)}</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
+      <div class="ivOk">✅ ${esc(u.name)} is saved in the cloud. Send this message — they paste it on the login screen.</div>
+      <div class="ivPin">${esc(pin)}</div>
+      <div class="ivMsg">${esc(msg)}</div>
+      <div class="mdRow2" style="margin-top:8px"><a class="mdBigBtn" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="${esc(waUrl)}">📤 WhatsApp</a><button type="button" class="mdBigBtn ghost" onclick="mdInvCopy()">📋 Copy</button></div>`);
+  };
+  window.mdInvCopy = function(){ const t = window._mdInvMsg || ''; try{ navigator.clipboard.writeText(t).then(() => showNavToast('📋 Message copied'), () => prompt('Copy', t)); }catch(e){ prompt('Copy', t); } };
+  /* ---- مالک کے Staff & Devices کارڈ میں ملازموں کی فہرست ---- */
+  window.mdStaffListHtml = function(){
+    const L = usersData.filter(u => u.is_active !== false && u.role === 'salesman' || (u.role === 'admin' && myPins()[u.user_id]));
+    return `<button type="button" class="mdBigBtn" style="background:linear-gradient(135deg,#16a34a,#0f766e)" onclick="mdInvOpen()">➕ Add a staff phone — ready message</button>`
+      + (L.length ? `<div class="settingsSubLabel">Staff (${L.length})</div>` + L.map(u => `<div class="mdStaffRow"><span class="t">${u.role === 'admin' ? '👑' : '🧑‍💼'} ${esc(u.name)}<small>${u.mobile ? '📱 ' + esc(u.mobile) + ' • ' : ''}${myPins()[u.user_id] ? '🔑 PIN ' + esc(myPins()[u.user_id]) : '🔑 PIN hidden'}</small></span>${myPins()[u.user_id] ? `<button type="button" onclick="mdInvShow(${u.user_id})">📨 Message</button>` : ''}<button type="button" onclick="mdInvOpen(${u.user_id})">🔄 New PIN</button></div>`).join('') : '');
+  };
+  const _r = window.renderStaffDevicesCard;
+  if(typeof _r === 'function') window.renderStaffDevicesCard = function(){ _r.apply(this, arguments); try{ if(!aioMultiOn() || AppState.settings.syncJoined) return mdMyPinCard(); const el = document.getElementById('staffDevicesCard'), anchor = el && el.querySelector('button[onclick="goTo(\'users\')"]'); if(anchor){ const d = document.createElement('div'); d.innerHTML = mdStaffListHtml(); anchor.parentNode.insertBefore(d, anchor); } }catch(e){} };
+  /* ---- ملازم کا فون: اپنا PIN دیکھیں / بدلیں ---- */
+  function mdMyPinCard(){
+    try{ const s = AppState.settings; if(!s.syncJoined || !s.myPin) return; const el = document.getElementById('staffDevicesCard'); if(!el) return;
+      const d = document.createElement('div'); d.className = 'mdStaffRow'; d.innerHTML = `<span class="t">🔑 My PIN: <b style="letter-spacing:3px">${esc(s.myPin)}</b><small>Use it to log in on this phone</small></span><button type="button" onclick="mdMyPinChange()">✏️ Change</button>`;
+      el.insertBefore(d, el.children[1] || null); }catch(e){}
+  }
+  window.mdMyPinChange = async function(){
+    const s = AppState.settings, me = usersData.find(u => u.pin === (s.myPinH || '') ) || usersData.find(u => AppState.currentUser && u.name === AppState.currentUser.name);
+    if(!me){ alert('Please log in first.'); return; }
+    const p = (prompt('New PIN (4–6 digits):') || '').replace(/\D/g, ''); if(!p) return;
+    if(p.length < 4){ alert('PIN must be at least 4 digits'); return; }
+    const h = await hashPin(p); if(SYNC_SEED_STAFF_PINS.includes(h) || usersData.some(u => u.pin === h && u !== me)){ alert('This PIN cannot be used — choose another'); return; }
+    me.pin = h; s.myPin = p; s.myPinH = h; saveToStorage('settings', s); persistAllData(); try{ await syncNow(); }catch(e){}
+    alert('✅ Your new PIN: ' + p + '\nThe owner will see "PIN hidden" — they can make a new one any time.'); renderStaffDevicesCard();
+  };
+  /* ---- ملازم: لاگ اِن صفحے پر «مالک کا پیغام پیسٹ کریں» ---- */
+  function parseInv(t){
+    const i = String(t || '').indexOf(INV_TAG); if(i < 0) return null;
+    const m = String(t).slice(i + INV_TAG.length).match(/^([A-Za-z0-9_-]+)\.([a-z0-9]+)/); if(!m || chk(m[1]) !== m[2]) return null;
+    try{ const o = JSON.parse(b64d(m[1])); return o && o.c && o.p ? o : null; }catch(e){ return null; }
+  }
+  window.mdPasteOpen = function(){
+    open(`<div class="ivH"><h3>📋 Paste owner's message</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
+      <div class="settingsHint" style="margin:0 0 8px">Your shop owner sent you a WhatsApp message. Copy the <b>whole message</b> and paste it here.</div>
+      <textarea id="ivPaste" placeholder="Paste the message here…" onpaste="setTimeout(mdPasteGo, 150)"></textarea>
+      <div class="ivErr" id="ivErr"></div>
+      <div class="mdRow2"><button type="button" class="mdBigBtn ghost" onclick="mdPasteClip()">📋 Paste</button><button type="button" class="mdBigBtn" id="ivGo" onclick="mdPasteGo()">🔗 Connect</button></div>`);
+  };
+  window.mdPasteClip = async function(){ try{ const t = await navigator.clipboard.readText(); if(t){ document.getElementById('ivPaste').value = t; return mdPasteGo(); } }catch(e){} document.getElementById('ivErr').textContent = 'Long-press the box and choose «Paste»'; };
+  window.mdPasteGo = async function(){
+    const t = (document.getElementById('ivPaste') || {}).value || '', err = x => { document.getElementById('ivErr').textContent = x; };
+    if(!t.trim()) return err('Please paste the message first');
+    const o = parseInv(t);
+    if(!o) return err('⚠️ This message is not complete — ask the owner to send it again (keep the last line)');
+    if(o.x && Date.now() > o.x) return err('⏰ This message is old (more than ' + INV_DAYS + ' days) — ask the owner for a new one (🔄 New PIN)');
+    mdInvClose();
+    openJoinShopModal(o.c);
+    document.getElementById('joinShopPin').value = o.p;
+    document.getElementById('joinShopDevName').value = (o.n || 'Staff') + "'s phone";
+    window._mdJoinPin = o.p;
+    await doJoinShop();
+  };
+  /* جڑنے کے بعد: PIN اسی فون پر یاد اور خود لاگ اِن */
+  window.mdAfterJoin = function(pin){ try{ sessionStorage.setItem('aioJoinPin', pin); }catch(e){} try{ const s = AppState.settings; s.myPin = pin; saveToStorage('settings', s); hashPin(pin).then(h => { s.myPinH = h; saveToStorage('settings', s); }); }catch(e){} };
+  window.addEventListener('load', () => {
+    let p = ''; try{ p = sessionStorage.getItem('aioJoinPin') || ''; sessionStorage.removeItem('aioJoinPin'); }catch(e){}
+    if(!p) return; let n = 0;
+    const tryIt = () => { n++;
+      const sel = document.getElementById('loginSalesmanSelect'), iS = document.getElementById('pinInputSalesman'), iA = document.getElementById('pinInputAdmin');
+      const i = (iS && iS.offsetParent) ? iS : (iA && iA.offsetParent) ? iA : null;
+      if(!i){ if(n < 20) setTimeout(tryIt, 500); return; }
+      if(i === iS && sel){ hashPin(p).then(h => { const u = usersData.find(x => x.pin === h); if(u){ const o = Array.from(sel.options).find(x => x.value == u.user_id || x.textContent.trim() === u.name); if(o) sel.value = o.value; } i.value = p; try{ login(); }catch(e){} }); return; }
+      i.value = p; try{ login(); }catch(e){}
+    };
+    setTimeout(tryIt, 1200);
+  });
+  /* لاگ اِن صفحے پر بٹن */
+  const jb = document.getElementById('loginJoinShopBtn');
+  if(jb && !document.getElementById('loginInvBtn')){ const b = document.createElement('button'); b.type = 'button'; b.id = 'loginInvBtn'; b.className = 'loginInvBtn'; b.textContent = "📋 Paste owner's message — connect to your shop"; b.onclick = () => mdPasteOpen(); jb.parentNode.insertBefore(b, jb); jb.textContent = '🔗 Join with Shop Code + PIN'; }
+})();
+</script>
+
 </body>
 </html>
