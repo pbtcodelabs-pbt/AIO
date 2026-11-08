@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU178</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU179</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU178</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU179</span>
     </div>
   </div>
 
@@ -30445,7 +30445,7 @@ function devAcctRender(){
     <div style="display:flex; gap:6px;"><select id="devAcctD" class="devInput" style="flex:1;">${opt}<option value="-1">Custom days…</option></select>
       <select id="devAcctDev" class="devInput" style="flex:0 0 150px;">${[1,2,3,4].map(n => `<option value="${n}">P1+${n - 1} — ${n} phone${n > 1 ? 's' : ''}</option>`).join('')}</select></div>
     <div class="devSecHint" style="margin-top:-2px;">Package = total phones (owner + staff). Staff phones join with the Shop Code (Staff &amp; Devices), they don't sign in.</div>
-    <input type="text" id="devAcctNote" class="devInput" placeholder="Note (agent, payment ref…) — only you see this">
+    <input type="text" id="devAcctNote" class="devInput" placeholder="Note — only you see this">
     <button type="button" class="devBigBtn go" onclick="devAcctGrant()">✅ Give / extend</button>
     <div id="devAcctMsg" class="devSecHint"></div>
     <div style="font-weight:800; margin:12px 0 6px; display:flex; justify-content:space-between; align-items:center;">📋 Customers <button type="button" class="devBigBtn" style="width:auto; padding:4px 10px; margin:0;" onclick="devAcctLoad()">🔄</button></div>
@@ -34906,9 +34906,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU178'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU179'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'A4 bill: Invoice # and Bill To in white text directly on the green header';
+  const UPDATE_NOTE = 'Developer console: Note field no longer mentions payment';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
