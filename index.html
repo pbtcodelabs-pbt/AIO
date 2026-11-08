@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU187</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU188</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU187</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU188</span>
     </div>
   </div>
 
@@ -34927,9 +34927,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU187'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU188'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Login page: new video \'how to connect a staff phone\' (English first, Urdu button) next to the intro video';
+  const UPDATE_NOTE = 'Login page video Share fixed: video is prepared first, then \'Share now\' shares instantly';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35164,20 +35164,35 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     ov.querySelectorAll('[data-l]').forEach(function(b){ if (b.tagName === 'BUTTON') b.classList.toggle('on', b.getAttribute('data-l') === l); });
     var v = ov.querySelector('video');
     if (v.getAttribute('src') !== src(l)) { v.src = src(l); v.poster = poster(l); }
+    try { ivShBtn(l); } catch(_) {}
     var a = ov.querySelector('.ivDl'); a.href = src(l); a.setAttribute('download', dlName(l));
     ov.style.display = 'flex';
     var pr = v.play(); if (pr && pr.catch) pr.catch(function(){});
   };
   window.closeIntroVideo = function(){ var ov = document.getElementById('introVidOv'); if (!ov) return; var v = ov.querySelector('video'); try { v.pause(); } catch(_) {} ov.style.display = 'none'; };
+  /* (مالک کی جانچ، 8 نومبر) ویڈیو (≈8MB) لانے میں دیر ہو تو فون شیئر کی اجازت ختم — «Must be handling a user gesture»۔
+     اب پہلی بار ویڈیو لا کر یاد (IVF)، بٹن «📤 Share now ✓» بن جاتا ہے؛ دوسری بار دبانے پر فوراً شیئر */
+  var IVF = {};
+  function ivShBtn(l){ var ov = document.getElementById('introVidOv'); if (!ov) return; var b = ov.querySelector('.ivSh'); if (!b) return; var ok = !!IVF[src(l)]; b.textContent = ok ? '📤 Share now ✓' : '📤 Share'; b.classList.toggle('on', ok); }
+  window._ivShBtn = ivShBtn;
   async function shareIntroVideo(){
     var ov = document.getElementById('introVidOv'), l = ov.getAttribute('data-l') || 'en';
     var txt = KIND === 'staff' ? 'AIO POS — how to connect a staff phone to your shop 📱' : 'AIO POS — all-in-one software for your shop 🧾📱\nGoogle Play: https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos';
-    try {
-      var blob = await (await fetch(src(l))).blob();
-      var f = new File([blob], dlName(l), { type: 'video/mp4' });
-      if (navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text: txt }); return; }
-    } catch (e) { if (e && e.name === 'AbortError') return; }
-    try { if (navigator.share) { await navigator.share({ text: txt + '\n' + src(l) }); return; } } catch (_) { return; }
+    var key = src(l), f = IVF[key], b = ov.querySelector('.ivSh');
+    if (!f) {
+      b.textContent = '⏳ Preparing video…';
+      try {
+        var blob = await (await fetch(key)).blob();
+        IVF[key] = new File([blob], dlName(l), { type: 'video/mp4' });
+        ivShBtn(l);
+      } catch (e) { b.textContent = '📤 Share'; ov.querySelector('.ivDl').click(); }
+      return;
+    }
+    if (navigator.canShare && navigator.canShare({ files: [f] })) {
+      try { await navigator.share({ files: [f], text: txt }); } catch (e) { if (e && e.name !== 'AbortError') alert('Please press «📤 Share now» again.'); }
+      return;
+    }
+    try { if (navigator.share) { await navigator.share({ text: txt + '\n' + key }); return; } } catch (_) { return; }
     ov.querySelector('.ivDl').click();
   }
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeIntroVideo(); });
