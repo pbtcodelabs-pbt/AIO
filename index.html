@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU184</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU185</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU184</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU185</span>
     </div>
   </div>
 
@@ -34926,9 +34926,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU184'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU185'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Add staff phone: Shop Code shown + in the message (code, name, mobile, PIN); Delete button for staff in User Management';
+  const UPDATE_NOTE = 'Fix: a newly joined staff phone could show \'Subscription Required\' — the shop\'s subscription date now always reaches the cloud';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35214,6 +35214,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   window.mdEnsureKeys = async function(){
     try{
       const s = AppState.settings; if(s.syncJoined || !aioMultiOn() || !(crypto && crypto.subtle)) return;
+      try{ syncPushShopInfo(); }catch(e){} // ہیلپ ڈیسک #155: پہلے دکان کی معلومات (سبسکرپشن کی تاریخ) — ورنہ کلاؤڈ میں صرف pinPub جاتا اور جڑے فون پر «Subscription Required»
       const sh = shopInfo(); let pub = sh.pinPub;
       if(!s.pinKeyPriv){ const kp = await crypto.subtle.generateKey(Object.assign({modulusLength:2048, publicExponent:new Uint8Array([1,0,1])}, RSA), true, ['encrypt','decrypt']); s.pinKeyPriv = await crypto.subtle.exportKey('jwk', kp.privateKey); pub = await crypto.subtle.exportKey('jwk', kp.publicKey); saveToStorage('settings', s); }
       else if(!pub || pub.n !== s.pinKeyPriv.n){ const k = s.pinKeyPriv; pub = {kty:'RSA', n:k.n, e:k.e, alg:k.alg || 'RSA-OAEP-256', ext:true}; }
