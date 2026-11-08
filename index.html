@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU182</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU183</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU182</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU183</span>
     </div>
   </div>
 
@@ -34907,9 +34907,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU182'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU183'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'User Management: Add a staff phone (ready message) button + ready message on every staff card; Set Custom PIN is remembered for the owner';
+  const UPDATE_NOTE = 'Ready staff message waits for the cloud properly (no more \'Could not reach the cloud\' on slow internet)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35220,6 +35220,27 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       <div class="ivErr" id="ivErr"></div>
       <button type="button" class="mdBigBtn" id="ivGo" onclick="mdInvSave(${u ? u.user_id : 0})">✅ Save &amp; make the message</button>`);
   };
+  /* ہیلپ ڈیسک #153: اصل فون پر پیچھے پہلے سے سنک چل رہا ہو (syncBusy) تو syncNow فوراً لوٹ آتا اور 8 سیکنڈ میں «Could not reach the cloud» —
+     اب سنک ختم ہونے کا انتظار، users کا ڈبہ زبردستی، 45 سیکنڈ تک تصدیق؛ پھر بھی نہ ہو تو پیغام بنتا ہے اور پیچھے کوشش جاری رہتی ہے */
+  async function mdCloudHas(h, ms, tick){
+    const t0 = Date.now(), wait = x => new Promise(r => setTimeout(r, x));
+    while(Date.now() - t0 < ms){
+      let w = 0; while(syncBusy && w < 40){ await wait(300); w++; if(tick) tick(Math.round((Date.now() - t0) / 1000)); }
+      try{ delete syncDocStamp.users; }catch(e){}
+      try{ await syncNow(); }catch(e){}
+      try{ const c = await syncGetChunk('users'); if(c && c.items && c.items.some(x => x.pin === h && x.is_active !== false)) return true; }catch(e){}
+      if(tick) tick(Math.round((Date.now() - t0) / 1000));
+      await wait(2000);
+    }
+    return false;
+  }
+  window.mdCloudHas = mdCloudHas;
+  function mdCloudLater(h, name){
+    const box = document.getElementById('ivOkTxt') || document.getElementById('ivErr');
+    const why = window.__cloudSyncError ? ' (' + window.__cloudSyncError + ')' : '';
+    if(box){ box.style.color = '#b45309'; box.textContent = `⏳ The internet is slow — the message is ready. Keep this app open with internet for a minute before ${name} pastes it.${why}`; }
+    mdCloudHas(h, 10 * 60000).then(ok => { try{ const b = document.getElementById('ivOkTxt') || document.getElementById('ivErr'); if(ok){ if(b){ b.style.color = '#0f766e'; b.textContent = `✅ Cloud updated — ${name} can paste the message now`; } showNavToast(`✅ Cloud updated — ${name} can join now`); } }catch(e){} });
+  }
   window.mdInvSave = async function(userId){
     const err = t => { document.getElementById('ivErr').textContent = t; }, btn = document.getElementById('ivGo');
     const u0 = userId ? usersData.find(x => x.user_id === userId) : null;
@@ -35245,15 +35266,10 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     try{ renderUserList(); }catch(e){}
     document.getElementById('ivErr').style.color = '#0f766e'; err('⏳ Sending to the cloud…');
     persistAllData();
-    let ok = false;
-    for(let t = 0; t < 4 && !ok; t++){
-      try{ await syncNow(); }catch(e){}
-      try{ const c = await syncGetChunk('users'); ok = !!(c && c.items && c.items.some(x => x.pin === h && x.is_active !== false)); }catch(e){}
-      if(!ok) await new Promise(r => setTimeout(r, 1500));
-    }
+    const ok = await mdCloudHas(h, 45000, s => err(`⏳ Sending to the cloud… ${s}s`));
     btn.disabled = false; document.getElementById('ivErr').style.color = '';
-    if(!ok) return err('⚠️ Could not reach the cloud — check the internet and press again');
     mdInvShow(u.user_id);
+    if(!ok) mdCloudLater(h, u.name);
   };
   function invText(u, pin){
     const sh = shopInfo(), code = AppState.settings.businessId;
@@ -35268,7 +35284,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const msg = invText(u, pin); window._mdInvMsg = msg;
     const wa = mob(u.mobile || ''), waUrl = 'https://wa.me/' + (wa.length === 11 ? '92' + wa.slice(1) : '') + '?text=' + encodeURIComponent(msg);
     open(`<div class="ivH"><h3>✅ Message ready — ${esc(u.name)}</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
-      <div class="ivOk">✅ ${esc(u.name)} is saved in the cloud. Send this message — they paste it on the login screen.</div>
+      <div class="ivOk" id="ivOkTxt">✅ ${esc(u.name)} is saved in the cloud. Send this message — they paste it on the login screen.</div>
       <div class="ivPin">${esc(pin)}</div>
       <div class="ivMsg">${esc(msg)}</div>
       <div class="mdRow2" style="margin-top:8px"><a class="mdBigBtn" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="${esc(waUrl)}">📤 WhatsApp</a><button type="button" class="mdBigBtn ghost" onclick="mdInvCopy()">📋 Copy</button></div>`);
@@ -35319,7 +35335,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     if(SYNC_SEED_STAFF_PINS.includes(h) || usersData.some(x => x.pin === h && x.user_id !== userId)){ alert('❌ This PIN cannot be used (sample PIN or used by someone else) — choose another.'); return; }
     await mdEnsureKeys();
     u.pin = h; u.pinBox = await pinBox(np); u.pinAt = Date.now(); myPins()[userId] = np; saveToStorage('settings', AppState.settings);
-    persistAllData(); try{ await syncNow(); }catch(e){}
+    persistAllData(); mdCloudHas(h, 10 * 60000).then(ok => { if(ok) try{ showNavToast(`✅ ${u.name}'s new PIN is on the cloud`); }catch(e){} });
     renderUserList();
     if(confirm(`✅ ${u.name}'s PIN is now: ${np}\n\nMake the ready message to send on WhatsApp now?`)) mdInvShow(userId);
   };
