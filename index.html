@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU185</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU186</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU185</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU186</span>
     </div>
   </div>
 
@@ -34926,9 +34926,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU185'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU186'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Fix: a newly joined staff phone could show \'Subscription Required\' — the shop\'s subscription date now always reaches the cloud';
+  const UPDATE_NOTE = 'User Management: \'Add a staff phone\' and \'Add New User\' buttons are full size again';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35343,7 +35343,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       if(aioMultiOn()){ const b = document.createElement('button'); b.type = 'button'; b.className = 'mdMsgBtn'; b.style.cssText = 'margin:6px 0 0;width:auto;padding:7px 12px;border-radius:10px;border:0;background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff;font-weight:900;font-size:13px;cursor:pointer'; b.textContent = '📨 Ready message — connect phone'; b.onclick = () => p ? mdInvShow(u.user_id) : mdInvOpen(u.user_id); d.after(b); } });
     /* ہیلپ ڈیسک #152: User Management میں بھی «➕ Add a staff phone — ready message» */
     const tb = document.querySelector('#usersListView .partyToolbar');
-    if(tb && !document.getElementById('mdAddStaffBtn')){ const b = document.createElement('button'); b.id = 'mdAddStaffBtn'; b.type = 'button'; b.textContent = '➕ Add a staff phone — ready message'; b.style.cssText = 'background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff'; b.onclick = () => mdInvOpen(); tb.insertBefore(b, tb.firstChild); const sp = tb.querySelector(':scope > div:empty'); if(sp) sp.remove(); tb.style.flexWrap = 'wrap'; tb.style.gap = '8px'; }
+    if(tb && !document.getElementById('mdAddStaffBtn')){ const b = document.createElement('button'); b.id = 'mdAddStaffBtn'; b.type = 'button'; b.textContent = '➕ Add a staff phone — ready message'; b.style.cssText = 'background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff'; b.onclick = () => mdInvOpen(); tb.insertBefore(b, tb.firstChild); const sp = tb.querySelector(':scope > div:empty'); if(sp) sp.remove(); tb.style.flexWrap = 'wrap'; tb.style.gap = '8px'; tb.querySelectorAll(':scope > button').forEach(x => { x.style.minHeight = '46px'; x.style.padding = '10px 18px'; x.style.fontSize = '15px'; }); }
   }catch(e){} }
   /* ہیلپ ڈیسک #152: «✏️ Set Custom PIN» سے بدلا PIN بھی مالک کو یاد اور کلاؤڈ میں (تالا لگا) */
   const _scp = window.setCustomUserPin;
