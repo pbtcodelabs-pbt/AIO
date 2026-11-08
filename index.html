@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU177</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU178</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU177</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU178</span>
     </div>
   </div>
 
@@ -27389,9 +27389,9 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     const maxW = Math.round(pxWidth * 0.24);
     const bwL = Math.min(maxW, Math.round(wInv + pad * 2)), bwR = Math.min(maxW, Math.round(wBill + pad * 2));
     const bxL = tableLeft, bxR = tableRight - bwR;
-    ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fillRect(bxL, by, bwL, bh); ctx.fillRect(bxR, by, bwR, bh);
+    /* AIO0811SU178 (ہیلپ ڈیسک #140، Ali And Company): سفید ڈبے نہیں — سیدھا رنگین پٹی پر سفید لکھائی */
     const lh = Math.round(bh / (a4Ph ? 3.6 : 3));
-    ctx.fillStyle = '#1a1a1a'; ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left';
     ctx.font = F('bold 15px'); ctx.fillText(`Invoice #${billNoText(invoice) || '—'}`, bxL + pad, by + lh * 1.1, bwL - pad * 2);
     ctx.font = F('13px'); ctx.fillText(`${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`, bxL + pad, by + lh * 2.1, bwL - pad * 2);
     ctx.textAlign = 'right';
@@ -34906,9 +34906,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU177'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU178'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Bill footer / custom message also in Bill & Print Settings';
+  const UPDATE_NOTE = 'A4 bill: Invoice # and Bill To in white text directly on the green header';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
