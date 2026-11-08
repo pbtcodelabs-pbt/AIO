@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU180</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU181</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU180</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU181</span>
     </div>
   </div>
 
@@ -34907,9 +34907,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU180'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU181'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Staff phone: owner makes a ready message, staff pastes it on login - connected and logged in';
+  const UPDATE_NOTE = 'Staff can change own PIN; owner always sees the latest PIN (locked in the cloud with the owner\'s key)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35189,14 +35189,29 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   const open = html => { box().innerHTML = html; document.getElementById('mdInvModal').classList.add('show'); };
   window.mdInvClose = () => document.getElementById('mdInvModal').classList.remove('show');
   function myPins(){ const s = AppState.settings; s.staffPins = s.staffPins || {}; return s.staffPins; }
+  /* ہیلپ ڈیسک #151: PIN کلاؤڈ میں مالک کی چابی (RSA-OAEP) سے بند — ملازم بدلے تو بھی مالک کو تازہ PIN، دوسرے ملازم نہیں دیکھ سکتے */
+  const RSA = {name:'RSA-OAEP', hash:'SHA-256'};
+  async function ownerPriv(){ const j = AppState.settings.pinKeyPriv; if(!j) return null; try{ return await crypto.subtle.importKey('jwk', j, RSA, false, ['decrypt']); }catch(e){ return null; } }
+  window.mdEnsureKeys = async function(){
+    try{
+      const s = AppState.settings; if(s.syncJoined || !aioMultiOn() || !(crypto && crypto.subtle)) return;
+      const sh = shopInfo(); let pub = sh.pinPub;
+      if(!s.pinKeyPriv){ const kp = await crypto.subtle.generateKey(Object.assign({modulusLength:2048, publicExponent:new Uint8Array([1,0,1])}, RSA), true, ['encrypt','decrypt']); s.pinKeyPriv = await crypto.subtle.exportKey('jwk', kp.privateKey); pub = await crypto.subtle.exportKey('jwk', kp.publicKey); saveToStorage('settings', s); }
+      else if(!pub || pub.n !== s.pinKeyPriv.n){ const k = s.pinKeyPriv; pub = {kty:'RSA', n:k.n, e:k.e, alg:k.alg || 'RSA-OAEP-256', ext:true}; }
+      if(!sh.pinPub || sh.pinPub.n !== pub.n){ shopInfoData = [Object.assign({}, sh, {id:'shop', pinPub: pub})]; saveToStorage('syncShopInfo', shopInfoData); scheduleSync(300); }
+    }catch(e){}
+  };
+  async function pinBox(pin){ const pub = shopInfo().pinPub; if(!pub || !(crypto && crypto.subtle)) return ''; try{ const k = await crypto.subtle.importKey('jwk', pub, RSA, false, ['encrypt']); const c = await crypto.subtle.encrypt(RSA, k, new TextEncoder().encode(String(pin))); return btoa(String.fromCharCode.apply(null, new Uint8Array(c))); }catch(e){ return ''; } }
+  async function pinOpen(box){ const k = await ownerPriv(); if(!k || !box) return ''; try{ const b = Uint8Array.from(atob(box), c => c.charCodeAt(0)); return new TextDecoder().decode(await crypto.subtle.decrypt(RSA, k, b)); }catch(e){ return ''; } }
+  window.mdPinsRefresh = async function(){ let ch = false; for(const u of usersData){ if(!u.pinBox) continue; const p = await pinOpen(u.pinBox); if(p && myPins()[u.user_id] !== p){ myPins()[u.user_id] = p; ch = true; } } if(ch) saveToStorage('settings', AppState.settings); return ch; };
   async function freePin(){ const used = new Set(usersData.map(u => u.pin)); for(let t = 0; t < 50; t++){ const p = String(1000 + Math.floor(Math.random() * 9000)); if(/^(\d)\1{3}$/.test(p) || p === '1234') continue; if(!used.has(await hashPin(p))) return p; } return String(Date.now()).slice(-4); }
   /* ---- مالک: ملازم بنائیں / نیا PIN ---- */
   window.mdInvOpen = async function(userId){
     if(AppState.currentRole && AppState.currentRole !== 'admin'){ alert('Only the owner can add staff phones.'); return; }
     if(!aioMultiOn()){ alert('First turn on Multi-Device (Settings → 👥 Staff & Devices).'); return; }
     const u = userId ? usersData.find(x => x.user_id === userId) : null;
-    const pin = await freePin(), mobile = u ? (u.mobile || '') : '';
-    open(`<div class="ivH"><h3>${u ? '🔄 New PIN for ' + esc(u.name) : '➕ Add a staff phone'}</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
+    const pin = (u && myPins()[u.user_id]) || await freePin(), mobile = u ? (u.mobile || '') : '';
+    open(`<div class="ivH"><h3>${u ? '✏️ PIN for ' + esc(u.name) : '➕ Add a staff phone'}</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
       <div class="settingsHint" style="margin:0 0 8px">The app makes a ready message. Send it on WhatsApp — your staff only <b>pastes it</b> on the login screen and is connected.</div>
       ${u ? '' : `<label class="mdLbl">Staff name</label><input id="ivName" class="mdInput" placeholder="e.g. Ali" maxlength="40">`}
       <label class="mdLbl">Staff mobile (WhatsApp)</label><input id="ivMob" class="mdInput" inputmode="tel" placeholder="03XXXXXXXXX" value="${esc(mobile)}">
@@ -35221,9 +35236,11 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const max = planMaxDevices(), devs = (typeof syncLiveDevices === 'function' ? syncLiveDevices(devicesData) : devicesData).length;
     if(!u0 && max && max < 99 && devs >= max) return err(`Your package allows ${max} phones (owner included) and all are in use — remove an old phone or upgrade first`);
     btn.disabled = true; err('');
+    await mdEnsureKeys();
     let u = u0;
     if(u){ u.pin = h; u.mobile = mobile || u.mobile || ''; u.is_active = true; }
     else { u = {user_id: nextUserId++, name, username: name.toLowerCase().replace(/[^a-z0-9]+/g, '') + String(Date.now()).slice(-3), pin: h, role, is_active: true, screens: role === 'admin' ? [] : ['home','billing','billhistory','customers'], mobile}; usersData.push(u); }
+    u.pinBox = await pinBox(pin); u.pinAt = Date.now();
     myPins()[u.user_id] = pin; saveToStorage('settings', AppState.settings);
     try{ renderUserList(); }catch(e){}
     document.getElementById('ivErr').style.color = '#0f766e'; err('⏳ Sending to the cloud…');
@@ -35261,10 +35278,11 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   window.mdStaffListHtml = function(){
     const L = usersData.filter(u => u.is_active !== false && u.role === 'salesman' || (u.role === 'admin' && myPins()[u.user_id]));
     return `<button type="button" class="mdBigBtn" style="background:linear-gradient(135deg,#16a34a,#0f766e)" onclick="mdInvOpen()">➕ Add a staff phone — ready message</button>`
-      + (L.length ? `<div class="settingsSubLabel">Staff (${L.length})</div>` + L.map(u => `<div class="mdStaffRow"><span class="t">${u.role === 'admin' ? '👑' : '🧑‍💼'} ${esc(u.name)}<small>${u.mobile ? '📱 ' + esc(u.mobile) + ' • ' : ''}${myPins()[u.user_id] ? '🔑 PIN ' + esc(myPins()[u.user_id]) : '🔑 PIN hidden'}</small></span>${myPins()[u.user_id] ? `<button type="button" onclick="mdInvShow(${u.user_id})">📨 Message</button>` : ''}<button type="button" onclick="mdInvOpen(${u.user_id})">🔄 New PIN</button></div>`).join('') : '');
+      + (L.length ? `<div class="settingsSubLabel">Staff (${L.length})</div>` + L.map(u => `<div class="mdStaffRow"><span class="t">${u.role === 'admin' ? '👑' : '🧑‍💼'} ${esc(u.name)}<small>${u.mobile ? '📱 ' + esc(u.mobile) + ' • ' : ''}${myPins()[u.user_id] ? '🔑 PIN <b style="letter-spacing:2px;color:#0f766e">' + esc(myPins()[u.user_id]) + '</b>' : '🔑 PIN not known yet'}</small></span>${myPins()[u.user_id] ? `<button type="button" onclick="mdInvShow(${u.user_id})">📨 Message</button>` : ''}<button type="button" onclick="mdInvOpen(${u.user_id})">✏️ PIN</button></div>`).join('') : '');
   };
   const _r = window.renderStaffDevicesCard;
-  if(typeof _r === 'function') window.renderStaffDevicesCard = function(){ _r.apply(this, arguments); try{ if(!aioMultiOn() || AppState.settings.syncJoined) return mdMyPinCard(); const el = document.getElementById('staffDevicesCard'), anchor = el && el.querySelector('button[onclick="goTo(\'users\')"]'); if(anchor){ const d = document.createElement('div'); d.innerHTML = mdStaffListHtml(); anchor.parentNode.insertBefore(d, anchor); } }catch(e){} };
+  if(typeof _r === 'function') window.renderStaffDevicesCard = function(){ _r.apply(this, arguments); try{ if(!aioMultiOn() || AppState.settings.syncJoined) return mdMyPinCard(); const el = document.getElementById('staffDevicesCard'), anchor = el && el.querySelector('button[onclick="goTo(\'users\')"]'); if(anchor){ const d = document.createElement('div'); d.innerHTML = mdStaffListHtml(); anchor.parentNode.insertBefore(d, anchor); }
+    if(!window._mdPinBusy){ window._mdPinBusy = true; mdEnsureKeys().then(() => mdPinsRefresh()).then(ch => { window._mdPinBusy = false; if(ch) renderStaffDevicesCard(); }).catch(() => { window._mdPinBusy = false; }); } }catch(e){} };
   /* ---- ملازم کا فون: اپنا PIN دیکھیں / بدلیں ---- */
   function mdMyPinCard(){
     try{ const s = AppState.settings; if(!s.syncJoined || !s.myPin) return; const el = document.getElementById('staffDevicesCard'); if(!el) return;
@@ -35277,9 +35295,16 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const p = (prompt('New PIN (4–6 digits):') || '').replace(/\D/g, ''); if(!p) return;
     if(p.length < 4){ alert('PIN must be at least 4 digits'); return; }
     const h = await hashPin(p); if(SYNC_SEED_STAFF_PINS.includes(h) || usersData.some(u => u.pin === h && u !== me)){ alert('This PIN cannot be used — choose another'); return; }
-    me.pin = h; s.myPin = p; s.myPinH = h; saveToStorage('settings', s); persistAllData(); try{ await syncNow(); }catch(e){}
-    alert('✅ Your new PIN: ' + p + '\nThe owner will see "PIN hidden" — they can make a new one any time.'); renderStaffDevicesCard();
+    me.pin = h; me.pinBox = await pinBox(p); me.pinAt = Date.now(); s.myPin = p; s.myPinH = h; saveToStorage('settings', s); persistAllData(); try{ await syncNow(); }catch(e){}
+    alert('✅ Your new PIN: ' + p + '\nThe shop owner can also see it, so ask them if you ever forget it.'); renderStaffDevicesCard();
   };
+  /* ---- Users اسکرین: ہر ملازم کا تازہ PIN مالک کو ---- */
+  const _rul = window.renderUserList;
+  function isOwnerDev(){ const s = AppState.settings; return !s.syncJoined && (!AppState.currentRole || AppState.currentRole === 'admin'); }
+  function paintUserPins(){ try{ if(!isOwnerDev()) return; const w = document.getElementById('userListWrap'); if(!w) return; const cards = w.querySelectorAll('.userCard');
+    usersData.forEach((u, i) => { const c = cards[i], p = myPins()[u.user_id]; if(!c || u.role === 'admin' || c.querySelector('.mdPinTag')) return; const d = document.createElement('div'); d.className = 'mdPinTag'; d.style.cssText = 'font-size:12.5px;font-weight:800;color:#0f766e;margin-top:3px'; d.textContent = p ? '🔑 PIN: ' + p : '🔑 PIN: not known yet (✏️ set it in Staff & Devices)'; (c.firstElementChild || c).appendChild(d); }); }catch(e){} }
+  if(typeof _rul === 'function') window.renderUserList = function(){ const r = _rul.apply(this, arguments); paintUserPins(); if(isOwnerDev() && !window._mdPinBusy2){ window._mdPinBusy2 = true; mdPinsRefresh().then(ch => { window._mdPinBusy2 = false; if(ch){ _rul(); paintUserPins(); } }).catch(() => { window._mdPinBusy2 = false; }); } return r; };
+  window.addEventListener('load', () => setTimeout(() => { try{ const s = AppState.settings; if(s.syncJoined && s.syncRole === 'staff'){ const b = document.getElementById('loginJoinShopBtn'); if(b && !document.getElementById('mdForgotHint')){ const d = document.createElement('div'); d.id = 'mdForgotHint'; d.style.cssText = 'font-size:12.5px;font-weight:700;color:#475569;text-align:center;margin:8px 4px'; d.textContent = '🔑 Forgot your PIN? Ask your shop owner — they can always see your current PIN.'; b.parentNode.insertBefore(d, b); } } }catch(e){} }, 1500));
   /* ---- ملازم: لاگ اِن صفحے پر «مالک کا پیغام پیسٹ کریں» ---- */
   function parseInv(t){
     const i = String(t || '').indexOf(INV_TAG); if(i < 0) return null;
