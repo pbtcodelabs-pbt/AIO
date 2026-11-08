@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU175</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU176</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU175</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU176</span>
     </div>
   </div>
 
@@ -14306,6 +14306,7 @@ function renderInvNotesStrip(){
   const h = recNotesHtml(inv);
   el.innerHTML = h ? h.replace('<div class="recNotes">', `<div class="recNotes" onclick="openRecNotes('inv', ${inv.invoice_id})" title="Tap to add or delete notes">`)
     : `<button type="button" class="noteChip" onclick="openRecNotes('inv', ${inv.invoice_id})">📝 Add note</button>`;
+  el.insertAdjacentHTML('beforeend', `<button type="button" class="noteChip" style="margin-inline-start:6px;background:#e0f2fe;border-color:#7dd3fc;color:#075985;" onclick="editBillFooter()" title="Text printed at the bottom of every bill">🧾 Footer</button>`); // AIO0811SU176 (#107)
 }
 // نوٹ بدلا — جو فہرست کھلی ہو وہ تازہ
 function recNotesRefresh(){
@@ -15008,7 +15009,7 @@ function finalizeInvoice(){
     walletApplied = Math.min(customer.wallet_balance, grandTotal);
     customer.wallet_balance -= walletApplied; // TODO: customers.wallet_balance UPDATE
     customer.walletHistory = customer.walletHistory || [];
-    customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
+    customer.walletHistory.unshift({type:'receivable_collected', at: new Date().toISOString(), amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
   }
   // ---------- بل بناتے وقت صارف نے خود جو نقد رقم درج کی ہو — یہ صرف اسی بل کے لیے نہیں بلکہ پرانے بقایہ سمیت پوری واجب الادا رقم کے خلاف لاگو ہوگی ----------
   const dueAfterWallet = Math.max(0, grandTotal - walletApplied);
@@ -15337,7 +15338,7 @@ function approvePendingBill(){
         walletApplied = Math.min(customer.wallet_balance, grandTotal);
         customer.wallet_balance -= walletApplied;
         customer.walletHistory = customer.walletHistory || [];
-        customer.walletHistory.unshift({type:'receivable_collected', amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
+        customer.walletHistory.unshift({type:'receivable_collected', at: new Date().toISOString(), amount:walletApplied, via:'wallet', date:new Date().toISOString().split('T')[0], note:`Auto-applied to ${invoice.invoice_no}`});
       }
       const remainingDue = Math.max(0, grandTotal - walletApplied);
       if(remainingDue > 0) customer.total_receivable += remainingDue;
@@ -18018,9 +18019,35 @@ function getOpeningStock(v){
   }
   return o;
 }
+// AIO0811SU176 (ہیلپ ڈیسک #118، Ali And Company): آج کی بکری (خالص، واپسی منہا) — Old + Add New − Sold = Available ہمیشہ برابر
+var _soldTodayCache = {key: '', map: {}};
+function soldTodayMap(){
+  const today = toLocalDateStr(new Date());
+  const key = today + '|' + (invoicesData || []).length + '|' + ((invoicesData || [])[0] ? (invoicesData[0].invoice_id || '') + (invoicesData[0].status || '') : '');
+  if(_soldTodayCache.key === key) return _soldTodayCache.map;
+  const map = {};
+  (invoicesData || []).forEach(inv => {
+    if(!inv || !inv.created_at || inv.status === 'voided' || toLocalDateStr(new Date(inv.created_at)) !== today) return;
+    (inv.items || []).forEach(it => {
+      const nq = netSoldQty(it); if(nq <= 0) return;
+      let vid = it.variant_id, units = nq;
+      if(it.loose_product_id){ try{ const t = resolveStockTarget(it, nq); if(!t) return; vid = t.v.variant_id; units = t.units; }catch(e){ return; } }
+      if(!vid) return;
+      map[vid] = roundStock((map[vid] || 0) + units);
+    });
+  });
+  _soldTodayCache = {key, map};
+  return map;
+}
 function getAddedToday(v){
-  getOpeningStock(v);
-  return dailyStockSnapshot.added[v.variant_id] || 0;
+  const opening = getOpeningStock(v);
+  let added = dailyStockSnapshot.added[v.variant_id] || 0;
+  // سٹاک کہیں اور سے بدلا ہو (پراڈکٹ فارم، شپمنٹ وغیرہ) تو «Add New» خود درست — Old + Add New − Sold = Available
+  try{
+    const expected = roundStock((Number(v.stock) || 0) - opening + (soldTodayMap()[v.variant_id] || 0));
+    if(expected >= 0 && Math.abs(expected - added) > 0.0005){ added = expected; dailyStockSnapshot.added[v.variant_id] = expected; saveToStorage('dailyStockSnapshot', dailyStockSnapshot); }
+  }catch(e){}
+  return added;
 }
 // ---------- Stock Adjustment سے "آج شامل" کو سیدھا لکھیں — فرق کے برابر اصل سٹاک بھی اوپر/نیچے (غلطی درست ہو سکے) ----------
 function setAddedToday(v, newAdded){
@@ -19695,7 +19722,7 @@ function renderStockAdjustmentScreen(){
     return `
       <div class="capRow saGrid7 ${idx % 2 ? 'alt' : ''} ${isNegative ? 'capNeg' : ''}" data-said="${v.variant_id}">
           ${capThumbHtml(item.product.name, img, item.product.product_id)}
-          <div class="capBox capName" title="${item.displayName.replace(/"/g,'&quot;')}"><b>${(item.product.name || item.displayName).replace(/</g,'&lt;')}</b><small>${(v.label || cat).replace(/</g,'&lt;')}</small></div>
+          <div class="capBox capName" title="${item.displayName.replace(/"/g,'&quot;')}"><b>${(item.product.name || item.displayName).replace(/</g,'&lt;')}</b><small>${(v.label || cat).replace(/</g,'&lt;')}${(soldTodayMap()[v.variant_id] || 0) > 0 ? ` · <span style="color:#b91c1c;font-weight:800;">−${roundStock(soldTodayMap()[v.variant_id])} sold today</span>` : ''}</small></div>
           <div class="capIn capLocked" title="Previous stock (start of day) — locked" onclick="showNavToast('🔒 Old stock is locked — add stock in “Add New”')">${roundStock(prev)}</div>
           <input type="number" class="capIn added" min="0" step="any" value="${roundStock(added)}" oninput="previewStockAdjAdded(${v.variant_id}, this)" onchange="updateStockAdjField(${v.variant_id}, 'added', this.value)" onfocus="this.select()" title="Stock added today">
           <div class="capIn capLocked capStockNow ${isNegative ? 'neg' : (isLow ? 'low' : '')}" title="Available stock — locked, updates automatically" onclick="showNavToast('🔒 Available is automatic — change stock only in “Add New”')">${roundStock(v.stock)}</div>
@@ -20472,7 +20499,7 @@ function buildPartyStatement(type, id){
     });
     const firstObC = (c.walletHistory || []).map(h => h.type).lastIndexOf('opening_balance'); // سب سے پہلا = اوپننگ، باقی = ایڈجسٹمنٹ (اپنی تاریخ پر)
     (c.walletHistory || []).forEach((h, i) => {
-      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0'), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})${h.by ? ' — 👤 ' + h.by : ''}`, dr: 0, cr: h.amount, del: i});
+      if(h.type === 'receivable_collected') rows.push({date: h.date, ts: (h.at && String(h.at).slice(0,10) === String(h.date || '').slice(0,10) ? h.at : (h.date || '') + 'T23:59:' + String(59 - Math.min(59, i)).padStart(2, '0')), text: `📥 Payment received (${h.via === 'wallet' ? 'wallet' : h.via === 'bank' ? 'bank' : 'cash'})${h.by ? ' — 👤 ' + h.by : ''}`, dr: 0, cr: h.amount, del: i});
       else if(h.type === 'opening_balance'){
         const first = i === firstObC, add = h.direction === 'add', cr = add ? 0 : (h.toReceivable != null ? h.toReceivable : h.amount);
         const legacyNote = /^(Opening balance( set)?|Balance corrected)$/.test(h.note || '');
@@ -20492,7 +20519,7 @@ function buildPartyStatement(type, id){
     });
     const firstObS = (s.ledgerHistory || []).map(h => h.type).lastIndexOf('opening_balance');
     (s.ledgerHistory || []).forEach((h, i) => {
-      const ts = (h.date || '') + 'T12:00:' + String(59 - Math.min(59, i)).padStart(2, '0');
+      const ts = h.at && String(h.at).slice(0,10) === String(h.date || '').slice(0,10) ? h.at : (h.date || '') + 'T23:59:' + String(59 - Math.min(59, i)).padStart(2, '0'); /* AIO0811SU176 (#125): بغیر وقت کی ادائیگی اسی دن کے بل کے بعد */
       if(h.type === 'payment') rows.push({date: h.date, ts, text: `💵 Payment sent${h.note ? ' — ' + h.note : ''}${h.by ? ' — 👤 ' + h.by : ''}`, dr: 0, cr: h.amount, del: i});
       else if(h.type === 'return') rows.push({date: h.date, ts, text: `↩️ ${h.note || 'Item return'}`, dr: 0, cr: h.amount});
       else if(h.type === 'adjust') rows.push({date: h.date, ts, text: `✏️ Shipment edited${h.note ? ' — ' + h.note : ''}`, dr: h.amount > 0 ? h.amount : 0, cr: h.amount < 0 ? -h.amount : 0});
@@ -20508,7 +20535,8 @@ function buildPartyStatement(type, id){
   // اوپننگ بیلنس سب سے پہلے (رجسٹر کا پرانا بقایہ) — بعد میں ڈالا ہو تو بھی پہلی تاریخ پر، ساتھ اصل تاریخ لکھی
   const firstDate = rows.filter(x => !x.ob).map(x => x.date).sort()[0];
   rows.forEach(x => { if(x.ob && firstDate && firstDate < x.date){ x.text += ` (entered ${formatDateDMY(x.date)})`; x.date = firstDate; x.ts = ''; } }); // صرف پہلا اوپننگ؛ ایڈجسٹمنٹ اپنی تاریخ پر
-  rows.sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.ts).localeCompare(String(b.ts)));
+  const _tsN = t => { if(!t) return 0; const v = /Z$|[+-]\d\d:\d\d$/.test(t) ? Date.parse(t) : Date.parse(String(t).replace(' ', 'T')); return isNaN(v) ? 0 : v; }; /* AIO0811SU176 (ہیلپ ڈیسک #125): بل کا وقت UTC اور ادائیگی کا مقامی متن — اب سب اصل وقت سے */
+  rows.sort((a, b) => String(a.date).localeCompare(String(b.date)) || (_tsN(a.ts) - _tsN(b.ts)) || String(a.ts).localeCompare(String(b.ts)));
   let run = current;
   for(let i = rows.length - 1; i >= 0; i--){ rows[i].bal = run; run = moneyRound(run - rows[i].dr + rows[i].cr); }
   return {rows, current, earlier: moneyRound(run), name};
@@ -21436,7 +21464,7 @@ function confirmPaySupplier(){
   financeDummy.cashInHand -= amount; // ---------- نقد ادائیگی — یہ رقم اب کیش میں سے نکل گئی ----------
 
   s.ledgerHistory = s.ledgerHistory || [];
-  s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note, by: AppState.currentUser?.name || ''});
+  s.ledgerHistory.unshift({type:'payment', amount, date: payDate, at: new Date().toISOString(), note, by: AppState.currentUser?.name || ''});
 
   const savedPayment = recordPaymentEntry({
     date: payDate,
@@ -24968,7 +24996,7 @@ function saveCollectReceivable(){
   // ---------- نوٹ: totalReceivable اب Dashboard پر لائیو حساب ہوتا ہے (customersData سے براہ راست)، اس لیے یہاں الگ سے اپڈیٹ کرنے کی ضرورت نہیں ----------
 
   c.walletHistory.unshift({
-    type: 'receivable_collected',
+    type: 'receivable_collected', at: new Date().toISOString(),
     amount: moneyRound(amount - excess),
     via: activeCollectMode,
     date: payDate,
@@ -25324,7 +25352,7 @@ function saveRecordPaymentModal(){
     balanceAfter = moneyRound(c.total_receivable - extra);
     financeDummy.cashInHand += amount;
     c.walletHistory = c.walletHistory || [];
-    c.walletHistory.unshift({type:'receivable_collected', amount: toRec, via:method==='Cash'?'cash':'bank', date: payDate, by: AppState.currentUser?.name || ''});
+    c.walletHistory.unshift({type:'receivable_collected', at: new Date().toISOString(), amount: toRec, via:method==='Cash'?'cash':'bank', date: payDate, by: AppState.currentUser?.name || ''});
     if(extra > 0){
       c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + extra);
       c.walletHistory.unshift({type:'deposit', amount: extra, via:'advance', date: payDate, note:'Advance — extra with payment'});
@@ -25338,7 +25366,7 @@ function saveRecordPaymentModal(){
     balanceAfter = s.total_payable;
     financeDummy.cashInHand -= amount;
     s.ledgerHistory = s.ledgerHistory || [];
-    s.ledgerHistory.unshift({type:'payment', amount, date: payDate, note, by: AppState.currentUser?.name || ''});
+    s.ledgerHistory.unshift({type:'payment', amount, date: payDate, at: new Date().toISOString(), note, by: AppState.currentUser?.name || ''});
   }
 
   const savedPayment = recordPaymentEntry({
@@ -25978,6 +26006,7 @@ function renderUserList(){
       </div>
       <div class="userActions">
         <span class="roleTag ${u.role}">${u.role === 'admin' ? '👑 Admin' : '🧑‍💼 Salesman'}</span>
+        <button class="btnResetPin" onclick="editUserName(${u.user_id})">📝 Edit Name</button>
         <button class="btnResetPin" onclick="setCustomUserPin(${u.user_id})">✏️ Set Custom PIN</button>
         <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
         <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 Change Role</button>
@@ -26085,6 +26114,26 @@ async function confirmRoleChangeWithPin(){
 }
 
 // ---------- خود اپنی مرضی کا PIN لکھیں — یاد رکھنا آسان ہو، بے ترتیب نہیں ----------
+// AIO0811SU176 (ہیلپ ڈیسک #124، Ali And Company): یوزر کا نام اور یوزر نیم بدلیں — صرف ایڈمن (یہ اسکرین ویسے ہی ایڈمن کی ہے)
+function editUserName(userId){
+  if(AppState.currentRole !== 'admin'){ alert('Only an Admin can edit users.'); return; }
+  const u = usersData.find(x => x.user_id === userId); if(!u) return;
+  const name = prompt(`Edit name for ${u.name}:`, u.name || '');
+  if(name === null) return;
+  const nm = name.trim(); if(!nm){ alert('❌ Name cannot be empty.'); return; }
+  const un0 = prompt(`Username (login ID) for ${nm}:`, u.username || '');
+  if(un0 === null) return;
+  const un = un0.trim().replace(/\s+/g, '');
+  if(!un){ alert('❌ Username cannot be empty.'); return; }
+  if(usersData.some(x => x !== u && String(x.username || '').toLowerCase() === un.toLowerCase())){ alert('❌ This username is already used by another user.'); return; }
+  const old = u.name;
+  u.name = nm; u.username = un; u.updated_at = new Date().toISOString();
+  try{ if(AppState.currentUser && AppState.currentUser.user_id === u.user_id){ AppState.currentUser.name = nm; AppState.currentUser.username = un; } }catch(e){}
+  try{ persistAllData(); }catch(e){}
+  try{ if(typeof syncSchedule === 'function') syncSchedule(); }catch(e){}
+  renderUserList();
+  alert(`✅ Saved: ${old} → ${nm} (@${un})`);
+}
 async function setCustomUserPin(userId){
   const u = usersData.find(x => x.user_id === userId);
   if(!u) return;
@@ -27273,7 +27322,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   const grandTotalBoxH = Math.round(46 * fscale);
 
   // ---------- کل اونچائی کا اندازہ ----------
-  let estimatedHeight = headerBandH + 30 + detailsBoxH + 20 + tableH + 30;
+  let estimatedHeight = headerBandH + 22 + tableH + 30; // AIO0811SU176: الگ ڈیٹیلز ڈبہ نہیں
   if(!invoice.customer_id){
     if(invoice.discount && invoice.discount > 0) estimatedHeight += Math.round(50*fscale);
     if(invoice.tax_amount && invoice.tax_amount > 0) estimatedHeight += Math.round(26*fscale);
@@ -27313,43 +27362,40 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   ctx.font = F('bold 30px');
-  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, Math.round(headerBandH*0.46));
+  ctx.fillText(AppState.settings.businessName || 'AIO POS', pxWidth/2, Math.round(headerBandH*0.46), Math.round(pxWidth*0.5));
   ctx.font = F('14px');
   let hy = Math.round(headerBandH*0.67);
   const hyStep = Math.round(18*fscale);
-  if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, hy); hy += hyStep; }
-  if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, hy); }
+  if(AppState.settings.businessAddress){ ctx.fillText(AppState.settings.businessAddress, pxWidth/2, hy, Math.round(pxWidth*0.5)); hy += hyStep; }
+  if(AppState.settings.businessPhone){ ctx.fillText(AppState.settings.businessPhone, pxWidth/2, hy, Math.round(pxWidth*0.5)); }
 
   let y = headerBandH + 30;
 
-  // ---------- انوائس ڈیٹیلز باکس — ہلکے تھیم رنگ کے ساتھ ----------
-  ctx.fillStyle = hexToRgba(theme.primary, 0.08);
-  ctx.fillRect(tableLeft, y, tableRight - tableLeft, detailsBoxH);
-  ctx.strokeStyle = hexToRgba(theme.primary, 0.4);
-  ctx.lineWidth = 1;
-  ctx.strokeRect(tableLeft + 0.5, y + 0.5, tableRight - tableLeft, detailsBoxH);
-
+  // ---------- AIO0811SU176 (ہیلپ ڈیسک #111، Ali And Company): Invoice # اور Bill To اب اوپر رنگین پٹی کے دونوں کونوں میں ہلکے ڈبوں میں — نیچے والا الگ ڈبہ ختم (جگہ بچی) ----------
   const billDateObj = new Date(invoice.created_at);
   const dd = String(billDateObj.getDate()).padStart(2, '0');
   const mm = String(billDateObj.getMonth() + 1).padStart(2, '0');
   const yy = String(billDateObj.getFullYear()).slice(-2);
-
-  ctx.fillStyle = '#1a1a1a';
-  ctx.textAlign = 'left';
-  ctx.font = F('bold 16px');
-  ctx.fillText(`Invoice #${billNoText(invoice) || '—'}`, tableLeft + 16, y + Math.round(detailsBoxH*(invoicePhone(invoice) ? 0.32 : 0.4)));
-  ctx.font = F('13px');
-  ctx.fillText(`${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`, tableLeft + 16, y + Math.round(detailsBoxH*(invoicePhone(invoice) ? 0.57 : 0.71)));
-
-  ctx.textAlign = 'right';
-  ctx.font = F('bold 16px');
   const a4Ph = invoicePhone(invoice);
-  ctx.fillText('Bill To', tableRight - 16, y + Math.round(detailsBoxH*(a4Ph ? 0.32 : 0.4)));
-  ctx.font = F('13px');
-  ctx.fillText(invoice.customer_name, tableRight - 16, y + Math.round(detailsBoxH*(a4Ph ? 0.57 : 0.71)));
-  if(a4Ph){ ctx.fillText(a4Ph, tableRight - 16, y + Math.round(detailsBoxH*0.82)); }
-
-  y += detailsBoxH + 26;
+  {
+    const pad = Math.round(10 * fscale), bh = Math.round(headerBandH * 0.72), by = Math.round((headerBandH - bh) / 2);
+    ctx.font = F('bold 15px'); const wInv = ctx.measureText(`Invoice #${billNoText(invoice) || '—'}`).width;
+    ctx.font = F('13px'); const wName = Math.max(ctx.measureText(String(invoice.customer_name || '')).width, a4Ph ? ctx.measureText(a4Ph).width : 0);
+    ctx.font = F('bold 15px'); const wBill = Math.max(ctx.measureText('Bill To').width, wName);
+    const maxW = Math.round(pxWidth * 0.24);
+    const bwL = Math.min(maxW, Math.round(wInv + pad * 2)), bwR = Math.min(maxW, Math.round(wBill + pad * 2));
+    const bxL = tableLeft, bxR = tableRight - bwR;
+    ctx.fillStyle = 'rgba(255,255,255,0.92)'; ctx.fillRect(bxL, by, bwL, bh); ctx.fillRect(bxR, by, bwR, bh);
+    const lh = Math.round(bh / (a4Ph ? 3.6 : 3));
+    ctx.fillStyle = '#1a1a1a'; ctx.textAlign = 'left';
+    ctx.font = F('bold 15px'); ctx.fillText(`Invoice #${billNoText(invoice) || '—'}`, bxL + pad, by + lh * 1.1, bwL - pad * 2);
+    ctx.font = F('13px'); ctx.fillText(`${dd}/${mm}/${yy} ${getDayAbbrev(invoice.created_at)}`, bxL + pad, by + lh * 2.1, bwL - pad * 2);
+    ctx.textAlign = 'right';
+    ctx.font = F('bold 15px'); ctx.fillText('Bill To', bxR + bwR - pad, by + lh * 1.1, bwR - pad * 2);
+    ctx.font = F('13px'); ctx.fillText(String(invoice.customer_name || ''), bxR + bwR - pad, by + lh * 2.1, bwR - pad * 2);
+    if(a4Ph) ctx.fillText(a4Ph, bxR + bwR - pad, by + lh * 3.1, bwR - pad * 2);
+  }
+  y = headerBandH + 22;
 
   // ---------- آئٹمز ٹیبل — رنگین ہیڈر، باریک گرڈ — اب مکمل 3-طرفہ الائنمنٹ (Left/Center/Right)، تھرمل بل جیسی ہی ----------
   const a4Align = ['left','center','right'].includes(AppState.settings.printItemAlign) ? AppState.settings.printItemAlign : 'left';
@@ -31631,6 +31677,37 @@ const BRAND_LINE_1 = 'Reach us for the best software solutions — PC, Mobile & 
 /* مالک کا حکم (5 نومبر): بل / رپورٹ / رسید / پرنٹ / پیغام کے نیچے PBT Code Labs + ڈویلپر کا نمبر نہیں — اسی دکان کا نام + موبائل (جس کی ایپ ہے) */
 function bizFootName(){ return String((AppState.settings && AppState.settings.businessName) || '').trim(); }
 function bizFootPhone(){ return String((AppState.settings && AppState.settings.businessPhone) || '').trim(); }
+/* AIO0811SU176 (ہیلپ ڈیسک #107 / #132): بل کے نیچے اپنا فوٹر — خالی ہو تو دکان کا نام + موبائل؛ لکھا ہو تو وہی (کئی لائنیں، اردو نستعلیق بھی) ہر بل / رسید / رپورٹ کے نیچے */
+function customFooterText(){ return String((AppState.settings && AppState.settings.billFooterText) || '').replace(/\r/g, '').trim(); }
+function customFooterLines(){ return customFooterText().split('\n').map(x => x.trim()).filter(Boolean).slice(0, 4); }
+function hasUrduScript(t){ return /[؀-ۿ]/.test(String(t || '')); }
+try{ document.fonts && document.fonts.load("20px 'Noto Nastaliq Urdu'"); document.fonts && document.fonts.load("bold 20px 'Noto Nastaliq Urdu'"); }catch(e){}
+function editBillFooter(){
+  let ov = document.getElementById('billFooterOv');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'billFooterOv'; ov.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:14px;'; document.body.appendChild(ov); }
+  const cur = customFooterText();
+  ov.innerHTML = `<div style="background:#fff;border-radius:16px;width:min(440px,100%);padding:16px;box-shadow:0 12px 36px rgba(0,0,0,.35);font-family:inherit;">
+    <div style="font-size:17px;font-weight:800;margin-bottom:6px;">🧾 Bill footer text</div>
+    <div style="font-size:12.5px;color:#475569;margin-bottom:8px;">Printed at the bottom of every bill, receipt and report. Leave empty to show your shop name and mobile. Urdu (نستعلیق) works too. Up to 4 lines.</div>
+    <textarea id="billFooterIn" rows="4" dir="auto" placeholder="e.g. Thank you for your purchase! Come again 🙏&#10;شکریہ — دوبارہ تشریف لائیں" style="width:100%;box-sizing:border-box;border:1.5px solid #94a3b8;border-radius:10px;padding:10px;font-size:15px;font-family:inherit,'Noto Nastaliq Urdu';">${cur.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</textarea>
+    <div style="font-size:12px;color:#64748b;margin:6px 0 10px;">Default (empty): ${(bizFootName() || 'Shop name').replace(/[<>&]/g,'')}${bizFootPhone() ? ' • ' + bizFootPhone().replace(/[<>&]/g,'') : ''}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" onclick="saveBillFooter()" style="flex:1;min-width:120px;height:44px;border:0;border-radius:12px;background:#0f766e;color:#fff;font-weight:800;font-size:15px;">💾 Save</button>
+      <button type="button" onclick="document.getElementById('billFooterIn').value='';saveBillFooter()" style="flex:1;min-width:120px;height:44px;border:1.5px solid #cbd5e1;border-radius:12px;background:#f8fafc;font-weight:700;">↩️ Use shop name</button>
+      <button type="button" onclick="document.getElementById('billFooterOv').style.display='none'" style="height:44px;padding:0 14px;border:1.5px solid #cbd5e1;border-radius:12px;background:#fff;font-weight:700;">✖</button>
+    </div></div>`;
+  ov.style.display = 'flex';
+  setTimeout(() => { const t = document.getElementById('billFooterIn'); if(t) t.focus(); }, 50);
+}
+function saveBillFooter(){
+  const t = document.getElementById('billFooterIn');
+  AppState.settings.billFooterText = String(t ? t.value : '').replace(/\r/g, '').split('\n').map(x => x.trim()).filter(Boolean).slice(0, 4).join('\n');
+  try{ saveToStorage('settings', AppState.settings); }catch(e){}
+  try{ persistAllData(); }catch(e){}
+  const ov = document.getElementById('billFooterOv'); if(ov) ov.style.display = 'none';
+  try{ if(typeof currentPreviewInvoiceId !== 'undefined' && currentPreviewInvoiceId != null && document.getElementById('invoicePreviewModal') && document.getElementById('invoicePreviewModal').classList.contains('show')) openInvoicePreview(currentPreviewInvoiceId); }catch(e){}
+  try{ showNavToast(AppState.settings.billFooterText ? '✅ Footer saved — every bill will show it' : '✅ Footer: shop name + mobile'); }catch(e){}
+}
 function bizFootLine(){ return [bizFootName(), bizFootPhone() ? '📞 ' + bizFootPhone() : ''].filter(Boolean).join('  •  '); }
 function brandPhone(){
   // AIO0311TU154 (ہیلپ ڈیسک #21): بین الاقوامی شکل +92 — ہر بل، رپورٹ، رسید، پوسٹر، پرنٹ اور پیغام کے فوٹر میں
@@ -31644,10 +31721,12 @@ function brandLine2(){ return bizFootPhone() ? '📞 ' + bizFootPhone() : ''; }
 function appendBrandFooter(canvas){
   if(!canvas || !canvas.getContext || !canvas.width || !canvas.height) return canvas;
   if(canvas._brandSig === canvas.width + 'x' + canvas.height) return canvas;
-  if(!bizFootName() && !bizFootPhone()) return canvas;   // دکان کا نام / نمبر نہیں تو کچھ نہیں
+  const _cf = customFooterLines();
+  if(!_cf.length && !bizFootName() && !bizFootPhone()) return canvas;   // دکان کا نام / نمبر نہیں تو کچھ نہیں
   const w = canvas.width, h = canvas.height;
   const fs = Math.max(11, Math.min(24, Math.round(w / 34)));
-  const band = Math.round(fs * 3.6);
+  const _urdu = _cf.some(hasUrduScript);
+  const band = _cf.length ? Math.round(fs * (_urdu ? 2.1 : 1.45) * _cf.length + fs * 1.2) : Math.round(fs * 3.6);
   const copy = document.createElement('canvas');
   copy.width = w; copy.height = h;
   copy.getContext('2d').drawImage(canvas, 0, 0);
@@ -31665,6 +31744,19 @@ function appendBrandFooter(canvas){
     let p = px; ctx.font = `${weight} ${p}px ${fam}`;
     while(ctx.measureText(txt).width > w * 0.92 && p > 7){ p -= 0.5; ctx.font = `${weight} ${p}px ${fam}`; }
   };
+  if(_cf.length){
+    let yy = h + Math.round(fs * 0.6);
+    _cf.forEach((ln, k) => {
+      const ur = hasUrduScript(ln), lh = Math.round(fs * (ur ? 2.1 : 1.45));
+      yy += lh;
+      ctx.fillStyle = k === 0 ? '#0f172a' : '#334155';
+      const famL = ur ? "'Noto Nastaliq Urdu', 'Noto Sans', Arial, sans-serif" : fam;
+      let p = k === 0 ? fs : Math.round(fs * 0.9); ctx.font = `${k === 0 ? 700 : 600} ${p}px ${famL}`;
+      while(ctx.measureText(ln).width > w * 0.92 && p > 7){ p -= 0.5; ctx.font = `${k === 0 ? 700 : 600} ${p}px ${famL}`; }
+      ctx.fillText(ln, w / 2, yy - Math.round(lh * (ur ? 0.35 : 0.2)));
+    });
+    ctx.restore(); canvas._brandSig = canvas.width + 'x' + canvas.height; return canvas;
+  }
   const l1 = bizFootName() ? '🏪 ' + bizFootName() : '', l2 = brandLine2();
   ctx.fillStyle = '#0f172a'; fit(l1 || l2, fs, '800');
   ctx.fillText(l1 || l2, w / 2, h + Math.round(fs * 1.75));
@@ -31674,7 +31766,7 @@ function appendBrandFooter(canvas){
   return canvas;
 }
 // ---------- سادہ لکھائی (Fast Print / USB / واٹس ایپ) کے نیچے برانڈنگ ----------
-function brandTextLines(){ return [bizFootName(), bizFootPhone()].filter(Boolean); }
+function brandTextLines(){ const c = customFooterLines(); return c.length ? c : [bizFootName(), bizFootPhone()].filter(Boolean); }
 function brandPlainText(text, cols){
   const c = cols || Math.max(32, ...String(text || '').split('\n').map(l => l.length).filter(n => n <= 64));
   const ctr = t => { const pad = Math.max(0, Math.floor((c - t.length) / 2)); return ' '.repeat(pad) + t; };
@@ -31683,7 +31775,7 @@ function brandPlainText(text, cols){
   return body + '\n' + '-'.repeat(Math.min(c, 48)) + '\n' + bl.map(ctr).join('\n') + '\n\n\n';
 }
 function brandMsg(text){
-  const f = bizFootLine(); return String(text || '') + (f ? `\n\n— ${f}` : '');
+  const c = customFooterLines(); const f = c.length ? c.join('\n') : bizFootLine(); return String(text || '') + (f ? `\n\n— ${f}` : '');
 }
 // ---------- سب رینڈر فنکشنز کو لپیٹ دیں — جو بھی کینوس بنے، اس کے نیچے برانڈنگ خود لگے ----------
 (function wrapBrandedRenderers(){
@@ -34809,9 +34901,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU175'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU176'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Update card now shows old → new version and what changed while updating';
+  const UPDATE_NOTE = 'Fixes: running balance after payments, edit user name, stock Add New matches sales, invoice details in header, your own bill footer text (Urdu too)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
