@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU183</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU184</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3609,7 +3609,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU183</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU184</span>
     </div>
   </div>
 
@@ -26013,6 +26013,7 @@ function renderUserList(){
         <button class="btnResetPin" onclick="editUserName(${u.user_id})">📝 Edit Name</button>
         <button class="btnResetPin" onclick="setCustomUserPin(${u.user_id})">✏️ Set Custom PIN</button>
         <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
+        ${canDeleteUser(u) ? `<button class="btnToggleActive" style="background:#dc2626;color:#fff;border-color:#dc2626" onclick="deleteUser(${u.user_id})">🗑️ Delete</button>` : ''}
         <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 Change Role</button>
         ${u.role === 'salesman' ? `<button class="btnResetPin" onclick="openScreensModal(${u.user_id})">🖥️ Screens (${(u.screens||[]).length})</button>` : ''}
       </div>
@@ -26070,6 +26071,24 @@ function saveUserScreens(){
   applyScreenAuthorizationToNav(); // اگر یہی ملازم اس وقت لاگ ان ہے تو مینیو فوری تازہ ہو جائے
 }
 
+// ---------- ہیلپ ڈیسک #154 (مالک کا حکم): ملازم کو مکمل حذف — اپنا آپ اور آخری فعال Admin نہیں؛ کلاؤڈ میں بھی ہٹتا ہے (ملاپ میں base سے غائب = حذف) ----------
+function canDeleteUser(u){
+  if(!u) return false;
+  if(AppState.currentUser && AppState.currentUser.user_id === u.user_id) return false;
+  if(u.role === 'admin' && usersData.filter(x => x.role === 'admin' && x.is_active !== false && x.user_id !== u.user_id).length < 1) return false;
+  return true;
+}
+function deleteUser(userId){
+  const u = usersData.find(x => x.user_id === userId);
+  if(!u || !canDeleteUser(u)){ alert('⚠️ This user cannot be deleted (yourself or the only Admin).'); return; }
+  if(!confirm(`🗑️ Delete ${u.name} completely?\n\n• ${u.name} will not be able to log in on any phone\n• Old bills stay in history with their name\n• This cannot be undone\n\nPress OK to delete.`)) return;
+  const i = usersData.indexOf(u); if(i >= 0) usersData.splice(i, 1);
+  try{ const sp = AppState.settings.staffPins; if(sp && sp[userId] != null){ delete sp[userId]; saveToStorage('settings', AppState.settings); } }catch(e){}
+  persistAllData();
+  try{ if(typeof scheduleSync === 'function') scheduleSync(300); }catch(e){}
+  renderUserList();
+  try{ showNavToast(`🗑️ ${u.name} deleted`); }catch(e){}
+}
 function toggleUserActive(userId){
   const u = usersData.find(x => x.user_id === userId);
   if(!u) return;
@@ -34907,9 +34926,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU183'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0811SU184'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Ready staff message waits for the cloud properly (no more \'Could not reach the cloud\' on slow internet)';
+  const UPDATE_NOTE = 'Add staff phone: Shop Code shown + in the message (code, name, mobile, PIN); Delete button for staff in User Management';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35213,6 +35232,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const pin = (u && myPins()[u.user_id]) || await freePin(), mobile = u ? (u.mobile || '') : '';
     open(`<div class="ivH"><h3>${u ? '✏️ PIN for ' + esc(u.name) : '➕ Add a staff phone'}</h3><span class="ivX" onclick="mdInvClose()">✖</span></div>
       <div class="settingsHint" style="margin:0 0 8px">The app makes a ready message. Send it on WhatsApp — your staff only <b>pastes it</b> on the login screen and is connected.</div>
+      <label class="mdLbl">🏪 Business code (Shop Code) — filled automatically</label><div class="mdInput ivCode" style="background:#f1f5f9;font-weight:900;letter-spacing:1px;text-align:center;color:#0f766e;user-select:all">${esc(AppState.settings.businessId || '')}</div>
       ${u ? '' : `<label class="mdLbl">Staff name</label><input id="ivName" class="mdInput" placeholder="e.g. Ali" maxlength="40">`}
       <label class="mdLbl">Staff mobile (WhatsApp)</label><input id="ivMob" class="mdInput" inputmode="tel" placeholder="03XXXXXXXXX" value="${esc(mobile)}">
       <label class="mdLbl">PIN (4 digits — made for you, you can change it)</label><input id="ivPin" class="mdInput" inputmode="numeric" maxlength="6" value="${pin}" style="text-align:center;letter-spacing:6px;font-weight:900;font-size:20px">
@@ -35275,7 +35295,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const sh = shopInfo(), code = AppState.settings.businessId;
     const tok = JSON.stringify({c: code, p: pin, n: u.name, x: Date.now() + INV_DAYS * 864e5});
     const t = b64e(tok);
-    return `🔗 ${sh.businessName || AppState.settings.businessName || 'Our shop'} — AIO POS\n\nAssalam-o-Alaikum ${u.name}!\nYou are added as ${u.role === 'admin' ? "owner's 2nd phone" : 'staff'}.\n🔑 Your PIN: ${pin}\n\n1️⃣ Install / open the AIO POS app\n2️⃣ On the login screen press «📋 Paste owner's message»\n3️⃣ Paste this whole message — you are connected ✅\n\n(Valid for ${INV_DAYS} days — keep the last line)\n${INV_TAG}${t}.${chk(t)}`;
+    return `🔗 ${sh.businessName || AppState.settings.businessName || 'Our shop'} — AIO POS\n\nAssalam-o-Alaikum ${u.name}!\nYou are added as ${u.role === 'admin' ? "owner's 2nd phone" : 'staff'}.\n\n🏪 Shop Code: ${code}\n👤 Name: ${u.name}\n${u.mobile ? '📱 Mobile: ' + u.mobile + '\n' : ''}🔑 Your PIN: ${pin}\n\n1️⃣ Install / open the AIO POS app\n2️⃣ On the login screen press «📋 Paste owner's message»\n3️⃣ Paste this whole message — you are connected ✅\n\n(Valid for ${INV_DAYS} days — keep the last line)\n${INV_TAG}${t}.${chk(t)}`;
   }
   window.mdInvShow = function(userId){
     const u = usersData.find(x => x.user_id === userId); if(!u) return;
