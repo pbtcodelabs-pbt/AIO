@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0811SU188</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO189</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0811SU188</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO189</span>
     </div>
   </div>
 
@@ -7448,7 +7448,7 @@ async function syncGetChunk(chunk){
   try{
     const res = await aioAuthFetch(syncPath(chunk));
     if(res.status === 404) return {missing: true, items: []};
-    if(!res.ok) return null;
+    if(!res.ok){ let st = ''; try{ st = (await res.json())?.error?.status || ''; }catch(e2){} window.__cloudSyncError = `Read failed (${res.status} ${st}) — ${chunk}`; return null; }
     const d = await res.json();
     let items = [];
     try{ items = JSON.parse(d.fields?.json?.stringValue || '[]'); }catch(e){}
@@ -29272,7 +29272,7 @@ function openJoinShopModal(code){
   document.getElementById('joinShopModal').classList.add('show');
 }
 function closeJoinShopModal(){ document.getElementById('joinShopModal').classList.remove('show'); }
-function joinMsg(t, ok){ const m = document.getElementById('joinShopMsg'); m.style.color = ok ? 'var(--success,#15803d)' : '#b91c1c'; m.textContent = t; }
+function joinMsg(t, ok){ const m = document.getElementById('joinShopMsg'); m.style.whiteSpace = 'pre-line'; m.style.color = ok ? 'var(--success,#15803d)' : '#b91c1c'; m.textContent = t; }
 async function doJoinShop(){
   const code = document.getElementById('joinShopCode').value.trim().toUpperCase().replace(/\s+/g, '');
   const pin = document.getElementById('joinShopPin').value.trim();
@@ -29286,9 +29286,15 @@ async function doJoinShop(){
   const revert = (t) => { s.businessId = prev.businessId; s.syncOn = prev.syncOn; saveToStorage('settings', s); refreshMultiFlag(); btn.disabled = false; joinMsg(t); };
   try{
     s.businessId = code; s.syncOn = true; refreshMultiFlag();
-    if(!(await aioEnsureAuth())) return revert('No internet — could not connect');
-    const u = await syncGetChunk('users');
-    if(u === null) return revert('No internet — could not connect');
+    /* ہیلپ ڈیسک #148 (Ali And Company): ایک بار کی ناکامی پر «No internet» — اب 3 کوششیں، اور اصل وجہ پیغام میں */
+    let u = null, why = ''; window.__cloudSyncError = null;
+    for(let t = 0; t < 3 && u === null; t++){
+      if(t) { joinMsg(`⏳ Connecting… (try ${t + 1})`, true); await new Promise(r => setTimeout(r, 1500)); }
+      if(t && AppState.settings.aioFbAuth){ AppState.settings.aioFbAuth.expiresAt = 0; }
+      if(!(await aioEnsureAuth())){ why = window.__cloudSyncError || why; continue; }
+      u = await syncGetChunk('users'); if(u === null) why = window.__cloudSyncError || why;
+    }
+    if(u === null) return revert(navigator.onLine === false ? 'No internet — please turn on mobile data / Wi-Fi and press Connect again' : 'Could not reach the shop cloud — press Connect again' + (why ? '\n(' + why + ')' : ''));
     if(u.missing || !u.items.length) return revert('Shop not found — please check the code with the owner');
     const h = await hashPin(pin);
     const user = u.items.find(x => x.pin === h && x.is_active !== false && !(x.role !== 'admin' && SYNC_SEED_STAFF_PINS.includes(x.pin) && ['Aslam Bhai','Bilal'].includes(x.name))); /* ہیلپ ڈیسک #150: صرف نمونے کے ملازم رد — مالک کا اپنا ملازم 1111 / 2222 کے ساتھ بھی جڑے */
@@ -34927,9 +34933,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0811SU188'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO189'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Login page video Share fixed: video is prepared first, then \'Share now\' shares instantly';
+  const UPDATE_NOTE = 'Join a shop: tries 3 times and shows the exact reason instead of \'No internet\'';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
