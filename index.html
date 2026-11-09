@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO190</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO191</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO190</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO191</span>
     </div>
   </div>
 
@@ -10832,7 +10832,7 @@ function refreshLoginLockoutUI(){
   }
 }
 
-async function login(){
+async function login(){ try{ userPauseTick(); }catch(e){}
   if(window._launchCheckPending === true) return;
   // ---------- AIO610TU027: Quick حالت میں PIN کے بغیر سیدھا اندر ----------
   if(document.getElementById('loginScreen').classList.contains('loginQuick')){
@@ -26007,13 +26007,14 @@ function renderUserList(){
     <div class="userCard">
       <div>
         <div class="uName">${u.name} <span class="statusDot ${u.is_active ? 'on':'off'}"></span></div>
-        <div class="uMeta">@${u.username} — ${u.is_active ? 'Active' : 'Inactive'}</div>
+        <div class="uMeta">@${u.username} — ${u.is_active ? 'Active' : (u.pauseUntil && u.pauseUntil > Date.now() ? '⏸️ Paused till ' + new Date(u.pauseUntil).toLocaleDateString('en-GB') : '⛔ Suspended')}</div>
       </div>
       <div class="userActions">
         <span class="roleTag ${u.role}">${u.role === 'admin' ? '👑 Admin' : '🧑‍💼 Salesman'}</span>
         <button class="btnResetPin" onclick="editUserName(${u.user_id})">📝 Edit Name</button>
         <button class="btnResetPin" onclick="setCustomUserPin(${u.user_id})">✏️ Set Custom PIN</button>
-        <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⏸️ Deactivate' : '▶️ Activate'}</button>
+        ${u.is_active && u.role !== 'admin' ? `<button class="btnToggleActive" onclick="pauseUser(${u.user_id})">⏸️ Pause (few days)</button>` : ''}
+        <button class="btnToggleActive" onclick="toggleUserActive(${u.user_id})">${u.is_active ? '⛔ Suspend' : '▶️ Resume'}</button>
         ${canDeleteUser(u) ? `<button class="btnToggleActive" style="background:#dc2626;color:#fff;border-color:#dc2626" onclick="deleteUser(${u.user_id})">🗑️ Delete</button>` : ''}
         <button class="btnResetPin" onclick="requestRoleChangeAuth(${u.user_id})">🔄 Change Role</button>
         ${u.role === 'salesman' ? `<button class="btnResetPin" onclick="openScreensModal(${u.user_id})">🖥️ Screens (${(u.screens||[]).length})</button>` : ''}
@@ -26093,10 +26094,22 @@ function deleteUser(userId){
 function toggleUserActive(userId){
   const u = usersData.find(x => x.user_id === userId);
   if(!u) return;
-  u.is_active = !u.is_active;
-  // TODO: یہاں users table میں UPDATE ہوگا
+  if(u.is_active && u.role === 'admin' && usersData.filter(x => x.role === 'admin' && x.is_active && x.user_id !== u.user_id).length < 1){ alert('This is the only owner — it cannot be suspended.'); return; }
+  if(u.is_active && !confirm(`⛔ Suspend ${u.name}?\n\nThey cannot log in (on any phone) until you tap ▶️ Resume.`)) return;
+  u.is_active = !u.is_active; delete u.pauseUntil;   /* AIO0911MO191 (#193): معطل / بحال — اب محفوظ اور سنک بھی (پہلے صرف اسکرین پر) */
+  persistAllData(); try{ if(typeof syncNow === 'function' && AppState.settings.syncOn) syncNow(); }catch(e){}
   renderUserList();
 }
+/* AIO0911MO191 (مالک کا حکم، #193): ⏸️ عارضی روک — چند دن، پھر خود بحال */
+function pauseUser(userId){
+  const u = usersData.find(x => x.user_id === userId); if(!u) return;
+  const d = parseInt((prompt(`⏸️ Pause ${u.name} for how many days? (1–60)\nThey cannot log in until then — it opens by itself.`, '1') || '').replace(/\D/g, ''), 10);
+  if(!(d >= 1 && d <= 60)) return;
+  u.is_active = false; u.pauseUntil = Date.now() + d * 864e5;
+  persistAllData(); try{ if(typeof syncNow === 'function' && AppState.settings.syncOn) syncNow(); }catch(e){}
+  renderUserList();
+}
+function userPauseTick(){ try{ let ch = false; (usersData || []).forEach(u => { if(!u.is_active && u.pauseUntil && Date.now() >= u.pauseUntil){ u.is_active = true; delete u.pauseUntil; ch = true; } }); if(ch) persistAllData(); }catch(e){} }
 
 // ---------- کسی یوزر کا Role بدلنا (Salesman ⇄ Admin) — صرف موجودہ لاگ ان Admin اپنا PIN دوبارہ ڈال کر ہی کر سکتا ہے۔
 // یہ بٹن صرف Admin کی اپنی User Management اسکرین پر نظر آتا ہے (جو خود admin-only ہے) —
@@ -29183,10 +29196,10 @@ function renderStaffDevicesCard(){
     </div>`).join('') : '<div class="settingsHint">No devices yet.</div>';
   el.innerHTML = `<h3>👥 Staff &amp; Devices</h3>
     <div class="mdStatus" style="color:${stCol};">${map[cloudSyncStatus] || ''}</div>
-    ${owner ? `<div class="settingsSubLabel" style="margin-top:0;">Shop Code — give this to your staff</div>
+    ${owner ? `<div class="mdSteps" style="margin-top:0">➕ <b>Add a staff phone:</b> ask your staff for their <b>AIO ID</b> (on their login screen) → 👤 Users → ➕ Add a staff phone → paste the ID → Save. Their phone connects by itself.</div>
+    <details class="mdMore" style="margin:6px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:800;color:#64748b">⚙️ More — Shop Code (not needed any more)</summary>
     <div class="mdCode"><b>${mdEsc(s.businessId)}</b></div>
-    <div class="mdRow2"><button type="button" class="mdBigBtn ghost" onclick="copyShopCode()">📋 Copy</button><button type="button" class="mdBigBtn ghost" onclick="shareShopCode()">📤 WhatsApp</button></div>
-    <div class="mdSteps">On the other phone: open the app → login screen → <b>🔗 Join a shop</b> → enter this code and the person's own PIN.</div>
+    <div class="mdRow2"><button type="button" class="mdBigBtn ghost" onclick="copyShopCode()">📋 Copy</button><button type="button" class="mdBigBtn ghost" onclick="shareShopCode()">📤 WhatsApp</button></div></details>
     <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; margin:8px 0;"><input type="checkbox" ${sh.staffApproval ? 'checked' : ''} onchange="setStaffApproval(this.checked)" style="width:18px; height:18px; margin:0;"> Staff bills need my approval first</label>
     <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:800; margin:8px 0;"><input type="checkbox" ${sh.staffSeeAllBills ? 'checked' : ''} onchange="setStaffSeeAllBills(this.checked)" style="width:18px; height:18px; margin:0;"> Show Bill History of all bills to staff</label>
     <button type="button" class="mdBigBtn" onclick="goTo('users')">👤 Add / manage staff &amp; their screens</button>`
@@ -34933,9 +34946,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO190'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO191'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Staff phone joins the easy way: AIO ID → owner adds it → phone connects by itself';
+  const UPDATE_NOTE = 'Staff: only AIO ID (old paste / shop code removed); Users: ⏸️ Pause, ⛔ Suspend, 🗑️ Delete';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35436,7 +35449,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 })();
 </script>
 
-<!-- ===== AIO0911MO190 / AIODR0911MO155 (مالک کا حکم، ہیلپ ڈیسک #193): ملازم کا فون جوڑنا بالکل سادہ —
+<!-- ===== AIO0911MO191 / AIODR0911MO155 (مالک کا حکم، ہیلپ ڈیسک #193): ملازم کا فون جوڑنا بالکل سادہ —
      ہر فون اپنا اکاؤنٹ (نام، موبائل، Gmail) بنا کر پکی «AIO ID» (AIO48213) لیتا ہے؛ ملازم یہ ID مالک کو بتاتا ہے؛
      مالک «➕ Add a staff phone» میں صرف ID لکھتا ہے (نام / موبائل خود، PIN خود)؛ ملازم کا فون خود دیکھتا ہے کہ کسی دکان نے
      شامل کیا اور ایک دبانے سے جڑ جاتا ہے (کوئی کوڈ / پیغام / وقت کی حد نہیں)۔ سرور: aio-pos-verify `/aioid` (reg / me / look / invite / done / del) ===== -->
@@ -35457,6 +35470,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 .ivAio{display:flex;gap:6px;align-items:stretch}.ivAio input{flex:1;text-transform:uppercase;letter-spacing:2px;font-weight:900;text-align:center;direction:ltr}
 .ivAio button{border:0;border-radius:12px;padding:0 14px;font-weight:900;background:#0f766e;color:#fff;cursor:pointer;font-family:inherit}
 .ivAioOk{font-size:13px;font-weight:800;margin:4px 0 2px;min-height:16px}
+/* AIO0911MO191 (مالک کا حکم): پرانے راستے لاگ اِن صفحے سے ہٹائے — صرف AIO ID */
+#loginInvBtn,#loginJoinShopBtn{display:none !important}
+#aioIdCard.on{background:#dcfce7;border-color:#22c55e;color:#14532d;font-size:15px;font-weight:800}
 </style>
 <script>
 (function(){
@@ -35521,14 +35537,22 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   /* ---- 2) لاگ اِن صفحے پر اپنی ID + خودکار جڑنا ---- */
   function paintCard(){
     try{
-      const b = document.getElementById('loginJoinShopBtn'); if(!b) return;
+      const en = document.getElementById('loginEnterBtn'); if(!en) return;
       let c = document.getElementById('aioIdCard');
-      if(!c){ c = document.createElement('div'); c.id = 'aioIdCard'; b.insertAdjacentElement('afterend', c); }
-      const m = me(), joined = AppState.settings && AppState.settings.syncJoined;
-      if(!m.id){ c.innerHTML = `🆔 <b>Join a shop the easy way</b><div class="row"><button type="button" onclick="aioIdRegOpen()">🆔 Create my AIO ID</button></div>`; return; }
+      if(!c){ c = document.createElement('div'); c.id = 'aioIdCard'; }
+      const m = me(), s = AppState.settings || {}, joined = !!s.syncJoined;
+      if(joined){
+        let shop = ''; try{ shop = (shopInfo() || {}).businessName || ''; }catch(e){} shop = shop || s.businessName || 'your shop';
+        c.className = 'on'; c.innerHTML = `✅ This mobile is connected with <b>${E(shop)}</b><div class="st">Tap <b>Enter</b> and type your PIN${m.id ? ' • 🆔 ' + E(m.id) : ''}</div>`;
+        if(c.nextElementSibling !== en) en.insertAdjacentElement('beforebegin', c);
+        return;
+      }
+      c.className = '';
+      if(c.previousElementSibling !== en) en.insertAdjacentElement('afterend', c);
+      if(!m.id){ c.innerHTML = `🆔 <b>Work in a shop? Connect this phone</b><div class="row"><button type="button" onclick="aioIdRegOpen()">🆔 Create my AIO ID</button></div>`; return; }
       c.innerHTML = `🆔 Your AIO ID: <b class="id">${E(m.id)}</b>
         <div class="row"><button type="button" onclick="aioIdCopy()">📋 Copy</button><button type="button" class="g" onclick="aioIdShare()">📤 Send to owner</button></div>
-        <div class="st" id="aioIdSt">${joined ? '✅ This phone is connected to a shop' : '⏳ Give this ID to your shop owner — this phone connects by itself when they add you'}</div>`;
+        <div class="st" id="aioIdSt">⏳ Give this ID to your shop owner — this phone connects by itself when they add you</div>`;
     }catch(e){}
   }
   window.aioIdPaint = paintCard;
@@ -35561,6 +35585,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   };
   window.addEventListener('load', () => setTimeout(() => {
     try{
+      try{ userPauseTick(); }catch(e){}
       const m = me(), s = AppState.settings || {};
       if(m.pendBiz && s.syncJoined && s.businessId === m.pendBiz && m.id){ call({op:'done', id: m.id, dev: dev()}).catch(() => {}); delete m.pendBiz; save(m); }
       paintCard();
@@ -35581,12 +35606,13 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       const bx = document.getElementById('mdInvBox'); if(!bx || userId) return r;
       const hint = bx.querySelector('.settingsHint'); if(hint) hint.innerHTML = 'Ask your staff for their <b>AIO ID</b> (on their login screen) and write it here — their name and mobile fill in, and <b>their phone connects by itself</b>. No message needed.';
       const d = document.createElement('div');
-      d.innerHTML = `<label class="mdLbl">🆔 Staff's AIO ID</label><div class="ivAio"><input id="ivAioId" class="mdInput" maxlength="10" placeholder="AIO12345" oninput="aioIvFind(true)"><button type="button" onclick="aioIvFind()">🔍 Find</button></div><div class="ivAioOk" id="ivAioOk"></div>`;
+      d.innerHTML = `<label class="mdLbl">🆔 Staff's AIO ID</label><div class="ivAio"><input id="ivAioId" class="mdInput" maxlength="10" placeholder="AIO12345" oninput="aioIvFind(true)"><button type="button" onclick="aioIvPaste()">📋 Paste</button></div><div class="ivAioOk" id="ivAioOk"></div>`;
       const code = bx.querySelector('.ivCode'); (code || hint).insertAdjacentElement('afterend', d);
       setTimeout(() => { const i = document.getElementById('ivAioId'); if(i) i.focus(); }, 200);
     }catch(e){}
     return r;
   };
+  window.aioIvPaste = async function(){ const i = document.getElementById('ivAioId'); try{ const t = await navigator.clipboard.readText(); if(t){ i.value = t.trim(); return aioIvFind(); } }catch(e){} i.focus(); const ok = document.getElementById('ivAioOk'); if(ok){ ok.style.color = '#64748b'; ok.textContent = 'Long-press the box and choose «Paste»'; } };
   window.aioIvFind = async function(quiet){
     const i = document.getElementById('ivAioId'), ok = document.getElementById('ivAioOk'); if(!i || !ok) return;
     const id = normId(i.value); window._ivAioId = '';
@@ -35609,6 +35635,11 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const nm = userId ? ((usersData.find(x => x.user_id === userId) || {}).name || '') : ((document.getElementById('ivName') || {}).value || '').trim();
     const role = userId ? ((usersData.find(x => x.user_id === userId) || {}).role || 'salesman') : ((document.getElementById('ivRole') || {}).value || 'salesman');
     const before = usersData.length;
+    if(!userId){   /* AIO0911MO191: پیکج کی حد — بنے ہوئے ملازم بھی گنے جائیں (صرف جڑے فون نہیں) */
+      try{ const max = planMaxDevices(), pins = AppState.settings.staffPins || {};
+        const made = usersData.filter(u => u.is_active !== false && pins[u.user_id] && !(typeof SYNC_SEED_STAFF_PINS !== 'undefined' && SYNC_SEED_STAFF_PINS.includes(u.pin))).length;
+        if(max && max < 99 && 1 + made >= max){ const e = document.getElementById('ivErr'); if(e){ e.style.color = ''; e.textContent = `Your package allows ${max} phone${max > 1 ? 's' : ''} (owner included) — ${made} staff already added. Suspend / delete one in 👤 Users, or upgrade the package.`; } return; } }catch(e){}
+    }
     const r = await _save.apply(this, arguments);
     try{
       const added = userId || usersData.length > before;
