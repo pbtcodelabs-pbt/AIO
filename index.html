@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO197</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO198</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO197</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO198</span>
     </div>
   </div>
 
@@ -7695,7 +7695,8 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
 async function syncNow(){
   if(!aioMultiOn()) return;
   if(storeIsHydrating()){ setTimeout(() => syncNow(), 500); return; }
-  if(!syncForeignDone && !syncBusy){ syncForeignDone = true; try{ await syncDropForeign(); }catch(e){} }   /* AIO0911MO196 */ // پہلے فون کا ڈیٹا IndexedDB سے واپس آ جائے
+  if(!syncForeignDone && !syncBusy){ syncForeignDone = true; try{ await syncDropForeign(); }catch(e){} }   /* AIO0911MO196 */
+  try{ syncPushShopInfo(); }catch(e){}   /* AIO0911MO198: مالک کی بل / پرنٹ سیٹنگ بدلے تو ملازم تک */ // پہلے فون کا ڈیٹا IndexedDB سے واپس آ جائے
   if(syncBusy){ syncAgain = true; return; }
   syncBusy = true;
   const touched = new Set();
@@ -7757,6 +7758,7 @@ function syncAfterApply(touched){
   try{ persistAllData(); }catch(e){}
   touched.forEach(t => { try{ applyCloudDocTypeUI(t); }catch(e){} });
   if(touched.has('devices')) syncCheckStillMember();
+  if(touched.has('shopinfo')){ try{ shopCfgApply(); }catch(e){} }
   if(touched.has('products')){ try{ syncRepriceCart(); }catch(e){} }
   if(touched.has('cashbox')){ try{ renderKpiCards(); }catch(e){} try{ const h = document.getElementById('hlCash'); if(h) h.textContent = 'Rs. ' + financeDummy.cashInHand.toLocaleString(); }catch(e){} }
   if(touched.has('products') || touched.has('invoices')){ try{ renderCart(); }catch(e){} }
@@ -7827,11 +7829,25 @@ function syncCheckStillMember(){
   if(syncMyDevice()) AppState.settings.syncWasListed = true;
 }
 // ---------- مالک کی سبسکرپشن اور سیٹنگ — جڑے ہوئے فون انہی پر چلتے ہیں ----------
+/* AIO0911MO198 (ہیلپ ڈیسک #198 / #200، Ali And Company): ملازم کے فون پر دکان کا نام، نمبر، پتہ، لوگو، بل / پرنٹ کی سیٹنگ — مالک کے فون سے (shopinfo.cfg) */
+const SHOP_CFG_RX = /^(business(Name|Phone|Address|Email|Logo)|paperWidth|paymentAccounts|tax(Enabled|Percent)|wholesaleEnabled|trackInventory|receiptColorId|print[A-Z]\w*|invoice(PrintStyle|Style|Orientation)|billFooterText|productCardName(Size|Weight|Color|Bg|BgIntensity))$/;
+function shopCfgPick(s){ const o = {}; Object.keys(s || {}).forEach(k => { if(!SHOP_CFG_RX.test(k)) return; const v = s[k]; if(k === 'businessLogo' && typeof v === 'string' && v.length > 300000) return; o[k] = v; }); return o; }
+function shopCfgApply(){
+  try{
+    if(!AppState.settings.syncJoined) return false;
+    const cfg = (shopInfo() || {}).cfg; if(!cfg || typeof cfg !== 'object') return false;
+    const s = AppState.settings; let ch = false;
+    Object.keys(cfg).forEach(k => { if(!SHOP_CFG_RX.test(k)) return; if(JSON.stringify(s[k]) !== JSON.stringify(cfg[k])){ s[k] = cfg[k]; ch = true; } });
+    if(ch){ saveToStorage('settings', s); try{ const a = document.querySelector('.screen.active'); if(a && AppState.currentUser) goTo(a.id.replace('screen-', '')); }catch(e){} }
+    return ch;
+  }catch(e){ return false; }
+}
+setTimeout(shopCfgApply, 2500);
 function syncPushShopInfo(){
   if(!aioMultiOn() || AppState.settings.syncJoined) return;
   const s = AppState.settings, cur = shopInfo();
   const rec = Object.assign({}, cur, {id: 'shop', businessName: s.businessName || '', subscriptionExpiry: s.subscriptionExpiry || '', lifetime: !!s.lifetimeLicense,
-    staffApproval: cur.staffApproval === true, maxDevices: planMaxDevices()});
+    staffApproval: cur.staffApproval === true, maxDevices: planMaxDevices(), cfg: shopCfgPick(s)});
   if(syncEq(rec, cur)) return;
   shopInfoData = [rec]; saveToStorage('syncShopInfo', shopInfoData); scheduleSync(800);
 }
@@ -8702,6 +8718,7 @@ async function backupToGoogleDrive(){
             AppState.settings.gdriveAccountEmail = accountEmail;
             persistAllData();
           }
+          try{ renderLastBackupStatus(); }catch(e){}
         }
       }catch(e){ /* اگر ای میل نہ ملے تو بھی بیک اپ کامیاب ہی شمار ہوگا، صرف پیغام میں ای میل نہیں دکھے گا */ }
 
@@ -9592,6 +9609,7 @@ function getAllowedNavItems(){
   return NAV_ITEMS.filter(it => {
     if(it.mu && !AIO_MULTIUSER_ENABLED) return false;
     if(role === 'admin' || it.always) return true;
+    if(!it.screen && it.action){ const ak = {openReportCenterModal:'reports', openReplyTemplatesModal:'replytemplates'}[it.action]; return !!ak && allowed.includes(ak); }   /* AIO0911MO198 (#199) */
     return !!it.screen && allowed.includes(it.screen);
   });
 }
@@ -26016,6 +26034,13 @@ const ASSIGNABLE_SCREENS = [
   {key:'billsettings', label:'🖨️ Bill & Print Settings'},
   {key:'settings', label:'⚙️ Settings'},
   {key:'users', label:'🔑 Users'},
+  /* AIO0911MO198 (ہیلپ ڈیسک #199، Ali And Company): ہوم کی باقی ٹائلیں بھی ملازم کو دی جا سکیں */
+  {key:'advanceorders', label:'📝 Advance Orders'},
+  {key:'categories', label:'🏷️ Categories'},
+  {key:'payments', label:'💳 Payments Record'},
+  {key:'trends', label:'📈 Trend Analysis'},
+  {key:'reports', label:'🖨️ Reports'},
+  {key:'replytemplates', label:'📋 Reply Templates'},
 ];
 
 // ---------- Dummy Approval Requests (بعد میں Salesman خود Billing اسکرین سے یہ بھیجے گا) ----------
@@ -27410,6 +27435,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
     estimatedHeight += 24 + Math.round(34*rowScale) + ((summary.rows.length + 1) * Math.round(28*rowScale)) + 8 + 40; // Payment Summary باکس (متحرک اونچائی)
   }
   estimatedHeight += Math.round(50*fscale); // آخری خالی جگہ (دستخط والی لائن ہٹا دی گئی)
+  if(AppState.settings.printShowSalesman && invoice.sold_by) estimatedHeight += Math.round(24*fscale);   /* AIO0911MO198 (#201): A4 پر Sold by */
   estimatedHeight += Math.round(50*fscale); // فوٹر
 
   canvas.width = pxWidth;
@@ -27721,6 +27747,7 @@ async function renderInvoiceToA4Canvas(invoice, highlightMatchKey = null){
   ctx.fillStyle = '#1a1a1a';
   ctx.textAlign = 'center';
   ctx.fillText('Thank you for your business!', pxWidth/2, y);
+  if(AppState.settings.printShowSalesman && invoice.sold_by){ y += Math.round(22*fscale); ctx.font = F('13px'); ctx.fillStyle = '#334155'; ctx.fillText('Sold by: ' + invoice.sold_by, pxWidth/2, y); }   /* AIO0911MO198 (#201) */
 }
 
 // ---------- Invoice Preview Modal کھولنا/بند کرنا ----------
@@ -29199,6 +29226,9 @@ function renderLastBackupStatus(){
   const dateStr = d.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
   const timeStr = d.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
   el.innerHTML = `✅ Last backup: <b>${fileName}</b><br>${dateStr} at ${timeStr} — look for this exact file in Downloads to restore.`;
+  /* AIO0911MO198 (ہیلپ ڈیسک #203، Ali And Company): آخری Google Drive بیک اپ کس Gmail میں گیا */
+  try{ const ga = AppState.settings.lastGDriveBackupAt, gm = AppState.settings.gdriveAccountEmail;
+    if(ga){ const g = new Date(ga); el.innerHTML += `<br>☁️ Google Drive backup: ${g.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})} at ${g.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})}` + (gm ? ` — Gmail: <b>${String(gm).replace(/[<>&]/g, '')}</b>` : ' — Gmail not known yet (shows after the next Drive backup)'); } }catch(e){}
   el.style.background = '#eef2ff';
   el.style.color = 'var(--primary-dark)';
 }
@@ -34984,9 +35014,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO197'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO198'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'One font everywhere (Arial Narrow) and one fixed theme colour — font / colour pickers removed';
+  const UPDATE_NOTE = 'Staff phone gets shop name, number and bill settings; more screens for staff; Sold by on A4; Drive backup Gmail shown';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
