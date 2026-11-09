@@ -619,20 +619,26 @@ export class McsStats {
       if (!me) return Response.json({ ok: false, reason: "login" });
       const PBT = "PBT Code Labs";
       const acc = (th) => {   /* r = پڑھ سکے، w = لکھ سکے، side = اپنی طرف کا who */
-        th = String(th || ""); if (!th || th.startsWith("CD-")) return null;
+        th = String(th || ""); if (!th) return null;
+        if (th.startsWith("CD-")) {   /* MCS0911MO253: ڈویلپر ↔ کو-ڈویلپر — صرف یہی دو (ایجنٹ / صارف کبھی نہیں) */
+          if (me.by === "D") return { r: 1, w: 1, side: "dev", cd: 1 };
+          if (me.by === "C:" + b.phone && th === "CD-" + b.phone) return { r: 1, w: 1, side: "agent", cd: 1 };
+          return null; }
         if (me.staff) { if (th.startsWith("B-")) return { r: 1, w: 0, side: "dev" }; return { r: 1, w: 1, side: "dev" }; }
         if (me.agent) { if (th === me.agent) return { r: 1, w: 1, side: "agent" }; if (th.startsWith("B-" + me.agent + "~") && linked(me.agent, th.slice(3 + me.agent.length))) return { r: 1, w: 1, side: "agent" }; return null; }
         if (me.uid) { if (th === "U-" + me.uid) return { r: 1, w: 1, side: "user" }; const m = /^B-(.+)~(.+)$/.exec(th); if (m && m[2] === me.uid && linked(m[1], me.uid)) return { r: 1, w: 1, side: "user" }; return null; }
         return null;
       };
-      const rdKey = (th) => me.staff ? "rd_" + th : "ru_" + (me.agent || me.uid) + "_" + th;
+      const rdKey = (th) => me.staff && !(th.startsWith("CD-") && me.by !== "D") ? "rd_" + th : "ru_" + (me.agent || me.uid || me.by) + "_" + th;
       const sumOf = (th, side) => {
         const lm = this.sql.exec("SELECT who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 1", th).toArray()[0] || null;
         const rd = parseInt(cfg(rdKey(th)) || "0", 10);
         const nw = this.sql.exec("SELECT COUNT(*) AS n FROM agmsg WHERE code = ? AND who != ? AND ts > ?", th, side, rd).toArray()[0].n;
         return { last: lm ? lm.ts : 0, lt: lm ? String(lm.text || (lm.img ? "🖼️" : lm.audio ? "🎤" : "")).slice(0, 80) : "", mine: lm ? lm.who === side : false, nw };
       };
+      const cdName = (ph) => (this.sql.exec("SELECT name FROM codev WHERE phone = ?", ph).toArray()[0] || {}).name || "";
       const label = (th) => {   /* عملے کے لیے دھاگے کا نام */
+        if (th.startsWith("CD-")) return me.by === "D" ? { k: "cd", title: "👥 " + (cdName(th.slice(3)) || "کو-ڈویلپر"), sub: "کو-ڈویلپر · 0" + d10(th.slice(3)) } : { k: "cd", title: "👨‍💻 ڈویلپر", sub: "صرف آپ اور ڈویلپر" };
         if (th.startsWith("U-")) { const u = getU(th.slice(2)); return { k: "user", title: u ? u.name : th.slice(2), sub: u ? "0" + d10(u.mobile) + " · " + u.id : "" }; }
         if (th.startsWith("B-")) { const m = /^B-(.+)~(.+)$/.exec(th) || []; const a = agents().find((x) => x.code === m[1]); const u = getU(m[2] || ""); return { k: "biz", title: "🤝 " + (a ? a.name : m[1]) + " ↔ " + (u ? u.name : ""), sub: (m[1] || "") + " · " + (u ? "0" + d10(u.mobile) : "") }; }
         const a = agents().find((x) => x.code === th) || (() => { for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === th) return x; } return null; })();
@@ -642,6 +648,8 @@ export class McsStats {
         let L = [];
         if (me.staff) {
           L = this.sql.exec("SELECT code, MAX(ts) AS last FROM agmsg GROUP BY code ORDER BY last DESC LIMIT 400").toArray().filter((t) => !String(t.code).startsWith("CD-")).map((t) => Object.assign({ th: t.code }, label(t.code), sumOf(t.code, "dev")));
+          if (me.by === "D") for (const r of this.sql.exec("SELECT phone FROM codev").toArray()) { const th = "CD-" + r.phone; L.push(Object.assign({ th }, label(th), sumOf(th, "dev"))); }
+          else { const th = "CD-" + b.phone; L.push(Object.assign({ th }, label(th), sumOf(th, "agent"), { pin: 1 })); }
         } else if (me.agent) {
           L.push(Object.assign({ th: me.agent, k: "pbt", title: PBT, sub: "سوال، مسئلہ، مدد" }, sumOf(me.agent, "agent")));
           const seen = new Set();
@@ -653,7 +661,7 @@ export class McsStats {
           const ph = d10(me.u.mobile), done = new Set();
           if (ph) for (const r of this.sql.exec("SELECT code FROM agref WHERE rk LIKE ?", "p" + ph + "%").toArray()) { if (done.has(r.code)) continue; done.add(r.code); const a = agents().find((x) => x.code === r.code); if (!a) continue; const th = "B-" + a.code + "~" + me.uid; L.push(Object.assign({ th, k: "agent", title: "🤝 " + a.name, sub: "آپ کا MCS ایجنٹ" }, sumOf(th, "user"))); }
         }
-        L.sort((x, y) => (x.k === "pbt" ? -1 : 0) - (y.k === "pbt" ? -1 : 0) || (y.last || 0) - (x.last || 0));
+        L.sort((x, y) => (x.k === "pbt" || x.pin ? -1 : 0) - (y.k === "pbt" || y.pin ? -1 : 0) || (y.last || 0) - (x.last || 0));
         return Response.json({ ok: true, staff: !!me.staff, list: L, nw: L.reduce((n, x) => n + (x.nw || 0), 0) });
       }
       const A = acc(b.thr); if (!A) return Response.json({ ok: false, reason: "no_access" });
@@ -664,8 +672,8 @@ export class McsStats {
       }
       setCfg(rdKey(b.thr), now);
       const rows = this.sql.exec("SELECT id, who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
-      const nameOf = (who) => who === "dev" ? PBT : who === "agent" ? "🤝 MCS ایجنٹ" : "صارف";
-      return Response.json({ ok: true, w: A.w, title: me.staff ? label(b.thr).title : null, msgs: rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), text: m.text || "", img: m.img || "", audio: m.audio || "", ts: m.ts })) });
+      const nameOf = (who) => A.cd ? (who === "dev" ? "👨‍💻 ڈویلپر" : "👥 " + (cdName(String(b.thr).slice(3)) || "کو-ڈویلپر")) : who === "dev" ? PBT : who === "agent" ? "🤝 MCS ایجنٹ" : "صارف";
+      return Response.json({ ok: true, w: A.w, cd: !!A.cd, title: me.staff ? label(b.thr).title : null, msgs: rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), text: m.text || "", img: m.img || "", audio: m.audio || "", ts: m.ts })) });
     }
     if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
       const b = await request.json();
