@@ -620,6 +620,8 @@ export class McsStats {
          دھاگے (agmsg.code): U-<صارف ID> · <ایجنٹ کوڈ> (پرانا پورٹل والا) · B-<ایجنٹ کوڈ>~<صارف ID>؛ CD-… (کو-ڈویلپر ↔ ڈویلپر) یہاں نہیں */
       const b = await request.json(), now = Date.now();
       try { this.sql.exec("ALTER TABLE agmsg ADD COLUMN byw TEXT"); } catch (e) {}
+      try { this.sql.exec("ALTER TABLE agmsg ADD COLUMN file TEXT"); } catch (e) {}
+      try { this.sql.exec("ALTER TABLE agmsg ADD COLUMN fname TEXT"); } catch (e) {}
       const cfg = (k) => (this.sql.exec("SELECT v FROM agcfg WHERE k = ?", k).toArray()[0] || {}).v;
       const setCfg = (k, v) => this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", k, String(v));
       const getU = (id) => { const r = this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", id).toArray()[0]; if (!r) return null; const u = JSON.parse(r.data); return u.del ? null : u; };
@@ -663,7 +665,7 @@ export class McsStats {
         const lm = this.sql.exec("SELECT who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 1", th).toArray()[0] || null;
         const rd = parseInt(cfg(rdKey(th)) || "0", 10);
         const nw = this.sql.exec("SELECT COUNT(*) AS n FROM agmsg WHERE code = ? AND who != ? AND ts > ?", th, side, rd).toArray()[0].n;
-        return { last: lm ? lm.ts : 0, lt: lm ? String(lm.text || (lm.img ? "🖼️" : lm.audio ? "🎤" : "")).slice(0, 80) : "", mine: lm ? lm.who === side : false, nw };
+        return { last: lm ? lm.ts : 0, lt: lm ? String(lm.text || (lm.img ? "🖼️" : lm.audio ? "🎤" : "📎")).slice(0, 80) : "", mine: lm ? lm.who === side : false, nw };
       };
       const cdName = (ph) => (this.sql.exec("SELECT name FROM codev WHERE phone = ?", ph).toArray()[0] || {}).name || "";
       const label = (th) => {   /* عملے کے لیے دھاگے کا نام */
@@ -700,14 +702,27 @@ export class McsStats {
           else x.av = ""; }
         return Response.json({ ok: true, staff: !!me.staff, list: L, nw: L.reduce((n, x) => n + (x.nw || 0), 0), avs: avOut(L.map((x) => x.av)) });
       }
+      if (b.op === "find") {   /* MCS0911MO255 (ہیلپ ڈیسک #168): ➕ نئی چیٹ — عملہ کسی بھی صارف (نام / موبائل / ID / کاروبار کا نمبر) یا ایجنٹ کو ڈھونڈ کر چیٹ شروع کرے */
+        if (!me.staff) return Response.json({ ok: false, reason: "no_access" });
+        const q = String(b.text || "").trim().toLowerCase(), qd = q.replace(/\D/g, ""), out = [];
+        for (const a of agents()) { const hay = [a.name, a.code, a.phone, a.city].join(" ").toLowerCase(); if (!q || hay.includes(q) || (qd.length >= 4 && String(a.phone || "").includes(qd.slice(-10)))) out.push({ th: a.code, k: "agent", title: "🤝 " + a.name, sub: a.code + " · 0" + d10(a.phone) + (a.city ? " · " + a.city : ""), av: "A:" + a.code }); }
+        const phones = String(b.phones || "").split(",").map((x) => x.replace(/\D/g, "").slice(-10)).filter((x) => x.length === 10).slice(0, 40);
+        const seen = new Set();
+        const addU = (u, why) => { if (!u || u.del || seen.has(u.id)) return; seen.add(u.id); out.push({ th: "U-" + u.id, k: "user", title: u.name || u.id, sub: (why ? why + " · " : "") + "0" + d10(u.mobile) + " · " + u.id, av: "" }); };
+        for (const ph of phones) { const id = uidByPh(ph); if (id) addU(getU(id), (b.pn || {})[ph] || ""); }
+        if (q) { for (const r of this.sql.exec("SELECT data FROM mcsuser ORDER BY ts DESC LIMIT 3000").toArray()) { if (out.length >= 60) break; let u; try { u = JSON.parse(r.data); } catch (e) { continue; }
+            const hay = [u.name, u.id, u.email].join(" ").toLowerCase(); if (hay.includes(q) || (qd.length >= 4 && String(u.mobile || "").includes(qd.length > 10 ? qd.slice(-10) : qd))) addU(u, ""); } }
+        else for (const r of this.sql.exec("SELECT data FROM mcsuser ORDER BY ts DESC LIMIT 25").toArray()) { try { addU(JSON.parse(r.data), ""); } catch (e) {} }
+        return Response.json({ ok: true, list: out.slice(0, 80), avs: avOut(out.map((x) => x.av)) });
+      }
       const A = acc(b.thr); if (!A) return Response.json({ ok: false, reason: "no_access" });
       if (b.op === "send") {
         if (!A.w) return Response.json({ ok: false, reason: "read_only" });
-        if (!(b.text || b.img || b.audio)) return Response.json({ ok: false, reason: "empty" });
-        this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts, byw) VALUES (?, ?, ?, ?, ?, ?, ?)", b.thr, A.side, String(b.text || "").slice(0, 2000), String(b.img || ""), String(b.audio || ""), now, me.by || me.agent || me.uid || "");
+        if (!(b.text || b.img || b.audio || b.file)) return Response.json({ ok: false, reason: "empty" });
+        this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts, byw, file, fname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", b.thr, A.side, String(b.text || "").slice(0, 2000), String(b.img || ""), String(b.audio || ""), now, me.by || me.agent || me.uid || "", String(b.file || ""), String(b.fname || "").slice(0, 120));
       }
       setCfg(rdKey(b.thr), now);
-      const rows = this.sql.exec("SELECT id, who, text, img, audio, ts, byw FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
+      const rows = this.sql.exec("SELECT id, who, text, img, audio, ts, byw, file, fname FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
       const th0 = String(b.thr);
       const avOf = (m) => {
         if (me.uid) return "";   /* عام صارف: کسی کی تصویر نہیں */
@@ -716,7 +731,7 @@ export class McsStats {
         if (m.who === "dev") return me.agent ? "D" : (m.byw && /^(D|C:\d+)$/.test(m.byw) ? m.byw : "D");
         return ""; };
       const nameOf = (who) => A.cd ? (who === "dev" ? "👨‍💻 ڈویلپر" : "👥 " + (cdName(String(b.thr).slice(3)) || "کو-ڈویلپر")) : who === "dev" ? PBT : who === "agent" ? "🤝 MCS ایجنٹ" : "صارف";
-      const out = rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), av: avOf(m), text: m.text || "", img: m.img || "", audio: m.audio || "", ts: m.ts }));
+      const out = rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), av: avOf(m), text: m.text || "", img: m.img || "", audio: m.audio || "", file: m.file || "", fname: m.fname || "", ts: m.ts }));
       return Response.json({ ok: true, w: A.w, cd: !!A.cd, title: me.staff ? label(b.thr).title : null, msgs: out, avs: avOut(out.map((m) => m.mine ? "" : m.av)) });
     }
     if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
@@ -1169,10 +1184,10 @@ async function handleAgent(request, env, path) {
   }
   if (path === "/mcschat") {   /* MCS0911MO251: 💬 My Chats */
     const as = String(b.as || ""); if (!["user", "agent", "cd", "dev"].includes(as)) return reply({ ok: false, reason: "login" });
-    const op = String(b.op || ""); if (!["list", "thread", "send", "av"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const op = String(b.op || ""); if (!["list", "thread", "send", "av", "find"].includes(op)) return reply({ error: "bad_op" }, 400);
     const admin = as === "dev" ? await verifyFirebaseAdmin(request) : false; if (as === "dev" && !admin) return reply({ ok: false, reason: "login" });
     const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
-    return fwd("/mc_chat", { as, op, admin: !!admin, phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, op === "av" ? 80000 : 700000), audio: media(b.audio, 900000) });
+    return fwd("/mc_chat", { as, op, admin: !!admin, phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, op === "av" ? 80000 : 700000), audio: media(b.audio, 900000), file: (() => { const v = String(b.file || ""); return /^data:[a-z]+\/[a-z0-9.+-]+;base64,/i.test(v) && v.length <= 950000 ? v : ""; })(), fname: S(b.fname, 120), phones: S(b.phones, 600), pn: (b.pn && typeof b.pn === "object") ? Object.fromEntries(Object.entries(b.pn).slice(0, 40).map(([k, v]) => [String(k).replace(/\D/g, "").slice(-10), S(v, 60)])) : {} });
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
