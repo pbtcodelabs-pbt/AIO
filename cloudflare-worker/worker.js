@@ -342,7 +342,7 @@ async function handleRates(ctx, debug) {
 /* ===== MCS: کالوں / واٹس ایپ / میسج کی گنتی — Durable Object (SQLite)، ہر دن ہر دکان (فون نمبر) کی گنتی ===== */
 const STAT_KINDS = ["call", "wa", "sms", "share", "open", "ad", "view"];   /* view = پروفائل دیکھی گئی */
 /* MCS0511TH142 (مالک کا حکم): ایجنٹ کا ریفرل کوڈ = کاروبار کی قسم کے دو حروف + ترتیب وار نمبر (MS-001) — ہر قسم کا الگ، کبھی دوہرا نہیں */
-const AG_ABBR = { medicalStore: "MS", homeopathic: "HM", testingLab: "TL", plumberElectrician: "PE", tuitionTeacher: "TT", groceryStore: "GS", clothesShop: "CS", mobileElectronics: "ME", hardwareStore: "HW", bakery: "BK", jewelryShop: "JS", furnitureShop: "FS", autoParts: "AP", beautyParlor: "BP", restaurant: "RS", otherShop: "OS", doctor: "DR", emergencyNumbers: "EN", govOffices: "GO" };
+const AG_ABBR = { medicalStore: "MS", homeopathic: "HM", testingLab: "TL", plumberElectrician: "PE", tuitionTeacher: "TT", groceryStore: "GS", clothesShop: "CS", mobileElectronics: "ME", hardwareStore: "HW", bakery: "BK", jewelryShop: "JS", furnitureShop: "FS", autoParts: "AP", beautyParlor: "BP", restaurant: "RS", otherShop: "OS", doctor: "DR", emergencyNumbers: "EN", govOffices: "GO", mcsAgent: "AG" };   /* MCS0911MO262: «MCS Agent» کیٹگری (صرف ایجنٹ) = AG-001 */
 function agCatTag(c) { let h = 0; for (let i = 0; i < c.length; i++) h = (h * 31 + c.charCodeAt(i)) >>> 0; return h.toString(36).slice(0, 7); }   /* ایپ کے pfCatTag جیسا */
 const AG_TAG = Object.fromEntries(Object.keys(AG_ABBR).map((k) => [agCatTag(k), AG_ABBR[k]]));
 function agAbbrOfRk(rk) { return AG_TAG[String(rk || "").split("_")[1] || ""] || "BZ"; }   /* نئی (ایڈمن کی بنائی) قسم = BZ */
