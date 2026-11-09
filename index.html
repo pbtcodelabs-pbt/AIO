@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO193</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO194</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO193</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO194</span>
     </div>
   </div>
 
@@ -34946,9 +34946,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO193'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO194'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Login: shop name shown big — «This mobile is connected with 🏪 Ali & Company»; App version at the bottom';
+  const UPDATE_NOTE = '«+ Add New User» asks for the staff AIO ID; AIO ID creation retries on weak internet';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35354,7 +35354,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   /* ---- مالک کے Staff & Devices کارڈ میں ملازموں کی فہرست ---- */
   window.mdStaffListHtml = function(){
     const L = usersData.filter(u => u.is_active !== false && u.role === 'salesman' || (u.role === 'admin' && myPins()[u.user_id]));
-    return `<button type="button" class="mdBigBtn" style="background:linear-gradient(135deg,#16a34a,#0f766e)" onclick="mdInvOpen()">➕ Add a staff phone — ready message</button>`
+    return `<button type="button" class="mdBigBtn" style="background:linear-gradient(135deg,#16a34a,#0f766e)" onclick="mdInvOpen()">➕ Add staff — paste AIO ID</button>`
       + (L.length ? `<div class="settingsSubLabel">Staff (${L.length})</div>` + L.map(u => `<div class="mdStaffRow"><span class="t">${u.role === 'admin' ? '👑' : '🧑‍💼'} ${esc(u.name)}<small>${u.mobile ? '📱 ' + esc(u.mobile) + ' • ' : ''}${myPins()[u.user_id] ? '🔑 PIN <b style="letter-spacing:2px;color:#0f766e">' + esc(myPins()[u.user_id]) + '</b>' : '🔑 PIN not known yet'}</small></span>${myPins()[u.user_id] ? `<button type="button" onclick="mdInvShow(${u.user_id})">📨 Message</button>` : ''}<button type="button" onclick="mdInvOpen(${u.user_id})">✏️ PIN</button></div>`).join('') : '');
   };
   const _r = window.renderStaffDevicesCard;
@@ -35381,9 +35381,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   function paintUserPins(){ try{ if(!isOwnerDev()) return; const w = document.getElementById('userListWrap'); if(!w) return; const cards = w.querySelectorAll('.userCard');
     usersData.forEach((u, i) => { const c = cards[i], p = myPins()[u.user_id]; if(!c || u.role === 'admin' || c.querySelector('.mdPinTag')) return; const d = document.createElement('div'); d.className = 'mdPinTag'; d.style.cssText = 'font-size:12.5px;font-weight:800;color:#0f766e;margin-top:3px'; d.textContent = p ? '🔑 PIN: ' + p : '🔑 PIN: not known yet — press ✏️ Set Custom PIN once'; (c.firstElementChild || c).appendChild(d);
       if(aioMultiOn()){ const b = document.createElement('button'); b.type = 'button'; b.className = 'mdMsgBtn'; b.style.cssText = 'margin:6px 0 0;width:auto;padding:7px 12px;border-radius:10px;border:0;background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff;font-weight:900;font-size:13px;cursor:pointer'; b.textContent = '📨 Ready message — connect phone'; b.onclick = () => p ? mdInvShow(u.user_id) : mdInvOpen(u.user_id); d.after(b); } });
-    /* ہیلپ ڈیسک #152: User Management میں بھی «➕ Add a staff phone — ready message» */
+    /* ہیلپ ڈیسک #152: User Management میں بھی «➕ Add staff — paste AIO ID» */
     const tb = document.querySelector('#usersListView .partyToolbar');
-    if(tb && !document.getElementById('mdAddStaffBtn')){ const b = document.createElement('button'); b.id = 'mdAddStaffBtn'; b.type = 'button'; b.textContent = '➕ Add a staff phone — ready message'; b.style.cssText = 'background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff'; b.onclick = () => mdInvOpen(); tb.insertBefore(b, tb.firstChild); const sp = tb.querySelector(':scope > div:empty'); if(sp) sp.remove(); tb.style.flexWrap = 'wrap'; tb.style.gap = '8px'; tb.querySelectorAll(':scope > button').forEach(x => { x.style.minHeight = '46px'; x.style.padding = '10px 18px'; x.style.fontSize = '15px'; }); }
+    if(tb && !document.getElementById('mdAddStaffBtn')){ const b = document.createElement('button'); b.id = 'mdAddStaffBtn'; b.type = 'button'; b.textContent = '➕ Add staff — paste AIO ID'; b.style.cssText = 'background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff'; b.onclick = () => mdInvOpen(); tb.insertBefore(b, tb.firstChild); const sp = tb.querySelector(':scope > div:empty'); if(sp) sp.remove(); tb.style.flexWrap = 'wrap'; tb.style.gap = '8px'; tb.querySelectorAll(':scope > button').forEach(x => { x.style.minHeight = '46px'; x.style.padding = '10px 18px'; x.style.fontSize = '15px'; }); }
   }catch(e){} }
   /* ہیلپ ڈیسک #152: «✏️ Set Custom PIN» سے بدلا PIN بھی مالک کو یاد اور کلاؤڈ میں (تالا لگا) */
   const _scp = window.setCustomUserPin;
@@ -35506,7 +35506,8 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   function me(){ try{ return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; }catch(e){ return {}; } }
   function save(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
   function dev(){ const m = me(); if(!m.dev){ m.dev = 'X' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); save(m); } return m.dev; }
-  async function call(b){ const r = await fetch(API, {method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(b)}); return r.json(); }
+  /* AIO0911MO194 (مالک کی جانچ): ایک ہی کوشش میں نیٹ کا جھٹکا = «No internet» — اب 3 کوششیں */
+  async function call(b){ let last; for(let t = 0; t < 3; t++){ try{ const r = await fetch(API, {method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(b)}); return await r.json(); }catch(e){ last = e; await new Promise(z => setTimeout(z, 1500)); } } throw last; }
   function normId(v){ let t = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if(/^\d{5}$/.test(t)) t = 'AIO' + t; return /^AIO\d{5}$/.test(t) ? t : ''; }
   function box(html, canClose){ window._aioIdCanClose = !!canClose; document.getElementById('aioIdBox').innerHTML = html; document.getElementById('aioIdModal').classList.add('show'); }
   function shut(){ document.getElementById('aioIdModal').classList.remove('show'); }
@@ -35558,7 +35559,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       if(!r || !r.ok || !r.id){ b.disabled = false; return err(r && r.reason === 'missing' ? 'Please check name, mobile and Gmail' : 'Could not create — try again'); }
       const m = me(); Object.assign(m, {id: r.id, name, mobile: '0' + mobile.slice(-10), gmail}); save(m);
       aioIdChoose(); paintCard(); poll();
-    }catch(e){ b.disabled = false; err('📶 No internet — please try again'); }
+    }catch(e){ b.disabled = false; err(navigator.onLine === false ? '📶 No internet — turn on data / Wi-Fi and press again' : '⚠️ Could not reach the server — press «Create my AIO ID» again'); }
   };
   window.aioIdChoose = function(){
     const m = me();
@@ -35686,6 +35687,17 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     }catch(e){}
   }, 1500));
 
+  /* AIO0911MO194 (مالک کا حکم): User Management کا «+ Add New User» — ملٹی ڈیوائس چالو ہو تو وہی AIO ID والا فارم (ID پیسٹ، نام / موبائل خود، PIN، کردار)؛ ورنہ پرانا ڈبہ + اشارہ */
+  try{
+    const _nu = window.openNewUserModal;
+    if(typeof _nu === 'function') window.openNewUserModal = function(){
+      try{ if(typeof aioMultiOn === 'function' && aioMultiOn() && typeof window.mdInvOpen === 'function') return window.mdInvOpen(); }catch(e){}
+      const r = _nu.apply(this, arguments);
+      try{ const bx = document.querySelector('#newUserModal .modalBox'); if(bx && !document.getElementById('nuAioHint')){ const d = document.createElement('div'); d.id = 'nuAioHint'; d.style.cssText = 'font-size:12.5px;color:#0f766e;background:#ecfdf5;border:1px dashed #10b981;border-radius:10px;padding:8px 10px;margin:0 0 10px;line-height:1.5';
+        d.innerHTML = '🆔 To connect a staff <b>phone</b> with their AIO ID, first turn on <b>👥 Staff &amp; Devices</b> (Settings) — then «+ Add New User» asks for the AIO ID.'; const h = bx.querySelector('h3'); (h || bx.firstChild).insertAdjacentElement('afterend', d); } }catch(e){}
+      return r;
+    };
+  }catch(e){}
   /* ---- 3) مالک: «➕ Add a staff phone» میں صرف AIO ID ---- */
   const _open = window.mdInvOpen;
   if(typeof _open === 'function') window.mdInvOpen = async function(userId){
