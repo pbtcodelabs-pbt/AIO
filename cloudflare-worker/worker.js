@@ -414,7 +414,7 @@ export class McsStats {
   }
   agCodeFor(cnic, rk, id) {   /* شناختی کارڈ کا پرانا کوڈ واپس، ورنہ نیا (MS-001) اور ہمیشہ کے لیے محفوظ */
     const c = String(cnic || "").replace(/\D/g, ""), row = this.agCnicRow(c); if (row) return row.code;
-    const code = this.agNextCode(agAbbrOfRk(rk));
+    const code = this.agNextCode(rk ? agAbbrOfRk(rk) : "AG");   /* MCS0911MO264: کاروبار کے بغیر ایجنٹ = AG */
     if (c.length === 13) this.sql.exec("INSERT OR IGNORE INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?)", c, code, id || "", Date.now());
     return code;
   }
@@ -701,8 +701,10 @@ export class McsStats {
       const prev = old ? JSON.parse(old.data) : null;
       const id = old ? old.id : "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
       { const o = this.agCnicOwner(b.d.cnic, old ? old.id : null); if (o) return Response.json({ ok: false, reason: "cnic_taken" }); }   /* MCS0511TH145: ایک شناختی کارڈ پر ایک ہی ایجنٹ */
-      const pr = this.sql.exec("SELECT paid, until FROM prof WHERE rec = ?", b.d.bizRk).toArray()[0];
-      if (!pr || !(pr.paid > 0)) return Response.json({ ok: false, reason: "not_paid" });   /* MCS0511TH134: ایجنٹ صرف وہی جس کی پروفائل خریدی ہو */
+      if (b.d.bizRk) { const pr = this.sql.exec("SELECT paid, until FROM prof WHERE rec = ?", b.d.bizRk).toArray()[0];
+        if (!pr || !(pr.paid > 0)) return Response.json({ ok: false, reason: "not_paid" }); }   /* MCS0511TH134: کاروبار کے ساتھ آئے تو وہ پروفائل خریدی ہو؛ MCS0911MO264: کاروبار کے بغیر (صرف ایجنٹ) بھی درخواست — noBiz */
+      if (prev && prev.status === "pending" && b.d.full) return Response.json({ ok: false, reason: "pending" });   /* ایک وقت میں ایک ہی زیرِ غور درخواست */
+      if (!b.d.bizRk) b.d.noBiz = 1;
       const d = Object.assign({}, b.d, { id, at: prev ? prev.at : now, upd: now, status: prev && prev.status === "approved" ? "approved" : "pending", code: prev ? prev.code || "" : "", pin: prev ? prev.pin || "" : "", note: prev ? prev.note || "" : "" });
       this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET phone = excluded.phone, data = excluded.data, ts = excluded.ts", id, d.phone, JSON.stringify(d), now);
       for (const k of ["front", "back", "selfie"]) if (b.img && b.img[k]) this.sql.exec("INSERT INTO agimg (id, kind, data) VALUES (?, ?, ?) ON CONFLICT (id, kind) DO UPDATE SET data = excluded.data", id, k, b.img[k]);
@@ -1342,9 +1344,10 @@ async function handleAgent(request, env, path) {
     const cnic = String(b.cnic || "").replace(/\D/g, ""); if (cnic.length !== 13) return reply({ ok: false, reason: "bad_cnic" });
     if (dev.length < 6) return reply({ error: "bad_dev" }, 400);
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
-    if (!S(b.bizRk, 60)) return reply({ ok: false, reason: "not_paid" });
-    const d = { name: S(b.name, 80), father: S(b.father, 80), cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), phone, wa: entPhone(b.wa) || "", email: S(b.email, 80), city: S(b.city, 60), address: S(b.address, 200), biz: S(b.biz, 120), bizRk: S(b.bizRk, 60), exp: S(b.exp, 400), dev };
-    if (!d.name || !d.city) return reply({ ok: false, reason: "missing" });   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
+    /* MCS0911MO264 (ہیلپ ڈیسک #172، مالک کی ⚡ منظوری): «Earn with MCS» کا سیدھا فارم — اپنا کاروبار نہ ہو تب بھی درخواست (bizRk خالی = noBiz)، منظوری مالک کی؛ کوڈ AG-001 */
+    const d = { name: S(b.name, 80), father: S(b.father, 80), cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), phone, wa: entPhone(b.wa) || "", email: S(b.email, 80), city: S(b.city, 60), address: S(b.address, 200), biz: S(b.biz, 120), bizRk: S(b.bizRk, 60), exp: S(b.exp, 400), dev, full: b.full ? 1 : 0 };
+    if (!d.name || !d.city) return reply({ ok: false, reason: "missing" });
+    if (d.full && (!d.father || !d.address || !/@/.test(d.email))) return reply({ ok: false, reason: "missing" });   /* MCS0911MO264: پورے فارم میں سب خانے لازمی */   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
     return fwd("/ag_apply", { d, img });
   }
   if (path === "/agfind") { const code = S(b.code, 60); if (!code) return reply({ ok: false, reason: "bad_code" }); return fwd("/ag_find", { code, phone: (() => { const dd = code.replace(/\D/g, ""); return dd.length >= 10 && dd.length <= 12 && /^0?3\d{9}$/.test(dd.slice(-11)) ? entPhone(code) : ""; })() }); }
