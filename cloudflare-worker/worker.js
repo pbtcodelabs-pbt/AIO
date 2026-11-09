@@ -520,7 +520,8 @@ export class McsStats {
         const seen = {}; for (const l of this.finLines(mon)) if (l.src === "play" && l.by === "agent" && l.sh.agent && !seen[l.code]) { seen[l.code] = 1; this.agNote("A:" + l.code, "ready", "✅ " + mon.replace("_", "-") + " کی گوگل پلے والی رقم آ گئی — آپ کا کمیشن ادائیگی کے لیے تیار"); } }
       this.finLog("grecv", { mon, amount: b.amount }); return Response.json(this.finMonth(mon)); }
     if (op === "xadd") { const kind = b.kind === "ad" ? "ad" : "mem", amount = Math.max(0, parseInt(b.amount, 10) || 0); if (!amount) return Response.json({ ok: false, reason: "amount" });
-      const rk = String(b.rk || "").slice(0, 60); let w = { by: "pbt", code: "PBT" }; const ref = String(b.ref || "").toUpperCase();
+      const rk = String(b.rk || "").slice(0, 60);
+      if (/^ad:/.test(rk) && this.sql.exec("SELECT id FROM finx WHERE rk = ?", rk).toArray().length) return Response.json({ ok: false, reason: "dup" });   /* AGP0911MO021: My City Shines کا ایک اشتہار ایک ہی بار حساب میں */ let w = { by: "pbt", code: "PBT" }; const ref = String(b.ref || "").toUpperCase();
       if (ref === "PBT-D") w = { by: "dev", code: "PBT-D" }; else if (ref === "PBT-C") w = { by: "codev", code: "PBT-C" }; else if (ref && ref !== "PBT") { const a = this.ppAgents().find((x) => String(x.code).toUpperCase() === ref); if (a) w = { by: "agent", code: a.code, agent: a.name }; } else if (rk) w = this.saleWho(rk);
       if (b.biz) w.biz = String(b.biz).slice(0, 80);
       this.sql.exec("INSERT INTO finx (mon, ts, kind, amount, rk, who, note) VALUES (?, ?, ?, ?, ?, ?, ?)", this.finMonOf(now), now, kind, amount, rk, JSON.stringify(w), String(b.note || "").slice(0, 200));
@@ -536,6 +537,7 @@ export class McsStats {
       this.sql.exec("INSERT INTO agpay (code, amount, note, ts, method, acct, img) VALUES (?, ?, ?, ?, ?, ?, ?)", who.startsWith("A:") ? who.slice(2) : who, amount, String(b.note || "").slice(0, 200), now, String(b.method || "").slice(0, 40), String(b.acctNo || "").slice(0, 60), img);
       this.sql.exec("UPDATE payreq SET done = 1 WHERE who = ? AND done = 0", who);
       this.agNote(who, "paid", "💸 Rs " + amount + " آپ کو ادا کر دیے گئے" + (b.method ? " — " + String(b.method).slice(0, 40) : "")); this.finLog("payout", { who, amount, method: b.method, acct: b.acctNo, note: b.note }); return Response.json({ ok: true }); }
+    if (op === "xads") return Response.json({ ok: true, list: this.sql.exec("SELECT id, rk, amount, ts, who FROM finx WHERE rk LIKE 'ad:%'").toArray() });
     if (op === "log") return Response.json({ ok: true, list: this.sql.exec("SELECT id, ts, op, data FROM finlog ORDER BY id DESC LIMIT 200").toArray() });
     if (op === "payimg") { const r = this.sql.exec("SELECT img FROM agpay WHERE id = ?", parseInt(b.id, 10) || 0).toArray()[0]; return Response.json({ ok: true, img: r ? r.img || "" : "" }); }
     return Response.json({ ok: false, reason: "bad_op" });
