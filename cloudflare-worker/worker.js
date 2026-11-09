@@ -596,6 +596,77 @@ export class McsStats {
       }
       return Response.json({ ok: false, reason: "bad_act" });
     }
+    if (op === "/mc_chat") {   /* MCS0911MO251 (مالک کا حکم): 💬 My Chats — صارف ↔ PBT، ایجنٹ ↔ PBT، ایجنٹ ↔ اپنے کاروبار والے صارف۔
+         عملہ (ڈویلپر / کو-ڈویلپر) کا ہر جواب who='dev' = «PBT Code Labs» — کس نے دیا (`by`) صرف اندر، کسی کو نظر نہیں۔ ایجنٹ ↔ ایجنٹ کوئی راستہ نہیں۔
+         دھاگے (agmsg.code): U-<صارف ID> · <ایجنٹ کوڈ> (پرانا پورٹل والا) · B-<ایجنٹ کوڈ>~<صارف ID>؛ CD-… (کو-ڈویلپر ↔ ڈویلپر) یہاں نہیں */
+      const b = await request.json(), now = Date.now();
+      try { this.sql.exec("ALTER TABLE agmsg ADD COLUMN byw TEXT"); } catch (e) {}
+      const cfg = (k) => (this.sql.exec("SELECT v FROM agcfg WHERE k = ?", k).toArray()[0] || {}).v;
+      const setCfg = (k, v) => this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", k, String(v));
+      const getU = (id) => { const r = this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", id).toArray()[0]; if (!r) return null; const u = JSON.parse(r.data); return u.del ? null : u; };
+      const d10 = (x) => String(x || "").replace(/\D/g, "").slice(-10);
+      const agents = () => this.sql.exec("SELECT data FROM agent").toArray().map((r) => JSON.parse(r.data)).filter((x) => x.code && x.status === "approved" && !x.off);
+      /* اس ایجنٹ کے کاروبار (agref) — مالک کا موبائل کاروبار کی چابی p<10 ہندسے> سے */
+      const bizOf = (code) => this.sql.exec("SELECT rk, data FROM agref WHERE code = ?", code).toArray().map((r) => { let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {} const m = /^p(\d{10})/.exec(r.rk || ""); return { rk: r.rk, ph: m ? m[1] : "", name: d.name || d.nameUr || d.biz || "" }; });
+      const uidByPh = (ph) => ph ? (this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:92" + ph).toArray()[0] || {}).id || "" : "";
+      const linked = (code, uid) => { const u = getU(uid); if (!u) return false; const ph = d10(u.mobile); return !!ph && bizOf(code).some((x) => x.ph === ph); };
+      /* — کون؟ — */
+      let me = null;
+      if (b.as === "dev" && b.admin) me = { staff: true, by: "D" };
+      else if (b.as === "cd") { const r = this.sql.exec("SELECT name, pin FROM codev WHERE phone = ?", b.phone).toArray()[0]; if (r && b.pin && r.pin === b.pin) me = { staff: true, by: "C:" + b.phone }; }
+      else if (b.as === "agent") { const a = agents().find((x) => x.phone === b.phone && x.pin && x.pin === b.pin); if (a) me = { agent: a.code, name: a.name }; }
+      else if (b.as === "user" && b.th) { const r = this.sql.exec("SELECT id FROM mcssess WHERE tok = ?", b.th).toArray()[0]; const u = r && getU(r.id); if (u) me = { uid: u.id, u }; }
+      if (!me) return Response.json({ ok: false, reason: "login" });
+      const PBT = "PBT Code Labs";
+      const acc = (th) => {   /* r = پڑھ سکے، w = لکھ سکے، side = اپنی طرف کا who */
+        th = String(th || ""); if (!th || th.startsWith("CD-")) return null;
+        if (me.staff) { if (th.startsWith("B-")) return { r: 1, w: 0, side: "dev" }; return { r: 1, w: 1, side: "dev" }; }
+        if (me.agent) { if (th === me.agent) return { r: 1, w: 1, side: "agent" }; if (th.startsWith("B-" + me.agent + "~") && linked(me.agent, th.slice(3 + me.agent.length))) return { r: 1, w: 1, side: "agent" }; return null; }
+        if (me.uid) { if (th === "U-" + me.uid) return { r: 1, w: 1, side: "user" }; const m = /^B-(.+)~(.+)$/.exec(th); if (m && m[2] === me.uid && linked(m[1], me.uid)) return { r: 1, w: 1, side: "user" }; return null; }
+        return null;
+      };
+      const rdKey = (th) => me.staff ? "rd_" + th : "ru_" + (me.agent || me.uid) + "_" + th;
+      const sumOf = (th, side) => {
+        const lm = this.sql.exec("SELECT who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 1", th).toArray()[0] || null;
+        const rd = parseInt(cfg(rdKey(th)) || "0", 10);
+        const nw = this.sql.exec("SELECT COUNT(*) AS n FROM agmsg WHERE code = ? AND who != ? AND ts > ?", th, side, rd).toArray()[0].n;
+        return { last: lm ? lm.ts : 0, lt: lm ? String(lm.text || (lm.img ? "🖼️" : lm.audio ? "🎤" : "")).slice(0, 80) : "", mine: lm ? lm.who === side : false, nw };
+      };
+      const label = (th) => {   /* عملے کے لیے دھاگے کا نام */
+        if (th.startsWith("U-")) { const u = getU(th.slice(2)); return { k: "user", title: u ? u.name : th.slice(2), sub: u ? "0" + d10(u.mobile) + " · " + u.id : "" }; }
+        if (th.startsWith("B-")) { const m = /^B-(.+)~(.+)$/.exec(th) || []; const a = agents().find((x) => x.code === m[1]); const u = getU(m[2] || ""); return { k: "biz", title: "🤝 " + (a ? a.name : m[1]) + " ↔ " + (u ? u.name : ""), sub: (m[1] || "") + " · " + (u ? "0" + d10(u.mobile) : "") }; }
+        const a = agents().find((x) => x.code === th) || (() => { for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === th) return x; } return null; })();
+        return { k: "agent", title: "🤝 " + (a ? a.name : th), sub: th + (a && a.phone ? " · 0" + d10(a.phone) : "") };
+      };
+      if (b.op === "list") {
+        let L = [];
+        if (me.staff) {
+          L = this.sql.exec("SELECT code, MAX(ts) AS last FROM agmsg GROUP BY code ORDER BY last DESC LIMIT 400").toArray().filter((t) => !String(t.code).startsWith("CD-")).map((t) => Object.assign({ th: t.code }, label(t.code), sumOf(t.code, "dev")));
+        } else if (me.agent) {
+          L.push(Object.assign({ th: me.agent, k: "pbt", title: PBT, sub: "سوال، مسئلہ، مدد" }, sumOf(me.agent, "agent")));
+          const seen = new Set();
+          for (const x of bizOf(me.agent)) { if (!x.ph || seen.has(x.ph)) continue; seen.add(x.ph); const uid = uidByPh(x.ph); const u = uid && getU(uid);
+            if (u) { const th = "B-" + me.agent + "~" + uid; L.push(Object.assign({ th, k: "biz", title: x.name || u.name, sub: u.name + " · 0" + x.ph }, sumOf(th, "agent"))); }
+            else L.push({ th: "", k: "biz", title: x.name || ("0" + x.ph), sub: "0" + x.ph + " · ابھی ایپ میں اکاؤنٹ نہیں", off: 1 }); }
+        } else {
+          L.push(Object.assign({ th: "U-" + me.uid, k: "pbt", title: PBT, sub: "سوال، مسئلہ، مشورہ" }, sumOf("U-" + me.uid, "user")));
+          const ph = d10(me.u.mobile), done = new Set();
+          if (ph) for (const r of this.sql.exec("SELECT code FROM agref WHERE rk LIKE ?", "p" + ph + "%").toArray()) { if (done.has(r.code)) continue; done.add(r.code); const a = agents().find((x) => x.code === r.code); if (!a) continue; const th = "B-" + a.code + "~" + me.uid; L.push(Object.assign({ th, k: "agent", title: "🤝 " + a.name, sub: "آپ کا MCS ایجنٹ" }, sumOf(th, "user"))); }
+        }
+        L.sort((x, y) => (x.k === "pbt" ? -1 : 0) - (y.k === "pbt" ? -1 : 0) || (y.last || 0) - (x.last || 0));
+        return Response.json({ ok: true, staff: !!me.staff, list: L, nw: L.reduce((n, x) => n + (x.nw || 0), 0) });
+      }
+      const A = acc(b.thr); if (!A) return Response.json({ ok: false, reason: "no_access" });
+      if (b.op === "send") {
+        if (!A.w) return Response.json({ ok: false, reason: "read_only" });
+        if (!(b.text || b.img || b.audio)) return Response.json({ ok: false, reason: "empty" });
+        this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts, byw) VALUES (?, ?, ?, ?, ?, ?, ?)", b.thr, A.side, String(b.text || "").slice(0, 2000), String(b.img || ""), String(b.audio || ""), now, me.by || me.agent || me.uid || "");
+      }
+      setCfg(rdKey(b.thr), now);
+      const rows = this.sql.exec("SELECT id, who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
+      const nameOf = (who) => who === "dev" ? PBT : who === "agent" ? "🤝 MCS ایجنٹ" : "صارف";
+      return Response.json({ ok: true, w: A.w, title: me.staff ? label(b.thr).title : null, msgs: rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), text: m.text || "", img: m.img || "", audio: m.audio || "", ts: m.ts })) });
+    }
     if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
       const b = await request.json();
       const r = this.sql.exec("SELECT name, pin, seen FROM codev WHERE phone = ?", b.phone).toArray()[0];
@@ -1039,6 +1110,13 @@ async function handleAgent(request, env, path) {
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
+  if (path === "/mcschat") {   /* MCS0911MO251: 💬 My Chats */
+    const as = String(b.as || ""); if (!["user", "agent", "cd", "dev"].includes(as)) return reply({ ok: false, reason: "login" });
+    const op = String(b.op || ""); if (!["list", "thread", "send"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const admin = as === "dev" ? await verifyFirebaseAdmin(request) : false; if (as === "dev" && !admin) return reply({ ok: false, reason: "login" });
+    const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
+    return fwd("/mc_chat", { as, op, admin: !!admin, phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, 700000), audio: media(b.audio, 900000) });
+  }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
     const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react", "agpin"].includes(op)) return reply({ error: "bad_op" }, 400);
@@ -1183,7 +1261,7 @@ export default {
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
