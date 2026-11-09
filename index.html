@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO189</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO190</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO189</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO190</span>
     </div>
   </div>
 
@@ -34933,9 +34933,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO189'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO190'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Join a shop: tries 3 times and shows the exact reason instead of \'No internet\'';
+  const UPDATE_NOTE = 'Staff phone joins the easy way: AIO ID → owner adds it → phone connects by itself';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35433,6 +35433,205 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   /* لاگ اِن صفحے پر بٹن */
   const jb = document.getElementById('loginJoinShopBtn');
   if(jb && !document.getElementById('loginInvBtn')){ const b = document.createElement('button'); b.type = 'button'; b.id = 'loginInvBtn'; b.className = 'loginInvBtn'; b.textContent = "📋 Paste owner's message — connect to your shop"; b.onclick = () => mdPasteOpen(); jb.parentNode.insertBefore(b, jb); jb.textContent = '🔗 Join with Shop Code + PIN'; }
+})();
+</script>
+
+<!-- ===== AIO0911MO190 / AIODR0911MO155 (مالک کا حکم، ہیلپ ڈیسک #193): ملازم کا فون جوڑنا بالکل سادہ —
+     ہر فون اپنا اکاؤنٹ (نام، موبائل، Gmail) بنا کر پکی «AIO ID» (AIO48213) لیتا ہے؛ ملازم یہ ID مالک کو بتاتا ہے؛
+     مالک «➕ Add a staff phone» میں صرف ID لکھتا ہے (نام / موبائل خود، PIN خود)؛ ملازم کا فون خود دیکھتا ہے کہ کسی دکان نے
+     شامل کیا اور ایک دبانے سے جڑ جاتا ہے (کوئی کوڈ / پیغام / وقت کی حد نہیں)۔ سرور: aio-pos-verify `/aioid` (reg / me / look / invite / done / del) ===== -->
+<div class="modalOverlay" id="aioIdModal" style="z-index:100070;" onclick="if(event.target===this && window._aioIdCanClose) this.classList.remove('show')">
+  <div class="modalBox" style="max-width:420px;" id="aioIdBox"></div>
+</div>
+<style>
+#aioIdBox h3{margin:0 0 6px;font-size:19px}
+#aioIdBox .aiH{font-size:13px;color:#475569;margin-bottom:8px;line-height:1.5}
+#aioIdBox .aiErr{color:#b91c1c;font-weight:800;font-size:13px;min-height:18px;margin-top:6px;white-space:pre-line}
+.aioIdBig{font:900 30px/1.2 ui-monospace,Menlo,Consolas,monospace;letter-spacing:3px;text-align:center;color:#0f766e;background:#ecfdf5;border:2px dashed #10b981;border-radius:14px;padding:10px;margin:8px 0;user-select:all;direction:ltr}
+#aioIdCard{margin-top:10px;padding:10px 12px;border-radius:14px;background:#f0fdfa;border:1.5px solid #5eead4;text-align:center;font-size:13.5px;line-height:1.5;color:#134e4a}
+#aioIdCard b.id{font:900 20px ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;color:#0f766e;direction:ltr;display:inline-block}
+#aioIdCard .row{display:flex;gap:8px;justify-content:center;margin-top:6px;flex-wrap:wrap}
+#aioIdCard .row button{width:auto !important;flex:1;margin:0 !important;border:0;border-radius:999px;padding:7px 14px;font-weight:800;cursor:pointer;background:#0f766e;color:#fff;font-family:inherit;font-size:13px}
+#aioIdCard .row button.g{background:#fff;color:#0f766e;border:1.5px solid #0f766e}
+#aioIdCard .st{font-size:12px;color:#64748b;margin-top:4px}
+.ivAio{display:flex;gap:6px;align-items:stretch}.ivAio input{flex:1;text-transform:uppercase;letter-spacing:2px;font-weight:900;text-align:center;direction:ltr}
+.ivAio button{border:0;border-radius:12px;padding:0 14px;font-weight:900;background:#0f766e;color:#fff;cursor:pointer;font-family:inherit}
+.ivAioOk{font-size:13px;font-weight:800;margin:4px 0 2px;min-height:16px}
+</style>
+<script>
+(function(){
+  const API = 'https://aio-pos-verify.pbtcodelabs.workers.dev/aioid';
+  const KEY = STORAGE_PREFIX + 'aioId', APP = STORAGE_PREFIX === 'aioDr_' ? 'DR' : 'AIO';
+  const E = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function me(){ try{ return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; }catch(e){ return {}; } }
+  function save(o){ try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
+  function dev(){ const m = me(); if(!m.dev){ m.dev = 'X' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); save(m); } return m.dev; }
+  async function call(b){ const r = await fetch(API, {method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(b)}); return r.json(); }
+  function normId(v){ let t = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if(/^\d{5}$/.test(t)) t = 'AIO' + t; return /^AIO\d{5}$/.test(t) ? t : ''; }
+  function box(html, canClose){ window._aioIdCanClose = !!canClose; document.getElementById('aioIdBox').innerHTML = html; document.getElementById('aioIdModal').classList.add('show'); }
+  function shut(){ document.getElementById('aioIdModal').classList.remove('show'); }
+  window.aioIdClose = shut;
+  function toast(t){ try{ showNavToast(t); }catch(e){ try{ alert(t); }catch(_){} } }
+  window.aioIdCopy = function(){ const id = me().id || ''; try{ navigator.clipboard.writeText(id).then(() => toast('📋 ' + id + ' copied'), () => prompt('Copy', id)); }catch(e){ prompt('Copy', id); } };
+  window.aioIdShare = function(){ const id = me().id || '', t = 'My AIO POS ID: ' + id + '\nPlease add me as staff (Staff & Devices → ➕ Add a staff phone → AIO ID).';
+    try{ if(navigator.share){ navigator.share({text: t}).catch(() => {}); return; } }catch(e){} window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); };
+
+  /* ---- 1) اکاؤنٹ بنائیں: نام، موبائل، Gmail → AIO ID ---- */
+  window.aioIdRegOpen = function(){
+    const m = me(), s = (typeof AppState !== 'undefined' && AppState.settings) || {};
+    box(`<h3>🆔 Create your AIO ID</h3>
+      <div class="aiH">One time only. Your <b>AIO ID</b> connects this phone to a shop — just tell it to your shop owner. ${navigator.onLine === false ? '<br><b style="color:#b45309">📶 No internet — you can do this later.</b>' : ''}</div>
+      <label class="mdLbl">👤 Your name</label><input id="aiName" class="mdInput" maxlength="60" value="${E(m.name || '')}" placeholder="e.g. Ali Raza">
+      <label class="mdLbl">📱 Mobile number</label><input id="aiMob" class="mdInput" inputmode="tel" maxlength="16" value="${E(m.mobile || s.businessPhone || '')}" placeholder="03XXXXXXXXX">
+      <label class="mdLbl">✉️ Gmail</label><input id="aiMail" class="mdInput" type="email" maxlength="80" value="${E(m.gmail || '')}" placeholder="name@gmail.com" style="direction:ltr">
+      <div class="aiErr" id="aiErr"></div>
+      <button type="button" class="mdBigBtn" id="aiGo" onclick="aioIdRegGo()">✅ Create my AIO ID</button>
+      <button type="button" class="mdBigBtn ghost" style="background:#fff;color:#64748b;box-shadow:none;border:1.5px solid #cbd5e1" onclick="aioIdLater()">Later</button>`, false);
+  };
+  window.aioIdLater = function(){ try{ sessionStorage.setItem('aioIdLater', '1'); }catch(e){} shut(); paintCard(); };
+  window.aioIdRegGo = async function(){
+    const v = id => (document.getElementById(id).value || '').trim(), err = t => { document.getElementById('aiErr').textContent = t; };
+    const name = v('aiName'), mobile = v('aiMob').replace(/[۰-۹]/g, c => '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/\D/g, ''), gmail = v('aiMail').toLowerCase();
+    if(name.length < 2) return err('Please write your name');
+    if(!/^(0?3\d{9}|923\d{9})$/.test(mobile)) return err('Please write a correct mobile number (03XXXXXXXXX)');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(gmail)) return err('Please write your Gmail (name@gmail.com)');
+    const b = document.getElementById('aiGo'); b.disabled = true; err('⏳ …');
+    try{
+      const r = await call({op:'reg', app: APP, dev: dev(), name, mobile: '0' + mobile.slice(-10), gmail});
+      if(!r || !r.ok || !r.id){ b.disabled = false; return err(r && r.reason === 'missing' ? 'Please check name, mobile and Gmail' : 'Could not create — try again'); }
+      const m = me(); Object.assign(m, {id: r.id, name, mobile: '0' + mobile.slice(-10), gmail}); save(m);
+      aioIdShow(); paintCard(); poll();
+    }catch(e){ b.disabled = false; err('📶 No internet — please try again'); }
+  };
+  window.aioIdShow = function(){
+    const m = me(); if(!m.id) return aioIdRegOpen();
+    box(`<h3>✅ Your AIO ID</h3><div class="aioIdBig">${E(m.id)}</div>
+      <div class="aiH">👤 ${E(m.name)} • 📱 ${E(m.mobile)}<br>Working in a shop? <b>Tell this ID to your shop owner.</b> When they add you, this phone connects by itself — no code, no message.</div>
+      <div class="mdRow2"><button type="button" class="mdBigBtn" onclick="aioIdCopy()">📋 Copy</button><button type="button" class="mdBigBtn" style="background:linear-gradient(180deg,#22c55e,#15803d)" onclick="aioIdShare()">📤 Send</button></div>
+      <button type="button" class="mdBigBtn ghost" style="background:#fff;color:#0f766e;box-shadow:none;border:1.5px solid #0f766e" onclick="aioIdClose()">OK</button>
+      <div style="text-align:center;margin-top:8px"><a href="#" style="font-size:12px;color:#94a3b8" onclick="event.preventDefault();aioIdDelete()">🗑️ Delete my AIO ID / account</a></div>`, true);
+  };
+  window.aioIdDelete = async function(){
+    const m = me(); if(!m.id) return;
+    if(!confirm('Delete your AIO ID ' + m.id + ' and its name / mobile / Gmail from our server?\n\nYour shop data on this phone is NOT deleted.')) return;
+    try{ const r = await call({op:'del', id: m.id, dev: dev()}); if(!r || !r.ok){ alert('Could not delete — check internet and try again'); return; } }catch(e){ alert('📶 No internet'); return; }
+    save({dev: m.dev}); shut(); paintCard(); toast('🗑️ AIO ID deleted');
+  };
+
+  /* ---- 2) لاگ اِن صفحے پر اپنی ID + خودکار جڑنا ---- */
+  function paintCard(){
+    try{
+      const b = document.getElementById('loginJoinShopBtn'); if(!b) return;
+      let c = document.getElementById('aioIdCard');
+      if(!c){ c = document.createElement('div'); c.id = 'aioIdCard'; b.insertAdjacentElement('afterend', c); }
+      const m = me(), joined = AppState.settings && AppState.settings.syncJoined;
+      if(!m.id){ c.innerHTML = `🆔 <b>Join a shop the easy way</b><div class="row"><button type="button" onclick="aioIdRegOpen()">🆔 Create my AIO ID</button></div>`; return; }
+      c.innerHTML = `🆔 Your AIO ID: <b class="id">${E(m.id)}</b>
+        <div class="row"><button type="button" onclick="aioIdCopy()">📋 Copy</button><button type="button" class="g" onclick="aioIdShare()">📤 Send to owner</button></div>
+        <div class="st" id="aioIdSt">${joined ? '✅ This phone is connected to a shop' : '⏳ Give this ID to your shop owner — this phone connects by itself when they add you'}</div>`;
+    }catch(e){}
+  }
+  window.aioIdPaint = paintCard;
+  let shownFor = '';
+  async function poll(){
+    const m = me(); if(!m.id || !navigator.onLine) return;
+    try{
+      const r = await call({op:'me', id: m.id, dev: dev()});
+      if(r && r.ok === false && r.reason === 'none'){ save({dev: m.dev}); paintCard(); return; }
+      const iv = r && r.inv; if(!iv) return;
+      const s = AppState.settings || {};
+      if(s.syncJoined && s.businessId === iv.biz){ call({op:'done', id: m.id, dev: dev()}).catch(() => {}); return; }
+      if(shownFor === iv.biz + iv.at) return; shownFor = iv.biz + iv.at;
+      window._aioInv = iv;
+      box(`<h3>🏪 ${E(iv.shop || 'A shop')} added you</h3>
+        <div class="aiH">You are added as <b>${iv.role === 'admin' ? "owner's 2nd phone" : 'staff'}</b> — name <b>${E(iv.uname || m.name)}</b>.<br>Tap <b>Connect</b> — this phone gets the shop's data and logs you in.</div>
+        <button type="button" class="mdBigBtn" onclick="aioIdJoin()">🔗 Connect now</button>
+        <button type="button" class="mdBigBtn ghost" style="background:#fff;color:#64748b;box-shadow:none;border:1.5px solid #cbd5e1" onclick="aioIdClose()">Not now</button>`, true);
+    }catch(e){}
+  }
+  window.aioIdPoll = poll;
+  window.aioIdJoin = async function(){
+    const iv = window._aioInv; if(!iv) return; shut();
+    const m = me(); m.pendBiz = iv.biz; save(m);
+    openJoinShopModal(iv.biz);
+    document.getElementById('joinShopPin').value = iv.pin;
+    document.getElementById('joinShopDevName').value = (iv.uname || m.name || 'Staff') + "'s phone";
+    window._mdJoinPin = iv.pin;
+    await doJoinShop();
+  };
+  window.addEventListener('load', () => setTimeout(() => {
+    try{
+      const m = me(), s = AppState.settings || {};
+      if(m.pendBiz && s.syncJoined && s.businessId === m.pendBiz && m.id){ call({op:'done', id: m.id, dev: dev()}).catch(() => {}); delete m.pendBiz; save(m); }
+      paintCard();
+      let later = false; try{ later = sessionStorage.getItem('aioIdLater') === '1'; }catch(e){}
+      if(!m.id && !later && !s.syncJoined) aioIdRegOpen();
+      poll();
+      setInterval(() => { if(document.hidden) return; const ls = document.getElementById('loginScreen'); const onLogin = ls && ls.offsetParent !== null; if(onLogin || !(AppState.settings || {}).syncJoined) poll(); }, 15000);
+      document.addEventListener('visibilitychange', () => { if(!document.hidden) poll(); });
+    }catch(e){}
+  }, 1500));
+
+  /* ---- 3) مالک: «➕ Add a staff phone» میں صرف AIO ID ---- */
+  const _open = window.mdInvOpen;
+  if(typeof _open === 'function') window.mdInvOpen = async function(userId){
+    const r = await _open.apply(this, arguments);
+    try{
+      window._ivAioId = '';
+      const bx = document.getElementById('mdInvBox'); if(!bx || userId) return r;
+      const hint = bx.querySelector('.settingsHint'); if(hint) hint.innerHTML = 'Ask your staff for their <b>AIO ID</b> (on their login screen) and write it here — their name and mobile fill in, and <b>their phone connects by itself</b>. No message needed.';
+      const d = document.createElement('div');
+      d.innerHTML = `<label class="mdLbl">🆔 Staff's AIO ID</label><div class="ivAio"><input id="ivAioId" class="mdInput" maxlength="10" placeholder="AIO12345" oninput="aioIvFind(true)"><button type="button" onclick="aioIvFind()">🔍 Find</button></div><div class="ivAioOk" id="ivAioOk"></div>`;
+      const code = bx.querySelector('.ivCode'); (code || hint).insertAdjacentElement('afterend', d);
+      setTimeout(() => { const i = document.getElementById('ivAioId'); if(i) i.focus(); }, 200);
+    }catch(e){}
+    return r;
+  };
+  window.aioIvFind = async function(quiet){
+    const i = document.getElementById('ivAioId'), ok = document.getElementById('ivAioOk'); if(!i || !ok) return;
+    const id = normId(i.value); window._ivAioId = '';
+    if(!id){ if(!quiet) { ok.style.color = '#b91c1c'; ok.textContent = 'Write the ID like AIO12345'; } else ok.textContent = ''; return; }
+    if(me().id === id){ ok.style.color = '#b91c1c'; ok.textContent = 'This is your own ID — write your staff\'s ID'; return; }
+    ok.style.color = '#64748b'; ok.textContent = '⏳ Finding…';
+    try{
+      const r = await call({op:'look', id, by: dev()});
+      if(!r || !r.ok){ ok.style.color = '#b91c1c'; ok.textContent = r && r.reason === 'no_id' ? '❌ No phone has this ID — check it again' : r && r.reason === 'wait' ? 'Too many tries — wait a while' : 'Not found — try again'; return; }
+      window._ivAioId = id; i.value = id;
+      const n = document.getElementById('ivName'), mb = document.getElementById('ivMob');
+      if(n && !n.value) n.value = r.name || ''; if(mb && !mb.value) mb.value = r.mobile || '';
+      { const g = document.getElementById('ivGo'); if(g) g.textContent = '✅ Save — their phone connects by itself'; }
+      ok.style.color = '#0f766e'; ok.textContent = '✅ ' + (r.name || '') + (r.mobile ? ' • 📱 ' + r.mobile : '') + (r.gmail ? ' • ' + r.gmail : '');
+    }catch(e){ ok.style.color = '#b91c1c'; ok.textContent = '📶 No internet'; }
+  };
+  const _save = window.mdInvSave;
+  if(typeof _save === 'function') window.mdInvSave = async function(userId){
+    const id = window._ivAioId || '', pin = ((document.getElementById('ivPin') || {}).value || '').replace(/\D/g, '');
+    const nm = userId ? ((usersData.find(x => x.user_id === userId) || {}).name || '') : ((document.getElementById('ivName') || {}).value || '').trim();
+    const role = userId ? ((usersData.find(x => x.user_id === userId) || {}).role || 'salesman') : ((document.getElementById('ivRole') || {}).value || 'salesman');
+    const before = usersData.length;
+    const r = await _save.apply(this, arguments);
+    try{
+      const added = userId || usersData.length > before;
+      if(id && added && pin.length >= 4){
+        const sh = (typeof shopInfo === 'function' && shopInfo()) || {};
+        const x = await call({op:'invite', id, by: dev(), biz: AppState.settings.businessId, pin, uname: nm, role, shop: sh.businessName || AppState.settings.businessName || ''});
+        const okEl = document.getElementById('ivOkTxt');
+        if(x && x.ok){ if(okEl){ okEl.innerHTML = `✅ ${E(nm)} is added. <b>Their phone (${E(id)}) will connect by itself</b> — they just tap «Connect». PIN: <b>${E(pin)}</b> (they can change it later).`; } toast('📲 ' + nm + "'s phone will connect by itself"); }
+        else if(okEl){ okEl.insertAdjacentHTML('beforeend', '<br><span style="color:#b45309">⚠️ Could not reach the AIO ID server — send the message below instead.</span>'); }
+      }
+    }catch(e){}
+    return r;
+  };
+
+  /* ---- 4) Staff & Devices میں اپنی AIO ID ---- */
+  const _rsd = window.renderStaffDevicesCard;
+  if(typeof _rsd === 'function') window.renderStaffDevicesCard = function(){
+    const r = _rsd.apply(this, arguments);
+    try{ const el = document.getElementById('staffDevicesCard'), m = me(); if(el && !el.querySelector('.aioIdRow')){ const d = document.createElement('div'); d.className = 'mdStaffRow aioIdRow';
+      d.innerHTML = m.id ? `<span class="t">🆔 My AIO ID: <b style="letter-spacing:2px;direction:ltr;display:inline-block">${E(m.id)}</b><small>${E(m.name || '')} • ${E(m.mobile || '')}</small></span><button type="button" onclick="aioIdShow()">📋 Show</button>` : `<span class="t">🆔 No AIO ID yet<small>Needed to connect phones the easy way</small></span><button type="button" onclick="aioIdRegOpen()">➕ Create</button>`;
+      el.insertBefore(d, el.children[1] || null); } }catch(e){}
+    return r;
+  };
 })();
 </script>
 
