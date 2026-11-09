@@ -448,6 +448,25 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
+    /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
+    const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
+    try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
+      this.sql.exec("INSERT INTO useday (day, k, n) VALUES (?, 'req', 1) ON CONFLICT (day, k) DO UPDATE SET n = n + 1", uday); } catch (e) {}
+    if (op === "/mcs_use") {
+      const b = await request.json();
+      if (b.op === "add") {
+        for (const k of ["r", "w", "d"]) { const n = Math.max(0, Math.min(200000, parseInt(b[k], 10) || 0)); if (n) this.sql.exec("INSERT INTO useday (day, k, n) VALUES (?, ?, ?) ON CONFLICT (day, k) DO UPDATE SET n = n + excluded.n", uday, "fs_" + k, n); }
+        if (b.dev) this.sql.exec("INSERT OR IGNORE INTO usedev (day, dev) VALUES (?, ?)", uday, String(b.dev).slice(0, 64));
+        return Response.json({ ok: true });
+      }
+      const from = new Date(Date.now() + 5 * 3600e3 - 40 * 864e5).toISOString().slice(0, 10);
+      const days = {};
+      for (const r of this.sql.exec("SELECT day, k, n FROM useday WHERE day >= ?", from).toArray()) (days[r.day] = days[r.day] || {})[r.k] = r.n;
+      for (const r of this.sql.exec("SELECT day, COUNT(*) AS n FROM usedev WHERE day >= ? GROUP BY day", from).toArray()) (days[r.day] = days[r.day] || {}).dev = r.n;
+      try { this.sql.exec("DELETE FROM useday WHERE day < ?", new Date(Date.now() - 400 * 864e5).toISOString().slice(0, 10)); this.sql.exec("DELETE FROM usedev WHERE day < ?", from); } catch (e) {}
+      let db = 0; try { db = this.sql.databaseSize || 0; } catch (e) {}
+      return Response.json({ ok: true, today: uday, days, dbBytes: db || 0 });
+    }
     if (op === "/ent_claim") {   /* گاہک: اپنی چابی (جی میل / موبائل) سے اس فون پر کھولنا — فون کی حد تک */
       const b = await request.json();
       const row = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + b.key).toArray()[0];
@@ -618,6 +637,16 @@ export class McsStats {
       else if (b.as === "user" && b.th) { const r = this.sql.exec("SELECT id FROM mcssess WHERE tok = ?", b.th).toArray()[0]; const u = r && getU(r.id); if (u) me = { uid: u.id, u }; }
       if (!me) return Response.json({ ok: false, reason: "login" });
       const PBT = "PBT Code Labs";
+      /* MCS0911MO254 (مالک کا حکم): گول تصویریں — عملہ (D / C:<نمبر>) اور ایجنٹ (A:<کوڈ>) کی؛ عام صارف کو عملے کی تصویر کبھی نہیں (وہاں «PBT Code Labs»)؛ ایجنٹ کو PBT کے ہر جواب پر ڈویلپر (کمپنی) کی تصویر */
+      try { this.sql.exec("CREATE TABLE IF NOT EXISTS chatav (k TEXT PRIMARY KEY, img TEXT, ts INTEGER)"); } catch (e) {}
+      const myAv = me.by || (me.agent ? "A:" + me.agent : "");
+      if (b.op === "av") {
+        if (!myAv) return Response.json({ ok: false, reason: "no_av" });
+        const img = String(b.img || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 80000) return Response.json({ ok: false, reason: "bad_img" });
+        this.sql.exec("INSERT INTO chatav (k, img, ts) VALUES (?, ?, ?) ON CONFLICT (k) DO UPDATE SET img = excluded.img, ts = excluded.ts", myAv, img, now);
+        return Response.json({ ok: true });
+      }
+      const avOut = (keys) => { const o = {}; for (const k of new Set(keys.filter(Boolean))) { const r = this.sql.exec("SELECT img FROM chatav WHERE k = ?", k).toArray()[0]; if (r) o[k] = r.img; } return o; };
       const acc = (th) => {   /* r = پڑھ سکے، w = لکھ سکے، side = اپنی طرف کا who */
         th = String(th || ""); if (!th) return null;
         if (th.startsWith("CD-")) {   /* MCS0911MO253: ڈویلپر ↔ کو-ڈویلپر — صرف یہی دو (ایجنٹ / صارف کبھی نہیں) */
@@ -662,7 +691,14 @@ export class McsStats {
           if (ph) for (const r of this.sql.exec("SELECT code FROM agref WHERE rk LIKE ?", "p" + ph + "%").toArray()) { if (done.has(r.code)) continue; done.add(r.code); const a = agents().find((x) => x.code === r.code); if (!a) continue; const th = "B-" + a.code + "~" + me.uid; L.push(Object.assign({ th, k: "agent", title: "🤝 " + a.name, sub: "آپ کا MCS ایجنٹ" }, sumOf(th, "user"))); }
         }
         L.sort((x, y) => (x.k === "pbt" || x.pin ? -1 : 0) - (y.k === "pbt" || y.pin ? -1 : 0) || (y.last || 0) - (x.last || 0));
-        return Response.json({ ok: true, staff: !!me.staff, list: L, nw: L.reduce((n, x) => n + (x.nw || 0), 0) });
+        for (const x of L) { const th = x.th || "";
+          if (me.uid) x.av = "";
+          else if (me.agent) x.av = x.k === "pbt" ? "D" : "";
+          else if (th.startsWith("CD-")) x.av = me.by === "D" ? "C:" + th.slice(3) : "D";
+          else if (th.startsWith("B-")) { const m = /^B-(.+)~/.exec(th); x.av = m ? "A:" + m[1] : ""; }
+          else if (!th.startsWith("U-")) x.av = "A:" + th;
+          else x.av = ""; }
+        return Response.json({ ok: true, staff: !!me.staff, list: L, nw: L.reduce((n, x) => n + (x.nw || 0), 0), avs: avOut(L.map((x) => x.av)) });
       }
       const A = acc(b.thr); if (!A) return Response.json({ ok: false, reason: "no_access" });
       if (b.op === "send") {
@@ -671,9 +707,17 @@ export class McsStats {
         this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts, byw) VALUES (?, ?, ?, ?, ?, ?, ?)", b.thr, A.side, String(b.text || "").slice(0, 2000), String(b.img || ""), String(b.audio || ""), now, me.by || me.agent || me.uid || "");
       }
       setCfg(rdKey(b.thr), now);
-      const rows = this.sql.exec("SELECT id, who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
+      const rows = this.sql.exec("SELECT id, who, text, img, audio, ts, byw FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
+      const th0 = String(b.thr);
+      const avOf = (m) => {
+        if (me.uid) return "";   /* عام صارف: کسی کی تصویر نہیں */
+        if (th0.startsWith("CD-")) return m.who === "dev" ? "D" : "C:" + th0.slice(3);
+        if (m.who === "agent") { if (th0.startsWith("B-")) { const x = /^B-(.+)~/.exec(th0); return x ? "A:" + x[1] : ""; } return "A:" + th0; }
+        if (m.who === "dev") return me.agent ? "D" : (m.byw && /^(D|C:\d+)$/.test(m.byw) ? m.byw : "D");
+        return ""; };
       const nameOf = (who) => A.cd ? (who === "dev" ? "👨‍💻 ڈویلپر" : "👥 " + (cdName(String(b.thr).slice(3)) || "کو-ڈویلپر")) : who === "dev" ? PBT : who === "agent" ? "🤝 MCS ایجنٹ" : "صارف";
-      return Response.json({ ok: true, w: A.w, cd: !!A.cd, title: me.staff ? label(b.thr).title : null, msgs: rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), text: m.text || "", img: m.img || "", audio: m.audio || "", ts: m.ts })) });
+      const out = rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), av: avOf(m), text: m.text || "", img: m.img || "", audio: m.audio || "", ts: m.ts }));
+      return Response.json({ ok: true, w: A.w, cd: !!A.cd, title: me.staff ? label(b.thr).title : null, msgs: out, avs: avOut(out.map((m) => m.mine ? "" : m.av)) });
     }
     if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
       const b = await request.json();
@@ -1118,12 +1162,17 @@ async function handleAgent(request, env, path) {
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
+  if (path === "/mcsuse") {   /* MCS0911MO254: 📊 استعمال — ایپ گنتی بھیجے (add)؛ پڑھنا صرف ایڈمن */
+    if (b.op === "add") return fwd("/mcs_use", { op: "add", r: b.r, w: b.w, d: b.d, dev });
+    if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    return fwd("/mcs_use", { op: "get" });
+  }
   if (path === "/mcschat") {   /* MCS0911MO251: 💬 My Chats */
     const as = String(b.as || ""); if (!["user", "agent", "cd", "dev"].includes(as)) return reply({ ok: false, reason: "login" });
-    const op = String(b.op || ""); if (!["list", "thread", "send"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const op = String(b.op || ""); if (!["list", "thread", "send", "av"].includes(op)) return reply({ error: "bad_op" }, 400);
     const admin = as === "dev" ? await verifyFirebaseAdmin(request) : false; if (as === "dev" && !admin) return reply({ ok: false, reason: "login" });
     const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
-    return fwd("/mc_chat", { as, op, admin: !!admin, phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, 700000), audio: media(b.audio, 900000) });
+    return fwd("/mc_chat", { as, op, admin: !!admin, phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, op === "av" ? 80000 : 700000), audio: media(b.audio, 900000) });
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
@@ -1269,7 +1318,7 @@ export default {
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
