@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO195</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO196</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO195</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO196</span>
     </div>
   </div>
 
@@ -7031,6 +7031,9 @@ function storeDb(){
 async function storeIdbGet(key){ const db = await storeDb(); return new Promise((res, rej) => { const rq = db.transaction('kv').objectStore('kv').get(key); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); }
 async function storeIdbPut(key, val){ const db = await storeDb(); return new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(val, key); tx.oncomplete = () => res(true); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); }); }
 const _storeIdbQ = new Map(); let _storeIdbBusy = false;
+/* AIO0911MO196 (مالک کا حکم — عمران کے فون پر پرانی دکان کی چیزیں): جگہ بھری ہو تو فہرستیں IndexedDB میں لکھی جاتی ہیں (پیچھے، قطار میں)؛
+   دکان سے جڑتے ہی صفحہ دوبارہ کھلتا تھا اور یہ لکھائی ادھوری رہ جاتی — پرانی دکان کا ڈیٹا واپس آ جاتا۔ اب دوبارہ کھولنے سے پہلے قطار خالی ہونے کا انتظار */
+function storeFlush(ms){ return new Promise(res => { const t0 = Date.now(); (function w(){ if((!_storeIdbQ.size && !_storeIdbBusy) || Date.now() - t0 > (ms || 15000)) return res(); setTimeout(w, 60); })(); }); }
 function storeQueueIdb(key, json){
   _storeIdbQ.set(key, json);
   if(_storeIdbBusy) return;
@@ -7333,6 +7336,37 @@ function syncChunkValid(c){
   return SYNC_BUCKETS[c.split('__')[0]] ? c.includes('__v4_b') : c.includes('__v3_');
 }
 function syncDocTypeOfChunk(chunk){ return String(chunk).split('__')[0]; }
+/* AIO0911MO196 (مالک کا حکم): جڑے فون (ملازم / مالک کا دوسرا فون) پر کسی اور دکان کا بچا ہوا ڈیٹا — جو نہ کلاؤڈ سے آیا (base میں نہیں)
+   نہ اس فون پر جڑنے کے بعد بنا (اپنی سلاٹ کی آئی ڈی / بل نمبر «-سلاٹ») — کلاؤڈ میں جانے سے پہلے ہٹا دیں (الگ محفوظ، گم نہیں) */
+let syncForeignDone = false;
+async function syncDropForeign(){
+  const s = AppState.settings || {}, slot = syncSlot(); if(!s.syncJoined || !(slot > 0)) return 0;
+  let keys = []; try{ const db = await syncDb(); keys = await new Promise(res => { const rq = db.transaction('kv').objectStore('kv').getAllKeys(); rq.onsuccess = () => res(rq.result || []); rq.onerror = () => res([]); }); }catch(e){ return 0; }
+  const T = ['products', 'customers', 'suppliers', 'invoices'], B = {};
+  for(const k of keys){
+    if(typeof k !== 'string' || k.indexOf('base:') !== 0) continue;
+    const c = k.slice(5), t = syncDocTypeOfChunk(c); if(!T.includes(t)) continue;
+    const m = aioGetDocTypeMeta(t); if(!m) continue;
+    let arr = []; try{ arr = JSON.parse(await syncBaseGet(c)) || []; }catch(e){}
+    const set = B[t] = B[t] || new Set(); (Array.isArray(arr) ? arr : []).forEach(x => { if(x && x[m.matchKey] != null) set.add(String(x[m.matchKey])); });
+  }
+  let idx = null; try{ idx = await syncGetIndex(); }catch(e){} if(!idx) return 0;   /* کلاؤڈ تک نہ پہنچے تو کچھ نہ چھیڑیں */
+  const lo = slot * 1000000, hi = lo + 1000000, own = new RegExp('-' + slot + '$'), drop = {}; let n = 0;
+  T.forEach(t => {
+    const m = aioGetDocTypeMeta(t); if(!m) return;
+    let set = B[t];
+    if(!set){ if(Object.keys(idx).some(c => syncChunkValid(c) && syncDocTypeOfChunk(c) === t)) return; set = new Set(); }   /* کلاؤڈ میں ہے مگر ابھی آیا نہیں — نہ چھیڑیں؛ کلاؤڈ میں اس قسم کا کچھ نہیں تو خالی */
+    const keep = [], gone = [];
+    m.data.forEach(x => { const id = x && x[m.matchKey]; const ok = set.has(String(id)) || (t === 'invoices' ? own.test(String(x.invoice_no || '')) : (Number(id) >= lo && Number(id) < hi)); (ok ? keep : gone).push(x); });
+    if(gone.length){ drop[t] = gone; n += gone.length; m.data = keep; }
+  });
+  if(!n) return 0;
+  try{ await storeIdbPut('foreignDropped_' + Date.now(), JSON.stringify(drop)); }catch(e){}
+  try{ persistAllData(); }catch(e){} try{ await storeFlush(); }catch(e){}
+  try{ showNavToast(`🧹 ${n} old item${n > 1 ? 's' : ''} from another shop removed from this phone`); }catch(e){}
+  try{ T.forEach(t => applyCloudDocTypeUI(t)); }catch(e){}
+  return n;
+}
 // ---------- 📦 ڈبوں کا میٹر — ہر ڈبے کا سائز؛ 60% سے اوپر تو مالک کو تنبیہ؛ 95% پر لکھنا روک کر صاف پیغام ----------
 const SYNC_BOX_LIMIT = 1000000;
 const syncBoxSizes = loadFromStorage('syncBoxSizes', {});
@@ -7660,7 +7694,8 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
 // ---------- پورا سنک ----------
 async function syncNow(){
   if(!aioMultiOn()) return;
-  if(storeIsHydrating()){ setTimeout(() => syncNow(), 500); return; } // پہلے فون کا ڈیٹا IndexedDB سے واپس آ جائے
+  if(storeIsHydrating()){ setTimeout(() => syncNow(), 500); return; }
+  if(!syncForeignDone && !syncBusy){ syncForeignDone = true; try{ await syncDropForeign(); }catch(e){} }   /* AIO0911MO196 */ // پہلے فون کا ڈیٹا IndexedDB سے واپس آ جائے
   if(syncBusy){ syncAgain = true; return; }
   syncBusy = true;
   const touched = new Set();
@@ -29317,7 +29352,9 @@ async function doJoinShop(){
     const mine = devs.find(d => d.uid === syncDeviceUid());
     if(!mine && shop.maxDevices && syncLiveDevices(devs).length >= shop.maxDevices) return revert(`The shop's package allows ${shop.maxDevices} device${shop.maxDevices > 1 ? 's' : ''} (owner included) and they are all in use — ask the owner to open Settings → Staff & Devices, remove an old device or upgrade the package`);
     const slot = mine ? (mine.slot || 1) : (Math.max(0, ...devs.map(d => d.slot || 0)) + 1);
+    try{ await storeIdbPut('preJoinBackup', JSON.stringify({at: Date.now(), biz: prev.businessId || '', products: productsData, customers: customersData, suppliers: suppliersData, invoices: invoicesData})); }catch(e){}   /* AIO0911MO196: پرانی دکان کا ڈیٹا گم نہیں — الگ محفوظ */
     syncWipeLocalBusinessData(); await syncBaseClearAll();
+    try{ persistAllData(); }catch(e){} await storeFlush();   /* AIO0911MO196: خالی فہرستیں پہلے پکی لکھی جائیں */
     s.syncJoined = true; s.syncRole = user.role === 'admin' ? 'owner2' : 'staff'; s.syncSlot = slot; s.syncWasListed = false;
     s.syncDeviceName = name || (user.role === 'admin' ? 'Owner device ' + slot : user.name + "'s device");
     saveToStorage('settings', s); refreshMultiFlag();
@@ -29328,6 +29365,7 @@ async function doJoinShop(){
     syncFixCounters(); persistAllData();
     joinMsg('✅ Connected!', true);
     if(window._mdJoinPin){ try{ mdAfterJoin(window._mdJoinPin); }catch(e){} } else { try{ mdAfterJoin(pin); }catch(e){} }
+    try{ persistAllData(); }catch(e){} await storeFlush();   /* AIO0911MO196: دوبارہ کھولنے سے پہلے سب لکھائی مکمل */
     setTimeout(() => { alert(`✅ Connected to ${shop.businessName || 'the shop'}.` + (window._mdJoinPin ? '\nLogging you in…' : '\nLog in with your PIN.')); location.reload(); }, 300);
   }catch(e){ revert('Could not connect — ' + (e && e.message || e)); }
 }
@@ -34946,9 +34984,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO195'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO196'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'User Management: paste staff AIO ID at the top — name, Gmail, mobile, PIN shown, Save';
+  const UPDATE_NOTE = 'Home page locked at 100% (no A− / A+ there); staff phone never shows another shop old items';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35850,5 +35888,17 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 })();
 </script>
 
+<script>
+/* AIO0911MO196 / AIODR0911MO161 (مالک کا حکم): ہوم صفحہ ہمیشہ 100٪ — وہاں A− / A+ نہیں، نہ چھوٹا نہ بڑا، اسکرین سے باہر نہیں؛ باقی صفحوں پر پہلے جیسا */
+(function(){
+  function homeOn(){ const h = document.getElementById('screen-home'); return !!(h && h.classList.contains('active')); }
+  function apply(){ const on = homeOn(); document.documentElement.classList.toggle('aioHomeLock', on); try{ document.documentElement.style.zoom = on ? 1 : ((Number(AppState.settings.uiZoom) || 100) / 100); }catch(e){} }
+  const _a = window.applyUiZoom;
+  if(typeof _a === 'function') window.applyUiZoom = function(){ const r = _a.apply(this, arguments); if(homeOn()) document.documentElement.style.zoom = 1; return r; };
+  const st = document.createElement('style'); st.textContent = 'html.aioHomeLock .uiZoomStepper{display:none !important} html.aioHomeLock, html.aioHomeLock body{overflow-x:hidden !important; max-width:100vw}'; document.head.appendChild(st);
+  const h = document.getElementById('screen-home'); if(h) new MutationObserver(apply).observe(h, {attributes: true, attributeFilter: ['class']});
+  apply(); setTimeout(apply, 1500);
+})();
+</script>
 </body>
 </html>
