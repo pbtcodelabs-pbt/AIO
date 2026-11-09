@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO194</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO195</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO194</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO195</span>
     </div>
   </div>
 
@@ -34946,9 +34946,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO194'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO195'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = '«+ Add New User» asks for the staff AIO ID; AIO ID creation retries on weak internet';
+  const UPDATE_NOTE = 'User Management: paste staff AIO ID at the top — name, Gmail, mobile, PIN shown, Save';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35754,6 +35754,89 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     }catch(e){}
     return r;
   };
+
+  /* ---- 3b) AIO0911MO195 (مالک کا حکم): 👤 User Management میں سب سے اوپر چھوٹا ڈبہ — ملازم کی بھیجی AIO ID پیسٹ → نام / Gmail / موبائل / PIN سامنے → ✅ Save ---- */
+  function uaPinGen(){ const used = new Set(Object.values((AppState.settings && AppState.settings.staffPins) || {}).map(String)); for(let t = 0; t < 60; t++){ const p = String(1000 + Math.floor(Math.random() * 9000)); if(!/^(\d)\1{3}$/.test(p) && p !== '1234' && !used.has(p)) return p; } return String(1000 + Math.floor(Math.random() * 9000)); }
+  function uaOwner(){ const s = AppState.settings || {}; return !s.syncJoined && (!AppState.currentRole || AppState.currentRole === 'admin'); }
+  function uaBoxPaint(){
+    try{
+      const v = document.getElementById('usersListView'); if(!v) return;
+      let bx = document.getElementById('uaAioBox');
+      if(!uaOwner()){ if(bx) bx.remove(); return; }
+      if(!bx){ bx = document.createElement('div'); bx.id = 'uaAioBox'; v.insertBefore(bx, v.firstChild); }
+      if(bx.dataset.on === String(aioMultiOn())) return;
+      bx.dataset.on = String(aioMultiOn());
+      bx.innerHTML = aioMultiOn()
+        ? `<div class="uaT">🆔 Add staff — paste the AIO ID they sent you</div>
+           <div class="uaRow"><input id="uaAioIn" maxlength="12" placeholder="AIO12345" autocomplete="off" oninput="uaAioFind(true)"><button type="button" onclick="uaAioPaste()">📋 Paste</button></div>
+           <div id="uaAioRes"></div>`
+        : `<div class="uaT">🆔 Add staff by AIO ID</div><div class="uaH">First turn on <b>👥 Staff &amp; Devices</b> (Settings) — then paste your staff's AIO ID here.</div>`;
+    }catch(e){}
+  }
+  window.uaAioPaste = async function(){ const i = document.getElementById('uaAioIn'); try{ const t = await navigator.clipboard.readText(); if(t){ i.value = t.trim(); return uaAioFind(); } }catch(e){} i.focus(); const r = document.getElementById('uaAioRes'); if(r) r.innerHTML = '<div class="uaH">Long-press the box and choose «Paste»</div>'; };
+  let uaSeq = 0;
+  window.uaAioFind = async function(quiet){
+    const i = document.getElementById('uaAioIn'), res = document.getElementById('uaAioRes'); if(!i || !res) return;
+    const raw = (i.value.match(/AIO\s*\d{5}/i) || [i.value])[0], id = normId(raw), q = ++uaSeq;
+    if(!id){ res.innerHTML = quiet ? '' : '<div class="uaErr">Write the ID like AIO12345</div>'; return; }
+    if(me().id === id){ res.innerHTML = '<div class="uaErr">This is your own ID — paste your staff\'s ID</div>'; return; }
+    i.value = id; res.innerHTML = '<div class="uaH">⏳ Finding…</div>';
+    let r; try{ r = await call({op:'look', id, by: dev()}); }catch(e){ if(q === uaSeq) res.innerHTML = '<div class="uaErr">📶 Could not reach the server — press 📋 Paste again</div>'; return; }
+    if(q !== uaSeq) return;
+    if(!r || !r.ok){ res.innerHTML = `<div class="uaErr">${r && r.reason === 'no_id' ? '❌ No phone has this ID — check it again' : r && r.reason === 'wait' ? 'Too many tries — wait a while' : 'Not found — try again'}</div>`; return; }
+    const pin = uaPinGen();
+    res.innerHTML = `<div class="uaCard" data-id="${E(id)}">
+      <div class="uaL"><span>🆔 AIO ID</span><b style="letter-spacing:2px">${E(id)}</b></div>
+      <div class="uaL"><span>👤 Name</span><input id="uaNm" maxlength="40" value="${E(r.name || '')}"></div>
+      <div class="uaL"><span>✉️ Gmail</span><b style="direction:ltr">${E(r.gmail || '—')}</b></div>
+      <div class="uaL"><span>📱 Mobile</span><b style="direction:ltr">${E(r.mobile || '—')}</b></div>
+      <div class="uaL"><span>🔑 PIN</span><input id="uaPin" inputmode="numeric" maxlength="6" value="${pin}" class="uaPin"><small>change if you like</small></div>
+      <div class="uaL"><span>🧑‍💼 Access</span><select id="uaRole"><option value="salesman">Staff (Billing, Bills, Customers)</option><option value="admin">Owner's 2nd phone (full)</option></select></div>
+      <input type="hidden" id="uaMob" value="${E(r.mobile || '')}">
+      <button type="button" class="uaGo" onclick="uaAioSave()">✅ Save — their phone connects by itself</button></div>`;
+  };
+  window.uaAioSave = async function(){
+    const card = document.querySelector('#uaAioRes .uaCard'); if(!card) return;
+    const id = card.dataset.id, nm = (document.getElementById('uaNm').value || '').trim(), pin = (document.getElementById('uaPin').value || '').replace(/\D/g, ''), role = document.getElementById('uaRole').value, mob = document.getElementById('uaMob').value;
+    if(nm.length < 2){ alert('Please write the staff name'); return; }
+    if(pin.length < 4){ alert('PIN must be 4 to 6 digits'); return; }
+    await window.mdInvOpen();
+    const set = (k, v) => { const el = document.getElementById(k); if(el) el.value = v; };
+    set('ivAioId', id); set('ivName', nm); set('ivMob', mob); set('ivPin', pin); set('ivRole', role);
+    await window.aioIvFind(true);
+    if(window._ivAioId !== id){ return; }   /* فارم میں غلطی خود نظر آتی ہے */
+    const before = usersData.length;
+    await window.mdInvSave(0);
+    if(usersData.length > before){
+      const u = usersData[usersData.length - 1]; if(u && u.name === nm){ u.aioId = id; try{ persistAllData(); }catch(e){} }
+      const res = document.getElementById('uaAioRes'), inp = document.getElementById('uaAioIn'); if(res) res.innerHTML = `<div class="uaOk">✅ ${E(nm)} added — PIN <b>${E(pin)}</b>. Their phone (${E(id)}) connects by itself.</div>`; if(inp) inp.value = '';
+      try{ renderUserList(); }catch(e){}
+    }
+  };
+  function uaTags(){ try{ if(!uaOwner()) return; const w = document.getElementById('userListWrap'); if(!w) return; const cards = w.querySelectorAll('.userCard');
+    usersData.forEach((u, i) => { const c = cards[i]; if(!c || !u.aioId || c.querySelector('.uaIdTag')) return; const d = document.createElement('div'); d.className = 'uaIdTag'; d.textContent = '🆔 ' + u.aioId; (c.firstElementChild || c).appendChild(d); }); }catch(e){} }
+  { const _r2 = window.renderUserList; if(typeof _r2 === 'function') window.renderUserList = function(){ const r = _r2.apply(this, arguments); uaBoxPaint(); uaTags(); return r; }; }
+  { const _g = window.goTo; if(typeof _g === 'function') window.goTo = function(n){ const r = _g.apply(this, arguments); if(n === 'users') setTimeout(() => { uaBoxPaint(); uaTags(); }, 50); return r; }; }
+  { const st = document.createElement('style'); st.textContent = `
+    #uaAioBox{background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border:2px solid #10b981;border-radius:16px;padding:12px;margin:0 0 12px}
+    #uaAioBox .uaT{font-weight:900;color:#065f46;font-size:15px;margin-bottom:8px}
+    #uaAioBox .uaRow{display:flex;gap:8px}
+    #uaAioBox .uaRow input{flex:1;min-width:0;padding:11px 12px;border:2px solid #10b981;border-radius:12px;font-size:18px;font-weight:900;letter-spacing:2px;text-align:center;text-transform:uppercase;background:#fff}
+    #uaAioBox .uaRow button{flex:0 0 auto;padding:0 16px;border:0;border-radius:12px;background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff;font-weight:900;font-size:15px;cursor:pointer}
+    #uaAioBox .uaH{font-size:13px;color:#475569;margin-top:6px}
+    #uaAioBox .uaErr{font-size:13px;color:#b91c1c;font-weight:800;margin-top:6px}
+    #uaAioBox .uaOk{font-size:14px;color:#065f46;font-weight:800;margin-top:8px;background:#d1fae5;border-radius:10px;padding:8px 10px}
+    #uaAioBox .uaCard{background:#fff;border:1.5px solid #a7f3d0;border-radius:14px;padding:10px 12px;margin-top:10px}
+    #uaAioBox .uaL{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed #e2e8f0;flex-wrap:wrap}
+    #uaAioBox .uaL>span{flex:0 0 92px;font-size:13px;color:#64748b;font-weight:800}
+    #uaAioBox .uaL>b{flex:1;min-width:0;font-size:15px;color:#0f172a;word-break:break-all}
+    #uaAioBox .uaL input,#uaAioBox .uaL select{flex:1;min-width:0;padding:8px 10px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:15px;font-weight:700;background:#fff}
+    #uaAioBox .uaL .uaPin{flex:0 0 110px;text-align:center;letter-spacing:5px;font-size:19px;font-weight:900;color:#0f766e}
+    #uaAioBox .uaL small{font-size:11.5px;color:#94a3b8}
+    #uaAioBox .uaGo{width:100%;margin-top:10px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff;font-weight:900;font-size:15.5px;cursor:pointer;box-shadow:0 4px 0 #065f46}
+    .uaIdTag{font-size:12px;font-weight:800;color:#7c3aed;margin-top:2px;letter-spacing:1px}
+    #usersListView #mdAddStaffBtn{display:none !important}
+    @media (min-width:700px){#uaAioBox{max-width:620px}}`; document.head.appendChild(st); }
 
   /* ---- 4) Staff & Devices میں اپنی AIO ID ---- */
   const _rsd = window.renderStaffDevicesCard;
