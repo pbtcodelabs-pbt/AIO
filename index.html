@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO191</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO192</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO191</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO192</span>
     </div>
   </div>
 
@@ -26096,11 +26096,11 @@ function toggleUserActive(userId){
   if(!u) return;
   if(u.is_active && u.role === 'admin' && usersData.filter(x => x.role === 'admin' && x.is_active && x.user_id !== u.user_id).length < 1){ alert('This is the only owner — it cannot be suspended.'); return; }
   if(u.is_active && !confirm(`⛔ Suspend ${u.name}?\n\nThey cannot log in (on any phone) until you tap ▶️ Resume.`)) return;
-  u.is_active = !u.is_active; delete u.pauseUntil;   /* AIO0911MO191 (#193): معطل / بحال — اب محفوظ اور سنک بھی (پہلے صرف اسکرین پر) */
+  u.is_active = !u.is_active; delete u.pauseUntil;   /* AIO0911MO192 (#193): معطل / بحال — اب محفوظ اور سنک بھی (پہلے صرف اسکرین پر) */
   persistAllData(); try{ if(typeof syncNow === 'function' && AppState.settings.syncOn) syncNow(); }catch(e){}
   renderUserList();
 }
-/* AIO0911MO191 (مالک کا حکم، #193): ⏸️ عارضی روک — چند دن، پھر خود بحال */
+/* AIO0911MO192 (مالک کا حکم، #193): ⏸️ عارضی روک — چند دن، پھر خود بحال */
 function pauseUser(userId){
   const u = usersData.find(x => x.user_id === userId); if(!u) return;
   const d = parseInt((prompt(`⏸️ Pause ${u.name} for how many days? (1–60)\nThey cannot log in until then — it opens by itself.`, '1') || '').replace(/\D/g, ''), 10);
@@ -34946,9 +34946,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO191'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO0911MO192'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Staff: only AIO ID (old paste / shop code removed); Users: ⏸️ Pause, ⛔ Suspend, 🗑️ Delete';
+  const UPDATE_NOTE = 'Login fits one screen (small tiles); AIO ID for everyone — Gmail from Google list, Only me / Work in a shop';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35449,7 +35449,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 })();
 </script>
 
-<!-- ===== AIO0911MO191 / AIODR0911MO155 (مالک کا حکم، ہیلپ ڈیسک #193): ملازم کا فون جوڑنا بالکل سادہ —
+<!-- ===== AIO0911MO192 / AIODR0911MO155 (مالک کا حکم، ہیلپ ڈیسک #193): ملازم کا فون جوڑنا بالکل سادہ —
      ہر فون اپنا اکاؤنٹ (نام، موبائل، Gmail) بنا کر پکی «AIO ID» (AIO48213) لیتا ہے؛ ملازم یہ ID مالک کو بتاتا ہے؛
      مالک «➕ Add a staff phone» میں صرف ID لکھتا ہے (نام / موبائل خود، PIN خود)؛ ملازم کا فون خود دیکھتا ہے کہ کسی دکان نے
      شامل کیا اور ایک دبانے سے جڑ جاتا ہے (کوئی کوڈ / پیغام / وقت کی حد نہیں)۔ سرور: aio-pos-verify `/aioid` (reg / me / look / invite / done / del) ===== -->
@@ -35470,9 +35470,30 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 .ivAio{display:flex;gap:6px;align-items:stretch}.ivAio input{flex:1;text-transform:uppercase;letter-spacing:2px;font-weight:900;text-align:center;direction:ltr}
 .ivAio button{border:0;border-radius:12px;padding:0 14px;font-weight:900;background:#0f766e;color:#fff;cursor:pointer;font-family:inherit}
 .ivAioOk{font-size:13px;font-weight:800;margin:4px 0 2px;min-height:16px}
-/* AIO0911MO191 (مالک کا حکم): پرانے راستے لاگ اِن صفحے سے ہٹائے — صرف AIO ID */
+/* AIO0911MO192 (مالک کا حکم): پرانے راستے لاگ اِن صفحے سے ہٹائے — صرف AIO ID */
 #loginInvBtn,#loginJoinShopBtn{display:none !important}
 #aioIdCard.on{background:#dcfce7;border-color:#22c55e;color:#14532d;font-size:15px;font-weight:800}
+/* AIO0911MO192 (مالک کا حکم): لاگ اِن صفحہ ایک اسکرین میں — بڑے بٹن چھوٹے ٹائلوں (#loginTiles) میں، ورژن صاف */
+#loginScreen .loginBox{padding-top:14px !important;padding-bottom:12px !important}
+#loginScreen .loginLogoBadge{width:46px !important;height:46px !important;font-size:24px !important;margin:0 auto 4px !important;border-radius:14px !important}
+#loginScreen h2#loginHeading{font-size:19px !important;margin:2px 0 0 !important}
+#loginScreen #loginVersionBadge{font-size:11.5px !important;margin:2px 0 6px !important;color:#475569 !important;display:block !important;white-space:nowrap}
+#loginScreen #loginSubStatus{margin:0 0 8px !important;padding:6px 10px !important;font-size:12.5px !important}
+#loginScreen .loginRoleTabs{margin-bottom:8px !important;gap:8px !important}
+#loginScreen .loginRoleTab{padding:7px 6px !important;min-height:0 !important;flex-direction:row !important;gap:6px !important;font-size:14px !important}
+#loginScreen .loginRoleTab .lrtIcon{font-size:17px !important;margin:0 !important}
+#loginScreen .loginRememberRow{margin:6px 2px !important}
+#loginScreen #loginEnterBtn{margin-top:4px !important}
+#loginScreen .lgHid{display:none !important}
+#aioIdCard{margin-top:8px;padding:7px 10px;font-size:12.5px}
+#aioIdCard.mini{background:#f8fafc;border:1px dashed #cbd5e1;padding:5px 8px;font-size:12px;color:#475569}
+#aioIdCard.mini b.id{font-size:14px}#aioIdCard.mini a{color:#0f766e;font-weight:800;margin-inline-start:6px}
+#aioIdCard .row{margin-top:4px}#aioIdCard .row button{padding:5px 10px;font-size:12.5px}
+#loginTiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+#loginTiles button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 3px;border-radius:12px;background:#f1f5f9;border:1px solid #e2e8f0;font-family:inherit;font-weight:700;font-size:10.5px;line-height:1.15;color:#0f172a;text-align:center;min-height:54px}
+#loginTiles button i{font-style:normal;font-size:18px;line-height:1}
+#loginTiles button:active{transform:scale(.96)}
+@media (min-width:700px){#loginTiles button{font-size:11.5px;min-height:58px}}
 </style>
 <script>
 (function(){
@@ -35494,16 +35515,33 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 
   /* ---- 1) اکاؤنٹ بنائیں: نام، موبائل، Gmail → AIO ID ---- */
   window.aioIdRegOpen = function(){
-    const m = me(), s = (typeof AppState !== 'undefined' && AppState.settings) || {};
+    const m = me(), s = (typeof AppState !== 'undefined' && AppState.settings) || {}, off = navigator.onLine === false;
     box(`<h3>🆔 Create your AIO ID</h3>
-      <div class="aiH">One time only. Your <b>AIO ID</b> connects this phone to a shop — just tell it to your shop owner. ${navigator.onLine === false ? '<br><b style="color:#b45309">📶 No internet — you can do this later.</b>' : ''}</div>
+      <div class="aiH">One time only — needed to use AIO POS. Choose your Gmail, write your name and mobile.</div>
+      <label class="mdLbl">✉️ Gmail</label>
+      <div id="aiGBtn" style="display:flex;justify-content:center;min-height:44px;margin-bottom:6px"></div>
+      <input id="aiMail" class="mdInput" type="email" maxlength="80" value="${E(m.gmail || '')}" placeholder="…or type: name@gmail.com" style="direction:ltr">
       <label class="mdLbl">👤 Your name</label><input id="aiName" class="mdInput" maxlength="60" value="${E(m.name || '')}" placeholder="e.g. Ali Raza">
       <label class="mdLbl">📱 Mobile number</label><input id="aiMob" class="mdInput" inputmode="tel" maxlength="16" value="${E(m.mobile || s.businessPhone || '')}" placeholder="03XXXXXXXXX">
-      <label class="mdLbl">✉️ Gmail</label><input id="aiMail" class="mdInput" type="email" maxlength="80" value="${E(m.gmail || '')}" placeholder="name@gmail.com" style="direction:ltr">
       <div class="aiErr" id="aiErr"></div>
       <button type="button" class="mdBigBtn" id="aiGo" onclick="aioIdRegGo()">✅ Create my AIO ID</button>
-      <button type="button" class="mdBigBtn ghost" style="background:#fff;color:#64748b;box-shadow:none;border:1.5px solid #cbd5e1" onclick="aioIdLater()">Later</button>`, false);
+      ${off ? `<button type="button" class="mdBigBtn ghost" style="background:#fff;color:#64748b;box-shadow:none;border:1.5px solid #cbd5e1" onclick="aioIdLater()">📶 No internet — continue for now</button>` : ''}`, false);
+    aioGsiBtn();
   };
+  /* Gmail خود: گوگل کی فہرست (فون کے سب Gmail) سے چنیں — نام بھی ساتھ */
+  const GCID = '954131537356-2be2rne30mje71l9qibosblvj3j0eqoj.apps.googleusercontent.com';
+  function gsiLoad(){ return new Promise((res, rej) => { if(window.google && google.accounts && google.accounts.id) return res(); const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = () => res(); sc.onerror = rej; document.head.appendChild(sc); setTimeout(() => (window.google && google.accounts && google.accounts.id) ? res() : rej(new Error('gsi')), 9000); }); }
+  async function aioGsiBtn(){
+    const el = document.getElementById('aiGBtn'); if(!el) return;
+    try{
+      await gsiLoad();
+      google.accounts.id.initialize({ client_id: GCID, auto_select: false, cancel_on_tap_outside: true, ux_mode: 'popup', callback: r => {
+        try{ const p = JSON.parse(decodeURIComponent(escape(atob(r.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))))); const mi = document.getElementById('aiMail'), ni = document.getElementById('aiName');
+          if(mi && p.email){ mi.value = String(p.email).toLowerCase(); } if(ni && !ni.value && p.name) ni.value = p.name;
+          const mb = document.getElementById('aiMob'); if(mb && !mb.value) mb.focus(); else if(ni) ni.focus(); }catch(e){} } });
+      el.innerHTML = ''; google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill', width: 280 });
+    }catch(e){ el.innerHTML = '<span style="font-size:12px;color:#64748b">Google list not available — type your Gmail below</span>'; }
+  }
   window.aioIdLater = function(){ try{ sessionStorage.setItem('aioIdLater', '1'); }catch(e){} shut(); paintCard(); };
   window.aioIdRegGo = async function(){
     const v = id => (document.getElementById(id).value || '').trim(), err = t => { document.getElementById('aiErr').textContent = t; };
@@ -35516,9 +35554,17 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       const r = await call({op:'reg', app: APP, dev: dev(), name, mobile: '0' + mobile.slice(-10), gmail});
       if(!r || !r.ok || !r.id){ b.disabled = false; return err(r && r.reason === 'missing' ? 'Please check name, mobile and Gmail' : 'Could not create — try again'); }
       const m = me(); Object.assign(m, {id: r.id, name, mobile: '0' + mobile.slice(-10), gmail}); save(m);
-      aioIdShow(); paintCard(); poll();
+      aioIdChoose(); paintCard(); poll();
     }catch(e){ b.disabled = false; err('📶 No internet — please try again'); }
   };
+  window.aioIdChoose = function(){
+    const m = me();
+    box(`<h3>✅ Your AIO ID is ready</h3><div class="aioIdBig">${E(m.id)}</div>
+      <div class="aiH" style="text-align:center">How will you use AIO POS?</div>
+      <button type="button" class="mdBigBtn" onclick="aioIdMode('solo')">👤 Only me — this is my own phone / shop<br><small style="font-weight:700;opacity:.85">Tap and enter the app</small></button>
+      <button type="button" class="mdBigBtn" style="background:linear-gradient(180deg,#22c55e,#15803d)" onclick="aioIdMode('staff')">🏪 I work in a shop — connect to my owner<br><small style="font-weight:700;opacity:.85">Send this ID to your shop owner</small></button>`, false);
+  };
+  window.aioIdMode = function(md){ const m = me(); m.mode = md; save(m); paintCard(); if(md === 'staff'){ aioIdShow(); try{ aioIdShare(); }catch(e){} } else { shut(); toast('✅ Welcome — tap Enter'); } };
   window.aioIdShow = function(){
     const m = me(); if(!m.id) return aioIdRegOpen();
     box(`<h3>✅ Your AIO ID</h3><div class="aioIdBig">${E(m.id)}</div>
@@ -35549,13 +35595,52 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       }
       c.className = '';
       if(c.previousElementSibling !== en) en.insertAdjacentElement('afterend', c);
-      if(!m.id){ c.innerHTML = `🆔 <b>Work in a shop? Connect this phone</b><div class="row"><button type="button" onclick="aioIdRegOpen()">🆔 Create my AIO ID</button></div>`; return; }
+      if(!m.id){ c.innerHTML = `<div class="row" style="margin:0"><button type="button" onclick="aioIdRegOpen()">🆔 Create my AIO ID</button></div>`; return; }
+      if(m.mode !== 'staff'){ c.className = 'mini'; c.innerHTML = `🆔 <b class="id">${E(m.id)}</b> <a href="#" onclick="event.preventDefault();aioIdMode('staff')">🏪 Work in a shop?</a>`; return; }
       c.innerHTML = `🆔 Your AIO ID: <b class="id">${E(m.id)}</b>
         <div class="row"><button type="button" onclick="aioIdCopy()">📋 Copy</button><button type="button" class="g" onclick="aioIdShare()">📤 Send to owner</button></div>
         <div class="st" id="aioIdSt">⏳ Give this ID to your shop owner — this phone connects by itself when they add you</div>`;
     }catch(e){}
   }
   window.aioIdPaint = paintCard;
+  /* AIO0911MO192: اضافی بٹن ایک چھوٹے ٹائل گرڈ میں — اصل بٹن چھپے (کام ویسے، ٹائل اسی کو دباتا ہے) */
+  const TILES = [
+    ['#loginRestoreBtn', '🔄', 'Restore purchase', 'acct'],
+    ['button[onclick^="openRequestCodeModal"]', '📩', 'Get code', 'acct'],
+    ['a[onclick^="toggleLoginActivationBox"]', '🔑', 'Have a code', 'acct'],
+    ['a[onclick^="openPackagePlansModal"]', '📦', 'Plans', 'acct'],
+    ['a[onclick^="acctOpen"]', '👤', 'Account sign-in', 'acct'],
+    ['.loginAcctSend', '📨', 'Send details', 'acct'],
+    ['button[onclick^="shareAppLink"]', '📤', 'Share app', ''],
+    ['button[onclick*="\'intro\'"]', '🎬', 'Intro video', ''],
+    ['button[onclick*="\'staff\'"]', '📱', 'Staff video', ''],
+    ['.loginForgotHint a', '🔐', 'Forgot PIN', '']
+  ];
+  function tiles(){
+    try{
+      const box = document.querySelector('#loginScreen .loginBox'); if(!box) return;
+      let g = document.getElementById('loginTiles'); if(!g){ g = document.createElement('div'); g.id = 'loginTiles'; }
+      const card = document.getElementById('aioIdCard'), en = document.getElementById('loginEnterBtn');
+      const anchor = card && card.previousElementSibling === en ? card : en; if(anchor && g.previousElementSibling !== anchor) anchor.insertAdjacentElement('afterend', g);
+      const s = AppState.settings || {}, joined = !!s.syncJoined;
+      const html = [];
+      TILES.forEach(([sel, ic, lb, grp], k) => {
+        const el = box.querySelector(sel); if(!el) return;
+        const host = el.closest('.loginHint') || el;
+        host.classList.add('lgHid');
+        const shown = el.dataset.lgShow !== undefined ? el.dataset.lgShow === '1' : true;
+        if(el.style.display === 'none' || (host !== el && host.style.display === 'none')) return;
+        if(el.classList.contains('subOnly') && document.documentElement.classList.contains('isLinked')) return;
+        if(joined && grp === 'acct') return;
+        html.push(`<button type="button" data-k="${k}"><i>${ic}</i>${lb}</button>`);
+      });
+      const h = html.join(''); if(g._h !== h){ g._h = h; g.innerHTML = h; g.querySelectorAll('button').forEach(b => b.onclick = () => { const el = box.querySelector(TILES[+b.dataset.k][0]); if(el) el.click(); }); }
+      g.style.display = h ? '' : 'none';
+      /* «Sign in with account» والا لنک پلانز والی لائن میں ہے — اس پوری لائن کو بھی چھپائیں */
+      box.querySelectorAll('.loginHint').forEach(x => { if(x.querySelector('a[onclick^="openPackagePlansModal"], a[onclick^="acctOpen"]')) x.classList.add('lgHid'); });
+    }catch(e){}
+  }
+  window.aioLoginTiles = tiles;
   let shownFor = '';
   async function poll(){
     const m = me(); if(!m.id || !navigator.onLine) return;
@@ -35588,9 +35673,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       try{ userPauseTick(); }catch(e){}
       const m = me(), s = AppState.settings || {};
       if(m.pendBiz && s.syncJoined && s.businessId === m.pendBiz && m.id){ call({op:'done', id: m.id, dev: dev()}).catch(() => {}); delete m.pendBiz; save(m); }
-      paintCard();
+      paintCard(); tiles(); setInterval(() => { const ls = document.getElementById('loginScreen'); if(ls && ls.offsetParent !== null){ paintCard(); tiles(); } }, 2000);
       let later = false; try{ later = sessionStorage.getItem('aioIdLater') === '1'; }catch(e){}
-      if(!m.id && !later && !s.syncJoined) aioIdRegOpen();
+      if(!m.id && !(later && navigator.onLine === false)) aioIdRegOpen();   /* AIO0911MO192: ہر بندے کے لیے لازمی (صرف انٹرنیٹ نہ ہو تو اس بار چھوڑ) */
       poll();
       setInterval(() => { if(document.hidden) return; const ls = document.getElementById('loginScreen'); const onLogin = ls && ls.offsetParent !== null; if(onLogin || !(AppState.settings || {}).syncJoined) poll(); }, 15000);
       document.addEventListener('visibilitychange', () => { if(!document.hidden) poll(); });
@@ -35635,7 +35720,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     const nm = userId ? ((usersData.find(x => x.user_id === userId) || {}).name || '') : ((document.getElementById('ivName') || {}).value || '').trim();
     const role = userId ? ((usersData.find(x => x.user_id === userId) || {}).role || 'salesman') : ((document.getElementById('ivRole') || {}).value || 'salesman');
     const before = usersData.length;
-    if(!userId){   /* AIO0911MO191: پیکج کی حد — بنے ہوئے ملازم بھی گنے جائیں (صرف جڑے فون نہیں) */
+    if(!userId){   /* AIO0911MO192: پیکج کی حد — بنے ہوئے ملازم بھی گنے جائیں (صرف جڑے فون نہیں) */
       try{ const max = planMaxDevices(), pins = AppState.settings.staffPins || {};
         const made = usersData.filter(u => u.is_active !== false && pins[u.user_id] && !(typeof SYNC_SEED_STAFF_PINS !== 'undefined' && SYNC_SEED_STAFF_PINS.includes(u.pin))).length;
         if(max && max < 99 && 1 + made >= max){ const e = document.getElementById('ivErr'); if(e){ e.style.color = ''; e.textContent = `Your package allows ${max} phone${max > 1 ? 's' : ''} (owner included) — ${made} staff already added. Suspend / delete one in 👤 Users, or upgrade the package.`; } return; } }catch(e){}
