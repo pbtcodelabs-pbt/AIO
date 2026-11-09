@@ -34948,7 +34948,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
   const APP_VERSION = 'AIO0911MO193'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Login: «App version» moved to the bottom; your AIO ID clearly labelled «Your ID»';
+  const UPDATE_NOTE = 'Login: shop name shown big — «This mobile is connected with 🏪 Ali & Company»; App version at the bottom';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35472,7 +35472,8 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 .ivAioOk{font-size:13px;font-weight:800;margin:4px 0 2px;min-height:16px}
 /* AIO0911MO193 (مالک کا حکم): پرانے راستے لاگ اِن صفحے سے ہٹائے — صرف AIO ID */
 #loginInvBtn,#loginJoinShopBtn{display:none !important}
-#aioIdCard.on{background:#dcfce7;border-color:#22c55e;color:#14532d;font-size:15px;font-weight:800}
+#aioIdCard.on{background:#dcfce7;border-color:#22c55e;color:#14532d;font-size:13.5px;font-weight:800}
+#aioIdCard .shopNm{font-size:19px;font-weight:900;color:#065f46;margin:2px 0}
 /* AIO0911MO193 (مالک کا حکم): لاگ اِن صفحہ ایک اسکرین میں — بڑے بٹن چھوٹے ٹائلوں (#loginTiles) میں، ورژن صاف */
 #loginScreen .loginBox{padding-top:14px !important;padding-bottom:12px !important}
 #loginScreen .loginLogoBadge{width:46px !important;height:46px !important;font-size:24px !important;margin:0 auto 4px !important;border-radius:14px !important}
@@ -35590,8 +35591,8 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       if(!c){ c = document.createElement('div'); c.id = 'aioIdCard'; }
       const m = me(), s = AppState.settings || {}, joined = !!s.syncJoined;
       if(joined){
-        let shop = ''; try{ shop = (shopInfo() || {}).businessName || ''; }catch(e){} shop = shop || s.businessName || 'your shop';
-        c.className = 'on'; c.innerHTML = `✅ This mobile is connected with <b>${E(shop)}</b><div class="st">Tap <b>Enter</b> and type your PIN${m.id ? ' • Your ID: ' + E(m.id) : ''}</div>`;
+        let shop = ''; try{ shop = (shopInfo() || {}).businessName || ''; }catch(e){} shop = shop || m.shop || s.businessName || '';
+        c.className = 'on'; c.innerHTML = `✅ This mobile is connected with<div class="shopNm">🏪 ${E(shop || 'the shop')}</div><div class="st">Tap <b>Enter</b> and type your PIN${m.id ? ' • Your ID: ' + E(m.id) : ''}</div>`;
         if(c.nextElementSibling !== en) en.insertAdjacentElement('beforebegin', c);
         return;
       }
@@ -35664,7 +35665,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   window.aioIdPoll = poll;
   window.aioIdJoin = async function(){
     const iv = window._aioInv; if(!iv) return; shut();
-    const m = me(); m.pendBiz = iv.biz; save(m);
+    const m = me(); m.pendBiz = iv.biz; if(iv.shop) m.shop = iv.shop; save(m);
     openJoinShopModal(iv.biz);
     document.getElementById('joinShopPin').value = iv.pin;
     document.getElementById('joinShopDevName').value = (iv.uname || m.name || 'Staff') + "'s phone";
