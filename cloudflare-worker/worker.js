@@ -373,6 +373,10 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS sale (id INTEGER PRIMARY KEY AUTOINCREMENT, rec TEXT, ts INTEGER, src TEXT, units INTEGER, mon TEXT)");
     try { this.sql.exec("ALTER TABLE sale ADD COLUMN who TEXT"); } catch (e) {}   /* AGP0511TH011: فروخت کے وقت کا «لانے والا» محفوظ — بعد میں ایجنٹ ہٹے تو پرانا حساب نہ بدلے */
     this.sql.exec("CREATE TABLE IF NOT EXISTS agcnic (cnic TEXT PRIMARY KEY, code TEXT, id TEXT, ts INTEGER)");   /* MCS0511TH145: ایک شناختی کارڈ = ایک ایجنٹ = ایک کوڈ، ہمیشہ کے لیے (حذف کے بعد بھی) */
+    /* AGP0911MO015 (مالک کا حکم): PBT پورٹل — لاگ اِن صرف 6 ہندسوں کا PIN؛ PIN بھولنے پر پیدائش کا سال (ایک بار محفوظ)؛ ڈویلپر کا PIN سیشن */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS ppyob (role TEXT, id TEXT, yob TEXT, PRIMARY KEY (role, id))");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS ppsess (tok TEXT PRIMARY KEY, exp INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS ppfail (k TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS codev (phone TEXT PRIMARY KEY, name TEXT, pin TEXT, ts INTEGER, seen INTEGER)");   /* MCS0511TH136: کو-ڈویلپر (صرف جانچ موڈ — کچھ محفوظ / منظور نہیں) */
     if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN paid INTEGER DEFAULT 0"); } catch (e) {}
@@ -421,6 +425,67 @@ export class McsStats {
       for (const t of ["agref", "agpay", "agproof", "agmsg"]) this.sql.exec("UPDATE " + t + " SET code = ? WHERE code = ?", d.code, old);
     }
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agmig2', '1')");
+  }
+  /* ===== AGP0911MO015: PBT پورٹل کا آسان لاگ اِن ===== */
+  ppSha(t) { return crypto.subtle.digest("SHA-256", new TextEncoder().encode("ppdev:" + t)).then((h) => [...new Uint8Array(h)].map((x) => x.toString(16).padStart(2, "0")).join("")); }
+  ppFails(k, win, add) { const now = Date.now(); this.sql.exec("DELETE FROM ppfail WHERE ts < ?", now - 86400e3); if (add) this.sql.exec("INSERT INTO ppfail (k, ts) VALUES (?, ?)", k, now); return this.sql.exec("SELECT COUNT(*) AS n FROM ppfail WHERE k = ? AND ts > ?", k, now - win).toArray()[0].n; }
+  ppAgents() { return this.sql.exec("SELECT id, data FROM agent").toArray().map((r) => Object.assign(JSON.parse(r.data), { _id: r.id })).filter((x) => x.status === "approved" && !x.off); }
+  ppFind(role, pin, phone) {   /* PIN (+ موبائل اختیاری) سے بندہ ڈھونڈیں */
+    if (role === "agent") return this.ppAgents().filter((x) => x.pin && x.pin === pin && (!phone || x.phone === phone)).map((x) => ({ id: x.phone, phone: x.phone, name: x.name, code: x.code }));
+    if (role === "codev") return this.sql.exec("SELECT phone, name FROM codev WHERE pin = ?" + (phone ? " AND phone = ?" : ""), ...(phone ? [pin, phone] : [pin])).toArray().map((x) => ({ id: x.phone, phone: x.phone, name: x.name }));
+    return [];
+  }
+  ppYob(role, id) { const r = this.sql.exec("SELECT yob FROM ppyob WHERE role = ? AND id = ?", role, id).toArray()[0]; return r ? r.yob : ""; }
+  async ppOp(op, b) {
+    const role = String(b.role || ""), pin = String(b.pin || ""), now = Date.now(), key = String(b.key || "").slice(0, 80);
+    if (!["agent", "codev", "dev"].includes(role)) return Response.json({ ok: false, reason: "role" });
+    if (op === "/pp_check") { const r = this.sql.exec("SELECT exp FROM ppsess WHERE tok = ?", String(b.tok || "")).toArray()[0]; return Response.json({ ok: !!(r && r.exp > now) }); }
+    if (op === "/pp_login") {
+      if (this.ppFails("L:" + key, 15 * 60e3) >= 8 || this.ppFails("L:all:" + role, 15 * 60e3) >= 60) return Response.json({ ok: false, reason: "wait" });
+      if (!/^\d{6}$/.test(pin)) return Response.json({ ok: false, reason: "pin" });
+      if (role === "dev") {
+        const h = (this.sql.exec("SELECT v FROM agcfg WHERE k = 'devpin'").toArray()[0] || {}).v;
+        if (!h) return Response.json({ ok: false, reason: "nodev" });
+        if (h !== await this.ppSha(pin)) { this.ppFails("L:" + key, 0, 1); this.ppFails("L:all:dev", 0, 1); return Response.json({ ok: false, reason: "pin" }); }
+        const tok = "pps." + [...crypto.getRandomValues(new Uint8Array(24))].map((x) => x.toString(16).padStart(2, "0")).join("");
+        this.sql.exec("DELETE FROM ppsess WHERE exp < ?", now); this.sql.exec("INSERT INTO ppsess (tok, exp) VALUES (?, ?)", tok, now + 60 * 86400e3);
+        return Response.json({ ok: true, tok, yob: !!this.ppYob("dev", "dev") });
+      }
+      const m = this.ppFind(role, pin, b.phone || "");
+      if (!m.length) { this.ppFails("L:" + key, 0, 1); this.ppFails("L:all:" + role, 0, 1); return Response.json({ ok: false, reason: "pin" }); }
+      if (m.length > 1) return Response.json({ ok: false, reason: "dup" });   /* دو بندوں کا ایک ہی PIN — موبائل بھی پوچھیں */
+      return Response.json({ ok: true, phone: m[0].phone, name: m[0].name, code: m[0].code || "", yob: !!this.ppYob(role, m[0].id) });
+    }
+    if (op === "/pp_yob") {   /* پیدائش کا سال — ایک بار (لاگ اِن کے بعد) */
+      const y = String(b.yob || ""); if (!/^(19[2-9]\d|20[01]\d)$/.test(y)) return Response.json({ ok: false, reason: "yob" });
+      let id = "";
+      if (role === "dev") { if (!b.adminOk) { const r = this.sql.exec("SELECT exp FROM ppsess WHERE tok = ?", String(b.tok || "")).toArray()[0]; if (!r || r.exp < now) return Response.json({ ok: false, reason: "login" }); } id = "dev"; }
+      else { const m = this.ppFind(role, pin, b.phone || ""); if (m.length !== 1) return Response.json({ ok: false, reason: "login" }); id = m[0].id; }
+      this.sql.exec("INSERT INTO ppyob (role, id, yob) VALUES (?, ?, ?) ON CONFLICT (role, id) DO UPDATE SET yob = excluded.yob", role, id, y);
+      return Response.json({ ok: true });
+    }
+    if (op === "/pp_devpin") {   /* ڈویلپر کا PIN — صرف ای میل / پاس ورڈ (فائربیس) والے لاگ اِن سے */
+      if (!b.adminOk) return Response.json({ ok: false, reason: "login" });
+      if (!/^\d{6}$/.test(pin)) return Response.json({ ok: false, reason: "pin" });
+      this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('devpin', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", await this.ppSha(pin));
+      return Response.json({ ok: true, yob: !!this.ppYob("dev", "dev") });
+    }
+    if (op === "/pp_forgot") {   /* موبائل + پیدائش کا سال → نیا PIN (ڈویلپر: سال + نیا PIN، بہت سخت حد) */
+      const phone = String(b.phone || ""), y = String(b.yob || ""), np = String(b.newpin || "");
+      const fk = "F:" + role + ":" + (role === "dev" ? "dev" : phone);
+      if (this.ppFails(fk, 86400e3) >= (role === "dev" ? 3 : 5) || this.ppFails("F:" + key, 3600e3) >= 6) return Response.json({ ok: false, reason: "wait" });
+      if (!/^\d{6}$/.test(np) || /^(\d)\1{5}$/.test(np) || np === "123456") return Response.json({ ok: false, reason: "newpin" });
+      const id = role === "dev" ? "dev" : phone, yob = id ? this.ppYob(role, id) : "";
+      if (!yob) return Response.json({ ok: false, reason: "noyob" });
+      if (yob !== y) { this.ppFails(fk, 0, 1); this.ppFails("F:" + key, 0, 1); return Response.json({ ok: false, reason: "yob" }); }
+      if (role === "dev") { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('devpin', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", await this.ppSha(np)); return Response.json({ ok: true }); }
+      if (this.ppFind(role, np).some((x) => x.id !== id)) return Response.json({ ok: false, reason: "taken" });
+      if (role === "codev") { if (!this.sql.exec("SELECT phone FROM codev WHERE phone = ?", id).toArray().length) return Response.json({ ok: false, reason: "noyob" }); this.sql.exec("UPDATE codev SET pin = ? WHERE phone = ?", np, id); return Response.json({ ok: true }); }
+      const a = this.ppAgents().find((x) => x.phone === id); if (!a) return Response.json({ ok: false, reason: "noyob" });
+      const d = JSON.parse(this.sql.exec("SELECT data FROM agent WHERE id = ?", a._id).toArray()[0].data); d.pin = np; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), a._id);
+      return Response.json({ ok: true });
+    }
+    return Response.json({ ok: false, reason: "bad_op" });
   }
   finData(mon0) {
     const mon = String(mon0 || "").replace(/[^0-9_]/g, "").slice(0, 7);
@@ -734,6 +799,7 @@ export class McsStats {
       const out = rows.map((m) => ({ id: m.id, mine: m.who === A.side, who: m.who, name: nameOf(m.who), av: avOf(m), text: m.text || "", img: m.img || "", audio: m.audio || "", file: m.file || "", fname: m.fname || "", ts: m.ts }));
       return Response.json({ ok: true, w: A.w, cd: !!A.cd, title: me.staff ? label(b.thr).title : null, msgs: out, avs: avOut(out.map((m) => m.mine ? "" : m.av)) });
     }
+    if (op.startsWith("/pp_")) return this.ppOp(op, await request.json());
     if (op === "/cd_login") {   /* کو-ڈویلپر: موبائل + PIN → نام (صرف جانچ موڈ کھلتا ہے) */
       const b = await request.json();
       const r = this.sql.exec("SELECT name, pin, seen FROM codev WHERE phone = ?", b.phone).toArray()[0];
@@ -1031,9 +1097,12 @@ async function handleStat(request, env) {
 const MCS_ADMIN_EMAILS = ["pbtcodelabs@gmail.com"];
 let fbJwks = null, fbJwksAt = 0;
 function b64uToBytes(s) { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return Uint8Array.from(atob(s), (c) => c.charCodeAt(0)); }
+let PP_ENV = null;   /* AGP0911MO015: ڈویلپر کا PIN سیشن (pps.…) بھی ایڈمن مانا جاتا ہے */
 async function verifyFirebaseAdmin(request) {
   try {
-    const h = request.headers.get("Authorization") || ""; const jwt = h.replace(/^Bearer\s+/i, ""); const parts = jwt.split(".");
+    const h = request.headers.get("Authorization") || ""; const jwt = h.replace(/^Bearer\s+/i, "");
+    if (/^pps\.[0-9a-f]{48}$/.test(jwt)) { if (!PP_ENV || !PP_ENV.MCS_STATS) return false; const st = PP_ENV.MCS_STATS.get(PP_ENV.MCS_STATS.idFromName("mcs")); const r = await (await st.fetch("https://s/pp_check", { method: "POST", body: JSON.stringify({ role: "dev", tok: jwt }) })).json(); return !!r.ok; }
+    const parts = jwt.split(".");
     if (parts.length !== 3) return false;
     const head = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[0]))), pl = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[1])));
     const now = Date.now() / 1000;
@@ -1155,6 +1224,12 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_portal", { admin: !!admin, code: S(b.code, 60), phone, pin: S(b.pin, 10), act: S(b.act, 10), rk: S(b.rk, 60), note: S(b.note, 400), text: S(b.text, 2000), img: media(b.img, 700000), audio: media(b.audio, 900000) });
   }
   if (path === "/cdchat") { const phone = entPhone(b.phone); if (!phone || !b.pin) return reply({ ok: false, reason: "login" }); const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; }; return fwd("/cd_chat", { phone, pin: S(b.pin, 10), act: S(b.act, 10), text: S(b.text, 2000), img: media(b.img, 700000), audio: media(b.audio, 900000) }); }
+  if (path === "/pplogin") {   /* AGP0911MO015: {op: login|yob|devpin|forgot, role, pin, phone, yob, newpin, tok} */
+    const op = String(b.op || "login"); if (!["login", "yob", "devpin", "forgot"].includes(op)) return reply({ ok: false, reason: "bad_op" });
+    const ip = request.headers.get("CF-Connecting-IP") || "";
+    const adminOk = (op === "devpin" || (op === "yob" && b.role === "dev" && !b.tok)) ? await verifyFirebaseAdmin(request) : false;
+    return fwd("/pp_" + op, { role: S(b.role, 8), pin: S(b.pin, 10).replace(/\D/g, ""), phone: b.phone ? entPhone(b.phone) : "", yob: S(b.yob, 4), newpin: S(b.newpin, 10).replace(/\D/g, ""), tok: S(b.tok, 60), key: (dev || "x") + "|" + ip, adminOk: !!adminOk });
+  }
   if (path === "/cdfin") { const phone = entPhone(b.phone); if (!phone || !b.pin) return reply({ ok: false, reason: "login" }); return fwd("/cd_fin", { phone, pin: S(b.pin, 10), mon: S(b.mon, 7) }); }
   if (path === "/codev") { const phone = entPhone(b.phone); if (!phone || !b.pin) return reply({ ok: false, reason: "login" }); return fwd("/cd_login", { phone, pin: S(b.pin, 10) }); }
   if (path === "/codevadmin") {
@@ -1329,11 +1404,12 @@ async function handleProf(request, env, path) {
 
 export default {
   async fetch(request, env, ctx) {
+    PP_ENV = env;
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/pplogin"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
