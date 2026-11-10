@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO0911MO198</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1011TU199</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO0911MO198</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1011TU199</span>
     </div>
   </div>
 
@@ -14457,6 +14457,7 @@ function settleNegativeReceivable(c, why){
 }
 
 function renderCart(){
+  try{ if(aioMultiOn() && Billing.cart && Billing.cart.length) billSeqReserve(); }catch(e){}   /* AIO0911MO199 (#201) */
   try{ renderEditBillBanner(); }catch(e){}
   // ---------- پہلے ڈرافٹ واپس (گاہک + وصول رقم/ڈسکاؤنٹ)، پھر محفوظ — ورنہ خالی خانے پرانی رقم مٹا دیتے ----------
   if(!billingDraftCustomerRestored && Billing.cart.length > 0){
@@ -14898,13 +14899,42 @@ function generateBillNumbers(){
   const daily_bill_no = String(dailyCount);
   const monthly_bill_no = String(monthlyCount);
 
-  const bill_serial = nextBillSerial(); // AIO0111SU139: سادہ سیریل 1، 2، 3… (دن/مہینے والا چکر ختم)
+  const _rs = billSeqPick();   /* AIO0911MO199 (#201): کلاؤڈ سے پکا کیا ہوا سادہ نمبر — سب فونوں پر ایک ہی سلسلہ، کبھی دہرا نہیں */
+  const bill_serial = _rs || nextBillSerial(); // AIO0111SU139: سادہ سیریل 1، 2، 3… (دن/مہینے والا چکر ختم)
   return {
     daily_bill_no,
     monthly_bill_no,
     bill_serial,
-    invoice_no: `Bill#${bill_serial}` + (aioMultiOn() && syncSlot() > 0 ? '-' + syncSlot() : '')
+    invoice_no: `Bill#${bill_serial}` + (!_rs && aioMultiOn() && syncSlot() > 0 ? '-' + syncSlot() : '')   /* نیٹ نہ ہو تو ملازم کے فون پر پہلے جیسا «-1» (ٹکراؤ سے بچاؤ) */
   };
+}
+/* AIO0911MO199 (ہیلپ ڈیسک #201، Ali And Company، مالک کا ⚡): ملٹی ڈیوائس میں بھی سادہ بل نمبر 1، 2، 3… — «-1» نہیں۔
+   کلاؤڈ میں ایک گنتی (businesses/<biz>/store/billseq)؛ کارٹ میں پہلی چیز آتے ہی فون اگلا نمبر شرط کے ساتھ لکھ کر اپنے نام پکا کر لیتا ہے
+   (دو فون ایک ساتھ مانگیں تو ایک کی لکھائی رد، وہ اگلا لیتا ہے) — بل بنتے وقت وہی نمبر۔ نیٹ نہ ہو / ابھی نہ ملا ہو تو پہلے والا طریقہ۔ */
+function billSeqPick(){
+  try{
+    if(!aioMultiOn()) return 0;
+    const r = AppState.settings.billSeqResv; if(!r || !r.n || r.biz !== AppState.settings.businessId) return 0;
+    if(Date.now() - (r.at || 0) > 6 * 3600e3) return 0;
+    if(invoicesData.some(i => Number(i.bill_serial) === Number(r.n))) return 0;   /* استعمال ہو چکا */
+    return Number(r.n);
+  }catch(e){ return 0; }
+}
+let _billSeqBusy = false;
+async function billSeqReserve(){
+  if(_billSeqBusy || !aioMultiOn() || billSeqPick()) return;
+  _billSeqBusy = true;
+  try{
+    for(let t = 0; t < 6; t++){
+      const c = await syncGetChunk('billseq'); if(c === null) return;   /* نیٹ نہیں */
+      const cur = Number(((c.items || [])[0] || {}).n) || 0;
+      const k = Math.max(cur, nextBillSerial() - 1) + 1;
+      const res = await syncPutChunk('billseq', JSON.stringify([{n: k, at: Date.now(), by: syncSlot()}]), c.missing ? null : c.ut);
+      if(res && res.ut){ AppState.settings.billSeqResv = {n: k, at: Date.now(), biz: AppState.settings.businessId}; saveToStorage('settings', AppState.settings); return; }
+      if(res !== 'conflict') return;
+      await new Promise(z => setTimeout(z, 200 + Math.random() * 400));
+    }
+  }catch(e){}finally{ _billSeqBusy = false; }
 }
 
 // ---------- بل مکمل (Complete) کرنے سے پہلے کبھی بھی دیکھ سکیں کہ بل بالکل ویسا ہی بن رہا ہے جیسا چاہیے —
@@ -35014,9 +35044,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO0911MO198'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1011TU199'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Staff phone gets shop name, number and bill settings; more screens for staff; Sold by on A4; Drive backup Gmail shown';
+  const UPDATE_NOTE = 'Simple bill numbers 1, 2, 3 on every phone (no -1) — the cloud keeps them unique';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
