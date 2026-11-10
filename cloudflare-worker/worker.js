@@ -437,8 +437,8 @@ export class McsStats {
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agmig2', '1')");
   }
   /* ===== AGP0911MO018 (مالک کی منظوری، 9 نومبر): MCS کا حساب — صرف My City Shines =====
-     ممبرشپ (1000 فی سال): گوگل پلے سے = گوگل 15٪، مینٹیننس 15٪، لانے والا 15٪، باقی ڈویلپر / کو-ڈویلپر آدھا آدھا؛ سیدھی ملی = گوگل والا 15٪ بھی مینٹیننس میں۔
-     اشتہار: مینٹیننس 15٪، لانے والا 15٪، باقی آدھا آدھا۔ لانے والا: ایجنٹ / PBT-D (ڈویلپر) / PBT-C (کو-ڈویلپر) / PBT (آدھا آدھا)۔
+     ممبرشپ (1000 فی سال): گوگل پلے سے = گوگل 15٪، مینٹیننس 15٪، پھر بچی رقم کا 15٪ لانے والا (AGP1011TU023)، باقی ڈویلپر / کو-ڈویلپر آدھا آدھا؛ سیدھی ملی = گوگل والا 15٪ بھی مینٹیننس میں۔
+     اشتہار: مینٹیننس 15٪، بچی رقم کا 15٪ لانے والا، باقی آدھا آدھا۔ لانے والا: ایجنٹ / PBT-D (ڈویلپر) / PBT-C (کو-ڈویلپر) / PBT (آدھا آدھا)۔
      9 نومبر سے پہلے کی فروخت پرانے حساب (ایجنٹ 170، ڈویلپر / کو-ڈویلپر 265) سے۔ پلے والی رقم گوگل سے «✅ وصول» ہونے تک «⏳ آنا باقی»۔
      ادائیگی: ہر مہینے 20 سے 25 تاریخ، کم از کم 1,000؛ اس سے زیادہ ہو تو بیچ میں درخواست۔ */
   static FIN2_AT = Date.UTC(2026, 10, 8, 19, 0);   /* 9 نومبر 2026، رات 12 بجے (PKT) */
@@ -446,7 +446,9 @@ export class McsStats {
   finLog(op, data) { try { this.sql.exec("INSERT INTO finlog (ts, op, data) VALUES (?, ?, ?)", Date.now(), op, JSON.stringify(data || {}).slice(0, 2000)); } catch (e) {} }
   finMonOf(ts) { const t = new Date(ts + 5 * 3600e3); return t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"); }
   finCfg(k, d) { const r = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", k).toArray()[0]; return r ? r.v : d; }
-  finSplit(kind, src, amount, by, ts) {
+  finSplit(kind, src, amount, by, ts, gAct) {
+    /* AGP1011TU023 (مالک کا حکم، 10 نومبر): گوگل 15٪ (اصل کٹوتی معلوم ہو تو وہی — gAct) + مینٹیننس 15٪ پہلے؛ بچی رقم کا 15٪ لانے والا؛ باقی ڈویلپر / کو-ڈویلپر آدھا آدھا۔
+       سیدھی (پلے کے بغیر) ممبرشپ: گوگل والا 15٪ مینٹیننس میں؛ اشتہار: صرف مینٹیننس 15٪۔ لانے والا PBT-D = ڈویلپر، PBT-C = کو-ڈویلپر، PBT = آدھا آدھا۔ */
     const P = (x) => Math.round(amount * x), sh = { google: 0, maint: 0, agent: 0, dev: 0, codev: 0 };
     if (kind === "mem" && ts < McsStats.FIN2_AT) {   /* پرانا حساب (1000 پر 150 / 150 / 170 / 265 / 265) */
       const rate = parseInt(this.finCfg("rate", "170"), 10) || 170, k = amount / 1000;
@@ -455,10 +457,10 @@ export class McsStats {
       if (by === "agent") sh.agent = a; else if (by === "dev") sh.dev += a; else if (by === "codev") sh.codev += a; else { sh.dev += Math.round(a / 2); sh.codev += a - Math.round(a / 2); }
       sh.dev += amount - (sh.google + sh.maint + sh.agent + sh.dev + sh.codev); return sh;
     }
-    const a = P(0.15);
-    if (kind === "mem") { sh.google = src === "play" ? P(0.15) : 0; sh.maint = P(0.15) + (src === "play" ? 0 : P(0.15)); } else sh.maint = P(0.15);
+    if (kind === "mem") { sh.google = src === "play" ? (gAct != null ? Math.max(0, Math.min(amount, Math.round(gAct))) : P(0.15)) : 0; sh.maint = P(0.15) + (src === "play" ? 0 : P(0.15)); } else sh.maint = P(0.15);
+    const rem = Math.max(0, amount - sh.google - sh.maint), a = Math.round(rem * 0.15);
     if (by === "agent") sh.agent = a; else if (by === "dev") sh.dev += a; else if (by === "codev") sh.codev += a; else { sh.dev += Math.round(a / 2); sh.codev += a - Math.round(a / 2); }
-    const rest = amount - (sh.google + sh.maint + a); sh.dev += Math.round(rest / 2); sh.codev += rest - Math.round(rest / 2);
+    const rest = rem - a; sh.dev += Math.round(rest / 2); sh.codev += rest - Math.round(rest / 2);
     return sh;
   }
   finLines(mon) {   /* ہر فروخت / وصولی کی لائن + تقسیم */
@@ -471,6 +473,10 @@ export class McsStats {
       out.push({ id: "x" + x.id, kind: x.kind, src: "direct", mon: x.mon, ts: x.ts, units: 0, amount: x.amount, rk: x.rk, by: w.by || "pbt", code: w.code || "PBT", agent: w.agent || "", biz: w.biz || "", note: x.note, manual: 1, sh: this.finSplit(x.kind, "direct", x.amount, w.by || "pbt", x.ts) }); }
     const recv = {};
     for (const l of out) { if (l.src !== "play") { l.ready = 1; continue; } if (!(l.mon in recv)) { const g = this.finCfg("grecv_" + l.mon, ""); let o = null; try { o = g ? JSON.parse(g) : null; } catch (e) {} recv[l.mon] = o; } l.ready = recv[l.mon] ? 1 : 0; }
+    /* AGP1011TU023: گوگل سے اصل رقم آ گئی (grecv) تو اس مہینے کی ہر پلے فروخت پر گوگل کی اصل کٹوتی اسی تناسب سے — بچی رقم اور ایجنٹ کا 15٪ اسی سے */
+    const playSum = {}; for (const l of out) if (l.src === "play" && l.kind === "mem") playSum[l.mon] = (playSum[l.mon] || 0) + l.amount;
+    for (const l of out) { if (l.src !== "play" || l.kind !== "mem" || !recv[l.mon] || l.ts < McsStats.FIN2_AT) continue; const tot = playSum[l.mon] || 0; if (!tot) continue;
+      const cut = Math.max(0, tot - (recv[l.mon].amount || 0)); l.sh = this.finSplit("mem", "play", l.amount, l.by, l.ts, cut * l.amount / tot); }
     return out.sort((a, b) => a.ts - b.ts);
   }
   finCodevs() { return this.sql.exec("SELECT phone, name FROM codev ORDER BY ts").toArray(); }
