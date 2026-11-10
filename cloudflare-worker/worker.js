@@ -377,6 +377,8 @@ export class McsStats {
     /* AGP0911MO018 (مالک کی منظوری): MCS کا حساب — دستی وصولی (اشتہار / ممبرشپ)، ادائیگی کے اکاؤنٹ، ادائیگی کی درخواست */
     this.sql.exec("CREATE TABLE IF NOT EXISTS finx (id INTEGER PRIMARY KEY AUTOINCREMENT, mon TEXT, ts INTEGER, kind TEXT, amount INTEGER, rk TEXT, who TEXT, note TEXT)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS payacct (who TEXT PRIMARY KEY, data TEXT, ts INTEGER)");
+    /* AGP1011TU025 (مالک کا حکم): غلط / جانچ والی فروخت یا وصولی «ہٹائیں» — کبھی مٹتی نہیں، صرف void (حساب سے باہر)، «واپس لائیں» سے واپس، آڈٹ لاگ میں */
+    for (const t of ["sale", "finx"]) for (const c of ["void INTEGER DEFAULT 0", "vwhy TEXT", "vts INTEGER"]) { try { this.sql.exec("ALTER TABLE " + t + " ADD COLUMN " + c); } catch (e) {} }
     /* AGP0911MO019: ایجنٹ کی اطلاعات (سرور کے اصل واقعات سے) + حساب کا آڈٹ لاگ */
     this.sql.exec("CREATE TABLE IF NOT EXISTS agnote (id INTEGER PRIMARY KEY AUTOINCREMENT, who TEXT, kind TEXT, text TEXT, ts INTEGER, rd INTEGER DEFAULT 0)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS finlog (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, op TEXT, data TEXT)");
@@ -465,10 +467,10 @@ export class McsStats {
   }
   finLines(mon) {   /* ہر فروخت / وصولی کی لائن + تقسیم */
     const price = parseInt(this.finCfg("memprice", "1000"), 10) || 1000, out = [];
-    const sales = this.sql.exec("SELECT id, rec, ts, src, units, mon, who FROM sale" + (mon ? " WHERE mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
+    const sales = this.sql.exec("SELECT id, rec, ts, src, units, mon, who FROM sale WHERE COALESCE(void, 0) = 0" + (mon ? " AND mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
     for (const x of sales) { let w = null; try { w = x.who ? JSON.parse(x.who) : null; } catch (e) {} w = w || this.saleWho(x.rec); const src = x.src === "play" ? "play" : "direct", amount = (x.units || 0) * price;
       out.push({ id: "s" + x.id, kind: "mem", src, mon: x.mon, ts: x.ts, units: x.units, amount, rk: x.rec, by: w.by, code: w.code, agent: w.agent || "", biz: w.biz || "", sh: this.finSplit("mem", src, amount, w.by, x.ts) }); }
-    const xs = this.sql.exec("SELECT id, mon, ts, kind, amount, rk, who, note FROM finx" + (mon ? " WHERE mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
+    const xs = this.sql.exec("SELECT id, mon, ts, kind, amount, rk, who, note FROM finx WHERE COALESCE(void, 0) = 0" + (mon ? " AND mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
     for (const x of xs) { let w = {}; try { w = JSON.parse(x.who || "{}"); } catch (e) {}
       out.push({ id: "x" + x.id, kind: x.kind, src: "direct", mon: x.mon, ts: x.ts, units: 0, amount: x.amount, rk: x.rk, by: w.by || "pbt", code: w.code || "PBT", agent: w.agent || "", biz: w.biz || "", note: x.note, manual: 1, sh: this.finSplit(x.kind, "direct", x.amount, w.by || "pbt", x.ts) }); }
     const recv = {};
@@ -486,7 +488,7 @@ export class McsStats {
     for (const l of lines) { const v = isA ? (l.by === "agent" && l.code === code ? l.sh.agent : 0) : Math.round(l.sh.codev / nC); if (!v) continue; due += v; if (l.ready) ready += v; byMon[l.mon] = byMon[l.mon] || { mon: l.mon, amt: 0, ready: 0, n: 0 }; byMon[l.mon].amt += v; byMon[l.mon].n++; if (l.ready) byMon[l.mon].ready += v; }
     if (isA) {   /* کھاتے (sale) سے پہلے کے پرانے سال — پرانی شرح */
       const rate = parseInt(this.finCfg("rate", "170"), 10) || 170;
-      for (const r of this.sql.exec("SELECT rk FROM agref WHERE code = ?", code).toArray()) { const p = this.sql.exec("SELECT paid FROM prof WHERE rec = ?", r.rk).toArray()[0] || {}; const all = this.sql.exec("SELECT COALESCE(SUM(units), 0) AS u FROM sale WHERE rec = ?", r.rk).toArray()[0].u || 0; legacy += Math.max(0, (p.paid || 0) - all) * rate; }
+      for (const r of this.sql.exec("SELECT rk FROM agref WHERE code = ?", code).toArray()) { const p = this.sql.exec("SELECT paid FROM prof WHERE rec = ?", r.rk).toArray()[0] || {}; const all = this.sql.exec("SELECT COALESCE(SUM(units), 0) AS u FROM sale WHERE rec = ? AND COALESCE(void, 0) = 0", r.rk).toArray()[0].u || 0; legacy += Math.max(0, (p.paid || 0) - all) * rate; }
       due += legacy; ready += legacy;
     }
     const pk = isA ? code : key, pays = this.sql.exec("SELECT id, amount, note, method, acct, ts FROM agpay WHERE code = ? ORDER BY ts DESC", pk).toArray();
@@ -535,7 +537,7 @@ export class McsStats {
       this.sql.exec("INSERT INTO finx (mon, ts, kind, amount, rk, who, note) VALUES (?, ?, ?, ?, ?, ?, ?)", this.finMonOf(now), now, kind, amount, rk, JSON.stringify(w), String(b.note || "").slice(0, 200));
       if (w.by === "agent") this.agNote("A:" + w.code, "sale", (kind === "ad" ? "📢 اشتہار" : "⭐ ممبرشپ") + (w.biz ? " — " + w.biz : "") + " — آپ کا کمیشن Rs " + this.finSplit(kind, "direct", amount, "agent", now).agent + " (تیار)");
       this.finLog("xadd", { kind, amount, rk, w, note: b.note }); return Response.json(this.finMonth(this.finMonOf(now))); }
-    if (op === "xdel") { const xid = parseInt(String(b.id || "").replace(/\D/g, ""), 10) || 0; this.finLog("xdel", this.sql.exec("SELECT * FROM finx WHERE id = ?", xid).toArray()[0] || { id: xid }); this.sql.exec("DELETE FROM finx WHERE id = ?", xid); return Response.json(this.finMonth(mon)); }
+    if (op === "xdel") { const xid = parseInt(String(b.id || "").replace(/\D/g, ""), 10) || 0; this.sql.exec("UPDATE finx SET void = 1, vwhy = ?, vts = ? WHERE id = ?", "xdel", Date.now(), xid); this.finLog("void", { id: "x" + xid, why: "xdel" }); return Response.json(this.finMonth(mon)); }   /* AGP1011TU025: اب مٹانا نہیں — void */
     if (op === "people") { const lines = this.finLines(""), list = [];
       for (const a of this.ppAgents()) list.push(Object.assign({ kind: "agent", name: a.name, phone: a.phone, code: a.code }, this.finPerson("A:" + a.code, lines)));
       for (const c of this.finCodevs()) list.push(Object.assign({ kind: "codev", name: c.name, phone: c.phone, code: "" }, this.finPerson("C:" + c.phone, lines)));
@@ -545,6 +547,20 @@ export class McsStats {
       this.sql.exec("INSERT INTO agpay (code, amount, note, ts, method, acct, img) VALUES (?, ?, ?, ?, ?, ?, ?)", who.startsWith("A:") ? who.slice(2) : who, amount, String(b.note || "").slice(0, 200), now, String(b.method || "").slice(0, 40), String(b.acctNo || "").slice(0, 60), img);
       this.sql.exec("UPDATE payreq SET done = 1 WHERE who = ? AND done = 0", who);
       this.agNote(who, "paid", "💸 Rs " + amount + " آپ کو ادا کر دیے گئے" + (b.method ? " — " + String(b.method).slice(0, 40) : "")); this.finLog("payout", { who, amount, method: b.method, acct: b.acctNo, note: b.note }); return Response.json({ ok: true }); }
+    if (op === "void" || op === "unvoid") {   /* AGP1011TU025: s<id> = فروخت (ممبرشپ کے خریدے سال بھی واپس)، x<id> = دستی وصولی */
+      const id = String(b.id || ""), n = parseInt(id.slice(1), 10) || 0, on = op === "void" ? 1 : 0, vnow = Date.now();
+      if (id[0] === "s") { const r = this.sql.exec("SELECT id, rec, units, COALESCE(void, 0) AS v FROM sale WHERE id = ?", n).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "not_found" }); if (r.v === on) return Response.json({ ok: false, reason: on ? "already" : "not_void" });
+        this.sql.exec("UPDATE sale SET void = ?, vwhy = ?, vts = ? WHERE id = ?", on, String(b.why || "").slice(0, 200), vnow, n);
+        this.sql.exec("UPDATE prof SET paid = MAX(0, COALESCE(paid, 0) " + (on ? "-" : "+") + " ?) WHERE rec = ?", r.units || 0, r.rec);   /* خریدے سال (ایجنٹ کا پرانا حساب / «رجسٹرڈ») بھی اسی کے ساتھ */
+        this.finLog(op, { id, rec: r.rec, units: r.units, why: b.why }); }
+      else if (id[0] === "x") { const r = this.sql.exec("SELECT id, COALESCE(void, 0) AS v, amount, kind FROM finx WHERE id = ?", n).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "not_found" }); if (r.v === on) return Response.json({ ok: false, reason: on ? "already" : "not_void" });
+        this.sql.exec("UPDATE finx SET void = ?, vwhy = ?, vts = ? WHERE id = ?", on, String(b.why || "").slice(0, 200), vnow, n); this.finLog(op, { id, kind: r.kind, amount: r.amount, why: b.why }); }
+      else return Response.json({ ok: false, reason: "bad" });
+      return Response.json(this.finMonth(mon)); }
+    if (op === "voided") { const price = parseInt(this.finCfg("memprice", "1000"), 10) || 1000;
+      const a = this.sql.exec("SELECT id, rec, ts, src, units, mon, who, vwhy, vts FROM sale WHERE void = 1 ORDER BY vts DESC LIMIT 300").toArray().map((x) => { let w = {}; try { w = JSON.parse(x.who || "{}"); } catch (e) {} return { id: "s" + x.id, kind: "mem", src: x.src, ts: x.ts, mon: x.mon, amount: (x.units || 0) * price, rk: x.rec, code: w.code || "", agent: w.agent || "", biz: w.biz || "", why: x.vwhy, vts: x.vts }; });
+      const c = this.sql.exec("SELECT id, ts, kind, amount, rk, who, note, mon, vwhy, vts FROM finx WHERE void = 1 ORDER BY vts DESC LIMIT 300").toArray().map((x) => { let w = {}; try { w = JSON.parse(x.who || "{}"); } catch (e) {} return { id: "x" + x.id, kind: x.kind, src: "direct", ts: x.ts, mon: x.mon, amount: x.amount, rk: x.rk, code: w.code || "", agent: w.agent || "", biz: w.biz || x.note || "", why: x.vwhy, vts: x.vts }; });
+      return Response.json({ ok: true, list: a.concat(c).sort((p, q) => q.vts - p.vts) }); }
     if (op === "xads") return Response.json({ ok: true, list: this.sql.exec("SELECT id, rk, amount, ts, who FROM finx WHERE rk LIKE 'ad:%'").toArray() });
     if (op === "log") return Response.json({ ok: true, list: this.sql.exec("SELECT id, ts, op, data FROM finlog ORDER BY id DESC LIMIT 200").toArray() });
     if (op === "payimg") { const r = this.sql.exec("SELECT img FROM agpay WHERE id = ?", parseInt(b.id, 10) || 0).toArray()[0]; return Response.json({ ok: true, img: r ? r.img || "" : "" }); }
@@ -1414,7 +1430,7 @@ async function handleAgent(request, env, path) {
     const adminOk = as === "dev" ? await verifyFirebaseAdmin(request) : false;
     const img = (v, n) => { v = String(v || ""); return /^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length <= n ? v : ""; };
     const acct = b.acct && typeof b.acct === "object" ? { method: S(b.acct.method, 40), title: S(b.acct.title, 80), number: S(b.acct.number, 40), iban: S(b.acct.iban, 40), bank: S(b.acct.bank, 60), qr: img(b.acct.qr, 400000) } : null;
-    return fwd("/fin2", { as, adminOk: !!adminOk, phone: as === "dev" ? "" : entPhone(b.phone), pin: S(b.pin, 10), op: S(b.op, 10), mon: S(b.mon, 7), acct, kind: S(b.kind, 4), amount: b.amount, rk: S(b.rk, 60), ref: S(b.ref, 20), biz: S(b.biz, 80), note: S(b.note, 200), who: S(b.who, 40), method: S(b.method, 40), acctNo: S(b.acctNo, 60), img: img(b.img, 700000), id: S(b.id, 20) });
+    return fwd("/fin2", { as, adminOk: !!adminOk, phone: as === "dev" ? "" : entPhone(b.phone), pin: S(b.pin, 10), op: S(b.op, 10), mon: S(b.mon, 7), acct, kind: S(b.kind, 4), amount: b.amount, rk: S(b.rk, 60), ref: S(b.ref, 20), biz: S(b.biz, 80), note: S(b.note, 200), who: S(b.who, 40), method: S(b.method, 40), acctNo: S(b.acctNo, 60), img: img(b.img, 700000), id: S(b.id, 20), why: S(b.why, 200) });
   }
   if (path === "/pplogin") {   /* AGP0911MO015: {op: login|yob|devpin|forgot, role, pin, phone, yob, newpin, tok} */
     const op = String(b.op || "login"); if (!["login", "yob", "devpin", "forgot", "chpin"].includes(op)) return reply({ ok: false, reason: "bad_op" });
