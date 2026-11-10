@@ -1395,7 +1395,7 @@
   .mdBigBtn.danger{background:#fff; color:#b91c1c; border:1.5px solid #fca5a5; box-shadow:none;}
   .mdCode{display:flex; gap:8px; align-items:center; margin:6px 0;}
   .mdCode b{flex:1; text-align:center; padding:11px; border-radius:12px; background:#f0fdfa; border:1.5px dashed #14b8a6; font:900 16px/1.2 ui-monospace,Menlo,Consolas,monospace; letter-spacing:1px; color:#0f766e; word-break:break-all;}
-  html.isLinked #subStatusStrip, html.isLinked #subBoxRow, html.isLinked #trialCountdownStrip, html.isLinked #loginTrialBtn, html.isLinked .subOnly{display:none !important;}
+  html.isLinked #subStatusStrip, html.isLinked #subBoxRow, html.isLinked #trialCountdownStrip, html.isLinked #loginTrialBtn, html.isLinked #loginSubStatus, html.isLinked .subOnly{display:none !important;}
   html.isLinked .linkedOnly{display:block !important;}
   .mdDev{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:14px; background:#fff; border:1.5px solid #e2e8f0; margin-bottom:6px;}
   .mdDev .mdIco{width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#eef2ff; font-size:18px; flex:0 0 auto;}
@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1011TU200</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1011TU201</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1011TU200</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1011TU201</span>
     </div>
   </div>
 
@@ -10784,6 +10784,7 @@ async function setupLoginScreen(){
       statusEl.innerHTML = `<div style="font-size:20px; font-weight:900;">🔒 Subscription Required</div><div style="font-size:12.5px; font-weight:700; margin-top:5px;">${AppState.settings.isOnFreeTrial ? 'Your free trial has ended.' : 'Your subscription has ended.'} Select a plan to continue.</div>`;
     }
     statusEl.style.display = 'block';
+    if(isLinkedDevice()) statusEl.style.display = 'none'; // AIO1011TU201 (ہیلپ ڈیسک #208): ملازم / جڑے فون پر اپنا ٹرائل نہیں — مالک کی سبسکرپشن پر چلتا ہے
 
     // ---------- 🎁 ٹرائل بٹن: صرف اسی وقت نظر آئے جب ٹرائل ختم ہو چکا ہو، تاکہ ہوم پیج صاف رہے ----------
     applyLoginMode();
@@ -35060,9 +35061,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1011TU200'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1011TU201'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Backup card now shows the Gmail used for Google Drive backup';
+  const UPDATE_NOTE = 'Staff / linked phone no longer shows its own Free Trial on the login screen';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
