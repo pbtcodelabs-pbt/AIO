@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1111WE203</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1111WE204</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1111WE203</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1111WE204</span>
     </div>
   </div>
 
@@ -35075,9 +35075,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1111WE203'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1111WE204'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Staff & Devices are now in one place — Users: turn on Multi-Device, paste your staff AIO ID, PINs, phones (old ready-message buttons removed)';
+  const UPDATE_NOTE = 'Home: owner switch «Staff bills need my approval» — turning it OFF asks your Admin PIN';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -36055,5 +36055,47 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
 })();
 </script>
 <style>#staffDevicesCard.sdInUsers{margin:0 0 12px;border:2px solid #cbd5e1;border-radius:16px}#usersListView>#staffDevicesCard.sdInUsers:last-child{margin-top:14px}</style>
+<style>
+#apprSw{display:flex;align-items:center;gap:10px;margin:8px 10px 6px;padding:9px 12px;border-radius:14px;background:#fff;border:2px solid #cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;user-select:none}
+#apprSw.on{border-color:#16a34a;background:#f0fdf4}#apprSw .t{flex:1;min-width:0;font-weight:800;font-size:14px;color:#0f172a;line-height:1.25}#apprSw .t small{display:block;font-weight:600;font-size:12px;color:#64748b}
+#apprSw .k{flex:0 0 auto;width:50px;height:28px;border-radius:99px;background:#cbd5e1;position:relative;transition:.2s}#apprSw .k::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s}
+#apprSw.on .k{background:#16a34a}#apprSw.on .k::after{left:25px}
+#apprPinOv{position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#apprPinOv>div{background:#fff;border-radius:16px;padding:16px;width:100%;max-width:340px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+#apprPinOv h3{margin:0 0 6px;font-size:17px}#apprPinOv p{margin:0 0 10px;font-size:13px;color:#475569}
+#apprPinOv input{width:100%;box-sizing:border-box;padding:11px;border:2px solid #cbd5e1;border-radius:12px;font-size:20px;letter-spacing:6px;text-align:center}
+#apprPinOv .e{color:#b91c1c;font-size:13px;font-weight:700;min-height:18px;margin-top:6px}#apprPinOv .r{display:flex;gap:8px;margin-top:8px}#apprPinOv button{flex:1;padding:11px;border:0;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer}
+</style>
+<script>
+/* AIO1111WE204 (مالک کا حکم، 11 نومبر): ملازم کے بل کی منظوری — مالک کے ہوم پر بٹن (#apprSw، صرف مالک کا فون + ملٹی ڈیوائس)؛
+   آن کرنا بغیر PIN، بند کرنا صرف ایڈمن PIN سے (ملازم مالک کا فون پکڑ کر بند نہ کر سکے)؛ Users والے کارڈ کا ✓ بھی یہی اصول۔ ملازم کے فون پر نظر نہیں آتا۔ */
+(function(){
+  const own = () => { const s = (typeof AppState !== 'undefined' && AppState.settings) || {}; return !s.syncJoined && (!AppState.currentRole || AppState.currentRole === 'admin'); };
+  const on = () => { try{ return shopInfo().staffApproval === true; }catch(e){ return false; } };
+  function askPin(){ return new Promise(res => {
+    const o = document.createElement('div'); o.id = 'apprPinOv';
+    o.innerHTML = '<div><h3>🔑 Admin PIN</h3><p>Turning OFF approval means staff bills are saved without your check. Enter your Admin PIN to confirm.</p><input type="password" inputmode="numeric" maxlength="8" autocomplete="off"><div class="e"></div><div class="r"><button type="button" class="c" style="background:#e2e8f0">Cancel</button><button type="button" class="g" style="background:#dc2626;color:#fff">Turn OFF</button></div></div>';
+    document.body.appendChild(o); const i = o.querySelector('input'), e = o.querySelector('.e'); setTimeout(() => i.focus(), 50);
+    const done = v => { o.remove(); res(v); };
+    o.querySelector('.c').onclick = () => done(false);
+    const go = async () => { const p = (i.value || '').replace(/[۰-۹]/g, c => '۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/\D/g, ''); if(p.length < 4){ e.textContent = 'Write your Admin PIN'; return; }
+      const h = await hashPin(p); if(usersData.some(u => u.role === 'admin' && u.is_active !== false && u.pin === h)) done(true); else { e.textContent = '❌ Wrong PIN — approval stays ON'; i.value = ''; i.focus(); } };
+    o.querySelector('.g').onclick = go; i.onkeydown = ev => { if(ev.key === 'Enter') go(); };
+  }); }
+  const _set = window.setStaffApproval;
+  window.setStaffApproval = async function(v){
+    if(!v && on()){ const ok = await askPin(); if(!ok){ try{ renderStaffDevicesCard(); }catch(e){} paint(); return; } }
+    _set(v); setTimeout(paint, 50); try{ renderStaffDevicesCard(); }catch(e){}
+  };
+  function paint(){ try{
+    const h = document.getElementById('screen-home'); if(!h) return; let b = document.getElementById('apprSw');
+    if(!own() || !aioMultiOn()){ if(b) b.remove(); return; }
+    if(!b){ b = document.createElement('div'); b.id = 'apprSw'; b.setAttribute('role', 'switch'); b.onclick = () => window.setStaffApproval(!on()); h.insertBefore(b, h.firstElementChild); }
+    const v = on(), html = `<span class="t">🛡️ Staff bills need my approval<small>${v ? 'ON — staff bills wait for you (turning OFF asks your PIN)' : 'OFF — staff bills are saved directly'}</small></span><span class="k"></span>`;
+    if(b._h !== html){ b._h = html; b.innerHTML = html; } b.classList.toggle('on', v); b.setAttribute('aria-checked', String(v));
+  }catch(e){} }
+  setInterval(paint, 1500); setTimeout(paint, 800);
+})();
+</script>
 </body>
 </html>
