@@ -899,6 +899,7 @@ export class McsStats {
       if (b.as === "dev" && b.admin) me = { staff: true, by: "D" };
       else if (b.as === "cd") { const r = this.sql.exec("SELECT name, pin FROM codev WHERE phone = ?", b.phone).toArray()[0]; if (r && b.pin && r.pin === b.pin) me = { staff: true, by: "C:" + b.phone }; }
       else if (b.as === "agent") { const a = agents().find((x) => x.phone === b.phone && x.pin && x.pin === b.pin); if (a) me = { agent: a.code, name: a.name }; }
+      else if (b.as === "biz" && b.rec && b.key) { const r = this.sql.exec("SELECT key, data FROM prof WHERE rec = ?", b.rec).toArray()[0]; if (r && r.key && r.key === b.key) { me = { biz: b.rec }; if (b.bn && cfg("bn_" + b.rec) !== b.bn) setCfg("bn_" + b.rec, b.bn); } }   /* MCS1111WE294 (#217): کاروبار کی چابی = اسی فون کا مالک؛ دھاگہ P-<rec> */
       else if (b.as === "user" && b.th) { const r = this.sql.exec("SELECT id FROM mcssess WHERE tok = ?", b.th).toArray()[0]; const u = r && getU(r.id); if (u) me = { uid: u.id, u }; }
       if (!me) return Response.json({ ok: false, reason: "login" });
       const PBT = "PBT Code Labs";
@@ -920,10 +921,11 @@ export class McsStats {
           return null; }
         if (me.staff) { if (th.startsWith("B-")) return { r: 1, w: 0, side: "dev" }; return { r: 1, w: 1, side: "dev" }; }
         if (me.agent) { if (th === me.agent) return { r: 1, w: 1, side: "agent" }; if (th.startsWith("B-" + me.agent + "~") && linked(me.agent, th.slice(3 + me.agent.length))) return { r: 1, w: 1, side: "agent" }; return null; }
+        if (me.biz) return th === "P-" + me.biz ? { r: 1, w: 1, side: "user" } : null;
         if (me.uid) { if (th === "U-" + me.uid) return { r: 1, w: 1, side: "user" }; const m = /^B-(.+)~(.+)$/.exec(th); if (m && m[2] === me.uid && linked(m[1], me.uid)) return { r: 1, w: 1, side: "user" }; return null; }
         return null;
       };
-      const rdKey = (th) => me.staff && !(th.startsWith("CD-") && me.by !== "D") ? "rd_" + th : "ru_" + (me.agent || me.uid || me.by) + "_" + th;
+      const rdKey = (th) => me.staff && !(th.startsWith("CD-") && me.by !== "D") ? "rd_" + th : "ru_" + (me.agent || me.uid || me.biz || me.by) + "_" + th;
       const sumOf = (th, side) => {
         const lm = this.sql.exec("SELECT who, text, img, audio, ts FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 1", th).toArray()[0] || null;
         const rd = parseInt(cfg(rdKey(th)) || "0", 10);
@@ -933,6 +935,7 @@ export class McsStats {
       const cdName = (ph) => (this.sql.exec("SELECT name FROM codev WHERE phone = ?", ph).toArray()[0] || {}).name || "";
       const label = (th) => {   /* عملے کے لیے دھاگے کا نام */
         if (th.startsWith("CD-")) return me.by === "D" ? { k: "cd", title: "👥 " + (cdName(th.slice(3)) || "کو-ڈویلپر"), sub: "کو-ڈویلپر · 0" + d10(th.slice(3)) } : { k: "cd", title: "👨‍💻 ڈویلپر", sub: "صرف آپ اور ڈویلپر" };
+        if (th.startsWith("P-")) { const rec = th.slice(2); let d = {}; try { d = JSON.parse((this.sql.exec("SELECT data FROM prof WHERE rec = ?", rec).toArray()[0] || {}).data || "{}"); } catch (e) {} const ph = (/^p(\d{10})/.exec(rec) || [])[1] || ""; return { k: "user", title: "🏪 " + (cfg("bn_" + rec) || d.nameUr || ("0" + ph)), sub: "کاروبار · 0" + ph + " · " + rec }; }
         if (th.startsWith("U-")) { const u = getU(th.slice(2)); return { k: "user", title: u ? u.name : th.slice(2), sub: u ? "0" + d10(u.mobile) + " · " + u.id : "" }; }
         if (th.startsWith("B-")) { const m = /^B-(.+)~(.+)$/.exec(th) || []; const a = agents().find((x) => x.code === m[1]); const u = getU(m[2] || ""); return { k: "biz", title: "🤝 " + (a ? a.name : m[1]) + " ↔ " + (u ? u.name : ""), sub: (m[1] || "") + " · " + (u ? "0" + d10(u.mobile) : "") }; }
         const a = agents().find((x) => x.code === th) || (() => { for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === th) return x; } return null; })();
@@ -950,6 +953,8 @@ export class McsStats {
           for (const x of bizOf(me.agent)) { if (!x.ph || seen.has(x.ph)) continue; seen.add(x.ph); const uid = uidByPh(x.ph); const u = uid && getU(uid);
             if (u) { const th = "B-" + me.agent + "~" + uid; L.push(Object.assign({ th, k: "biz", title: x.name || u.name, sub: u.name + " · 0" + x.ph }, sumOf(th, "agent"))); }
             else L.push({ th: "", k: "biz", title: x.name || ("0" + x.ph), sub: "0" + x.ph + " · ابھی ایپ میں اکاؤنٹ نہیں", off: 1 }); }
+        } else if (me.biz) {
+          L.push(Object.assign({ th: "P-" + me.biz, k: "pbt", title: PBT, sub: "سوال، مسئلہ، مشورہ" }, sumOf("P-" + me.biz, "user")));
         } else {
           L.push(Object.assign({ th: "U-" + me.uid, k: "pbt", title: PBT, sub: "سوال، مسئلہ، مشورہ" }, sumOf("U-" + me.uid, "user")));
           const ph = d10(me.u.mobile), done = new Set();
@@ -957,11 +962,11 @@ export class McsStats {
         }
         L.sort((x, y) => (x.k === "pbt" || x.pin ? -1 : 0) - (y.k === "pbt" || y.pin ? -1 : 0) || (y.last || 0) - (x.last || 0));
         for (const x of L) { const th = x.th || "";
-          if (me.uid) x.av = "";
+          if (me.uid || me.biz) x.av = "";
           else if (me.agent) x.av = x.k === "pbt" ? "D" : "";
           else if (th.startsWith("CD-")) x.av = me.by === "D" ? "C:" + th.slice(3) : "D";
           else if (th.startsWith("B-")) { const m = /^B-(.+)~/.exec(th); x.av = m ? "A:" + m[1] : ""; }
-          else if (!th.startsWith("U-")) x.av = "A:" + th;
+          else if (!th.startsWith("U-") && !th.startsWith("P-")) x.av = "A:" + th;
           else x.av = ""; }
         return Response.json({ ok: true, staff: !!me.staff, list: L, nw: L.reduce((n, x) => n + (x.nw || 0), 0), avs: avOut(L.map((x) => x.av)) });
       }
@@ -982,13 +987,13 @@ export class McsStats {
       if (b.op === "send") {
         if (!A.w) return Response.json({ ok: false, reason: "read_only" });
         if (!(b.text || b.img || b.audio || b.file)) return Response.json({ ok: false, reason: "empty" });
-        this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts, byw, file, fname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", b.thr, A.side, String(b.text || "").slice(0, 2000), String(b.img || ""), String(b.audio || ""), now, me.by || me.agent || me.uid || "", String(b.file || ""), String(b.fname || "").slice(0, 120));
+        this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts, byw, file, fname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", b.thr, A.side, String(b.text || "").slice(0, 2000), String(b.img || ""), String(b.audio || ""), now, me.by || me.agent || me.uid || me.biz || "", String(b.file || ""), String(b.fname || "").slice(0, 120));
       }
       setCfg(rdKey(b.thr), now);
       const rows = this.sql.exec("SELECT id, who, text, img, audio, ts, byw, file, fname FROM agmsg WHERE code = ? ORDER BY ts DESC, id DESC LIMIT 200", b.thr).toArray().reverse();
       const th0 = String(b.thr);
       const avOf = (m) => {
-        if (me.uid) return "";   /* عام صارف: کسی کی تصویر نہیں */
+        if (me.uid || me.biz) return "";   /* عام صارف: کسی کی تصویر نہیں */
         if (th0.startsWith("CD-")) return m.who === "dev" ? "D" : "C:" + th0.slice(3);
         if (m.who === "agent") { if (th0.startsWith("B-")) { const x = /^B-(.+)~/.exec(th0); return x ? "A:" + x[1] : ""; } return "A:" + th0; }
         if (m.who === "dev") return me.agent ? "D" : (m.byw && /^(D|C:\d+)$/.test(m.byw) ? m.byw : "D");
@@ -1485,11 +1490,12 @@ async function handleAgent(request, env, path) {
     return fwd("/mcs_use", { op: "get" });
   }
   if (path === "/mcschat") {   /* MCS0911MO251: 💬 My Chats */
-    const as = String(b.as || ""); if (!["user", "agent", "cd", "dev"].includes(as)) return reply({ ok: false, reason: "login" });
+    const as = String(b.as || ""); if (!["user", "agent", "cd", "dev", "biz"].includes(as)) return reply({ ok: false, reason: "login" });
     const op = String(b.op || ""); if (!["list", "thread", "send", "av", "find"].includes(op)) return reply({ error: "bad_op" }, 400);
     const admin = as === "dev" ? await verifyFirebaseAdmin(request) : false; if (as === "dev" && !admin) return reply({ ok: false, reason: "login" });
     const media = (v, n) => { v = String(v || ""); return /^data:(image|audio)\/[a-z0-9.+-]+(;codecs=[a-z0-9.]+)?;base64,/.test(v) && v.length <= n ? v : ""; };
-    return fwd("/mc_chat", { as, op, admin: !!admin, phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, op === "av" ? 80000 : 700000), audio: media(b.audio, 900000), file: (() => { const v = String(b.file || ""); return /^data:[a-z]+\/[a-z0-9.+-]+;base64,/i.test(v) && v.length <= 950000 ? v : ""; })(), fname: S(b.fname, 120), phones: S(b.phones, 600), pn: (b.pn && typeof b.pn === "object") ? Object.fromEntries(Object.entries(b.pn).slice(0, 40).map(([k, v]) => [String(k).replace(/\D/g, "").slice(-10), S(v, 60)])) : {} });
+    const bizRec = as === "biz" && /^p\d{10}(_[a-z0-9]{2,12})?$/.test(String(b.rec || "")) ? String(b.rec) : "";   /* MCS1111WE294 (ہیلپ ڈیسک #217): کاروبار والا — اکاؤنٹ کے بغیر، کاروبار کی چابی سے */
+    return fwd("/mc_chat", { as, op, admin: !!admin, rec: bizRec, key: as === "biz" ? S(b.key, 40) : "", bn: as === "biz" ? S(b.bn, 60) : "", phone: entPhone(b.phone) || "", pin: S(b.pin, 10), th: as === "user" && b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "", thr: S(b.thr, 120), text: S(b.text, 2000), img: media(b.img, op === "av" ? 80000 : 700000), audio: media(b.audio, 900000), file: (() => { const v = String(b.file || ""); return /^data:[a-z]+\/[a-z0-9.+-]+;base64,/i.test(v) && v.length <= 950000 ? v : ""; })(), fname: S(b.fname, 120), phones: S(b.phones, 600), pn: (b.pn && typeof b.pn === "object") ? Object.fromEntries(Object.entries(b.pn).slice(0, 40).map(([k, v]) => [String(k).replace(/\D/g, "").slice(-10), S(v, 60)])) : {} });
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
