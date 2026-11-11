@@ -1267,6 +1267,22 @@ export class McsStats {
       else this.sql.exec("INSERT INTO verified (rec, ts) VALUES (?, ?) ON CONFLICT (rec) DO UPDATE SET ts = excluded.ts", b.rec, Date.now());
       return Response.json({ ok: true });
     }
+    if (op === "/preq") {   /* MCS1111WE330 */
+      const b = await request.json();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS preq (rec TEXT PRIMARY KEY, data TEXT, st TEXT, note TEXT, ts INTEGER, upd INTEGER)");
+      const o = b.op, now = Date.now();
+      if (o === "add") {
+        const old = this.sql.exec("SELECT st, ts FROM preq WHERE rec = ?", b.rec).toArray()[0];
+        if (old && now - old.ts < 60000) return Response.json({ ok: true, again: 1 });
+        this.sql.exec("INSERT OR REPLACE INTO preq (rec, data, st, note, ts, upd) VALUES (?, ?, 'new', '', ?, ?)", b.rec, JSON.stringify(b.data || {}), now, now);
+        const n = this.sql.exec("SELECT COUNT(*) AS n FROM preq").toArray()[0].n; if (n > 3000) this.sql.exec("DELETE FROM preq WHERE st IN ('done','rej') AND upd < ?", now - 90 * 864e5);
+        return Response.json({ ok: true });
+      }
+      if (o === "mine") { const r = this.sql.exec("SELECT st, note, ts, upd FROM preq WHERE rec = ?", b.rec).toArray()[0]; return Response.json(r ? { ok: true, st: r.st, note: r.note, ts: r.ts, upd: r.upd } : { ok: true, st: "" }); }
+      if (o === "list") { const L = this.sql.exec("SELECT rec, data, st, note, ts, upd FROM preq WHERE st NOT IN ('done','rej') OR upd > ? ORDER BY ts", now - 3 * 864e5).toArray(); const pr = {}; for (const r of this.sql.exec("SELECT rec, since, until, pend FROM prof").toArray()) pr[r.rec] = r; return Response.json({ ok: true, list: L.map((r) => Object.assign({ rec: r.rec, st: r.st, note: r.note, ts: r.ts, upd: r.upd, data: JSON.parse(r.data || "{}") }, pr[r.rec] ? { since: pr[r.rec].since, until: pr[r.rec].until, pend: pr[r.rec].pend ? 1 : 0, has: 1 } : { has: 0 }, this.sidGet(r.rec) ? { sid: this.sidGet(r.rec) } : {})) }); }
+      if (o === "set") { if (!["new", "pend", "info", "done", "rej"].includes(b.st)) return Response.json({ ok: false, reason: "bad_st" }); const r = this.sql.exec("SELECT rec FROM preq WHERE rec = ?", b.rec).toArray()[0]; if (!r) this.sql.exec("INSERT INTO preq (rec, data, st, note, ts, upd) VALUES (?, '{}', ?, ?, ?, ?)", b.rec, b.st, b.note || "", now, now); else this.sql.exec("UPDATE preq SET st = ?, note = ?, upd = ? WHERE rec = ?", b.st, b.note || "", now, b.rec); return Response.json({ ok: true }); }
+      return Response.json({ ok: false, reason: "bad_op" });
+    }
     if (op === "/plist") { const subs = {}; for (const x of this.sql.exec("SELECT rec, subid FROM sale WHERE subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY ts").toArray()) subs[x.rec] = x.subid;
       return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts, pend FROM prof").toArray().map((r) => { const sid = this.sidGet(r.rec); return [r.rec, Object.assign({ since: r.since, until: r.until, ts: r.ts }, r.pend ? { pend: 1 } : {}, sid ? { sid } : {}, subs[r.rec] ? { subid: subs[r.rec] } : {})]; }))); }
     if (op === "/mcs_sid") {   /* MCS1111WE312: کارڈ کی «پرانی ID کی جگہ سسٹم ID» — اس موبائل کی MCS-NNN (نہ ہو تو اگلی) */
@@ -1741,6 +1757,15 @@ async function handleProf(request, env, path) {
   const u = new URL(request.url);
   if (path === "/pimg") return fwd("/pimg", { id: clean(u.searchParams.get("id")) }, { "Cache-Control": "public, max-age=2592000" });
   let b = {}; if (request.method === "POST") { try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); } }
+  if (path === "/preq") {   /* MCS1111WE330: دکاندار کی «ممبرشپ / رجسٹریشن» درخواست — ڈویلپر کے ہوم پر پٹی اور منظوری کا صفحہ */
+    const op = String(b.op || "");
+    if (op === "list" || op === "set") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); }
+    const rq = clean(b.rec); if (op !== "list" && !/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rq)) return reply({ error: "bad_rec" }, 400);
+    const str = (v, n) => String(v == null ? "" : v).slice(0, n);
+    const d = b.data && typeof b.data === "object" ? b.data : {};
+    const data = op === "add" ? { name: str(d.name, 80), mobile: str(d.mobile, 20), wa: str(d.wa, 20), gmail: str(d.gmail, 80), prof: str(d.prof, 160), cat: str(d.cat, 60), city: str(d.city, 60), area: str(d.area, 120), ref: str(d.ref, 30), refName: str(d.refName, 80), uid: str(d.uid, 40), kind: str(d.kind, 10), text: str(d.text, 1500) } : null;
+    return fwd("/preq", { op, rec: rq, data, st: str(b.st, 10), note: str(b.note, 600) });
+  }
   const rec = clean(b.rec || u.searchParams.get("rec"));
   if (!/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec)) return reply({ error: "bad_rec" }, 400);   /* فون + کاروبار کی قسم — ایک نمبر کی کئی پروفائلیں */
   if (path === "/pget") return fwd("/pget", { rec });
@@ -1765,7 +1790,7 @@ export default {
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
-    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
+    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
