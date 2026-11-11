@@ -345,6 +345,8 @@ const STAT_KINDS = ["call", "wa", "sms", "share", "open", "ad", "view"];   /* vi
 const AG_ABBR = { medicalStore: "MS", homeopathic: "HM", testingLab: "TL", plumberElectrician: "PE", tuitionTeacher: "TT", groceryStore: "GS", clothesShop: "CS", mobileElectronics: "ME", hardwareStore: "HW", bakery: "BK", jewelryShop: "JS", furnitureShop: "FS", autoParts: "AP", beautyParlor: "BP", restaurant: "RS", otherShop: "OS", doctor: "DR", emergencyNumbers: "EN", govOffices: "GO", mcsAgent: "AG" };   /* MCS0911MO262: «MCS Agent» کیٹگری (صرف ایجنٹ) = AG-001 */
 function agCatTag(c) { let h = 0; for (let i = 0; i < c.length; i++) h = (h * 31 + c.charCodeAt(i)) >>> 0; return h.toString(36).slice(0, 7); }   /* ایپ کے pfCatTag جیسا */
 const AG_TAG = Object.fromEntries(Object.keys(AG_ABBR).map((k) => [agCatTag(k), AG_ABBR[k]]));
+/* MCS1111WE329 (مالک کا حکم): ڈویلپر / کو-ڈویلپر کے کوڈ DEV / CODEV (پرانے PBT-D / PBT-C بھی مانے جاتے ہیں) */
+function refNorm(v) { const c = String(v || "").toUpperCase().trim(); return c === "PBT-D" ? "DEV" : c === "PBT-C" ? "CODEV" : c; }
 function agAbbrOfRk(rk) { return AG_TAG[String(rk || "").split("_")[1] || ""] || "BZ"; }   /* نئی (ایڈمن کی بنائی) قسم = BZ */
 function agNormRef(v) { const t = String(v || "").trim().toUpperCase().replace(/\s+/g, ""); const m = /^([A-Z]{2})[-.]?0*(\d{1,5})$/.exec(t); return m ? m[1] + "-" + m[2].padStart(3, "0") : String(v || "").trim(); }
 export class McsStats {
@@ -433,6 +435,12 @@ export class McsStats {
     this.sql.exec("UPDATE mcssid SET subn = ? WHERE sid = ?", n, sid);
     return sid + "-" + String(n).padStart(2, "0");
   }
+  refMigrate() {   /* MCS1111WE329: ایک بار — محفوظ PBT-D / PBT-C → DEV / CODEV (فروخت، وصولی، ممبرشپ) */
+    if (this.finCfg("refmig1", "")) return;
+    for (const t of ["sale", "finx"]) for (const x of this.sql.exec("SELECT id, who FROM " + t + " WHERE who LIKE '%PBT-%'").toArray()) { try { const w = JSON.parse(x.who); w.code = refNorm(w.code); if (w.was) w.was = refNorm(w.was); this.sql.exec("UPDATE " + t + " SET who = ? WHERE id = ?", JSON.stringify(w), x.id); } catch (e) {} }
+    for (const x of this.sql.exec("SELECT rec, data FROM prof WHERE data LIKE '%PBT-%'").toArray()) { try { const d = JSON.parse(x.data); d.ref = refNorm(d.ref); this.sql.exec("UPDATE prof SET data = ? WHERE rec = ?", JSON.stringify(d), x.rec); } catch (e) {} }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('refmig1', '1')");
+  }
   sidMigrate() {   /* ایک بار: پہلے سے بنے اکاؤنٹ اور رجسٹرڈ کاروبار (ممبرشپ) وقت کی ترتیب سے MCS-001…؛ پرانی فروخت پر سبسکرپشن ID */
     if (this.finCfg("sidmig1", "")) return;
     const rows = [];
@@ -495,7 +503,7 @@ export class McsStats {
   }
   /* ===== AGP0911MO018 (مالک کی منظوری، 9 نومبر): MCS کا حساب — صرف My City Shines =====
      ممبرشپ (1000 فی سال): گوگل پلے سے = گوگل 15٪، مینٹیننس 15٪، پھر بچی رقم کا 15٪ لانے والا (AGP1011TU023)، باقی ڈویلپر / کو-ڈویلپر آدھا آدھا؛ سیدھی ملی = گوگل والا 15٪ بھی مینٹیننس میں۔
-     اشتہار: مینٹیننس 15٪، بچی رقم کا 15٪ لانے والا، باقی آدھا آدھا۔ لانے والا: ایجنٹ / PBT-D (ڈویلپر) / PBT-C (کو-ڈویلپر) / PBT (آدھا آدھا)۔
+     اشتہار: مینٹیننس 15٪، بچی رقم کا 15٪ لانے والا، باقی آدھا آدھا۔ لانے والا: ایجنٹ / DEV (ڈویلپر) / CODEV (کو-ڈویلپر) / PBT (آدھا آدھا)۔
      9 نومبر سے پہلے کی فروخت پرانے حساب (ایجنٹ 170، ڈویلپر / کو-ڈویلپر 265) سے۔ پلے والی رقم گوگل سے «✅ وصول» ہونے تک «⏳ آنا باقی»۔
      ادائیگی: ہر مہینے 20 سے 25 تاریخ، کم از کم 1,000؛ اس سے زیادہ ہو تو بیچ میں درخواست۔ */
   static FIN2_AT = Date.UTC(2026, 10, 8, 19, 0);   /* 9 نومبر 2026، رات 12 بجے (PKT) */
@@ -505,7 +513,7 @@ export class McsStats {
   finCfg(k, d) { const r = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", k).toArray()[0]; return r ? r.v : d; }
   finSplit(kind, src, amount, by, ts, gAct) {
     /* AGP1011TU023 (مالک کا حکم، 10 نومبر): گوگل 15٪ (اصل کٹوتی معلوم ہو تو وہی — gAct) + مینٹیننس 15٪ پہلے؛ بچی رقم کا 15٪ لانے والا؛ باقی ڈویلپر / کو-ڈویلپر آدھا آدھا۔
-       سیدھی (پلے کے بغیر) ممبرشپ: گوگل والا 15٪ مینٹیننس میں؛ اشتہار: صرف مینٹیننس 15٪۔ لانے والا PBT-D = ڈویلپر، PBT-C = کو-ڈویلپر، PBT = آدھا آدھا۔ */
+       سیدھی (پلے کے بغیر) ممبرشپ: گوگل والا 15٪ مینٹیننس میں؛ اشتہار: صرف مینٹیننس 15٪۔ لانے والا DEV = ڈویلپر، CODEV = کو-ڈویلپر، PBT = آدھا آدھا۔ */
     const P = (x) => Math.round(amount * x), sh = { google: 0, maint: 0, agent: 0, dev: 0, codev: 0 };
     if (false && kind === "mem" && ts < McsStats.FIN2_AT) {   /* MCS1111WE328 (مالک کا حکم): پرانا حساب ختم — سب فروخت (پرانی بھی) نئے اصول پر */
       const rate = parseInt(this.finCfg("rate", "170"), 10) || 170, k = amount / 1000;
@@ -599,7 +607,7 @@ export class McsStats {
     if (op === "xadd") { const kind = b.kind === "ad" ? "ad" : "mem", amount = Math.max(0, parseInt(b.amount, 10) || 0); if (!amount) return Response.json({ ok: false, reason: "amount" });
       const rk = String(b.rk || "").slice(0, 60);
       if (/^ad:/.test(rk) && this.sql.exec("SELECT id FROM finx WHERE rk = ?", rk).toArray().length) return Response.json({ ok: false, reason: "dup" });   /* AGP0911MO021: My City Shines کا ایک اشتہار ایک ہی بار حساب میں */ let w = { by: "pbt", code: "PBT" }; const ref = String(b.ref || "").toUpperCase();
-      if (ref === "PBT-D") w = { by: "dev", code: "PBT-D" }; else if (ref === "PBT-C") w = { by: "codev", code: "PBT-C" }; else if (ref && ref !== "PBT") { const a = this.ppAgents().find((x) => String(x.code).toUpperCase() === ref); if (a) w = { by: "agent", code: a.code, agent: a.name }; } else if (rk) w = this.saleWho(rk);
+      if (refNorm(ref) === "DEV") w = { by: "dev", code: "DEV" }; else if (refNorm(ref) === "CODEV") w = { by: "codev", code: "CODEV" }; else if (ref && ref !== "PBT") { const a = this.ppAgents().find((x) => String(x.code).toUpperCase() === ref); if (a) w = { by: "agent", code: a.code, agent: a.name }; } else if (rk) w = this.saleWho(rk);
       if (b.biz) w.biz = String(b.biz).slice(0, 80);
       this.sql.exec("INSERT INTO finx (mon, ts, kind, amount, rk, who, note) VALUES (?, ?, ?, ?, ?, ?, ?)", this.finMonOf(now), now, kind, amount, rk, JSON.stringify(w), String(b.note || "").slice(0, 200));
       if (w.by === "agent") this.agNote("A:" + w.code, "sale", (kind === "ad" ? "📢 اشتہار" : "⭐ ممبرشپ") + (w.biz ? " — " + w.biz : "") + " — آپ کا کمیشن Rs " + this.finSplit(kind, "direct", amount, "agent", now).agent + " (تیار)");
@@ -608,7 +616,7 @@ export class McsStats {
     if (op === "people") { const lines = this.finLines(""), list = [];
       for (const a of this.ppAgents()) list.push(Object.assign({ kind: "agent", name: a.name, phone: a.phone, code: a.code }, this.finPerson("A:" + a.code, lines)));
       for (const c of this.finCodevs()) list.push(Object.assign({ kind: "codev", name: c.name, phone: c.phone, code: "" }, this.finPerson("C:" + c.phone, lines)));
-      list.push(Object.assign({ kind: "dev", name: "Developer (PBT-D)", phone: "", code: "" }, this.finPerson("D:", lines)));   /* MCS1111WE327 (مالک کا حکم): ڈویلپر کو دی رقم بھی درج */
+      list.push(Object.assign({ kind: "dev", name: "Developer (DEV)", phone: "", code: "" }, this.finPerson("D:", lines)));   /* MCS1111WE327 (مالک کا حکم): ڈویلپر کو دی رقم بھی درج */
       return Response.json({ ok: true, list, reqs: this.sql.exec("SELECT id, who, amount, ts FROM payreq WHERE done = 0 ORDER BY ts").toArray() }); }
     if (op === "payout") { const who = String(b.who || ""), amount = parseInt(b.amount, 10) || 0; if (!/^(A|C|D):/.test(who) || amount <= 0) return Response.json({ ok: false, reason: "bad" });
       const img = /^data:image\/(jpeg|png|webp);base64,/.test(String(b.img || "")) && String(b.img).length <= 700000 ? b.img : "";
@@ -617,8 +625,8 @@ export class McsStats {
       this.agNote(who, "paid", "💸 Rs " + amount + " آپ کو ادا کر دیے گئے" + (b.method ? " — " + String(b.method).slice(0, 40) : "")); this.finLog("payout", { who, amount, method: b.method, acct: b.acctNo, note: b.note }); return Response.json({ ok: true }); }
     if (op === "setwho") {   /* MCS1111WE326 (مالک کا حکم): «Brought by» درست کریں — PBT-D / PBT-C / PBT / ایجنٹ کوڈ؛ ممبرشپ کا ref بھی */
       const n = parseInt(String(b.id || "").slice(1), 10) || 0, r = this.sql.exec("SELECT id, rec, who FROM sale WHERE id = ?", n).toArray()[0]; if (!r || String(b.id || "")[0] !== "s") return Response.json({ ok: false, reason: "not_found" });
-      const c = String(b.code || "").toUpperCase().trim(); let w;
-      if (c === "PBT-D") w = { by: "dev", code: "PBT-D" }; else if (c === "PBT-C") w = { by: "codev", code: "PBT-C" }; else if (c === "PBT" || !c) w = { by: "pbt", code: "PBT" };
+      const c = refNorm(b.code); let w;
+      if (c === "DEV") w = { by: "dev", code: "DEV" }; else if (c === "CODEV") w = { by: "codev", code: "CODEV" }; else if (c === "PBT" || !c) w = { by: "pbt", code: "PBT" };
       else { const ag = this.agResolve(c); if (!ag) return Response.json({ ok: false, reason: "no_agent" }); w = { by: "agent", code: ag.code, agent: ag.name }; }
       let old = {}; try { old = JSON.parse(r.who || "{}"); } catch (e) {} if (old.biz) w.biz = old.biz;
       this.sql.exec("UPDATE sale SET who = ? WHERE id = ?", JSON.stringify(w), n);
@@ -736,8 +744,8 @@ export class McsStats {
     const a = this.sql.exec("SELECT code, data FROM agref WHERE rk = ?", rec).toArray()[0];
     if (a) { let n = "", live = false; for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === a.code) { n = x.name; live = x.status === "approved" && !x.off; break; } }
       if (!live) return { by: "pbt", code: "PBT", was: a.code, agent: n };   /* AGP0511TH011 (مالک کا حکم): ایجنٹ غیر فعال / ہٹایا گیا — آئندہ کمیشن کمپنی (PBT) کا */ let biz = ""; try { biz = JSON.parse(a.data || "{}").name || ""; } catch (e) {} return { by: "agent", code: a.code, agent: n, biz }; }
-    const p = this.sql.exec("SELECT data FROM prof WHERE rec = ?", rec).toArray()[0]; let ref = "PBT"; try { ref = (JSON.parse((p && p.data) || "{}").ref || "PBT").toUpperCase(); } catch (e) {}
-    return { by: ref === "PBT-D" ? "dev" : ref === "PBT-C" ? "codev" : "pbt", code: ref };
+    const p = this.sql.exec("SELECT data FROM prof WHERE rec = ?", rec).toArray()[0]; let ref = "PBT"; try { ref = refNorm(JSON.parse((p && p.data) || "{}").ref || "PBT"); } catch (e) {}
+    return { by: ref === "DEV" ? "dev" : ref === "CODEV" ? "codev" : "pbt", code: ref };
   }
   agMigrate3() {   /* MCS0511TH145: پہلے سے بنے ایجنٹوں کا شناختی کارڈ → کوڈ ایک بار محفوظ */
     if (this.sql.exec("SELECT v FROM agcfg WHERE k = 'agmig3'").toArray().length) return;
@@ -747,7 +755,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
-    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} }
+    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
@@ -1671,7 +1679,7 @@ function profClean(d) {
   out.items = (Array.isArray(d.items) ? d.items : []).slice(0, 20).map((x) => ({ n: S(x && x.n, 60), p: S(x && x.p, 24) })).filter((x) => x.n);
   out.phones = (Array.isArray(d.phones) ? d.phones : []).slice(0, 3).map((x) => S(x, 20).replace(/[^0-9+\- ]/g, "")).filter(Boolean);
   out.links = (Array.isArray(d.links) ? d.links : []).slice(0, 3).map((x) => S(x, 200)).filter((x) => /^https?:\/\//i.test(x));
-  out.ref = S(d.ref, 40).replace(/[^A-Za-z0-9_\-]/g, "") || "PBT";   /* MCS0511TH157: ایجنٹ کا ریفرل کوڈ، نہ ہو تو PBT (ہمارا اپنا گاہک) */
+  out.ref = refNorm(S(d.ref, 40).replace(/[^A-Za-z0-9_\-]/g, "")) || "PBT";   /* MCS0511TH157: ایجنٹ کا ریفرل کوڈ، نہ ہو تو PBT (ہمارا اپنا گاہک) */
   if (d.map && isFinite(+d.map.lat) && isFinite(+d.map.lon)) out.map = { lat: +(+d.map.lat).toFixed(6), lon: +(+d.map.lon).toFixed(6) };
   return out;
 }
