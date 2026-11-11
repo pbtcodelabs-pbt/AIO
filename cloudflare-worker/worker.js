@@ -551,7 +551,7 @@ export class McsStats {
   finPerson(key, lines) {   /* key: A:<کوڈ> یا C:<نمبر> — کتنا بنا، کتنا تیار، کتنا ادا */
     const codevs = this.finCodevs(), nC = Math.max(1, codevs.length); let due = 0, ready = 0, legacy = 0;
     const isA = key.startsWith("A:"), code = key.slice(2), byMon = {};
-    for (const l of lines) { const v = isA ? (l.by === "agent" && l.code === code ? l.sh.agent : 0) : Math.round(l.sh.codev / nC); if (!v) continue; due += v; if (l.ready) ready += v; byMon[l.mon] = byMon[l.mon] || { mon: l.mon, amt: 0, ready: 0, n: 0 }; byMon[l.mon].amt += v; byMon[l.mon].n++; if (l.ready) byMon[l.mon].ready += v; }
+    for (const l of lines) { const v = isA ? (l.by === "agent" && l.code === code ? l.sh.agent : 0) : key === "D:" ? l.sh.dev : Math.round(l.sh.codev / nC);   /* MCS1111WE327: D: = ڈویلپر کا اپنا حصہ */ if (!v) continue; due += v; if (l.ready) ready += v; byMon[l.mon] = byMon[l.mon] || { mon: l.mon, amt: 0, ready: 0, n: 0 }; byMon[l.mon].amt += v; byMon[l.mon].n++; if (l.ready) byMon[l.mon].ready += v; }
     if (isA) {   /* کھاتے (sale) سے پہلے کے پرانے سال — پرانی شرح */
       const rate = parseInt(this.finCfg("rate", "170"), 10) || 170;
       for (const r of this.sql.exec("SELECT rk FROM agref WHERE code = ?", code).toArray()) { const p = this.sql.exec("SELECT paid FROM prof WHERE rec = ?", r.rk).toArray()[0] || {}; const all = this.sql.exec("SELECT COALESCE(SUM(units), 0) AS u FROM sale WHERE rec = ? AND COALESCE(void, 0) = 0", r.rk).toArray()[0].u || 0; legacy += Math.max(0, (p.paid || 0) - all) * rate; }
@@ -608,8 +608,9 @@ export class McsStats {
     if (op === "people") { const lines = this.finLines(""), list = [];
       for (const a of this.ppAgents()) list.push(Object.assign({ kind: "agent", name: a.name, phone: a.phone, code: a.code }, this.finPerson("A:" + a.code, lines)));
       for (const c of this.finCodevs()) list.push(Object.assign({ kind: "codev", name: c.name, phone: c.phone, code: "" }, this.finPerson("C:" + c.phone, lines)));
+      list.push(Object.assign({ kind: "dev", name: "Developer (PBT-D)", phone: "", code: "" }, this.finPerson("D:", lines)));   /* MCS1111WE327 (مالک کا حکم): ڈویلپر کو دی رقم بھی درج */
       return Response.json({ ok: true, list, reqs: this.sql.exec("SELECT id, who, amount, ts FROM payreq WHERE done = 0 ORDER BY ts").toArray() }); }
-    if (op === "payout") { const who = String(b.who || ""), amount = parseInt(b.amount, 10) || 0; if (!/^(A|C):/.test(who) || amount <= 0) return Response.json({ ok: false, reason: "bad" });
+    if (op === "payout") { const who = String(b.who || ""), amount = parseInt(b.amount, 10) || 0; if (!/^(A|C|D):/.test(who) || amount <= 0) return Response.json({ ok: false, reason: "bad" });
       const img = /^data:image\/(jpeg|png|webp);base64,/.test(String(b.img || "")) && String(b.img).length <= 700000 ? b.img : "";
       this.sql.exec("INSERT INTO agpay (code, amount, note, ts, method, acct, img) VALUES (?, ?, ?, ?, ?, ?, ?)", who.startsWith("A:") ? who.slice(2) : who, amount, String(b.note || "").slice(0, 200), now, String(b.method || "").slice(0, 40), String(b.acctNo || "").slice(0, 60), img);
       this.sql.exec("UPDATE payreq SET done = 1 WHERE who = ? AND done = 0", who);
