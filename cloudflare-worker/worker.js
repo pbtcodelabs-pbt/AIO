@@ -523,7 +523,7 @@ export class McsStats {
       sh.dev += amount - (sh.google + sh.maint + sh.agent + sh.dev + sh.codev); return sh;
     }
     if (kind === "mem") { sh.google = src === "play" ? (gAct != null ? Math.max(0, Math.min(amount, Math.round(gAct))) : P(0.15)) : 0; sh.maint = P(0.15) + (src === "play" ? 0 : P(0.15)); } else sh.maint = P(0.15);
-    const rem = Math.max(0, amount - sh.google - sh.maint), a = Math.round(rem * 0.15);
+    const rem = Math.max(0, amount - sh.google - sh.maint), a = Math.min(rem, P(0.15));   /* MCS1111WE332 (مالک کا حکم): لانے والا = پوری رقم کا 15٪ (1000 → 150 / 150 / 150 / 275 / 275) */
     if (by === "agent") sh.agent = a; else if (by === "dev") sh.dev += a; else if (by === "codev") sh.codev += a; else { sh.dev += Math.round(a / 2); sh.codev += a - Math.round(a / 2); }
     const rest = rem - a; sh.dev += Math.round(rest / 2); sh.codev += rest - Math.round(rest / 2);
     return sh;
