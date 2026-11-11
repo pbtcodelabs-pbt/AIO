@@ -522,9 +522,11 @@ export class McsStats {
   }
   finLines(mon) {   /* ہر فروخت / وصولی کی لائن + تقسیم */
     const price = parseInt(this.finCfg("memprice", "1000"), 10) || 1000, out = [];
-    const sales = this.sql.exec("SELECT id, rec, ts, src, units, mon, who FROM sale WHERE COALESCE(void, 0) = 0" + (mon ? " AND mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
+    const sales = this.sql.exec("SELECT id, rec, ts, src, units, mon, who, subid FROM sale WHERE COALESCE(void, 0) = 0" + (mon ? " AND mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
     for (const x of sales) { let w = null; try { w = x.who ? JSON.parse(x.who) : null; } catch (e) {} w = w || this.saleWho(x.rec); const src = x.src === "play" ? "play" : "direct", amount = (x.units || 0) * price;
-      out.push({ id: "s" + x.id, kind: "mem", src, mon: x.mon, ts: x.ts, units: x.units, amount, rk: x.rec, by: w.by, code: w.code, agent: w.agent || "", biz: w.biz || "", sh: this.finSplit("mem", src, amount, w.by, x.ts) }); }
+      const pr = this.sql.exec("SELECT data, since, until FROM prof WHERE rec = ?", x.rec).toArray()[0]; let pd = {}; try { pd = JSON.parse((pr && pr.data) || "{}"); } catch (e) {}
+      out.push({ id: "s" + x.id, kind: "mem", src, mon: x.mon, ts: x.ts, units: x.units, amount, rk: x.rec, by: w.by, code: w.code, agent: w.agent || "", biz: w.biz || (this.finCfg("bn_" + x.rec, "") || ""), sh: this.finSplit("mem", src, amount, w.by, x.ts),
+        subid: x.subid || "", sid: this.sidGet(x.rec), mob: this.sidMob(x.rec), exists: pr ? 1 : 0, until: (pr && pr.until) || 0, ref: pd.ref || "", addr: pd.addr || "" }); }   /* MCS1111WE326: تفصیل کے لیے */
     const xs = this.sql.exec("SELECT id, mon, ts, kind, amount, rk, who, note FROM finx WHERE COALESCE(void, 0) = 0" + (mon ? " AND mon = ?" : "") + " ORDER BY ts", ...(mon ? [mon] : [])).toArray();
     for (const x of xs) { let w = {}; try { w = JSON.parse(x.who || "{}"); } catch (e) {}
       out.push({ id: "x" + x.id, kind: x.kind, src: "direct", mon: x.mon, ts: x.ts, units: 0, amount: x.amount, rk: x.rk, by: w.by || "pbt", code: w.code || "PBT", agent: w.agent || "", biz: w.biz || "", note: x.note, manual: 1, sh: this.finSplit(x.kind, "direct", x.amount, w.by || "pbt", x.ts) }); }
@@ -535,6 +537,15 @@ export class McsStats {
     for (const l of out) { if (l.src !== "play" || l.kind !== "mem" || !recv[l.mon] || l.ts < McsStats.FIN2_AT) continue; const tot = playSum[l.mon] || 0; if (!tot) continue;
       const cut = Math.max(0, tot - (recv[l.mon].amount || 0)); l.sh = this.finSplit("mem", "play", l.amount, l.by, l.ts, cut * l.amount / tot); }
     return out.sort((a, b) => a.ts - b.ts);
+  }
+  finSync() {   /* MCS1111WE326 (مالک کا حکم): حساب ایک جگہ برابر — حذف شدہ کاروبار کی فروخت خود «ہٹائی گئی» (واپس لائی جا سکتی)، حذف شدہ ایجنٹ کا «لانے والا» دوبارہ */
+    const now = Date.now(), live = new Set(this.sql.exec("SELECT data FROM agent").toArray().map((r) => { try { return JSON.parse(r.data).code; } catch (e) { return ""; } }).filter(Boolean));
+    for (const x of this.sql.exec("SELECT id, rec, units, who FROM sale WHERE COALESCE(void, 0) = 0").toArray()) {
+      if (!this.sql.exec("SELECT rec FROM prof WHERE rec = ?", x.rec).toArray().length) {
+        this.sql.exec("UPDATE sale SET void = 1, vwhy = ?, vts = ? WHERE id = ?", "auto: business deleted", now, x.id); this.finLog("void", { id: "s" + x.id, rec: x.rec, why: "auto: business deleted" }); continue; }
+      let w = {}; try { w = JSON.parse(x.who || "{}"); } catch (e) {}
+      if (w.by === "agent" && w.code && !live.has(w.code)) { const nw = this.saleWho(x.rec); if (w.biz) nw.biz = w.biz; this.sql.exec("UPDATE sale SET who = ? WHERE id = ?", JSON.stringify(nw), x.id); this.finLog("setwho", { id: "s" + x.id, old: w.code, code: nw.code, why: "auto: agent deleted" }); }
+    }
   }
   finCodevs() { return this.sql.exec("SELECT phone, name FROM codev ORDER BY ts").toArray(); }
   finPerson(key, lines) {   /* key: A:<کوڈ> یا C:<نمبر> — کتنا بنا، کتنا تیار، کتنا ادا */
@@ -579,6 +590,7 @@ export class McsStats {
       this.sql.exec("INSERT INTO payacct (who, data, ts) VALUES (?, ?, ?) ON CONFLICT (who) DO UPDATE SET data = excluded.data, ts = excluded.ts", key, JSON.stringify(d), now); return Response.json({ ok: true }); }
     if (op === "req" && key !== "D") { const p = this.finPerson(key, this.finLines("")); if (!p.canReq) return Response.json({ ok: false, reason: p.req ? "already" : "min", avail: p.avail, min: p.min });
       this.sql.exec("INSERT INTO payreq (who, amount, ts) VALUES (?, ?, ?)", key, p.avail, now); return Response.json({ ok: true, amount: p.avail }); }
+    if (op === "month" && key === "D") { try { this.finSync(); } catch (e) {} }
     if (op === "month" && (key === "D" || key.startsWith("C:"))) return Response.json(this.finMonth(mon));
     if (key !== "D") return Response.json({ ok: false, reason: "no_access" });
     if (op === "grecv") { if (b.amount === "" || b.amount == null) this.sql.exec("DELETE FROM agcfg WHERE k = ?", "grecv_" + mon); else { this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "grecv_" + mon, JSON.stringify({ amount: Math.max(0, parseInt(b.amount, 10) || 0), at: now }));
@@ -602,6 +614,17 @@ export class McsStats {
       this.sql.exec("INSERT INTO agpay (code, amount, note, ts, method, acct, img) VALUES (?, ?, ?, ?, ?, ?, ?)", who.startsWith("A:") ? who.slice(2) : who, amount, String(b.note || "").slice(0, 200), now, String(b.method || "").slice(0, 40), String(b.acctNo || "").slice(0, 60), img);
       this.sql.exec("UPDATE payreq SET done = 1 WHERE who = ? AND done = 0", who);
       this.agNote(who, "paid", "💸 Rs " + amount + " آپ کو ادا کر دیے گئے" + (b.method ? " — " + String(b.method).slice(0, 40) : "")); this.finLog("payout", { who, amount, method: b.method, acct: b.acctNo, note: b.note }); return Response.json({ ok: true }); }
+    if (op === "setwho") {   /* MCS1111WE326 (مالک کا حکم): «Brought by» درست کریں — PBT-D / PBT-C / PBT / ایجنٹ کوڈ؛ ممبرشپ کا ref بھی */
+      const n = parseInt(String(b.id || "").slice(1), 10) || 0, r = this.sql.exec("SELECT id, rec, who FROM sale WHERE id = ?", n).toArray()[0]; if (!r || String(b.id || "")[0] !== "s") return Response.json({ ok: false, reason: "not_found" });
+      const c = String(b.code || "").toUpperCase().trim(); let w;
+      if (c === "PBT-D") w = { by: "dev", code: "PBT-D" }; else if (c === "PBT-C") w = { by: "codev", code: "PBT-C" }; else if (c === "PBT" || !c) w = { by: "pbt", code: "PBT" };
+      else { const ag = this.agResolve(c); if (!ag) return Response.json({ ok: false, reason: "no_agent" }); w = { by: "agent", code: ag.code, agent: ag.name }; }
+      let old = {}; try { old = JSON.parse(r.who || "{}"); } catch (e) {} if (old.biz) w.biz = old.biz;
+      this.sql.exec("UPDATE sale SET who = ? WHERE id = ?", JSON.stringify(w), n);
+      const pr = this.sql.exec("SELECT data FROM prof WHERE rec = ?", r.rec).toArray()[0]; if (pr) { let d = {}; try { d = JSON.parse(pr.data || "{}"); } catch (e) {} d.ref = w.code; this.sql.exec("UPDATE prof SET data = ? WHERE rec = ?", JSON.stringify(d), r.rec); }
+      if (w.by !== "agent") this.sql.exec("DELETE FROM agref WHERE rk = ?", r.rec); else this.sql.exec("INSERT INTO agref (rk, code, data, ts) VALUES (?, ?, '{}', ?) ON CONFLICT (rk) DO UPDATE SET code = excluded.code", r.rec, w.code, now);
+      this.finLog("setwho", { id: b.id, rec: r.rec, old: old.code || "", code: w.code });
+      return Response.json(this.finMonth(mon)); }
     if (op === "void" || op === "unvoid") {   /* AGP1011TU025: s<id> = فروخت (ممبرشپ کے خریدے سال بھی واپس)، x<id> = دستی وصولی */
       const id = String(b.id || ""), n = parseInt(id.slice(1), 10) || 0, on = op === "void" ? 1 : 0, vnow = Date.now();
       if (id[0] === "s") { const r = this.sql.exec("SELECT id, rec, units, COALESCE(void, 0) AS v FROM sale WHERE id = ?", n).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "not_found" }); if (r.v === on) return Response.json({ ok: false, reason: on ? "already" : "not_void" });
@@ -1508,7 +1531,7 @@ async function handleAgent(request, env, path) {
     const adminOk = as === "dev" ? await verifyFirebaseAdmin(request) : false;
     const img = (v, n) => { v = String(v || ""); return /^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length <= n ? v : ""; };
     const acct = b.acct && typeof b.acct === "object" ? { method: S(b.acct.method, 40), title: S(b.acct.title, 80), number: S(b.acct.number, 40), iban: S(b.acct.iban, 40), bank: S(b.acct.bank, 60), qr: img(b.acct.qr, 400000) } : null;
-    return fwd("/fin2", { as, adminOk: !!adminOk, phone: as === "dev" ? "" : entPhone(b.phone), pin: S(b.pin, 10), op: S(b.op, 10), mon: S(b.mon, 7), acct, kind: S(b.kind, 4), amount: b.amount, rk: S(b.rk, 60), ref: S(b.ref, 20), biz: S(b.biz, 80), note: S(b.note, 200), who: S(b.who, 40), method: S(b.method, 40), acctNo: S(b.acctNo, 60), img: img(b.img, 700000), id: S(b.id, 20), why: S(b.why, 200) });
+    return fwd("/fin2", { as, adminOk: !!adminOk, phone: as === "dev" ? "" : entPhone(b.phone), pin: S(b.pin, 10), op: S(b.op, 10), mon: S(b.mon, 7), acct, kind: S(b.kind, 4), amount: b.amount, rk: S(b.rk, 60), ref: S(b.ref, 20), biz: S(b.biz, 80), note: S(b.note, 200), who: S(b.who, 40), method: S(b.method, 40), acctNo: S(b.acctNo, 60), img: img(b.img, 700000), id: S(b.id, 20), why: S(b.why, 200), code: S(b.code, 40) });
   }
   if (path === "/pplogin") {   /* AGP0911MO015: {op: login|yob|devpin|forgot, role, pin, phone, yob, newpin, tok} */
     const op = String(b.op || "login"); if (!["login", "yob", "devpin", "forgot", "chpin"].includes(op)) return reply({ ok: false, reason: "bad_op" });
