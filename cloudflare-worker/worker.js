@@ -507,7 +507,7 @@ export class McsStats {
     /* AGP1011TU023 (مالک کا حکم، 10 نومبر): گوگل 15٪ (اصل کٹوتی معلوم ہو تو وہی — gAct) + مینٹیننس 15٪ پہلے؛ بچی رقم کا 15٪ لانے والا؛ باقی ڈویلپر / کو-ڈویلپر آدھا آدھا۔
        سیدھی (پلے کے بغیر) ممبرشپ: گوگل والا 15٪ مینٹیننس میں؛ اشتہار: صرف مینٹیننس 15٪۔ لانے والا PBT-D = ڈویلپر، PBT-C = کو-ڈویلپر، PBT = آدھا آدھا۔ */
     const P = (x) => Math.round(amount * x), sh = { google: 0, maint: 0, agent: 0, dev: 0, codev: 0 };
-    if (kind === "mem" && ts < McsStats.FIN2_AT) {   /* پرانا حساب (1000 پر 150 / 150 / 170 / 265 / 265) */
+    if (false && kind === "mem" && ts < McsStats.FIN2_AT) {   /* MCS1111WE328 (مالک کا حکم): پرانا حساب ختم — سب فروخت (پرانی بھی) نئے اصول پر */
       const rate = parseInt(this.finCfg("rate", "170"), 10) || 170, k = amount / 1000;
       sh.google = src === "play" ? Math.round(150 * k) : 0; sh.maint = Math.round(300 * k) - sh.google; const a = Math.round(rate * k);
       sh.dev = Math.round(265 * k); sh.codev = Math.round(265 * k);
@@ -534,7 +534,7 @@ export class McsStats {
     for (const l of out) { if (l.src !== "play") { l.ready = 1; continue; } if (!(l.mon in recv)) { const g = this.finCfg("grecv_" + l.mon, ""); let o = null; try { o = g ? JSON.parse(g) : null; } catch (e) {} recv[l.mon] = o; } l.ready = recv[l.mon] ? 1 : 0; }
     /* AGP1011TU023: گوگل سے اصل رقم آ گئی (grecv) تو اس مہینے کی ہر پلے فروخت پر گوگل کی اصل کٹوتی اسی تناسب سے — بچی رقم اور ایجنٹ کا 15٪ اسی سے */
     const playSum = {}; for (const l of out) if (l.src === "play" && l.kind === "mem") playSum[l.mon] = (playSum[l.mon] || 0) + l.amount;
-    for (const l of out) { if (l.src !== "play" || l.kind !== "mem" || !recv[l.mon] || l.ts < McsStats.FIN2_AT) continue; const tot = playSum[l.mon] || 0; if (!tot) continue;
+    for (const l of out) { if (l.src !== "play" || l.kind !== "mem" || !recv[l.mon]) continue; const tot = playSum[l.mon] || 0; if (!tot) continue;
       const cut = Math.max(0, tot - (recv[l.mon].amount || 0)); l.sh = this.finSplit("mem", "play", l.amount, l.by, l.ts, cut * l.amount / tot); }
     return out.sort((a, b) => a.ts - b.ts);
   }
