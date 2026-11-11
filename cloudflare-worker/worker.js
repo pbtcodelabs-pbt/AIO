@@ -398,7 +398,11 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS mcsfail (k TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS aioid (id TEXT PRIMARY KEY, dev TEXT, data TEXT, ts INTEGER)");   /* AIO0911MO190: ہر فون کی پکی AIO ID */
     this.sql.exec("CREATE TABLE IF NOT EXISTS aioinv (id TEXT PRIMARY KEY, data TEXT, ts INTEGER)");
-    this.sql.exec("CREATE TABLE IF NOT EXISTS mbuy (tok TEXT PRIMARY KEY, rec TEXT, sku TEXT, exp INTEGER, ts INTEGER)");   /* MCS0411WE147: پلے اسٹور کی ممبرشپ — ٹوکن ← ممبرشپ */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mbuy (tok TEXT PRIMARY KEY, rec TEXT, sku TEXT, exp INTEGER, ts INTEGER)");
+    /* MCS1111WE312 (مالک کا حکم، 11 نومبر — «System Structure & ID Flow»): ہر موبائل کی ایک سسٹم ID ترتیب سے MCS-001، MCS-002…؛
+       ہر ممبرشپ (سبسکرپشن / تجدید) پر MCS-001-01، -02…؛ ایجنٹ AG-001، AG-002… */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mcssid (mob TEXT PRIMARY KEY, sid TEXT UNIQUE, subn INTEGER DEFAULT 0, ts INTEGER)");
+    try { this.sql.exec("ALTER TABLE sale ADD COLUMN subid TEXT"); } catch (e) {}   /* MCS0411WE147: پلے اسٹور کی ممبرشپ — ٹوکن ← ممبرشپ */
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
@@ -410,16 +414,67 @@ export class McsStats {
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "seq_" + ab, String(n));
     return ab + "-" + String(n).padStart(3, "0");
   }
+
+  sidMob(v) { const s = String(v || ""); const m = /^p(\d{10})_/.exec(s); return m ? "92" + m[1] : entPhone(s); }   /* ممبرشپ rk (p3001234567_…) یا کوئی بھی نمبر → 92… */
+  sidGet(mob) { mob = this.sidMob(mob); if (!mob) return ""; const r = this.sql.exec("SELECT sid FROM mcssid WHERE mob = ?", mob).toArray()[0]; return r ? r.sid : ""; }
+  sidFor(mob0, ts) {   /* اسی موبائل کی ID، ورنہ اگلی MCS-NNN */
+    const mob = this.sidMob(mob0); if (!mob) return "";
+    const ex = this.sidGet(mob); if (ex) return ex;
+    let n = (parseInt(this.finCfg("sidseq", "0"), 10) || 0) + 1, sid;
+    for (;;) { sid = "MCS-" + String(n).padStart(3, "0"); if (!this.sql.exec("SELECT mob FROM mcssid WHERE sid = ?", sid).toArray().length) break; n++; }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidseq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
+    this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 0, ?)", mob, sid, ts || Date.now());
+    this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + mob);
+    return sid;
+  }
+  subNext(rec) {   /* نئی سبسکرپشن ID: MCS-001-01، -02… (ہر ممبرشپ / تجدید پر ایک آگے) */
+    const sid = this.sidFor(rec); if (!sid) return "";
+    const r = this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sid).toArray()[0]; const n = ((r && r.subn) || 0) + 1;
+    this.sql.exec("UPDATE mcssid SET subn = ? WHERE sid = ?", n, sid);
+    return sid + "-" + String(n).padStart(2, "0");
+  }
+  sidMigrate() {   /* ایک بار: پہلے سے بنے اکاؤنٹ اور رجسٹرڈ کاروبار (ممبرشپ) وقت کی ترتیب سے MCS-001…؛ پرانی فروخت پر سبسکرپشن ID */
+    if (this.finCfg("sidmig1", "")) return;
+    const rows = [];
+    for (const r of this.sql.exec("SELECT data, ts FROM mcsuser").toArray()) { try { const u = JSON.parse(r.data); if (!u.del && u.mobile) rows.push([r.ts || u.ts || 0, u.mobile]); } catch (e) {} }
+    for (const r of this.sql.exec("SELECT rec, since, ts FROM prof").toArray()) rows.push([r.since || r.ts || 0, r.rec]);
+    rows.sort((a, b) => a[0] - b[0]).forEach((x) => this.sidFor(x[1], x[0]));
+    for (const r of this.sql.exec("SELECT id, rec FROM sale WHERE subid IS NULL ORDER BY ts").toArray()) { const sub = this.subNext(r.rec); if (sub) this.sql.exec("UPDATE sale SET subid = ? WHERE id = ?", sub, r.id); }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidmig1', '1')");
+  }
+  agRecode(id) {   /* MCS1111WE312: پرانا ایجنٹ کوڈ (MS-001…) → اگلا AG-NNN؛ ریفرل / حساب / چیٹ / اطلاعات ساتھ */
+    const r = this.sql.exec("SELECT data FROM agent WHERE id = ?", id).toArray()[0]; if (!r) return { ok: false, reason: "none" };
+    const d = JSON.parse(r.data); if (!d.code) return { ok: false, reason: "no_code" }; if (/^AG-\d+$/.test(d.code)) return { ok: true, code: d.code, same: 1 };
+    if (String(d.cnic || "").replace(/\D/g, "").length !== 13) return { ok: false, reason: "bad_cnic" };
+    const old = d.code, code = this.agCodeFor(d.cnic, d.bizRk, id, d.phone); if (!code) return { ok: false, reason: "no_biz" }; d.code = code; d.oldCodes = (d.oldCodes || []).concat(old);
+    this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), id);
+    for (const t of ["agref", "agpay", "agproof", "agmsg"]) this.sql.exec("UPDATE " + t + " SET code = ? WHERE code = ?", code, old);
+    for (const t of ["agnote", "payacct", "payreq"]) { try { this.sql.exec("UPDATE " + t + " SET who = ? WHERE who = ?", "A:" + code, "A:" + old); } catch (e) {} }
+    try { this.sql.exec("UPDATE finx SET who = ? WHERE who = ?", code, old); } catch (e) {}
+    for (const x of this.sql.exec("SELECT id, who FROM sale WHERE who LIKE ?", '%"' + old + '"%').toArray()) { try { const w = JSON.parse(x.who); if (w.code === old) w.code = code; if (w.was === old) w.was = code; this.sql.exec("UPDATE sale SET who = ? WHERE id = ?", JSON.stringify(w), x.id); } catch (e) {} }
+    for (const k of ["rd_" + old]) { try { this.sql.exec("UPDATE agcfg SET k = ? WHERE k = ?", "rd_" + code, k); } catch (e) {} }
+    this.finLog("agrecode", { id, old, code });
+    return { ok: true, code, old };
+  }
   agCnicRow(cnic) { const c = String(cnic || "").replace(/\D/g, ""); return c.length === 13 ? this.sql.exec("SELECT code, id FROM agcnic WHERE cnic = ?", c).toArray()[0] || null : null; }
   agCnicOwner(cnic, exceptId) {   /* اسی شناختی کارڈ کا کوئی اور ایجنٹ (کسی بھی حالت میں) */
     const c = String(cnic || "").replace(/\D/g, ""); if (c.length !== 13) return null;
     for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.id !== exceptId && String(d.cnic || "").replace(/\D/g, "") === c) return d; }
     return null;
   }
-  agCodeFor(cnic, rk, id) {   /* شناختی کارڈ کا پرانا کوڈ واپس، ورنہ نیا (MS-001) اور ہمیشہ کے لیے محفوظ */
-    const c = String(cnic || "").replace(/\D/g, ""), row = this.agCnicRow(c); if (row) return row.code;
-    const code = this.agNextCode(rk ? agAbbrOfRk(rk) : "AG");   /* MCS0911MO264: کاروبار کے بغیر ایجنٹ = AG */
-    if (c.length === 13) this.sql.exec("INSERT OR IGNORE INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?)", c, code, id || "", Date.now());
+  agBizOf(rk, phone) {   /* MCS1111WE312: ایجنٹ کا جڑا کاروبار — دیا گیا rk (اگر سرور پر ہو) ورنہ اسی موبائل کی کوئی ممبرشپ */
+    if (rk && this.sql.exec("SELECT rec FROM prof WHERE rec = ?", rk).toArray().length) return rk;
+    const m = this.sidMob(phone); if (!m) return "";
+    const r = this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ? ORDER BY since LIMIT 1", "p" + m.slice(2) + "_%").toArray()[0]; return r ? r.rec : "";
+  }
+  agCodeFor(cnic, rk, id, phone) {   /* MCS1111WE312 (مالک کا حکم): ایجنٹ کوڈ = اس کی سسٹم ID کا نمبر — MCS-001 → AG-001؛ کاروبار جڑا ہونا لازمی */
+    const c = String(cnic || "").replace(/\D/g, ""); if (c.length !== 13) return "";   /* مالک کا حکم: شناختی کارڈ کے بغیر ایجنٹ کوڈ نہیں */
+    const row = this.agCnicRow(c); if (row && /^AG-\d+$/.test(row.code)) return row.code;
+    const biz = this.agBizOf(rk, phone); if (!biz) return "";
+    const sid = this.sidFor(biz); if (!sid) return "";
+    let code = "AG-" + sid.slice(4);
+    for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.code === code && d.id !== id && String(d.cnic || "").replace(/\D/g, "") !== c) { code = this.agNextCode("AGX"); break; } }
+    if (c.length === 13) this.sql.exec("INSERT INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?) ON CONFLICT (cnic) DO UPDATE SET code = excluded.code", c, code, id || "", Date.now());
     return code;
   }
   agResolve(code, phone) {   /* نیا کوڈ (ms1 / MS-001)، پرانا p… کوڈ، ایجنٹ کا موبائل یا شناختی کارڈ نمبر (MCS0511TH143) → منظور ایجنٹ */
@@ -647,7 +702,9 @@ export class McsStats {
   saleAdd(rec, src, units) {
     const t = new Date(Date.now() + 5 * 3600e3);
     const w = this.saleWho(rec);
-    this.sql.exec("INSERT INTO sale (rec, ts, src, units, mon, who) VALUES (?, ?, ?, ?, ?, ?)", rec, Date.now(), src, units, t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"), JSON.stringify(w));
+    try { this.sidMigrate(); } catch (e) {}
+    const subid = this.subNext(rec);
+    this.sql.exec("INSERT INTO sale (rec, ts, src, units, mon, who, subid) VALUES (?, ?, ?, ?, ?, ?, ?)", rec, Date.now(), src, units, t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"), JSON.stringify(w), subid || null);
     if (w.by === "agent") { const amt = (units || 0) * (parseInt(this.finCfg("memprice", "1000"), 10) || 1000), sh = this.finSplit("mem", src === "play" ? "play" : "direct", amt, "agent", Date.now());
       this.agNote("A:" + w.code, "sale", "⭐ " + (w.biz || rec) + " نے ممبرشپ لی" + (units > 1 ? " (" + units + " سال)" : "") + " — آپ کا کمیشن Rs " + sh.agent + (src === "play" ? " (گوگل سے رقم آنے پر تیار)" : " (تیار)")); }
   }
@@ -666,6 +723,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
+    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
@@ -805,7 +863,7 @@ export class McsStats {
       if (b.act === "proof" && !b.admin) { this.sql.exec("INSERT INTO agproof (code, rk, note, img, ts) VALUES (?, ?, ?, ?, ?)", code, String(b.rk || "").slice(0, 60), String(b.note || "").slice(0, 400), String(b.img || "").slice(0, 700000), now); }
       if (b.act === "msg") { this.sql.exec("INSERT INTO agmsg (code, who, text, img, audio, ts) VALUES (?, ?, ?, ?, ?, ?)", code, b.admin ? "dev" : "agent", String(b.text || "").slice(0, 2000), String(b.img || "").slice(0, 700000), String(b.audio || "").slice(0, 900000), now); }
       const rate = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'rate'").toArray()[0] || {}).v || "0", 10) || 0;
-      const refs = this.sql.exec("SELECT rk, data, ts FROM agref WHERE code = ? ORDER BY ts DESC", code).toArray().map((r) => { const p = this.sql.exec("SELECT since, until, paid FROM prof WHERE rec = ?", r.rk).toArray()[0] || {}; return Object.assign(JSON.parse(r.data), { rk: r.rk, at: r.ts, until: p.until || 0, paid: p.paid || 0 }); });
+      const refs = this.sql.exec("SELECT rk, data, ts FROM agref WHERE code = ? ORDER BY ts DESC", code).toArray().map((r, i, A) => { const p = this.sql.exec("SELECT since, until, paid FROM prof WHERE rec = ?", r.rk).toArray()[0] || {}; return Object.assign(JSON.parse(r.data), { rk: r.rk, at: r.ts, until: p.until || 0, paid: p.paid || 0, rid: code + "-" + String(A.length - i).padStart(3, "0"), sid: this.sidGet(r.rk) }); });   /* MCS1111WE312: ایجنٹ کا ہر کاروبار AG-001-001، -002… */
       /* AGP0511TH011: کمیشن کے سال اب فروخت کے کھاتے (sale.who) سے — غیر فعال ہونے کے بعد کی تجدید اس کی نہیں؛ کھاتے سے پہلے کے پرانے سال (legacy) ویسے */
       let years = 0;
       for (const r of refs) { const rows = this.sql.exec("SELECT units, who FROM sale WHERE rec = ?", r.rk).toArray(); let all = 0, mine = 0; for (const x of rows) { all += x.units || 0; try { const w = JSON.parse(x.who || "{}"); if (w.by === "agent" && w.code === code) mine += x.units || 0; } catch (e) {} } years += mine + Math.max(0, (r.paid || 0) - all); }
@@ -821,7 +879,7 @@ export class McsStats {
       const b = await request.json(), now = Date.now();
       const key = (k) => (this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", k).toArray()[0] || {}).id || "";
       const get = (id) => { const r = this.sql.exec("SELECT data, pwh FROM mcsuser WHERE id = ?", id).toArray()[0]; if (!r) return null; const u = JSON.parse(r.data); u._pwh = r.pwh || ""; return u; };
-      const out = (u) => ({ id: u.id, name: u.name, mobile: u.mobile, email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, ts: u.ts });
+      const out = (u) => ({ id: u.id, sid: this.sidFor(u.mobile, u.ts) || u.id, name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, ts: u.ts });
       const sess = async (id, via) => { const raw = crypto.getRandomValues(new Uint8Array(24)); const tok = Array.from(raw).map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcssess (tok, id, via, ts, last) VALUES (?, ?, ?, ?, ?)", await uaTokHash(tok), id, via, now, now); return tok; };
       const failK = "f:" + (b.fk || ""), failR = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", failK).toArray()[0];
       const fails = failR && now - failR.ts < 15 * 60e3 ? failR.n : 0;
@@ -834,12 +892,13 @@ export class McsStats {
         let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
         while (get("MCS-" + n)) n++;
         this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('useq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
-        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "" };
+        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, district: b.district || "", email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "" };
         this.sql.exec("INSERT INTO mcsuser (id, data, pwh, ts, seen) VALUES (?, ?, ?, ?, ?)", u.id, JSON.stringify(u), b.pwh || "", now, now);
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "m:" + u.mobile, u.id);
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
         if (u.email) this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "e:" + u.email, u.id);
         if (u.gmail) this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "g:" + u.gmail, u.id);
+        { const sid = this.sidFor(u.mobile, now); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }   /* MCS1111WE312: اکاؤنٹ ID = MCS-001… (اسی موبائل کی) */
         u._pwh = b.pwh || "";
         return Response.json({ ok: true, tok: await sess(u.id, u.gmail ? "g" : "p"), user: out(u) });
       }
@@ -864,6 +923,7 @@ export class McsStats {
       const S = bySess();
       if (!S) return Response.json({ ok: false, reason: "session" });
       if (b.act === "me") return Response.json({ ok: true, user: out(S.u) });
+      if (b.act === "setdist") { S.u.district = b.district || ""; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }
       if (b.act === "logout") { this.sql.exec("DELETE FROM mcssess WHERE tok = ?", b.th); return Response.json({ ok: true }); }
       if (b.act === "setpw") {   /* پاس ورڈ بدلیں — پرانا ٹھیک ہو، یا گوگل سے 15 منٹ کے اندر لاگ اِن ہوا ہو (پاس ورڈ بھول گئے) */
         if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
@@ -1063,6 +1123,7 @@ export class McsStats {
       const b = await request.json();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM agent ORDER BY ts DESC LIMIT 1000").toArray().map((r) => { const d = JSON.parse(r.data); if (d.code) { d.refs = this.sql.exec("SELECT COUNT(*) AS n FROM agref WHERE code = ?", d.code).toArray()[0].n; d.newProofs = this.sql.exec("SELECT COUNT(*) AS n FROM agproof WHERE code = ? AND done = 0", d.code).toArray()[0].n; } return d; }), rate: parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'rate'").toArray()[0] || {}).v || "0", 10) || 0 });
       if (b.op === "fin") return Response.json(this.finData(b.mon));
+      if (b.op === "recode") return Response.json(this.agRecode(String(b.id || "")));
       /* AGP0511TH006: ڈویلپر کا سب چیٹس والا ڈبہ — ہر ایجنٹ / کو-ڈویلپر کا الگ دھاگہ، نئے پیغام گنتی */
       if (b.op === "inbox") {
         const names = {}; for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code) names[x.code] = x.name; }
@@ -1091,7 +1152,8 @@ export class McsStats {
         if (c.code) for (const r of this.sql.exec("SELECT data FROM agent").toArray()) if (JSON.parse(r.data).bizRk === c.code) return Response.json({ ok: false, reason: "code_taken" });
         { const o = this.agCnicOwner(c.cnic); if (o) return Response.json({ ok: false, reason: "cnic_taken", other: o.name + (o.code ? " (" + o.code + ")" : "") }); }
         const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
-        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: this.agCodeFor(c.cnic, c.code, id), pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: c.cnic || "", father: c.father || "", address: c.address || "", wa: c.wa || "", email: c.email || "", exp: "", note: "", noBiz: c.code ? 0 : 1 };
+        if (!this.agBizOf(c.code, c.phone)) return Response.json({ ok: false, reason: "no_biz" });   /* MCS1111WE312: ایجنٹ وہی جس کا کاروبار جڑا ہو */
+        const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: this.agCodeFor(c.cnic, c.code, id, c.phone), pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: c.cnic || "", father: c.father || "", address: c.address || "", wa: c.wa || "", email: c.email || "", exp: "", note: "", noBiz: c.code ? 0 : 1 };
         this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
         for (const k of ["front", "back", "selfie"]) if (c.img && c.img[k]) this.sql.exec("INSERT INTO agimg (id, kind, data) VALUES (?, ?, ?) ON CONFLICT (id, kind) DO UPDATE SET data = excluded.data", id, k, c.img[k]);
         return Response.json({ ok: true, agent: d });
@@ -1111,7 +1173,7 @@ export class McsStats {
       if (b.op === "delete") { this.sql.exec("DELETE FROM agent WHERE id = ?", b.id); this.sql.exec("DELETE FROM agimg WHERE id = ?", b.id); return Response.json({ ok: true }); }
       if (b.op === "approve") {
         { const o = this.agCnicOwner(d.cnic, d.id); if (o && o.status === "approved") return Response.json({ ok: false, reason: "cnic_taken", other: o.name + " (" + o.code + ")" }); }
-        if (!d.code || /^p\d/.test(d.code)) d.code = this.agCodeFor(d.cnic, d.bizRk, d.id);   /* MCS0511TH145: شناختی کارڈ کا پرانا کوڈ، ورنہ نیا MS-001 */
+        if (!d.code || /^p\d/.test(d.code)) { if (String(d.cnic || "").replace(/\D/g, "").length !== 13) return Response.json({ ok: false, reason: "bad_cnic" }); d.code = this.agCodeFor(d.cnic, d.bizRk, d.id, d.phone); if (!d.code) return Response.json({ ok: false, reason: "no_biz" }); }   /* MCS1111WE312: AG-<سسٹم ID کا نمبر>؛ کاروبار لازمی */
         if (!d.pin) d.pin = String(100000 + Math.floor(Math.random() * 900000));
         d.status = "approved"; d.okAt = Date.now();
       } else if (b.op === "reject") { d.status = "rejected"; d.note = String(b.note || "").slice(0, 300); }
@@ -1173,7 +1235,13 @@ export class McsStats {
       else this.sql.exec("INSERT INTO verified (rec, ts) VALUES (?, ?) ON CONFLICT (rec) DO UPDATE SET ts = excluded.ts", b.rec, Date.now());
       return Response.json({ ok: true });
     }
-    if (op === "/plist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts, pend FROM prof").toArray().map((r) => [r.rec, Object.assign({ since: r.since, until: r.until, ts: r.ts }, r.pend ? { pend: 1 } : {})])));
+    if (op === "/plist") { const subs = {}; for (const x of this.sql.exec("SELECT rec, subid FROM sale WHERE subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY ts").toArray()) subs[x.rec] = x.subid;
+      return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts, pend FROM prof").toArray().map((r) => { const sid = this.sidGet(r.rec); return [r.rec, Object.assign({ since: r.since, until: r.until, ts: r.ts }, r.pend ? { pend: 1 } : {}, sid ? { sid } : {}, subs[r.rec] ? { subid: subs[r.rec] } : {})]; }))); }
+    if (op === "/mcs_sid") {   /* MCS1111WE312: کارڈ کی «پرانی ID کی جگہ سسٹم ID» — اس موبائل کی MCS-NNN (نہ ہو تو اگلی) */
+      const b = await request.json(); const sid = b.assign ? this.sidFor(b.mob) : this.sidGet(b.mob);
+      if (b.assign && sid) this.finLog("sid", { mob: this.sidMob(b.mob), sid, by: b.by || "" });
+      return Response.json({ ok: !!sid, sid });
+    }
     if (op === "/pget") {
       const { rec } = await request.json();
       const r = this.sql.exec("SELECT data, since, until, ts, pend FROM prof WHERE rec = ?", rec).toArray()[0];
@@ -1363,7 +1431,7 @@ async function handleMcsAuth(request, env) {
   let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
   const S = (v, n) => String(v == null ? "" : v).replace(/[<>"]/g, "").replace(/\s+/g, " ").slice(0, n).trim();
   const pw = String(b.pw || ""), op = String(b.op || "");
-  const pwOk = (p) => p.length >= 6 && p.length <= 64;
+  const pwOk = (p) => p.length >= 5 && p.length <= 64;   /* MCS1111WE312: 5–6 ہندسوں کا PIN بھی */
   const ip = request.headers.get("CF-Connecting-IP") || "";
   const th = b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "";
   const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
@@ -1377,10 +1445,12 @@ async function handleMcsAuth(request, env) {
     if (b.gtoken) { gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" }); }
     if (!gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
     if (gmail && pw && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
-    r = await call({ act: "signup", name, mobile, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev });
+    const district = S(b.district, 60);   /* MCS1111WE312: ضلع اختیاری (مالک: سائن اپ پر صرف نام، موبائل، PIN) */
+    r = await call({ act: "signup", name, mobile, district, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev });
   } else if (op === "login") {
     const id = S(b.id, 80).toLowerCase(), ids = [];
     if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
+    else if (/^mcs-?\d{1,5}$/.test(id)) ids.push("a:MCS-" + id.replace(/\D/g, "").padStart(3, "0"));   /* MCS1111WE312: نئی ID MCS-001 */
     if (entPhone(id)) ids.push("m:" + entPhone(id));
     if (entEmail(id)) ids.push("e:" + entEmail(id), "g:" + entEmail(id));
     if (!ids.length || !pw) return reply({ ok: false, reason: "login" });
@@ -1390,6 +1460,9 @@ async function handleMcsAuth(request, env) {
   } else if (op === "google") {
     const gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" });
     r = await call({ act: "google", gmail });
+  } else if (op === "setdist") {
+    const district = S(b.district, 60); if (!district) return reply({ ok: false, reason: "district" });
+    r = await call({ act: "setdist", th, district });
   } else if (["me", "logout"].includes(op)) {
     r = await call({ act: op, th });
   } else if (op === "setpw" || op === "delete") {
@@ -1499,7 +1572,7 @@ async function handleAgent(request, env, path) {
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
-    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react", "agpin"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react", "agpin", "recode"].includes(op)) return reply({ error: "bad_op" }, 400);
     let c;
     if (op === "create") { const cc = b.c || {}, cn = String(cc.cnic || "").replace(/\D/g, ""); c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120), cnic: cn.length === 13 ? cn.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3") : "", father: S(cc.father, 80), address: S(cc.address, 200), email: S(cc.email, 80), wa: entPhone(cc.wa) || "" };
       if (cc.img && typeof cc.img === "object") { c.img = {}; for (const k of ["front", "back", "selfie"]) { const v = String(cc.img[k] || ""); if (/^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length <= 700000) c.img[k] = v; } }   /* MCS0911MO266: ڈویلپر کے فارم کی تصویریں (اختیاری) */
@@ -1611,6 +1684,22 @@ async function handleMcsBuy(request, env, ctx) {
     return reply({ ok: false, error: "server_error" }, 500);
   }
 }
+/* MCS1111WE312: سسٹم ID — موبائل کی MCS-NNN دیکھیں / لگائیں (لگانا صرف ایڈمن یا لاگ اِن اکاؤنٹ) */
+async function handleMcsSid(request, env) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const mob = /^p\d{10}(_[a-z0-9]{2,12})?$/.test(String(b.rec || "")) ? String(b.rec) : entPhone(b.mob);
+  if (!mob) return reply({ ok: false, reason: "mobile" });
+  let assign = false, by = "";
+  if (b.assign) {
+    if (await verifyFirebaseAdmin(request)) { assign = true; by = "admin"; }
+    else if (b.tok) { const me = await (await stub.fetch("https://s/ua", { method: "POST", body: JSON.stringify({ act: "me", th: await uaTokHash(String(b.tok).slice(0, 80)) }) })).json(); if (me && me.ok) { assign = true; by = me.user.sid || me.user.id; } }
+    if (!assign) return reply({ ok: false, reason: "login" }, 403);
+  }
+  const r = await stub.fetch("https://s/mcs_sid", { method: "POST", body: JSON.stringify({ mob, assign, by }) });
+  return new Response(await r.text(), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+}
 async function handleProf(request, env, path) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -1643,6 +1732,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
+    if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pimg", "/pclaim", "/psave", "/padmin"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
