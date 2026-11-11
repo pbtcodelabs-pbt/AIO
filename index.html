@@ -3387,7 +3387,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1011TU202</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1111WE203</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3610,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1011TU202</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1111WE203</span>
     </div>
   </div>
 
@@ -29307,7 +29307,7 @@ function renderStaffDevicesCard(){
     el.innerHTML = `<h3>👥 Staff &amp; Devices</h3>
       ${planMaxDevices() < 99 ? `<div class="mdPlan${planMaxDevices() < 2 ? ' full' : ''}"><span>📦 Your package <b>${planName(planMaxDevices())}</b></span><span>${planMaxDevices()} device${planMaxDevices() > 1 ? 's' : ''}${AppState.settings.isOnFreeTrial ? ' (trial)' : ''}</span>${planMaxDevices() < PLAN_MAX_PACK || AppState.settings.isOnFreeTrial ? `<button type="button" onclick="openPackagePlansModal(2)">⬆️ Upgrade</button>` : ''}</div>` : ''}
       <div class="settingsHint">Run your shop on <b>more phones with the same data</b> — you and your staff each log in with your own PIN. Bills, stock, customers and payments update on every device.</div>
-      <div class="mdSteps">1️⃣ Turn on here (this device becomes the owner's device)<br>2️⃣ Add your staff and their PINs (👤 Users)<br>3️⃣ On the other phone: login screen → <b>🔗 Join a shop</b> → Shop Code + PIN</div>
+      <div class="mdSteps">1️⃣ Turn on here (this device becomes the owner's device)<br>2️⃣ Your staff opens AIO POS on their phone → creates an <b>AIO ID</b> → sends it to you<br>3️⃣ Paste that ID in the green box below → ✅ Save — their phone connects by itself</div>
       <button type="button" class="mdBigBtn" onclick="enableMultiDevice()">📲 Turn on Multi-Device</button>`;
     return;
   }
@@ -29322,7 +29322,7 @@ function renderStaffDevicesCard(){
     </div>`).join('') : '<div class="settingsHint">No devices yet.</div>';
   el.innerHTML = `<h3>👥 Staff &amp; Devices</h3>
     <div class="mdStatus" style="color:${stCol};">${map[cloudSyncStatus] || ''}</div>
-    ${owner ? `<div class="mdSteps" style="margin-top:0">➕ <b>Add a staff phone:</b> ask your staff for their <b>AIO ID</b> (on their login screen) → 👤 Users → ➕ Add a staff phone → paste the ID → Save. Their phone connects by itself.</div>
+    ${owner ? `<div class="mdSteps" style="margin-top:0">➕ <b>Add a staff phone:</b> ask your staff for their <b>AIO ID</b> (on their login screen) → paste it in the green box at the top of this page → ✅ Save. Their phone connects by itself.</div>
     <details class="mdMore" style="margin:6px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:800;color:#64748b">⚙️ More — Shop Code (not needed any more)</summary>
     <div class="mdCode"><b>${mdEsc(s.businessId)}</b></div>
     <div class="mdRow2"><button type="button" class="mdBigBtn ghost" onclick="copyShopCode()">📋 Copy</button><button type="button" class="mdBigBtn ghost" onclick="shareShopCode()">📤 WhatsApp</button></div></details>
@@ -35075,9 +35075,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1011TU202'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1111WE203'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Auto Drive backup at 12 noon and 8 PM; only the last 10 backups are kept in the Drive folder';
+  const UPDATE_NOTE = 'Staff & Devices are now in one place — Users: turn on Multi-Device, paste your staff AIO ID, PINs, phones (old ready-message buttons removed)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35487,7 +35487,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       + (L.length ? `<div class="settingsSubLabel">Staff (${L.length})</div>` + L.map(u => `<div class="mdStaffRow"><span class="t">${u.role === 'admin' ? '👑' : '🧑‍💼'} ${esc(u.name)}<small>${u.mobile ? '📱 ' + esc(u.mobile) + ' • ' : ''}${myPins()[u.user_id] ? '🔑 PIN <b style="letter-spacing:2px;color:#0f766e">' + esc(myPins()[u.user_id]) + '</b>' : '🔑 PIN not known yet'}</small></span>${myPins()[u.user_id] ? `<button type="button" onclick="mdInvShow(${u.user_id})">📨 Message</button>` : ''}<button type="button" onclick="mdInvOpen(${u.user_id})">✏️ PIN</button></div>`).join('') : '');
   };
   const _r = window.renderStaffDevicesCard;
-  if(typeof _r === 'function') window.renderStaffDevicesCard = function(){ _r.apply(this, arguments); try{ if(!aioMultiOn() || AppState.settings.syncJoined) return mdMyPinCard(); const el = document.getElementById('staffDevicesCard'), anchor = el && el.querySelector('button[onclick="goTo(\'users\')"]'); if(anchor){ const d = document.createElement('div'); d.innerHTML = mdStaffListHtml(); anchor.parentNode.insertBefore(d, anchor); }
+  if(typeof _r === 'function') window.renderStaffDevicesCard = function(){ _r.apply(this, arguments); try{ if(!aioMultiOn() || AppState.settings.syncJoined) return mdMyPinCard(); const el = document.getElementById('staffDevicesCard'), anchor = el && el.querySelector('button[onclick="goTo(\'users\')"]'); if(anchor) anchor.remove();
     if(!window._mdPinBusy){ window._mdPinBusy = true; mdEnsureKeys().then(() => mdPinsRefresh()).then(ch => { window._mdPinBusy = false; if(ch) renderStaffDevicesCard(); }).catch(() => { window._mdPinBusy = false; }); } }catch(e){} };
   /* ---- ملازم کا فون: اپنا PIN دیکھیں / بدلیں ---- */
   function mdMyPinCard(){
@@ -35508,8 +35508,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   const _rul = window.renderUserList;
   function isOwnerDev(){ const s = AppState.settings; return !s.syncJoined && (!AppState.currentRole || AppState.currentRole === 'admin'); }
   function paintUserPins(){ try{ if(!isOwnerDev()) return; const w = document.getElementById('userListWrap'); if(!w) return; const cards = w.querySelectorAll('.userCard');
-    usersData.forEach((u, i) => { const c = cards[i], p = myPins()[u.user_id]; if(!c || u.role === 'admin' || c.querySelector('.mdPinTag')) return; const d = document.createElement('div'); d.className = 'mdPinTag'; d.style.cssText = 'font-size:12.5px;font-weight:800;color:#0f766e;margin-top:3px'; d.textContent = p ? '🔑 PIN: ' + p : '🔑 PIN: not known yet — press ✏️ Set Custom PIN once'; (c.firstElementChild || c).appendChild(d);
-      if(aioMultiOn()){ const b = document.createElement('button'); b.type = 'button'; b.className = 'mdMsgBtn'; b.style.cssText = 'margin:6px 0 0;width:auto;padding:7px 12px;border-radius:10px;border:0;background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff;font-weight:900;font-size:13px;cursor:pointer'; b.textContent = '📨 Ready message — connect phone'; b.onclick = () => p ? mdInvShow(u.user_id) : mdInvOpen(u.user_id); d.after(b); } });
+    usersData.forEach((u, i) => { const c = cards[i], p = myPins()[u.user_id]; if(!c || u.role === 'admin' || c.querySelector('.mdPinTag')) return; const d = document.createElement('div'); d.className = 'mdPinTag'; d.style.cssText = 'font-size:12.5px;font-weight:800;color:#0f766e;margin-top:3px'; d.textContent = p ? '🔑 PIN: ' + p : '🔑 PIN: not known yet — press ✏️ Set Custom PIN once'; (c.firstElementChild || c).appendChild(d); });
     /* ہیلپ ڈیسک #152: User Management میں بھی «➕ Add staff — paste AIO ID» */
     const tb = document.querySelector('#usersListView .partyToolbar');
     if(tb && !document.getElementById('mdAddStaffBtn')){ const b = document.createElement('button'); b.id = 'mdAddStaffBtn'; b.type = 'button'; b.textContent = '➕ Add staff — paste AIO ID'; b.style.cssText = 'background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff'; b.onclick = () => mdInvOpen(); tb.insertBefore(b, tb.firstChild); const sp = tb.querySelector(':scope > div:empty'); if(sp) sp.remove(); tb.style.flexWrap = 'wrap'; tb.style.gap = '8px'; tb.querySelectorAll(':scope > button').forEach(x => { x.style.minHeight = '46px'; x.style.padding = '10px 18px'; x.style.fontSize = '15px'; }); }
@@ -35527,7 +35526,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     u.pin = h; u.pinBox = await pinBox(np); u.pinAt = Date.now(); myPins()[userId] = np; saveToStorage('settings', AppState.settings);
     persistAllData(); mdCloudHas(h, 10 * 60000).then(ok => { if(ok) try{ showNavToast(`✅ ${u.name}'s new PIN is on the cloud`); }catch(e){} });
     renderUserList();
-    if(confirm(`✅ ${u.name}'s PIN is now: ${np}\n\nMake the ready message to send on WhatsApp now?`)) mdInvShow(userId);
+    alert(`✅ ${u.name}'s PIN is now: ${np}\n\nTell it to ${u.name} — they type it on the login screen.`);
   };
   if(typeof _rul === 'function') window.renderUserList = function(){ const r = _rul.apply(this, arguments); paintUserPins(); if(isOwnerDev() && !window._mdPinBusy2){ window._mdPinBusy2 = true; mdPinsRefresh().then(ch => { window._mdPinBusy2 = false; if(ch){ _rul(); paintUserPins(); } }).catch(() => { window._mdPinBusy2 = false; }); } return r; };
   window.addEventListener('load', () => setTimeout(() => { try{ const s = AppState.settings; if(s.syncJoined && s.syncRole === 'staff'){ const b = document.getElementById('loginJoinShopBtn'); if(b && !document.getElementById('mdForgotHint')){ const d = document.createElement('div'); d.id = 'mdForgotHint'; d.style.cssText = 'font-size:12.5px;font-weight:700;color:#475569;text-align:center;margin:8px 4px'; d.textContent = '🔑 Forgot your PIN? Ask your shop owner — they can always see your current PIN.'; b.parentNode.insertBefore(d, b); } } }catch(e){} }, 1500));
@@ -35820,10 +35819,10 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   try{
     const _nu = window.openNewUserModal;
     if(typeof _nu === 'function') window.openNewUserModal = function(){
-      try{ if(typeof aioMultiOn === 'function' && aioMultiOn() && typeof window.mdInvOpen === 'function') return window.mdInvOpen(); }catch(e){}
+      try{ if(typeof aioMultiOn === 'function' && aioMultiOn()){ const bx = document.getElementById('uaAioBox'), i = document.getElementById('uaAioIn'); if(bx){ bx.scrollIntoView({behavior:'smooth', block:'start'}); if(i) setTimeout(() => i.focus(), 350); bx.style.boxShadow = '0 0 0 4px #fde047'; setTimeout(() => bx.style.boxShadow = '', 1600); return; } } }catch(e){}
       const r = _nu.apply(this, arguments);
       try{ const bx = document.querySelector('#newUserModal .modalBox'); if(bx && !document.getElementById('nuAioHint')){ const d = document.createElement('div'); d.id = 'nuAioHint'; d.style.cssText = 'font-size:12.5px;color:#0f766e;background:#ecfdf5;border:1px dashed #10b981;border-radius:10px;padding:8px 10px;margin:0 0 10px;line-height:1.5';
-        d.innerHTML = '🆔 To connect a staff <b>phone</b> with their AIO ID, first turn on <b>👥 Staff &amp; Devices</b> (Settings) — then «+ Add New User» asks for the AIO ID.'; const h = bx.querySelector('h3'); (h || bx.firstChild).insertAdjacentElement('afterend', d); } }catch(e){}
+        d.innerHTML = '🆔 To connect a staff <b>phone</b> with their AIO ID, first tap <b>📲 Turn on Multi-Device</b> on the Users page — then paste their AIO ID in the green box.'; const h = bx.querySelector('h3'); (h || bx.firstChild).insertAdjacentElement('afterend', d); } }catch(e){}
       return r;
     };
   }catch(e){}
@@ -35899,7 +35898,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
         ? `<div class="uaT">🆔 Add staff — paste the AIO ID they sent you</div>
            <div class="uaRow"><input id="uaAioIn" maxlength="12" placeholder="AIO12345" autocomplete="off" oninput="uaAioFind(true)"><button type="button" onclick="uaAioPaste()">📋 Paste</button></div>
            <div id="uaAioRes"></div>`
-        : `<div class="uaT">🆔 Add staff by AIO ID</div><div class="uaH">First turn on <b>👥 Staff &amp; Devices</b> (Settings) — then paste your staff's AIO ID here.</div>`;
+        : `<div class="uaT">🆔 Add staff by AIO ID</div><div class="uaH">First tap <b>📲 Turn on Multi-Device</b> above — then paste your staff's AIO ID here.</div>`;
     }catch(e){}
   }
   window.uaAioPaste = async function(){ const i = document.getElementById('uaAioIn'); try{ const t = await navigator.clipboard.readText(); if(t){ i.value = t.trim(); return uaAioFind(); } }catch(e){} i.focus(); const r = document.getElementById('uaAioRes'); if(r) r.innerHTML = '<div class="uaH">Long-press the box and choose «Paste»</div>'; };
@@ -36027,5 +36026,34 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   lock(); setTimeout(lock, 1500);
 })();
 </script>
+<script>
+/* AIO1111WE203 (مالک کا حکم): ملازم کا سارا نظام ایک جگہ — 👤 Users۔ مالک کے فون پر «👥 Staff & Devices» کارڈ (ملٹی ڈیوائس آن / آف، فون، پیکج، سنک)
+   Settings سے اٹھ کر Users میں: بند ہو تو سب سے اوپر (📲 Turn on)، چالو ہو تو نیچے؛ سب سے اوپر سبز «🆔 Add staff — paste AIO ID»؛ Settings میں صرف «👤 Open Users» کا راستہ۔
+   ملازم کے فون (جڑا) پر کارڈ Settings ہی میں (اپنا PIN بدلنا)۔ پرانے «📨 Ready message» بٹن ختم۔ */
+(function(){
+  const own = () => { const s = (typeof AppState !== 'undefined' && AppState.settings) || {}; return !s.syncJoined && (!AppState.currentRole || AppState.currentRole === 'admin'); };
+  function home(){ let h = document.getElementById('sdHome'); const c = document.getElementById('staffDevicesCard');
+    if(!h && c && c.closest('#screen-settings, .settingsCard') !== null){ h = document.createElement('div'); h.id = 'sdHome'; h.style.display = 'none'; c.parentNode.insertBefore(h, c); }
+    if(!h && c){ h = document.createElement('div'); h.id = 'sdHome'; h.style.display = 'none'; c.parentNode.insertBefore(h, c); } return h; }
+  function pointer(on){ const h = home(); if(!h) return; let p = document.getElementById('sdPointer');
+    if(on && !p){ p = document.createElement('div'); p.id = 'sdPointer'; p.className = 'settingsCard admin-only';
+      p.innerHTML = '<h3>👥 Staff &amp; Devices</h3><div class="settingsHint">Staff, their phones, PINs and Multi-Device are now all in one place — <b>👤 Users</b>.</div><button type="button" class="mdBigBtn" onclick="goTo(\'users\')">👤 Open Users — add a staff phone</button>';
+      h.parentNode.insertBefore(p, h); }
+    if(!on && p) p.remove(); }
+  function place(){ try{
+    const c = document.getElementById('staffDevicesCard'), v = document.getElementById('usersListView'), h = home(); if(!c || !v || !h) return;
+    if(own()){
+      if(aioMultiOn()){ if(v.lastElementChild !== c) v.appendChild(c); }
+      else if(v.firstElementChild !== c) v.insertBefore(c, v.firstChild);
+      c.classList.add('sdInUsers'); pointer(true);
+    } else { if(h.nextElementSibling !== c) h.parentNode.insertBefore(c, h.nextSibling); c.classList.remove('sdInUsers'); pointer(false); }
+  }catch(e){} }
+  const wrap = n => { const f = window[n]; if(typeof f === 'function') window[n] = function(){ const r = f.apply(this, arguments); try{ place(); }catch(e){} return r; }; };
+  ['renderUserList', 'renderStaffDevicesCard'].forEach(wrap);
+  const _g = window.goTo; if(typeof _g === 'function') window.goTo = function(n){ const r = _g.apply(this, arguments); if(n === 'users' || n === 'settings') setTimeout(() => { try{ if(n === 'users') renderStaffDevicesCard(); place(); }catch(e){} }, 80); return r; };
+  setTimeout(place, 1500);
+})();
+</script>
+<style>#staffDevicesCard.sdInUsers{margin:0 0 12px;border:2px solid #cbd5e1;border-radius:16px}#usersListView>#staffDevicesCard.sdInUsers:last-child{margin-top:14px}</style>
 </body>
 </html>
