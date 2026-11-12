@@ -73,6 +73,8 @@ jobs:
           print('memberships with MCS ID:', len(rows))
           for r in rows: print(r)
           PY
+          echo "== agents (code / name)"
+          for i in 1 2 3 4 5 6 7 8 9 10; do c=$(printf "AG-%03d" $i); curl -sS -m 15 -X POST https://aio-pos-verify.pbtcodelabs.workers.dev/agfind -H 'Content-Type: text/plain' -d "{\"code\":\"$c\"}"; echo; done
       - name: Test /rates
         if: env.HAS_TOKEN == 'true'
         continue-on-error: true
