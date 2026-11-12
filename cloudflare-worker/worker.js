@@ -911,7 +911,12 @@ export class McsStats {
       const b = await request.json(), now = Date.now();
       const key = (k) => (this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", k).toArray()[0] || {}).id || "";
       const get = (id) => { const r = this.sql.exec("SELECT data, pwh FROM mcsuser WHERE id = ?", id).toArray()[0]; if (!r) return null; const u = JSON.parse(r.data); u._pwh = r.pwh || ""; return u; };
-      const out = (u) => ({ id: u.id, sid: this.sidFor(u.mobile, u.ts) || u.id, name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, ts: u.ts });
+      const pkOf = (u) => {   /* MCS1211TH333: ہر اکاؤنٹ کا پکا 4 ہندسوں کا پاس کوڈ — ایجنٹ کو رجسٹریشن کے لیے (ID + کوڈ سے ریکارڈ) */
+        if (u.pk && /^\d{4}$/.test(u.pk)) return u.pk;
+        u.pk = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
+        const d = Object.assign({}, u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), u.id); return u.pk;
+      };
+      const out = (u) => ({ id: u.id, sid: this.sidFor(u.mobile, u.ts) || u.id, name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, ts: u.ts, pk: pkOf(u) });
       const sess = async (id, via) => { const raw = crypto.getRandomValues(new Uint8Array(24)); const tok = Array.from(raw).map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcssess (tok, id, via, ts, last) VALUES (?, ?, ?, ?, ?)", await uaTokHash(tok), id, via, now, now); return tok; };
       const failK = "f:" + (b.fk || ""), failR = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", failK).toArray()[0];
       const fails = failR && now - failR.ts < 15 * 60e3 ? failR.n : 0;
@@ -933,6 +938,14 @@ export class McsStats {
         { const sid = this.sidFor(u.mobile, now); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }   /* MCS1111WE312: اکاؤنٹ ID = MCS-001… (اسی موبائل کی) */
         u._pwh = b.pwh || "";
         return Response.json({ ok: true, tok: await sess(u.id, u.gmail ? "g" : "p"), user: out(u) });
+      }
+      if (b.act === "reglook") {   /* MCS1211TH333: ایجنٹ / ڈویلپر — سائن اپ شدہ بندے کی ID (یا موبائل) + 4 ہندسوں کا کوڈ → نام، موبائل، ضلع (15 منٹ میں 8 غلط = روک) */
+        if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
+        const id = b.ids.map((k) => key(k)).find(Boolean) || "";
+        const u = id && get(id);
+        if (!u || u.del || !u.pk || String(u.pk) !== String(b.pk || "")) { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "nomatch" }); }
+        this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
+        return Response.json({ ok: true, user: { sid: this.sidFor(u.mobile, u.ts) || u.id, name: u.name, mobile: u.mobile, district: u.district || "" } });
       }
       if (b.act === "find") {   /* لاگ اِن: Account ID / موبائل / ای میل → ہیش واپس (ورکر جانچے) */
         if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
@@ -1505,6 +1518,13 @@ async function handleMcsAuth(request, env) {
     const fk = ip + "|" + ids[0];
     r = await call({ act: "find", ids, fk });
     if (r.ok) r = (await uaCheck(pw, r.pwh)) ? await call({ act: "pwok", id: r.id, fk }) : await call({ act: "pwbad", fk });
+  } else if (op === "reglook") {   /* MCS1211TH333 */
+    const id = S(b.id, 40).toLowerCase(), ids = [], pk = String(b.pk || "").replace(/\D/g, "").slice(0, 4);
+    if (/^mcs-?\d{1,5}$/.test(id)) ids.push("a:MCS-" + id.replace(/\D/g, "").padStart(3, "0"));
+    else if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
+    if (entPhone(id)) ids.push("m:" + entPhone(id));
+    if (!ids.length || pk.length !== 4) return reply({ ok: false, reason: "nomatch" });
+    r = await call({ act: "reglook", ids, pk, fk: ip + "|rl" });
   } else if (op === "google") {
     const gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" });
     r = await call({ act: "google", gmail });
