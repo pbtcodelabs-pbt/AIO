@@ -397,6 +397,7 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS mcsuser (id TEXT PRIMARY KEY, data TEXT, pwh TEXT, ts INTEGER, seen INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS mcsukey (k TEXT PRIMARY KEY, id TEXT)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS mcssess (tok TEXT PRIMARY KEY, id TEXT, via TEXT, ts INTEGER, last INTEGER)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS actcode (code TEXT PRIMARY KEY, data TEXT, ts INTEGER, used INTEGER DEFAULT 0, uid TEXT)");   /* MCS1211TH334: منظوری کے بعد ایکٹیویشن کوڈ XXXX-XXXX */
     this.sql.exec("CREATE TABLE IF NOT EXISTS mcsfail (k TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS aioid (id TEXT PRIMARY KEY, dev TEXT, data TEXT, ts INTEGER)");   /* AIO0911MO190: ہر فون کی پکی AIO ID */
     this.sql.exec("CREATE TABLE IF NOT EXISTS aioinv (id TEXT PRIMARY KEY, data TEXT, ts INTEGER)");
@@ -938,6 +939,35 @@ export class McsStats {
         { const sid = this.sidFor(u.mobile, now); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }   /* MCS1111WE312: اکاؤنٹ ID = MCS-001… (اسی موبائل کی) */
         u._pwh = b.pwh || "";
         return Response.json({ ok: true, tok: await sess(u.id, u.gmail ? "g" : "p"), user: out(u) });
+      }
+      if (b.act === "actmake") {   /* MCS1211TH334 (صرف ڈویلپر — ورکر نے جانچا): منظور رجسٹریشن کا ایکٹیویشن کوڈ XXXX-XXXX (بڑے حروف + ہندسے) */
+        const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let code = "";
+        for (let t = 0; t < 20; t++) { const r8 = crypto.getRandomValues(new Uint8Array(8)); let c = ""; for (let i = 0; i < 8; i++) { c += A[r8[i] % A.length]; if (i === 3) c += "-"; } if (!/\d/.test(c) || !/[A-Z]/.test(c)) continue; if (!this.sql.exec("SELECT code FROM actcode WHERE code = ?", c).toArray().length) { code = c; break; } }
+        if (!code) return Response.json({ ok: false, reason: "busy" });
+        const d = { mobile: b.mobile, name: b.name || "", rec: b.rec || "", kind: b.kind || "service", recId: b.recId || "", until: b.until || 0, prof: b.prof || "" };
+        this.sql.exec("INSERT INTO actcode (code, data, ts, used, uid) VALUES (?, ?, ?, 0, '')", code, JSON.stringify(d), now);
+        return Response.json({ ok: true, code });
+      }
+      if (b.act === "actuse") {   /* MCS1211TH334: ایجنٹ سے ملا کوڈ → اسی موبائل کا اکاؤنٹ (نہ ہو تو بنے) + لاگ اِن + کاروبار کی تفصیل */
+        if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
+        const row = this.sql.exec("SELECT data, used, uid FROM actcode WHERE code = ?", b.code).toArray()[0];
+        if (!row) { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "badcode" }); }
+        const d = JSON.parse(row.data); let id = key("m:" + d.mobile), u = id && get(id);
+        if (!u || u.del) {
+          let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
+          while (get("MCS-" + n)) n++;
+          this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('useq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
+          u = { id: "MCS-" + n, name: d.name || "", mobile: d.mobile, district: "", email: "", gmail: "", ts: now, dev: b.dev || "" };
+          this.sql.exec("INSERT INTO mcsuser (id, data, pwh, ts, seen) VALUES (?, ?, '', ?, ?)", u.id, JSON.stringify(u), now, now);
+          this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "m:" + u.mobile, u.id);
+          this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
+          { const sid = this.sidFor(u.mobile, now); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }
+          u._pwh = "";
+        }
+        this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
+        this.sql.exec("UPDATE actcode SET used = used + 1, uid = ? WHERE code = ?", u.id, b.code);
+        this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
+        return Response.json({ ok: true, tok: await sess(u.id, "c"), user: out(u), act: d });
       }
       if (b.act === "reglook") {   /* MCS1211TH333: ایجنٹ / ڈویلپر — سائن اپ شدہ بندے کی ID (یا موبائل) + 4 ہندسوں کا کوڈ → نام، موبائل، ضلع (15 منٹ میں 8 غلط = روک) */
         if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
@@ -1518,6 +1548,14 @@ async function handleMcsAuth(request, env) {
     const fk = ip + "|" + ids[0];
     r = await call({ act: "find", ids, fk });
     if (r.ok) r = (await uaCheck(pw, r.pwh)) ? await call({ act: "pwok", id: r.id, fk }) : await call({ act: "pwbad", fk });
+  } else if (op === "actmake") {   /* MCS1211TH334: صرف ڈویلپر (My City Shines ایڈمن) */
+    if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
+    const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
+    r = await call({ act: "actmake", mobile, name: S(b.name, 60), rec: S(b.rec, 80), kind: b.kind === "doctor" ? "doctor" : "service", recId: S(b.recId, 80), until: Number(b.until) || 0, prof: S(b.prof, 100) });
+  } else if (op === "actuse") {   /* MCS1211TH334 */
+    const c = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (c.length !== 8) return reply({ ok: false, reason: "badcode" });
+    r = await call({ act: "actuse", code: c.slice(0, 4) + "-" + c.slice(4), fk: ip + "|ac", dev });
   } else if (op === "reglook") {   /* MCS1211TH333 */
     const id = S(b.id, 40).toLowerCase(), ids = [], pk = String(b.pk || "").replace(/\D/g, "").slice(0, 4);
     if (/^mcs-?\d{1,5}$/.test(id)) ids.push("a:MCS-" + id.replace(/\D/g, "").padStart(3, "0"));
