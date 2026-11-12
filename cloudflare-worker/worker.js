@@ -963,7 +963,8 @@ export class McsStats {
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
         if (u.email) this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "e:" + u.email, u.id);
         if (u.gmail) this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "g:" + u.gmail, u.id);
-        { const sid = this.sidGet(u.mobile); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }   /* MCS1211TH351: سائن اپ پر MCS ID نہیں بنتی — صرف پہلے سے رجسٹرڈ ہو تو جوڑ */
+        { if (!this.finCfg("sid352at", "")) this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sid352at', ?) ON CONFLICT (k) DO NOTHING", String(now));
+          const sid = this.staffSid(u.mobile) ? "" : this.sidFor(u.mobile, now); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }   /* MCS1211TH352 (مالک کا حکم): سائن اپ ہوتے ہی MCS ID — رجسٹریشن فارم کی فہرست میں فوراً */
         u._pwh = b.pwh || "";
         return Response.json({ ok: true, tok: await sess(u.id, u.gmail ? "g" : "p"), user: out(u) });
       }
@@ -989,7 +990,7 @@ export class McsStats {
           this.sql.exec("INSERT INTO mcsuser (id, data, pwh, ts, seen) VALUES (?, ?, '', ?, ?)", u.id, JSON.stringify(u), now, now);
           this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "m:" + u.mobile, u.id);
           this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
-          { const sid = this.sidGet(u.mobile); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }
+          { const sid = this.staffSid(u.mobile) ? "" : this.sidFor(u.mobile, now); if (sid) this.sql.exec("INSERT OR REPLACE INTO mcsukey (k, id) VALUES (?, ?)", "a:" + sid, u.id); }   /* MCS1211TH352 */
           u._pwh = "";
         }
         this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
@@ -1044,7 +1045,11 @@ export class McsStats {
           const sl = this.sql.exec("SELECT id, rec FROM sale WHERE COALESCE(void, 0) = 0 ORDER BY ts").toArray().find((r) => this.sidMob(r.rec) === x.mob);
           if (sl) this.sql.exec("UPDATE sale SET subid = ? WHERE id = ?", sid + "-01", sl.id);
         });
-        this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidseq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(L.length));
+        /* MCS1211TH352: نئے اصول (سائن اپ پر ID) کے بعد والے سائن اپ — رجسٹرڈ کے بعد ترتیب سے */
+        { const at = parseInt(this.finCfg("sid352at", "0"), 10) || 0, seen = new Set(L.map((x) => x.mob)); let n = L.length;
+          if (at) for (const r of this.sql.exec("SELECT data, ts FROM mcsuser WHERE ts >= ? ORDER BY ts", at).toArray()) { let u = null; try { u = JSON.parse(r.data); } catch (e) {} const m = u && !u.del && entPhone(u.mobile); if (!m || seen.has(m) || this.staffSid(m)) continue; seen.add(m); n++;
+            const sid = "MCS-" + String(n).padStart(3, "0"); this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 0, ?)", m, sid, r.ts); this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + m); }
+          this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidseq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n)); }
         const agents = this.agRenumber(b.agentFirst || (L[0] && L[0].mob) || "");
         return Response.json({ ok: true, agents, list: L.map((x, i) => ({ mob: x.mob, sid: "MCS-" + String(i + 1).padStart(3, "0"), subid: "MCS-" + String(i + 1).padStart(3, "0") + "-01" })) });
       }
@@ -1058,7 +1063,7 @@ export class McsStats {
         if (!ok) return Response.json({ ok: false, reason: "login" });
         /* MCS1211TH351 (مالک کا حکم): فہرست (رجسٹریشن فارم کی ID) = صرف رجسٹرڈ کاروبار (MCS00101…)؛ DEV / CODEV / PBT / AG ریفرل کی فہرست میں، یہاں نہیں */
         const L = [], uBy = (mob) => { const k2 = this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + mob).toArray()[0]; if (!k2) return null; const r2 = this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", k2.id).toArray()[0]; try { return r2 ? JSON.parse(r2.data) : null; } catch (e) { return null; } };
-        for (const r of this.sql.exec("SELECT mob, sid, subn FROM mcssid ORDER BY sid").toArray()) { const u = uBy(r.mob) || {}; L.push({ sid: r.sid, subid: r.subn ? r.sid + "-" + String(r.subn).padStart(2, "0") : "", name: u.name || this.finCfg("sidname_" + r.mob, "") || "", mobile: r.mob, district: u.district || "", kind: "reg" }); }
+        for (const r of this.sql.exec("SELECT mob, sid, subn FROM mcssid ORDER BY sid").toArray()) { const u = uBy(r.mob) || {}; L.push({ sid: r.sid, subid: r.subn ? r.sid + "-" + String(r.subn).padStart(2, "0") : "", name: u.name || this.finCfg("sidname_" + r.mob, "") || "", mobile: r.mob, district: u.district || "", kind: r.subn ? "reg" : "new" }); }   /* MCS1211TH352: نئے سائن اپ (kind new) بھی */
         return Response.json({ ok: true, list: L });
       }
       if (b.act === "reglook") {   /* MCS1211TH333: ایجنٹ / ڈویلپر — سائن اپ شدہ بندے کی ID (یا موبائل) + 4 ہندسوں کا کوڈ → نام، موبائل، ضلع (15 منٹ میں 8 غلط = روک) */
