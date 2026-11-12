@@ -445,6 +445,19 @@ export class McsStats {
     const agents = this.agRenumber(agentFirst);
     return { ok: true, agents, list: L.map((x, i) => ({ mob: x.mob, name: x.name, sid: "MCS-" + String(i + 1).padStart(3, "0"), subid: "MCS-" + String(i + 1).padStart(3, "0") + "-01" })) };
   }
+  agOff354() {   /* MCS1211TH354 (مالک کا حکم): ایجنٹ صرف حبیب شہباز (AG-001) — باقی ایجنٹ «غیر فعال» (off، مٹائے نہیں — واپس لائے جا سکتے ہیں)؛ کو-ڈویلپر کا شناختی کارڈ = CODEV */
+    if (this.finCfg("agoff354", "")) return;
+    const HAB = "923015079681", done = [];
+    for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { let d = {}; try { d = JSON.parse(r.data); } catch (e) { continue; }
+      if (entPhone(d.phone || "") === HAB || d.off) continue;
+      d.off = 1; d.offAt = Date.now(); d.offWhy = "owner: only Habib Shahbaz is an agent (MCS1211TH354)";
+      this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), r.id); done.push((d.code || "") + " " + (d.name || ""));
+      const cn = String(d.cnic || "").replace(/\D/g, "");
+      if (cn.length === 13 && this.sql.exec("SELECT phone FROM codev WHERE phone = ?", entPhone(d.phone || "")).toArray().length) this.sql.exec("INSERT INTO agcnic (cnic, code, id, ts) VALUES (?, 'CODEV', 'CODEV', ?) ON CONFLICT (cnic) DO UPDATE SET code = 'CODEV', id = 'CODEV'", cn, Date.now());
+    }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agoff354', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), off: done }));
+    this.finLog("agoff354", { off: done });
+  }
   sidFix353() {   /* MCS1211TH353 (مالک کا حکم — خود سرور پر، ایک بار): حبیب شہباز MCS-001، غوثیہ نان شاپ MCS-002، پنجاب سیٹنگ (آصف) MCS-003؛ حبیب شہباز ایجنٹ AG-001 */
     if (this.finCfg("sidmig353", "")) return;
     const nm = (rec) => { let n = this.finCfg("bn_" + rec, "") || ""; if (!n) { const a = this.sql.exec("SELECT data FROM agref WHERE rk = ?", rec).toArray()[0]; try { const d = JSON.parse((a && a.data) || "{}"); n = d.name || d.biz || ""; } catch (e) {} }
@@ -822,7 +835,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
-    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } }
+    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
