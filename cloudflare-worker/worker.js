@@ -466,6 +466,9 @@ export class McsStats {
     return { ok: true, code, old };
   }
   agCnicRow(cnic) { const c = String(cnic || "").replace(/\D/g, ""); return c.length === 13 ? this.sql.exec("SELECT code, id FROM agcnic WHERE cnic = ?", c).toArray()[0] || null : null; }
+  agStaffCnic(cnic) {   /* MCS1211TH335: ڈویلپر / کو-ڈویلپر کا شناختی کارڈ — اس پر ایجنٹ کوڈ نہیں (DEV / CODEV ہی ان کا ریفرل)؛ کاروبار بن سکتا ہے */
+    const r = this.agCnicRow(cnic); return r && (r.code === "DEV" || r.code === "CODEV") ? r.code : "";
+  }
   agCnicOwner(cnic, exceptId) {   /* اسی شناختی کارڈ کا کوئی اور ایجنٹ (کسی بھی حالت میں) */
     const c = String(cnic || "").replace(/\D/g, ""); if (c.length !== 13) return null;
     for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.id !== exceptId && String(d.cnic || "").replace(/\D/g, "") === c) return d; }
@@ -479,6 +482,7 @@ export class McsStats {
   agCodeFor(cnic, rk, id, phone) {   /* MCS1111WE312 (مالک کا حکم): ایجنٹ کوڈ = اس کی سسٹم ID کا نمبر — MCS-001 → AG-001؛ کاروبار جڑا ہونا لازمی */
     const c = String(cnic || "").replace(/\D/g, ""); if (c.length !== 13) return "";   /* مالک کا حکم: شناختی کارڈ کے بغیر ایجنٹ کوڈ نہیں */
     const row = this.agCnicRow(c); if (row && /^AG-\d+$/.test(row.code)) return row.code;
+    if (row && (row.code === "DEV" || row.code === "CODEV")) return "";
     const biz = this.agBizOf(rk, phone); if (!biz) return "";
     const sid = this.sidFor(biz); if (!sid) return "";
     let code = "AG-" + sid.slice(4);
@@ -815,7 +819,7 @@ export class McsStats {
       const old = this.sql.exec("SELECT id, data FROM agent WHERE phone = ?", b.d.phone).toArray()[0];
       const prev = old ? JSON.parse(old.data) : null;
       const id = old ? old.id : "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
-      { const o = this.agCnicOwner(b.d.cnic, old ? old.id : null); if (o) return Response.json({ ok: false, reason: "cnic_taken" }); }   /* MCS0511TH145: ایک شناختی کارڈ پر ایک ہی ایجنٹ */
+      { const st = this.agStaffCnic(b.d.cnic); if (st) return Response.json({ ok: false, reason: "cnic_staff", other: st }); } { const o = this.agCnicOwner(b.d.cnic, old ? old.id : null); if (o) return Response.json({ ok: false, reason: "cnic_taken" }); }   /* MCS0511TH145: ایک شناختی کارڈ پر ایک ہی ایجنٹ */
       if (b.d.bizRk) { const pr = this.sql.exec("SELECT paid, until FROM prof WHERE rec = ?", b.d.bizRk).toArray()[0];
         if (!pr || !(pr.paid > 0)) return Response.json({ ok: false, reason: "not_paid" }); }   /* MCS0511TH134: کاروبار کے ساتھ آئے تو وہ پروفائل خریدی ہو؛ MCS0911MO264: کاروبار کے بغیر (صرف ایجنٹ) بھی درخواست — noBiz */
       if (prev && prev.status === "pending" && b.d.full) return Response.json({ ok: false, reason: "pending" });   /* ایک وقت میں ایک ہی زیرِ غور درخواست */
@@ -944,7 +948,7 @@ export class McsStats {
         const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let code = "";
         for (let t = 0; t < 20; t++) { const r8 = crypto.getRandomValues(new Uint8Array(8)); let c = ""; for (let i = 0; i < 8; i++) { c += A[r8[i] % A.length]; if (i === 3) c += "-"; } if (!/\d/.test(c) || !/[A-Z]/.test(c)) continue; if (!this.sql.exec("SELECT code FROM actcode WHERE code = ?", c).toArray().length) { code = c; break; } }
         if (!code) return Response.json({ ok: false, reason: "busy" });
-        const d = { mobile: b.mobile, name: b.name || "", rec: b.rec || "", kind: b.kind || "service", recId: b.recId || "", until: b.until || 0, prof: b.prof || "" };
+        const d = { mobile: b.mobile, name: b.name || "", rec: b.rec || "", kind: b.kind || "service", recId: b.recId || "", until: b.until || 0, prof: b.prof || "", cnic: b.cnic || "", district: b.district || "" };
         this.sql.exec("INSERT INTO actcode (code, data, ts, used, uid) VALUES (?, ?, ?, 0, '')", code, JSON.stringify(d), now);
         return Response.json({ ok: true, code });
       }
@@ -952,6 +956,7 @@ export class McsStats {
         if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
         const row = this.sql.exec("SELECT data, used, uid FROM actcode WHERE code = ?", b.code).toArray()[0];
         if (!row) { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "badcode" }); }
+        if (row.used > 0) { fail(); return Response.json({ ok: false, reason: "used" }); }   /* MCS1211TH335: ایک بار استعمال کے بعد ختم — نیا فون «کاروبار واپس لائیں» سے */
         const d = JSON.parse(row.data); let id = key("m:" + d.mobile), u = id && get(id);
         if (!u || u.del) {
           let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
@@ -966,8 +971,54 @@ export class McsStats {
         }
         this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
         this.sql.exec("UPDATE actcode SET used = used + 1, uid = ? WHERE code = ?", u.id, b.code);
+        { u.act = { rec: d.rec, kind: d.kind, recId: d.recId, prof: d.prof }; if (d.cnic) u.cnic = d.cnic; if (!u.district && d.district) u.district = d.district; if (!u.name && d.name) u.name = d.name;
+          const dd = Object.assign({}, u); delete dd._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(dd), u.id);
+          if (d.rec) this.sql.exec("UPDATE prof SET key = '' WHERE rec = ?", d.rec); }   /* نیا فون اسی وقت کاروبار لے سکے */
         this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
         return Response.json({ ok: true, tok: await sess(u.id, "c"), user: out(u), act: d });
+      }
+      if (b.act === "relink") {   /* MCS1211TH335: نیا فون / دوبارہ انسٹال — نام، موبائل، ضلع، شناختی کارڈ ملیں تو لاگ اِن + کاروبار (ممبرشپ باقی ہو تو) */
+        if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
+        const id = key("m:" + b.mobile), u = id && get(id);
+        const nn = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, "");
+        const cOk = u && u.cnic && String(u.cnic).replace(/\D/g, "") === String(b.cnic || "").replace(/\D/g, "");
+        const nOk = u && nn(u.name) && (nn(u.name) === nn(b.name) || nn(u.name).startsWith(nn(b.name).slice(0, 4)) || nn(b.name).startsWith(nn(u.name).slice(0, 4)));
+        const dOk = u && (!u.district || u.district === b.district);
+        if (!u || u.del) { fail(); return Response.json({ ok: false, reason: "noacct" }); }
+        if (!u.cnic) return Response.json({ ok: false, reason: "nocnic" });
+        if (!cOk || !nOk || !dOk) { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "nomatch" }); }
+        this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
+        const a = u.act || null; let until = 0;
+        if (a && a.rec) { const pr = this.sql.exec("SELECT until FROM prof WHERE rec = ?", a.rec).toArray()[0]; until = pr ? pr.until || 0 : 0; if (pr && until > now) this.sql.exec("UPDATE prof SET key = '' WHERE rec = ?", a.rec); }
+        this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
+        return Response.json({ ok: true, tok: await sess(u.id, "r"), user: out(u), act: a, until });
+      }
+      if (b.act === "staffcnic") {   /* MCS1211TH335 (صرف ڈویلپر): DEV / CODEV کا شناختی کارڈ — اس پر ایجنٹ کوڈ کبھی نہیں */
+        if (b.who !== "DEV" && b.who !== "CODEV") return Response.json({ ok: false, reason: "who" });
+        if (b.cnic) {
+          const c = String(b.cnic).replace(/\D/g, ""); if (c.length !== 13) return Response.json({ ok: false, reason: "bad_cnic" });
+          const ex = this.agCnicRow(c); if (ex && ex.code !== b.who) return Response.json({ ok: false, reason: "cnic_used", other: ex.code });
+          this.sql.exec("DELETE FROM agcnic WHERE code = ?", b.who);
+          this.sql.exec("INSERT INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?) ON CONFLICT (cnic) DO UPDATE SET code = excluded.code, id = excluded.id", c, b.who, b.who, now);
+        }
+        const L = {}; for (const r of this.sql.exec("SELECT cnic, code FROM agcnic WHERE code IN ('DEV','CODEV')").toArray()) L[r.code] = r.cnic.slice(0, 5) + "-" + r.cnic.slice(5, 12) + "-" + r.cnic.slice(12);
+        return Response.json({ ok: true, list: L });
+      }
+      if (b.act === "reglist") {   /* MCS1211TH347: ڈویلپر / کو-ڈویلپر / منظور ایجنٹ — سب سائن اپ شدہ IDs (نام، موبائل، ضلع) رجسٹریشن فارم کی ڈراپ ڈاؤن کے لیے */
+        let ok = !!b.admin;
+        if (!ok && b.phone && b.pin) {
+          const ph = String(b.phone), pin = String(b.pin);
+          for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { let x = {}; try { x = JSON.parse(r.data); } catch (e) {} if (x.phone === ph && x.status === "approved" && !x.off && x.pin && x.pin === pin) { ok = true; break; } }
+          if (!ok) { const c = this.sql.exec("SELECT pin FROM codev WHERE phone = ?", ph).toArray()[0]; if (c && c.pin && c.pin === pin) ok = true; }
+        }
+        if (!ok) return Response.json({ ok: false, reason: "login" });
+        const L = [];
+        for (const r of this.sql.exec("SELECT data, ts FROM mcsuser").toArray()) {
+          let u = null; try { u = JSON.parse(r.data); } catch (e) {} if (!u || u.del || !u.mobile) continue;
+          L.push({ sid: this.sidFor(u.mobile, u.ts || r.ts) || u.id, name: u.name || "", mobile: u.mobile, district: u.district || "", ts: u.ts || r.ts || 0 });
+        }
+        L.sort((x, y) => (parseInt(String(x.sid).replace(/\D/g, ""), 10) || 0) - (parseInt(String(y.sid).replace(/\D/g, ""), 10) || 0));
+        return Response.json({ ok: true, list: L });
       }
       if (b.act === "reglook") {   /* MCS1211TH333: ایجنٹ / ڈویلپر — سائن اپ شدہ بندے کی ID (یا موبائل) + 4 ہندسوں کا کوڈ → نام، موبائل، ضلع (15 منٹ میں 8 غلط = روک) */
         if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
@@ -1177,7 +1228,7 @@ export class McsStats {
       if (!cd || !b.cpin || cd.pin !== b.cpin) return Response.json({ ok: false, reason: "login" });
       if (this.sql.exec("SELECT id FROM agent WHERE phone = ?", c.phone).toArray().length) return Response.json({ ok: false, reason: "exists" });
       for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code === c.code || x.bizRk === c.code) return Response.json({ ok: false, reason: "code_taken" }); }
-      { const o = this.agCnicOwner(c.cnic); if (o) return Response.json({ ok: false, reason: "cnic_taken", other: o.name }); }
+      { const st = this.agStaffCnic(c.cnic); if (st) return Response.json({ ok: false, reason: "cnic_staff", other: st }); } { const o = this.agCnicOwner(c.cnic); if (o) return Response.json({ ok: false, reason: "cnic_taken", other: o.name }); }
       const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
       const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: "", pin: "", status: "pending", at: now, upd: now, byCodev: cd.name, dev: "", cnic: c.cnic || "", father: "", address: "", wa: "", email: "", exp: "👥 کو-ڈویلپر " + cd.name + " نے تجویز کیا", note: "" };
       this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
@@ -1187,7 +1238,7 @@ export class McsStats {
       const b = await request.json();
       const r = this.sql.exec("SELECT data FROM agent WHERE phone = ?", b.phone).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "login" });
       const d = JSON.parse(r.data); if (!d.pin || d.pin !== b.pin || d.dev !== b.dev) return Response.json({ ok: false, reason: "login" });
-      { const o = this.agCnicOwner(b.cnic, d.id), row = this.agCnicRow(b.cnic); if (o || (row && row.code !== d.code)) return Response.json({ ok: false, reason: "cnic_taken" }); }
+      { const st = this.agStaffCnic(b.cnic); if (st) return Response.json({ ok: false, reason: "cnic_staff", other: st }); } { const o = this.agCnicOwner(b.cnic, d.id), row = this.agCnicRow(b.cnic); if (o || (row && row.code !== d.code)) return Response.json({ ok: false, reason: "cnic_taken" }); }
       d.cnic = b.cnic; if (b.father) d.father = b.father; d.docsAt = Date.now();
       if (d.code) this.sql.exec("INSERT OR IGNORE INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?)", String(b.cnic).replace(/\D/g, ""), d.code, d.id, Date.now());
       this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), d.id);
@@ -1225,7 +1276,7 @@ export class McsStats {
         const c = b.c || {};
         if (this.sql.exec("SELECT id FROM agent WHERE phone = ?", c.phone).toArray().length) return Response.json({ ok: false, reason: "exists" });
         if (c.code) for (const r of this.sql.exec("SELECT data FROM agent").toArray()) if (JSON.parse(r.data).bizRk === c.code) return Response.json({ ok: false, reason: "code_taken" });
-        { const o = this.agCnicOwner(c.cnic); if (o) return Response.json({ ok: false, reason: "cnic_taken", other: o.name + (o.code ? " (" + o.code + ")" : "") }); }
+        { const st = this.agStaffCnic(c.cnic); if (st) return Response.json({ ok: false, reason: "cnic_staff", other: st }); } { const o = this.agCnicOwner(c.cnic); if (o) return Response.json({ ok: false, reason: "cnic_taken", other: o.name + (o.code ? " (" + o.code + ")" : "") }); }
         const now = Date.now(), id = "A" + now.toString(36) + Math.random().toString(36).slice(2, 5);
         if (!this.agBizOf(c.code, c.phone)) return Response.json({ ok: false, reason: "no_biz" });   /* MCS1111WE312: ایجنٹ وہی جس کا کاروبار جڑا ہو */
         const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: this.agCodeFor(c.cnic, c.code, id, c.phone), pin: String(100000 + Math.floor(Math.random() * 900000)), status: "approved", okAt: now, at: now, upd: now, byOwner: 1, dev: "", cnic: c.cnic || "", father: c.father || "", address: c.address || "", wa: c.wa || "", email: c.email || "", exp: "", note: "", noBiz: c.code ? 0 : 1 };
@@ -1247,7 +1298,7 @@ export class McsStats {
       if (b.op === "imgs") return Response.json({ ok: true, img: Object.fromEntries(this.sql.exec("SELECT kind, data FROM agimg WHERE id = ?", b.id).toArray().map((x) => [x.kind, x.data])) });
       if (b.op === "delete") { this.sql.exec("DELETE FROM agent WHERE id = ?", b.id); this.sql.exec("DELETE FROM agimg WHERE id = ?", b.id); return Response.json({ ok: true }); }
       if (b.op === "approve") {
-        { const o = this.agCnicOwner(d.cnic, d.id); if (o && o.status === "approved") return Response.json({ ok: false, reason: "cnic_taken", other: o.name + " (" + o.code + ")" }); }
+        { const st = this.agStaffCnic(d.cnic); if (st) return Response.json({ ok: false, reason: "cnic_staff", other: st }); } { const o = this.agCnicOwner(d.cnic, d.id); if (o && o.status === "approved") return Response.json({ ok: false, reason: "cnic_taken", other: o.name + " (" + o.code + ")" }); }
         if (!d.code || /^p\d/.test(d.code)) { if (String(d.cnic || "").replace(/\D/g, "").length !== 13) return Response.json({ ok: false, reason: "bad_cnic" }); d.code = this.agCodeFor(d.cnic, d.bizRk, d.id, d.phone); if (!d.code) return Response.json({ ok: false, reason: "no_biz" }); }   /* MCS1111WE312: AG-<سسٹم ID کا نمبر>؛ کاروبار لازمی */
         if (!d.pin) d.pin = String(100000 + Math.floor(Math.random() * 900000));
         d.status = "approved"; d.okAt = Date.now();
@@ -1551,11 +1602,20 @@ async function handleMcsAuth(request, env) {
   } else if (op === "actmake") {   /* MCS1211TH334: صرف ڈویلپر (My City Shines ایڈمن) */
     if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
     const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
-    r = await call({ act: "actmake", mobile, name: S(b.name, 60), rec: S(b.rec, 80), kind: b.kind === "doctor" ? "doctor" : "service", recId: S(b.recId, 80), until: Number(b.until) || 0, prof: S(b.prof, 100) });
+    r = await call({ act: "actmake", mobile, name: S(b.name, 60), rec: S(b.rec, 80), kind: b.kind === "doctor" ? "doctor" : "service", recId: S(b.recId, 80), until: Number(b.until) || 0, prof: S(b.prof, 100), cnic: String(b.cnic || "").replace(/\D/g, "").slice(0, 13), district: S(b.district, 60) });
+  } else if (op === "relink") {   /* MCS1211TH335 */
+    const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
+    r = await call({ act: "relink", mobile, name: S(b.name, 60), district: S(b.district, 60), cnic: String(b.cnic || "").replace(/\D/g, "").slice(0, 13), fk: ip + "|rl2" });
+  } else if (op === "staffcnic") {   /* MCS1211TH335 */
+    if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
+    r = await call({ act: "staffcnic", who: String(b.who || ""), cnic: String(b.cnic || "").replace(/\D/g, "").slice(0, 13) });
   } else if (op === "actuse") {   /* MCS1211TH334 */
     const c = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (c.length !== 8) return reply({ ok: false, reason: "badcode" });
     r = await call({ act: "actuse", code: c.slice(0, 4) + "-" + c.slice(4), fk: ip + "|ac", dev });
+  } else if (op === "reglist") {   /* MCS1211TH347 */
+    const admin = !!(await verifyFirebaseAdmin(request));
+    r = await call({ act: "reglist", admin, phone: S(b.phone, 20), pin: S(b.pin, 12) });
   } else if (op === "reglook") {   /* MCS1211TH333 */
     const id = S(b.id, 40).toLowerCase(), ids = [], pk = String(b.pk || "").replace(/\D/g, "").slice(0, 4);
     if (/^mcs-?\d{1,5}$/.test(id)) ids.push("a:MCS-" + id.replace(/\D/g, "").padStart(3, "0"));
