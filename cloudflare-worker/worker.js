@@ -1521,7 +1521,13 @@ export class McsStats {
       else if (b.act === "approve") { const now = Date.now(); this.sql.exec("UPDATE prof SET since = ?, until = MAX(COALESCE(until, 0), ?), pend = 0 WHERE rec = ?", now, now + 15 * 864e5, b.rec); }   /* MCS0511TH157: منظوری = 15 دن مفت شروع */
       else if (b.act === "reject") this.sql.exec("UPDATE prof SET pend = 0 WHERE rec = ?", b.rec);
       else if (b.act === "free") this.sql.exec("UPDATE prof SET key = '' WHERE rec = ?", b.rec);
-      else if (b.act === "del") { this.sql.exec("DELETE FROM prof WHERE rec = ?", b.rec); this.sql.exec("DELETE FROM pimg WHERE rec = ?", b.rec); }
+      else if (b.act === "del") { this.sql.exec("DELETE FROM prof WHERE rec = ?", b.rec); this.sql.exec("DELETE FROM pimg WHERE rec = ?", b.rec);
+        /* MCS1211TH354 (مالک کا حکم): کاروبار / ممبرشپ حذف = اس کی ID بھی ختم — اسی موبائل کی کوئی اور ممبرشپ یا اکاؤنٹ نہ ہو تو MCS ID ریٹائر (دوبارہ کسی کو نہیں) */
+        try { const mob = this.sidMob(b.rec), sid = mob && this.sidGet(mob);
+          if (sid && !this.sql.exec("SELECT rec FROM prof").toArray().some((r) => this.sidMob(r.rec) === mob) && !this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + mob).toArray().length) {
+            this.sql.exec("DELETE FROM mcssid WHERE mob = ?", mob); this.sql.exec("DELETE FROM mcsukey WHERE k = ?", "a:" + sid); this.finLog("sidretire", { sid, rec: b.rec }); }
+          this.sql.exec("UPDATE sale SET subid = NULL WHERE rec = ? AND COALESCE(void, 0) = 0", b.rec);
+        } catch (e) {} }
       return Response.json({ ok: true });
     }
     if (op === "/vlist") return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, ts FROM verified").toArray().map((r) => [r.rec, r.ts])));
