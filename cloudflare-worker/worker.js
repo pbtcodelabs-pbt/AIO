@@ -423,6 +423,45 @@ export class McsStats {
   /* MCS1211TH351 (مالک کا حکم): ڈویلپر = DEV، کو-ڈویلپر = CODEV — ان کی MCS ID نہیں */
   staffSid(mob0) { const mob = this.sidMob(mob0); if (!mob) return ""; if (mob === (this.finCfg("devmob", "") || "923206793793")) return "DEV";
     return this.sql.exec("SELECT phone FROM codev WHERE phone = ?", mob).toArray().length ? "CODEV" : ""; }
+  sidResetCore(L, agentFirst, now) {   /* MCS1211TH351/353: رجسٹرڈ کاروبار کو ترتیب سے MCS-001…، باقی ختم؛ ایجنٹ AG-001… */
+    const old = this.sql.exec("SELECT mob, sid, subn FROM mcssid").toArray();
+    this.finLog("sidreset", { old: old.length, list: L.map((x) => x.mob) });
+    this.sql.exec("DELETE FROM mcssid");
+    this.sql.exec("DELETE FROM mcsukey WHERE k GLOB 'a:MCS-[0-9][0-9][0-9]'");
+    this.sql.exec("UPDATE sale SET subid = NULL");
+    L.forEach((x, i) => {
+      const sid = "MCS-" + String(i + 1).padStart(3, "0");
+      this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 1, ?)", x.mob, sid, now);
+      this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + x.mob);
+      if (x.name) this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "sidname_" + x.mob, x.name);
+      const sl = this.sql.exec("SELECT id, rec FROM sale WHERE COALESCE(void, 0) = 0 ORDER BY ts").toArray().find((r) => this.sidMob(r.rec) === x.mob);
+      if (sl) this.sql.exec("UPDATE sale SET subid = ? WHERE id = ?", sid + "-01", sl.id);
+    });
+    /* MCS1211TH352: نئے اصول (سائن اپ پر ID) کے بعد والے سائن اپ — رجسٹرڈ کے بعد ترتیب سے */
+    { const at = parseInt(this.finCfg("sid352at", "0"), 10) || 0, seen = new Set(L.map((x) => x.mob)); let n = L.length;
+      if (at) for (const r of this.sql.exec("SELECT data, ts FROM mcsuser WHERE ts >= ? ORDER BY ts", at).toArray()) { let u = null; try { u = JSON.parse(r.data); } catch (e) {} const m = u && !u.del && entPhone(u.mobile); if (!m || seen.has(m) || this.staffSid(m)) continue; seen.add(m); n++;
+        const sid = "MCS-" + String(n).padStart(3, "0"); this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 0, ?)", m, sid, r.ts); this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + m); }
+      this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidseq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n)); }
+    const agents = this.agRenumber(agentFirst);
+    return { ok: true, agents, list: L.map((x, i) => ({ mob: x.mob, name: x.name, sid: "MCS-" + String(i + 1).padStart(3, "0"), subid: "MCS-" + String(i + 1).padStart(3, "0") + "-01" })) };
+  }
+  sidFix353() {   /* MCS1211TH353 (مالک کا حکم — خود سرور پر، ایک بار): حبیب شہباز MCS-001، غوثیہ نان شاپ MCS-002، پنجاب سیٹنگ (آصف) MCS-003؛ حبیب شہباز ایجنٹ AG-001 */
+    if (this.finCfg("sidmig353", "")) return;
+    const nm = (rec) => { let n = this.finCfg("bn_" + rec, "") || ""; if (!n) { const a = this.sql.exec("SELECT data FROM agref WHERE rk = ?", rec).toArray()[0]; try { const d = JSON.parse((a && a.data) || "{}"); n = d.name || d.biz || ""; } catch (e) {} }
+      if (!n) for (const x of this.sql.exec("SELECT who FROM sale WHERE rec = ?", rec).toArray()) { try { const w = JSON.parse(x.who || "{}"); if (w.biz) { n = w.biz; break; } } catch (e) {} }
+      if (!n) { const p = this.sql.exec("SELECT data FROM prof WHERE rec = ?", rec).toArray()[0]; try { const d = JSON.parse((p && p.data) || "{}"); n = d.nameUr || d.name || d.biz || ""; } catch (e) {} } return String(n || ""); };
+    const C = [], seen = new Set();
+    for (const r of this.sql.exec("SELECT rec, MIN(ts) AS t FROM sale WHERE COALESCE(void, 0) = 0 AND COALESCE(units, 0) > 0 GROUP BY rec ORDER BY t").toArray()) { const mob = this.sidMob(r.rec); if (!mob || seen.has(mob) || this.staffSid(mob)) continue; seen.add(mob); C.push({ mob, name: nm(r.rec), t: r.t }); }
+    const HAB = "923015079681";
+    const slots = [ (x) => x.mob === HAB || /حبیب\s*شہباز|habib\s*shahbaz|محمدی\s*کری/i.test(x.name), (x) => /غوث|gh?ou?s|ghaus|نان|naan/i.test(x.name), (x) => /پنجاب|punjab|سیٹنگ|سٹنگ|setting|آصف|asif/i.test(x.name) ];
+    const L = []; const used = new Set();
+    slots.forEach((f, i) => { const c = C.find((x) => !used.has(x.mob) && f(x)); if (c) { used.add(c.mob); L[i] = c; } });
+    if (!L[0]) { L[0] = { mob: HAB, name: "Habib Shahbaz" }; used.add(HAB); }
+    for (let i = 1; i < 3; i++) if (!L[i]) { const c = C.find((x) => !used.has(x.mob)); if (c) { used.add(c.mob); L[i] = c; } }
+    const list = L.filter(Boolean).map((x) => ({ mob: x.mob, name: x.name }));
+    const r = this.sidResetCore(list, HAB, Date.now());
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidmig353', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), list: r.list.map((x) => x.sid + " " + x.name), agents: (r.agents || []).map((a) => a.code + " " + (a.name || "")), cand: C.length }));
+  }
   sidFor(mob0, ts) {   /* اسی موبائل کی ID، ورنہ اگلی MCS-NNN — MCS1211TH351: صرف رجسٹرڈ (فروخت / منظوری) پر بلایا جائے، سائن اپ پر نہیں */
     const mob = this.sidMob(mob0); if (!mob) return "";
     const ex = this.sidGet(mob); if (ex) return ex;
@@ -783,7 +822,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
-    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} }
+    if (!this._sidMig) { this._sidMig = 1; try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
@@ -1032,26 +1071,7 @@ export class McsStats {
         if (!b.admin) return Response.json({ ok: false, reason: "admin_only" });
         const L = (b.list || []).map((x) => ({ mob: this.sidMob(x.mob), name: String(x.name || "").slice(0, 80) })).filter((x) => x.mob);
         if (!L.length || new Set(L.map((x) => x.mob)).size !== L.length) return Response.json({ ok: false, reason: "bad_list" });
-        const old = this.sql.exec("SELECT mob, sid, subn FROM mcssid").toArray();
-        this.finLog("sidreset", { old: old.length, list: L.map((x) => x.mob) });
-        this.sql.exec("DELETE FROM mcssid");
-        this.sql.exec("DELETE FROM mcsukey WHERE k GLOB 'a:MCS-[0-9][0-9][0-9]'");
-        this.sql.exec("UPDATE sale SET subid = NULL");
-        L.forEach((x, i) => {
-          const sid = "MCS-" + String(i + 1).padStart(3, "0");
-          this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 1, ?)", x.mob, sid, now);
-          this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + x.mob);
-          if (x.name) this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "sidname_" + x.mob, x.name);
-          const sl = this.sql.exec("SELECT id, rec FROM sale WHERE COALESCE(void, 0) = 0 ORDER BY ts").toArray().find((r) => this.sidMob(r.rec) === x.mob);
-          if (sl) this.sql.exec("UPDATE sale SET subid = ? WHERE id = ?", sid + "-01", sl.id);
-        });
-        /* MCS1211TH352: نئے اصول (سائن اپ پر ID) کے بعد والے سائن اپ — رجسٹرڈ کے بعد ترتیب سے */
-        { const at = parseInt(this.finCfg("sid352at", "0"), 10) || 0, seen = new Set(L.map((x) => x.mob)); let n = L.length;
-          if (at) for (const r of this.sql.exec("SELECT data, ts FROM mcsuser WHERE ts >= ? ORDER BY ts", at).toArray()) { let u = null; try { u = JSON.parse(r.data); } catch (e) {} const m = u && !u.del && entPhone(u.mobile); if (!m || seen.has(m) || this.staffSid(m)) continue; seen.add(m); n++;
-            const sid = "MCS-" + String(n).padStart(3, "0"); this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 0, ?)", m, sid, r.ts); this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + m); }
-          this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidseq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n)); }
-        const agents = this.agRenumber(b.agentFirst || (L[0] && L[0].mob) || "");
-        return Response.json({ ok: true, agents, list: L.map((x, i) => ({ mob: x.mob, sid: "MCS-" + String(i + 1).padStart(3, "0"), subid: "MCS-" + String(i + 1).padStart(3, "0") + "-01" })) });
+        return Response.json(this.sidResetCore(L, b.agentFirst || (L[0] && L[0].mob) || "", now));
       }
       if (b.act === "reglist") {   /* MCS1211TH347: ڈویلپر / کو-ڈویلپر / منظور ایجنٹ — سب سائن اپ شدہ IDs (نام، موبائل، ضلع) رجسٹریشن فارم کی ڈراپ ڈاؤن کے لیے */
         let ok = !!b.admin;
