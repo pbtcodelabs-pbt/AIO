@@ -663,6 +663,29 @@ export class McsStats {
     const mons = this.sql.exec("SELECT mon FROM sale UNION SELECT mon FROM finx ORDER BY mon DESC LIMIT 24").toArray().map((x) => x.mon);
     return { ok: true, mon, lines, totals: T, agents: Object.values(ag), gross, play, direct, gEst, gAct, recv, mons };
   }
+  /* AGP1311FR034 (ہیلپ ڈیسک #235): Total Users (Free + Paid) — mcsuser؛ Paid = جس موبائل کی کوئی ممبرشپ ابھی جاری اور اس کی فروخت (void نہیں) ہوئی ہو؛
+     Total Businesses / Professionals — My City Shines Firestore کی گنتی (aggregation count، ایک گھنٹے کی کیش agcfg fsstat235 — کوٹہ نہ کھائے) */
+  async mcsStats235(now) {
+    const users = this.sql.exec("SELECT data FROM mcsuser").toArray().map((r) => { try { return JSON.parse(r.data); } catch (e) { return {}; } });
+    const sold = new Set(this.sql.exec("SELECT DISTINCT rec FROM sale WHERE COALESCE(void, 0) = 0").toArray().map((r) => r.rec));
+    const paidMob = new Set(); for (const r of this.sql.exec("SELECT rec, until FROM prof WHERE until > ?", now).toArray()) if (sold.has(r.rec)) { const m = this.sidMob(r.rec); if (m) paidMob.add(m); }
+    let paid = 0; for (const u of users) if (paidMob.has(this.sidMob(u.mobile))) paid++;
+    let fs = {}; try { fs = JSON.parse((this.sql.exec("SELECT v FROM agcfg WHERE k = 'fsstat235'").toArray()[0] || {}).v || "{}"); } catch (e) { fs = {}; }
+    if (!fs.at || now - fs.at > 3600e3) {
+      const K = "AIzaSyAvu8ymIZAGEPaYwd_LBJzKS2lZ3Q4_Mog", U = "https://firestore.googleapis.com/v1/projects/my-city-shines/databases/(default)/documents:runAggregationQuery?key=" + K;
+      const inF = (L) => ({ fieldFilter: { field: { fieldPath: "category" }, op: "IN", value: { arrayValue: { values: L.map((x) => ({ stringValue: x })) } } } });
+      const cnt = async (col, where) => { const q = { structuredAggregationQuery: { structuredQuery: Object.assign({ from: [{ collectionId: col }] }, where ? { where } : {}), aggregations: [{ alias: "n", count: {} }] } };
+        const r = await fetch(U, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(q) }); if (!r.ok) throw new Error("fs " + r.status);
+        const j = await r.json(); return parseInt(((((j[0] || {}).result || {}).aggregateFields || {}).n || {}).integerValue || "0", 10); };
+      try {
+        const BIZ = ["medicalStore", "homeopathic", "testingLab", "groceryStore", "clothesShop", "mobileElectronics", "hardwareStore", "bakery", "jewelryShop", "furnitureShop", "autoParts", "beautyParlor", "restaurant", "otherShop", "mcsAgent"];
+        const [all, biz, skip, docs] = await Promise.all([cnt("services"), cnt("services", inF(BIZ)), cnt("services", inF(["emergencyNumbers", "govOffices"])), cnt("doctors")]);
+        fs = { at: now, biz, pro: Math.max(0, all - biz - skip) + docs };
+        this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('fsstat235', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify(fs));
+      } catch (e) { fs.err = String(e.message || e); }
+    }
+    return { users: users.length, paid, free: users.length - paid, biz: fs.biz == null ? null : fs.biz, pro: fs.pro == null ? null : fs.pro, fsAt: fs.at || 0 };
+  }
   async fin2(b) {
     const op = String(b.op || ""), now = Date.now();
     let key = "";
@@ -671,6 +694,7 @@ export class McsStats {
     else if (b.as === "cd") { const r = this.sql.exec("SELECT pin FROM codev WHERE phone = ?", String(b.phone || "")).toArray()[0]; if (r && b.pin && r.pin === b.pin) key = "C:" + b.phone; }
     if (!key) return Response.json({ ok: false, reason: "login" });
     const mon = String(b.mon || this.finMonOf(now)).replace(/[^0-9_]/g, "").slice(0, 7);
+    if (op === "stats") return Response.json(Object.assign({ ok: true }, await this.mcsStats235(now)));   /* AGP1311FR034 (ہیلپ ڈیسک #235): کمپنی کی کل گنتی */
     if (op === "me" && key !== "D") return Response.json(Object.assign({ ok: true, unread: this.sql.exec("SELECT COUNT(*) AS n FROM agnote WHERE who = ? AND rd = 0", key).toArray()[0].n }, this.finPerson(key, this.finLines(""))));
     if (op === "notes" && key !== "D") { const list = this.sql.exec("SELECT id, kind, text, ts, rd FROM agnote WHERE who = ? ORDER BY id DESC LIMIT 60", key).toArray(); this.sql.exec("UPDATE agnote SET rd = 1 WHERE who = ? AND rd = 0", key); return Response.json({ ok: true, list }); }
     if (op === "acct" && key !== "D") { const a = b.acct || {}; const qr = /^data:image\/(jpeg|png|webp);base64,/.test(String(a.qr || "")) && String(a.qr).length <= 400000 ? a.qr : "";
