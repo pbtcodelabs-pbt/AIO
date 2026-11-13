@@ -867,7 +867,8 @@ export class McsStats {
     if (op === "/mcs_use") {
       const b = await request.json();
       if (b.op === "add") {
-        for (const k of ["r", "w", "d"]) { const n = Math.max(0, Math.min(200000, parseInt(b[k], 10) || 0)); if (n) this.sql.exec("INSERT INTO useday (day, k, n) VALUES (?, ?, ?) ON CONFLICT (day, k) DO UPDATE SET n = n + excluded.n", uday, "fs_" + k, n); }
+        const qd = "Q" + fsQuotaDay(Date.now());   /* AGP1311FR035: فائربیس کا کوٹہ امریکی (Pacific) دن پر — الگ گنتی */
+        for (const k of ["r", "w", "d"]) { const n = Math.max(0, Math.min(200000, parseInt(b[k], 10) || 0)); if (n) { this.sql.exec("INSERT INTO useday (day, k, n) VALUES (?, ?, ?) ON CONFLICT (day, k) DO UPDATE SET n = n + excluded.n", uday, "fs_" + k, n); this.sql.exec("INSERT INTO useday (day, k, n) VALUES (?, ?, ?) ON CONFLICT (day, k) DO UPDATE SET n = n + excluded.n", qd, "fs_" + k, n); } }
         if (b.dev) this.sql.exec("INSERT OR IGNORE INTO usedev (day, dev) VALUES (?, ?)", uday, String(b.dev).slice(0, 64));
         return Response.json({ ok: true });
       }
@@ -877,7 +878,16 @@ export class McsStats {
       for (const r of this.sql.exec("SELECT day, COUNT(*) AS n FROM usedev WHERE day >= ? GROUP BY day", from).toArray()) (days[r.day] = days[r.day] || {}).dev = r.n;
       try { this.sql.exec("DELETE FROM useday WHERE day < ?", new Date(Date.now() - 400 * 864e5).toISOString().slice(0, 10)); this.sql.exec("DELETE FROM usedev WHERE day < ?", from); } catch (e) {}
       let db = 0; try { db = this.sql.databaseSize || 0; } catch (e) {}
-      return Response.json({ ok: true, today: uday, days, dbBytes: db || 0 });
+      /* AGP1311FR035: کوٹے کا میٹر — اس کوٹہ دن کی گنتی + اصل حالت (ہر 5 منٹ میں ایک چھوٹی پڑھائی؛ 429 = ختم) */
+      const qday = fsQuotaDay(Date.now()), q = {}; for (const r of this.sql.exec("SELECT k, n FROM useday WHERE day = ?", "Q" + qday).toArray()) q[r.k] = r.n;
+      let pr = {}; try { pr = JSON.parse((this.sql.exec("SELECT v FROM agcfg WHERE k = 'fsprobe'").toArray()[0] || {}).v || "{}"); } catch (e) { pr = {}; }
+      if (!pr.at || Date.now() - pr.at > 300e3 || b.fresh) {
+        let st = "err"; try { const r = await fetch("https://firestore.googleapis.com/v1/projects/my-city-shines/databases/(default)/documents/appConfig/ticker?key=AIzaSyAvu8ymIZAGEPaYwd_LBJzKS2lZ3Q4_Mog&mask.fieldPaths=x", { cf: { cacheTtl: 0 } }); st = r.status === 429 ? "quota" : r.ok || r.status === 404 ? "ok" : "err" + r.status; } catch (e) { st = "err"; }
+        if (st === "quota" && pr.st !== "quota") pr.since = Date.now(); if (st !== "quota") pr.since = 0;
+        pr.at = Date.now(); pr.st = st; this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('fsprobe', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify(pr));
+      }
+      const quota = { day: qday, r: q.fs_r || 0, w: q.fs_w || 0, d: q.fs_d || 0, req: (days[uday] || {}).req || 0, resetAt: fsQuotaReset(Date.now()), live: pr.st, liveAt: pr.at, since: pr.since || 0 };
+      return Response.json({ ok: true, today: uday, days, dbBytes: db || 0, quota });
     }
     if (op === "/ent_claim") {   /* گاہک: اپنی چابی (جی میل / موبائل) سے اس فون پر کھولنا — فون کی حد تک */
       const b = await request.json();
@@ -1838,7 +1848,7 @@ async function handleAgent(request, env, path) {
   if (path === "/mcsuse") {   /* MCS0911MO254: 📊 استعمال — ایپ گنتی بھیجے (add)؛ پڑھنا صرف ایڈمن */
     if (b.op === "add") return fwd("/mcs_use", { op: "add", r: b.r, w: b.w, d: b.d, dev });
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
-    return fwd("/mcs_use", { op: "get" });
+    return fwd("/mcs_use", { op: "get", fresh: !!b.fresh });
   }
   if (path === "/mcschat") {   /* MCS0911MO251: 💬 My Chats */
     const as = String(b.as || ""); if (!["user", "agent", "cd", "dev", "biz"].includes(as)) return reply({ ok: false, reason: "login" });
@@ -1916,6 +1926,12 @@ async function handleVerify(request, env, path) {
   if (path === "/editdone") return fwd("/editdone", { id: parseInt(b.id, 10) || 0 });
   return reply({ error: "not_found" }, 404);
 }
+
+
+/* AGP1311FR035: Firestore کا روزانہ کوٹہ امریکی Pacific آدھی رات پر نیا ہوتا ہے (سردیوں میں پاکستان کا دوپہر 1 بجے، گرمیوں میں 12 بجے) */
+function fsLaParts(ms) { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(new Date(ms))) p[x.type] = x.value; return p; }
+function fsQuotaDay(ms) { const p = fsLaParts(ms); return p.year + "-" + p.month + "-" + p.day; }
+function fsQuotaReset(ms) { const p = fsLaParts(ms); return ms - ((+p.hour * 3600 + +p.minute * 60 + +p.second) * 1000) + 864e5 - (ms % 1000); }
 
 /* ===== MCS پروفائل کے راستے ===== */
 function profClean(d) {
