@@ -777,11 +777,31 @@
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
   /* ---------- AIO910FR003: Wholesale بند ہو تو اس سے متعلق ہر بٹن/خانہ چھپا رہے ---------- */
   body.wsOff .wsOnly{display:none !important;}
-  /* AIO1411SA207: بلنگ پر موڈ کی پٹی */
-  #saleModeStrip{margin:3px 0 2px; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:800; line-height:1.4; text-align:center;}
-  #saleModeStrip.smRetail{background:#dcfce7; color:#166534; border:1px solid #bbf7d0;}
-  #saleModeStrip.smWholesale{background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;}
-  #saleModeStrip small{display:block; font-weight:700; font-size:11px; opacity:.85;}
+  /* AIO1411SA209: Daily Recovery */
+  .drBar{display:flex; gap:8px; margin-bottom:8px; align-items:center;}
+  .drBar select, .drBar input[type=text]{flex:1 1 0; min-width:0; padding:9px; border:1px solid #dbe1ea; border-radius:10px; font-size:13px; background:#fff;}
+  .drChk{flex:1 1 0; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700;}
+  .drSummary{display:flex; gap:6px; margin:8px 0; font-size:11.5px;}
+  .drSummary div{flex:1; background:#f1f5f9; border-radius:10px; padding:6px 4px; text-align:center; font-weight:700;}
+  .drSummary b{display:block; font-size:13.5px;}
+  .drRow{background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:9px 10px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .drTop{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px;}
+  .drTop b{font-size:14.5px;} .drTop small{color:var(--muted); font-size:11px;}
+  .drGrid{display:grid; grid-template-columns:1fr 1.1fr 1fr; gap:6px; align-items:end;}
+  .drCell small{display:block; font-size:10.5px; color:var(--muted); font-weight:700; margin-bottom:2px;}
+  .drCell b{display:block; font-size:14px;}
+  .drCell input{width:100%; box-sizing:border-box; padding:7px 6px; border:1.5px solid #93c5fd; border-radius:8px; font-size:14px; font-weight:700; text-align:center;}
+  .drLeft.red{color:#b91c1c;} .drLeft.green{color:#15803d;} .drLeft.orange{color:#c2410c;}
+  .drRemBtn{margin-top:7px; width:100%; padding:7px; border:none; border-radius:9px; background:#dcfce7; color:#166534; font-weight:800; font-size:12.5px; cursor:pointer;}
+  .drDayBtn{flex:1; padding:8px 4px; border:1.5px solid #cbd5e1; border-radius:10px; background:#fff; font-size:12px; font-weight:800; cursor:pointer;}
+  .drDayBtn.active{background:#16a34a; border-color:#15803d; color:#fff;}
+  .drResetBtn{margin-top:6px; border:none; background:none; color:var(--primary-dark); font-size:12px; font-weight:700; cursor:pointer; padding:4px 0;}
+  /* AIO1411SA209: منتخب بٹن کے نیچے چھوٹی پٹی */
+  .smStripRow{display:flex; gap:8px; margin-top:3px;}
+  .smStripRow span{flex:1 1 0; min-width:0; text-align:center; font-size:10.5px; font-weight:800; line-height:1.3; padding:2px 4px; border-radius:8px; visibility:hidden; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .smStripRow span.on{visibility:visible;}
+  .smStripRow .smRetail{background:#dcfce7; color:#166534; border:1px solid #bbf7d0;}
+  .smStripRow .smWholesale{background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;}
   /* ---------- AIO910FR006: سنگل یوزر پیکج — ملٹی یوزر/کلاؤڈ سے متعلق ہر چیز چھپی رہے ---------- */
   body.muOff .muOnly{display:none !important;}
   .cartCustChip{flex:0 0 auto; max-width:40%; display:inline-flex; align-items:center; gap:4px; padding:7px 10px; border-radius:999px;
@@ -3392,7 +3412,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1411SA208</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1411SA209</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3615,7 +3635,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1411SA208</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1411SA209</span>
     </div>
   </div>
 
@@ -3793,9 +3813,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="billingTopBar">
         <div class="modeToggleRow">
           <!-- ---------- AIO910FR003: Walk-in سوئچ ختم — کسٹمر نہ چنیں تو خودکار نقد (Cash) بل ---------- -->
-          <div class="billModeToggle wsOnly" style="flex:1 1 auto; min-width:0;">
-            <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
-            <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
+          <div class="wsOnly" style="flex:1 1 auto; min-width:0;">
+            <div class="billModeToggle">
+              <button id="modeRetail" class="active" onclick="setSaleMode('retail')">🏷️ Retail</button>
+              <button id="modeWholesale" onclick="setSaleMode('wholesale')">📦 Wholesale</button>
+            </div>
+            <!-- AIO1411SA209: پٹی منتخب بٹن کے عین نیچے -->
+            <div class="smStripRow"><span id="smStripRetail" class="smRetail"></span><span id="smStripWholesale" class="smWholesale"></span></div>
           </div>
 
           <!-- ---------- ⚙️ Settings بٹن — بالکل یہیں Billing اسکرین پر ---------- -->
@@ -3816,9 +3840,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             </div>
           </div>
         </div>
-
-        <!-- AIO1411SA207: Retail/Wholesale کی پٹی -->
-        <div id="saleModeStrip" class="wsOnly smRetail"></div>
 
         <div class="searchRow">
           <button id="billingSuggestToggleBtn" onclick="toggleBillingSearchSuggestions()" title="Toggle search suggestions list" style="flex:0 0 42px; padding:0; font-size:15px;">💡</button>
@@ -5190,6 +5211,56 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <button onclick="openRecordPaymentModal()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; margin-bottom:14px;">➕ Record New Payment</button>
 
       <div id="paymentsListWrap"></div>
+    </div>
+
+    <!-- ===== AIO1411SA209: 📅 Daily Recovery ===== -->
+    <div class="screen admin-only" id="screen-recovery">
+      <div class="pageTitle">📅 Daily Recovery</div>
+
+      <div class="drBar">
+        <select id="drSort" onchange="DR.sort=this.value; drRender()">
+          <option value="high">💰 Highest balance first</option>
+          <option value="low">💰 Lowest balance first</option>
+          <option value="new">🆕 Newest customers first</option>
+          <option value="old">🕰️ Oldest customers first</option>
+          <option value="name">🔤 Name (A–Z)</option>
+        </select>
+        <select id="drArea" onchange="DR.area=this.value; drRender()"><option value="">🗺️ All areas</option></select>
+      </div>
+      <div class="drBar">
+        <input type="text" id="drSearch" placeholder="🔍 Search customer" oninput="DR.q=this.value; drRender()" style="flex:2;">
+        <label class="drChk"><input type="checkbox" id="drAll" onchange="DR.all=this.checked; drRender()"> Include zero balance</label>
+      </div>
+
+      <div class="drSummary" id="drSummary"></div>
+      <div id="drListWrap"></div>
+
+      <button class="checkoutBtn" style="margin-top:12px; background:var(--success);" onclick="drSaveAll()">💾 Save received payments</button>
+      <div class="settingsHint" style="margin:6px 0 14px;">Type the amount you collected in each row — the remaining balance updates at once. Nothing is saved until you press “Save received payments”.</div>
+    </div>
+
+    <div class="modalOverlay" id="drReminderModal" onclick="if(event.target===this) this.classList.remove('show')">
+      <div class="profileBox" style="width:440px;">
+        <div class="profileHead">
+          <div class="pAvatarLg">💬</div>
+          <div class="pInfo">
+            <div class="pName">Recovery Reminder</div>
+            <div class="pMeta" id="drRemMeta">—</div>
+          </div>
+          <span class="closeBtn" onclick="document.getElementById('drReminderModal').classList.remove('show')">✖</span>
+        </div>
+        <div class="profileBody">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button type="button" id="drDayToday" class="drDayBtn active" onclick="drSetDay('today')">I am coming today</button>
+            <button type="button" id="drDayTomorrow" class="drDayBtn" onclick="drSetDay('tomorrow')">I am coming tomorrow</button>
+          </div>
+          <div class="settingsSubLabel">Message (you can edit this)</div>
+          <textarea id="drRemText" style="width:100%; min-height:200px; padding:10px; border:1px solid #dbe1ea; border-radius:8px; font-family:inherit; font-size:13px; line-height:1.5;"></textarea>
+          <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12.5px; font-weight:700;"><input type="checkbox" id="drRemKeep"> Keep this message the same for every customer</label>
+          <button type="button" class="drResetBtn" onclick="drResetTpl()">↺ Back to the original message</button>
+          <button class="checkoutBtn" style="margin-top:10px; background:var(--success);" onclick="drSendReminder()">💬 Send via WhatsApp</button>
+        </div>
+      </div>
     </div>
 
     <!-- RECORD PAYMENT MODAL (Payments Hub کا اپنا مکمل فارم — کسی بھی سمت کی پیمنٹ) -->
@@ -9522,6 +9593,7 @@ const HOME_TILE_GROUPS_ADMIN = [
   ]},
   { section: '💳 Payments', tiles: [
     {icon:'💳', label:'Payments Record', screen:'payments'},
+    {icon:'📅', label:'Daily Recovery', screen:'recovery'},
   ]},
   { section: '📊 Insights', tiles: [
     {icon:'📊', label:'Dashboard', screen:'dashboard'},
@@ -9619,8 +9691,9 @@ const NAV_ITEMS = [
   {id:20, icon:'📈', label:'Trend Analysis',        screen:'trends'},
   {id:21, icon:'🔑', label:'Users',                 screen:'users', mu:true},
   {id:22, icon:'<span class="pbthd-sos" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(#fde047,#facc15);color:#111;border-radius:999px;padding:2px 9px;font:800 12px/1.35 Arial,sans-serif;box-shadow:0 2px 0 #ca8a04;white-space:nowrap;vertical-align:middle;direction:ltr"><b style="background:#111;color:#facc15;border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;font-size:11px">?</b>Help Desk</span>', label:'PBT Help Desk',         action:'openHelpDesk', always:true}, // AIO0111SU142: مسئلہ / مشورہ — سب کے لیے (ملازم بھی)
+  {id:23, icon:'📅', label:'Daily Recovery',        screen:'recovery'} /* AIO1411SA209 */
 ];
-const NAV_DEFAULT_HOME_ADMIN = [1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,22];
+const NAV_DEFAULT_HOME_ADMIN = [1,2,3,4,5,6,7,8,9,10,11,12,23,13,15,16,17,18,19,20,21,22];
 // ---------- پرانے نمبر (AIO1210MO019–021) → نئے A–Z نمبر، تاکہ کسی کی بنائی ہوئی ترتیب ضائع نہ ہو ----------
 const NAV_OLD_TO_NEW = {1:4, 2:3, 3:1, 4:13, 5:5, 6:18, 7:6, 8:19, 9:12, 10:7, 11:20, 12:16, 13:9, 14:21, 15:17, 16:2, 17:15, 18:11, 19:10, 20:8, 21:14};
 function migrateNavNumbering(){
@@ -9661,6 +9734,13 @@ function getHomeTileIds(){
       if(Array.isArray(a) && !a.map(Number).includes(22)) a.push(22);
     });
     AppState.settings.helpDeskTile = true;
+    try{ persistAllData(); }catch(e){}
+  }
+  // AIO1411SA209: «📅 Daily Recovery» ٹائل پرانی ترتیب میں بھی ایک بار جڑ جائے (صرف ایڈمن)
+  if(AppState.settings && !AppState.settings.recoveryTile){
+    const a = AppState.settings.homeTilesAdmin;
+    if(Array.isArray(a) && !a.map(Number).includes(23)) a.push(23);
+    AppState.settings.recoveryTile = true;
     try{ persistAllData(); }catch(e){}
   }
   const allowedIds = getAllowedNavItems().map(x => x.id);
@@ -11572,6 +11652,7 @@ function goTo(screenName, _isHistoryNav){
   if(screenName === 'billsettings') renderBillSettingsScreen();
   if(screenName === 'myaccount') renderMyAccountScreen();
   if(screenName === 'payments') renderPaymentsScreen();
+  if(screenName === 'recovery') renderRecoveryScreen();
   if(screenName === 'trends') renderTrendsScreen();
 
   // موبائل پر نیا صفحہ کھلتے ہی sidebar drawer خودکار بند ہو جائے
@@ -11661,6 +11742,7 @@ const APP_SEARCH_INDEX = [
   {label:'Suppliers', path:'Suppliers', screen:'suppliers', keywords:'suppliers vendor payable bank account pay supplier add new import csv'},
   {label:'Purchase Orders', path:'Purchase Orders', screen:'purchaseorders', keywords:'purchase order po restock get from low stock receive'},
   {label:'Payments', path:'Payments', screen:'payments', keywords:'payments record customer supplier receipt paid received total'},
+  {label:'Daily Recovery', path:'Daily Recovery', screen:'recovery', keywords:'daily recovery collect udhar balance due reminder customers area'},
   {label:'Advance Orders', path:'Advance Orders', screen:'advanceorders', keywords:'advance order preorder booking pending fulfilled print list'},
   {label:'My Ads — Promote App', path:'My Ads', action:'openMyAdsModal', keywords:'my ads poster promote advertisement share whatsapp flex'},
   {label:'Reports Center', path:'Reports', action:'openReportCenterModal', keywords:'reports price list inventory profit purchase sale category print whatsapp broadcast todays sale'},
@@ -14154,11 +14236,11 @@ function getModePrice(v, mode){
 
 // ---------- AIO1411SA207: بلنگ پر پٹی — کون سا ریٹ چل رہا ہے ----------
 function updateSaleModeStrip(){
-  const el = document.getElementById('saleModeStrip'); if(!el) return;
+  const r = document.getElementById('smStripRetail'), w = document.getElementById('smStripWholesale');
+  if(!r || !w) return;
   const ws = (typeof Billing !== 'undefined' && Billing.saleMode === 'wholesale');
-  el.classList.toggle('smWholesale', ws);
-  el.classList.toggle('smRetail', !ws);
-  el.textContent = ws ? '📦 Wholesale prices selected' : '🏷️ Retail prices selected';
+  r.textContent = '🏷️ Retail prices selected'; w.textContent = '📦 Wholesale prices selected';
+  r.classList.toggle('on', !ws); w.classList.toggle('on', ws);
 }
 // ---------- Retail / Wholesale Toggle (فوری تمام cart Priceیں تبدیل کرے) ----------
 function setSaleMode(mode){
@@ -25166,6 +25248,153 @@ function saveCollectReceivable(){
   sharePaymentReceiptImage(savedPayment.payment_id);
 }
 
+// ===================== AIO1411SA209: 📅 Daily Recovery =====================
+const DR = { rec: {}, sort: 'high', area: '', q: '', all: false, msgFor: null, day: 'today' };
+const DR_DEFAULT_TPL = 'Dear {name},\n\nUp to now, the total remaining dues of {business} against you are Rs. {amount}.\n\nPlease keep my balance ready — I am coming {day}.\n\nThank you.';
+function drEsc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function drMoney(n){ return 'Rs. ' + Math.round(Number(n) || 0).toLocaleString(); }
+function drDue(c){ return Number(c.total_receivable) || 0; }
+function drReceived(c){ return Number(DR.rec[c.customer_id]) || 0; }
+function drList(){
+  let list = customersData.filter(c => !String(c.name || '').includes('Walk-in') && (DR.all || drDue(c) > 0));
+  if(DR.area) list = list.filter(c => String(c.area || '').trim() === DR.area);
+  if(DR.q) list = list.filter(c => partyMatchesQuery(c, DR.q));
+  const by = {
+    high: (a, b) => drDue(b) - drDue(a),
+    low:  (a, b) => drDue(a) - drDue(b),
+    new:  (a, b) => (b.customer_id || 0) - (a.customer_id || 0),
+    old:  (a, b) => (a.customer_id || 0) - (b.customer_id || 0),
+    name: (a, b) => String(a.name || '').localeCompare(String(b.name || ''))
+  }[DR.sort] || (() => 0);
+  return list.sort(by);
+}
+function renderRecoveryScreen(){
+  const areas = [...new Set(customersData.filter(c => c.area && String(c.area).trim()).map(c => String(c.area).trim()))].sort((a, b) => a.localeCompare(b));
+  const sel = document.getElementById('drArea');
+  sel.innerHTML = '<option value="">🗺️ All areas</option>' + areas.map(a => `<option value="${drEsc(a)}">${drEsc(a)}</option>`).join('');
+  if(!areas.includes(DR.area)) DR.area = '';
+  sel.value = DR.area;
+  document.getElementById('drSort').value = DR.sort;
+  document.getElementById('drSearch').value = DR.q;
+  document.getElementById('drAll').checked = !!DR.all;
+  drRender();
+}
+function drLeftInfo(c){
+  const left = drDue(c) - drReceived(c);
+  if(left < 0) return {txt: 'Too much', cls: 'orange'};
+  if(left === 0) return {txt: 'Clear ✓', cls: 'green'};
+  return {txt: drMoney(left), cls: 'red'};
+}
+function drSummaryPaint(list){
+  const due = list.reduce((s, c) => s + drDue(c), 0);
+  const got = list.reduce((s, c) => s + drReceived(c), 0);
+  document.getElementById('drSummary').innerHTML =
+    `<div>Customers<b>${list.length}</b></div><div>Total due<b>${drMoney(due)}</b></div><div>Received now<b>${drMoney(got)}</b></div><div>Remaining<b>${drMoney(due - got)}</b></div>`;
+}
+function drRender(){
+  const list = drList();
+  const wrap = document.getElementById('drListWrap');
+  if(!wrap) return;
+  drSummaryPaint(list);
+  if(!list.length){ wrap.innerHTML = '<div class="placeholder">No customer found</div>'; return; }
+  wrap.innerHTML = list.map(c => {
+    const id = c.customer_id, li = drLeftInfo(c), v = DR.rec[id];
+    return `<div class="drRow">
+      <div class="drTop"><b>${drEsc(c.name)}</b><small>${drEsc(c.area || '')}</small></div>
+      <div class="drGrid">
+        <div class="drCell"><small>Total due</small><b>${drMoney(drDue(c))}</b></div>
+        <div class="drCell"><small>Received now</small><input type="number" inputmode="decimal" min="0" placeholder="0" value="${v ? drEsc(v) : ''}" onfocus="this.select()" oninput="drTyped(${id}, this.value)"></div>
+        <div class="drCell"><small>Remaining</small><b class="drLeft ${li.cls}" id="drLeft-${id}">${li.txt}</b></div>
+      </div>
+      <button class="drRemBtn" onclick="drOpenReminder(${id})">💬 Reminder</button>
+    </div>`;
+  }).join('');
+}
+function drTyped(id, val){
+  const n = parseFloat(val);
+  if(n > 0) DR.rec[id] = n; else delete DR.rec[id];
+  const c = customersData.find(x => x.customer_id === id); if(!c) return;
+  const el = document.getElementById('drLeft-' + id);
+  if(el){ const li = drLeftInfo(c); el.textContent = li.txt; el.className = 'drLeft ' + li.cls; }
+  drSummaryPaint(drList());
+}
+// ---------- رقم محفوظ کریں — وہی حساب جو Customers میں «Collect» کا ہے (صرف Cash، بقایا سے زیادہ نہیں) ----------
+function drSaveAll(){
+  const rows = customersData.filter(c => drReceived(c) > 0);
+  if(!rows.length){ alert('Please type the received amount for at least one customer.'); return; }
+  const over = rows.filter(c => drReceived(c) > drDue(c));
+  if(over.length){ alert('These customers have an amount larger than their balance — please correct them first:\n\n' + over.map(c => '• ' + c.name + ' (balance ' + drMoney(drDue(c)) + ')').join('\n')); return; }
+  const total = rows.reduce((s, c) => s + drReceived(c), 0);
+  if(!confirm('Save ' + rows.length + ' payment(s), total ' + drMoney(total) + '?')) return;
+  const payDate = localDateStr(new Date());
+  rows.forEach(c => {
+    const amount = drReceived(c);
+    const balanceBefore = c.total_receivable;
+    c.total_receivable = moneyRound(c.total_receivable - amount);
+    financeDummy.cashInHand += amount;
+    if(!Array.isArray(c.walletHistory)) c.walletHistory = [];
+    c.walletHistory.unshift({ type: 'receivable_collected', at: new Date().toISOString(), amount: moneyRound(amount), via: 'cash', date: payDate, by: AppState.currentUser?.name || '' });
+    recordPaymentEntry({
+      direction: 'in', party_type: 'customer', party_id: c.customer_id, party_name: c.name,
+      amount, balance_before: balanceBefore, balance_after: c.total_receivable,
+      method: 'Cash', slip_image: null, note: 'Daily recovery', date: payDate, created_at: payCreatedAt(payDate)
+    });
+  });
+  DR.rec = {};
+  persistAllData();
+  drRender();
+  try{ showNavToast('✅ ' + rows.length + ' payment(s) saved — ' + drMoney(total)); }catch(e){}
+}
+// ---------- ریمائنڈر ----------
+function drTpl(){ const t = AppState.settings.recoveryReminderTpl; return (typeof t === 'string' && t.trim()) ? t : DR_DEFAULT_TPL; }
+function drFill(tpl, c, amount, day){
+  return tpl.split('{name}').join(c.name).split('{business}').join(AppState.settings.businessName || 'our shop')
+            .split('{amount}').join(Math.round(amount).toLocaleString()).split('{day}').join(day);
+}
+function drOpenReminder(id){
+  const c = customersData.find(x => x.customer_id === id); if(!c) return;
+  DR.msgFor = id; DR.day = 'today';
+  const left = Math.max(0, drDue(c) - drReceived(c));
+  document.getElementById('drRemMeta').textContent = c.name + ' — ' + drMoney(left) + ' remaining';
+  document.getElementById('drRemText').value = drFill(drTpl(), c, left, 'today');
+  document.getElementById('drRemKeep').checked = false;
+  document.getElementById('drDayToday').classList.add('active');
+  document.getElementById('drDayTomorrow').classList.remove('active');
+  document.getElementById('drReminderModal').classList.add('show');
+}
+function drSetDay(day){
+  if(day === DR.day) return;
+  const ta = document.getElementById('drRemText');
+  ta.value = ta.value.replace(new RegExp('\\b' + DR.day + '\\b', 'g'), day);
+  DR.day = day;
+  document.getElementById('drDayToday').classList.toggle('active', day === 'today');
+  document.getElementById('drDayTomorrow').classList.toggle('active', day === 'tomorrow');
+}
+function drResetTpl(){
+  const c = customersData.find(x => x.customer_id === DR.msgFor); if(!c) return;
+  delete AppState.settings.recoveryReminderTpl; persistAllData();
+  const left = Math.max(0, drDue(c) - drReceived(c));
+  document.getElementById('drRemText').value = drFill(DR_DEFAULT_TPL, c, left, DR.day);
+  document.getElementById('drRemKeep').checked = false;
+}
+function drSendReminder(){
+  const c = customersData.find(x => x.customer_id === DR.msgFor); if(!c) return;
+  const text = document.getElementById('drRemText').value;
+  if(!c.phone){ alert("This customer's phone number isn't saved."); return; }
+  if(document.getElementById('drRemKeep').checked){
+    const left = Math.max(0, drDue(c) - drReceived(c));
+    let t = text;
+    t = t.split(Math.round(left).toLocaleString()).join('{amount}');
+    t = t.split(c.name).join('{name}');
+    const biz = AppState.settings.businessName || 'our shop';
+    t = t.split(biz).join('{business}');
+    t = t.replace(new RegExp('\\b' + DR.day + '\\b', 'g'), '{day}');
+    AppState.settings.recoveryReminderTpl = t; persistAllData();
+  }
+  window.open(`https://wa.me/${formatPhoneForWhatsApp(c.phone)}?text=${encodeURIComponent(brandMsg(text))}`, '_blank');
+  document.getElementById('drReminderModal').classList.remove('show');
+}
+
 // ---------- Billing کے کسٹمر ڈراپ ڈاؤن کو customersData سے پُر کریں — ساتھ ساتھ City/Area فلٹر ڈراپ ڈاؤن بھی تازہ کریں ----------
 function populateCustomerDropdown(){
   const areaSel = document.getElementById('custAreaFilter');
@@ -26118,6 +26347,7 @@ const ASSIGNABLE_SCREENS = [
   {key:'advanceorders', label:'📝 Advance Orders'},
   {key:'categories', label:'🏷️ Categories'},
   {key:'payments', label:'💳 Payments Record'},
+  {key:'recovery', label:'📅 Daily Recovery'},
   {key:'trends', label:'📈 Trend Analysis'},
   {key:'reports', label:'🖨️ Reports'},
   {key:'replytemplates', label:'📋 Reply Templates'},
@@ -35096,9 +35326,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1411SA208'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1411SA209'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Billing: small permanent strip shows Retail or Wholesale prices selected; Wholesale is now on for existing installs too';
+  const UPDATE_NOTE = 'New 📅 Daily Recovery page: customers with balance, filters, quick received entry and WhatsApp reminders; Retail/Wholesale note now sits under the selected button';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
