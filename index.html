@@ -777,6 +777,11 @@
   .emptyCart{text-align:center; color:var(--muted); padding:18px 0; font-size:13px;}
   /* ---------- AIO910FR003: Wholesale بند ہو تو اس سے متعلق ہر بٹن/خانہ چھپا رہے ---------- */
   body.wsOff .wsOnly{display:none !important;}
+  /* AIO1411SA207: بلنگ پر موڈ کی پٹی */
+  #saleModeStrip{margin:3px 0 2px; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:800; line-height:1.4; text-align:center;}
+  #saleModeStrip.smRetail{background:#dcfce7; color:#166534; border:1px solid #bbf7d0;}
+  #saleModeStrip.smWholesale{background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe;}
+  #saleModeStrip small{display:block; font-weight:700; font-size:11px; opacity:.85;}
   /* ---------- AIO910FR006: سنگل یوزر پیکج — ملٹی یوزر/کلاؤڈ سے متعلق ہر چیز چھپی رہے ---------- */
   body.muOff .muOnly{display:none !important;}
   .cartCustChip{flex:0 0 auto; max-width:40%; display:inline-flex; align-items:center; gap:4px; padding:7px 10px; border-radius:999px;
@@ -3387,7 +3392,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1111WE206</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1411SA208</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3610,7 +3615,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1111WE206</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1411SA208</span>
     </div>
   </div>
 
@@ -3811,6 +3816,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             </div>
           </div>
         </div>
+
+        <!-- AIO1411SA207: Retail/Wholesale کی پٹی -->
+        <div id="saleModeStrip" class="wsOnly smRetail"></div>
 
         <div class="searchRow">
           <button id="billingSuggestToggleBtn" onclick="toggleBillingSearchSuggestions()" title="Toggle search suggestions list" style="flex:0 0 42px; padding:0; font-size:15px;">💡</button>
@@ -4156,7 +4164,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             <span class="vcFieldLabel">Sale Price</span>
             <input type="number" id="npRetail" value="0" onfocus="this.select()" oninput="npLiveMarkupSync('retail',this.value)">
           </div>
-          <div class="vcFieldWrap npExtra wsOnly">
+          <div class="vcFieldWrap wsOnly">
             <span class="vcFieldLabel">Wholesale Price</span>
             <input type="number" id="npWholesale" value="0" onfocus="this.select()">
           </div>
@@ -9109,7 +9117,7 @@ const DEFAULT_SETTINGS = {
   // ---------- ٹیکس — پاکستان میں عام دکانوں کے کاؤنٹر بل پر لاگو نہیں ہوتا، اس لیے ڈیفالٹ بند ہے۔
   // جن کاروباروں کو ضرورت ہو (رجسٹرڈ/فارمل بزنس) وہ Settings سے آن کر کے فیصد لگا سکتے ہیں ----------
   taxEnabled: false,
-  wholesaleEnabled: false, // ---------- AIO910FR003: Wholesale ریٹ ڈیفالٹ بند — صرف خرید اور فروخت قیمت، سادہ ایپ ----------
+  wholesaleEnabled: true, // ---------- AIO1411SA207: Wholesale ڈیفالٹ آن (مالک کا حکم) — Settings سے بند بھی ہو سکتا ہے ----------
   trackInventory: false, // ---------- ڈیفالٹ آف — سٹاک ختم ہونے پر بھی بل بنتا رہے، مائنس میں جائے (موجودہ رویہ) ----------
   taxPercent: 0,
   invoiceStyle: 'thermal', // 'thermal' | 'a4' — تھرمل رسید یا رنگین A4 بزنس انوائس
@@ -12511,6 +12519,7 @@ function resumeHeldBill(id){
   Billing.saleMode = h.saleMode || 'retail';
   ['modeRetail','cartModeRetail'].forEach(i => document.getElementById(i)?.classList.toggle('active', Billing.saleMode === 'retail'));
   ['modeWholesale','cartModeWholesale'].forEach(i => document.getElementById(i)?.classList.toggle('active', Billing.saleMode === 'wholesale'));
+  try{ updateSaleModeStrip(); }catch(e){}
   const custSel = document.getElementById('customerSelect');
   if(custSel){
     // ہیلپ ڈیسک #38: تلاش / علاقے کا فلٹر لگا ہو تو گاہک فہرست میں نہیں ملتا تھا اور بل خاموشی سے Walk-in بن جاتا — پہلے فلٹر صاف
@@ -14143,9 +14152,18 @@ function getModePrice(v, mode){
   return v.retail;
 }
 
+// ---------- AIO1411SA207: بلنگ پر پٹی — کون سا ریٹ چل رہا ہے ----------
+function updateSaleModeStrip(){
+  const el = document.getElementById('saleModeStrip'); if(!el) return;
+  const ws = (typeof Billing !== 'undefined' && Billing.saleMode === 'wholesale');
+  el.classList.toggle('smWholesale', ws);
+  el.classList.toggle('smRetail', !ws);
+  el.textContent = ws ? '📦 Wholesale prices selected' : '🏷️ Retail prices selected';
+}
 // ---------- Retail / Wholesale Toggle (فوری تمام cart Priceیں تبدیل کرے) ----------
 function setSaleMode(mode){
   Billing.saleMode = mode;
+  try{ updateSaleModeStrip(); }catch(e){}
   document.getElementById('modeRetail').classList.toggle('active', mode==='retail');
   document.getElementById('modeWholesale').classList.toggle('active', mode==='wholesale');
   document.getElementById('cartModeRetail').classList.toggle('active', mode==='retail');
@@ -14279,6 +14297,7 @@ function startEditBill(invoiceId){
       Billing.saleMode = inv.sale_mode; // بل کے اپنے ریٹ رہیں — دوبارہ قیمت نہ لگائیں
       ['modeRetail','cartModeRetail'].forEach(id => document.getElementById(id)?.classList.toggle('active', inv.sale_mode === 'retail'));
       ['modeWholesale','cartModeWholesale'].forEach(id => document.getElementById(id)?.classList.toggle('active', inv.sale_mode === 'wholesale'));
+      try{ updateSaleModeStrip(); }catch(e){}
     }
     const sel = document.getElementById('customerSelect');
     // AIO3010FR127: گاہک کی فہرست پرانی ہو (مثلاً دوسرے فون سے آیا گاہک) تو پہلے تازہ — ورنہ بل خاموشی سے Walk-in نقد بن جاتا تھا
@@ -34947,7 +34966,9 @@ function toggleWholesaleEnabled(checked){
   persistAllData();
   applyWholesaleVisibility();
 }
+try{ if(!AppState.settings.wsDefaultOn208){ AppState.settings.wsDefaultOn208 = true; AppState.settings.wholesaleEnabled = true; persistAllData(); } }catch(e){} // AIO1411SA208: پرانی انسٹال پر بھی ایک بار Wholesale آن
 try{ applyWholesaleVisibility(); }catch(e){ console.warn('wholesale visibility', e); }
+try{ updateSaleModeStrip(); }catch(e){}
 
 function toggleTrackInventory(checked){
   AppState.settings.trackInventory = checked;
@@ -35075,9 +35096,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1111WE206'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1411SA208'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Settings: removed the extra «Open Users» box — staff & phones are only in 👤 Users';
+  const UPDATE_NOTE = 'Billing: small permanent strip shows Retail or Wholesale prices selected; Wholesale is now on for existing installs too';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
