@@ -624,6 +624,22 @@ export class McsStats {
     if (done) { const sid = this.sidGet(to); if (sid) { this.subSet(to, sid + "M1"); this.sql.exec("UPDATE sale SET subid = ? WHERE rec = ? AND COALESCE(void, 0) = 0", sid + "M1", to); } }
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('own450', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), from: from || "", to: to || "", done }));
   }
+  /* MCS1511SU456 (مالک کا حکم، ایک بار): ایڈمن 1 (0320-6793793) کے سب کاروبار کی مدت صفر — ٹیسٹ خریداریاں / جمع شدہ مدت ختم، تاکہ پرومو کوڈ سے نئی سبسکرپشن شروع سے آزمائی جا سکے۔
+     پرانے ٹیسٹ ٹوکن کاروبار سے الگ (rec = void_…) تاکہ پیچھے کی تجدید دوبارہ مدت نہ ڈالے؛ ان کی فروخت void (حساب سے باہر، «Removed entries» میں)؛ ممبرشپ نمبر M1 ویسا */
+  own456() {
+    if (this.finCfg("own456", "")) return;
+    const now = Date.now(), recs = this.sql.exec("SELECT rec FROM prof WHERE rec LIKE 'p3206793793_%'").toArray().map((r) => r.rec);
+    let sales = 0, toks = 0;
+    for (const rec of recs) {
+      this.sql.exec("UPDATE prof SET until = ?, paid = 0, pend = 0 WHERE rec = ?", now, rec);
+      toks += this.sql.exec("SELECT tok FROM mbuy WHERE rec = ?", rec).toArray().length;
+      this.sql.exec("UPDATE mbuy SET rec = ? WHERE rec = ?", "void_" + rec, rec);
+      sales += this.sql.exec("SELECT id FROM sale WHERE rec = ? AND COALESCE(void, 0) = 0", rec).toArray().length;
+      this.sql.exec("UPDATE sale SET void = 1, vwhy = ?, vts = ? WHERE rec = ? AND COALESCE(void, 0) = 0", "owner reset 456 (test purchases)", now, rec);
+    }
+    this.finLog("own456", { recs, sales, toks });
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('own456', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: now, recs: recs.length, sales, toks }));
+  }
   subFix450() {   /* ایک بار: ہر موبائل کے زندہ کاروبار (پرانے پہلے) کو M1، M2… دوبارہ؛ ان کی فروخت کا subid بھی */
     if (this._sf450) return; this._sf450 = 1;
     if (this.finCfg("subfix450", "")) return;
@@ -1051,7 +1067,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
-    if (!this._f450) { this._f450 = 1; try { this.own450(); } catch (e) {} try { this.subFix450(); } catch (e) {} }
+    if (!this._f450) { this._f450 = 1; try { this.own450(); } catch (e) {} try { this.subFix450(); } catch (e) {} try { this.own456(); } catch (e) {} }
     if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
