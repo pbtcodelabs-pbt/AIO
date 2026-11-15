@@ -578,11 +578,43 @@ export class McsStats {
     this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + mob);
     return sid;
   }
-  subNext(rec) {   /* نئی سبسکرپشن ID: MCS-001-01، -02… (ہر ممبرشپ / تجدید پر ایک آگے) */
+  /* MCS1511SU450 (مالک کا حکم — «ایک ہی کاروبار ہے تو M1 ہو، M2 نہیں»): ممبرشپ نمبر کاروبار کا پکا نمبر — اس موبائل کا پہلا زندہ کاروبار M1، دوسرا M2…
+     تجدید پر وہی نمبر؛ حذف شدہ کاروبار کا نمبر خالی ہو کر اگلے نئے کو (گنتی کبھی بے وجہ آگے نہیں بڑھتی) */
+  subOf(rec) {
+    const c = this.finCfg("subof_" + rec, ""); if (c) return c;
+    const q = this.sql.exec("SELECT subid FROM sale WHERE rec = ? AND subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY id DESC LIMIT 1", rec).toArray()[0];
+    return q ? q.subid : "";
+  }
+  subSet(rec, subid) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "subof_" + rec, subid); }
+  subNext(rec) {
     const sid = this.sidFor(rec); if (!sid) return "";
-    const r = this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sid).toArray()[0]; const n = ((r && r.subn) || 0) + 1;
-    this.sql.exec("UPDATE mcssid SET subn = ? WHERE sid = ?", n, sid);
-    return sid + "M" + n;   /* MCS1511SU429: MCS001M1، MCS001M2… */
+    const own = this.subOf(rec); if (own && own.indexOf(sid + "M") === 0) { this.subSet(rec, own); return own; }
+    const mob = this.sidMob(rec), used = new Set();
+    for (const r of this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ?", "p" + mob.slice(2) + "_%").toArray()) {
+      if (r.rec === rec) continue; const m = /M(\d+)$/.exec(this.subOf(r.rec) || ""); if (m) used.add(parseInt(m[1], 10));
+    }
+    let n = 1; while (used.has(n)) n++;
+    const subid = sid + "M" + n; this.subSet(rec, subid);
+    const cur = this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sid).toArray()[0];
+    if (!cur || (cur.subn || 0) < n) this.sql.exec("UPDATE mcssid SET subn = ? WHERE sid = ?", n, sid);
+    return subid;   /* MCS001M1، MCS001M2… */
+  }
+  subFix450() {   /* ایک بار: ہر موبائل کے زندہ کاروبار (پرانے پہلے) کو M1، M2… دوبارہ؛ ان کی فروخت کا subid بھی */
+    if (this._sf450) return; this._sf450 = 1;
+    if (this.finCfg("subfix450", "")) return;
+    const log = [];
+    for (const s of this.sql.exec("SELECT mob, sid FROM mcssid").toArray()) {
+      const recs = this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ? ORDER BY since, ts", "p" + String(s.mob).slice(2) + "_%").toArray().map((r) => r.rec)
+        .filter((rec) => this.subOf(rec) || this.sql.exec("SELECT id FROM sale WHERE rec = ? AND COALESCE(void, 0) = 0 LIMIT 1", rec).toArray().length || this.adminSlotOf(rec));
+      recs.forEach((rec, i) => {
+        const nv = s.sid + "M" + (i + 1), old = this.subOf(rec);
+        if (old !== nv) { this.sql.exec("UPDATE sale SET subid = ? WHERE rec = ? AND COALESCE(void, 0) = 0", nv, rec); log.push(rec + ":" + (old || "-") + ">" + nv); }
+        this.subSet(rec, nv);
+      });
+      this.sql.exec("UPDATE mcssid SET subn = ? WHERE mob = ?", recs.length, s.mob);
+    }
+    this.finLog("subfix450", { moved: log });
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('subfix450', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), moved: log.length }));
   }
   idFmt1() {   /* MCS1511SU429 (مالک کا حکم، ایک بار): پرانی ID سے ڈیش ہٹائیں — MCS-001 ← MCS001؛ MCS-001-01 ← MCS001M1؛ AG-001 ← AG001 (ریفرل / حساب / چیٹ ساتھ ساتھ) */
     if (this._idf) return; this._idf = 1;
@@ -1494,7 +1526,7 @@ export class McsStats {
       if (b.op === "del") this.sql.exec("DELETE FROM codev WHERE phone = ?", b.phone);
       return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen FROM codev ORDER BY ts DESC").toArray() });
     }
-    if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} }
+    if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} try { this.subFix450(); } catch (e) {} }
     if (op === "/ag_find") {   /* MCS0511TH142: کوڈ / پرانا کوڈ / موبائل → ایجنٹ کا اصل کوڈ اور نام (لکھنا کچھ نہیں) */
       const b = await request.json(); const ag = this.agResolve(b.code, b.phone);
       return Response.json(ag ? { ok: true, code: ag.code, name: ag.name } : { ok: false, reason: "bad_code" });
@@ -1681,7 +1713,7 @@ export class McsStats {
       if (!r) return Response.json({ ok: true, exists: false, steps: [{ k: "biz", ok: false }] });
       const mb = this.sql.exec("SELECT gpa, free, exp, sku FROM mbuy WHERE rec = ? ORDER BY ts DESC LIMIT 1", rec).toArray()[0];
       const sid = this.sidGet(rec) || "", sl = this.sql.exec("SELECT subid FROM sale WHERE rec = ? AND subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY id DESC LIMIT 1", rec).toArray()[0];
-      let subid = sl ? sl.subid : ""; if (!subid && sid && this.adminSlotOf(rec)) { const q = this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sid).toArray()[0]; if (q && q.subn) subid = sid + "M" + q.subn; }
+      try { this.subFix450(); } catch (e) {} let subid = this.subOf(rec) || (sl ? sl.subid : "");
       const adm = this.adminFree(rec), active = (r.until || 0) > now, kind = adm ? "admin" : mb ? (mb.free ? "promo" : "paid") : "";
       const days = Math.max(0, Math.round(((r.until || 0) - now) / 864e5));
       const gm = mb && mb.gpa ? String(mb.gpa).replace(/^(GPA\.)\d{4}-\d{4}-\d{4}-(\d{5})$/, "$1••••-••••-••••-$2") : "";
@@ -1748,7 +1780,7 @@ export class McsStats {
       }
       const x = this.sql.exec("SELECT since, until, pend FROM prof WHERE rec = ?", b.rec).toArray()[0];
       const sd = this.sidGet(b.rec), sq = sd ? this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sd).toArray()[0] : null;
-      return Response.json({ key, since: x.since, until: x.until, pend: 0, sid: sd || "", subid: sd && sq && sq.subn && this.adminSlotOf(b.rec) ? sd + "M" + sq.subn : "" });
+      return Response.json({ key, since: x.since, until: x.until, pend: 0, sid: sd || "", subid: sd ? this.subOf(b.rec) : "" });
     }
     if (op === "/psave") {
       const b = await request.json();
@@ -1914,7 +1946,7 @@ async function handleMcsAuth(request, env) {
     let gmail = "";
     if (b.gtoken) { gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" }); }
     if (!gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
-    if (gmail && pw && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
+    if (gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });   /* MCS1511SU450 (مالک کا حکم): گوگل سے بھی PIN لازمی — موبائل + PIN ہمیشہ چلے */
     const district = S(b.district, 60);   /* MCS1111WE312: ضلع اختیاری (مالک: سائن اپ پر صرف نام، موبائل، PIN) */
     r = await call({ act: "signup", name, mobile, district, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev });
   } else if (op === "login") {
