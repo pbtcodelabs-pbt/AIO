@@ -1172,9 +1172,12 @@ export class McsStats {
       const fail = () => { this.sql.exec("INSERT INTO mcsfail (k, n, ts) VALUES (?, 1, ?) ON CONFLICT (k) DO UPDATE SET n = CASE WHEN ? - mcsfail.ts < 900000 THEN mcsfail.n + 1 ELSE 1 END, ts = excluded.ts", failK, now, now); };
       const bySess = () => { if (!b.th) return null; const r = this.sql.exec("SELECT id, via, ts FROM mcssess WHERE tok = ?", b.th).toArray()[0]; if (!r) return null; const u = get(r.id); if (!u || u.del) return null; if (now - (r.last || 0) > 864e5) this.sql.exec("UPDATE mcssess SET last = ? WHERE tok = ?", now, b.th); return { u, via: r.via, at: r.ts }; };
       if (b.act === "signup") {
-        if (key("m:" + b.mobile)) return Response.json({ ok: false, reason: "mobile_taken" });
-        if (b.email && key("e:" + b.email)) return Response.json({ ok: false, reason: "email_taken" });
-        if (b.gmail && (key("g:" + b.gmail) || key("e:" + b.gmail))) return Response.json({ ok: false, reason: "gmail_taken" });
+        /* MCS1511SU445 (مالک کا حکم — «0320 پر اکاؤنٹ نہیں مگر لکھا آتا ہے پہلے سے بنا ہے»): چابی ہو مگر اکاؤنٹ ہے ہی نہیں (ٹوٹی چابی) یا حذف شدہ ہے تو وہ چابی خود صاف — صرف زندہ اکاؤنٹ ہی «پہلے سے بنا ہے» کہلائے */
+        const live = (k) => { const id0 = key(k); if (!id0) return ""; const u0 = get(id0); if (u0 && !u0.del) return id0;
+          try { this.sql.exec("DELETE FROM mcsukey WHERE k = ?", k); if (u0) { this.sql.exec("DELETE FROM mcsukey WHERE id = ?", id0); this.sql.exec("DELETE FROM mcssess WHERE id = ?", id0); this.sql.exec("DELETE FROM mcsuser WHERE id = ?", id0); } } catch (e) {} return ""; };
+        if (live("m:" + b.mobile)) return Response.json({ ok: false, reason: "mobile_taken" });
+        if (b.email && live("e:" + b.email)) return Response.json({ ok: false, reason: "email_taken" });
+        if (b.gmail && (live("g:" + b.gmail) || live("e:" + b.gmail))) return Response.json({ ok: false, reason: "gmail_taken" });
         let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
         while (get("MCS-" + n)) n++;
         this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('useq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
@@ -1329,6 +1332,7 @@ export class McsStats {
       if (b.act === "delete") {   /* پلے اسٹور کا اصول: اکاؤنٹ اور اس کی سب چابیاں / سیشن ختم */
         if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
         this.sql.exec("DELETE FROM mcsukey WHERE id = ?", S.u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", S.u.id); this.sql.exec("DELETE FROM mcsuser WHERE id = ?", S.u.id);
+        try { for (const k0 of ["m:" + S.u.mobile, S.u.email ? "e:" + S.u.email : "", S.u.gmail ? "g:" + S.u.gmail : "", S.u.gmail ? "e:" + S.u.gmail : ""]) if (k0) this.sql.exec("DELETE FROM mcsukey WHERE k = ?", k0); } catch (e) {}   /* MCS1511SU445: حذف پر موبائل / ای میل کی چابی ہر حال میں آزاد */
         /* MCS1511SU443 (مالک کا حکم — «MCS008 بالکل ختم»): اکاؤنٹ حذف ہو اور اس موبائل کی کوئی ممبرشپ نہ ہو تو اس کی MCS ID بھی ریٹائر (دوبارہ سائن اپ پر نئی ID؛ پرانا نمبر کسی کو دوبارہ نہیں)؛ ایڈمن کی MCS001 / MCS002 کبھی نہیں */
         try { const mob = this.sidMob(S.u.mobile); const sid = mob ? this.sidGet(mob) : "";
           if (sid && !this.adminSlotOf(mob) && !this.sql.exec("SELECT rec FROM prof").toArray().some((x) => this.sidMob(x.rec) === mob)) {
