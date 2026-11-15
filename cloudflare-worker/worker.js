@@ -27,6 +27,7 @@ var MCS_SKUS = ["mcs_mem_default", "mcs_mem_1", "mcs_mem_2", "mcs_mem_3", "mcs_m
    • کوئی کاروبار مفت نہیں — نہ 15 دن، نہ منظوری پر مفت دن۔ کاروبار صرف ادائیگی (Google Play، اصلی GPA آرڈر نمبر) سے رجسٹرڈ / فعال ہوتا ہے۔
    • ٹیسٹ خریداری (License Tester) قبول نہیں۔ مالک کے ریڈیم / پروموشن کوڈ (مثلاً 90 دن) قبول — مگر انہیں «سیل» نہیں گنا جاتا (کمیشن / حساب میں نہیں)۔
    • MCS1511SU429: ایڈمن 1 (ADMIN1) اور ایڈمن 2 (ADMIN2) کے کاروبار بھی مفت نہیں — سب ادائیگی سے۔ DEV / CODEV نام ختم۔
+   • MCS1511SU431: ایڈمن 1 (03206793793) کی ID MCS008 سے ہٹ کر MCS001 — ایڈمن 2 کی MCS002؛ جو ان IDs پر تھا وہ ایڈمن کی پرانی ID لیتا ہے (ادلا بدلی، سرور خود، ایک بار)
    اختیاری ماحول کی چابیاں (Cloudflare ← Settings ← Variables): ALLOW_TEST="1" ٹیسٹ خریداری بھی مانو (صرف جانچ کے لیے)؛ ALLOW_PROMO="0" ریڈیم کوڈ بند؛ GPA_STRICT="1" پرانی سختی (گاہک کا لکھا آرڈر نمبر گوگل سے نہ ملے تو انکار) — عام طور پر ضرورت نہیں: آرڈر نمبر سرور خود گوگل سے لیتا ہے */
 var ADMIN_FREE_MOBILES = [];   /* مثال: ["923001234567", "923331234567"] — ان دو ایڈمن موبائل نمبروں کو MCS-001 / MCS-002 (اگر خالی ہوں) اور مفت کاروبار ملتا ہے */
 /* MCS1511SU428 (مالک کا حکم): دو ایڈمن کے لیے پکی (محفوظ) MCS ID — ایڈمن 1 (ڈویلپر) = MCS-001، ایڈمن 2 = MCS-002۔
@@ -448,6 +449,19 @@ export class McsStats {
     for (const k of Object.keys(ADMIN_SLOTS)) if (entPhone(ADMIN_SLOTS[k]) === mob) return k;
     return "";
   }
+  adminFix431() {   /* MCS1511SU431 (مالک کا حکم): ایڈمن کا موبائل اگر MCS008 جیسی کسی اور ID پر بیٹھا ہو تو اسے اس کی پکی MCS001 / MCS002 پر لائیں؛ جو اس ID پر تھا وہ ایڈمن کی پرانی ID لے لے (ادلا بدلی — کوئی خالی خانہ نہیں)؛ ہر چیز ساتھ (لاگ اِن چابی، ممبرشپ ID)؛ دوبارہ چلے تو کچھ نہیں بدلتا */
+    for (const k of Object.keys(ADMIN_SLOTS)) {
+      const mob = entPhone(ADMIN_SLOTS[k]); if (!mob) continue;
+      const me = this.sql.exec("SELECT sid FROM mcssid WHERE mob = ?", mob).toArray()[0];
+      if (!me || me.sid === k) continue;
+      const old = me.sid, hold = this.sql.exec("SELECT mob FROM mcssid WHERE sid = ?", k).toArray()[0], tmp = "ZZ" + k;
+      if (hold) this.sidRen(k, tmp);
+      this.sidRen(old, k);
+      if (hold) this.sidRen(tmp, old);
+      for (const m of [mob, hold && hold.mob]) { if (!m) continue; const sid = this.sidGet(m); if (sid) { try { this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + sid, "m:" + m); } catch (e) {} } }
+      try { this.finLog("admfix431", { slot: k, from: old, swapped: hold ? hold.mob : "" }); } catch (e) {}
+    }
+  }
   sidRen(a, b) {   /* ایک سسٹم ID بدلیں: mcssid + لاگ اِن کی چابی (a:MCS-NNN) + فروخت کی سبسکرپشن ID (MCS-NNN-01) — سب ساتھ */
     this.sql.exec("UPDATE mcssid SET sid = ? WHERE sid = ?", b, a);
     this.sql.exec("UPDATE mcsukey SET k = ? WHERE k = ?", "a:" + b, "a:" + a);
@@ -544,7 +558,8 @@ export class McsStats {
   }
   sidFor(mob0, ts) {   /* اسی موبائل کی ID، ورنہ اگلی MCS-NNN — MCS1211TH351: صرف رجسٹرڈ (فروخت / منظوری) پر بلایا جائے، سائن اپ پر نہیں */
     const mob = this.sidMob(mob0); if (!mob) return "";
-    const ex = this.sidGet(mob); if (ex) return ex;
+    const ex = this.sidGet(mob);
+    if (ex) { const sl0 = this.adminSlotOf(mob); if (sl0 && ex !== sl0) { try { this.adminFix431(); } catch (e) {} return this.sidGet(mob) || ex; } return ex; }   /* MCS1511SU431: ایڈمن غلط ID پر ہو تو اسی وقت درست */
     let n = (parseInt(this.finCfg("sidseq", "0"), 10) || 0) + 1, sid;
     /* MCS1511SU428: MCS-001 / MCS-002 صرف ایڈمن کے دو طے شدہ موبائل کے لیے — کوئی اور کبھی نہیں */
     const slot = this.adminSlotOf(mob);
@@ -958,7 +973,7 @@ export class McsStats {
   saleAdd(rec, src, units) {
     const t = new Date(Date.now() + 5 * 3600e3);
     const w = this.saleWho(rec);
-    try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.sidMigrate(); } catch (e) {}
+    try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {}
     const subid = this.subNext(rec);
     this.sql.exec("INSERT INTO sale (rec, ts, src, units, mon, who, subid) VALUES (?, ?, ?, ?, ?, ?, ?)", rec, Date.now(), src, units, t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"), JSON.stringify(w), subid || null);
     if (w.by === "agent") { const amt = (units || 0) * (parseInt(this.finCfg("memprice", "1000"), 10) || 1000), sh = this.finSplit("mem", src === "play" ? "play" : "direct", amt, "agent", Date.now());
@@ -979,7 +994,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
-    if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
+    if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
@@ -1451,7 +1466,7 @@ export class McsStats {
       if (b.op === "del") this.sql.exec("DELETE FROM codev WHERE phone = ?", b.phone);
       return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen FROM codev ORDER BY ts DESC").toArray() });
     }
-    if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} }
+    if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} }
     if (op === "/ag_find") {   /* MCS0511TH142: کوڈ / پرانا کوڈ / موبائل → ایجنٹ کا اصل کوڈ اور نام (لکھنا کچھ نہیں) */
       const b = await request.json(); const ag = this.agResolve(b.code, b.phone);
       return Response.json(ag ? { ok: true, code: ag.code, name: ag.name } : { ok: false, reason: "bad_code" });
