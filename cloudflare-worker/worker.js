@@ -409,6 +409,7 @@ export class McsStats {
     this.sql.exec("CREATE TABLE IF NOT EXISTS codev (phone TEXT PRIMARY KEY, name TEXT, pin TEXT, ts INTEGER, seen INTEGER)");
     for (const c of ["perms TEXT", "off INTEGER", "offts INTEGER", "offp TEXT"]) { try { this.sql.exec("ALTER TABLE codev ADD COLUMN " + c); } catch (e) {} }   /* MCS1511SU458 (مالک کا حکم): ایڈمن کی اجازتیں + ہٹانا / بحال */   /* MCS0511TH136: کو-ڈویلپر (صرف جانچ موڈ — کچھ محفوظ / منظور نہیں) */
     if (!this.sql.exec("SELECT v FROM agcfg WHERE k = 'cdseed'").toArray().length) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('cdseed', '1')"); this.sql.exec("INSERT OR IGNORE INTO codev (phone, name, pin, ts, seen) VALUES ('923138469706', 'محمد عمران', ?, ?, 0)", String(100000 + Math.floor(Math.random() * 900000)), Date.now()); }   /* مالک نے دیا (4 نومبر) — PIN صرف ایڈمن پینل میں */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS pendop (id INTEGER PRIMARY KEY AUTOINCREMENT, by TEXT, op TEXT, data TEXT, ts INTEGER, st TEXT DEFAULT 'p', dts INTEGER, dnote TEXT)");   /* MCS1511SU459 (مالک کا حکم): maker-checker — ایڈمن 2 تجویز کرے، آخری منظوری صرف ایڈمن 1 */
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN paid INTEGER DEFAULT 0"); } catch (e) {}
     try { this.sql.exec("ALTER TABLE prof ADD COLUMN pend INTEGER DEFAULT 0"); } catch (e) {}   /* MCS0511TH157: دکاندار نے خود بنائی — ایڈمن کی منظوری پر 15 دن */
     /* MCS0511TH161 (مالک کا حکم، ہیلپ ڈیسک #95): ایپ کا لاگ اِن — اکاؤنٹ (موبائل ایک ہی بار)، چابیاں m:/e:/g:/a:، سیشن (ٹوکن کا SHA-256)، غلط پاس ورڈ کی حد */
@@ -945,7 +946,42 @@ export class McsStats {
     if (!key) return Response.json({ ok: false, reason: "login" });
     if (CDP && !CDP.accounts && op !== "stats" && op !== "notes") return Response.json({ ok: false, reason: "no_perm" });   /* MCS1511SU458: اجازت «اپنا حساب» نہیں */
     if (CDP && op === "stats" && !CDP.company) return Response.json({ ok: false, reason: "no_perm" });
+    if (CDP && op === "people" && !CDP.agview) return Response.json({ ok: false, reason: "no_perm" });   /* MCS1511SU459: ایجنٹوں کا ریکارڈ صرف اجازت «agview» سے */
     const mon = String(b.mon || this.finMonOf(now)).replace(/[^0-9_]/g, "").slice(0, 7);
+    if (op === "cur") {   /* MCS1511SU459: تقسیم کا ڈبہ / حساب کی سطر سرور کی اصل شرح سے — فون نمبر کے بغیر، سب کردار دیکھ سکتے ہیں */
+      const nm = {}; for (const r of this.sql.exec("SELECT phone, name FROM codev").toArray()) nm[r.phone] = r.name;
+      const view = (c) => ({ at: c.at || 0, google: c.google, maint: c.maint, bring: c.bring, adm: Object.keys(c.adm || {}).map((ph) => ({ name: nm[ph] || "Admin 2", t: c.adm[ph].t, v: c.adm[ph].v })) });
+      return Response.json({ ok: true, cur: view(this.splitCur()), rules: this.splitRules().slice(-30).map(view), legacy: !this.splitRules().length, price: parseInt(this.finCfg("memprice", "1000"), 10) || 1000 }); }
+    if (op === "reports") {   /* MCS1511SU459: رپورٹیں — ایجنٹ وار گنتی، ٹرائل / ختم ہونے والی ممبرشپ (کم دن اوپر)، حساب کی جانچ (ہر لائن کا جوڑ = رقم) */
+      if (key !== "D" && !(CDP && CDP.agview)) return Response.json({ ok: false, reason: "no_perm" });
+      const DAY = 864e5, rs = this.sql.exec("SELECT rec, data, since, until, paid, COALESCE(pend, 0) AS pend FROM prof").toArray(), refs = {};
+      for (const r of this.sql.exec("SELECT rk, code, data FROM agref").toArray()) { let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {} refs[r.rk] = { code: r.code, d }; }
+      const stOf = (x) => { const live = (x.until || 0) > now; return (x.paid || 0) > 0 ? (live ? "active" : "expired") : (live ? "trial" : "pending"); };
+      const items = rs.map((x) => { let d = {}; try { d = JSON.parse(x.data || "{}"); } catch (e) {} const rf = refs[x.rec], days = Math.ceil(((x.until || 0) - now) / DAY);
+        return { rec: x.rec, name: String(d.name || (rf && rf.d.name) || "").slice(0, 60), phone: String(d.phone || d.mob || (rf && rf.d.phone) || this.sidMob(x.rec) || ""), city: String(d.city || (rf && rf.d.city) || ""), until: x.until || 0, days, paid: x.paid || 0, st: stOf(x), agent: rf ? rf.code : "" }; });
+      const byA = {}, mk = (code, name) => (byA[code] = byA[code] || { code, name, total: 0, active: 0, trial: 0, expired: 0, pending: 0 });
+      for (const a of this.ppAgents()) mk(a.code, a.name);
+      for (const k of Object.keys(refs)) { const e = mk(refs[k].code || "", ""); e.total++; }
+      for (const it of items) if (it.agent) { const e = mk(it.agent, ""); e[it.st]++; }
+      const agents = Object.values(byA).filter((e) => e.code).sort((p, q) => q.total - p.total);
+      const trial = items.filter((i) => i.st === "trial").sort((p, q) => p.until - q.until).slice(0, 300);
+      const soon = items.filter((i) => i.st === "active" && i.until - now <= 60 * DAY).sort((p, q) => p.until - q.until).slice(0, 300);
+      const lines = this.finLines(""), bad = []; let sumA = 0, sumP = 0;
+      for (const l of lines) { const s = l.sh || {}, parts = (s.google || 0) + (s.maint || 0) + (s.agent || 0) + (s.dev || 0) + (s.codev || 0), cdSum = Object.values(s.cd || {}).reduce((x, y) => x + y, 0); sumA += l.amount || 0; sumP += parts; if (parts !== (l.amount || 0) || cdSum !== (s.codev || 0)) bad.push({ id: l.id, mon: l.mon, amount: l.amount, parts, cdSum, codev: s.codev || 0 }); }
+      return Response.json({ ok: true, agents, trial, soon, counts: { all: items.length, active: items.filter((i) => i.st === "active").length, trial: trial.length, expired: items.filter((i) => i.st === "expired").length, pending: items.filter((i) => i.st === "pending").length }, check: { lines: lines.length, sumAmount: sumA, sumParts: sumP, bad: bad.slice(0, 50), nbad: bad.length } }); }
+    if (CDP && op === "mypend") { const list = this.sql.exec("SELECT id, op, data, ts, st, dts, dnote FROM pendop WHERE by = ? ORDER BY id DESC LIMIT 50", key).toArray().map((r) => { let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {} delete d.img; return Object.assign(r, { data: d }); }); return Response.json({ ok: true, list }); }
+    if (CDP && ["void", "unvoid", "setwho", "payout", "gift"].includes(op)) {   /* MCS1511SU459: ایڈمن 2 یہ کام خود نہیں کر سکتا — درخواست pendop میں، منظوری صرف ایڈمن 1 */
+      const id = String(b.id || ""), who = String(b.who || ""), amt = parseInt(b.amount, 10) || 0, until = parseInt(b.until, 10) || 0;
+      if ((op === "void" || op === "unvoid") && !/^[sx]\d+$/.test(id)) return Response.json({ ok: false, reason: "bad" });
+      if (op === "setwho" && !/^s\d+$/.test(id)) return Response.json({ ok: false, reason: "bad" });
+      if (op === "payout" && (!/^(A|C|D):/.test(who) || amt <= 0)) return Response.json({ ok: false, reason: "bad" });
+      if (op === "gift" && (!String(b.rec || "") || until <= now)) return Response.json({ ok: false, reason: "bad" });
+      const d = { id, why: String(b.why || "").slice(0, 200), code: String(b.code || "").slice(0, 40), who, amount: amt, method: String(b.method || "").slice(0, 40), acctNo: String(b.acctNo || "").slice(0, 60), note: String(b.note || "").slice(0, 200), img: /^data:image\/(jpeg|png|webp);base64,/.test(String(b.img || "")) && String(b.img).length <= 700000 ? b.img : "", rec: String(b.rec || "").slice(0, 80), until, mon };
+      d.byName = (this.sql.exec("SELECT name FROM codev WHERE phone = ?", key.slice(2)).toArray()[0] || {}).name || "";
+      if (this.sql.exec("SELECT id FROM pendop WHERE by = ? AND op = ? AND st = 'p' AND data = ?", key, op, JSON.stringify(d)).toArray().length) return Response.json({ ok: false, reason: "already" });
+      this.sql.exec("INSERT INTO pendop (by, op, data, ts, st) VALUES (?, ?, ?, ?, 'p')", key, op, JSON.stringify(d), now);
+      this.finLog("propose", { op, by: key, byName: d.byName, id, rec: d.rec, who, amount: amt });
+      return Response.json({ ok: true, pending: 1 }); }
     if (op === "stats") return Response.json(Object.assign({ ok: true }, await this.mcsStats235(now)));   /* AGP1311FR034 (ہیلپ ڈیسک #235): کمپنی کی کل گنتی */
     if (op === "me" && key !== "D") return Response.json(Object.assign({ ok: true, unread: this.sql.exec("SELECT COUNT(*) AS n FROM agnote WHERE who = ? AND rd = 0", key).toArray()[0].n }, this.finPerson(key, this.finLines(""))));
     if (op === "notes" && key !== "D") { const list = this.sql.exec("SELECT id, kind, text, ts, rd FROM agnote WHERE who = ? ORDER BY id DESC LIMIT 60", key).toArray(); this.sql.exec("UPDATE agnote SET rd = 1 WHERE who = ? AND rd = 0", key); return Response.json({ ok: true, list }); }
@@ -971,6 +1007,19 @@ export class McsStats {
       const pTop = [r.google, r.maint, r.bring].filter((x) => x.t === "p").reduce((a, x) => a + +x.v, 0); if (pTop > 100) return Response.json({ ok: false, reason: "top_over" });
       this.splitPush({ at: Date.now(), google: norm(r.google), maint: norm(r.maint), bring: norm(r.bring), adm }, "admin1"); return Response.json({ ok: true, cur: this.splitCur(), rules: this.splitRules().slice(-30).reverse() }); }
     if (key !== "D") return Response.json({ ok: false, reason: "no_access" });
+    if (op === "pend") { const rows = this.sql.exec("SELECT id, by, op, data, ts, st, dts, dnote FROM pendop WHERE st = 'p' OR dts > ? ORDER BY CASE st WHEN 'p' THEN 0 ELSE 1 END, id DESC LIMIT 100", now - 30 * 864e5).toArray().map((r) => { let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {} const hasImg = !!d.img; delete d.img; return Object.assign(r, { data: d, hasImg }); }); return Response.json({ ok: true, list: rows, n: rows.filter((r) => r.st === "p").length }); }
+    if (op === "pendok" || op === "pendno") {   /* MCS1511SU459: آخری منظوری / رد — صرف ایڈمن 1 */
+      const pid = parseInt(b.id, 10) || 0, r = this.sql.exec("SELECT id, by, op, data FROM pendop WHERE id = ? AND st = 'p'", pid).toArray()[0];
+      if (!r) return Response.json({ ok: false, reason: "not_found" });
+      let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {}
+      if (op === "pendno") { this.sql.exec("UPDATE pendop SET st = 'no', dts = ?, dnote = ? WHERE id = ?", now, String(b.note || "").slice(0, 200), pid); this.finLog("pend_no", { id: pid, op: r.op, by: r.by, byName: d.byName, approver: "Admin 1" }); return Response.json({ ok: true }); }
+      let res = { ok: true };
+      if (r.op === "gift") { this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", d.until, d.rec); this.finLog("gift", { rec: d.rec, until: d.until }); }
+      else { const out = await this.fin2(Object.assign({}, d, { op: r.op, as: "dev", adminOk: true, mon: d.mon || mon })); try { res = await out.clone().json(); } catch (e) { res = { ok: true }; } }
+      if (res && res.ok === false) { this.sql.exec("UPDATE pendop SET st = 'err', dts = ?, dnote = ? WHERE id = ?", now, String(res.reason || "err").slice(0, 100), pid); return Response.json({ ok: false, reason: res.reason || "err" }); }
+      this.sql.exec("UPDATE pendop SET st = 'ok', dts = ? WHERE id = ?", now, pid);
+      this.finLog("pend_ok", { id: pid, op: r.op, proposer: r.by, proposerName: d.byName, approver: "Admin 1", target: d.id || d.rec || d.who || "" });
+      return Response.json({ ok: true }); }
     if (op === "grecv") { if (b.amount === "" || b.amount == null) this.sql.exec("DELETE FROM agcfg WHERE k = ?", "grecv_" + mon); else { this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "grecv_" + mon, JSON.stringify({ amount: Math.max(0, parseInt(b.amount, 10) || 0), at: now }));
         const seen = {}; for (const l of this.finLines(mon)) if (l.src === "play" && l.by === "agent" && l.sh.agent && !seen[l.code]) { seen[l.code] = 1; this.agNote("A:" + l.code, "ready", "✅ " + mon.replace("_", "-") + " کی گوگل پلے والی رقم آ گئی — آپ کا کمیشن ادائیگی کے لیے تیار"); } }
       this.finLog("grecv", { mon, amount: b.amount }); return Response.json(this.finMonth(mon)); }
