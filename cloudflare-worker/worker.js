@@ -23,6 +23,15 @@ var LIFETIME_EXPIRY = "2099-12-31";
 var MCS_PKG = "com.pbtcodelabs.mycityshines";
 var MCS_SKUS = ["mcs_mem_default", "mcs_mem_1", "mcs_mem_2", "mcs_mem_3", "mcs_mem_4"];
 
+/* MCS1511SU427 (مالک کا حکم، 15 نومبر): My City Shines کا نیا سبسکرپشن نظام — زیرو سے آغاز
+   • کوئی کاروبار مفت نہیں — نہ 15 دن، نہ منظوری پر مفت دن۔ کاروبار صرف ادائیگی (Google Play، اصلی GPA آرڈر نمبر) سے رجسٹرڈ / فعال ہوتا ہے۔
+   • ٹیسٹ خریداری (License Tester) قبول نہیں۔ مالک کے ریڈیم / پروموشن کوڈ (مثلاً 90 دن) قبول — مگر انہیں «سیل» نہیں گنا جاتا (کمیشن / حساب میں نہیں)۔
+   • صرف ایڈمن (ڈویلپر DEV، کو-ڈویلپر CODEV، اور نیچے ADMIN_FREE_MOBILES میں لکھے نمبر) کے اپنے کاروبار مفت فیڈ ہو سکتے ہیں — باقی سب ادائیگی سے۔
+   اختیاری ماحول کی چابیاں (Cloudflare ← Settings ← Variables): ALLOW_TEST="1" ٹیسٹ خریداری بھی مانو (صرف جانچ کے لیے)؛ ALLOW_PROMO="0" ریڈیم کوڈ بند؛ GPA_STRICT="0" GPA ملانا بند (صرف فارمیٹ دیکھے) */
+var ADMIN_FREE_MOBILES = [];   /* مثال: ["923001234567", "923331234567"] — ان دو ایڈمن موبائل نمبروں کو MCS-001 / MCS-002 (اگر خالی ہوں) اور مفت کاروبار ملتا ہے */
+var ADMIN_FREE_MS = 3650 * 864e5;   /* ایڈمن کے اپنے کاروبار — 10 سال (خود بڑھتا رہتا ہے) */
+var FS_PROJECT = "my-city-shines";
+
 // ---------- 🔔 نئی خریداری پر مالک کے فون پر پیغام (ntfy ایپ) ----------
 // مالک فون میں «ntfy» ایپ میں یہی topic سبسکرائب کرے۔ صرف پہلی تصدیق (acknowledge) پر پیغام، تجدید پر نہیں۔
 var NTFY_TOPIC = "aio-sales-7bg2fo5j6vist8funtq7jk";
@@ -99,6 +108,8 @@ async function subPriceInfo(base, accessToken, sku, token) {
       price: fmtPrice(v.priceAmountMicros, v.priceCurrencyCode),
       country: v.countryCode || "",
       test: v.purchaseType === 0,
+      promo: v.purchaseType === 1,   /* پروموشن / ریڈیم کوڈ */
+      micros: v.priceAmountMicros != null ? Number(v.priceAmountMicros) : null,
       trial: v.paymentState === 2
     };
   } catch (e) {
@@ -130,13 +141,13 @@ function b64url(bytesOrString) {
   return btoa(bin).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 
-async function getAccessToken(env) {
+async function getAccessToken(env, scope) {
   const sa = JSON.parse(env.SERVICE_ACCOUNT_JSON);
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claim = b64url(JSON.stringify({
     iss: sa.client_email,
-    scope: "https://www.googleapis.com/auth/androidpublisher",
+    scope: scope || "https://www.googleapis.com/auth/androidpublisher",
     aud: "https://oauth2.googleapis.com/token",
     iat: now,
     exp: now + 3600
@@ -406,6 +417,22 @@ export class McsStats {
        ہر ممبرشپ (سبسکرپشن / تجدید) پر MCS-001-01، -02…؛ ایجنٹ AG-001، AG-002… */
     this.sql.exec("CREATE TABLE IF NOT EXISTS mcssid (mob TEXT PRIMARY KEY, sid TEXT UNIQUE, subn INTEGER DEFAULT 0, ts INTEGER)");
     try { this.sql.exec("ALTER TABLE sale ADD COLUMN subid TEXT"); } catch (e) {}   /* MCS0411WE147: پلے اسٹور کی ممبرشپ — ٹوکن ← ممبرشپ */
+    /* MCS1511SU427: خریداری کا GPA آرڈر نمبر (ایک آرڈر ایک ہی بار) + مفت / ریڈیم کوڈ کا نشان؛ جائزے کی جدول */
+    for (const c of ["gpa TEXT", "free INTEGER DEFAULT 0"]) { try { this.sql.exec("ALTER TABLE mbuy ADD COLUMN " + c); } catch (e) {} }
+    this.sql.exec("CREATE TABLE IF NOT EXISTS preq (rec TEXT PRIMARY KEY, data TEXT, st TEXT, note TEXT, ts INTEGER, upd INTEGER)");
+  }
+  adminFree(rec) {   /* MCS1511SU427: صرف ایڈمن (DEV / CODEV، ADMIN_FREE_MOBILES یا agcfg «adminfree» فہرست) کا کاروبار مفت — کوئی اور نہیں */
+    try {
+      if (this.finCfg("adminfree_off", "")) return false;
+      const mob = this.sidMob(rec); if (!mob) return false;
+      if (this.staffSid(mob)) return true;
+      if (ADMIN_FREE_MOBILES.map(entPhone).includes(mob)) return true;
+      let extra = []; try { extra = JSON.parse(this.finCfg("adminfree", "[]")); } catch (e) {}
+      return Array.isArray(extra) && extra.map(entPhone).includes(mob);
+    } catch (e) { return false; }
+  }
+  paidActive(rec) {   /* اس کاروبار کی کوئی Google Play خریداری (ادا شدہ یا ریڈیم) ابھی چل رہی ہے؟ */
+    try { return !!this.sql.exec("SELECT tok FROM mbuy WHERE rec = ? AND exp > ? LIMIT 1", rec, Date.now()).toArray().length; } catch (e) { return false; }
   }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
@@ -479,6 +506,13 @@ export class McsStats {
     const mob = this.sidMob(mob0); if (!mob) return "";
     const ex = this.sidGet(mob); if (ex) return ex;
     let n = (parseInt(this.finCfg("sidseq", "0"), 10) || 0) + 1, sid;
+    /* MCS1511SU427: MCS-001 / MCS-002 ایڈمن کے لیے محفوظ — ایڈمن کا موبائل (فہرست «adminfree» / MCS-001/002) ہو تو پہلا خالی 001 یا 002، باقی سب کو 003 سے */
+    const admSlot = !this.staffSid(mob) && this.adminFree(mob);
+    if (admSlot) for (const k of ["MCS-001", "MCS-002"]) { if (!this.sql.exec("SELECT mob FROM mcssid WHERE sid = ?", k).toArray().length) {
+      this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 0, ?)", mob, k, ts || Date.now());
+      this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) SELECT ?, id FROM mcsukey WHERE k = ?", "a:" + k, "m:" + mob);
+      return k; } }
+    if (n < 3) n = 3;
     for (;;) { sid = "MCS-" + String(n).padStart(3, "0"); if (!this.sql.exec("SELECT mob FROM mcssid WHERE sid = ?", sid).toArray().length) break; n++; }
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('sidseq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
     this.sql.exec("INSERT INTO mcssid (mob, sid, subn, ts) VALUES (?, ?, 0, ?)", mob, sid, ts || Date.now());
@@ -1485,12 +1519,16 @@ export class McsStats {
         const n = this.sql.exec("SELECT COUNT(*) AS n FROM preq").toArray()[0].n; if (n > 3000) this.sql.exec("DELETE FROM preq WHERE st IN ('done','rej') AND upd < ?", now - 90 * 864e5);
         return Response.json({ ok: true });
       }
-      if (o === "mine") { const r = this.sql.exec("SELECT st, note, ts, upd FROM preq WHERE rec = ?", b.rec).toArray()[0]; return Response.json(r ? { ok: true, st: r.st, note: r.note, ts: r.ts, upd: r.upd } : { ok: true, st: "" }); }
+      if (o === "mine") { const r = this.sql.exec("SELECT st, note, ts, upd FROM preq WHERE rec = ?", b.rec).toArray()[0];
+        /* MCS1511SU427 (مالک کا حکم): ادا شدہ (GPA لگا) کاروبار کے مالک کو «منظوری کا انتظار» کبھی نہیں — ایڈمن کا جائزہ پس منظر میں؛ ایڈمن نے معلومات مانگی ہوں (info) یا رد کیا ہو تو وہی دکھے */
+        if (this.paidActive(b.rec) && (!r || r.st === "new" || r.st === "pend")) return Response.json({ ok: true, st: "done", note: "", ts: r ? r.ts : 0, upd: r ? r.upd : 0 });
+        return Response.json(r ? { ok: true, st: r.st, note: r.note, ts: r.ts, upd: r.upd } : { ok: true, st: "" }); }
       if (o === "list") { const L = this.sql.exec("SELECT rec, data, st, note, ts, upd FROM preq WHERE st NOT IN ('done','rej') OR upd > ? ORDER BY ts", now - 3 * 864e5).toArray(); const pr = {}; for (const r of this.sql.exec("SELECT rec, since, until, pend FROM prof").toArray()) pr[r.rec] = r; return Response.json({ ok: true, list: L.map((r) => Object.assign({ rec: r.rec, st: r.st, note: r.note, ts: r.ts, upd: r.upd, data: JSON.parse(r.data || "{}") }, pr[r.rec] ? { since: pr[r.rec].since, until: pr[r.rec].until, pend: pr[r.rec].pend ? 1 : 0, has: 1 } : { has: 0 }, this.sidGet(r.rec) ? { sid: this.sidGet(r.rec) } : {})) }); }
       if (o === "set") { if (!["new", "pend", "info", "done", "rej"].includes(b.st)) return Response.json({ ok: false, reason: "bad_st" }); const r = this.sql.exec("SELECT rec FROM preq WHERE rec = ?", b.rec).toArray()[0]; if (!r) this.sql.exec("INSERT INTO preq (rec, data, st, note, ts, upd) VALUES (?, '{}', ?, ?, ?, ?)", b.rec, b.st, b.note || "", now, now); else this.sql.exec("UPDATE preq SET st = ?, note = ?, upd = ? WHERE rec = ?", b.st, b.note || "", now, b.rec); return Response.json({ ok: true }); }
       return Response.json({ ok: false, reason: "bad_op" });
     }
-    if (op === "/plist") { const subs = {}; for (const x of this.sql.exec("SELECT rec, subid FROM sale WHERE subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY ts").toArray()) subs[x.rec] = x.subid;
+    if (op === "/plist") { try { for (const x of this.sql.exec("SELECT rec FROM prof WHERE COALESCE(until, 0) < ?", Date.now() + 30 * 864e5).toArray()) if (this.adminFree(x.rec)) this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", Date.now() + ADMIN_FREE_MS, x.rec); } catch (e) {}   /* MCS1511SU427: ایڈمن کا کاروبار کبھی ختم نہ ہو */
+      const subs = {}; for (const x of this.sql.exec("SELECT rec, subid FROM sale WHERE subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY ts").toArray()) subs[x.rec] = x.subid;
       return Response.json(Object.fromEntries(this.sql.exec("SELECT rec, since, until, ts, pend FROM prof").toArray().map((r) => { const sid = this.sidGet(r.rec); if (sid && !subs[r.rec]) { const q = this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sid).toArray()[0]; if (q && q.subn) { const usedN = Object.values(subs).filter((v) => String(v).startsWith(sid + "-")).map((v) => parseInt(String(v).slice(sid.length + 1), 10) || 0); let n = 1; while (usedN.includes(n)) n++; subs[r.rec] = sid + "-" + String(n).padStart(2, "0"); } }   /* MCS1211TH353: ایک موبائل کی دوسری ممبرشپ -02 */ return [r.rec, Object.assign({ since: r.since, until: r.until, ts: r.ts }, r.pend ? { pend: 1 } : {}, sid ? { sid } : {}, subs[r.rec] ? { subid: subs[r.rec] } : {})]; }))); }
     if (op === "/mcs_sid") {   /* MCS1111WE312: کارڈ کی «پرانی ID کی جگہ سسٹم ID» — اس موبائل کی MCS-NNN (نہ ہو تو اگلی) */
       const b = await request.json(); const sid = b.assign ? this.sidFor(b.mob) : this.sidGet(b.mob);
@@ -1499,32 +1537,57 @@ export class McsStats {
     }
     if (op === "/pget") {
       const { rec } = await request.json();
-      const r = this.sql.exec("SELECT data, since, until, ts, pend FROM prof WHERE rec = ?", rec).toArray()[0];
+      let r = this.sql.exec("SELECT data, since, until, ts, pend FROM prof WHERE rec = ?", rec).toArray()[0];
       if (!r) return Response.json({ none: true });
+      if ((r.until || 0) < Date.now() + 180 * 864e5 && this.adminFree(rec)) { r.until = Date.now() + ADMIN_FREE_MS; this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", r.until, rec); }   /* MCS1511SU427 */
       const imgs = this.sql.exec("SELECT id, ts FROM pimg WHERE rec = ? ORDER BY id", rec).toArray();
       let data = {}; try { data = JSON.parse(r.data || "{}"); } catch (e) {}
       return Response.json({ rec, data, since: r.since, until: r.until, ts: r.ts, imgs, pend: r.pend ? 1 : 0 });
     }
     if (op === "/pimg") { const { id } = await request.json(); const r = this.sql.exec("SELECT data FROM pimg WHERE id = ?", id).toArray()[0]; return Response.json({ data: r ? r.data : "" }); }
-    if (op === "/pbuy") {   /* MCS0411WE147: گوگل سے تصدیق شدہ خریداری → اسی ممبرشپ کی مدت؛ ٹوکن ایک بار جس ممبرشپ سے جڑا، ہمیشہ اسی کا */
+    if (op === "/pbuy_probe") {   /* MCS1511SU427: یہ ٹوکن (مثلاً Play Store میں ریڈیم کوڈ سے لی ہوئی سبسکرپشن) کسی کاروبار سے جڑ چکا؟ */
+      const b = await request.json(); const r = this.sql.exec("SELECT rec FROM mbuy WHERE tok = ?", String(b.tok || "")).toArray()[0];
+      return Response.json({ ok: true, linked: !!r, rec: r ? r.rec : "" });
+    }
+    if (op === "/pbuy") {   /* MCS0411WE147 / MCS1511SU427: گوگل سے تصدیق شدہ خریداری → اسی ممبرشپ کی مدت؛ ٹوکن ایک بار جس ممبرشپ سے جڑا، ہمیشہ اسی کا؛ نئی خریداری پر GPA لازمی */
       const b = await request.json();
-      const row = this.sql.exec("SELECT rec, exp FROM mbuy WHERE tok = ?", b.tok).toArray()[0];
+      const row = this.sql.exec("SELECT rec, exp, free FROM mbuy WHERE tok = ?", b.tok).toArray()[0];
       const rec = row ? row.rec : b.rec;
       if (!rec) return Response.json({ ok: false, error: "no_rec" });
       const o = this.sql.exec("SELECT until, paid FROM prof WHERE rec = ?", rec).toArray()[0];
       if (!o) return Response.json({ ok: false, error: "no_prof" });
-      const now = Date.now(), prevExp = row ? (row.exp || 0) : 0;
-      if (!row) this.sql.exec("INSERT INTO mbuy (tok, rec, sku, exp, ts) VALUES (?, ?, ?, ?, ?)", b.tok, rec, b.sku, b.exp, now);
+      if (!row) {   /* نئی خریداری: آرڈر نمبر کے بغیر رجسٹر نہیں؛ ایک آرڈر نمبر ایک ہی بار */
+        if (!b.gpa) return Response.json({ ok: false, error: "gpa_needed" });
+        if (this.sql.exec("SELECT tok FROM mbuy WHERE gpa = ? LIMIT 1", b.gpa).toArray().length) return Response.json({ ok: false, error: "gpa_used" });
+      }
+      const now = Date.now(), prevExp = row ? (row.exp || 0) : 0, free = b.free ? 1 : 0;
+      let subid = "";
+      if (!row) this.sql.exec("INSERT INTO mbuy (tok, rec, sku, exp, ts, gpa, free) VALUES (?, ?, ?, ?, ?, ?, ?)", b.tok, rec, b.sku, b.exp, now, b.gpa || null, free);
       let until = o.until || 0;
       if (b.exp > prevExp) {
         const yrs = Math.max(row ? 0 : 1, Math.round((b.exp - Math.max(prevExp, now)) / (365 * 864e5)));
         /* پہلی بار: باقی دن ضائع نہیں — پرانی مدت (یا آج) سے آگے خریدی مدت؛ تجدید پر گوگل کی نئی تاریخ جتنا فرق */
         until = row ? until + (b.exp - prevExp) : Math.max(until, now) + (b.exp - now);
-        this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", until, b.access ? yrs : 0, rec);
-        if (b.access && yrs > 0) this.saleAdd(rec, "play", yrs);
-        if (row) this.sql.exec("UPDATE mbuy SET exp = ?, ts = ? WHERE tok = ?", b.exp, now, b.tok);
+        const conv = !!(row && row.free && !free);   /* ریڈیم / ٹرائل کے بعد پہلی اصل ادائیگی = اب سیل */
+        if (free) {
+          this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", until, rec);   /* ریڈیم کوڈ / مفت: مدت ملتی ہے، سیل / کمیشن نہیں */
+          if (!row) { try { subid = this.subNext(rec); } catch (e) {} }
+        } else {
+          const add = conv ? Math.max(1, yrs) : yrs;
+          this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", until, add, rec);
+          if (add > 0) this.saleAdd(rec, "play", add);
+        }
+        if (row) this.sql.exec("UPDATE mbuy SET exp = ?, ts = ?, free = ? WHERE tok = ?", b.exp, now, free, b.tok);
       }
-      return Response.json({ ok: true, rec, until, sku: row ? row.sku : b.sku });
+      if (!row) {   /* MCS1511SU427: ادائیگی ہوتے ہی فارم ایڈمن کے «جائزے» کی فہرست میں (منظوری نہیں — کاروبار پہلے ہی لائیو) */
+        const note = (b.test ? "🧪 ٹیسٹ رجسٹریشن (سیل نہیں)" : free ? "🎁 ریڈیم / پروموشن کوڈ" : "✅ Google Play سے ادا شدہ") + " — " + (b.gpa || "") + " — جائزہ برائے ایڈمن (منظوری درکار نہیں؛ کاروبار فعال)";
+        const old = this.sql.exec("SELECT st FROM preq WHERE rec = ?", rec).toArray()[0];
+        if (old) { if (old.st === "new" || old.st === "pend") this.sql.exec("UPDATE preq SET note = ?, upd = ? WHERE rec = ?", note, now, rec); }
+        else this.sql.exec("INSERT INTO preq (rec, data, st, note, ts, upd) VALUES (?, ?, 'new', ?, ?, ?)", rec, JSON.stringify({ paid: free ? 0 : 1, free: free, gpa: b.gpa || "", sku: b.sku || "", src: "play" }), note, now, now);
+        this.finLog("pbuy", { rec, gpa: b.gpa || "", sku: b.sku, free, until });
+      }
+      if (!subid) { const q = this.sql.exec("SELECT subid FROM sale WHERE rec = ? AND subid IS NOT NULL AND COALESCE(void, 0) = 0 ORDER BY id DESC LIMIT 1", rec).toArray()[0]; subid = q ? q.subid : ""; }
+      return Response.json({ ok: true, rec, until, sku: row ? this.sql.exec("SELECT sku FROM mbuy WHERE tok = ?", b.tok).toArray()[0].sku : b.sku, subid, free: !!free });
     }
     if (op === "/pclaim") {
       const b = await request.json(); const now = Date.now();
@@ -1533,14 +1596,14 @@ export class McsStats {
       const key = [...crypto.getRandomValues(new Uint8Array(18))].map((x) => "abcdefghjkmnpqrstuvwxyz23456789"[x % 31]).join("");
       if (r) this.sql.exec("UPDATE prof SET key = ? WHERE rec = ?", key, b.rec);
       else {
-        /* MCS0411WE133 (مالک کا حکم): 15 دن مفت صرف اس نمبر کی پہلی پروفائل پر (rec = نمبر_قسم)؛ اگلی پروفائل بند حالت میں — ایک سال جاری کرنے پر چالو */
-        const pfx = String(b.rec).split("_")[0], first = !this.sql.exec("SELECT rec FROM prof WHERE substr(rec, 1, ?) = ? AND rec != ? LIMIT 1", pfx.length + 1, pfx + "_", b.rec).toArray().length;
-        /* MCS0511TH157 (مالک کا حکم): دکاندار خود بنائے تو 15 دن ابھی نہیں — ایڈمن کی منظوری (padmin approve) پر شروع؛ ایڈمن خود بنائے تو فوراً */
-        const pend = first && !b.admin ? 1 : 0;
-        this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts, pend) VALUES (?, '{}', ?, ?, ?, ?, ?)", b.rec, key, now, b.admin ? now + 15 * 864e5 : now, now, pend);
+        /* MCS1511SU427 (مالک کا حکم): زیرو سے آغاز — کوئی بھی مفت کاروبار نہیں (نہ 15 دن، نہ «منظوری کا انتظار»)؛ مدت 0 = ادائیگی (Google Play GPA) یا ایڈمن کی دی ہوئی مدت سے شروع۔
+           صرف ایڈمن (MCS-001 / MCS-002 / DEV / CODEV) کا اپنا فیڈ کیا کاروبار مفت */
+        const af = this.adminFree(b.rec);
+        this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts, pend) VALUES (?, '{}', ?, ?, ?, ?, 0)", b.rec, key, now, af ? now + ADMIN_FREE_MS : now, now);
+        if (af) this.finLog("adminfree", { rec: b.rec });
       }
       const x = this.sql.exec("SELECT since, until, pend FROM prof WHERE rec = ?", b.rec).toArray()[0];
-      return Response.json({ key, since: x.since, until: x.until, pend: x.pend ? 1 : 0 });
+      return Response.json({ key, since: x.since, until: x.until, pend: 0 });
     }
     if (op === "/psave") {
       const b = await request.json();
@@ -1565,7 +1628,8 @@ export class McsStats {
         this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ? WHERE rec = ?", b.until, yrs, b.rec);
         if (yrs > 0) this.saleAdd(b.rec, "manual", yrs);
       }
-      else if (b.act === "approve") { const now = Date.now(); this.sql.exec("UPDATE prof SET since = ?, until = MAX(COALESCE(until, 0), ?), pend = 0 WHERE rec = ?", now, now + 15 * 864e5, b.rec); }   /* MCS0511TH157: منظوری = 15 دن مفت شروع */
+      else if (b.act === "approve") { const now = Date.now(); this.sql.exec("UPDATE prof SET since = ?, pend = 0 WHERE rec = ?", now, b.rec); }   /* MCS1511SU427 (مالک کا حکم): منظوری پر مفت دن نہیں — مدت صرف ادائیگی (یا ایڈمن کے «مدت بدلیں») سے */
+      else if (b.act === "gift") { if (b.until > 0) { this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", b.until, b.rec); this.finLog("gift", { rec: b.rec, until: b.until }); } }   /* MCS1511SU427: ایڈمن کی مفت مدت — سیل / کمیشن نہیں */
       else if (b.act === "reject") this.sql.exec("UPDATE prof SET pend = 0 WHERE rec = ?", b.rec);
       else if (b.act === "free") this.sql.exec("UPDATE prof SET key = '' WHERE rec = ?", b.rec);
       else if (b.act === "del") { this.sql.exec("DELETE FROM prof WHERE rec = ?", b.rec); this.sql.exec("DELETE FROM pimg WHERE rec = ?", b.rec);
@@ -1945,14 +2009,53 @@ function profClean(d) {
   if (d.map && isFinite(+d.map.lat) && isFinite(+d.map.lon)) out.map = { lat: +(+d.map.lat).toFixed(6), lon: +(+d.map.lon).toFixed(6) };
   return out;
 }
-/* MCS0411WE147: My City Shines کی پلے اسٹور ممبرشپ — ایپ ٹوکن + sku (+ نئی خریداری پر rec) بھیجتی ہے؛ گوگل سے تصدیق، acknowledge، پھر ممبرشپ کی مدت */
+/* MCS1511SU427: گوگل پلے آرڈر نمبر — GPA.1234-5678-9012-34567 (تجدید پر آخر میں ..0 وغیرہ لگتا ہے، اسے ہٹا دیتے ہیں) */
+function gpaNorm(t) {
+  const m = /GPA\.?\s*(\d{4})\s*-?\s*(\d{4})\s*-?\s*(\d{4})\s*-?\s*(\d{5})/.exec(String(t || "").toUpperCase().replace(/[۰-۹]/g, (c) => String(c.charCodeAt(0) - 1776)));
+  return m ? "GPA." + m[1] + "-" + m[2] + "-" + m[3] + "-" + m[4] : "";
+}
+/* MCS1511SU427: ادائیگی کے بعد کارڈ کو Firestore میں خود approved:true — صرف تب جب کارڈ کا واٹس ایپ نمبر اسی ممبرشپ (rec) کا ہو۔ سروس اکاؤنٹ کے پاس Firestore کی اجازت نہ ہو تو خاموشی سے false (ایپ خود بھی لکھتی ہے) */
+async function fsApprove(env, fs, rec) {
+  try {
+    if (!fs || (fs.col !== "services" && fs.col !== "doctors") || !/^[A-Za-z0-9_-]{4,64}$/.test(String(fs.id || ""))) return false;
+    const tk = await getAccessToken(env, "https://www.googleapis.com/auth/datastore");
+    const url = "https://firestore.googleapis.com/v1/projects/" + FS_PROJECT + "/databases/(default)/documents/" + fs.col + "/" + fs.id;
+    const g = await fetch(url, { headers: { Authorization: "Bearer " + tk } });
+    if (!g.ok) return false;
+    const f = ((await g.json()).fields) || {};
+    const wa = f.whatsapp ? (f.whatsapp.stringValue || f.whatsapp.integerValue || "") : "";
+    const mob = entPhone(wa);
+    if (!mob || "p" + mob.slice(2) !== String(rec).split("_")[0]) return false;
+    const p = await fetch(url + "?updateMask.fieldPaths=approved", { method: "PATCH", headers: { Authorization: "Bearer " + tk, "Content-Type": "application/json" }, body: JSON.stringify({ fields: { approved: { booleanValue: true } } }) });
+    return p.ok;
+  } catch (e) { return false; }
+}
+/* MCS0411WE147 / MCS1511SU427: My City Shines کی پلے اسٹور ممبرشپ — ایپ ٹوکن + sku + rec + gpa (آرڈر نمبر) بھیجتی ہے؛ گوگل سے تصدیق، acknowledge، پھر ممبرشپ کی مدت۔
+   قاعدے: ٹیسٹ خریداری ✗؛ نئی خریداری پر GPA لازمی اور گوگل کے آرڈر سے ملے؛ ریڈیم / پروموشن کوڈ ✓ (مدت ملے، سیل نہیں)؛ ادا شدہ ✓ — منظوری کے انتظار کے بغیر فعال */
 async function handleMcsBuy(request, env, ctx) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  /* MCS1511SU427: 🧪 ایڈمن کا «ٹیسٹ رجسٹریشن» بٹن — گوگل پلے / پیکج / پیسے کے بغیر؛ صرف ایڈمن؛ مدت دنوں میں (1 سے 90)، سیل / کمیشن نہیں */
+  if (b.adminTest) {
+    if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, error: "admin_only" }, 403);
+    const trec = String(b.rec || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
+    if (!/^p\d{10}(_[a-z0-9]{2,12})?$/.test(trec)) return reply({ ok: false, error: "bad_rec" }, 400);
+    const days = Math.max(1, Math.min(90, parseInt(b.days, 10) || 7)), rnd = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    const st = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+    const tr = await (await st.fetch("https://s/pbuy", { method: "POST", body: JSON.stringify({ tok: "admintest_" + rnd, rec: trec, sku: "mcs_mem_default", exp: Date.now() + days * 864e5, access: true, free: true, test: true, gpa: "ADMINTEST-" + rnd }) })).json();
+    if (!tr.ok) return reply(tr);
+    const ap = await fsApprove(env, b.fs, tr.rec);
+    return reply(Object.assign(tr, { access: true, test: true, state: "ADMIN_TEST", approved: ap }));
+  }
   const token = b.purchaseToken;
   if (typeof token !== "string" || token.length < 10 || token.length > 1000) return reply({ ok: false, error: "bad_token" }, 400);
   const rec = String(b.rec || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
   if (rec && !/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec)) return reply({ ok: false, error: "bad_rec" }, 400);
+  const gpaIn = b.gpa ? gpaNorm(b.gpa) : "";
+  if (b.gpa && !gpaIn) return reply({ ok: false, error: "bad_gpa" });
+  const tok = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)))).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 40);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  if (b.probe) { const pr = await (await stub.fetch("https://s/pbuy_probe", { method: "POST", body: JSON.stringify({ tok }) })).json(); return reply(pr); }   /* ایپ: یہ ٹوکن پہلے سے جڑا ہے؟ */
   try {
     const accessToken = await getAccessToken(env);
     const base = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/" + MCS_PKG;
@@ -1961,19 +2064,34 @@ async function handleMcsBuy(request, env, ctx) {
     const d = await res.json();
     const line = (d.lineItems || []).find((l) => MCS_SKUS.includes(l.productId));
     if (!line) return reply({ ok: false, error: "unknown_product" });
+    const exp = Date.parse(line.expiryTime) || 0;
+    const pi = await subPriceInfo(base, accessToken, line.productId, token);
+    const isTest = !!d.testPurchase || !!pi.test;
+    const isPromo = !!line.signupPromotion || !!pi.promo;
+    const isTrial = !!pi.trial || !!(line.offerDetails && /trial/i.test(line.offerDetails.offerId || ""));
+    const isFree = isTest || isPromo || isTrial || pi.micros === 0;   /* ٹیسٹ بھی «مفت» — مدت ملتی ہے، سیل / کمیشن نہیں */
+    const info = { state: d.subscriptionState, expiry: exp ? new Date(exp).toISOString().slice(0, 10) : "", test: isTest, promo: isPromo, free: isFree };
+    if (isTest && env.ALLOW_TEST === "0") return reply(Object.assign({ ok: false, access: false, error: "test_purchase" }, info));   /* ٹیسٹ خریداری عام طور پر قبول (صرف مالک کے License Testers کی ہوتی ہے)؛ ALLOW_TEST="0" سے بند */
+    if (isPromo && env.ALLOW_PROMO === "0") return reply(Object.assign({ ok: false, access: false, error: "promo_off" }, info));
+    if (d.subscriptionState === "SUBSCRIPTION_STATE_PENDING") return reply(Object.assign({ ok: false, access: false, error: "pending" }, info));   /* ادائیگی ابھی مکمل نہیں */
+    const access = ACCESS_STATES.includes(d.subscriptionState) && exp > Date.now();
+    if (!access) return reply(Object.assign({ ok: false, access: false, error: "expired" }, info));
+    /* آرڈر نمبر گوگل کے آرڈر سے ملے (تجدید پر ..0 کٹ جاتا ہے) */
+    if (gpaIn && env.GPA_STRICT !== "0") {
+      const mine = [d.latestOrderId, line.latestSuccessfulOrderId].map(gpaNorm).filter(Boolean);
+      if (mine.length && !mine.includes(gpaIn)) return reply(Object.assign({ ok: false, access: false, error: "gpa_mismatch" }, info));
+    }
     if (d.acknowledgementState !== "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED") {
       try {
         const ack = await fetch(base + "/purchases/subscriptions/" + line.productId + "/tokens/" + encodeURIComponent(token) + ":acknowledge", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: "{}" });
-        if (ack.ok) { const pi = await subPriceInfo(base, accessToken, line.productId, token); notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: pi.test || !!d.testPurchase, trial: false }); }
+        if (ack.ok) notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: isTest, trial: isTrial });
       } catch (e) {}
     }
-    const exp = Date.parse(line.expiryTime) || 0;
-    const access = ACCESS_STATES.includes(d.subscriptionState) && exp > Date.now();
-    const tok = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)))).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 40);
-    const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
-    const r = await stub.fetch("https://s/pbuy", { method: "POST", body: JSON.stringify({ tok, rec, sku: line.productId, exp, access }) });
+    const r = await stub.fetch("https://s/pbuy", { method: "POST", body: JSON.stringify({ tok, rec, sku: line.productId, exp, access: true, free: isFree, test: isTest, gpa: gpaIn }) });
     const j = await r.json();
-    return reply(Object.assign(j, { access, state: d.subscriptionState, expiry: exp ? new Date(exp).toISOString().slice(0, 10) : "" }));
+    if (!j.ok) return reply(Object.assign(j, { access: true }, info));   /* gpa_needed / gpa_used / no_rec / no_prof */
+    const approved = await fsApprove(env, b.fs, j.rec);
+    return reply(Object.assign(j, info, { access: true, approved }));
   } catch (e) {
     return reply({ ok: false, error: "server_error" }, 500);
   }
