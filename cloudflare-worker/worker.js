@@ -1309,6 +1309,10 @@ export class McsStats {
       if (b.act === "delete") {   /* پلے اسٹور کا اصول: اکاؤنٹ اور اس کی سب چابیاں / سیشن ختم */
         if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
         this.sql.exec("DELETE FROM mcsukey WHERE id = ?", S.u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", S.u.id); this.sql.exec("DELETE FROM mcsuser WHERE id = ?", S.u.id);
+        /* MCS1511SU443 (مالک کا حکم — «MCS008 بالکل ختم»): اکاؤنٹ حذف ہو اور اس موبائل کی کوئی ممبرشپ نہ ہو تو اس کی MCS ID بھی ریٹائر (دوبارہ سائن اپ پر نئی ID؛ پرانا نمبر کسی کو دوبارہ نہیں)؛ ایڈمن کی MCS001 / MCS002 کبھی نہیں */
+        try { const mob = this.sidMob(S.u.mobile); const sid = mob ? this.sidGet(mob) : "";
+          if (sid && !this.adminSlotOf(mob) && !this.sql.exec("SELECT rec FROM prof").toArray().some((x) => this.sidMob(x.rec) === mob)) {
+            this.sql.exec("DELETE FROM mcssid WHERE mob = ?", mob); this.sql.exec("DELETE FROM mcsukey WHERE k = ?", "a:" + sid); this.finLog("sidretire", { sid, why: "account deleted" }); } } catch (e) {}
         return Response.json({ ok: true });
       }
       return Response.json({ ok: false, reason: "bad_act" });
