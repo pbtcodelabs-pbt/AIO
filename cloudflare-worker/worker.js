@@ -2197,7 +2197,8 @@ async function handleMcsBuy(request, env, ctx) {
   const token = b.purchaseToken;
   if (typeof token !== "string" || token.length < 10 || token.length > 1000) return reply({ ok: false, error: "bad_token" }, 400);
   const rec = String(b.rec || "").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
-  if (rec && !/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec)) return reply({ ok: false, error: "bad_rec" }, 400);
+  /* MCS1511SU427: غلط rec پر بھی خریداری پہلے acknowledge (ورنہ گوگل منسوخ / واپس کر دیتا ہے)، انکار بعد میں */
+  const recBad = !!rec && !/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec);
   const gpaTyped = b.gpa ? gpaNorm(b.gpa) : "";   /* MCS1511SU428: آرڈر نمبر اب خود گوگل سے آتا ہے — گاہک کا ہاتھ سے لکھا صرف پرانی ایپ کے لیے */
   const tok = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)))).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 40);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -2211,7 +2212,7 @@ async function handleMcsBuy(request, env, ctx) {
     const line = (d.lineItems || []).find((l) => MCS_SKUS.includes(l.productId));
     if (!line) return reply({ ok: false, error: "unknown_product" });
     const exp = Date.parse(line.expiryTime) || 0;
-    const pi = await subPriceInfo(base, accessToken, line.productId, token);
+    const pi =await subPriceInfo(base, accessToken, line.productId, token);
     const isTest = !!d.testPurchase || !!pi.test;
     const isPromo = !!line.signupPromotion || !!pi.promo;
     const isTrial = !!pi.trial || !!(line.offerDetails && /trial/i.test(line.offerDetails.offerId || ""));
@@ -2229,12 +2230,15 @@ async function handleMcsBuy(request, env, ctx) {
     if (gGoogle.length && gpaTyped && !gGoogle.includes(gpaTyped)) { if (env.GPA_STRICT === "1") return reply(Object.assign({ ok: false, access: false, error: "gpa_mismatch" }, info)); gpaFixed = true; }
     if (!gGoogle.length && b.gpa && !gpaTyped) return reply(Object.assign({ ok: false, error: "bad_gpa" }, info));
     let ackOk = d.acknowledgementState === "ACKNOWLEDGEMENT_STATE_ACKNOWLEDGED";
-    if (!ackOk) {
+    let ackErr = "";
+    for (let t = 0; t < 3 && !ackOk; t++) {   /* MCS1511SU427: acknowledge تین کوششیں */
       try {
         const ack = await fetch(base + "/purchases/subscriptions/" + line.productId + "/tokens/" + encodeURIComponent(token) + ":acknowledge", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: "{}" });
-        if (ack.ok) { ackOk = true; notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: isTest, trial: isTrial }); }
-      } catch (e) {}
+        if (ack.ok) { ackOk = true; notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: isTest, trial: isTrial }); } else ackErr = "ack_" + ack.status;
+      } catch (e) { ackErr = "ack_error"; }
+      if (!ackOk && t < 2) await new Promise((r) => setTimeout(r, 800));
     }
+    if (recBad) return reply(Object.assign({ ok: false, error: "bad_rec", ack: ackOk, ackErr }, info), 400);
     const r = await stub.fetch("https://s/pbuy", { method: "POST", body: JSON.stringify({ tok, rec, sku: line.productId, exp, access: true, free: isFree, test: isTest, gpa: gpaIn }) });
     const j = await r.json();
     if (!j.ok) return reply(Object.assign(j, { access: true }, info));   /* gpa_needed / gpa_used / no_rec / no_prof */
