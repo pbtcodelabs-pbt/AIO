@@ -1295,6 +1295,26 @@ export class McsStats {
         this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
         return Response.json({ ok: true, tok: await sess(u.id, "g"), user: out(u) });
       }
+      if (b.act === "acctadm") {   /* MCS1511SU444 (مالک کا حکم — «033 والا اکاؤنٹ ڈیلیٹ نہیں ہوتا، 0320 «پہلے سے بنا ہے» کہتا ہے، سرچ میں کہیں نہیں»): صرف ایڈمن — نمبر / MCS ID / ای میل سے سائن اپ اکاؤنٹ ڈھونڈو، یا پورا صاف کرو (اکاؤنٹ + چابیاں + سیشن + ٹوٹی چابی + MCS ID)؛ کاروبار / ممبرشپ کو ہاتھ نہیں لگتا */
+        if (!b.admin) return Response.json({ ok: false, reason: "admin_only" });
+        if (b.del) {
+          const u = b.uid ? get(String(b.uid)) : null, mob = u ? String(u.mobile || "") : String(b.mob || "");
+          let keys = 0, sidGone = "";
+          if (u) { keys += this.sql.exec("SELECT COUNT(*) AS n FROM mcsukey WHERE id = ?", u.id).toArray()[0].n; this.sql.exec("DELETE FROM mcsukey WHERE id = ?", u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", u.id); this.sql.exec("DELETE FROM mcsuser WHERE id = ?", u.id); }
+          if (b.k) { const k0 = String(b.k), id0 = key(k0); if (id0 && !get(id0)) { this.sql.exec("DELETE FROM mcsukey WHERE k = ?", k0); keys++; } }
+          if (mob) {
+            const id1 = key("m:" + mob); if (id1 && !get(id1)) { this.sql.exec("DELETE FROM mcsukey WHERE k = ?", "m:" + mob); keys++; }
+            try { const sid = this.sidGet(mob); if (sid && !this.adminSlotOf(mob) && !this.sql.exec("SELECT rec FROM prof").toArray().some((x) => this.sidMob(x.rec) === mob)) { this.sql.exec("DELETE FROM mcssid WHERE mob = ?", mob); this.sql.exec("DELETE FROM mcsukey WHERE k = ?", "a:" + sid); sidGone = sid; this.finLog("sidretire", { sid, why: "admin wipe" }); } } catch (e) {}
+          }
+          return Response.json({ ok: true, removed: u ? u.id : "", keys, sidGone });
+        }
+        const mobs = new Set((b.mobs || []).map(String)), idset = new Set(), orphans = [];
+        for (const k of (b.keys || [])) { const id0 = key(k); if (!id0) continue; if (get(id0)) idset.add(id0); else orphans.push({ k, id: id0, mob: k.startsWith("m:") ? k.slice(2) : "" }); }
+        for (const r of this.sql.exec("SELECT id, data FROM mcsuser").toArray()) { try { const d = JSON.parse(r.data); if (mobs.has(String(d.mobile))) idset.add(r.id); } catch (e) {} }
+        const list = [];
+        for (const id0 of idset) { const u = get(id0); if (!u) continue; list.push({ uid: u.id, name: u.name || "", mobile: u.mobile || "", sid: this.sidGet(u.mobile) || "", gmail: u.gmail || "", email: u.email || "", hasPw: !!u._pwh, soft: !!u.del }); }
+        return Response.json({ ok: true, list, orphans });
+      }
       const S = bySess();
       if (!S) return Response.json({ ok: false, reason: "session" });
       if (b.act === "me") return Response.json({ ok: true, user: out(S.u) });
@@ -1930,6 +1950,17 @@ async function handleMcsAuth(request, env) {
     if (entPhone(id)) ids.push("m:" + entPhone(id));
     if (!ids.length || pk.length !== 4) return reply({ ok: false, reason: "nomatch" });
     r = await call({ act: "reglook", ids, pk, fk: ip + "|rl" });
+  } else if (op === "acctadm") {   /* MCS1511SU444 — صرف ایڈمن: سائن اپ اکاؤنٹ ڈھونڈو / صاف کرو */
+    if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
+    const keys = [], mobs = [];
+    for (const q0 of (Array.isArray(b.q) ? b.q : []).slice(0, 12)) {
+      const q = S(q0, 80).toLowerCase();
+      if (/^mcs-?\d{6,}$/.test(q)) keys.push("a:" + q.replace(/^mcs-?/, "MCS-").toUpperCase());
+      else if (/^mcs-?\d{1,5}$/.test(q)) keys.push("a:MCS" + q.replace(/\D/g, "").padStart(3, "0"));
+      if (entPhone(q)) { keys.push("m:" + entPhone(q)); mobs.push(entPhone(q)); }
+      if (entEmail(q)) keys.push("e:" + entEmail(q), "g:" + entEmail(q));
+    }
+    r = await call({ act: "acctadm", admin: true, keys, mobs, del: b.del === true, uid: S(b.uid, 40), mob: entPhone(b.mob) || "", k: S(b.k, 120) });
   } else if (op === "google") {
     const gmail = await verifyGoogleIdToken(b.gtoken); if (!gmail) return reply({ ok: false, reason: "google" });
     r = await call({ act: "google", gmail });
