@@ -1797,6 +1797,10 @@ export class McsStats {
       const r = this.sql.exec("SELECT key, since, until FROM prof WHERE rec = ?", b.rec).toArray()[0];
       if (r && r.key && !b.admin) return Response.json({ error: "taken" }, { status: 409 });
       const key = [...crypto.getRandomValues(new Uint8Array(18))].map((x) => "abcdefghjkmnpqrstuvwxyz23456789"[x % 31]).join("");
+      if (!r) {   /* MCS1511SU454 (مالک کا حکم — فی الحال ایک موبائل ایک کاروبار): اسی موبائل کا کوئی اور کاروبار ابھی فعال ہو تو نیا نہیں */
+        const mob = this.sidMob(b.rec);
+        if (mob && this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ? AND rec <> ? AND COALESCE(until, 0) > ? LIMIT 1", "p" + mob.slice(2) + "_%", b.rec, now).toArray().length) return Response.json({ error: "one_biz" }, { status: 409 });
+      }
       if (r) this.sql.exec("UPDATE prof SET key = ? WHERE rec = ?", key, b.rec);
       else {
         /* MCS1511SU427 (مالک کا حکم): زیرو سے آغاز — کوئی بھی مفت کاروبار نہیں (نہ 15 دن، نہ «منظوری کا انتظار»)؛ مدت 0 = ادائیگی (Google Play GPA) یا ایڈمن کی دی ہوئی مدت سے شروع۔
