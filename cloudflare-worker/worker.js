@@ -1901,7 +1901,11 @@ export class McsStats {
       let subid = "";
       if (!row) this.sql.exec("INSERT INTO mbuy (tok, rec, sku, exp, ts, gpa, free) VALUES (?, ?, ?, ?, ?, ?, ?)", b.tok, rec, b.sku, b.exp, now, b.gpa || null, free);
       let until = o.until || 0;
-      if (b.exp > prevExp) {
+      if (b.days > 0) {   /* MCS1511SU461: ایک بار کی خریداری — ہر نیا ٹوکن = اتنے دن مزید (اسی ٹوکن پر دوبارہ کچھ نہیں) */
+        if (!row) { until = Math.max(until, now) + b.days * 864e5; this.sql.exec("UPDATE mbuy SET exp = ? WHERE tok = ?", until, b.tok);
+          if (free) { this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", until, rec); try { subid = this.subNext(rec); } catch (e) {} }
+          else { this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", until, rec); this.saleAdd(rec, "play", Math.round(b.days / 365 * 100) / 100); } }
+      } else if (b.exp > prevExp) {
         const yrs = Math.max(row ? 0 : 1, Math.round((b.exp - Math.max(prevExp, now)) / (365 * 864e5)));
         /* پہلی بار: باقی دن ضائع نہیں — پرانی مدت (یا آج) سے آگے خریدی مدت؛ تجدید پر گوگل کی نئی تاریخ جتنا فرق */
         until = row ? until + (b.exp - prevExp) : Math.max(until, now) + (b.exp - now);
@@ -2418,6 +2422,36 @@ function mcsDone(o) {
 }
 /* MCS0411WE147 / MCS1511SU427: My City Shines کی پلے اسٹور ممبرشپ — ایپ ٹوکن + sku + rec + gpa (آرڈر نمبر) بھیجتی ہے؛ گوگل سے تصدیق، acknowledge، پھر ممبرشپ کی مدت۔
    قاعدے: ٹیسٹ خریداری ✗؛ نئی خریداری پر GPA لازمی اور گوگل کے آرڈر سے ملے؛ ریڈیم / پروموشن کوڈ ✓ (مدت ملے، سیل نہیں)؛ ادا شدہ ✓ — منظوری کے انتظار کے بغیر فعال */
+/* MCS1511SU461 (مالک کا حکم): One-time product «90 دن کی ممبرشپ» — سبسکرپشن کے پرومو کوڈ پر گوگل کارڈ لازمی مانگتا ہے، ایک بار والی چیز کے کوڈ پر نہیں۔
+   consumable: ہر خریداری / کوڈ = 90 دن مزید (پچھلی مدت پر جمع)؛ کامیابی پر سرور consume کرتا ہے تاکہ دوبارہ خریدی جا سکے۔
+   پرومو / ٹیسٹ (purchaseType 1 / 0) = مفت — مدت ملتی ہے، فروخت / کمیشن نہیں؛ اصل ادائیگی = سال کا حصہ (90/365) فروخت میں۔ */
+var MCS_ONCE = { mcs_mem_90d: 90 };
+async function mcsBuyOnce(env, ctx, b, token, tok, rec, recBad, stub) {
+  try {
+    const accessToken = await getAccessToken(env), sku = b.sku, days = MCS_ONCE[sku];
+    const url = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/" + MCS_PKG + "/purchases/products/" + encodeURIComponent(sku) + "/tokens/" + encodeURIComponent(token);
+    const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken } });
+    if (!res.ok) return reply({ ok: false, error: "google_" + res.status });
+    const d = await res.json();
+    if (d.purchaseState === 2) return reply({ ok: false, access: false, error: "pending" });
+    if (d.purchaseState !== 0) return reply({ ok: false, access: false, error: "canceled" });
+    const isTest = d.purchaseType === 0, isPromo = d.purchaseType === 1, isFree = isTest || isPromo;
+    const info = { state: "PURCHASED", once: 1, days, test: isTest, promo: isPromo, free: isFree };
+    let ackOk = d.acknowledgementState === 1 || d.consumptionState === 1;
+    for (let t = 0; t < 3 && !ackOk; t++) { try { const a = await fetch(url + ":acknowledge", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: "{}" }); if (a.ok) { ackOk = true; notifySale(ctx, { pkg: MCS_PKG, sku, country: d.regionCode || "", price: "", test: isTest, trial: isPromo }); } } catch (e) {} if (!ackOk && t < 2) await new Promise((r) => setTimeout(r, 800)); }
+    if (recBad) return reply(Object.assign({ ok: false, error: "bad_rec", ack: ackOk }, info), 400);
+    const gpa = gpaNorm(d.orderId || "") || ((isPromo ? "PROMO-" : "ONCE-") + tok.slice(0, 16));
+    const exp = (Number(d.purchaseTimeMillis) || Date.now()) + days * 864e5;
+    const j = await (await stub.fetch("https://s/pbuy", { method: "POST", body: JSON.stringify({ tok, rec, sku, exp, access: true, free: isFree, test: isTest, gpa, days }) })).json();
+    if (!j.ok) return reply(Object.assign(j, { access: true, ack: ackOk }, info));
+    let consumed = d.consumptionState === 1;
+    if (!consumed) { try { consumed = (await fetch(url + ":consume", { method: "POST", headers: { Authorization: "Bearer " + accessToken } })).ok; } catch (e) {} }
+    const done0 = mcsDone({ exp: Date.now() + days * 864e5, free: isFree, test: isTest, until: j.until, gpa, ackOk, biz: true, sid: j.sid, subid: j.subid, approved: false });
+    const approved = await fsApprove(env, b.fs, j.rec, { sid: j.sid, subid: j.subid, until: j.until, kind: done0.kind, days });
+    const done = approved ? Object.assign({}, done0, { complete: true, steps: done0.steps.map((x) => x.k === "card" ? Object.assign({}, x, { ok: true, t: "بزنس کارڈ پر ایکٹو لگ گیا" }) : x) }) : done0;
+    return reply(Object.assign(j, info, { access: true, approved, gpa, ack: ackOk, consumed, done }));
+  } catch (e) { return reply({ ok: false, error: "server_error" }, 500); }
+}
 async function handleMcsBuy(request, env, ctx) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
@@ -2442,6 +2476,7 @@ async function handleMcsBuy(request, env, ctx) {
   const tok = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)))).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 40);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
   if (b.probe) { const pr = await (await stub.fetch("https://s/pbuy_probe", { method: "POST", body: JSON.stringify({ tok }) })).json(); return reply(pr); }   /* ایپ: یہ ٹوکن پہلے سے جڑا ہے؟ */
+  if (MCS_ONCE[b.sku]) return mcsBuyOnce(env, ctx, b, token, tok, rec, recBad, stub);   /* MCS1511SU461: ایک بار کی خریداری (کارڈ کے بغیر پرومو کوڈ) */
   try {
     const accessToken = await getAccessToken(env);
     const base = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/" + MCS_PKG;
