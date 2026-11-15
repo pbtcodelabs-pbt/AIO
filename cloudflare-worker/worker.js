@@ -599,6 +599,31 @@ export class McsStats {
     if (!cur || (cur.subn || 0) < n) this.sql.exec("UPDATE mcssid SET subn = ? WHERE sid = ?", n, sid);
     return subid;   /* MCS001M1، MCS001M2… */
   }
+  /* MCS1511SU450: ایک ہی موبائل کے پرانے (حذف شدہ کارڈ والے) ریکارڈ کی مدت / خریداری / فروخت / نمبر نئے کارڈ پر */
+  recMove450(from, to) {
+    if (!from || !to || from === to) return false;
+    const f = this.sql.exec("SELECT until, paid FROM prof WHERE rec = ?", from).toArray()[0], t = this.sql.exec("SELECT until, paid FROM prof WHERE rec = ?", to).toArray()[0];
+    if (!f || !t) return false;
+    const now = Date.now(), until = Math.max(t.until || 0, f.until || 0);
+    this.sql.exec("UPDATE prof SET until = ?, paid = COALESCE(paid, 0) + ?, pend = 0 WHERE rec = ?", until, f.paid || 0, to);
+    this.sql.exec("UPDATE prof SET until = ?, paid = 0 WHERE rec = ?", Math.min(now, f.until || now), from);
+    this.sql.exec("UPDATE mbuy SET rec = ? WHERE rec = ?", to, from);
+    this.sql.exec("UPDATE sale SET rec = ? WHERE rec = ? AND COALESCE(void, 0) = 0", to, from);
+    const num = (v) => { const m = /M(\d+)$/.exec(v || ""); return m ? parseInt(m[1], 10) : 0; };
+    const sf = this.subOf(from), st = this.subOf(to);
+    this.sql.exec("DELETE FROM agcfg WHERE k = ?", "subof_" + from);
+    if (sf && (!num(st) || num(sf) < num(st))) { this.subSet(to, sf); this.sql.exec("UPDATE sale SET subid = ? WHERE rec = ? AND COALESCE(void, 0) = 0", sf, to); }
+    this.finLog("recmove450", { from, to, until, sub: this.subOf(to) });
+    return true;
+  }
+  own450() {   /* ایک بار (مالک کا حکم): ایڈمن 1 کی Google Play خریداری پرانے ریکارڈ (…2ukgfa) میں گئی، فون پر نیا کارڈ (…fsxj74) — مدت اور M1 نئے پر */
+    if (this.finCfg("own450", "")) return;
+    const pick = (end) => (this.sql.exec("SELECT rec FROM prof WHERE rec LIKE 'p3206793793_%' AND rec LIKE ?", "%" + end).toArray()[0] || {}).rec;
+    const from = pick("2ukgfa"), to = pick("fsxj74");
+    const done = from && to ? this.recMove450(from, to) : false;
+    if (done) { const sid = this.sidGet(to); if (sid) { this.subSet(to, sid + "M1"); this.sql.exec("UPDATE sale SET subid = ? WHERE rec = ? AND COALESCE(void, 0) = 0", sid + "M1", to); } }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('own450', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), from: from || "", to: to || "", done }));
+  }
   subFix450() {   /* ایک بار: ہر موبائل کے زندہ کاروبار (پرانے پہلے) کو M1، M2… دوبارہ؛ ان کی فروخت کا subid بھی */
     if (this._sf450) return; this._sf450 = 1;
     if (this.finCfg("subfix450", "")) return;
@@ -1026,6 +1051,7 @@ export class McsStats {
   async fetch(request) {
     const u = new URL(request.url);
     const op = u.pathname;
+    if (!this._f450) { this._f450 = 1; try { this.own450(); } catch (e) {} try { this.subFix450(); } catch (e) {} }
     if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
@@ -1727,6 +1753,8 @@ export class McsStats {
     if (op === "/pbuy") {   /* MCS0411WE147 / MCS1511SU427: گوگل سے تصدیق شدہ خریداری → اسی ممبرشپ کی مدت؛ ٹوکن ایک بار جس ممبرشپ سے جڑا، ہمیشہ اسی کا؛ نئی خریداری پر GPA لازمی */
       const b = await request.json();
       const row = this.sql.exec("SELECT rec, exp, free FROM mbuy WHERE tok = ?", b.tok).toArray()[0];
+      /* MCS1511SU450: ٹوکن اسی موبائل کے پرانے کاروبار سے جڑا ہو اور اب نئے کارڈ سے خرید / بحالی ہو — مدت، خریداری، نمبر نئے پر (پیسہ ضائع نہ ہو) */
+      if (row && b.rec && b.rec !== row.rec && this.sidMob(b.rec) && this.sidMob(b.rec) === this.sidMob(row.rec) && this.recMove450(row.rec, b.rec)) row.rec = b.rec;
       const rec = row ? row.rec : b.rec;
       if (!rec) return Response.json({ ok: false, error: "no_rec" });
       const o = this.sql.exec("SELECT until, paid FROM prof WHERE rec = ?", rec).toArray()[0];
