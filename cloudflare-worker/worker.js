@@ -1227,10 +1227,11 @@ export class McsStats {
       if (b.op === "get") {
         if (over("smg:" + b.ip, 25, 900e3)) return Response.json({ ok: false, reason: "wait" });
         if (!live(row)) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: row ? "expired" : "none" }); }
+        if (row.kind !== "JS" && !b.dev) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: "dev_only" }); }   /* SM1611MO276: NB / SB صرف ڈویلپر */
         return Response.json({ ok: true, code: row.code, kind: row.kind, data: row.data, st: row.st, ts: row.ts, upd: row.upd, res: row.kind === "JS" ? "" : row.res });
       }
       if (!live(row)) return Response.json({ ok: false, reason: row ? "expired" : "none" });
-      if (b.op === "me") { if (row.uid !== b.uid) return Response.json({ ok: false, reason: "none" }); return Response.json({ ok: true, kind: row.kind, st: row.st, res: row.res, upd: row.upd }); }
+      if (b.op === "me") { if (row.uid !== b.uid) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: "none" }); } return Response.json({ ok: true, kind: row.kind, st: row.st, res: row.res, upd: row.upd }); }
       if (b.op === "proof") {
         if (row.uid !== b.uid) return Response.json({ ok: false, reason: "none" });
         let d = {}; try { d = JSON.parse(row.data || "{}"); } catch (e) {}
@@ -1239,7 +1240,7 @@ export class McsStats {
       }
       if (b.op === "set") {   /* JS: new → ok (مالک نے جوڑا، res = دکان)، ok → joined (ملازم کا فون)؛ NB / SB: → done (ڈویلپر نے جاری کیا) */
         const okMove = (row.kind === "JS" && ((row.st === "new" && b.st === "ok") || (row.st === "ok" && b.st === "joined" && row.uid === b.uid) || (row.st === "new" && b.st === "no")))
-          || (row.kind !== "JS" && ["done", "no"].includes(b.st));
+          || (row.kind !== "JS" && b.dev && ["done", "no"].includes(b.st));
         if (!okMove) return Response.json({ ok: false, reason: "state", st: row.st });
         this.sql.exec("UPDATE smcode SET st = ?, res = CASE WHEN ? != '' AND ? != '{}' THEN ? ELSE res END, upd = ? WHERE code = ?", b.st, b.res, b.res, b.res, now, b.code);
         return Response.json({ ok: true });
@@ -2116,6 +2117,20 @@ async function verifyFirebaseAdmin(request) {
     return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64uToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
   } catch (e) { return false; }
 }
+/* SM1611MO276: سبزی منڈی کا ڈویلپر — sabzi-mandi-143e6 فائربیس کا ID ٹوکن (ڈویلپر پینل والی ای میل)، گوگل کی چابیوں سے جانچ */
+const SM_DEV_EMAILS = ["piarybhai@gmail.com"];
+async function verifySmDev(request) {
+  try {
+    const jwt = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, ""), parts = jwt.split(".");
+    if (parts.length !== 3) return false;
+    const head = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[0]))), pl = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[1])));
+    if (pl.aud !== "sabzi-mandi-143e6" || pl.iss !== "https://securetoken.google.com/sabzi-mandi-143e6" || pl.exp < Date.now() / 1000 || !SM_DEV_EMAILS.includes(String(pl.email || "").toLowerCase())) return false;
+    if (!fbJwks || Date.now() - fbJwksAt > 3600e3) { const r = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"); fbJwks = (await r.json()).keys || []; fbJwksAt = Date.now(); }
+    const jwk = fbJwks.find((k) => k.kid === head.kid); if (!jwk) return false;
+    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    return await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64uToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
+  } catch (e) { return false; }
+}
 /* =====================================================================
    🔑 اکاؤنٹ سبسکرپشن — جی میل (گوگل سائن اِن، ٹوکن یہاں جانچا جاتا ہے) یا موبائل نمبر؛ فون کی حد؛ صرف ڈویلپر دے سکتا ہے
    /entclaim {app, kind:'g'|'p', idToken | phone, dev}  — نیا فون جوڑتا ہے (حد تک)
@@ -2333,10 +2348,11 @@ async function handleAgent(request, env, path) {
     if (op !== "put" && code.length !== 6) return reply({ ok: false, reason: "bad_code" });
     if (op === "put" && !["NB", "SB", "JS"].includes(kind)) return reply({ ok: false, reason: "bad_kind" });
     const uid = String(b.uid || "").replace(/[^A-Za-z0-9_.:-]/g, "").slice(0, 80);
-    if ((op === "put" || op === "me" || op === "proof") && uid.length < 4) return reply({ ok: false, reason: "bad_uid" });
+    if ((op === "put" || op === "me" || op === "proof" || (op === "set" && b.st === "joined")) && uid.length < 16) return reply({ ok: false, reason: "bad_uid" });   /* SM1611MO276: فون کی لمبی خفیہ چابی، چھوٹا device UID نہیں */
+    const dev = (op === "get" || op === "set") && (request.headers.get("Authorization") || "").length > 20 ? await verifySmDev(request) : false;
     const js = (v, n) => { const s = typeof v === "string" ? v : JSON.stringify(v || {}); return s.length > n ? null : s; };
     const data = js(b.data, 6000), res = js(b.res, 3000); if (data === null || res === null) return reply({ ok: false, reason: "too_big" });
-    return fwd("/sm_code", { op, code, kind, data, res, uid, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
+    return fwd("/sm_code", { op, code, kind, data, res, uid, dev, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
   }
   if (path === "/mcsdir") {   /* MCS1611MO466: غیر رجسٹرڈ کارڈوں کی نقل — پڑھنا سب، لکھنا صرف ایڈمن 1 */
     if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
