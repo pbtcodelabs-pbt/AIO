@@ -1205,6 +1205,47 @@ export class McsStats {
       const quota = { day: qday, r: q.fs_r || 0, w: q.fs_w || 0, d: q.fs_d || 0, req: (days[uday] || {}).req || 0, resetAt: fsQuotaReset(Date.now()), live: pr.st, liveAt: pr.at, since: pr.since || 0 };
       return Response.json({ ok: true, today: uday, days, dbBytes: db || 0, quota });
     }
+    if (op === "/sm_code") {   /* SM1611MO275: سبزی منڈی کے چھوٹے کوڈ (NB / SB / JS) — تفصیل یہاں، کوڈ صرف 6 ہندسے */
+      const b = await request.json(), now = Date.now();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS smcode (code TEXT PRIMARY KEY, kind TEXT, data TEXT, res TEXT, st TEXT, uid TEXT, ts INTEGER, upd INTEGER)");
+      const TTL = { JS: 2 * 864e5, NB: 30 * 864e5, SB: 30 * 864e5 };
+      const over = (k, max, win) => { const r = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", k).toArray()[0]; return !!(r && now - r.ts < win && r.n >= max); };
+      const bump = (k, win) => this.sql.exec("INSERT INTO mcsfail (k, n, ts) VALUES (?, 1, ?) ON CONFLICT (k) DO UPDATE SET n = CASE WHEN ? - mcsfail.ts < ? THEN mcsfail.n + 1 ELSE 1 END, ts = CASE WHEN ? - mcsfail.ts < ? THEN mcsfail.ts ELSE excluded.ts END", k, now, now, win, now, win);
+      const live = (r) => r && now - r.ts < (TTL[r.kind] || 864e5);
+      const row = b.code ? this.sql.exec("SELECT * FROM smcode WHERE code = ?", b.code).toArray()[0] : null;
+      if (b.op === "put") {
+        if (over("smp:" + b.ip, 40, 3600e3)) return Response.json({ ok: false, reason: "wait" });
+        bump("smp:" + b.ip, 3600e3);
+        if (Math.random() < 0.05) this.sql.exec("DELETE FROM smcode WHERE ts < ?", now - 40 * 864e5);
+        const old = this.sql.exec("SELECT * FROM smcode WHERE uid = ? AND kind = ? AND st = 'new' ORDER BY ts DESC LIMIT 1", b.uid, b.kind).toArray()[0];
+        if (live(old)) { this.sql.exec("UPDATE smcode SET data = ?, upd = ? WHERE code = ?", b.data, now, old.code); return Response.json({ ok: true, code: old.code, same: 1 }); }
+        let c = ""; for (let i = 0; i < 40; i++) { const t = String(100000 + Math.floor(Math.random() * 900000)); const ex = this.sql.exec("SELECT * FROM smcode WHERE code = ?", t).toArray()[0]; if (!ex || !live(ex)) { if (ex) this.sql.exec("DELETE FROM smcode WHERE code = ?", t); c = t; break; } }
+        if (!c) return Response.json({ ok: false, reason: "busy" });
+        this.sql.exec("INSERT INTO smcode (code, kind, data, res, st, uid, ts, upd) VALUES (?, ?, ?, '', 'new', ?, ?, ?)", c, b.kind, b.data, b.uid, now, now);
+        return Response.json({ ok: true, code: c });
+      }
+      if (b.op === "get") {
+        if (over("smg:" + b.ip, 25, 900e3)) return Response.json({ ok: false, reason: "wait" });
+        if (!live(row)) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: row ? "expired" : "none" }); }
+        return Response.json({ ok: true, code: row.code, kind: row.kind, data: row.data, st: row.st, ts: row.ts, upd: row.upd, res: row.kind === "JS" ? "" : row.res });
+      }
+      if (!live(row)) return Response.json({ ok: false, reason: row ? "expired" : "none" });
+      if (b.op === "me") { if (row.uid !== b.uid) return Response.json({ ok: false, reason: "none" }); return Response.json({ ok: true, kind: row.kind, st: row.st, res: row.res, upd: row.upd }); }
+      if (b.op === "proof") {
+        if (row.uid !== b.uid) return Response.json({ ok: false, reason: "none" });
+        let d = {}; try { d = JSON.parse(row.data || "{}"); } catch (e) {}
+        if (b.tid) d.tid = b.tid; if (b.shot) d.shot = b.shot; d.proofAt = now;
+        this.sql.exec("UPDATE smcode SET data = ?, upd = ? WHERE code = ?", JSON.stringify(d), now, b.code); return Response.json({ ok: true });
+      }
+      if (b.op === "set") {   /* JS: new → ok (مالک نے جوڑا، res = دکان)، ok → joined (ملازم کا فون)؛ NB / SB: → done (ڈویلپر نے جاری کیا) */
+        const okMove = (row.kind === "JS" && ((row.st === "new" && b.st === "ok") || (row.st === "ok" && b.st === "joined" && row.uid === b.uid) || (row.st === "new" && b.st === "no")))
+          || (row.kind !== "JS" && ["done", "no"].includes(b.st));
+        if (!okMove) return Response.json({ ok: false, reason: "state", st: row.st });
+        this.sql.exec("UPDATE smcode SET st = ?, res = CASE WHEN ? != '' AND ? != '{}' THEN ? ELSE res END, upd = ? WHERE code = ?", b.st, b.res, b.res, b.res, now, b.code);
+        return Response.json({ ok: true });
+      }
+      return Response.json({ ok: false, reason: "bad_op" });
+    }
     if (op === "/mcs_dir") {   /* MCS1611MO466 (مالک کا حکم — فائربیس کی لمٹ): MCS نمبر کے بغیر کارڈوں کی ایک نقل (gzip base64)؛ فون فائربیس کی بجائے یہیں سے */
       const b = await request.json();
       this.sql.exec("CREATE TABLE IF NOT EXISTS mcsdir (i INTEGER PRIMARY KEY, v TEXT)");
@@ -2286,6 +2327,17 @@ async function handleAgent(request, env, path) {
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
+  if (path === "/smcode") {   /* SM1611MO275 (مالک کا حکم): سبزی منڈی کے چھوٹے 6 ہندسوں کے کوڈ — NB نیا کاروبار / SB تجدید (دکاندار ← ڈویلپر)، JS ملازم ← مالک */
+    const op = S(b.op, 8), code = String(b.code || "").replace(/\D/g, "").slice(-6), kind = String(b.kind || "").toUpperCase();
+    if (!["put", "get", "set", "me", "proof"].includes(op)) return reply({ ok: false, reason: "bad_op" });
+    if (op !== "put" && code.length !== 6) return reply({ ok: false, reason: "bad_code" });
+    if (op === "put" && !["NB", "SB", "JS"].includes(kind)) return reply({ ok: false, reason: "bad_kind" });
+    const uid = String(b.uid || "").replace(/[^A-Za-z0-9_.:-]/g, "").slice(0, 80);
+    if ((op === "put" || op === "me" || op === "proof") && uid.length < 4) return reply({ ok: false, reason: "bad_uid" });
+    const js = (v, n) => { const s = typeof v === "string" ? v : JSON.stringify(v || {}); return s.length > n ? null : s; };
+    const data = js(b.data, 6000), res = js(b.res, 3000); if (data === null || res === null) return reply({ ok: false, reason: "too_big" });
+    return fwd("/sm_code", { op, code, kind, data, res, uid, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
+  }
   if (path === "/mcsdir") {   /* MCS1611MO466: غیر رجسٹرڈ کارڈوں کی نقل — پڑھنا سب، لکھنا صرف ایڈمن 1 */
     if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
     return fwd("/mcs_dir", { op: b.op === "get" ? "get" : "ver" });
@@ -2564,7 +2616,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
