@@ -1205,6 +1205,23 @@ export class McsStats {
       const quota = { day: qday, r: q.fs_r || 0, w: q.fs_w || 0, d: q.fs_d || 0, req: (days[uday] || {}).req || 0, resetAt: fsQuotaReset(Date.now()), live: pr.st, liveAt: pr.at, since: pr.since || 0 };
       return Response.json({ ok: true, today: uday, days, dbBytes: db || 0, quota });
     }
+    if (op === "/mcs_dir") {   /* MCS1611MO466 (مالک کا حکم — فائربیس کی لمٹ): MCS نمبر کے بغیر کارڈوں کی ایک نقل (gzip base64)؛ فون فائربیس کی بجائے یہیں سے */
+      const b = await request.json();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcsdir (i INTEGER PRIMARY KEY, v TEXT)");
+      const meta = () => { try { return JSON.parse((this.sql.exec("SELECT v FROM agcfg WHERE k = 'dirmeta'").toArray()[0] || {}).v || "{}"); } catch (e) { return {}; } };
+      if (b.op === "put") {
+        const s = String(b.data || ""); if (!s || s.length > 8e6) return Response.json({ ok: false, reason: "size" });
+        const P = 900000, parts = Math.ceil(s.length / P);
+        this.sql.exec("DELETE FROM mcsdir");
+        for (let i = 0; i < parts; i++) this.sql.exec("INSERT INTO mcsdir (i, v) VALUES (?, ?)", i, s.slice(i * P, (i + 1) * P));
+        const m = { v: Date.now(), n: parseInt(b.n, 10) || 0, parts, len: s.length };
+        this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('dirmeta', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify(m));
+        return Response.json({ ok: true, ...m });
+      }
+      const m = meta();
+      if (b.op === "get") { if (!m.v) return Response.json({ ok: false, reason: "none" }); const data = this.sql.exec("SELECT v FROM mcsdir ORDER BY i").toArray().map((r) => r.v).join(""); return Response.json({ ok: true, v: m.v, n: m.n, data }); }
+      return Response.json({ ok: true, v: m.v || 0, n: m.n || 0 });
+    }
     if (op === "/ent_claim") {   /* گاہک: اپنی چابی (جی میل / موبائل) سے اس فون پر کھولنا — فون کی حد تک */
       const b = await request.json();
       const row = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + b.key).toArray()[0];
@@ -2269,6 +2286,10 @@ async function handleAgent(request, env, path) {
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
+  if (path === "/mcsdir") {   /* MCS1611MO466: غیر رجسٹرڈ کارڈوں کی نقل — پڑھنا سب، لکھنا صرف ایڈمن 1 */
+    if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
+    return fwd("/mcs_dir", { op: b.op === "get" ? "get" : "ver" });
+  }
   if (path === "/mcsuse") {   /* MCS0911MO254: 📊 استعمال — ایپ گنتی بھیجے (add)؛ پڑھنا صرف ایڈمن */
     if (b.op === "add") return fwd("/mcs_use", { op: "add", r: b.r, w: b.w, d: b.d, dev });
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
@@ -2584,7 +2605,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
