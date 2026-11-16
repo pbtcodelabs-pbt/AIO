@@ -1538,6 +1538,14 @@ export class McsStats {
         this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
         return Response.json({ ok: true, tok: await sess(u.id, "g"), user: out(u) });
       }
+      if (b.act === "glink") {   /* MCS1611MO476 (مالک کا حکم): Google سے آیا Gmail کسی اکاؤنٹ سے جڑا نہ ہو تو موبائل + PIN والے لاگ اِن کے فوراً بعد اسی اکاؤنٹ سے ہمیشہ کے لیے */
+        const u = get(b.id); if (!u || u.del) return Response.json({ ok: false, reason: "login" });
+        const other = key("g:" + b.gmail) || key("e:" + b.gmail);
+        if (other && other !== u.id) return Response.json({ ok: false, reason: "gmail_taken" });
+        if (u.gmail !== b.gmail) { u.gmail = b.gmail; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(Object.assign({}, u, { _pwh: undefined })), u.id); }
+        this.sql.exec("INSERT OR IGNORE INTO mcsukey (k, id) VALUES (?, ?)", "g:" + b.gmail, u.id);
+        return Response.json({ ok: true });
+      }
       if (b.act === "acctadm") {   /* MCS1511SU444 (مالک کا حکم — «033 والا اکاؤنٹ ڈیلیٹ نہیں ہوتا، 0320 «پہلے سے بنا ہے» کہتا ہے، سرچ میں کہیں نہیں»): صرف ایڈمن — نمبر / MCS ID / ای میل سے سائن اپ اکاؤنٹ ڈھونڈو، یا پورا صاف کرو (اکاؤنٹ + چابیاں + سیشن + ٹوٹی چابی + MCS ID)؛ کاروبار / ممبرشپ کو ہاتھ نہیں لگتا */
         if (!b.admin) return Response.json({ ok: false, reason: "admin_only" });
         if (b.del) {
@@ -2201,7 +2209,12 @@ async function handleMcsAuth(request, env) {
     if (!ids.length || !pw) return reply({ ok: false, reason: "login" });
     const fk = ip + "|" + ids[0];
     r = await call({ act: "find", ids, fk });
+    const uid0 = r.ok ? r.id : "";
     if (r.ok) r = (await uaCheck(pw, r.pwh)) ? await call({ act: "pwok", id: r.id, fk }) : await call({ act: "pwbad", fk });
+    if (r.ok && uid0 && b.gtoken) {   /* MCS1611MO476: «Continue with Google» والا Gmail اسی اکاؤنٹ سے جوڑیں */
+      const gm = await verifyGoogleIdToken(b.gtoken);
+      if (gm) { const lr = await call({ act: "glink", id: uid0, gmail: gm }); r.glink = lr && lr.ok ? gm : ((lr && lr.reason) || "no"); }
+    }
   } else if (op === "actmake") {   /* MCS1211TH334: صرف ڈویلپر (My City Shines ایڈمن) */
     if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
     const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
