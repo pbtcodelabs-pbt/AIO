@@ -3294,7 +3294,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   };
 })();
 </script>
-<style id="lgPlay211">#lgPlayBtn{display:flex;flex-direction:column;align-items:center;width:100%;margin:8px 0 2px;padding:9px 12px;border:none;border-radius:14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 3px 0 #14532d;line-height:1.25}#lgPlayBtn b{font-size:15px;font-weight:900}#lgPlayBtn small{font-size:11.5px;opacity:.92;font-weight:700}#lgPlayBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #14532d}</style>
+<style id="lgPlay211">#lgPlayBtn{display:flex;flex-direction:row;justify-content:center;gap:10px;align-items:center;width:100%;margin:8px 0 2px;padding:9px 12px;border:none;border-radius:14px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 3px 0 #14532d;line-height:1.25}#lgPlayBtn b{font-size:15px;font-weight:900}#lgPlayBtn small{font-size:11.5px;opacity:.92;font-weight:700}#lgPlayBtn .gpI{display:inline-flex;background:#fff;border-radius:10px;padding:5px}#lgPlayBtn .gpT{display:flex;flex-direction:column;align-items:flex-start;text-align:left}#lgPlayBtn .gpT small{font-size:10px;letter-spacing:.5px}#lgPlayBtn .gpT b{font-size:19px;line-height:1.1}#lgPlayBtn .gpT em{font-style:normal;font-size:11.5px;font-weight:800;color:#fde68a}#lgPlayBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #14532d}</style>
 </head>
 <body>
 <!-- ---------- 📊 پتلی Progress Bar — بیک اپ/ری سٹور کے دوران ہمیشہ اوپر نظر آئے گی ---------- -->
@@ -3369,7 +3369,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1611MO211</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1611MO212</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3591,7 +3591,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1611MO211</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1611MO212</span>
     </div>
   </div>
 
@@ -35122,9 +35122,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1611MO211'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1611MO212'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Subscription only on Google Play — plans shown on the login page; AIO POS videos on home';
+  const UPDATE_NOTE = 'Google Play logo on the subscription button';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -35814,7 +35814,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
       g.style.display = h ? '' : 'none';
       /* AIO1611MO211 (مالک کا حکم): سبسکرپشن صرف گوگل پلے — لاگ اِن پر نمایاں پیکج بٹن (ملازم کے جڑے فون پر نہیں) */
       { let pb = document.getElementById('lgPlayBtn');
-        if(!pb){ pb = document.createElement('button'); pb.type = 'button'; pb.id = 'lgPlayBtn'; pb.innerHTML = '<b>⭐ Subscription Plans</b><small>Buy securely on Google Play</small>'; pb.onclick = () => { try{ openPackagePlansModal(); }catch(e){} }; }
+        if(!pb){ pb = document.createElement('button'); pb.type = 'button'; pb.id = 'lgPlayBtn'; pb.innerHTML = '<span class="gpI"><svg viewBox="0 0 48 48" width="30" height="30"><path fill="#00d7fe" d="M7.6 4.3C7 4.9 6.7 5.9 6.7 7.2v33.6c0 1.3.3 2.3.9 2.9l.1.1L26.6 25v-.4L7.7 4.2z"/><path fill="#ffce00" d="M32.9 31.3l-6.3-6.3v-.4l6.3-6.3.1.1 7.5 4.3c2.1 1.2 2.1 3.2 0 4.4l-7.5 4.3z"/><path fill="#ff3a44" d="M33 31.2L26.6 24.8 7.6 43.8c.7.7 1.9.8 3.2.1L33 31.2"/><path fill="#00f076" d="M33 18.4L10.8 5.7c-1.3-.8-2.5-.7-3.2.1l19 19L33 18.4z"/></svg></span><span class="gpT"><small>GET IT ON</small><b>Google Play</b><em>Subscription Plans</em></span>'; pb.onclick = () => { try{ openPackagePlansModal(); }catch(e){} }; }
         if(g.nextElementSibling !== pb) g.insertAdjacentElement('afterend', pb);
         pb.style.display = (joined || document.documentElement.classList.contains('isLinked')) ? 'none' : ''; }
       { const vb = document.getElementById('loginVersionBadge'); if(vb && vb.parentNode === box && box.lastElementChild !== vb) box.appendChild(vb); }   /* AIO0911MO193: ورژن نیچے «App version:» — ID سے الجھن نہیں */
