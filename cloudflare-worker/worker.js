@@ -700,6 +700,32 @@ export class McsStats {
     this.finLog("agslot430", { moved });
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agslot430', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), moved }));
   }
+  agSlot486() {   /* MCS1611MO486 (مالک کا حکم، ایک بار): پہلا اصل ایجنٹ حبیب شہباز = AG003 (AG001 / AG002 ایڈمن کے) — AG003 خالی ہو تو اس کا AG004 → AG003، ریفرل / حساب / چیٹ ساتھ؛ پرانا کوڈ oldCodes میں */
+    if (this._ag486) return; this._ag486 = 1;
+    if (this.finCfg("agslot486", "")) return;
+    const rows = this.sql.exec("SELECT id, data FROM agent").toArray().map((r) => { try { return JSON.parse(r.data); } catch (e) { return null; } }).filter(Boolean);
+    const h = rows.find((d) => entPhone(d.phone || "") === "923015079681" && d.status === "approved");
+    let res = "none";
+    if (h && h.code !== "AG003") {
+      const taken = rows.find((d) => d !== h && (d.code === "AG003" || (d.oldCodes || []).includes("AG003")) && !ADMIN_AG[entPhone(d.phone || "")]);
+      if (taken && !taken.off) res = "taken:" + taken.id;
+      else {
+        const old = h.code;
+        if (taken) {   /* غیر فعال ایجنٹ AG003 پر ہو تو کوڈ آپس میں بدل (اس کا حساب اس کے ساتھ) */
+          taken.oldCodes = (taken.oldCodes || []).filter((c) => c !== "AG003");
+          if (taken.code === "AG003") { this.agMoveRefs("AG003", "AGTMP486"); taken.oldCodes.push("AG003"); taken.code = old; }
+          this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(taken), taken.id);
+        }
+        h.oldCodes = (h.oldCodes || []).concat(old); h.code = "AG003";
+        this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(h), h.id); this.agMoveRefs(old, "AG003");
+        if (taken && taken.code === old) this.agMoveRefs("AGTMP486", old);
+        try { this.sql.exec("UPDATE agcnic SET code = 'AG003' WHERE code = ?", old); } catch (e) {}
+        res = old + ">AG003";
+      }
+    }
+    this.finLog("agslot486", { res });
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agslot486', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), res }));
+  }
   refMigrate() {   /* MCS1111WE329: ایک بار — محفوظ PBT-D / PBT-C → DEV / CODEV (فروخت، وصولی، ممبرشپ) */
     if (this.finCfg("refmig1", "")) return;
     for (const t of ["sale", "finx"]) for (const x of this.sql.exec("SELECT id, who FROM " + t + " WHERE who LIKE '%PBT-%'").toArray()) { try { const w = JSON.parse(x.who); w.code = refNorm(w.code); if (w.was) w.was = refNorm(w.was); this.sql.exec("UPDATE " + t + " SET who = ? WHERE id = ?", JSON.stringify(w), x.id); } catch (e) {} }
@@ -1153,7 +1179,7 @@ export class McsStats {
   saleAdd(rec, src, units) {
     const t = new Date(Date.now() + 5 * 3600e3);
     const w = this.saleWho(rec);
-    try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {}
+    try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agSlot486(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {}
     const subid = this.subNext(rec);
     this.sql.exec("INSERT INTO sale (rec, ts, src, units, mon, who, subid) VALUES (?, ?, ?, ?, ?, ?, ?)", rec, Date.now(), src, units, t.getUTCFullYear() + "_" + String(t.getUTCMonth() + 1).padStart(2, "0"), JSON.stringify(w), subid || null);
     if (w.by === "agent") { const amt = (units || 0) * (parseInt(this.finCfg("memprice", "1000"), 10) || 1000), sh = this.finSplit("mem", src === "play" ? "play" : "direct", amt, "agent", Date.now());
@@ -1175,7 +1201,7 @@ export class McsStats {
     const u = new URL(request.url);
     const op = u.pathname;
     if (!this._f450) { this._f450 = 1; try { this.own450(); } catch (e) {} try { this.subFix450(); } catch (e) {} try { this.own456(); } catch (e) {} }
-    if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
+    if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agSlot486(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
@@ -1754,7 +1780,7 @@ export class McsStats {
       if (b.op === "del") this.sql.exec("DELETE FROM codev WHERE phone = ?", b.phone);
       return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen, perms, COALESCE(off, 0) AS off, offts FROM codev ORDER BY ts DESC").toArray().map((r) => Object.assign(r, { perms: this.cdPerms(r) })) });
     }
-    if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} try { this.subFix450(); } catch (e) {} }
+    if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agSlot486(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} try { this.subFix450(); } catch (e) {} }
     if (op === "/ag_find") {   /* MCS0511TH142: کوڈ / پرانا کوڈ / موبائل → ایجنٹ کا اصل کوڈ اور نام (لکھنا کچھ نہیں) */
       const b = await request.json(); const ag = this.agResolve(b.code, b.phone);
       return Response.json(ag ? { ok: true, code: ag.code, name: ag.name } : { ok: false, reason: "bad_code" });
