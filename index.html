@@ -3369,7 +3369,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1611MO212</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1611MO213</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3591,7 +3591,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1611MO212</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1611MO213</span>
     </div>
   </div>
 
@@ -9329,7 +9329,8 @@ async function devPassMatches(pass){
     const key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
     const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt: enc.encode(DEV_UNLOCK_SALT), iterations:200000}, key, 256);
     const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,'0')).join('');
-    return hex === (loadFromStorage('devConsoleHash', '') || DEV_UNLOCK_HASH); // ---------- اس فون پر بدلا ہوا پاسورڈ ہو تو وہی ----------
+    if(hex === (loadFromStorage('devConsoleHash', '') || DEV_UNLOCK_HASH)) return true; // ---------- اس فون پر بدلا ہوا پاسورڈ ہو تو وہی ----------
+    return typeof pbtHubPwOk === 'function' && await pbtHubPwOk(pass); // PBT-DEVHUB: ہیلپ ڈیسک والا مشترکہ پاس ورڈ
   }catch(e){ return false; }
 }
 async function devPassHash(pass){
@@ -35122,9 +35123,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1611MO212'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1611MO213'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Google Play logo on the subscription button';
+  const UPDATE_NOTE = 'One developer password for all apps — open this app\'s developer panel straight from the Help Desk';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -36196,6 +36197,18 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     };
   }
 })();
+</script>
+<script>
+/* 🔐 PBT-DEVHUB (مالک کا حکم، 16 نومبر 2026): ہیلپ ڈیسک «🔐 سب ڈویلپر پینل» سے سیدھا یہاں کا ڈویلپر پینل (`?devpanel=1`)
+   + ایک مشترکہ پاس ورڈ: ہیلپ ڈیسک اسی ویب سائٹ پر `pbt_devpass_v1` = SHA-256('PBTDEV|' + پاس ورڈ) رکھتا ہے — یہ پینل اسے بھی مانتا ہے (`pbtHubPwOk`)۔ */
+window.pbtHubPwOk = async function(p){
+  try{ const h = (function(){ try{ const f = document.createElement('iframe'); f.style.display = 'none'; document.documentElement.appendChild(f); const v = f.contentWindow.localStorage.getItem('pbt_devpass_v1'); f.remove(); return v; }catch(e){ return null; } })() || localStorage.getItem('pbt_devpass_v1');   /* ایپ کا اپنا نام والا خانہ نہیں — سیدھا ویب سائٹ کا */ if(!h || !p) return false;
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('PBTDEV|' + String(p).trim()));
+    return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('') === h; }catch(e){ return false; }
+};
+(function(){ try{ if(!/[?&]devpanel=1\b/.test(location.search)) return;
+  window.addEventListener('load', () => setTimeout(() => { try{ document.querySelectorAll('.modalOverlay.show').forEach(m=>m.classList.remove('show')); openDevConsole(); }catch(e){} }, 3000));
+}catch(e){} })();
 </script>
 </body>
 </html>
