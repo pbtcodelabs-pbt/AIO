@@ -1208,11 +1208,13 @@ export class McsStats {
     if (op === "/sm_code") {   /* SM1611MO275: سبزی منڈی کے چھوٹے کوڈ (NB / SB / JS) — تفصیل یہاں، کوڈ صرف 6 ہندسے */
       const b = await request.json(), now = Date.now();
       this.sql.exec("CREATE TABLE IF NOT EXISTS smcode (code TEXT PRIMARY KEY, kind TEXT, data TEXT, res TEXT, st TEXT, uid TEXT, ts INTEGER, upd INTEGER)");
-      const TTL = { JS: 2 * 864e5, NB: 30 * 864e5, SB: 30 * 864e5 };
+      const TTL = { JS: 2 * 864e5, NB: 30 * 864e5, SB: 30 * 864e5, DNB: 30 * 864e5, DSB: 30 * 864e5 };
       const over = (k, max, win) => { const r = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", k).toArray()[0]; return !!(r && now - r.ts < win && r.n >= max); };
       const bump = (k, win) => this.sql.exec("INSERT INTO mcsfail (k, n, ts) VALUES (?, 1, ?) ON CONFLICT (k) DO UPDATE SET n = CASE WHEN ? - mcsfail.ts < ? THEN mcsfail.n + 1 ELSE 1 END, ts = CASE WHEN ? - mcsfail.ts < ? THEN mcsfail.ts ELSE excluded.ts END", k, now, now, win, now, win);
       const live = (r) => r && now - r.ts < (TTL[r.kind] || 864e5);
-      const row = b.code ? this.sql.exec("SELECT * FROM smcode WHERE code = ?", b.code).toArray()[0] : null;
+      let row = b.code ? this.sql.exec("SELECT * FROM smcode WHERE code = ?", b.code).toArray()[0] : null;
+      if (row && ((b.app === "DR") !== /^D/.test(row.kind))) row = null;   /* AIODR1611MO173: ایپ کا کوڈ صرف اسی ایپ کو */
+      const kOut = (k) => String(k || "").replace(/^D(?=NB|SB)/, "");
       if (b.op === "put") {
         if (over("smp:" + b.ip, 40, 3600e3)) return Response.json({ ok: false, reason: "wait" });
         bump("smp:" + b.ip, 3600e3);
@@ -1228,10 +1230,10 @@ export class McsStats {
         if (over("smg:" + b.ip, 25, 900e3)) return Response.json({ ok: false, reason: "wait" });
         if (!live(row)) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: row ? "expired" : "none" }); }
         if (row.kind !== "JS" && !b.dev) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: "dev_only" }); }   /* SM1611MO276: NB / SB صرف ڈویلپر */
-        return Response.json({ ok: true, code: row.code, kind: row.kind, data: row.data, st: row.st, ts: row.ts, upd: row.upd, res: row.kind === "JS" ? "" : row.res });
+        return Response.json({ ok: true, code: row.code, kind: kOut(row.kind), data: row.data, st: row.st, ts: row.ts, upd: row.upd, res: row.kind === "JS" ? "" : row.res });
       }
       if (!live(row)) return Response.json({ ok: false, reason: row ? "expired" : "none" });
-      if (b.op === "me") { if (row.uid !== b.uid) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: "none" }); } return Response.json({ ok: true, kind: row.kind, st: row.st, res: row.res, upd: row.upd }); }
+      if (b.op === "me") { if (row.uid !== b.uid) { bump("smg:" + b.ip, 900e3); return Response.json({ ok: false, reason: "none" }); } return Response.json({ ok: true, kind: kOut(row.kind), st: row.st, res: row.res, upd: row.upd }); }
       if (b.op === "proof") {
         if (row.uid !== b.uid) return Response.json({ ok: false, reason: "none" });
         let d = {}; try { d = JSON.parse(row.data || "{}"); } catch (e) {}
@@ -2127,12 +2129,15 @@ async function verifyFirebaseAdmin(request) {
 }
 /* SM1611MO276: سبزی منڈی کا ڈویلپر — sabzi-mandi-143e6 فائربیس کا ID ٹوکن (ڈویلپر پینل والی ای میل)، گوگل کی چابیوں سے جانچ */
 const SM_DEV_EMAILS = ["piarybhai@gmail.com"];
-async function verifySmDev(request) {
+/* AIODR1611MO173: AIO Direct کا ڈویلپر — aio-pos-backup فائربیس (ڈویلپر پینل والا اکاؤنٹ) */
+const DR_DEV_EMAILS = ["developer@aioposdirect.app"];
+async function verifySmDev(request, proj, emails) {
+  proj = proj || "sabzi-mandi-143e6"; emails = emails || SM_DEV_EMAILS;
   try {
     const jwt = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, ""), parts = jwt.split(".");
     if (parts.length !== 3) return false;
     const head = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[0]))), pl = JSON.parse(new TextDecoder().decode(b64uToBytes(parts[1])));
-    if (pl.aud !== "sabzi-mandi-143e6" || pl.iss !== "https://securetoken.google.com/sabzi-mandi-143e6" || pl.exp < Date.now() / 1000 || !SM_DEV_EMAILS.includes(String(pl.email || "").toLowerCase())) return false;
+    if (pl.aud !== proj || pl.iss !== "https://securetoken.google.com/" + proj || pl.exp < Date.now() / 1000 || !emails.includes(String(pl.email || "").toLowerCase())) return false;
     if (!fbJwks || Date.now() - fbJwksAt > 3600e3) { const r = await fetch("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"); fbJwks = (await r.json()).keys || []; fbJwksAt = Date.now(); }
     const jwk = fbJwks.find((k) => k.kid === head.kid); if (!jwk) return false;
     const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
@@ -2356,20 +2361,22 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
   if (path === "/smcode") {   /* SM1611MO275 (مالک کا حکم): سبزی منڈی کے چھوٹے 6 ہندسوں کے کوڈ — NB نیا کاروبار / SB تجدید (دکاندار ← ڈویلپر)، JS ملازم ← مالک */
-    const op = S(b.op, 8), code = String(b.code || "").replace(/\D/g, "").slice(-6), kind = String(b.kind || "").toUpperCase();
+    const op = S(b.op, 8), code = String(b.code || "").replace(/\D/g, "").slice(-6), app = b.app === "DR" ? "DR" : "SM";
+    let kind = String(b.kind || "").toUpperCase();
     if (!["put", "get", "set", "me", "proof"].includes(op)) return reply({ ok: false, reason: "bad_op" });
     if (op !== "put" && code.length !== 6) return reply({ ok: false, reason: "bad_code" });
-    if (op === "put" && !["NB", "SB", "JS"].includes(kind)) return reply({ ok: false, reason: "bad_kind" });
+    if (op === "put" && !(app === "DR" ? ["NB", "SB"] : ["NB", "SB", "JS"]).includes(kind)) return reply({ ok: false, reason: "bad_kind" });
+    if (app === "DR" && kind) kind = "D" + kind;   /* AIODR1611MO173: AIO Direct کے کوڈ الگ (DNB / DSB) — سبزی منڈی سے کبھی نہیں ملتے */
     const uid = String(b.uid || "").replace(/[^A-Za-z0-9_.:-]/g, "").slice(0, 80);
     if ((op === "put" || op === "me" || op === "proof" || (op === "set" && b.st === "joined")) && uid.length < 16) return reply({ ok: false, reason: "bad_uid" });   /* SM1611MO276: فون کی لمبی خفیہ چابی، چھوٹا device UID نہیں */
-    let dev = (op === "get" || op === "set") && (request.headers.get("Authorization") || "").length > 20 ? await verifySmDev(request) : false;
-    if (!dev && (op === "get" || op === "set") && b.devpw) {   /* SM1611MO280: سبزی منڈی کے ڈویلپر پینل والا پاس ورڈ (SHA-256 ایپ کے DEFAULT_DEV_PANEL_PASSWORD_HASH جیسا) */
+    let dev = (op === "get" || op === "set") && (request.headers.get("Authorization") || "").length > 20 ? (app === "DR" ? await verifySmDev(request, "aio-pos-backup", DR_DEV_EMAILS) : await verifySmDev(request)) : false;
+    if (!dev && app === "SM" && (op === "get" || op === "set") && b.devpw) {   /* SM1611MO280: سبزی منڈی کے ڈویلپر پینل والا پاس ورڈ (SHA-256 ایپ کے DEFAULT_DEV_PANEL_PASSWORD_HASH جیسا) */
       const hx = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(b.devpw).trim().slice(0, 100))))).map((x) => x.toString(16).padStart(2, "0")).join("");
       dev = hx === "8de8edb14148430ed24a4ffb0b9050acf152f1b85f3e39f7ca54278b110d625f";
     }
     const js = (v, n) => { const s = typeof v === "string" ? v : JSON.stringify(v || {}); return s.length > n ? null : s; };
     const data = js(b.data, 6000), res = js(b.res, 3000); if (data === null || res === null) return reply({ ok: false, reason: "too_big" });
-    return fwd("/sm_code", { op, code, kind, data, res, uid, dev, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
+    return fwd("/sm_code", { op, code, kind, app, data, res, uid, dev, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
   }
   if (path === "/mcsdir") {   /* MCS1611MO466: غیر رجسٹرڈ کارڈوں کی نقل — پڑھنا سب، لکھنا صرف ایڈمن 1 */
     if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
