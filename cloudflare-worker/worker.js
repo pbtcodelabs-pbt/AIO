@@ -2349,7 +2349,11 @@ async function handleAgent(request, env, path) {
     if (op === "put" && !["NB", "SB", "JS"].includes(kind)) return reply({ ok: false, reason: "bad_kind" });
     const uid = String(b.uid || "").replace(/[^A-Za-z0-9_.:-]/g, "").slice(0, 80);
     if ((op === "put" || op === "me" || op === "proof" || (op === "set" && b.st === "joined")) && uid.length < 16) return reply({ ok: false, reason: "bad_uid" });   /* SM1611MO276: فون کی لمبی خفیہ چابی، چھوٹا device UID نہیں */
-    const dev = (op === "get" || op === "set") && (request.headers.get("Authorization") || "").length > 20 ? await verifySmDev(request) : false;
+    let dev = (op === "get" || op === "set") && (request.headers.get("Authorization") || "").length > 20 ? await verifySmDev(request) : false;
+    if (!dev && (op === "get" || op === "set") && b.devpw) {   /* SM1611MO280: سبزی منڈی کے ڈویلپر پینل والا پاس ورڈ (SHA-256 ایپ کے DEFAULT_DEV_PANEL_PASSWORD_HASH جیسا) */
+      const hx = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(b.devpw).trim().slice(0, 100))))).map((x) => x.toString(16).padStart(2, "0")).join("");
+      dev = hx === "8de8edb14148430ed24a4ffb0b9050acf152f1b85f3e39f7ca54278b110d625f";
+    }
     const js = (v, n) => { const s = typeof v === "string" ? v : JSON.stringify(v || {}); return s.length > n ? null : s; };
     const data = js(b.data, 6000), res = js(b.res, 3000); if (data === null || res === null) return reply({ ok: false, reason: "too_big" });
     return fwd("/sm_code", { op, code, kind, data, res, uid, dev, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
