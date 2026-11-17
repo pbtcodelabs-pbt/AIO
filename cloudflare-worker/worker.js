@@ -1346,6 +1346,46 @@ export class McsStats {
       if (b.op === "get") { if (!m.v) return Response.json({ ok: false, reason: "none" }); const data = this.sql.exec("SELECT v FROM mcsdir ORDER BY i").toArray().map((r) => r.v).join(""); return Response.json({ ok: true, v: m.v, n: m.n, data }); }
       return Response.json({ ok: true, v: m.v || 0, n: m.n || 0 });
     }
+    if (op === "/bk_run" || op === "/bk_get") {   /* AGP1711TU036 (مالک کا حکم — روز کا بیک اپ): سرور کی سب جدولیں + فائربیس کے لائیو کارڈ + appConfig + کارڈوں کی نقل → ایک gzip، 30 دن */
+      let b = {}; try { b = await request.json(); } catch (e) { b = {}; }
+      this.sql.exec("CREATE TABLE IF NOT EXISTS bkday (day TEXT, i INTEGER, v TEXT, PRIMARY KEY (day, i))");
+      this.sql.exec("CREATE TABLE IF NOT EXISTS bkmeta (day TEXT PRIMARY KEY, at INTEGER, len INTEGER, info TEXT)");
+      if (op === "/bk_get") {
+        if (b.op === "get") { const day = String(b.day || ""); const m = this.sql.exec("SELECT day, at, len, info FROM bkmeta WHERE day = ?", day).toArray()[0]; if (!m) return Response.json({ ok: false, reason: "none" });
+          return Response.json({ ok: true, day, at: m.at, data: this.sql.exec("SELECT v FROM bkday WHERE day = ? ORDER BY i", day).toArray().map((r) => r.v).join("") }); }
+        return Response.json({ ok: true, list: this.sql.exec("SELECT day, at, len, info FROM bkmeta ORDER BY day DESC").toArray().map((r) => ({ day: r.day, at: r.at, len: r.len, info: JSON.parse(r.info || "{}") })) });
+      }
+      const day = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);
+      if (!b.force && this.sql.exec("SELECT day FROM bkmeta WHERE day = ?", day).toArray().length) return Response.json({ ok: true, skip: true, day });
+      const SKIP = new Set(["bkday", "bkmeta", "mcsdir", "agimg", "pimg", "chatav", "hits", "useday", "usedev", "mcsfail", "ppfail", "entfail", "mcssess", "ppsess", "vtok"]);
+      const db = {}, info = { tables: {} };
+      for (const t of this.sql.exec("SELECT name FROM sqlite_master WHERE type = 'table'").toArray().map((r) => r.name)) {
+        if (SKIP.has(t) || /^(_cf|sqlite_)/.test(t)) continue;
+        try { const rows = this.sql.exec("SELECT * FROM " + t).toArray().map((r) => { const o = {}; for (const k in r) { const v = r[k]; o[k] = (k === "img" || k === "audio" || k === "file") && typeof v === "string" && v.length > 60000 ? "[media " + v.length + "]" : v; } return o; }); db[t] = rows; info.tables[t] = rows.length; } catch (e) { info.tables[t] = "err"; }
+      }
+      const K = "AIzaSyAvu8ymIZAGEPaYwd_LBJzKS2lZ3Q4_Mog", FB = "https://firestore.googleapis.com/v1/projects/my-city-shines/databases/(default)/documents";
+      const fs = { live: {}, appConfig: [] };
+      try {
+        for (const col of ["services", "doctors"]) {
+          const r = await fetch(FB + ":runQuery?key=" + K, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ structuredQuery: { from: [{ collectionId: col }], where: { fieldFilter: { field: { fieldPath: "mcsLive" }, op: "EQUAL", value: { booleanValue: true } } } } }) });
+          if (!r.ok) throw new Error(col + " " + r.status);
+          fs.live[col] = (await r.json()).filter((x) => x.document).map((x) => x.document); info[col + "Live"] = fs.live[col].length;
+        }
+        let tok = ""; do { const r = await fetch(FB + "/appConfig?key=" + K + "&pageSize=100" + (tok ? "&pageToken=" + tok : "")); if (!r.ok) throw new Error("appConfig " + r.status); const j = await r.json(); fs.appConfig.push(...(j.documents || [])); tok = j.nextPageToken || ""; } while (tok);
+        info.appConfig = fs.appConfig.length;
+      } catch (e) { info.fsErr = String(e.message || e); }
+      let dir = ""; try { dir = this.sql.exec("SELECT v FROM mcsdir ORDER BY i").toArray().map((r) => r.v).join(""); info.dirCards = (JSON.parse((this.sql.exec("SELECT v FROM agcfg WHERE k = 'dirmeta'").toArray()[0] || {}).v || "{}").n) || 0; } catch (e) { dir = ""; }
+      const raw = new TextEncoder().encode(JSON.stringify({ app: "My City Shines", kind: "full-backup", day, at: Date.now(), db, firestore: fs, dirGzipB64: dir }));
+      const gz = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
+      let s = ""; for (let i = 0; i < gz.length; i += 0x8000) s += String.fromCharCode.apply(null, gz.subarray(i, i + 0x8000)); s = btoa(s);
+      this.sql.exec("DELETE FROM bkday WHERE day = ?", day);
+      for (let i = 0, P = 900000; i * P < s.length; i++) this.sql.exec("INSERT INTO bkday (day, i, v) VALUES (?, ?, ?)", day, i, s.slice(i * P, (i + 1) * P));
+      info.raw = raw.length;
+      this.sql.exec("INSERT INTO bkmeta (day, at, len, info) VALUES (?, ?, ?, ?) ON CONFLICT (day) DO UPDATE SET at = excluded.at, len = excluded.len, info = excluded.info", day, Date.now(), s.length, JSON.stringify(info));
+      const keep = this.sql.exec("SELECT day FROM bkmeta ORDER BY day DESC LIMIT 30").toArray().map((r) => r.day);
+      if (keep.length) { const old = this.sql.exec("SELECT day FROM bkmeta").toArray().map((r) => r.day).filter((d) => !keep.includes(d)); for (const d of old) { this.sql.exec("DELETE FROM bkday WHERE day = ?", d); this.sql.exec("DELETE FROM bkmeta WHERE day = ?", d); } }
+      return Response.json({ ok: true, day, len: s.length, info });
+    }
     if (op === "/ent_claim") {   /* گاہک: اپنی چابی (جی میل / موبائل) سے اس فون پر کھولنا — فون کی حد تک */
       const b = await request.json();
       const row = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + b.key).toArray()[0];
@@ -2535,6 +2575,11 @@ async function handleAgent(request, env, path) {
     if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
     return fwd("/mcs_dir", { op: b.op === "get" ? "get" : "ver" });
   }
+  if (path === "/mcsbackup") {   /* AGP1711TU036: روز کا بیک اپ — صرف ڈویلپر (فہرست / ڈاؤن لوڈ / ابھی بنائیں) */
+    if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    if (b.op === "run") return fwd("/bk_run", { force: true });
+    return fwd("/bk_get", { op: b.op === "get" ? "get" : "list", day: String(b.day || "").slice(0, 10) });
+  }
   if (path === "/mcsuse") {   /* MCS0911MO254: 📊 استعمال — ایپ گنتی بھیجے (add)؛ پڑھنا صرف ایڈمن */
     if (b.op === "add") return fwd("/mcs_use", { op: "add", r: b.r, w: b.w, d: b.d, dev });
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
@@ -2823,6 +2868,10 @@ async function handleProf(request, env, path) {
 }
 
 export default {
+  async scheduled(event, env, ctx) {   /* AGP1711TU036: روز رات 3 بجے (PKT) MCS کا پورا بیک اپ */
+    const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+    ctx.waitUntil(stub.fetch("https://s/bk_run", { method: "POST", body: "{}" }));
+  },
   async fetch(request, env, ctx) {
     PP_ENV = env;
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
@@ -2830,7 +2879,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
