@@ -2120,6 +2120,24 @@ export class McsStats {
       else this.sql.exec("INSERT INTO verified (rec, ts) VALUES (?, ?) ON CONFLICT (rec) DO UPDATE SET ts = excluded.ts", b.rec, Date.now());
       return Response.json({ ok: true });
     }
+    if (op === "/adreq") {   /* MCS1711TU504: اشتہار کی درخواست — دکاندار / ایجنٹ / ایڈمن بنائیں، منظوری صرف ایڈمن 1 */
+      const b = await request.json();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS adreq (id TEXT PRIMARY KEY, uid TEXT, data TEXT, img TEXT, st TEXT, note TEXT, ts INTEGER, upd INTEGER)");
+      const o = b.op, now = Date.now();
+      if (o === "add") {
+        const last = this.sql.exec("SELECT ts FROM adreq WHERE uid = ? ORDER BY ts DESC LIMIT 1", b.uid).toArray()[0];
+        if (last && now - last.ts < 120000) return Response.json({ ok: false, reason: "wait" });
+        const id = "ar" + now.toString(36) + Math.random().toString(36).slice(2, 6);
+        this.sql.exec("INSERT INTO adreq (id, uid, data, img, st, note, ts, upd) VALUES (?, ?, ?, ?, 'new', '', ?, ?)", id, b.uid, JSON.stringify(b.data || {}), b.img || "", now, now);
+        const n = this.sql.exec("SELECT COUNT(*) AS n FROM adreq").toArray()[0].n; if (n > 2000) this.sql.exec("DELETE FROM adreq WHERE st IN ('ok','rej') AND upd < ?", now - 90 * 864e5);
+        return Response.json({ ok: true, id });
+      }
+      if (o === "mine") return Response.json({ ok: true, list: this.sql.exec("SELECT id, data, st, note, ts, upd FROM adreq WHERE uid = ? ORDER BY ts DESC LIMIT 20", b.uid).toArray().map((r) => ({ id: r.id, st: r.st, note: r.note, ts: r.ts, upd: r.upd, data: JSON.parse(r.data || "{}") })) });
+      if (o === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT id, data, st, note, ts, upd, LENGTH(img) AS il FROM adreq WHERE st = 'new' OR upd > ? ORDER BY ts", now - 3 * 864e5).toArray().map((r) => ({ id: r.id, st: r.st, note: r.note, ts: r.ts, upd: r.upd, hasImg: r.il > 0 ? 1 : 0, data: JSON.parse(r.data || "{}") })) });
+      if (o === "img") { const r = this.sql.exec("SELECT img FROM adreq WHERE id = ?", b.id).toArray()[0]; return Response.json({ ok: !!r, img: r ? r.img : "" }); }
+      if (o === "set") { if (!["ok", "rej", "new"].includes(b.st)) return Response.json({ ok: false, reason: "bad_st" }); const r = this.sql.exec("SELECT id FROM adreq WHERE id = ?", b.id).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "not_found" }); this.sql.exec("UPDATE adreq SET st = ?, note = ?, upd = ? WHERE id = ?", b.st, b.note || "", now, b.id); return Response.json({ ok: true }); }
+      return Response.json({ ok: false, reason: "bad_op" });
+    }
     if (op === "/preq") {   /* MCS1111WE330 */
       const b = await request.json();
       this.sql.exec("CREATE TABLE IF NOT EXISTS preq (rec TEXT PRIMARY KEY, data TEXT, st TEXT, note TEXT, ts INTEGER, upd INTEGER)");
@@ -2921,6 +2939,21 @@ async function handleProf(request, env, path) {
     const data = op === "add" ? { name: str(d.name, 80), mobile: str(d.mobile, 20), wa: str(d.wa, 20), gmail: str(d.gmail, 80), prof: str(d.prof, 160), cat: str(d.cat, 60), city: str(d.city, 60), area: str(d.area, 120), ref: str(d.ref, 30), refName: str(d.refName, 80), uid: str(d.uid, 40), kind: str(d.kind, 10), text: str(d.text, 1500) } : null;
     return fwd("/preq", { op, rec: rq, data, st: str(b.st, 10), note: str(b.note, 600) });
   }
+  if (path === "/adreq") {   /* MCS1711TU504: اشتہار کی درخواست */
+    const op = String(b.op || ""), str = (v, n) => String(v == null ? "" : v).slice(0, n);
+    if (["list", "img", "set"].includes(op)) { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); }
+    const uid = str(b.uid, 60).replace(/[^a-zA-Z0-9_\-]/g, "");
+    if ((op === "add" || op === "mine") && uid.length < 8) return reply({ error: "bad_uid" }, 400);
+    if (op === "add") {
+      const d = b.data && typeof b.data === "object" ? b.data : {};
+      const days = parseInt(d.days, 10) === 30 ? 30 : 15;
+      const data = { shop: str(d.shop, 80), name: str(d.name, 80), phone: str(d.phone, 20), line: str(d.line, 300), kind: str(d.kind, 20), area: str(d.area, 120), days, ref: str(d.ref, 30), refName: str(d.refName, 80), by: str(d.by, 20), rec: clean(d.rec), sid: str(d.sid, 20) };
+      if (!data.shop || !data.phone) return reply({ ok: false, reason: "missing" });
+      const img = (typeof b.img === "string" && /^data:image\/(jpeg|webp|png);base64,/.test(b.img) && b.img.length < 460000) ? b.img : "";
+      return fwd("/adreq", { op, uid, data, img });
+    }
+    return fwd("/adreq", { op, uid, id: str(b.id, 40), st: str(b.st, 4), note: str(b.note, 400) });
+  }
   const rec = clean(b.rec || u.searchParams.get("rec"));
   if (!/^p\d{10}(_[a-z0-9]{2,12})?$/.test(rec)) return reply({ error: "bad_rec" }, 400);   /* فون + کاروبار کی قسم — ایک نمبر کی کئی پروفائلیں */
   if (path === "/pget") return fwd("/pget", { rec });
@@ -2955,7 +2988,7 @@ export default {
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
-    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
+    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq", "/adreq"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
