@@ -1295,6 +1295,22 @@ export class McsStats {
       }
       return Response.json({ ok: false, reason: "bad_op" });
     }
+    if (op === "/mcs_city") {   /* MCS1711TU494 (مالک کا حکم): ہر مقامی شہر کی ایک بڑی تصویر (لاگ اِن / سائن اپ کے اوپر) — پڑھنا سب، لگانا صرف ایڈمن؛ نام = شہر کا نام (ضلع کے ساتھ) */
+      const b = await request.json();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcscity (city TEXT PRIMARY KEY, img TEXT, v INTEGER)");
+      const city = String(b.city || "").trim().replace(/\s+/g, " ").slice(0, 120);
+      if (b.op === "put") {
+        if (!city) return Response.json({ ok: false, reason: "city" });
+        const img = String(b.img || ""); if (!/^data:image\/(jpeg|webp|png);base64,/.test(img) || img.length > 450000) return Response.json({ ok: false, reason: "img" });
+        const v = Date.now(); this.sql.exec("INSERT INTO mcscity (city, img, v) VALUES (?, ?, ?) ON CONFLICT (city) DO UPDATE SET img = excluded.img, v = excluded.v", city, img, v);
+        return Response.json({ ok: true, v });
+      }
+      if (b.op === "del") { this.sql.exec("DELETE FROM mcscity WHERE city = ?", city); return Response.json({ ok: true }); }
+      if (b.op === "list") { const o = {}; for (const r of this.sql.exec("SELECT city, v FROM mcscity").toArray()) o[r.city] = r.v; return Response.json({ ok: true, cities: o }); }
+      const r = this.sql.exec("SELECT img, v FROM mcscity WHERE city = ?", city).toArray()[0];
+      if (b.op === "ver") return Response.json({ ok: true, v: r ? r.v : 0 });
+      return Response.json({ ok: true, v: r ? r.v : 0, img: r ? r.img : "" });
+    }
     if (op === "/mcs_dir") {   /* MCS1611MO466 (مالک کا حکم — فائربیس کی لمٹ): MCS نمبر کے بغیر کارڈوں کی ایک نقل (gzip base64)؛ فون فائربیس کی بجائے یہیں سے */
       const b = await request.json();
       this.sql.exec("CREATE TABLE IF NOT EXISTS mcsdir (i INTEGER PRIMARY KEY, v TEXT)");
@@ -2432,6 +2448,11 @@ async function handleAgent(request, env, path) {
     const data = js(b.data, 6000), res = js(b.res, 3000); if (data === null || res === null) return reply({ ok: false, reason: "too_big" });
     return fwd("/sm_code", { op, code, kind, app, data, res, uid, dev, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
   }
+  if (path === "/mcscity") {   /* MCS1711TU494: شہر کی تصویر — دیکھنا سب، لگانا / ہٹانا صرف ایڈمن */
+    const op = ["put", "del", "list", "ver"].includes(b.op) ? b.op : "get";
+    if ((op === "put" || op === "del") && !(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    return fwd("/mcs_city", { op, city: String(b.city || ""), img: op === "put" ? String(b.img || "") : "" });
+  }
   if (path === "/mcsdir") {   /* MCS1611MO466: غیر رجسٹرڈ کارڈوں کی نقل — پڑھنا سب، لکھنا صرف ایڈمن 1 */
     if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
     return fwd("/mcs_dir", { op: b.op === "get" ? "get" : "ver" });
@@ -2710,7 +2731,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
