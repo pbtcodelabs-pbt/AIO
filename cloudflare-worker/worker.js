@@ -1546,7 +1546,7 @@ export class McsStats {
         u.pk = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
         const d = Object.assign({}, u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), u.id); return u.pk;
       };
-      const out = (u) => ({ id: u.id, sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, ts: u.ts, pk: pkOf(u) });
+      const out = (u) => ({ id: u.id, sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, hasYob: !!u.yob, ts: u.ts, pk: pkOf(u) });
       const sess = async (id, via) => { const raw = crypto.getRandomValues(new Uint8Array(24)); const tok = Array.from(raw).map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcssess (tok, id, via, ts, last) VALUES (?, ?, ?, ?, ?)", await uaTokHash(tok), id, via, now, now); return tok; };
       const failK = "f:" + (b.fk || ""), failR = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", failK).toArray()[0];
       const fails = failR && now - failR.ts < 15 * 60e3 ? failR.n : 0;
@@ -1562,7 +1562,7 @@ export class McsStats {
         let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
         while (get("MCS-" + n)) n++;
         this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('useq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
-        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, district: b.district || "", email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "" };
+        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, district: b.district || "", email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "", yob: b.yob || "" };
         this.sql.exec("INSERT INTO mcsuser (id, data, pwh, ts, seen) VALUES (?, ?, ?, ?, ?)", u.id, JSON.stringify(u), b.pwh || "", now, now);
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "m:" + u.mobile, u.id);
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
@@ -1670,6 +1670,17 @@ export class McsStats {
         return Response.json({ ok: true, id: u.id, pwh: u._pwh });
       }
       if (b.act === "pwok") { const u = get(b.id); if (!u || u.del) return Response.json({ ok: false, reason: "login" }); this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK); this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id); return Response.json({ ok: true, tok: await sess(u.id, "p"), user: out(u) }); }
+      if (b.act === "fyob") {   /* MCS1711TU505 (مالک کا حکم): PIN بھول گئے — موبائل + پیدائش کا سال = وہیں نیا PIN (ہیلپ ڈیسک کا انتظار نہیں)؛ 15 منٹ میں 6 غلط اور ایک نمبر پر دن میں 5 = روک */
+        const mk = "fy:" + b.mobile, mr = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", mk).toArray()[0], mfails = mr && now - mr.ts < 864e5 ? mr.n : 0;
+        if (fails >= 6 || mfails >= 5) return Response.json({ ok: false, reason: "wait" });
+        const bumpM = () => this.sql.exec("INSERT INTO mcsfail (k, n, ts) VALUES (?, 1, ?) ON CONFLICT (k) DO UPDATE SET n = CASE WHEN ? - mcsfail.ts < 86400000 THEN mcsfail.n + 1 ELSE 1 END, ts = CASE WHEN ? - mcsfail.ts < 86400000 THEN mcsfail.ts ELSE excluded.ts END", mk, now, now, now);
+        const id = key("m:" + b.mobile), u = id ? get(id) : null;
+        if (!u || u.del) { fail(); return Response.json({ ok: false, reason: "nomatch" }); }
+        if (!u.yob) return Response.json({ ok: false, reason: "noyob" });
+        if (String(u.yob) !== String(b.yob)) { fail(); bumpM(); return Response.json({ ok: false, reason: "nomatch" }); }
+        this.sql.exec("UPDATE mcsuser SET pwh = ? WHERE id = ?", b.pwh, u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", u.id); this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
+        u._pwh = b.pwh; return Response.json({ ok: true, tok: await sess(u.id, "p"), user: out(u) });
+      }
       if (b.act === "pwbad") { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "login" }); }
       if (b.act === "google") {
         const id = key("g:" + b.gmail) || key("e:" + b.gmail);
@@ -1712,8 +1723,11 @@ export class McsStats {
       if (b.act === "me") return Response.json({ ok: true, user: out(S.u) });
       if (b.act === "setdist") { S.u.district = b.district || ""; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }
       if (b.act === "logout") { this.sql.exec("DELETE FROM mcssess WHERE tok = ?", b.th); return Response.json({ ok: true }); }
+      if (b.act === "setyob") { S.u.yob = b.yob; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }   /* MCS1711TU505 */
       if (b.act === "setpw") {   /* پاس ورڈ بدلیں — پرانا ٹھیک ہو، یا گوگل سے 15 منٹ کے اندر لاگ اِن ہوا ہو (پاس ورڈ بھول گئے) */
-        if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
+        const yobOk = !!(b.yob && S.u.yob && String(S.u.yob) === String(b.yob));   /* MCS1711TU505: پرانا PIN یاد نہ ہو تو پیدائش کا سال بھی چلتا ہے */
+        if (S.u._pwh && !(S.via === "g" && now - S.at < 15 * 60e3) && !b.oldOk && !yobOk) return Response.json({ ok: false, reason: "old", pwh: S.u._pwh });
+        if (b.yob && !S.u.yob) { S.u.yob = b.yob; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); }
         this.sql.exec("UPDATE mcsuser SET pwh = ? WHERE id = ?", b.pwh, S.u.id);
         this.sql.exec("DELETE FROM mcssess WHERE id = ? AND tok != ?", S.u.id, b.th);
         return Response.json({ ok: true });
@@ -2462,6 +2476,7 @@ async function handleMcsAuth(request, env) {
   const S = (v, n) => String(v == null ? "" : v).replace(/[<>"]/g, "").replace(/\s+/g, " ").slice(0, n).trim();
   const pw = String(b.pw || ""), op = String(b.op || "");
   const pwOk = (p) => p.length >= 5 && p.length <= 64;   /* MCS1111WE312: 5–6 ہندسوں کا PIN بھی */
+  const yobV = (() => { const y = String(b.yob || "").replace(/\D/g, ""); const n = parseInt(y, 10), cy = new Date().getUTCFullYear(); return y.length === 4 && n >= 1920 && n <= cy - 8 ? y : ""; })();   /* MCS1711TU505: پیدائش کا سال */
   const ip = request.headers.get("CF-Connecting-IP") || "";
   const th = b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : "";
   const dev = String(b.dev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
@@ -2476,7 +2491,7 @@ async function handleMcsAuth(request, env) {
     if (!gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
     if (gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });   /* MCS1511SU450 (مالک کا حکم): گوگل سے بھی PIN لازمی — موبائل + PIN ہمیشہ چلے */
     const district = S(b.district, 60);   /* MCS1111WE312: ضلع اختیاری (مالک: سائن اپ پر صرف نام، موبائل، PIN) */
-    r = await call({ act: "signup", name, mobile, district, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev });
+    r = await call({ act: "signup", name, mobile, district, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev, yob: yobV });
   } else if (op === "login") {
     const id = S(b.id, 80).toLowerCase(), ids = [];
     if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
@@ -2536,11 +2551,18 @@ async function handleMcsAuth(request, env) {
   } else if (op === "setdist") {
     const district = S(b.district, 60); if (!district) return reply({ ok: false, reason: "district" });
     r = await call({ act: "setdist", th, district });
+  } else if (op === "setyob") {   /* MCS1711TU505 */
+    if (!yobV) return reply({ ok: false, reason: "yob" });
+    r = await call({ act: "setyob", th, yob: yobV });
+  } else if (op === "forgot") {   /* MCS1711TU505: موبائل + پیدائش کا سال → نیا PIN */
+    const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
+    if (!yobV) return reply({ ok: false, reason: "yob" }); if (!pwOk(pw)) return reply({ ok: false, reason: "pw" });
+    r = await call({ act: "fyob", mobile, yob: yobV, pwh: await uaHash(pw), fk: ip + "|fy" });
   } else if (["me", "logout"].includes(op)) {
     r = await call({ act: op, th });
   } else if (op === "setpw" || op === "delete") {
     if (op === "setpw" && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
-    const body = { act: op, th, pwh: op === "setpw" ? await uaHash(pw) : "" };
+    const body = { act: op, th, pwh: op === "setpw" ? await uaHash(pw) : "", yob: op === "setpw" ? yobV : "" };
     r = await call(body);
     if (!r.ok && r.reason === "old") { r = (b.old && await uaCheck(String(b.old), r.pwh)) ? await call(Object.assign(body, { oldOk: 1 })) : { ok: false, reason: "old" }; }
   } else return reply({ ok: false, reason: "bad_op" }, 400);
