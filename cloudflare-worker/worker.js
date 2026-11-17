@@ -379,6 +379,8 @@ export class McsStats {
     /* 🔑 اکاؤنٹ سبسکرپشن (AIO وغیرہ، پلے اسٹور سے باہر خریدی): ریکارڈ + جی میل / موبائل کی چابیاں */
     this.sql.exec("CREATE TABLE IF NOT EXISTS ent (id TEXT PRIMARY KEY, app TEXT, data TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS entkey (k TEXT PRIMARY KEY, id TEXT)");
+    /* 📦 HD1711: ایکٹیویشن پیکج ٹیبل — ہر پیکج کا نام (کوڈ کا شروع)، مدت، کل فون؛ ہیلپ ڈیسک سے بدلا جا سکتا ہے */
+    this.sql.exec("CREATE TABLE IF NOT EXISTS entpkg (k TEXT PRIMARY KEY, app TEXT, data TEXT, ts INTEGER)");
     /* 🤝 MCS کمیشن ایجنٹ (MCS0411WE131): درخواست + شناختی کارڈ / سیلفی کی تصویریں — صرف ایڈمن پڑھے */
     this.sql.exec("CREATE TABLE IF NOT EXISTS agent (id TEXT PRIMARY KEY, phone TEXT, data TEXT, ts INTEGER)");
     this.sql.exec("CREATE TABLE IF NOT EXISTS agimg (id TEXT, kind TEXT, data TEXT, PRIMARY KEY (id, kind))");
@@ -438,6 +440,22 @@ export class McsStats {
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
   entOut(e) { const now = Date.now(); return { ok: true, id: e.id, name: e.name || "", life: !!e.life, exp: e.exp || 0, active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, devices: e.devices || 1, used: (e.claims || []).length, keys: e.keys || [] }; }
+  /* 📦 پیکج فہرست — پہلی بار خالی ہو تو AIO کے موجودہ Play پیکجوں (PLAY_BILLING_PRODUCTS) سے بھر دے؛ اس کے بعد ہیلپ ڈیسک سے بدلیں */
+  entPkgList(app) {
+    let rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
+    if (!rows.length && app === "AIO") {
+      const S = [
+        ["1p0-3m", "1P0-3M", "Owner only — 3 Months", 90, 1, false, "aio_user1plus0_3m"], ["1p0-6m", "1P0-6M", "Owner only — 6 Months", 180, 1, false, "aio_user1plus0_6m"], ["1p0-12m", "1P0-12M", "Owner only — 1 Year", 365, 1, false, "aio_user1plus0_12m"],
+        ["1p1-6m", "1P1-6M", "Owner + 1 staff — 6 Months", 180, 2, false, "aio_user1plus1_6m"], ["1p1-12m", "1P1-12M", "Owner + 1 staff — 1 Year", 365, 2, false, "aio_user1plus1_12m"],
+        ["1p2-6m", "1P2-6M", "Owner + 2 staff — 6 Months", 180, 3, false, "aio_user1plus2_6m"], ["1p2-12m", "1P2-12M", "Owner + 2 staff — 1 Year", 365, 3, false, "aio_user1plus2_12m"],
+        ["1p3-6m", "1P3-6M", "Owner + 3 staff — 6 Months", 180, 4, false, "aio_user1plus3_6m"], ["1p3-12m", "1P3-12M", "Owner + 3 staff — 1 Year", 365, 4, false, "aio_user1plus3_12m"],
+        ["1d100y", "1D100Y", "1 device — Lifetime (100 years)", 0, 1, true, "aio_lifetime_onetime"],
+      ];
+      S.forEach((s, n) => { const d = { id: s[0], prefix: s[1], name: s[2], days: s[3], devices: s[4], life: s[5], sku: s[6], active: true, sort: n + 1 }; this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", app + "|" + d.id, app, JSON.stringify(d), Date.now()); });
+      rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
+    }
+    return rows.map((r) => JSON.parse(r.data)).sort((a, b) => (a.sort || 99) - (b.sort || 99));
+  }
   agNextCode(ab) {   /* MCS0511TH142: ہر قسم کی الگ گنتی agcfg seq_XX */
     const r = this.sql.exec("SELECT v FROM agcfg WHERE k = ?", "seq_" + ab).toArray()[0]; let n = (parseInt((r || {}).v || "0", 10) || 0) + 1;
     const used = new Set(this.sql.exec("SELECT data FROM agent").toArray().map((x) => JSON.parse(x.data).code));
@@ -1336,7 +1354,21 @@ export class McsStats {
       if (e.revoked) return Response.json({ ok: false, reason: "revoked" });
       e.claims = e.claims || [];
       const mine = e.claims.find((c) => c.dev === b.dev);
-      if (!mine) {
+      if (!mine && b.key.startsWith("c:")) {   /* ACT-XXXXXX: ایکٹیویشن کوڈ — ایک ہی بار، ایک ہی فون؛ پہلی بار لگنے پر مدت شروع */
+        if (!b.bind) return Response.json({ ok: false, reason: "not_bound" });
+        if (e.pend && !e.redeemed) {
+          const now = Date.now();
+          e.devices = e.pend.devices || 1; e.life = !!e.pend.life; e.exp = e.life ? 0 : now + (e.pend.days || 0) * 864e5;
+          e.redeemed = now; e.usedAt = now; e.claims = [{ dev: b.dev, at: now, via: "c" }];
+          if (b.biz) e.biz = String(b.biz).slice(0, 60);   /* HD1711: یہ کوڈ اسی بزنس کا ہو گیا */
+          this.entPut(e);
+        } else if (!e.claims.length && e.redeemed) {   /* ڈویلپر نے «reset» کیا — اسی کوڈ سے نیا فون، مدت وہی */
+          e.claims.push({ dev: b.dev, at: Date.now(), via: "c" }); this.entPut(e);
+        } else if (e.redeemed && e.biz && b.biz && String(b.biz) === e.biz) {   /* HD1711: وہی بزنس، نیا / دوبارہ انسٹال فون — حد کے اندر (بھرا ہو تو سب سے پرانے کی جگہ)، مدت وہی */
+          if (e.claims.length >= (e.devices || 1)) { e.claims.sort((x, y) => (x.seen || x.at || 0) - (y.seen || y.at || 0)); while (e.claims.length >= (e.devices || 1)) e.claims.shift(); }
+          e.claims.push({ dev: b.dev, at: Date.now(), via: "c" }); this.entPut(e);
+        } else return Response.json({ ok: false, reason: "used" });
+      } else if (!mine) {
         if (!b.bind) return Response.json({ ok: false, reason: "not_bound" });
         /* AIO0411WE160: گاہک نے اپنے فون کا UID بھیجا ہو تو موبائل نمبر سے صرف وہی فون کھلے (نمبر کسی اور کو معلوم ہو تو جگہ نہ لے)؛ جی میل (گوگل سے تصدیق شدہ) کسی بھی فون پر */
         /* AIO0511TH173 (مالک کا حکم): نیا فون / دوبارہ انسٹال — جی میل (گوگل سے تصدیق شدہ) یا موبائل + اکاؤنٹ PIN ہو تو سب سے پرانے فون کی جگہ یہ فون (باقی دن وہی)؛ پرانا فون اگلی جانچ (30 منٹ) پر خود بند */
@@ -1915,6 +1947,16 @@ export class McsStats {
       this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), b.id);
       return Response.json({ ok: true, agent: d });
     }
+    if (op === "/ent_codefail") {   /* غلط کوڈ کی گنتی — ایک فون سے 15 منٹ میں 10 غلط کے بعد روک */
+      const b = await request.json(); const now = Date.now();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS entfail (dev TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
+      const r = this.sql.exec("SELECT n, ts FROM entfail WHERE dev = ?", b.dev).toArray()[0];
+      const cur = r && now - r.ts < 9e5 ? r.n : 0;
+      if (b.act === "check") return Response.json({ blocked: cur >= 10 });
+      if (b.act === "clear") { this.sql.exec("DELETE FROM entfail WHERE dev = ?", b.dev); return Response.json({ ok: true }); }
+      this.sql.exec("INSERT INTO entfail (dev, n, ts) VALUES (?, ?, ?) ON CONFLICT (dev) DO UPDATE SET n = excluded.n, ts = excluded.ts", b.dev, cur + 1, r && now - r.ts < 9e5 ? r.ts : now);
+      return Response.json({ ok: true });
+    }
     if (op === "/ent_dev") {   /* AIO0411WE161: ڈویلپر نے یہ فون (UID) جوڑا ہے؟ — گاہک کا فون خود کھلے */
       const b = await request.json();
       for (const r of this.sql.exec("SELECT data FROM ent WHERE app = ?", b.app).toArray()) {
@@ -1928,7 +1970,43 @@ export class McsStats {
     if (op === "/ent_admin") {   /* ڈویلپر: دینا / بڑھانا، فہرست، بند، فون صاف، حذف */
       const b = await request.json();
       const now = Date.now();
-      if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [], pin: e.pin || "" }); }) });
+      if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [], pin: e.pin || "", pend: e.pend || null, redeemed: e.redeemed || 0, label: e.label || "", code: e.code || ((e.keys || []).find((k) => k.startsWith("c:")) || "").slice(2), pkgId: e.pkgId || "", pkgName: e.pkgName || "", usedAt: e.usedAt || 0, biz: e.biz || "" }); }) });
+      if (b.op === "pkglist") return Response.json({ ok: true, list: this.entPkgList(b.app) });
+      if (b.op === "pkgsave") {   /* پیکج بنانا / بدلنا — id خالی ہو تو نیا */
+        this.entPkgList(b.app);
+        const p = b.pkg || {};
+        const prefix = String(p.prefix || "").toUpperCase().replace(/[^A-Z0-9-]/g, "").replace(/^-+|-+$/g, "").slice(0, 14);
+        const days = Math.max(0, Math.min(36500, parseInt(p.days, 10) || 0)), devices = Math.max(1, Math.min(20, parseInt(p.devices, 10) || 1)), life = !!p.life;
+        if (prefix.replace(/-/g, "").length < 2) return Response.json({ ok: false, reason: "bad_prefix" });
+        if (!life && !days) return Response.json({ ok: false, reason: "no_days" });
+        const dup = this.entPkgList(b.app).find((x) => x.prefix === prefix && x.id !== p.id);
+        if (dup) return Response.json({ ok: false, reason: "prefix_taken" });
+        const id = String(p.id || "").replace(/[^a-z0-9-]/g, "").slice(0, 40) || ("p" + now.toString(36));
+        const old = this.entPkgList(b.app).find((x) => x.id === id) || {};
+        const d = { id, prefix, name: String(p.name || prefix).slice(0, 80), days: life ? 0 : days, devices, life, sku: old.sku || "", active: p.active !== false, sort: old.sort || (this.entPkgList(b.app).length + 1) };
+        this.sql.exec("INSERT INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (k) DO UPDATE SET data = excluded.data, ts = excluded.ts", b.app + "|" + id, b.app, JSON.stringify(d), now);
+        return Response.json({ ok: true, pkg: d });
+      }
+      if (b.op === "pkgdel") { this.sql.exec("DELETE FROM entpkg WHERE k = ?", b.app + "|" + String(b.pkgId || "").slice(0, 40)); return Response.json({ ok: true }); }
+      if (b.op === "gencode") {   /* ایکٹیویشن کوڈ بنانا — پیکج چن کر؛ کوڈ = پیکج کا نام + 6 حروف، مثلاً 1P1-6M-K7Q9XA۔ ایک ہی بار استعمال */
+        const out = [];
+        const pk = b.pkgId ? this.entPkgList(b.app).find((x) => x.id === b.pkgId) : null;
+        if (b.pkgId && (!pk || pk.active === false)) return Response.json({ ok: false, reason: "no_pkg" });
+        const prefix = pk ? pk.prefix : "ACT", days = pk ? pk.days : b.days, life = pk ? !!pk.life : !!b.life, devices = pk ? pk.devices : b.devices;
+        for (let i = 0; i < b.count; i++) {
+          let rnd = "", canon = "";
+          for (let tries = 0; tries < 20; tries++) {
+            rnd = [...crypto.getRandomValues(new Uint8Array(6))].map((x) => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[x % 31]).join("");
+            canon = prefix === "ACT" ? "ACT-" + rnd : prefix.replace(/-/g, "") + rnd;
+            if (!this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|c:" + canon).toArray()[0]) break; canon = "";
+          }
+          if (!canon) continue;
+          const code = prefix + "-" + rnd;
+          const e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: ["c:" + canon], code, claims: [], exp: 0, at: now, devices, pend: { days, life, devices }, pkgId: pk ? pk.id : "", pkgName: pk ? pk.name : "", label: b.label || "", note: b.note || "", by: "dev", revoked: false };
+          this.entPut(e); out.push({ id: e.id, code, label: e.label, pkgName: e.pkgName, days, life, devices });
+        }
+        return Response.json({ ok: true, codes: out });
+      }
       if (b.op === "grant") {
         let id = b.id || "";
         if (!id) for (const k of b.keys) { const r = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + k).toArray()[0]; if (r) { id = r.id; break; } }
@@ -2498,14 +2576,23 @@ async function handleEnt(request, env, path) {
     if (path === "/entstatus") key = String(b.key || "").slice(0, 120);
     else if (b.kind === "g") { const em = await verifyGoogleIdToken(b.idToken); if (!em) return reply({ ok: false, reason: "google_failed" }); key = "g:" + em; }
     else if (b.kind === "p") { const ph = entPhone(b.phone); if (!ph) return reply({ ok: false, reason: "bad_phone" }); key = "p:" + ph; }
-    if (!/^[gp]:/.test(key)) return reply({ error: "bad_key" }, 400);
+    else if (b.kind === "c") {   /* ایکٹیویشن کوڈ ACT-XXXXXX (خالی جگہ / چھوٹے حروف / ڈیش کے بغیر بھی چلے) */
+      /* HD1711: کوڈ = پیکج کا نام + 6 حروف (مثلاً 1P1-6M-K7Q9XA)، پرانا ACT-XXXXXX بھی چلتا ہے؛ ڈیش / خالی جگہ / چھوٹے حروف کی پرواہ نہیں */
+      const c = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (c.length < 8 || c.length > 24) return reply({ ok: false, reason: "bad_code" });
+      if ((await (await fwd("/ent_codefail", { dev, act: "check" })).json()).blocked) return reply({ ok: false, reason: "wait" });
+      key = (c.startsWith("ACT") && c.length === 9) ? "c:ACT-" + c.slice(3) : "c:" + c;
+    }
+    if (!/^[gpc]:/.test(key)) return reply({ error: "bad_key" }, 400);
     const pin = b.kind === "p" ? String(b.pin || "").replace(/[^0-9]/g, "").slice(0, 8) : "";
-    const r = await fwd("/ent_claim", { app, key, dev, bind: path === "/entclaim", pin });
+    const r = await fwd("/ent_claim", { app, key, dev, bind: path === "/entclaim", pin, biz: String(b.biz || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 60) });
     const out = await r.json(); out.key = key;
+    if (b.kind === "c" && path === "/entclaim") { if (out.ok) await fwd("/ent_codefail", { dev, act: "clear" }); else if (out.reason === "none" || out.reason === "used") await fwd("/ent_codefail", { dev, act: "fail" }); }
     return reply(out);
   }
   if (path === "/entadmin") {
-    if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
+    /* HD1711: ایڈمن = My City Shines کا فائربیس ایڈمن، یا ہیلپ ڈیسک کا مالک (sabzi-mandi فائربیس، ڈویلپر ای میل) */
+    if (!(await verifyFirebaseAdmin(request)) && !(await verifySmDev(request))) return reply({ error: "admin_only" }, 403);
     const op = String(b.op || "");
     if (op === "grant") {
       const keys = [].concat((b.emails || []).map(entEmail).filter(Boolean).map((e) => "g:" + e), (b.phones || []).map(entPhone).filter(Boolean).map((p) => "p:" + p));
@@ -2513,6 +2600,18 @@ async function handleEnt(request, env, path) {
       const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), devices = Math.max(1, Math.min(20, parseInt(b.devices, 10) || 1));
       if (!days && !b.life && !b.id) return reply({ ok: false, reason: "no_days" });
       return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40), keys, days, life: !!b.life, devices, name: String(b.name || "").slice(0, 80), note: b.note === undefined ? undefined : String(b.note).slice(0, 300), setExp: parseInt(b.setExp, 10) || 0, bindDev: String(b.uid || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64).replace(/^(.{0,5})$/, "") });
+    }
+    if (op === "pkglist") return fwd("/ent_admin", { op, app });
+    if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
+    if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
+    if (op === "gencode" && b.pkgId) {   /* HD1711: موجودہ پیکج چن کر — مدت / فون / نام سرور کی پیکج فہرست سے */
+      const count = Math.max(1, Math.min(50, parseInt(b.count, 10) || 1));
+      return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId).slice(0, 40), count, label: String(b.label || "").slice(0, 60), note: String(b.note || "").slice(0, 300) });
+    }
+    if (op === "gencode") {
+      const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), devices = Math.max(1, Math.min(20, parseInt(b.devices, 10) || 1)), count = Math.max(1, Math.min(50, parseInt(b.count, 10) || 1));
+      if (!days && !b.life) return reply({ ok: false, reason: "no_days" });
+      return fwd("/ent_admin", { op, app, days, life: !!b.life, devices, count, label: String(b.label || "").slice(0, 60), note: String(b.note || "").slice(0, 300) });
     }
     if (op === "list") return fwd("/ent_admin", { op, app });
     if (["revoke", "unrevoke", "reset", "delete", "newpin"].includes(op)) return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40) });
