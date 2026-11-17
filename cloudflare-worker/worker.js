@@ -1722,6 +1722,7 @@ export class McsStats {
       if (!S) return Response.json({ ok: false, reason: "session" });
       if (b.act === "me") return Response.json({ ok: true, user: out(S.u) });
       if (b.act === "setdist") { S.u.district = b.district || ""; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }
+      if (b.act === "setname") { S.u.name = b.name; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }   /* MCS1711TU510: اکاؤنٹ کا نام بدلیں */
       if (b.act === "logout") { this.sql.exec("DELETE FROM mcssess WHERE tok = ?", b.th); return Response.json({ ok: true }); }
       if (b.act === "setyob") { S.u.yob = b.yob; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }   /* MCS1711TU505 */
       if (b.act === "setpw") {   /* پاس ورڈ بدلیں — پرانا ٹھیک ہو، یا گوگل سے 15 منٹ کے اندر لاگ اِن ہوا ہو (پاس ورڈ بھول گئے) */
@@ -2551,6 +2552,9 @@ async function handleMcsAuth(request, env) {
   } else if (op === "setdist") {
     const district = S(b.district, 60); if (!district) return reply({ ok: false, reason: "district" });
     r = await call({ act: "setdist", th, district });
+  } else if (op === "setname") {   /* MCS1711TU510 */
+    const name = S(b.name, 60); if (name.length < 2) return reply({ ok: false, reason: "name" });
+    r = await call({ act: "setname", th, name });
   } else if (op === "setyob") {   /* MCS1711TU505 */
     if (!yobV) return reply({ ok: false, reason: "yob" });
     r = await call({ act: "setyob", th, yob: yobV });
