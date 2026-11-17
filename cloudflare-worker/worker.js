@@ -2033,6 +2033,32 @@ export class McsStats {
         return Response.json({ ok: true, pkg: d });
       }
       if (b.op === "pkgdel") { this.sql.exec("DELETE FROM entpkg WHERE k = ?", b.app + "|" + String(b.pkgId || "").slice(0, 40)); return Response.json({ ok: true }); }
+      /* MCS1711TU500 (مالک کا حکم): MCS کا کوڈ ایک ہی بندے کا — MCS نمبر سے: کوڈ = ممبرشپ ID + 6 خفیہ حروف (MCS008M1-K7Q9XA)، صرف اسی موبائل کے کاروبار پر چلے؛ «12M» / تاریخ نہیں */
+      const mcsLook = (v) => {
+        const m = /^(MCS\d{1,5})(M\d{1,2})?$/.exec(String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "")); if (!m) return null;
+        const num = m[1].slice(3).padStart(3, "0"), s = this.sql.exec("SELECT mob, sid, subn FROM mcssid").toArray().find((r) => String(r.sid).replace(/[^A-Z0-9]/gi, "").toUpperCase() === "MCS" + num); if (!s) return null;
+        const recs = this.sql.exec("SELECT rec, until FROM prof WHERE rec LIKE ?", "p" + String(s.mob).slice(2) + "_%").toArray();
+        let sub = m[2] ? "MCS" + num + m[2] : ""; if (!sub) for (const r of recs) { const x = String(this.subOf(r.rec) || "").replace(/-/g, ""); if (x) { sub = x; break; } }
+        if (!sub) sub = "MCS" + num + "M1";   /* ابھی کوئی ممبرشپ نہیں = پہلی (M1) — کوڈ لگتے ہی یہی نمبر اسی کاروبار کو (/pcode) */
+        const k2 = this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + s.mob).toArray()[0], r2 = k2 && this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", k2.id).toArray()[0];
+        let u = {}; try { u = r2 ? JSON.parse(r2.data) : {}; } catch (e) {}
+        const live = recs.reduce((a, r) => Math.max(a, r.until || 0), 0);
+        return { sid: "MCS" + num, sub, mob: s.mob, name: u.name || this.finCfg("sidname_" + s.mob, "") || "", until: live };
+      };
+      if (b.op === "mcslook") { const x = mcsLook(b.sid); return Response.json(x ? Object.assign({ ok: true }, x) : { ok: false, reason: "no_sid" }); }
+      if (b.op === "gencode" && b.app === "MCS") {
+        const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
+        const out = [];
+        for (let i = 0; i < Math.min(5, b.count || 1); i++) {
+          let rnd = "", canon = "";
+          for (let tries = 0; tries < 20; tries++) { rnd = [...crypto.getRandomValues(new Uint8Array(6))].map((y) => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[y % 31]).join(""); canon = x.sub + rnd; if (!this.sql.exec("SELECT id FROM entkey WHERE k = ?", "MCS|c:" + canon).toArray()[0]) break; canon = ""; }
+          if (!canon) continue;
+          const code = x.sub + "-" + rnd;
+          const e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: "MCS", keys: ["c:" + canon], code, claims: [], exp: 0, at: now, devices: 1, pend: { days: 365, life: false, devices: 1 }, pkgId: "mcs-1y", pkgName: "1 Year Registration", label: (b.label || x.name || "").slice(0, 60), note: b.note || "", by: "dev", revoked: false, bindMob: x.mob, bindSub: x.sub };
+          this.entPut(e); out.push({ id: e.id, code, label: e.label, pkgName: e.pkgName, days: 365, devices: 1, name: x.name, sid: x.sid });
+        }
+        return Response.json({ ok: true, codes: out });
+      }
       if (b.op === "gencode") {   /* ایکٹیویشن کوڈ بنانا — پیکج چن کر؛ کوڈ = پیکج کا نام + 6 حروف، مثلاً 1P1-6M-K7Q9XA۔ ایک ہی بار استعمال */
         const out = [];
         const pk = b.pkgId ? this.entPkgList(b.app).find((x) => x.id === b.pkgId) : null;
@@ -2223,6 +2249,7 @@ export class McsStats {
       if (!e) return bad("none");
       if (e.revoked) return bad("revoked");
       if (e.redeemed && e.biz !== b.rec) return bad("used");
+      if (e.bindMob && this.sidMob(b.rec) !== e.bindMob) return bad("other_biz");   /* MCS1711TU500: کوڈ صرف اسی بندے (MCS نمبر) کے کاروبار پر */
       if (!e.redeemed) {
         const days = (e.pend && e.pend.life) ? 36500 : ((e.pend && e.pend.days) || 365), yrs = Math.max(1, Math.round(days / 365));
         let p = this.sql.exec("SELECT until FROM prof WHERE rec = ?", b.rec).toArray()[0];
@@ -2230,6 +2257,13 @@ export class McsStats {
           this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts, pend) VALUES (?, '{}', '', ?, ?, ?, 0)", b.rec, now, now, now); p = { until: now }; }   /* چابی خالی — دکاندار کا فون بعد میں /pclaim سے جڑ سکے */
         const until = Math.max(p.until || 0, now) + days * 864e5;
         this.sql.exec("UPDATE prof SET until = ?, pend = 0, paid = COALESCE(paid, 0) + ? WHERE rec = ?", until, yrs, b.rec);
+        try {   /* MCS1711TU500: کوڈ پر لکھا ممبرشپ نمبر (MCS008M1) ہی اس کاروبار کو — نمبر اور کوڈ ہمیشہ ایک جیسے */
+          const sid = this.sidFor(b.rec), bs = String(e.bindSub || ""), m = /M(\d+)$/.exec(bs);
+          if (sid && m && bs === String(sid).replace(/-/g, "") + "M" + m[1] && !this.subOf(b.rec)) {
+            const taken = this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ? AND rec <> ?", "p" + this.sidMob(b.rec).slice(2) + "_%", b.rec).toArray().some((r) => (this.subOf(r.rec) || "") === bs);
+            if (!taken) { this.subSet(b.rec, bs); this.sql.exec("UPDATE mcssid SET subn = MAX(COALESCE(subn, 0), ?) WHERE sid = ?", parseInt(m[1], 10), sid); }
+          }
+        } catch (er) {}
         try { this.saleAdd(b.rec, "code", yrs); } catch (er) { this.finLog("pcode_sale_err", { e: String(er) }); }
         e.redeemed = now; e.usedAt = now; e.biz = b.rec; e.claims = [{ dev: "rec:" + b.rec, at: now, via: "pcode", by: String(b.by || "").slice(0, 40) }];
         this.entPut(e); this.finLog("pcode", { rec: b.rec, code: e.code, by: b.by || "" });
@@ -2679,6 +2713,11 @@ async function handleEnt(request, env, path) {
     if (op === "pkglist") return fwd("/ent_admin", { op, app });
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
+    if (app === "MCS" && (op === "gencode" || op === "mcslook")) {   /* MCS1711TU500: MCS نمبر سے بندے کا کوڈ */
+      const sid = String(b.sid || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+      if (!/^MCS\d{1,5}(M\d{1,2})?$/.test(sid)) return reply({ ok: false, reason: "no_sid" });
+      return fwd("/ent_admin", { op, app, sid, count: 1, label: String(b.label || "").slice(0, 60), note: String(b.note || "").slice(0, 300) });
+    }
     if (op === "gencode" && b.pkgId) {   /* HD1711: موجودہ پیکج چن کر — مدت / فون / نام سرور کی پیکج فہرست سے */
       const count = Math.max(1, Math.min(50, parseInt(b.count, 10) || 1));
       return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId).slice(0, 40), count, label: String(b.label || "").slice(0, 60), note: String(b.note || "").slice(0, 300) });
