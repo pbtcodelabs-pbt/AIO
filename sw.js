@@ -3,14 +3,18 @@
 // ہر نئی فائل نمبر کے ساتھ CACHE_NAME بھی بدل دیں (نیچے v43 کو v44 وغیرہ کر دیں)
 // تاکہ صارف کے فون پر پرانا ورژن کیش سے نہ چپکا رہے۔
 // ======================================================================
-const CACHE_NAME = 'AIO1611MO214';
+const CACHE_NAME = 'AIO1711TU217';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './icon-512-maskable.png'
+  './icon-512-maskable.png',
+  './images/play-badge.png',
+  './images/app-logo.png',
+  './images/easypaisa-logo.png',
+  './images/ads-poster.jpg'
 ];
 // ---------- سست انٹرنیٹ پر سفید اسکرین کا علاج: اپنی فائلوں کے لیے نیٹ ورک کو صرف اتنی دیر دیں،
 // پھر فون میں محفوظ کاپی سے فوراً کھولیں — تازہ فائل پیچھے خاموشی سے آتی رہے اور اگلی بار کام آئے ----------
