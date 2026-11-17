@@ -454,6 +454,11 @@ export class McsStats {
       S.forEach((s, n) => { const d = { id: s[0], prefix: s[1], name: s[2], days: s[3], devices: s[4], life: s[5], sku: s[6], active: true, sort: n + 1 }; this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", app + "|" + d.id, app, JSON.stringify(d), Date.now()); });
       rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
     }
+    if (!rows.length && app === "MCS") {   /* MCS1711TU499: پہلی بار — ایک سال کی رجسٹریشن */
+      const d = { id: "mcs-1y", prefix: "MCS-1Y", name: "1 Year Registration", days: 365, devices: 1, life: false, sku: "", active: true, sort: 1 };
+      this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", "MCS|" + d.id, "MCS", JSON.stringify(d), Date.now());
+      rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
+    }
     return rows.map((r) => JSON.parse(r.data)).sort((a, b) => (a.sort || 99) - (b.sort || 99));
   }
   agNextCode(ab) {   /* MCS0511TH142: ہر قسم کی الگ گنتی agcfg seq_XX */
@@ -2208,6 +2213,31 @@ export class McsStats {
       const sd = this.sidGet(b.rec), sq = sd ? this.sql.exec("SELECT subn FROM mcssid WHERE sid = ?", sd).toArray()[0] : null;
       return Response.json({ key, since: x.since, until: x.until, pend: 0, sid: sd || "", subid: sd ? this.subOf(b.rec) : "" });
     }
+    if (op === "/pcode") {   /* MCS1711TU499 (مالک کا حکم): ایک سال کا رجسٹریشن کوڈ — جو بھی ڈالے (مالک / ایڈمن 2 / ایجنٹ / دکاندار)، کاروبار فوراً ایکٹو؛ کوڈ ایک ہی بار */
+      const b = await request.json(); const now = Date.now();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS entfail (dev TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
+      const fk = "pc:" + String(b.ip || ""), fr = this.sql.exec("SELECT n, ts FROM entfail WHERE dev = ?", fk).toArray()[0], cur = fr && now - fr.ts < 9e5 ? fr.n : 0;
+      if (cur >= 10) return Response.json({ ok: false, reason: "wait" });
+      const bad = (reason) => { this.sql.exec("INSERT INTO entfail (dev, n, ts) VALUES (?, ?, ?) ON CONFLICT (dev) DO UPDATE SET n = excluded.n, ts = excluded.ts", fk, cur + 1, fr && now - fr.ts < 9e5 ? fr.ts : now); return Response.json({ ok: false, reason }); };
+      const row = this.sql.exec("SELECT id FROM entkey WHERE k = ?", "MCS|c:" + b.code).toArray()[0], e = row && this.entGet(row.id);
+      if (!e) return bad("none");
+      if (e.revoked) return bad("revoked");
+      if (e.redeemed && e.biz !== b.rec) return bad("used");
+      if (!e.redeemed) {
+        const days = (e.pend && e.pend.life) ? 36500 : ((e.pend && e.pend.days) || 365), yrs = Math.max(1, Math.round(days / 365));
+        let p = this.sql.exec("SELECT until FROM prof WHERE rec = ?", b.rec).toArray()[0];
+        if (!p) { const mob = this.sidMob(b.rec); if (mob && this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ? AND rec <> ? AND COALESCE(until, 0) > ? LIMIT 1", "p" + mob.slice(2) + "_%", b.rec, now).toArray().length) return Response.json({ ok: false, reason: "one_biz" });
+          this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts, pend) VALUES (?, '{}', '', ?, ?, ?, 0)", b.rec, now, now, now); p = { until: now }; }   /* چابی خالی — دکاندار کا فون بعد میں /pclaim سے جڑ سکے */
+        const until = Math.max(p.until || 0, now) + days * 864e5;
+        this.sql.exec("UPDATE prof SET until = ?, pend = 0, paid = COALESCE(paid, 0) + ? WHERE rec = ?", until, yrs, b.rec);
+        try { this.saleAdd(b.rec, "code", yrs); } catch (er) { this.finLog("pcode_sale_err", { e: String(er) }); }
+        e.redeemed = now; e.usedAt = now; e.biz = b.rec; e.claims = [{ dev: "rec:" + b.rec, at: now, via: "pcode", by: String(b.by || "").slice(0, 40) }];
+        this.entPut(e); this.finLog("pcode", { rec: b.rec, code: e.code, by: b.by || "" });
+      }
+      this.sql.exec("DELETE FROM entfail WHERE dev = ?", fk);
+      const x = this.sql.exec("SELECT since, until FROM prof WHERE rec = ?", b.rec).toArray()[0], sd = this.sidGet(b.rec);
+      return Response.json({ ok: true, since: x.since, until: x.until, sid: sd || "", subid: sd ? this.subOf(b.rec) : "" });
+    }
     if (op === "/psave") {
       const b = await request.json();
       const r = this.sql.exec("SELECT key FROM prof WHERE rec = ?", b.rec).toArray()[0];
@@ -2337,7 +2367,7 @@ async function verifySmDev(request, proj, emails) {
    /entstatus {app, key, dev} — پہلے سے جڑا فون (تجدید / بند ہونے کی خبر)
    /entadmin  (Authorization: MCS ایڈمن کا فائربیس ٹوکن) {op:'grant'|'list'|'revoke'|'unrevoke'|'reset'|'delete', ...}
    ===================================================================== */
-const ENT_APPS = ["AIO"];
+const ENT_APPS = ["AIO", "MCS"];   /* MCS1711TU499: My City Shines کے ایک سال کے رجسٹریشن کوڈ بھی اسی جدول میں (چھڑانا /pcode سے) */
 const GOOGLE_CLIENT_IDS = ["954131537356-2be2rne30mje71l9qibosblvj3j0eqoj.apps.googleusercontent.com"];
 let gJwks = null, gJwksAt = 0;
 async function verifyGoogleIdToken(jwt) {
@@ -2855,6 +2885,11 @@ async function handleProf(request, env, path) {
   if (path === "/pstatus") return fwd("/pstatus", { rec });   /* MCS1511SU428: چیک لسٹ کی موجودہ حالت */
   const admin = await verifyFirebaseAdmin(request);
   if (path === "/pclaim") return fwd("/pclaim", { rec, admin });
+  if (path === "/pcode") {   /* MCS1711TU499: ایک سال کا رجسٹریشن کوڈ — کھلا (کوڈ خود اجازت ہے)، ایک IP سے 15 منٹ میں 10 غلط کے بعد روک */
+    const c = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (c.length < 8 || c.length > 24) return reply({ ok: false, reason: "bad_code" });
+    return fwd("/pcode", { rec, code: c, by: String(b.by || "").slice(0, 40), ip: request.headers.get("CF-Connecting-IP") || "" });
+  }
   if (path === "/psave") {
     const imgs = {};
     Object.entries(b.imgs && typeof b.imgs === "object" ? b.imgs : {}).forEach(([k, v]) => { const slot = parseInt(k, 10); if (slot >= 0 && slot < 4) imgs[slot] = (typeof v === "string" && /^data:image\/(jpeg|webp|png);base64,/.test(v) && v.length < 450000) ? v : null; });
@@ -2878,7 +2913,7 @@ export default {
     if (new URL(request.url).pathname === "/stat") return handleStat(request, env);
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
-    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
+    { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
