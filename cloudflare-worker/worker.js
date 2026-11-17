@@ -2051,7 +2051,9 @@ export class McsStats {
         const out = [];
         for (let i = 0; i < Math.min(5, b.count || 1); i++) {
           let rnd = "", canon = "";
-          const tag = String(b.label || x.name || "").trim().split(/\s+/)[0].toUpperCase().replace(/[^A-Z]/g, "").slice(0, 8);   /* MCS1711TU501 (مالک کا حکم): کوڈ میں بندے کا نام بھی — MCS008M1HABIB-K7Q9XA (اردو نام ہو تو نام نہیں) */
+          const SKIPW = /^(MUHAMMAD|MUHAMMED|MOHAMMAD|MOHAMMED|MOHAMAD|MUHAMAD|MOHD|MHD|MUHD|M|MD|SYED|SAYED|SAYYID|SYEDA|HAFIZ|HAFEEZ|MALIK|RANA|CH|CHAUDHRY|CHAUDHARY|CHOUDHRY|CHAUDRY|MIAN|MIA|SHEIKH|SHAIKH|SH|MIR|MIRZA|KHAWAJA|KHWAJA|SARDAR|RAJA|PIR|SYD|ABDUL|ABD|MR|MRS|MS|DR|ENGR|ENG|PROF|HAJI|ALHAJ|QARI|MAULANA|MOLANA|MUFTI|SAHIB|SAB)$/;   /* MCS1711TU502 (مالک کا حکم): عام سابقے چھوڑ کر اصل نام — Muhammad Habib Shahbaz → HABIB */
+          const words = String(b.label || x.name || "").toUpperCase().replace(/[^A-Z\s]/g, " ").split(/\s+/).filter(Boolean);
+          const tag = (words.find((w) => !SKIPW.test(w) && w.length >= 2) || words[0] || "").slice(0, 8);   /* MCS1711TU501 (مالک کا حکم): کوڈ میں بندے کا نام بھی — MCS008M1HABIB-K7Q9XA (اردو نام ہو تو نام نہیں) */
           for (let tries = 0; tries < 20; tries++) { rnd = [...crypto.getRandomValues(new Uint8Array(6))].map((y) => "ABCDEFGHJKMNPQRSTUVWXYZ23456789"[y % 31]).join(""); canon = x.sub + tag + rnd; if (!this.sql.exec("SELECT id FROM entkey WHERE k = ?", "MCS|c:" + canon).toArray()[0]) break; canon = ""; }
           if (!canon) continue;
           const code = x.sub + tag + "-" + rnd;
