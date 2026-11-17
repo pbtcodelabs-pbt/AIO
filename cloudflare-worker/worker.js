@@ -2592,7 +2592,7 @@ async function handleEnt(request, env, path) {
   }
   if (path === "/entadmin") {
     /* HD1711: ایڈمن = My City Shines کا فائربیس ایڈمن، یا ہیلپ ڈیسک کا مالک (sabzi-mandi فائربیس، ڈویلپر ای میل) */
-    if (!(await verifyFirebaseAdmin(request)) && !(await verifySmDev(request))) return reply({ error: "admin_only" }, 403);
+    if (!(await verifyFirebaseAdmin(request)) && !(await verifySmDev(request)) && !(await verifySmDev(request, "pbt-help-desk", SM_DEV_EMAILS))) return reply({ error: "admin_only" }, 403);   /* HD1711TU112: ہیلپ ڈیسک کا اپنا فائربیس (pbt-help-desk) بھی مالک کے لیے */
     const op = String(b.op || "");
     if (op === "grant") {
       const keys = [].concat((b.emails || []).map(entEmail).filter(Boolean).map((e) => "g:" + e), (b.phones || []).map(entPhone).filter(Boolean).map((p) => "p:" + p));
