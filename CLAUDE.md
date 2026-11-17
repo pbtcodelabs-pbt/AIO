@@ -166,3 +166,4 @@
 - **🔑 MCS1711TU501 سرور (مالک کا حکم):** MCS کوڈ میں بندے کا پہلا انگلش نام بھی (8 حروف تک) — `MCS008M1HABIB-K7Q9XA` (اردو نام ہو تو نام نہیں)؛ `/pcode` میں کوڈ 32 حروف تک۔
 - **MCS1711TU502 سرور:** کوڈ کا نام عام سابقے (MUHAMMAD، SYED، HAFIZ، MALIK، RANA، CH، MIAN، SHEIKH، ABDUL، HAJI…) چھوڑ کر اصل نام — «Muhammad Habib Shahbaz» → `HABIB`۔
 - **🔐 AIO1711TU219 (مالک کا حکم، 17 نومبر — پچھلا «7 ٹیپ ختم» منسوخ):** ورژن پر 7 بار دبانے سے ڈویلپر پینل پھر کھلتا ہے (پاس ورڈ کے ساتھ)؛ ہیلپ ڈیسک والا `?devpanel=1` بھی ویسا — دونوں راستے رہیں، 7 ٹیپ دوبارہ کبھی بند نہ کریں۔
+- **📢 MCS1711TU504 سرور (مالک کا حکم):** `/adreq` (`handleProf` → DO جدول `adreq (id, uid, data, img, st, note, ts, upd)`): op `add` (کھلا — shop / name / phone / line / kind / area / days 15|30 / ref / refName / by / rec / sid + تصویر ≤ 460KB؛ ایک uid سے 2 منٹ میں ایک، `wait`)، `mine` (uid)، `list` / `img` / `set` (ok / rej + note) صرف `verifyFirebaseAdmin`۔
