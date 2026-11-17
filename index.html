@@ -3369,7 +3369,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1711TU219</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1711TU220</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3591,7 +3591,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1711TU219</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1711TU220</span>
     </div>
   </div>
 
@@ -30380,40 +30380,99 @@ function isPlayBillingAvailable(){
 
 // ---------- Play Console سے قیمتیں لا کر کیش کر لیں — تاکہ Package Plans میں دکھائی جا سکیں ----------
 let playBillingDetailsCache = null;
-let playBillingLoadFailed = false; // ---------- ناکامی کی صورت میں Loading… ہمیشہ کے لیے اٹکنے کی بجائے خودکار Local/EasyPaisa پر واپس آ جائے ----------
-let playBillingLoadPromise = null; // ---------- ایک وقت میں ایک ہی کوشش چلے، دو دو اکٹھی نہیں ----------
+let playBillingLoadFailed = false;
+let playBillingLoadPromise = null; // ایک وقت میں ایک ہی کوشش
+let pbServiceCache = null;         // AIO1711TU220: Play Billing service صرف ایک بار لیں اور یاد رکھیں
+let pbServicePromise = null;
+window.pbErrKind = '';
 
-// ---------- کسی کام کو مقررہ سیکنڈ سے زیادہ انتظار نہ کرنے دیں — Google جواب ہی نہ دے تو اٹکنے کی بجائے اگلی کوشش ہو ----------
 function pbWithTimeout(promise, ms){
   return Promise.race([
     promise,
     new Promise((_, rej) => setTimeout(() => rej(new Error('timeout ' + ms + 'ms')), ms))
   ]);
 }
+function pbSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-// ---------- 🔁 خودکار دوبارہ کوشش: ایپ کھلتے وقت Google Play سے رابطہ جڑنے میں کبھی چند سیکنڈ لگ جاتے ہیں
-// (clientAppUnavailable وغیرہ)۔ اس لیے پہلی ناکامی پر ہمت نہ ہاریں — وقفے وقفے سے 4 بار نیا رابطہ جوڑ کر کوشش کریں،
-// اور ہر بار نیا service لیں (پرانا ٹوٹا ہوا دوبارہ استعمال نہ ہو)۔ گاہک کو صرف "Loading" نظر آئے ----------
+// ---------- AIO1711TU220: کیا ایپ Play Store سے انسٹال شدہ ایپ (TWA) کے اندر چل رہی ہے؟ ----------
+function pbInsideInstalledApp(){
+  try{
+    if(String(document.referrer || '').indexOf('android-app://') === 0){ try{ localStorage.setItem('pbTwaSeen', '1'); }catch(e){} return true; }
+    if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+    if(window.navigator && window.navigator.standalone) return true;
+    try{ if(localStorage.getItem('pbTwaSeen') === '1') return true; }catch(e){}
+  }catch(e){}
+  return false;
+}
+function pbOpenPlayStore(){
+  try{ window.open('https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos', '_blank'); }
+  catch(e){ try{ location.href = 'https://play.google.com/store/apps/details?id=com.pbtcodelabs.aiopos'; }catch(e2){} }
+}
+function pbIsClientUnavailable(err){
+  return !!err && (/clientAppUnavailable/i.test(String(err.message || '')) || /clientAppUnavailable/i.test(String(err.name || '')));
+}
+// ایپ پوری طرح کھلی اور نظر آ رہی ہو تب ہی Google Play سے رابطہ کریں
+function pbWaitVisible(){
+  return new Promise(res => {
+    if(document.visibilityState === 'visible') return res();
+    const done = () => { document.removeEventListener('visibilitychange', h); clearTimeout(t); res(); };
+    const h = () => { if(document.visibilityState === 'visible') done(); };
+    const t = setTimeout(done, 20000);
+    document.addEventListener('visibilitychange', h);
+  });
+}
+// ---------- service ایک ہی بار بنے اور cache ہو؛ clientAppUnavailable پر 1، 2، 4، 8 سیکنڈ کے وقفے سے دوبارہ کوشش ----------
+async function pbGetService(){
+  if(pbServiceCache) return pbServiceCache;
+  if(pbServicePromise) return pbServicePromise;
+  pbServicePromise = (async () => {
+    await pbWaitVisible();
+    const waits = [0, 1000, 2000, 4000, 8000];
+    let lastErr = null;
+    for(let i = 0; i < waits.length; i++){
+      if(waits[i]) await pbSleep(waits[i]);
+      try{
+        const s = await pbWithTimeout(window.getDigitalGoodsService('https://play.google.com/billing'), 8000);
+        if(s){ pbServiceCache = s; return s; }
+      }catch(err){
+        lastErr = err;
+        window.pbErrKind = pbIsClientUnavailable(err) ? 'clientAppUnavailable' : 'other';
+        window.pbDiag = 'C: ' + (err && err.name) + ' - ' + (err && err.message) + ' (try ' + (i + 1) + ')';
+      }
+    }
+    throw lastErr || new Error('Play Billing service not available');
+  })();
+  try{ return await pbServicePromise; }
+  finally{ pbServicePromise = null; }
+}
+
 async function loadPlayBillingDetails(){
-  if(!isPlayBillingAvailable()){ window.pbDiag='A: Play Billing not available (getDigitalGoodsService missing)'; return null; }
+  if(!isPlayBillingAvailable() || !pbInsideInstalledApp()){
+    window.pbDiag = 'A: not inside the Play-installed app (getDigitalGoodsService missing)';
+    window.pbErrKind = 'notInApp';
+    playBillingLoadFailed = true;
+    return null;
+  }
   if(playBillingDetailsCache) return playBillingDetailsCache;
   if(playBillingLoadPromise) return playBillingLoadPromise;
   playBillingLoadPromise = (async () => {
-    const waits = [0, 1500, 3000, 5000];
-    for(let i = 0; i < waits.length; i++){
-      if(waits[i]) await new Promise(r => setTimeout(r, waits[i]));
+    for(let i = 0; i < 2; i++){
       try{
-        const service = await pbWithTimeout(window.getDigitalGoodsService('https://play.google.com/billing'), 5000);
-        const details = await pbWithTimeout(service.getDetails(PLAY_BILLING_PRODUCTS.map(p => p.sku)), 6000);
+        const service = await pbGetService();
+        const details = await pbWithTimeout(service.getDetails(PLAY_BILLING_PRODUCTS.map(p => p.sku)), 10000);
         if(details && details.length > 0){
           playBillingDetailsCache = details;
           playBillingLoadFailed = false;
+          window.pbErrKind = '';
           return details;
         }
         window.pbDiag = 'B: Google returned 0 plans (try ' + (i + 1) + ')';
-      } catch(err){
+        window.pbErrKind = 'other';
+      }catch(err){
         console.warn('Play Billing details attempt ' + (i + 1) + ' failed:', err);
+        window.pbErrKind = pbIsClientUnavailable(err) ? 'clientAppUnavailable' : 'other';
         window.pbDiag = 'C: ' + (err && err.name) + ' - ' + (err && err.message) + ' (try ' + (i + 1) + ')';
+        pbServiceCache = null; // ٹوٹا ہوا service اگلی کوشش میں نیا لیں
       }
     }
     playBillingLoadFailed = true;
@@ -30423,8 +30482,8 @@ async function loadPlayBillingDetails(){
   finally{ playBillingLoadPromise = null; }
 }
 
-// ---------- ⚡ ایپ کھلتے ہی پس منظر میں خاموشی سے پیکج پہلے سے لوڈ کر لیں — تاکہ گاہک جب پیکج کھولے تو فوراً نظر آئیں ----------
-document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ if(isPlayBillingAvailable()) loadPlayBillingDetails(); }catch(e){} }, 3000); });
+// ---------- ایپ کھلنے کے بعد پس منظر میں پیکج پہلے سے لوڈ ----------
+document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try{ if(isPlayBillingAvailable() && pbInsideInstalledApp()) loadPlayBillingDetails(); }catch(e){} }, 3000); });
 
 // ---------- خریداری کا اصل عمل — کامیابی پر Play کو acknowledge کر کے، اسی طرح دن جوڑیں جیسے Local کوڈ سے جوڑتے ہیں ----------
 async function purchaseViaPlayBilling(sku, days){
@@ -30448,7 +30507,7 @@ async function purchaseViaPlayBilling(sku, days){
     // پہلے یہاں بغیر چیک کیے بلایا جاتا تھا، تو ادائیگی ہو جانے کے باوجود ایرر آتا اور دن نہیں جڑتے تھے۔
     // اب صرف موجود ہو تب بلائیں، اور ناکام بھی ہو تو خریداری کو ناکام نہ سمجھیں ----------
     try{
-      const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+      const service = await pbGetService();
       if(service && typeof service.acknowledge === 'function'){
         await service.acknowledge(purchaseToken, 'onetime');
       }
@@ -30547,7 +30606,7 @@ async function syncPlayBillingRenewal(){
   // ---------- AIO610TU027: ٹرائل کے دوران ہر بار چیک کریں — نئے فون پر نئی انسٹالیشن کو 7 دن ٹرائل ملتا ہے، اور پرانی خریداری فوراً واپس آنی چاہیے ----------
   if(daysLeft > 3 && !AppState.settings.isOnFreeTrial) return; // ---------- پیڈ سبسکرپشن کے فعال دورانیے میں بار بار نہ پوچھیں ----------
   try{
-    const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+    const service = await pbGetService();
     const purchases = await service.listPurchases();
     if(!purchases || purchases.length === 0) return;
 
@@ -30586,10 +30645,11 @@ async function restorePurchaseCore(){
   let purchases = null;
   for(let i = 0; i < 3 && purchases === null; i++){
     try{
-      const service = await pbWithTimeout(window.getDigitalGoodsService('https://play.google.com/billing'), 8000);
+      const service = await pbGetService();
       purchases = await pbWithTimeout(service.listPurchases(), 10000);
     }catch(e){
-      await new Promise(r => setTimeout(r, 1500)); // ---------- ہر بار نیا رابطہ، clientAppUnavailable جیسی عارضی خرابی کے لیے ----------
+      pbServiceCache = null;
+      await pbSleep(1500);
     }
   }
   if(purchases === null) return { status: 'unavailable' };
@@ -30789,15 +30849,15 @@ function openPackagePlansModal(phones){
   selectedPlanDays = null;
   selectedPlanPrice = null;
   playBillingLoadFailed = false; // ---------- ہر بار پاپ اپ کھلنے پر دوبارہ کوشش کا موقع دیں ----------
-  window.pbDiag = '';
+  window.pbDiag = ''; window.pbErrKind = '';
   renderPackagePlansView();
   document.getElementById('packagePlansModal').classList.add('show');
   // ---------- یہ ورژن ہمیشہ صرف Google Play Billing کے ذریعے چلتی ہے — قیمتیں لوڈ ہوتے ہی خودکار دوبارہ رینڈر ----------
   loadPlayBillingDetails().then(() => renderPackagePlansView());
   // ---------- خودکار دوبارہ کوششوں کو پورا وقت دیں (پہلے 6 سیکنڈ تھے، جو کم تھے) ----------
   setTimeout(() => {
-    if(!playBillingDetailsCache && document.getElementById('packagePlansModal').classList.contains('show')){ if(!window.pbDiag) window.pbDiag = 'D: no answer from Google within 30 seconds'; playBillingLoadFailed = true; renderPackagePlansView(); }
-  }, 30000);
+    if(!playBillingDetailsCache && document.getElementById('packagePlansModal').classList.contains('show')){ if(!window.pbDiag) window.pbDiag = 'D: no answer from Google within 80 seconds'; playBillingLoadFailed = true; renderPackagePlansView(); }
+  }, 80000);
 }
 
 // ---------- دنوں کو خوش کن لیبل میں بدلیں — "30 days" کی بجائے "1 Month" وغیرہ ----------
@@ -30817,11 +30877,19 @@ function renderPackagePlansView(){
   // Google Play پالیسی کے مطابق کوئی متبادل (EasyPaisa/Local) پیمنٹ کبھی نہیں دکھانی، اسی لیے
   // یہاں کوئی "لوکل" حصہ سرے سے موجود ہی نہیں — ناکامی کی صورت میں بھی صرف "دوبارہ کوشش کریں" دکھائیں ----------
   if(playBillingLoadFailed){
+    const _kind = window.pbErrKind || '';
+    const _msg = (_kind === 'notInApp')
+      ? 'Please open AIO POS from the app icon installed from Google Play.'
+      : (_kind === 'clientAppUnavailable')
+        ? 'Update the Google Play Store app, then fully close and reopen AIO POS.'
+        : 'Google Play is not responding right now. Please tap <b>Try Again</b>. If it still does not open, close the app fully and open it again.';
+    const _retryBtn = (_kind === 'notInApp') ? '' : `<button class="testPrintBtn" onclick="playBillingLoadFailed=false; playBillingDetailsCache=null; pbServiceCache=null; window.pbErrKind=''; renderPackagePlansView(); loadPlayBillingDetails().then(()=>renderPackagePlansView());">🔄 Try Again</button>`;
     wrap.innerHTML = `
       <div style="text-align:center; padding:20px 10px;">
-        <div style="color:var(--danger); font-weight:700; margin-bottom:12px;">⚠️ Google Play is not responding right now.</div>
-        <div style="color:var(--text); font-size:13px; margin-bottom:12px;">Please tap <b>Try Again</b>. If it still does not open, close the app fully and open it again.</div>
-        <button class="testPrintBtn" onclick="playBillingLoadFailed=false; playBillingDetailsCache=null; renderPackagePlansView(); loadPlayBillingDetails().then(()=>renderPackagePlansView());">🔄 Try Again</button>
+        <div style="color:var(--danger); font-weight:700; margin-bottom:12px;">⚠️ Google Play is not available</div>
+        <div style="color:var(--text); font-size:13px; margin-bottom:14px; line-height:1.6;">${_msg}</div>
+        <button class="testPrintBtn" style="margin-bottom:8px;" onclick="pbOpenPlayStore()">🛍️ Open in Play Store</button>
+        <div>${_retryBtn}</div>
         <div style="font-size:10px; color:var(--muted); margin-top:10px; word-break:break-all; opacity:.8;">Code: ${(window.pbDiag || '-').toString().replace(/</g,'&lt;')}</div>
       </div>`;
     return;
@@ -35146,9 +35214,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1711TU219'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1711TU220'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Developer panel opens again by tapping the version 7 times (with password) — Help Desk link still works';
+  const UPDATE_NOTE = 'Package Plans: more reliable Google Play connection, clearer messages and an Open in Play Store button';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
