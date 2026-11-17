@@ -700,6 +700,25 @@ export class McsStats {
     this.finLog("agslot430", { moved });
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agslot430', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), moved }));
   }
+  agFreeList() { try { const v = JSON.parse(this.finCfg("agfree", "[]") || "[]"); return Array.isArray(v) ? v.filter((c) => /^AG\d{3,}$/.test(c)).sort() : []; } catch (e) { return []; } }
+  agFreeSave(list) { const u = Array.from(new Set(list)).sort(); this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agfree', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify(u)); return u; }
+  agFreeCode(d) {   /* MCS1611MO487 (مالک کا حکم): ایجنٹ کا AG نمبر آزاد — اس کا پرانا حساب / ریفرل / چیٹ ایک محفوظ کوڈ (X…) پر، ایجنٹ بند؛ نمبر «خالی» فہرست میں */
+    const code = String(d && d.code || ""); if (!/^AG\d{3,}$/.test(code)) return "";
+    if (ADMIN_AG[entPhone(d.phone || "")] === code || Object.values(ADMIN_AG).includes(code)) return "";   /* AG001 / AG002 ایڈمن کے لیے پکے */
+    const arch = "X" + code + "-" + Date.now().toString(36).toUpperCase();
+    this.agMoveRefs(code, arch);
+    d.oldCodes = (d.oldCodes || []).filter((c) => c !== code).concat(arch); d.freedCode = code; d.freedAt = Date.now(); d.code = arch; d.off = true; d.offAt = Date.now();
+    this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), d.id);
+    for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { try { const x = JSON.parse(r.data); if (x.id !== d.id && (x.oldCodes || []).includes(code)) { x.oldCodes = x.oldCodes.filter((c) => c !== code); this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(x), x.id); } } catch (e) {} }
+    this.agFreeSave(this.agFreeList().concat(code));
+    this.finLog("agfree", { code, arch, id: d.id });
+    return code;
+  }
+  agTakeFree() {   /* سب سے چھوٹا خالی AG نمبر (جو ابھی کسی کے پاس نہیں) */
+    const used = new Set(this.sql.exec("SELECT data FROM agent").toArray().map((x) => { try { return JSON.parse(x.data).code; } catch (e) { return ""; } }));
+    const L = this.agFreeList(); const c = L.find((x) => !used.has(x)); if (!c) { if (L.length) this.agFreeSave(L.filter((x) => !used.has(x))); return ""; }
+    this.agFreeSave(L.filter((x) => x !== c && !used.has(x))); return c;
+  }
   agSlot486() {   /* MCS1611MO486 (مالک کا حکم، ایک بار): پہلا اصل ایجنٹ حبیب شہباز = AG003 (AG001 / AG002 ایڈمن کے) — AG003 خالی ہو تو اس کا AG004 → AG003، ریفرل / حساب / چیٹ ساتھ؛ پرانا کوڈ oldCodes میں */
     if (this._ag486) return; this._ag486 = 1;
     if (this.finCfg("agslot486", "")) return;
@@ -795,6 +814,7 @@ export class McsStats {
     const biz = this.agBizOf(rk, phone); if (!biz) return "";
     { const fixed = ADMIN_AG[entPhone(phone || "")]; if (fixed) { this.sql.exec("INSERT INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?) ON CONFLICT (cnic) DO UPDATE SET code = excluded.code", c, fixed, id || "", Date.now()); return fixed; } }   /* MCS1511SU430 */
     /* MCS1211TH351 (مالک کا حکم): ایجنٹ کوڈ ترتیب وار AG-001، AG-002… (MCS نمبر سے نہیں) */
+    { const fr = this.agTakeFree(); if (fr) { this.sql.exec("INSERT INTO agcnic (cnic, code, id, ts) VALUES (?, ?, ?, ?) ON CONFLICT (cnic) DO UPDATE SET code = excluded.code", c, fr, id || "", Date.now()); return fr; } }   /* MCS1611MO487: پہلے خالی ہوا AG نمبر */
     let mx = 0; for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { try { const m = /^AG-?(\d+)$/.exec(JSON.parse(r.data).code || ""); if (m) mx = Math.max(mx, +m[1]); } catch (e) {} }
     let code = "AG" + String(Math.max(mx, 2) + 1).padStart(3, "0");   /* 001 / 002 ایڈمن کے لیے محفوظ */
     for (const r of this.sql.exec("SELECT data FROM agent").toArray()) { const d = JSON.parse(r.data); if (d.code === code && d.id !== id && String(d.cnic || "").replace(/\D/g, "") !== c) { code = this.agNextCode("AGX"); break; } }
@@ -1781,6 +1801,9 @@ export class McsStats {
       return Response.json({ ok: true, list: this.sql.exec("SELECT phone, name, pin, ts, seen, perms, COALESCE(off, 0) AS off, offts FROM codev ORDER BY ts DESC").toArray().map((r) => Object.assign(r, { perms: this.cdPerms(r) })) });
     }
     if (!this._agMig) { this._agMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agSlot486(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.agMigrate(); } catch (e) {} try { this.agMigrate3(); } catch (e) {} try { this.subFix450(); } catch (e) {} }
+    if (op === "/ag_free") {   /* MCS1611MO487: خالی (پہلے الاٹ ہو کر آزاد ہوئے) AG نمبر — صرف نمبر، کوئی ذاتی معلومات نہیں */
+      return Response.json({ ok: true, free: this.agFreeList() });
+    }
     if (op === "/ag_find") {   /* MCS0511TH142: کوڈ / پرانا کوڈ / موبائل → ایجنٹ کا اصل کوڈ اور نام (لکھنا کچھ نہیں) */
       const b = await request.json(); const ag = this.agResolve(b.code, b.phone);
       return Response.json(ag ? { ok: true, code: ag.code, name: ag.name } : { ok: false, reason: "bad_code" });
@@ -1852,15 +1875,19 @@ export class McsStats {
         for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code && x.code === b.code) { if (b.note === "new" || !x.pin) { x.pin = String(100000 + Math.floor(Math.random() * 900000)); this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(x), r.id); } return Response.json({ ok: true, pin: x.pin, phone: x.phone, name: x.name }); } }
         return Response.json({ ok: false, reason: "none" });
       }
+      if (b.op === "free") {   /* MCS1611MO487 (مالک کا حکم): ایجنٹ ختم — AG نمبر آزاد، اگلے نئے ایجنٹ کو ملے؛ MCS ID / شناختی کارڈ ویسے؛ پرانا حساب الگ محفوظ کوڈ پر */
+        for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code && x.code === b.code) { const fc = this.agFreeCode(x); return Response.json({ ok: !!fc, free: this.agFreeList(), reason: fc ? "" : "admin_code" }); } }
+        return Response.json({ ok: false, reason: "none" });
+      }
       if (b.op === "deact" || b.op === "react") {   /* AGP0511TH011: ایجنٹ غیر فعال / دوبارہ فعال (کوڈ اور پرانا حساب ویسا) */
-        for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code && x.code === b.code) { x.off = b.op === "deact"; x.offAt = x.off ? Date.now() : 0; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(x), r.id); this.agNote("A:" + x.code, "status", x.off ? "⛔ آپ کا ایجنٹ اکاؤنٹ عارضی طور پر غیر فعال کر دیا گیا" : "✅ آپ کا ایجنٹ اکاؤنٹ دوبارہ فعال"); return Response.json({ ok: true, off: x.off }); } }
+        for (const r of this.sql.exec("SELECT id, data FROM agent").toArray()) { const x = JSON.parse(r.data); if (x.code && x.code === b.code) { if (x.freedCode && b.op === "react") return Response.json({ ok: false, reason: "freed" }); x.off = b.op === "deact"; x.offAt = x.off ? Date.now() : 0; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(x), r.id); this.agNote("A:" + x.code, "status", x.off ? "⛔ آپ کا ایجنٹ اکاؤنٹ عارضی طور پر غیر فعال کر دیا گیا" : "✅ آپ کا ایجنٹ اکاؤنٹ دوبارہ فعال"); return Response.json({ ok: true, off: x.off }); } }
         return Response.json({ ok: false, reason: "none" });
       }
       if (b.op === "proofdone") { this.sql.exec("UPDATE agproof SET done = 1 WHERE id = ?", parseInt(b.pid, 10) || 0); return Response.json({ ok: true }); }
       const r = this.sql.exec("SELECT data FROM agent WHERE id = ?", b.id).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "none" });
       const d = JSON.parse(r.data);
       if (b.op === "imgs") return Response.json({ ok: true, img: Object.fromEntries(this.sql.exec("SELECT kind, data FROM agimg WHERE id = ?", b.id).toArray().map((x) => [x.kind, x.data])) });
-      if (b.op === "delete") { this.sql.exec("DELETE FROM agent WHERE id = ?", b.id); this.sql.exec("DELETE FROM agimg WHERE id = ?", b.id); return Response.json({ ok: true }); }
+      if (b.op === "delete") { try { this.agFreeCode(d); } catch (e) {} this.sql.exec("DELETE FROM agent WHERE id = ?", b.id); this.sql.exec("DELETE FROM agimg WHERE id = ?", b.id); return Response.json({ ok: true }); }   /* MCS1611MO487: حذف = AG نمبر آزاد (پرانا حساب الگ محفوظ کوڈ پر) */
       if (b.op === "approve") {
         { const st = this.agStaffCnic(d.cnic); if (st) return Response.json({ ok: false, reason: "cnic_staff", other: st }); } { const o = this.agCnicOwner(d.cnic, d.id); if (o && o.status === "approved") return Response.json({ ok: false, reason: "cnic_taken", other: o.name + " (" + o.code + ")" }); }
         if (!d.code || /^p\d/.test(d.code)) { if (String(d.cnic || "").replace(/\D/g, "").length !== 13) return Response.json({ ok: false, reason: "bad_cnic" }); d.code = this.agCodeFor(d.cnic, d.bizRk, d.id, d.phone); if (!d.code) return Response.json({ ok: false, reason: "no_biz" }); }   /* MCS1111WE312: AG-<سسٹم ID کا نمبر>؛ کاروبار لازمی */
@@ -2320,6 +2347,7 @@ async function handleAgent(request, env, path) {
     if (d.full && (!d.father || !d.address || !/@/.test(d.email))) return reply({ ok: false, reason: "missing" });   /* MCS0911MO264: پورے فارم میں سب خانے لازمی */   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
     return fwd("/ag_apply", { d, img });
   }
+  if (path === "/agfree") return fwd("/ag_free", {});
   if (path === "/agfind") { const code = S(b.code, 60); if (!code) return reply({ ok: false, reason: "bad_code" }); return fwd("/ag_find", { code, phone: (() => { const dd = code.replace(/\D/g, ""); return dd.length >= 10 && dd.length <= 12 && /^0?3\d{9}$/.test(dd.slice(-11)) ? entPhone(code) : ""; })() }); }
   if (path === "/agref") { const code = S(b.code, 60), rk = S(b.rk, 60); if (!code || !rk) return reply({ ok: false, reason: "missing" }); return fwd("/ag_ref", { code, phone: (() => { const dd = code.replace(/\D/g, ""); return dd.length >= 10 && dd.length <= 12 && /^0?3\d{9}$/.test(dd.slice(-11)) ? entPhone(code) : ""; })(), rk, d: { name: S(b.name, 80), phone: S(b.phone, 20), cat: S(b.cat, 60), city: S(b.city, 60) } }); }
   if (path === "/agportal") {
@@ -2423,7 +2451,7 @@ async function handleAgent(request, env, path) {
   }
   if (path === "/agadmin") {
     if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
-    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react", "agpin", "recode"].includes(op)) return reply({ error: "bad_op" }, 400);
+    const op = String(b.op || ""); if (!["list", "imgs", "approve", "reject", "pending", "delete", "rate", "pay", "unpay", "proofdone", "create", "fin", "gcut", "inbox", "thread", "deact", "react", "agpin", "recode", "free"].includes(op)) return reply({ error: "bad_op" }, 400);
     let c;
     if (op === "create") { const cc = b.c || {}, cn = String(cc.cnic || "").replace(/\D/g, ""); c = { name: S(cc.name, 80), phone: entPhone(cc.phone), code: S(cc.code, 60), city: S(cc.city, 60), biz: S(cc.biz, 120), cnic: cn.length === 13 ? cn.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3") : "", father: S(cc.father, 80), address: S(cc.address, 200), email: S(cc.email, 80), wa: entPhone(cc.wa) || "" };
       if (cc.img && typeof cc.img === "object") { c.img = {}; for (const k of ["front", "back", "selfie"]) { const v = String(cc.img[k] || ""); if (/^data:image\/(jpeg|png|webp);base64,/.test(v) && v.length <= 700000) c.img[k] = v; } }   /* MCS0911MO266: ڈویلپر کے فارم کی تصویریں (اختیاری) */
@@ -2682,7 +2710,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/psave", "/padmin", "/preq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
