@@ -3369,7 +3369,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1711TU218</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1711TU219</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3591,7 +3591,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1711TU218</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1711TU219</span>
     </div>
   </div>
 
@@ -9318,7 +9318,7 @@ function getOrCreateDeviceUID(){
 const DEV_UNLOCK_SALT = 'AIO-DEV-UNLOCK-v1';
 const DEV_UNLOCK_HASH = 'ec6bf74a5d10d1524fbae3dd818a3be18c04bd13a6bc3242dd0e5d9fe6532a85';
 let _devTapCount = 0, _devTapTimer = null;
-function devConsoleBadgeTap(){ return; /* 🔐 مالک کا حکم (16 نومبر): 7 بار دبانے سے ڈویلپر پینل ختم — صرف ہیلپ ڈیسک «🔐 ڈویلپر پینل» سے (?devpanel=1) */
+function devConsoleBadgeTap(){ /* 🔐 مالک کا حکم (16 نومبر): 7 بار دبانے سے ڈویلپر پینل ختم تھا — MCS/سب ایپس 17 نومبر: مالک کے حکم سے واپس — صرف ہیلپ ڈیسک «🔐 ڈویلپر پینل» سے (?devpanel=1) */
   _devTapCount++;
   clearTimeout(_devTapTimer);
   _devTapTimer = setTimeout(() => { _devTapCount = 0; }, 2500);
@@ -35146,9 +35146,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1711TU218'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1711TU219'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Activation key box: simpler wording';
+  const UPDATE_NOTE = 'Developer panel opens again by tapping the version 7 times (with password) — Help Desk link still works';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
