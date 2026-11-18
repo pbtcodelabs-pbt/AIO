@@ -3414,7 +3414,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE222</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE223</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3636,7 +3636,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE222</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE223</span>
     </div>
   </div>
 
@@ -26939,9 +26939,14 @@ function selectBillsInDateRange(){
 // ---------- Bulk Delete سے پہلے PIN لازمی — تاکہ غلطی سے/بلا اجازت ڈیلیٹ نہ ہو ----------
 function requestBulkDeleteAuth(){
   if(selectedBillIds.size === 0){ alert('Please select at least one bill to delete.'); return; }
-  document.getElementById('bulkDeletePinInput').value = '';
-  document.getElementById('bulkDeletePinError').style.display = 'none';
-  document.getElementById('bulkDeletePinModal').classList.add('show');
+  // AIO1811WE223 (مالک کا حکم): PIN ختم — دو بار OK، پھر ڈیلیٹ (پرانا PIN والا confirmBulkDeleteWithPin اب استعمال نہیں ہوتا)
+  const n = selectedBillIds.size;
+  if(!confirm(`Delete ${n} selected bill(s) permanently? This cannot be undone.`)) return;
+  if(!confirm(`Final confirmation — permanently delete ${n} bill(s)?\nPress OK to delete them now.`)) return;
+  invoicesData = invoicesData.filter(inv => !selectedBillIds.has(inv.invoice_id));
+  saveToStorage('invoices', invoicesData);
+  alert(`✅ ${n} bill(s) permanently deleted.`);
+  toggleBulkDeleteMode();
 }
 async function confirmBulkDeleteWithPin(){
   const enteredPin = document.getElementById('bulkDeletePinInput').value.trim();
@@ -27267,6 +27272,7 @@ function permanentlyDeleteBill(invoiceId){
   const inv = invoicesData.find(i => i.invoice_id === invoiceId);
   if(!inv) return;
   if(!confirm(`Permanently delete voided bill ${inv.invoice_no}? This cannot be undone.`)) return;
+  if(!confirm(`Final confirmation — permanently delete bill ${inv.invoice_no}?\nPress OK to delete it now.`)) return;   // AIO1811WE223: دوسرا OK، PIN نہیں
   invoicesData = invoicesData.filter(i => i.invoice_id !== invoiceId);
   persistAllData();
   renderBillHistory();
@@ -27280,6 +27286,7 @@ function adminVoidBill(invoiceId){
     return;
   }
   if(!confirm('Void this bill? Stock will be restored, any cash/receivable/wallet effects will be reversed, and it will move out of the main list into the 🗑️ Voided tab.')) return;
+  if(!confirm(`Final confirmation — delete bill ${inv.invoice_no}?\nPress OK to delete it now.`)) return;   // AIO1811WE223: دوسرا OK، PIN نہیں
   executeVoidBill(inv);
   persistAllData();
   renderBillHistory();
@@ -35423,7 +35430,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1811WE222'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1811WE223'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
   const UPDATE_NOTE = 'Updates now install quietly in the background — no update card; only the owner sees a thin progress bar';
   const UPD_KEY = 'aioUpdateFromVersion';
@@ -36474,7 +36481,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     if(!h.length) return Promise.resolve(true);
     return askPin('🔐 Admin PIN required', 'Deleting needs the Admin PIN, so nothing is removed by mistake or without permission.', h);
   };
-  const DEL = [['deleteRecNote'], ['deleteExpenseEntry'], ['deletePendingPurchaseOrder', 'renderPurchaseOrdersScreen'], ['permanentlyDeleteBill'], ['adminVoidBill'],
+  const DEL = [['deleteRecNote'], ['deleteExpenseEntry'], ['deletePendingPurchaseOrder', 'renderPurchaseOrdersScreen'],   /* AIO1811WE223 (مالک کا حکم): بل ڈیلیٹ پر PIN نہیں — دو بار OK (permanentlyDeleteBill / adminVoidBill / bulk) */
     ['deleteVariantBatch'], ['deleteAdvanceOrder'], ['deleteDiaryEntry'], ['deleteDiaryHistoryLine'], ['deletePaymentAccount'], ['deleteSupplierBankAccount'], ['deleteReplyTemplate'], ['deleteUser']];
   DEL.forEach(([n, after]) => {
     const orig = window[n]; if(typeof orig !== 'function' || orig._delGate) return;
