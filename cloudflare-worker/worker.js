@@ -454,6 +454,11 @@ export class McsStats {
       S.forEach((s, n) => { const d = { id: s[0], prefix: s[1], name: s[2], days: s[3], devices: s[4], life: s[5], sku: s[6], active: true, sort: n + 1 }; this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", app + "|" + d.id, app, JSON.stringify(d), Date.now()); });
       rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
     }
+    if (!rows.length && app === "DR") {   /* AIODR1811WE178 (مالک کا حکم): AIO Direct — ایک فون، چار پیکج */
+      const S = [["dr-3m", "DR-3M", "3 Months", 90, false], ["dr-6m", "DR-6M", "6 Months", 180, false], ["dr-1y", "DR-1Y", "1 Year", 365, false], ["dr-life", "DR-LIFE", "Lifetime", 0, true]];
+      S.forEach((s, n) => { const d = { id: s[0], prefix: s[1], name: s[2], days: s[3], devices: 1, life: s[4], sku: "", active: true, sort: n + 1 }; this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", app + "|" + d.id, app, JSON.stringify(d), Date.now()); });
+      rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
+    }
     if (!rows.length && app === "MCS") {   /* MCS1711TU499: پہلی بار — ایک سال کی رجسٹریشن */
       const d = { id: "mcs-1y", prefix: "MCS-1Y", name: "1 Year Registration", days: 365, devices: 1, life: false, sku: "", active: true, sort: 1 };
       this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", "MCS|" + d.id, "MCS", JSON.stringify(d), Date.now());
@@ -2498,7 +2503,7 @@ async function verifySmDev(request, proj, emails) {
    /entstatus {app, key, dev} — پہلے سے جڑا فون (تجدید / بند ہونے کی خبر)
    /entadmin  (Authorization: MCS ایڈمن کا فائربیس ٹوکن) {op:'grant'|'list'|'revoke'|'unrevoke'|'reset'|'delete', ...}
    ===================================================================== */
-const ENT_APPS = ["AIO", "MCS"];   /* MCS1711TU499: My City Shines کے ایک سال کے رجسٹریشن کوڈ بھی اسی جدول میں (چھڑانا /pcode سے) */
+const ENT_APPS = ["AIO", "MCS", "DR"];   /* AIODR1811WE178: AIO Direct — AIO ID پر پیکج */   /* MCS1711TU499: My City Shines کے ایک سال کے رجسٹریشن کوڈ بھی اسی جدول میں (چھڑانا /pcode سے) */
 const GOOGLE_CLIENT_IDS = ["954131537356-2be2rne30mje71l9qibosblvj3j0eqoj.apps.googleusercontent.com"];
 let gJwks = null, gJwksAt = 0;
 async function verifyGoogleIdToken(jwt) {
