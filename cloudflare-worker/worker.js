@@ -2142,6 +2142,17 @@ export class McsStats {
         return Response.json({ ok: true, codes: out });
       }
       /* AIO1811WE224 (مالک کا حکم — کوڈ کا نظام ختم): ہیلپ ڈیسک سے AIO ID پر سیدھا پیکج — چابی "a:AIO12345"، اسی ID والا فون خود جڑتا ہے */
+      if (b.op === "aionew") {   /* AIO1811WE225 (مالک کا حکم — ID بھیجنے / منگوانے کا نظام نہیں): سرور پر بنی ہر AIO ID خود ہیلپ ڈیسک کی فہرست میں (نام + حالت) */
+        const want = b.app === "DR" ? "DR" : "AIO", out = [];
+        for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) {
+          let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
+          if ((a.app === "DR" ? "DR" : "AIO") !== want) continue;
+          const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
+          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "" } : null });
+        }
+        out.sort((p, q) => (q.made || 0) - (p.made || 0));
+        return Response.json({ ok: true, list: out.slice(0, 2000) });
+      }
       if (b.op === "aiolook" || b.op === "aiogrant") {
         const ar = this.sql.exec("SELECT dev, data, ts FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
         let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
@@ -2840,6 +2851,7 @@ async function handleEnt(request, env, path) {
     if (op === "pkglist") return fwd("/ent_admin", { op, app });
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
+    if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
     if (op === "aiolook" || op === "aiogrant") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن) */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^AIO\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
