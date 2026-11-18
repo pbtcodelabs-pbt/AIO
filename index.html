@@ -779,13 +779,29 @@
   body.wsOff .wsOnly{display:none !important;}
   /* AIO1411SA209: Daily Recovery */
   .drBar{display:flex; gap:8px; margin-bottom:8px; align-items:center;}
+  /* AIO1811WE227: کمپیکٹ Recovery */
+  .drQuick{display:flex; gap:8px; margin:0 0 10px;}
+  .drQuick button{flex:1; min-width:0; padding:8px 4px; border:1.5px solid #86efac; background:#ecfdf5; color:#166534; border-radius:10px; font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .drQuick button.h{border-color:#93c5fd; background:#eff6ff; color:#1e3a8a;}
+  .drHead{display:flex; gap:6px; align-items:center; margin:0 0 8px;}
+  .drTabs{flex:1; display:flex; gap:4px; background:#f1f5f9; border-radius:10px; padding:3px; min-width:0;}
+  .drTabs button{flex:1; min-width:0; border:none; background:transparent; padding:7px 4px; border-radius:8px; font-weight:800; font-size:12px; color:#475569; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .drTabs button.active{background:var(--primary); color:#fff;}
+  .drPrintBtn{flex:0 0 auto; border:1.5px solid #cbd5e1; background:#fff; border-radius:10px; padding:7px 9px; font-weight:800; font-size:12px; cursor:pointer;}
+  .drBar.drOne{gap:5px; margin-bottom:6px;}
+  .drBar.drOne input[type=text]{flex:1.5 1 0;} .drBar.drOne select, .drBar.drOne input[type=text]{padding:7px 5px; font-size:12px; border-radius:8px;}
+  .drBar.drOne .drChk{flex:0 0 auto; font-size:12px; gap:3px;}
+  .drSaveBtn{margin-top:8px !important; padding:10px !important; background:var(--success) !important;}
+  .drG5{grid-template-columns:1fr 1.1fr 1fr 36px 36px !important; gap:5px !important;}
+  .drG5 .drPosterBtn{width:36px; height:34px; font-size:16px;} .drWaBtn{background:#dcfce7 !important;}
+  .drDayPrint{border:1px solid #cbd5e1; background:#fff; border-radius:7px; padding:1px 6px; margin-left:4px; cursor:pointer; font-size:12px;}
   .drBar select, .drBar input[type=text]{flex:1 1 0; min-width:0; padding:9px; border:1px solid #dbe1ea; border-radius:10px; font-size:13px; background:#fff;}
   .drChk{flex:1 1 0; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700;}
-  .drSummary{display:flex; gap:6px; margin:8px 0; font-size:11.5px;}
-  .drSummary div{flex:1; background:#f1f5f9; border-radius:10px; padding:6px 4px; text-align:center; font-weight:700;}
-  .drSummary b{display:block; font-size:13.5px;}
-  .drRow{background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:9px 10px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,.05);}
-  .drTop{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px;}
+  .drSummary{display:flex; gap:4px; margin:4px 0 8px; font-size:10.5px;}
+  .drSummary div{flex:1; min-width:0; background:#f1f5f9; border-radius:8px; padding:4px 2px; text-align:center; font-weight:700; color:#475569;}
+  .drSummary b{display:block; font-size:12.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .drRow{background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:6px 8px; margin-bottom:6px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .drTop{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:3px;}
   .drTop b{font-size:14.5px;} .drTop small{color:var(--muted); font-size:11px;}
   .drGrid{display:grid; grid-template-columns:1fr 1.1fr 1fr 42px; gap:6px; align-items:end;}
   .drCell small{display:block; font-size:10.5px; color:var(--muted); font-weight:700; margin-bottom:2px;}
@@ -794,6 +810,7 @@
   .drLeft.red{color:#b91c1c;} .drLeft.green{color:#15803d;} .drLeft.orange{color:#c2410c;}
   .drPosterBtn{width:42px; height:38px; border:none; border-radius:10px; background:#dbeafe; font-size:19px; cursor:pointer; padding:0;}
 .drPaidTag{font-size:11.5px; font-weight:800; color:#15803d; margin:-2px 0 6px;}
+span.drPaidTag{margin:0 4px 0 0; font-size:11px;}
 .drHistDay{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin:14px 2px 6px; font-weight:800; font-size:13.5px;}
 .drHistDay small{color:var(--muted); font-size:11.5px; font-weight:700;}
 .drHistMore{width:100%; padding:10px; border:1.5px dashed #94a3b8; background:#f8fafc; border-radius:10px; font-weight:800; cursor:pointer; margin:8px 0 14px;}
@@ -3414,7 +3431,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE226</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE227</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3636,7 +3653,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE226</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE227</span>
     </div>
   </div>
 
@@ -4418,6 +4435,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <input type="text" id="partySearchInput" placeholder="🔍 Search by name or phone..." oninput="renderPartyList(this.value)">
         <button onclick="openNewPartyModal()">+ Add New</button>
       </div>
+      <!-- AIO1811WE227 (مالک کا حکم): Customers کے اوپر دو چھوٹے بٹن — آج کی ریکوری / پرانی ریکوری -->
+      <div id="recoveryOpenBtn" class="admin-only" style="display:none;"><div class="drQuick"><button type="button" onclick="drOpen('today')">📅 Today's Recovery</button><button type="button" class="h" onclick="drOpen('hist')">📜 Recovery History</button></div></div>
       <div class="csvImportBar">
         <button class="csvTemplateBtn" onclick="downloadPartyCsvTemplate()">📄 Download Excel/CSV Template</button>
         <button class="csvImportBtn" id="partyImportBtn" onclick="document.getElementById('partyCsvInput').click()">📥 Import <span id="partyImportBtnLabel">Customers</span></button>
@@ -4425,7 +4444,6 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
       <button id="bulkReminderBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:14px; background:#fff7ed; color:#c2410c; border:1.5px dashed #fdba74; border-radius:10px; font-weight:700; cursor:pointer;" onclick="openBulkReminderCenter()">📢 Remind All (Outstanding Balances)</button>
 
-      <button id="recoveryOpenBtn" class="admin-only" style="display:none; width:100%; padding:11px; margin-bottom:10px; background:#ecfdf5; color:#166534; border:1.5px solid #86efac; border-radius:10px; font-weight:800; cursor:pointer;" onclick="goTo('recovery')">📅 Recovery — Today's Recovery &amp; History</button>
       <div class="partyList" id="partyListWrap"></div>
     </div>
 
@@ -5219,38 +5237,38 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
     <!-- ===== AIO1411SA209: 📅 Daily Recovery ===== -->
     <div class="screen admin-only" id="screen-recovery">
-      <div class="pageTitle">📅 Recovery</div>
-      <!-- AIO1811WE222: دو ٹیب — Today's Recovery (پرانی اسکرین) / Recovery History (تاریخ وار) -->
-      <div class="billStatusTabs" id="drTabs" style="margin-bottom:10px;">
-        <button class="billTabBtn active" id="drTab-today" onclick="drSetTab('today')">📅 Today's Recovery</button>
-        <button class="billTabBtn" id="drTab-hist" onclick="drSetTab('hist')">📜 Recovery History</button>
+      <!-- AIO1811WE227 (مالک کا حکم): سب ایک ایک لائن میں، کم جگہ — ریکارڈ اوپر نظر آئیں؛ 🖨️ آج کی رپورٹ -->
+      <div class="drHead">
+        <div class="drTabs" id="drTabs">
+          <button class="active" id="drTab-today" onclick="drSetTab('today')">📅 Today</button>
+          <button id="drTab-hist" onclick="drSetTab('hist')">📜 History</button>
+        </div>
+        <button class="drPrintBtn" onclick="drPrintDay(drToday())" title="Print today's report">🖨️ Report</button>
       </div>
       <div id="drTodayWrap">
 
-      <div class="drBar">
-        <select id="drSort" onchange="DR.sort=this.value; drRender()">
-          <option value="high">💰 Highest balance first</option>
-          <option value="low">💰 Lowest balance first</option>
-          <option value="new">🆕 Newest customers first</option>
-          <option value="old">🕰️ Oldest customers first</option>
-          <option value="name">🔤 Name (A–Z)</option>
+      <div class="drBar drOne">
+        <input type="text" id="drSearch" placeholder="🔍 Search" oninput="DR.q=this.value; drRender()">
+        <select id="drSort" onchange="DR.sort=this.value; drRender()" title="Sort">
+          <option value="high">💰 High → Low</option>
+          <option value="low">💰 Low → High</option>
+          <option value="new">🆕 Newest</option>
+          <option value="old">🕰️ Oldest</option>
+          <option value="name">🔤 A–Z</option>
         </select>
-        <select id="drArea" onchange="DR.area=this.value; drRender()"><option value="">🗺️ All areas</option></select>
-      </div>
-      <div class="drBar">
-        <input type="text" id="drSearch" placeholder="🔍 Search customer" oninput="DR.q=this.value; drRender()" style="flex:2;">
-        <label class="drChk"><input type="checkbox" id="drAll" onchange="DR.all=this.checked; drRender()"> Include zero balance</label>
+        <select id="drArea" onchange="DR.area=this.value; drRender()" title="Area"><option value="">🗺️ All areas</option></select>
+        <label class="drChk" title="Include zero balance"><input type="checkbox" id="drAll" onchange="DR.all=this.checked; drRender()"> 0</label>
       </div>
 
       <div class="drSummary" id="drSummary"></div>
       <div id="drListWrap"></div>
 
-      <button class="checkoutBtn" style="margin-top:12px; background:var(--success);" onclick="drSaveAll()">💾 Save received payments</button>
-      <div class="settingsHint" style="margin:6px 0 14px;">Type the amount you collected in each row — the remaining balance updates at once. Nothing is saved until you press “Save received payments”. Tap 🖼️ on a row to save that customer and get a poster to share.</div>
+      <button class="checkoutBtn drSaveBtn" onclick="drSaveAll()">💾 Save received payments</button>
+      <div class="settingsHint" style="margin:4px 0 12px; font-size:11.5px;">Type the amount in each row, then press Save. 🖼️ = poster • 💬 = reminder • 🖨️ = today's report.</div>
       </div>
 
       <div id="drHistWrap" style="display:none;">
-        <div class="drBar"><input type="text" id="drHistSearch" placeholder="🔍 Search customer" oninput="DRH.q=this.value; DRH.days=30; drHistRender()" style="flex:1;"></div>
+        <div class="drBar drOne"><input type="text" id="drHistSearch" placeholder="🔍 Search customer" oninput="DRH.q=this.value; DRH.days=30; drHistRender()" style="flex:1;"></div>
         <div class="drSummary" id="drHistSummary"></div>
         <div id="drHistList"></div>
       </div>
@@ -25351,7 +25369,7 @@ function drSummaryPaint(list){
   const due = list.reduce((s, c) => s + drDue(c), 0);
   const got = list.reduce((s, c) => s + drReceived(c), 0);
   document.getElementById('drSummary').innerHTML =
-    `<div>Customers<b>${list.length}</b></div><div>Total due<b>${drMoney(due)}</b></div><div>Received now<b>${drMoney(got)}</b></div><div>Remaining<b>${drMoney(due - got)}</b></div>`;
+    `<div>Customers<b>${list.length}</b></div><div>Total due<b>${drMoney(due)}</b></div><div>Received<b>${drMoney(got)}</b></div><div>Remaining<b>${drMoney(due - got)}</b></div>`;
 }
 function drRender(){
   DRH.map = drBuildTodayMap();   /* AIO1811WE222 */
@@ -25364,15 +25382,14 @@ function drRender(){
     const id = c.customer_id, li = drLeftInfo(c), v = DR.rec[id];
     const pt = drPaidToday(id);
     return `<div class="drRow">
-      <div class="drTop"><b>${drEsc(c.name)}</b><small>${drEsc(c.area || '')}</small></div>
-      ${pt.sum > 0 ? `<div class="drPaidTag">✅ Received today ${drMoney(pt.sum)}</div>` : ''}
-      <div class="drGrid">
+      <div class="drTop"><b>${drEsc(c.name)}</b><small>${pt.sum > 0 ? `<span class="drPaidTag">✅ Today ${drMoney(pt.sum)}</span> ` : ''}${drEsc(c.area || '')}</small></div>
+      <div class="drGrid drG5">
         <div class="drCell"><small>Balance</small><b>${drMoney(drDue(c))}</b></div>
         <div class="drCell"><small>Recovery</small><input type="number" inputmode="decimal" min="0" placeholder="0" value="${v ? drEsc(v) : ''}" onfocus="this.select()" oninput="drTyped(${id}, this.value)"></div>
         <div class="drCell"><small>Remaining</small><b class="drLeft ${li.cls}" id="drLeft-${id}">${li.txt}</b></div>
         <div class="drCell"><button class="drPosterBtn" onclick="drPoster(${id})" title="Poster">🖼️</button></div>
+        <div class="drCell"><button class="drPosterBtn drWaBtn" onclick="drOpenReminder(${id})" title="Reminder">💬</button></div>
       </div>
-      <button class="drRemBtn" onclick="drOpenReminder(${id})">💬 Reminder</button>
     </div>`;
   }).join('');
 }
@@ -25479,6 +25496,36 @@ function drBuildTodayMap(){
 }
 function drPaidToday(id){ if(!DRH.map) DRH.map = drBuildTodayMap(); return DRH.map[id] || { sum: 0, list: [] }; }
 function drSetTab(tab){ DRH.tab = tab === 'hist' ? 'hist' : 'today'; drTabApply(); }
+/* AIO1811WE227: Customers والے دو چھوٹے بٹن */
+function drOpen(tab){ DRH.tab = tab === 'hist' ? 'hist' : 'today'; goTo('recovery'); }
+/* AIO1811WE227 (مالک کا حکم): کسی بھی دن کی صاف ستھری رپورٹ — ایک پرنٹ میں اس دن کی پوری ریکوری */
+function drPrintDay(d){
+  d = d || drToday();
+  const rows = (paymentsData || []).filter(p => drIsCustIn(p) && p.date === d).sort((a, b) => (a.payment_id || 0) - (b.payment_id || 0));
+  if(!rows.length){ alert('No recovery entry on ' + drNiceDate(d) + ' yet.'); return; }
+  const shop = drEsc(AppState.settings.businessName || 'AIO POS'), ph = drEsc(AppState.settings.businessPhone || '');
+  const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } };
+  const num = n => Math.round(Number(n) || 0).toLocaleString();
+  let tOld = 0, tGot = 0, tLeft = 0;
+  const body = rows.map((p, i) => { const o = Number(p.balance_before) || 0, g = Number(p.amount) || 0, l = Number(p.balance_after) || 0; tOld += o; tGot += g; tLeft += l;
+    return `<tr><td>${i + 1}</td><td class="n">${drEsc(p.party_name || '')}</td><td>${num(o)}</td><td class="g">${num(g)}</td><td class="${l > 0 ? 'r' : 'g'}">${l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear'}</td><td class="s">${tm(p)}<br>${drEsc(p.method || '')}</td></tr>`; }).join('');
+  const w = window.open('', '_blank');
+  if(!w){ alert('Please allow pop-ups to print.'); return; }
+  w.document.write(`<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recovery ${drEsc(drNiceDate(d))}</title><style>
+    body{font-family:Arial,sans-serif; padding:14px; color:#111; margin:0;} .h{text-align:center; border-bottom:2px solid #111; padding-bottom:6px; margin-bottom:8px;} .h b{font-size:18px;} .h div{font-size:12px; color:#444;}
+    .t{display:flex; justify-content:space-between; font-size:13px; font-weight:bold; margin:6px 0 8px;}
+    table{border-collapse:collapse; width:100%; font-size:12px;} th,td{border:1px solid #94a3b8; padding:4px 4px; text-align:right; white-space:nowrap;} th{background:#e2e8f0; font-size:11.5px;}
+    td:first-child,th:first-child{text-align:center; width:22px;} td.n,th.n{text-align:left; white-space:normal;} td.s{font-size:10px; color:#444; text-align:center; line-height:1.25;} .g{color:#15803d; font-weight:bold;} .r{color:#b91c1c; font-weight:bold;}
+    tfoot td{background:#f1f5f9; font-weight:bold;} .f{text-align:center; font-size:11.5px; color:#444; margin-top:10px;}
+    @media print{ body{padding:6mm;} }</style></head><body>
+    <div class="h"><b>${shop}</b><div>📅 Recovery Report — ${drEsc(drNiceDate(d))}</div></div>
+    <div class="t"><span>Entries: ${rows.length}</span><span>Total received: Rs. ${num(tGot)}</span></div>
+    <table><thead><tr><th>#</th><th class="n">Customer</th><th>Old Bal.</th><th>Received</th><th>Remaining</th><th style="text-align:center">Time</th></tr></thead><tbody>${body}</tbody>
+    <tfoot><tr><td></td><td class="n">Total</td><td>${num(tOld)}</td><td class="g">${num(tGot)}</td><td>${num(tLeft)}</td><td></td></tr></tfoot></table>
+    <div class="f">${shop}${ph ? ' • ' + ph : ''}</div>
+    <script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+  w.document.close();
+}
 function drTabApply(){
   const hist = DRH.tab === 'hist';
   const a = document.getElementById('drTodayWrap'), b = document.getElementById('drHistWrap');
@@ -25544,7 +25591,7 @@ function drHistRender(){
   wrap.innerHTML = shown.map(d => {
     const list = byDay[d].sort((a, b) => (b.payment_id || 0) - (a.payment_id || 0));
     const sum = list.reduce((s, p) => s + (Number(p.amount) || 0), 0);
-    return `<div class="drHistDay"><span>📅 ${drEsc(drNiceDate(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} payment(s) • ${drMoney(sum)}</small></div>` + list.map(p => `<div class="drRow">
+    return `<div class="drHistDay"><span>📅 ${drEsc(drNiceDate(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} payment(s) • ${drMoney(sum)} <button class="drDayPrint" onclick="drPrintDay('${drEsc(d)}')" title="Print this day">🖨️</button></small></div>` + list.map(p => `<div class="drRow">
       <div class="drTop"><b>${drEsc(p.party_name)}</b><small>${drEsc(p.by || '')}</small></div>
       <div class="drGrid">
         <div class="drCell"><small>Balance</small><b>${drMoney(p.balance_before)}</b></div>
@@ -35430,9 +35477,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1811WE226'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1811WE227'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'AIO IDs: AIO POS = AIO12345, AIO Direct = AIODR12345 (kept apart)';
+  const UPDATE_NOTE = 'Recovery: 2 small buttons on Customers, compact one-line screen, clean printable day report';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
