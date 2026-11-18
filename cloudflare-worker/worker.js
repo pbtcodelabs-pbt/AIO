@@ -1724,6 +1724,15 @@ export class McsStats {
       if (b.act === "setdist") { S.u.district = b.district || ""; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }
       if (b.act === "setname") { S.u.name = b.name; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }   /* MCS1711TU510: اکاؤنٹ کا نام بدلیں */
       if (b.act === "logout") { this.sql.exec("DELETE FROM mcssess WHERE tok = ?", b.th); return Response.json({ ok: true }); }
+      if (b.act === "regsum") {   /* MCS1811WE537 (مالک کا حکم — کوڈ کے بغیر ایکٹیویشن): رجسٹریشن کا خلاصہ ہیلپ ڈیسک کے لیے — کاروبار، شناختی کارڈ، تصویر */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS mcsreg (mob TEXT PRIMARY KEY, data TEXT, img TEXT, ts INTEGER)");
+        const mob = entPhone(S.u.mobile); if (!mob) return Response.json({ ok: false, reason: "mobile" });
+        const old = this.sql.exec("SELECT img FROM mcsreg WHERE mob = ?", mob).toArray()[0];
+        const img = b.img === undefined ? ((old && old.img) || "") : String(b.img || "");
+        this.sql.exec("INSERT INTO mcsreg (mob, data, img, ts) VALUES (?, ?, ?, ?) ON CONFLICT (mob) DO UPDATE SET data = excluded.data, img = excluded.img, ts = excluded.ts", mob, JSON.stringify(b.reg || {}), img, now);
+        if (b.dev && !S.u.dev) { S.u.dev = b.dev; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); }
+        return Response.json({ ok: true });
+      }
       if (b.act === "setyob") { S.u.yob = b.yob; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }   /* MCS1711TU505 */
       if (b.act === "setpw") {   /* پاس ورڈ بدلیں — پرانا ٹھیک ہو، یا گوگل سے 15 منٹ کے اندر لاگ اِن ہوا ہو (پاس ورڈ بھول گئے) */
         const yobOk = !!(b.yob && S.u.yob && String(S.u.yob) === String(b.yob));   /* MCS1711TU505: پرانا PIN یاد نہ ہو تو پیدائش کا سال بھی چلتا ہے */
@@ -2060,7 +2069,38 @@ export class McsStats {
         const live = recs.reduce((a, r) => Math.max(a, r.until || 0), 0);
         return { sid: "MCS" + num, sub, mob: s.mob, name: u.name || this.finCfg("sidname_" + s.mob, "") || "", until: live };
       };
-      if (b.op === "mcslook") { const x = mcsLook(b.sid); return Response.json(x ? Object.assign({ ok: true }, x) : { ok: false, reason: "no_sid" }); }
+      /* MCS1811WE537 (مالک کا حکم): کوڈ نہیں — ہیلپ ڈیسک میں MCS نمبر چن کر پوری تفصیل اور ایک بٹن سے ایک سال ایکٹیو */
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcsreg (mob TEXT PRIMARY KEY, data TEXT, img TEXT, ts INTEGER)");
+      const regOf = (mob) => { const r = this.sql.exec("SELECT data, img, ts FROM mcsreg WHERE mob = ?", mob).toArray()[0]; if (!r) return null; let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {} return { reg: d, img: r.img || "", ts: r.ts }; };
+      const userOf = (mob) => { const k = this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + mob).toArray()[0], r = k && this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", k.id).toArray()[0]; let u = {}; try { u = r ? JSON.parse(r.data) : {}; } catch (e) {} return u; };
+      const detail = (x) => { const u = userOf(x.mob), g = regOf(x.mob) || {};
+        const recs = this.sql.exec("SELECT rec, since, until FROM prof WHERE rec LIKE ?", "p" + String(x.mob).slice(2) + "_%").toArray().map((r) => ({ rec: r.rec, since: r.since || 0, until: r.until || 0, sub: String(this.subOf(r.rec) || "").replace(/-/g, "") }));
+        return Object.assign({}, x, { gmail: u.gmail || u.email || "", dev: u.dev || "", district: u.district || "", created: u.ts || 0, reg: g.reg || null, regAt: g.ts || 0, img: g.img || "", recs }); };
+      if (b.op === "mcslook") { const x = mcsLook(b.sid); return Response.json(x ? Object.assign({ ok: true }, detail(x)) : { ok: false, reason: "no_sid" }); }
+      if (b.op === "mcsnew") {
+        const rows = this.sql.exec("SELECT mob, sid, ts FROM mcssid").toArray(), out = [];
+        for (const s of rows) { const sid = String(s.sid || "").replace(/[^A-Z0-9]/gi, "").toUpperCase(); if (!/^MCS\d+$/.test(sid)) continue;
+          const u = userOf(s.mob), g = regOf(s.mob);
+          const live = this.sql.exec("SELECT MAX(COALESCE(until, 0)) AS u, COUNT(*) AS n FROM prof WHERE rec LIKE ?", "p" + String(s.mob).slice(2) + "_%").toArray()[0] || {};
+          out.push({ sid, mob: s.mob, name: u.name || this.finCfg("sidname_" + s.mob, "") || "", biz: (g && g.reg && g.reg.biz) || "", city: (g && g.reg && (g.reg.city || g.reg.dist)) || u.district || "", hasImg: !!(g && g.img), until: live.u || 0, nBiz: live.n || 0, at: Math.max(u.ts || 0, s.ts || 0, (g && g.ts) || 0) }); }
+        out.sort((p, q) => q.at - p.at);
+        return Response.json({ ok: true, list: out.slice(0, 300) });
+      }
+      if (b.op === "mcsact") {
+        const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
+        const mob = x.mob, m10 = String(mob).slice(2), g = regOf(mob), want = g && g.reg && g.reg.rec;
+        const recs = this.sql.exec("SELECT rec, until FROM prof WHERE rec LIKE ?", "p" + m10 + "_%").toArray();
+        let rec = want && recs.some((r) => r.rec === want) ? want : (recs.slice().sort((p, q) => (q.until || 0) - (p.until || 0))[0] || {}).rec || "";
+        if (!rec && want && want.indexOf("p" + m10 + "_") === 0) { this.sql.exec("INSERT INTO prof (rec, data, key, since, until, ts, pend) VALUES (?, '{}', '', ?, ?, ?, 0)", want, now, now, now); rec = want; }
+        if (!rec) return Response.json({ ok: false, reason: "no_biz" });
+        const p = this.sql.exec("SELECT until FROM prof WHERE rec = ?", rec).toArray()[0] || {};
+        const until = Math.max(p.until || 0, now) + 365 * 864e5;
+        this.sql.exec("UPDATE prof SET until = ?, pend = 0, paid = COALESCE(paid, 0) + 1 WHERE rec = ?", until, rec);
+        try { this.saleAdd(rec, "code", 1); } catch (er) { this.finLog("mcsact_sale_err", { e: String(er) }); }
+        this.finLog("mcsact", { rec, sid: x.sid, by: "helpdesk" });
+        const q = this.sql.exec("SELECT since, until FROM prof WHERE rec = ?", rec).toArray()[0] || {};
+        return Response.json({ ok: true, rec, sid: x.sid, sub: String(this.subOf(rec) || "").replace(/-/g, ""), since: q.since || 0, until: q.until || 0, name: x.name });
+      }
       if (b.op === "gencode" && b.app === "MCS") {
         const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
         const out = [];
@@ -2555,6 +2595,13 @@ async function handleMcsAuth(request, env) {
   } else if (op === "setname") {   /* MCS1711TU510 */
     const name = S(b.name, 60); if (name.length < 2) return reply({ ok: false, reason: "name" });
     r = await call({ act: "setname", th, name });
+  } else if (op === "regsum") {   /* MCS1811WE537: رجسٹریشن کا خلاصہ (صرف اپنا، لاگ اِن سے) */
+    const g = (b.reg && typeof b.reg === "object") ? b.reg : {};
+    const cn = String(g.cnic || "").replace(/\D/g, "").slice(0, 13);
+    const reg = { biz: S(g.biz, 80), cat: S(g.cat, 60), addr: S(g.addr, 160), area: S(g.area, 60), city: S(g.city, 60), dist: S(g.dist, 60), owner: S(g.owner, 60), cnic: cn.length === 13 ? cn : "", wa: entPhone(g.wa) || "", rec: /^p\d{10}_[a-z0-9]{2,12}$/.test(String(g.rec || "")) ? String(g.rec) : "", step: S(g.step, 20) };
+    let img; if (b.img !== undefined) { const im = String(b.img || ""); img = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(im) && im.length <= 90000 ? im : ""; }
+    const body = { act: "regsum", th, reg, dev }; if (img !== undefined) body.img = img;
+    r = await call(body);
   } else if (op === "setyob") {   /* MCS1711TU505 */
     if (!yobV) return reply({ ok: false, reason: "yob" });
     r = await call({ act: "setyob", th, yob: yobV });
@@ -2760,6 +2807,12 @@ async function handleEnt(request, env, path) {
     if (op === "pkglist") return fwd("/ent_admin", { op, app });
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
+    if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
+    if (app === "MCS" && op === "mcsact") {   /* MCS1811WE537: کوڈ کے بغیر ایک سال ایکٹیو (صرف ایڈمن) */
+      const sid = String(b.sid || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+      if (!/^MCS\d{1,5}$/.test(sid)) return reply({ ok: false, reason: "no_sid" });
+      return fwd("/ent_admin", { op, app, sid });
+    }
     if (app === "MCS" && (op === "gencode" || op === "mcslook")) {   /* MCS1711TU500: MCS نمبر سے بندے کا کوڈ */
       const sid = String(b.sid || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
       if (!/^MCS\d{1,5}(M\d{1,2})?$/.test(sid)) return reply({ ok: false, reason: "no_sid" });
