@@ -1472,7 +1472,7 @@ export class McsStats {
         const rows = this.sql.exec("SELECT id, data FROM aioid").toArray().map((r) => { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} return { id: r.id, a }; });
         if (!id && b.fp && bm) { const hit = rows.find((r) => r.a.fp && r.a.fp === b.fp && m10(r.a.mobile) === bm && app0(r.a.app) === bapp); if (hit) { id = hit.id; reused = true; } }
         const isNew = !id;
-        if (!id) { for (let t = 0; t < 40 && !id; t++) { const c = "AIO" + String(10000 + Math.floor(Math.random() * 90000)); if (!this.sql.exec("SELECT id FROM aioid WHERE id = ?", c).toArray().length) id = c; } }
+        if (!id) { for (let t = 0; t < 40 && !id; t++) { const c = (bapp === "DR" ? "AIODR" : "AIO") + String(10000 + Math.floor(Math.random() * 90000)); if (!this.sql.exec("SELECT id FROM aioid WHERE id = ?", c).toArray().length) id = c; } }
         if (!id) return Response.json({ ok: false, reason: "busy" });
         const prev = isNew ? null : get(id);
         const d = { name: b.name, mobile: b.mobile, gmail: b.gmail, app: b.app, fp: b.fp || (prev && prev.fp) || "", at: (prev && prev.at) || now, upd: now };
@@ -2753,7 +2753,7 @@ async function handleAgent(request, env, path) {
       if (dev.length < 6 || name.length < 2 || mobile.length < 10 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)) return reply({ ok: false, reason: "missing" });
       return fwd("/aio_id", { op, dev, name, mobile, gmail, app: S(b.app, 8) || "AIO", fp: String(b.fp || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40) });   /* AIO1811WE226: فون کی پہچان */
     }
-    if (!/^AIO\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
+    if (!/^AIO(DR)?\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
     if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", { op, id, dev }); }
     const by = String(b.by || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (by.length < 6) return reply({ ok: false, reason: "bad_by" });
     if (op === "look") return fwd("/aio_id", { op, id, by });
@@ -2860,7 +2860,7 @@ async function handleEnt(request, env, path) {
     }
     else if (b.kind === "a") {   /* AIO1811WE224: AIO ID — صرف وہی فون جس نے یہ ID بنائی (سرور پر dev ملتا ہو) */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (!/^AIO\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
+      if (!/^AIO(DR)?\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
       const adev = String(b.adev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);   /* AIO ID بنانے والے فون کی اپنی چابی (ایپ میں محفوظ) */
       const chk = adev.length >= 6 ? await (await fwd("/aio_id", { op: "me", id: aio, dev: adev })).json() : null; if (!chk || !chk.ok) return reply({ ok: false, reason: "none" });
       key = "a:" + aio;
@@ -2889,7 +2889,7 @@ async function handleEnt(request, env, path) {
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
     if (op === "aiolook" || op === "aiogrant" || op === "aioadd") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (!/^AIO\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
+      if (!/^AIO(DR)?\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
       return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
