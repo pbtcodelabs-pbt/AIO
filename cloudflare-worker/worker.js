@@ -1582,7 +1582,7 @@ export class McsStats {
         let n = parseInt((this.sql.exec("SELECT v FROM agcfg WHERE k = 'useq'").toArray()[0] || {}).v || "100000", 10) + 1 + Math.floor(Math.random() * 7);
         while (get("MCS-" + n)) n++;
         this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('useq', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", String(n));
-        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, district: b.district || "", email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "", yob: b.yob || "" };
+        const u = { id: "MCS-" + n, name: b.name, mobile: b.mobile, district: b.district || "", locality: b.locality || "", dob: b.dob || "", email: b.email || b.gmail || "", gmail: b.gmail || "", ts: now, dev: b.dev || "", yob: b.yob || "" };
         this.sql.exec("INSERT INTO mcsuser (id, data, pwh, ts, seen) VALUES (?, ?, ?, ?, ?)", u.id, JSON.stringify(u), b.pwh || "", now, now);
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "m:" + u.mobile, u.id);
         this.sql.exec("INSERT INTO mcsukey (k, id) VALUES (?, ?)", "a:" + u.id, u.id);
@@ -1691,11 +1691,12 @@ export class McsStats {
       }
       if (b.act === "pwok") { const u = get(b.id); if (!u || u.del) return Response.json({ ok: false, reason: "login" }); this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK); this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id); return Response.json({ ok: true, tok: await sess(u.id, "p"), user: out(u) }); }
       if (b.act === "fyob") {   /* MCS1711TU505 (مالک کا حکم): PIN بھول گئے — موبائل + پیدائش کا سال = وہیں نیا PIN (ہیلپ ڈیسک کا انتظار نہیں)؛ 15 منٹ میں 6 غلط اور ایک نمبر پر دن میں 5 = روک */
-        const mk = "fy:" + b.mobile, mr = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", mk).toArray()[0], mfails = mr && now - mr.ts < 864e5 ? mr.n : 0;
+        const byIds = Array.isArray(b.ids) && b.ids.length, mk = "fy:" + (byIds ? b.ids[0] : b.mobile), mr = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", mk).toArray()[0], mfails = mr && now - mr.ts < 864e5 ? mr.n : 0;
         if (fails >= 6 || mfails >= 5) return Response.json({ ok: false, reason: "wait" });
         const bumpM = () => this.sql.exec("INSERT INTO mcsfail (k, n, ts) VALUES (?, 1, ?) ON CONFLICT (k) DO UPDATE SET n = CASE WHEN ? - mcsfail.ts < 86400000 THEN mcsfail.n + 1 ELSE 1 END, ts = CASE WHEN ? - mcsfail.ts < 86400000 THEN mcsfail.ts ELSE excluded.ts END", mk, now, now, now);
-        const id = key("m:" + b.mobile), u = id ? get(id) : null;
+        const id = byIds ? (b.ids.map((k) => key(k)).find(Boolean) || "") : key("m:" + b.mobile), u = id ? get(id) : null;
         if (!u || u.del) { fail(); return Response.json({ ok: false, reason: "nomatch" }); }
+        if (byIds && String(u.mobile || "").replace(/\D/g, "").slice(-3) !== String(b.last3 || "")) { fail(); bumpM(); return Response.json({ ok: false, reason: "nomatch" }); }   /* MCS1811WE541: موبائل کے آخری 3 ہندسے */
         if (!u.yob) return Response.json({ ok: false, reason: "noyob" });
         if (String(u.yob) !== String(b.yob)) { fail(); bumpM(); return Response.json({ ok: false, reason: "nomatch" }); }
         this.sql.exec("UPDATE mcsuser SET pwh = ? WHERE id = ?", b.pwh, u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", u.id); this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
@@ -2604,7 +2605,8 @@ async function handleMcsAuth(request, env) {
     if (!gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });
     if (gmail && !pwOk(pw)) return reply({ ok: false, reason: "pw" });   /* MCS1511SU450 (مالک کا حکم): گوگل سے بھی PIN لازمی — موبائل + PIN ہمیشہ چلے */
     const district = S(b.district, 60);   /* MCS1111WE312: ضلع اختیاری (مالک: سائن اپ پر صرف نام، موبائل، PIN) */
-    r = await call({ act: "signup", name, mobile, district, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev, yob: yobV });
+    const locality = S(b.locality, 80), dobV = /^\d{4}-\d{2}-\d{2}$/.test(String(b.dob || "")) && String(b.dob).slice(0, 4) === yobV ? String(b.dob) : "";   /* MCS1811WE541: نئی سائن اپ — علاقہ + تاریخِ پیدائش */
+    r = await call({ act: "signup", name, mobile, district, locality, dob: dobV, email: email || "", gmail, pwh: pw ? await uaHash(pw) : "", dev, yob: yobV });
   } else if (op === "login") {
     const id = S(b.id, 80).toLowerCase(), ids = [];
     if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
@@ -2677,10 +2679,20 @@ async function handleMcsAuth(request, env) {
   } else if (op === "setyob") {   /* MCS1711TU505 */
     if (!yobV) return reply({ ok: false, reason: "yob" });
     r = await call({ act: "setyob", th, yob: yobV });
-  } else if (op === "forgot") {   /* MCS1711TU505: موبائل + پیدائش کا سال → نیا PIN */
-    const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
+  } else if (op === "forgot") {   /* MCS1711TU505: موبائل + پیدائش کا سال → نیا PIN؛ MCS1811WE541: Account ID یا موبائل + پیدائش کا سال + موبائل کے آخری 3 ہندسے */
     if (!yobV) return reply({ ok: false, reason: "yob" }); if (!pwOk(pw)) return reply({ ok: false, reason: "pw" });
-    r = await call({ act: "fyob", mobile, yob: yobV, pwh: await uaHash(pw), fk: ip + "|fy" });
+    if (b.id) {
+      const id = S(b.id, 80).toLowerCase(), ids = [], last3 = String(b.last3 || "").replace(/\D/g, "");
+      if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
+      else if (/^mcs-?\d{1,5}$/.test(id)) ids.push("a:MCS" + id.replace(/\D/g, "").padStart(3, "0"));
+      if (entPhone(id)) ids.push("m:" + entPhone(id));
+      if (!ids.length) return reply({ ok: false, reason: "who" });
+      if (last3.length !== 3) return reply({ ok: false, reason: "last3" });
+      r = await call({ act: "fyob", ids, last3, yob: yobV, pwh: await uaHash(pw), fk: ip + "|fy" });
+    } else {
+      const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
+      r = await call({ act: "fyob", mobile, yob: yobV, pwh: await uaHash(pw), fk: ip + "|fy" });
+    }
   } else if (["me", "logout"].includes(op)) {
     r = await call({ act: op, th });
   } else if (op === "setpw" || op === "delete") {
