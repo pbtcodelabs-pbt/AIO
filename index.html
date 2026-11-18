@@ -3414,7 +3414,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE224</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE225</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3636,7 +3636,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE224</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE225</span>
     </div>
   </div>
 
@@ -35430,9 +35430,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1811WE224'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1811WE225'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'No activation keys: your package is switched on from our Help Desk on your AIO ID — this phone turns on by itself';
+  const UPDATE_NOTE = 'Reinstall on the same phone gives back the same AIO ID and its days (🔄 Refresh on the login screen)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -36038,7 +36038,11 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(gmail)) return err('Please write your Gmail (name@gmail.com)');
     const b = document.getElementById('aiGo'); b.disabled = true; err('⏳ …');
     try{
-      const r = await call({op:'reg', app: APP, dev: dev(), name, mobile: '0' + mobile.slice(-10), gmail});
+      /* AIO1811WE226 (مالک کا حکم): نئی ID فون کی پہچان (سبزی منڈی جیسی fingerprint) + موبائل سے — اسی فون پر دوبارہ انسٹال پر وہی ID اور دن */
+      const fpv = (function(){ try{ const f = [String(navigator.userAgent || '').replace(/\d+/g, ''), Math.min(screen.width, screen.height), Math.max(screen.width, screen.height), navigator.hardwareConcurrency || 2, new Date().getTimezoneOffset(), navigator.language || '', navigator.deviceMemory || 4, Math.round((window.devicePixelRatio || 1) * 100), navigator.platform || ''].join('|');
+        let h1 = 5381, h2 = 52711; for(let i = 0; i < f.length; i++){ const c = f.charCodeAt(i); h1 = (h1 * 33) ^ c; h2 = (h2 * 31 + c) | 0; } return (h1 >>> 0).toString(36) + (h2 >>> 0).toString(36); }catch(e){ return ''; } })();
+      { const m0 = me(); if(!m0.id && fpv){ let h = 0; const k = fpv + '|' + mobile.slice(-10); for(let i = 0; i < k.length; i++){ h = ((h << 5) - h + k.charCodeAt(i)) | 0; } m0.dev = 'F' + fpv + (h >>> 0).toString(36); save(m0); } }
+      const r = await call({op:'reg', app: APP, dev: dev(), fp: fpv, name, mobile: '0' + mobile.slice(-10), gmail});
       if(!r || !r.ok || !r.id){ b.disabled = false; return err(r && r.reason === 'missing' ? 'Please check name, mobile and Gmail' : 'Could not create — try again'); }
       const m = me(); Object.assign(m, {id: r.id, name, mobile: '0' + mobile.slice(-10), gmail}); save(m);
       aioIdChoose(); paintCard(); poll();
@@ -36556,6 +36560,9 @@ window.pbtHubPwOk = async function(p){
       if(d.innerHTML !== h) d.innerHTML = h;
     }catch(e){}
   }
+  /* AIO1811WE226: لاگ اِن پر «🔄 Refresh» — سرور سے پیکج / دن ابھی دوبارہ */
+  setInterval(() => { try{ const c = document.getElementById('aioIdCard'), m = aio(); if(!c || !m.id || c.querySelector('.aioRf')) return; const b = document.createElement('a'); b.href = '#'; b.className = 'aioRf'; b.textContent = ' 🔄 Refresh'; b.style.cssText = 'margin-left:8px;font-weight:800;color:#0e7490;text-decoration:none';
+    b.onclick = ev => { ev.preventDefault(); last = 0; check(true).then(() => { try{ showNavToast('🔄 ' + (AppState.settings.subscriptionExpiry ? 'Valid till ' + formatDateDMY(AppState.settings.subscriptionExpiry) : 'Checked')); }catch(e){} }); }; c.appendChild(b); }catch(e){} }, 2000);
   window.aioActCheck = check;
   document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { check(true); gate(); }, 3000); });
   setInterval(() => { check(false); gate(); }, 60e3);

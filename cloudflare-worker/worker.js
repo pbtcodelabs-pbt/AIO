@@ -1463,13 +1463,28 @@ export class McsStats {
       const b = await request.json(), now = Date.now();
       const get = (id) => { const r = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", id).toArray()[0]; return r ? Object.assign(JSON.parse(r.data), { dev: r.dev }) : null; };
       if (b.op === "reg") {
+        /* AIO1811WE226 (مالک کا حکم): AIO ID فون سے بندھی — (1) اسی فون پر دوبارہ انسٹال: فون کی پہچان (fp، سبزی منڈی جیسی) + وہی موبائل = وہی ID اور اس کے دن؛
+           (2) نیا فون = نئی ID — اسی موبائل + Gmail والی پرانی ID کا پیکج خود بند (باقی دن `leftDays` میں لکھے، مالک ہیلپ ڈیسک سے نئی ID میں جوڑے) */
+        const m10 = (v) => String(v || "").replace(/\D/g, "").slice(-10), app0 = (v) => (v === "DR" ? "DR" : "AIO");
+        const bm = m10(b.mobile), bg = String(b.gmail || "").toLowerCase(), bapp = app0(b.app);
         const old = this.sql.exec("SELECT id FROM aioid WHERE dev = ?", b.dev).toArray()[0];
-        let id = old && old.id;
+        let id = old && old.id, reused = false;
+        const rows = this.sql.exec("SELECT id, data FROM aioid").toArray().map((r) => { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} return { id: r.id, a }; });
+        if (!id && b.fp && bm) { const hit = rows.find((r) => r.a.fp && r.a.fp === b.fp && m10(r.a.mobile) === bm && app0(r.a.app) === bapp); if (hit) { id = hit.id; reused = true; } }
+        const isNew = !id;
         if (!id) { for (let t = 0; t < 40 && !id; t++) { const c = "AIO" + String(10000 + Math.floor(Math.random() * 90000)); if (!this.sql.exec("SELECT id FROM aioid WHERE id = ?", c).toArray().length) id = c; } }
         if (!id) return Response.json({ ok: false, reason: "busy" });
-        const d = { name: b.name, mobile: b.mobile, gmail: b.gmail, app: b.app, at: old ? (get(id) || {}).at || now : now, upd: now };
-        this.sql.exec("INSERT INTO aioid (id, dev, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", id, b.dev, JSON.stringify(d), now);
-        return Response.json({ ok: true, id });
+        const prev = isNew ? null : get(id);
+        const d = { name: b.name, mobile: b.mobile, gmail: b.gmail, app: b.app, fp: b.fp || (prev && prev.fp) || "", at: (prev && prev.at) || now, upd: now };
+        this.sql.exec("INSERT INTO aioid (id, dev, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET dev = excluded.dev, data = excluded.data, ts = excluded.ts", id, b.dev, JSON.stringify(d), now);
+        if (isNew && bm && bg) for (const r of rows) {
+          if (r.id === id || app0(r.a.app) !== bapp || m10(r.a.mobile) !== bm || String(r.a.gmail || "").toLowerCase() !== bg) continue;
+          r.a.replacedBy = id; r.a.replacedAt = now; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(r.a), r.id);
+          const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", bapp + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
+          if (e && !e.revoked) { e.leftDays = e.life ? -1 : Math.max(0, Math.ceil(((e.exp || 0) - now) / 864e5)); e.revoked = true; e.replacedBy = id; e.note = (e.note || "") + " · new phone → " + id; this.entPut(e); }
+          try { this.finLog("aio_replaced", { old: r.id, by: id }); } catch (er) {}
+        }
+        return Response.json({ ok: true, id, reused });
       }
       if (b.op === "me" || b.op === "done" || b.op === "del") {
         const a = get(b.id); if (!a || a.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
@@ -2148,19 +2163,38 @@ export class McsStats {
           let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
           if ((a.app === "DR" ? "DR" : "AIO") !== want) continue;
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
-          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "" } : null });
+          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays } : null });
         }
         out.sort((p, q) => (q.made || 0) - (p.made || 0));
         return Response.json({ ok: true, list: out.slice(0, 2000) });
       }
-      if (b.op === "aiolook" || b.op === "aiogrant") {
+      if (b.op === "aiolook" || b.op === "aiogrant" || b.op === "aioadd") {
         const ar = this.sql.exec("SELECT dev, data, ts FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
         let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
         const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0];
         let e = kr ? this.entGet(kr.id) : null;
-        const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", made: a.at || ar.ts || 0, dev: ar.dev || "" };
-        const full = (x) => x ? Object.assign(this.entOut(x), { hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length }) : null;
-        if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e) });
+        const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", made: a.at || ar.ts || 0, dev: ar.dev || "", replacedBy: a.replacedBy || "", replacedAt: a.replacedAt || 0 };
+        const full = (x) => x ? Object.assign(this.entOut(x), { hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length, leftDays: x.leftDays === undefined ? null : x.leftDays, replacedBy: x.replacedBy || "" }) : null;
+        /* AIO1811WE226: اسی موبائل یا Gmail کی دوسری IDs (پرانا / نیا فون) — مالک دیکھ کر دن جوڑے */
+        const others = () => { const m10 = (v) => String(v || "").replace(/\D/g, "").slice(-10), bm = m10(a.mobile), bg = String(a.gmail || "").toLowerCase(), out = [];
+          for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { if (r.id === b.aio) continue; let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {}
+            if ((x.app === "DR" ? "DR" : "AIO") !== (b.app === "DR" ? "DR" : "AIO")) continue;
+            if (!((bm && m10(x.mobile) === bm) || (bg && String(x.gmail || "").toLowerCase() === bg))) continue;
+            const k2 = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e2 = k2 ? this.entGet(k2.id) : null;
+            out.push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", made: x.at || r.ts || 0, replacedBy: x.replacedBy || "", ent: e2 ? { active: !e2.revoked && (!!e2.life || (e2.exp || 0) > now), revoked: !!e2.revoked, life: !!e2.life, exp: e2.exp || 0, leftDays: e2.leftDays === undefined ? null : e2.leftDays, pkg: e2.pkgName || "" } : null }); }
+          return out; };
+        if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others() });
+        if (b.op === "aioadd") {   /* AIO1811WE226 (مالک کا حکم): سادہ بٹن — دن / مہینہ / سال / اپنے دن / لائف ٹائم سیدھے اسی ID میں */
+          const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life = !!b.life; if (!days && !life) return Response.json({ ok: false, reason: "no_days" });
+          if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: [], claims: [], exp: 0, at: now, by: "helpdesk", devices: 1 };
+          if (!e.keys.includes("a:" + b.aio)) e.keys.push("a:" + b.aio);
+          e.name = who.name || e.name || ""; e.revoked = false; e.devices = e.devices || 1; delete e.replacedBy; delete e.leftDays;
+          if (life) e.life = true; else e.exp = Math.max(now, e.exp || 0) + days * 864e5;
+          e.hist = e.hist || []; e.hist.push({ at: now, pkg: life ? "♾️ Lifetime (added)" : "+" + days + " days (added)", days, life, devices: e.devices, price: "", exp: e.life ? 0 : e.exp }); if (e.hist.length > 50) e.hist = e.hist.slice(-50);
+          if (!e.pkgName) e.pkgName = life ? "Lifetime" : "Added days";
+          this.entPut(e); try { this.finLog("aioadd", { aio: b.aio, days, life }); } catch (er) {}
+          return Response.json({ ok: true, who, ent: full(e), others: others() });
+        }
         const pk = this.entPkgList(b.app).find((x) => x.id === b.pkgId); if (!pk || pk.active === false) return Response.json({ ok: false, reason: "no_pkg" });
         if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: [], claims: [], exp: 0, at: now, by: "helpdesk" };
         if (!e.keys.includes("a:" + b.aio)) e.keys.push("a:" + b.aio);
@@ -2170,8 +2204,9 @@ export class McsStats {
         e.claims = e.claims || [];   /* فون خود جڑتا ہے (ایپ /entclaim kind a) */
         e.hist = e.hist || []; e.hist.push({ at: now, pkgId: pk.id, pkg: pk.name || pk.prefix, days: pk.life ? 0 : pk.days, life: !!pk.life, devices: pk.devices || 1, price: String(b.price || "").slice(0, 20), exp: e.life ? 0 : e.exp }); if (e.hist.length > 50) e.hist = e.hist.slice(-50);
         e.pkgId = pk.id; e.pkgName = pk.name || pk.prefix;
+        delete e.replacedBy; delete e.leftDays;
         this.entPut(e); try { this.finLog("aiogrant", { aio: b.aio, pkg: pk.id }); } catch (er) {}
-        return Response.json({ ok: true, who, ent: full(e) });
+        return Response.json({ ok: true, who, ent: full(e), others: others() });
       }
       if (b.op === "grant") {
         let id = b.id || "";
@@ -2716,7 +2751,7 @@ async function handleAgent(request, env, path) {
     if (op === "reg") {
       const name = S(b.name, 60), mobile = String(b.mobile || "").replace(/\D/g, "").slice(-11), gmail = S(b.gmail, 80).toLowerCase();
       if (dev.length < 6 || name.length < 2 || mobile.length < 10 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)) return reply({ ok: false, reason: "missing" });
-      return fwd("/aio_id", { op, dev, name, mobile, gmail, app: S(b.app, 8) || "AIO" });
+      return fwd("/aio_id", { op, dev, name, mobile, gmail, app: S(b.app, 8) || "AIO", fp: String(b.fp || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40) });   /* AIO1811WE226: فون کی پہچان */
     }
     if (!/^AIO\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
     if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", { op, id, dev }); }
@@ -2852,10 +2887,10 @@ async function handleEnt(request, env, path) {
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
-    if (op === "aiolook" || op === "aiogrant") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن) */
+    if (op === "aiolook" || op === "aiogrant" || op === "aioadd") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^AIO\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
-      return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12) });
+      return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
     if (app === "MCS" && op === "mcsact") {   /* MCS1811WE537: کوڈ کے بغیر ایک سال ایکٹیو (صرف ایڈمن) */
