@@ -3414,7 +3414,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE223</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO1811WE224</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3636,7 +3636,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE223</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO1811WE224</span>
     </div>
   </div>
 
@@ -35430,9 +35430,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1811WE223'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO1811WE224'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Updates now install quietly in the background — no update card; only the owner sees a thin progress bar';
+  const UPDATE_NOTE = 'No activation keys: your package is switched on from our Help Desk on your AIO ID — this phone turns on by itself';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -36093,7 +36093,6 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   /* AIO0911MO193: اضافی بٹن ایک چھوٹے ٹائل گرڈ میں — اصل بٹن چھپے (کام ویسے، ٹائل اسی کو دباتا ہے) */
   const TILES = [
     ['#loginRestoreBtn', '🔄', 'Restore purchase', 'acct'],
-    ['#loginActKeyBtn', '🔑', 'Activation key', 'acct'],
     ['button[onclick^="openRequestCodeModal"]', '📩', 'Get code', 'acct'],
     ['a[onclick^="toggleLoginActivationBox"]', '🔑', 'Have a code', 'acct'],
     ['button[onclick^="shareAppLink"]', '📤', 'Share app', ''],
@@ -36518,5 +36517,52 @@ window.pbtHubPwOk = async function(p){
   window.addEventListener('load', () => setTimeout(() => { try{ document.querySelectorAll('.modalOverlay.show').forEach(m=>m.classList.remove('show')); openDevConsole(); }catch(e){} }, 3000));
 }catch(e){} })();
 </script>
+<style id="aioAct224css">
+/* AIO1811WE224 (مالک کا حکم — کوڈ کا نظام ختم): ایکٹیویشن کی کا خانہ نہیں؛ AIO ID ہر جگہ نمایاں */
+#loginActKeyBtn,#actKeyModal{display:none !important}
+#subGateAio{margin:12px auto 4px;max-width:320px;background:#ecfeff;border:1.5px solid #0e7490;border-radius:14px;padding:10px 12px;text-align:center;font-weight:800;color:#0f172a}
+#subGateAio b{display:block;font-size:24px;letter-spacing:2px;direction:ltr;color:#0e7490;margin:2px 0 6px}
+#subGateAio button{border:0;border-radius:10px;padding:8px 14px;font-weight:800;background:#0e7490;color:#fff;margin:0 3px}
+</style>
+<script id="aioAct224">
+/* AIO1811WE224 (مالک کا حکم): پیکج اب ہیلپ ڈیسک سے اسی AIO ID پر — یہ فون سرور سے خود پوچھتا ہے (کوئی کوڈ / پیغام نہیں)؛
+   سرور: /entclaim kind "a" (AIO ID + اسی فون کی چابی) → چالو / مدت / کل فون → acctApply (پرانا اکاؤنٹ والا راستہ) */
+(function(){
+  if(typeof STORAGE_PREFIX === 'undefined' || STORAGE_PREFIX === 'aioDr_') return;   /* صرف AIO (Direct کا اپنا نظام) */
+  function aio(){ try{ return JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'aioId') || 'null') || {}; }catch(e){ return {}; } }
+  let last = 0, busy = false;
+  async function check(force){
+    const m = aio(); if(!m.id || !m.dev || busy || navigator.onLine === false) return;
+    if(!force && Date.now() - last < 10 * 60e3) return;
+    busy = true; last = Date.now();
+    try{
+      const r = await acctPost('/entclaim', { kind: 'a', aio: m.id, adev: m.dev, dev: getOrCreateDeviceUID(), biz: (function(){ try{ return getOrCreateBusinessId(); }catch(e){ return ''; } })() });
+      const s = AppState.settings, a = s.acctSub;
+      if(r && r.ok){
+        const was = !!(a && a.key === r.key && (a.life || (a.exp || 0) > Date.now())), newer = !a || a.key !== r.key || (r.exp || 0) > (a.exp || 0) || (!!r.life && !a.life);
+        acctApply(r, true);
+        if(r.active && newer && !was){ try{ alert('✅ Your AIO POS package is now active' + (r.life ? ' — Lifetime.' : ' until ' + formatDateDMY(s.subscriptionExpiry) + '.') + '\nTotal phones: ' + (r.devices || 1) + '\nAIO ID: ' + m.id); }catch(e){} }
+      } else if(r && r.reason === 'revoked' && a && String(a.key || '').indexOf('a:') === 0){ acctDrop(); }
+    }catch(e){}
+    busy = false;
+  }
+  function gate(){
+    try{
+      const g = document.getElementById('subscriptionGateScreen'); if(!g) return; const m = aio();
+      let d = document.getElementById('subGateAio'); const st = document.getElementById('subGateStatus');
+      if(!m.id){ if(d) d.remove(); return; }
+      if(!d){ d = document.createElement('div'); d.id = 'subGateAio'; if(st) st.insertAdjacentElement('afterend', d); else return; }
+      const h = '🆔 Your AIO ID<b>' + String(m.id).replace(/[^A-Z0-9]/g, '') + '</b><button type="button" onclick="aioIdCopy()">📋 Copy</button>';
+      if(d.innerHTML !== h) d.innerHTML = h;
+    }catch(e){}
+  }
+  window.aioActCheck = check;
+  document.addEventListener('DOMContentLoaded', () => { setTimeout(() => { check(true); gate(); }, 3000); });
+  setInterval(() => { check(false); gate(); }, 60e3);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') check(false); });
+  try{ const _a = window.acctRecheck; if(typeof _a === 'function') window.acctRecheck = function(){ try{ gate(); }catch(e){} return _a.apply(this, arguments); }; }catch(e){}
+})();
+</script>
 </body>
+
 </html>
