@@ -1459,6 +1459,20 @@ export class McsStats {
       for (const k of ["front", "back", "selfie"]) if (b.img && b.img[k]) this.sql.exec("INSERT INTO agimg (id, kind, data) VALUES (?, ?, ?) ON CONFLICT (id, kind) DO UPDATE SET data = excluded.data", id, k, b.img[k]);
       return Response.json({ ok: true, id, status: d.status, code: d.code });
     }
+    if (op === "/mcs_test") {   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ (اصل جدولوں کو کبھی نہیں چھوتا) */
+      const b = await request.json(), now = Date.now();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcsttk (ttk TEXT PRIMARY KEY, ts INTEGER)");
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcstest (k TEXT PRIMARY KEY, ttk TEXT, sid TEXT, data TEXT, until INTEGER, ts INTEGER)");
+      this.sql.exec("DELETE FROM mcsttk WHERE ts < ?", now - 30 * 864e5); this.sql.exec("DELETE FROM mcstest WHERE ttk NOT IN (SELECT ttk FROM mcsttk)");
+      if (b.op === "start") { const t = [...crypto.getRandomValues(new Uint8Array(16))].map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcsttk (ttk, ts) VALUES (?, ?)", t, now); return Response.json({ ok: true, ttk: t }); }
+      if (!this.sql.exec("SELECT ttk FROM mcsttk WHERE ttk = ?", b.ttk).toArray().length) return Response.json({ ok: false, reason: "ttk" });
+      if (b.op === "put") { for (const x of b.items || []) { const k = b.ttk.slice(0, 10) + "|" + x.sid, old = this.sql.exec("SELECT until FROM mcstest WHERE k = ?", k).toArray()[0];
+          this.sql.exec("INSERT INTO mcstest (k, ttk, sid, data, until, ts) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (k) DO UPDATE SET data = excluded.data, ts = excluded.ts", k, b.ttk, x.sid, JSON.stringify(x), old ? old.until || 0 : 0, now); }
+        return Response.json({ ok: true }); }
+      if (b.op === "status") return Response.json({ ok: true, list: this.sql.exec("SELECT sid, data, until FROM mcstest WHERE ttk = ?", b.ttk).toArray().map((r) => { let d = {}; try { d = JSON.parse(r.data); } catch (e) {} return { sid: r.sid, rec: d.rec || "", until: r.until || 0 }; }) });
+      if (b.op === "wipe") { this.sql.exec("DELETE FROM mcstest WHERE ttk = ?", b.ttk); this.sql.exec("DELETE FROM mcsttk WHERE ttk = ?", b.ttk); return Response.json({ ok: true }); }
+      return Response.json({ ok: false, reason: "op" });
+    }
     if (op === "/aio_id") {   /* AIO0911MO190 (ہیلپ ڈیسک #193، مالک کا حکم): ملازم کا فون جوڑنا سادہ — AIO ID → مالک شامل کرے → ملازم کا فون خود جڑے */
       const b = await request.json(), now = Date.now();
       const get = (id) => { const r = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", id).toArray()[0]; return r ? Object.assign(JSON.parse(r.data), { dev: r.dev }) : null; };
@@ -2104,7 +2118,19 @@ export class McsStats {
           const live = this.sql.exec("SELECT MAX(COALESCE(until, 0)) AS u, COUNT(*) AS n FROM prof WHERE rec LIKE ?", "p" + String(s.mob).slice(2) + "_%").toArray()[0] || {};
           out.push({ sid, mob: s.mob, name: u.name || this.finCfg("sidname_" + s.mob, "") || "", biz: (g && g.reg && g.reg.biz) || "", city: (g && g.reg && (g.reg.city || g.reg.dist)) || u.district || "", hasImg: !!(g && g.img), until: live.u || 0, nBiz: live.n || 0, at: Math.max(u.ts || 0, s.ts || 0, (g && g.ts) || 0) }); }
         out.sort((p, q) => q.at - p.at);
-        return Response.json({ ok: true, list: out.slice(0, 300) });
+        /* MCS1811WE541: ٹیسٹ موڈ کے اکاؤنٹ (🧪) سب سے اوپر — الگ خانے سے */
+        const tests = []; try { this.sql.exec("CREATE TABLE IF NOT EXISTS mcstest (k TEXT PRIMARY KEY, ttk TEXT, sid TEXT, data TEXT, until INTEGER, ts INTEGER)");
+          for (const r of this.sql.exec("SELECT k, sid, data, until, ts FROM mcstest ORDER BY ts DESC LIMIT 50").toArray()) { let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (er) {}
+            tests.push({ test: true, k: r.k, sid: r.sid, mob: d.mobile || "", name: d.name || "", biz: (d.reg && d.reg.biz) || "", city: (d.reg && d.reg.city) || "", until: r.until || 0, nBiz: d.rec ? 1 : 0, at: r.ts || 0 }); } } catch (er) {}
+        return Response.json({ ok: true, list: tests.concat(out.slice(0, 300)) });
+      }
+      if (b.op === "tlook" || b.op === "tact" || b.op === "twipe") {   /* MCS1811WE541: ٹیسٹ اکاؤنٹ — دیکھیں / ایک سال ایکٹیو / سب ٹیسٹ صاف */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS mcstest (k TEXT PRIMARY KEY, ttk TEXT, sid TEXT, data TEXT, until INTEGER, ts INTEGER)");
+        if (b.op === "twipe") { this.sql.exec("DELETE FROM mcstest"); try { this.sql.exec("DELETE FROM mcsttk"); } catch (er) {} return Response.json({ ok: true }); }
+        const r = this.sql.exec("SELECT k, sid, data, until, ts FROM mcstest WHERE k = ?", String(b.k || "")).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "no_sid" });
+        if (b.op === "tact") { const until = Math.max(r.until || 0, now) + 365 * 864e5; this.sql.exec("UPDATE mcstest SET until = ? WHERE k = ?", until, r.k); r.until = until; }
+        let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (er) {}
+        return Response.json({ ok: true, test: true, k: r.k, sid: r.sid, sub: r.sid + "M1", mob: d.mobile || "", name: d.name || "", until: r.until || 0, reg: d.reg || null, img: "", gmail: "", dev: "", district: (d.reg && d.reg.city) || "", created: r.ts || 0, recs: d.rec ? [{ rec: d.rec, until: r.until || 0, sub: r.sid + "M1" }] : [] });
       }
       if (b.op === "mcsact") {
         const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
@@ -2835,6 +2861,25 @@ async function handleAgent(request, env, path) {
   }
   return reply({ error: "not_found" }, 404);
 }
+/* MCS1811WE541 (مالک کا حکم): MCS ٹیسٹ موڈ کا الگ خانہ — ٹیسٹ اکاؤنٹ ہیلپ ڈیسک میں 🧪 نظر آئے، وہاں سے ایک سال ایکٹیو؛ اصل اکاؤنٹ / نمبر / فروخت سے بالکل الگ۔
+   start = صرف ایڈمن (فائربیس) → ٹیسٹ کی چابی (ttk)؛ put / status / wipe = اسی چابی سے */
+async function handleMcsTest(request, env) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const fwd = async (body) => { const r = await stub.fetch("https://s/mcs_test", { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS } }); };
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const op = String(b.op || ""), S = (v, n) => String(v == null ? "" : v).replace(/[<>"]/g, "").replace(/\s+/g, " ").slice(0, n).trim();
+  if (op === "start") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd({ op }); }
+  const ttk = String(b.ttk || "").replace(/[^a-f0-9]/g, "").slice(0, 64); if (ttk.length < 32) return reply({ ok: false, reason: "ttk" });
+  if (op === "put") {
+    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 10).map((x) => { const g = (x && x.reg) || {}; const cn = String(g.cnic || "").replace(/\D/g, "").slice(0, 13);
+      return { sid: S(x && x.sid, 12).toUpperCase().replace(/[^A-Z0-9]/g, ""), name: S(x && x.name, 60), mobile: S(x && x.mobile, 16), rec: /^p\d{10}_[a-z0-9]{2,12}$/.test(String((x && x.rec) || "")) ? String(x.rec) : "",
+        reg: { biz: S(g.biz, 80), cat: S(g.cat, 60), addr: S(g.addr, 160), city: S(g.city, 60), owner: S(g.owner, 60), cnic: cn.length === 13 ? cn : "" } }; }).filter((x) => /^MCS\d{1,5}$/.test(x.sid));
+    return fwd({ op, ttk, items });
+  }
+  if (op === "status" || op === "wipe") return fwd({ op, ttk });
+  return reply({ ok: false, reason: "op" });
+}
 async function handleEnt(request, env, path) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -2893,6 +2938,7 @@ async function handleEnt(request, env, path) {
       return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
+    if (app === "MCS" && (op === "tlook" || op === "tact" || op === "twipe")) return fwd("/ent_admin", { op, app, k: String(b.k || "").slice(0, 40) });   /* MCS1811WE541: ٹیسٹ اکاؤنٹ (صرف ایڈمن) */
     if (app === "MCS" && op === "mcsact") {   /* MCS1811WE537: کوڈ کے بغیر ایک سال ایکٹیو (صرف ایڈمن) */
       const sid = String(b.sid || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
       if (!/^MCS\d{1,5}$/.test(sid)) return reply({ ok: false, reason: "no_sid" });
@@ -3156,6 +3202,7 @@ export default {
     { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
+    { const tp = new URL(request.url).pathname; if (tp === "/mcstest" && request.method === "POST") return handleMcsTest(request, env); }   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ */
     { const vp = new URL(request.url).pathname; if (["/vtoken", "/vsubmit", "/vlist", "/vunset", "/edits", "/editdone"].includes(vp)) return handleVerify(request, env, vp); }
     if (request.method === "GET" && new URL(request.url).pathname === "/rates") return handleRates(ctx, new URL(request.url).searchParams.has("debug"));
     if (request.method !== "POST") return reply({ error: "POST only" }, 405);
