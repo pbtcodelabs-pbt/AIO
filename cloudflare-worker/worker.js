@@ -1879,7 +1879,7 @@ export class McsStats {
         if (!me.staff) return Response.json({ ok: false, reason: "no_access" });
         if (Array.isArray(b.words)) setCfg("badwords", JSON.stringify(b.words.map((w) => String(w || "").replace(/[<>"]/g, "").trim().slice(0, 40)).filter(Boolean).slice(0, 500)));
         let x = []; try { x = JSON.parse(cfg("badwords") || "[]"); } catch (e) {}
-        return Response.json({ ok: true, words: x, base: MCS_BAD.length });
+        return Response.json({ ok: true, words: x, base: MCS_BAD.length, baseList: MCS_BAD });   /* MCS1911TH562: پہلے سے ڈالی فہرست بھی دکھائیں */
       }
       if (b.op === "del") {   /* عملہ: ایک یا کئی چیٹیں پوری حذف */
         if (!me.staff) return Response.json({ ok: false, reason: "no_access" });
