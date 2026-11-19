@@ -569,6 +569,20 @@ export class McsStats {
     this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agoff354', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), off: done }));
     this.finLog("agoff354", { off: done });
   }
+  agOn558() {   /* MCS1911TH558 (مالک کا حکم، ایک بار): «صرف حبیب شہباز ایجنٹ» (MCS1211TH354) ختم — ایڈمن 1 (AG001) اور ایڈمن 2 (AG002) کے ایجنٹ دوبارہ فعال، اپنے پکے کوڈ پر؛ حبیب شہباز AG003؛ نئے ایجنٹ AG004… (agCodeFor) */
+    if (this.finCfg("agon558", "")) return;
+    const rows = this.sql.exec("SELECT id, data FROM agent").toArray().map((r) => { try { return JSON.parse(r.data); } catch (e) { return null; } }).filter(Boolean), done = [];
+    for (const d of rows) {
+      const fx = ADMIN_AG[entPhone(d.phone || "")]; if (!fx) continue;
+      if (rows.some((x) => x !== d && x.code === fx && !x.off && x.status === "approved")) continue;   /* اسی کوڈ پر کوئی اور فعال ہو تو نہ چھیڑیں */
+      let ch = 0;
+      if (d.off && /MCS1211TH354/.test(String(d.offWhy || ""))) { d.off = 0; delete d.offAt; d.onWhy = "owner: AG001 / AG002 / AG003 all agents (MCS1911TH558)"; ch = 1; }
+      if (!d.off && d.status === "approved" && d.code !== fx) { const old = d.code; if (old) { d.oldCodes = (d.oldCodes || []).filter((c) => c !== fx).concat(old); this.agMoveRefs(old, fx); } d.code = fx; ch = 1; }
+      if (ch) { this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), d.id); done.push(fx + " " + (d.name || "")); }
+    }
+    this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('agon558', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify({ at: Date.now(), on: done }));
+    this.finLog("agon558", { on: done });
+  }
   sidFix353() {   /* MCS1211TH353 (مالک کا حکم — خود سرور پر، ایک بار): حبیب شہباز MCS-001، غوثیہ نان شاپ MCS-002، پنجاب سیٹنگ (آصف) MCS-003؛ حبیب شہباز ایجنٹ AG-001 */
     if (this.finCfg("sidmig353", "")) return;
     const nm = (rec) => { let n = this.finCfg("bn_" + rec, "") || ""; if (!n) { const a = this.sql.exec("SELECT data FROM agref WHERE rk = ?", rec).toArray()[0]; try { const d = JSON.parse((a && a.data) || "{}"); n = d.name || d.biz || ""; } catch (e) {} }
@@ -1251,7 +1265,7 @@ export class McsStats {
     const u = new URL(request.url);
     const op = u.pathname;
     if (!this._f450) { this._f450 = 1; try { this.own450(); } catch (e) {} try { this.subFix450(); } catch (e) {} try { this.own456(); } catch (e) {} }
-    if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agSlot486(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} }
+    if (!this._sidMig) { this._sidMig = 1; try { this.idFmt1(); } catch (e) {} try { this.admCode1(); } catch (e) {} try { this.agSlots430(); } catch (e) {} try { this.agSlot486(); } catch (e) {} try { if (!this._af431) { this._af431 = 1; this.adminFix431(); } } catch (e) {} try { this.sidMigrate(); } catch (e) {} try { this.refMigrate(); } catch (e) {} try { this.sidFix353(); } catch (e) { this.finLog("sidfix353_err", { e: String(e) }); } try { this.sidAdmin428(); } catch (e) { this.finLog("sidadm428_err", { e: String(e) }); } try { this.agOff354(); } catch (e) {} try { this.agOn558(); } catch (e) { this.finLog("agon558_err", { e: String(e) }); } }
     /* MCS0911MO254 (مالک کا حکم): 📊 سرور کا استعمال — ہر DO درخواست روزانہ گنتی (`use`)؛ ایپ اپنی Firestore پڑھائی / لکھائی `/mcs_use` سے جمع کرتی ہے */
     const uday = new Date(Date.now() + 5 * 3600e3).toISOString().slice(0, 10);   /* پاکستانی دن */
     try { this.sql.exec("CREATE TABLE IF NOT EXISTS useday (day TEXT, k TEXT, n INTEGER, PRIMARY KEY (day, k))"); this.sql.exec("CREATE TABLE IF NOT EXISTS usedev (day TEXT, dev TEXT, PRIMARY KEY (day, dev))");
