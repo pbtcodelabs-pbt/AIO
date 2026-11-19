@@ -1205,13 +1205,15 @@ export class McsStats {
       const fk = "F:" + role + ":" + (role === "dev" ? "dev" : phone);
       if (this.ppFails(fk, 86400e3) >= (role === "dev" ? 3 : 5) || this.ppFails("F:" + key, 3600e3) >= 6) return Response.json({ ok: false, reason: "wait" });
       if (!/^\d{6}$/.test(np) || /^(\d)\1{5}$/.test(np) || np === "123456") return Response.json({ ok: false, reason: "newpin" });
-      const id = role === "dev" ? "dev" : phone, yob = id ? this.ppYob(role, id) : "";
+      const id = role === "dev" ? "dev" : phone;
+      /* MCS1911TH558 (مالک کا حکم): پورٹل میں سال نہ ہو تو اسی موبائل والے MCS اکاؤنٹ کی تاریخِ پیدائش (سائن اپ فارم) کا سال */
+      const yob = id ? (this.ppYob(role, id) || (role !== "dev" ? (() => { try { const k2 = this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + id).toArray()[0], r2 = k2 && this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", k2.id).toArray()[0], u2 = r2 ? JSON.parse(r2.data) : null; return u2 && !u2.del ? mcsYobOf(u2) : ""; } catch (e) { return ""; } })() : "")) : "";
       if (!yob) return Response.json({ ok: false, reason: "noyob" });
       if (yob !== y) { this.ppFails(fk, 0, 1); this.ppFails("F:" + key, 0, 1); return Response.json({ ok: false, reason: "yob" }); }
       if (role === "dev") { this.sql.exec("INSERT INTO agcfg (k, v) VALUES ('devpin', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", await this.ppSha(np)); return Response.json({ ok: true }); }
       if (this.ppFind(role, np).some((x) => x.id !== id)) return Response.json({ ok: false, reason: "taken" });
       if (role === "codev") { if (!this.sql.exec("SELECT phone FROM codev WHERE phone = ?", id).toArray().length) return Response.json({ ok: false, reason: "noyob" }); this.sql.exec("UPDATE codev SET pin = ? WHERE phone = ?", np, id); return Response.json({ ok: true }); }
-      const a = this.ppAgents().find((x) => x.phone === id); if (!a) return Response.json({ ok: false, reason: "noyob" });
+      const a = this.ppAgents().find((x) => x.phone === id); if (!a) return Response.json({ ok: false, reason: "noagent" });   /* MCS1911TH558: فعال ایجنٹ نہیں */
       const d = JSON.parse(this.sql.exec("SELECT data FROM agent WHERE id = ?", a._id).toArray()[0].data); d.pin = np; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), a._id);
       return Response.json({ ok: true });
     }
@@ -1711,8 +1713,8 @@ export class McsStats {
         const id = byIds ? (b.ids.map((k) => key(k)).find(Boolean) || "") : key("m:" + b.mobile), u = id ? get(id) : null;
         if (!u || u.del) { fail(); return Response.json({ ok: false, reason: "nomatch" }); }
         if (byIds && String(u.mobile || "").replace(/\D/g, "").slice(-3) !== String(b.last3 || "")) { fail(); bumpM(); return Response.json({ ok: false, reason: "nomatch" }); }   /* MCS1811WE541: موبائل کے آخری 3 ہندسے */
-        if (!u.yob) return Response.json({ ok: false, reason: "noyob" });
-        if (String(u.yob) !== String(b.yob)) { fail(); bumpM(); return Response.json({ ok: false, reason: "nomatch" }); }
+        if (!mcsYobOf(u)) return Response.json({ ok: false, reason: "noyob" });   /* MCS1911TH558: سال نہ ہو تو تاریخِ پیدائش کے پہلے 4 ہندسے */
+        if (mcsYobOf(u) !== String(b.yob)) { fail(); bumpM(); return Response.json({ ok: false, reason: "nomatch" }); }
         this.sql.exec("UPDATE mcsuser SET pwh = ? WHERE id = ?", b.pwh, u.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", u.id); this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
         u._pwh = b.pwh; return Response.json({ ok: true, tok: await sess(u.id, "p"), user: out(u) });
       }
@@ -2590,6 +2592,8 @@ async function verifyGoogleIdToken(jwt) {
     return (await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64uToBytes(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]))) ? String(pl.email).toLowerCase() : "";
   } catch (e) { return ""; }
 }
+/* MCS1911TH558: پیدائش کا سال — محفوظ سال، ورنہ سائن اپ / لاگ اِن فارم کی تاریخِ پیدائش (YYYY-MM-DD یا DD/MM/YYYY) کا سال */
+function mcsYobOf(u) { const y = String((u && u.yob) || "").replace(/\D/g, ""); if (/^(19|20)\d\d$/.test(y)) return y; const d = String((u && u.dob) || ""); const m = /^((?:19|20)\d\d)-\d\d-\d\d$/.exec(d) || /^\d{1,2}\D+\d{1,2}\D+((?:19|20)\d\d)$/.exec(d.trim()); return m ? m[1] : ""; }
 function entPhone(v) { let d = String(v || "").replace(/[۰-۹]/g, (c) => "۰۱۲۳۴۵۶۷۸۹".indexOf(c)).replace(/\D/g, ""); if (d.startsWith("0092")) d = d.slice(2); if (d.startsWith("0")) d = "92" + d.slice(1); if (d.length === 10 && d.startsWith("3")) d = "92" + d; return /^92\d{10}$/.test(d) ? d : ""; }
 function entEmail(v) { const e = String(v || "").trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(e) ? e : ""; }
 /* ===== 🔐 MCS ایپ کا لاگ اِن (MCS0511TH161، ہیلپ ڈیسک #95) — پاس ورڈ PBKDF2-SHA256 (p2$iter$salt$hash)، گوگل ID ٹوکن یہیں جانچا، SMS OTP نہیں (مالک کا فیصلہ) ===== */
