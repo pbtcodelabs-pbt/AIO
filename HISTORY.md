@@ -176,3 +176,4 @@
 - AIO1811WE227 (18 Nov 2026): Recovery — Customers top two compact buttons (Today's Recovery / Recovery History, drOpen), recovery screen one-line filters + compact summary/rows (💬 in grid), 🖨️ Report = clean day report (drPrintDay; also per day in History).
 - 19 Nov 2026: CLAUDE.md — every reply to the owner starts with «قبلہ عالی جاہ میں آپ کی نرم گوئی اور اچھے اخلاق کا مشکور ہوں، صورتحال یہ ہے…» (owner's order).
 - **MCS1911TH558 (مالک کا حکم، سرور):** PIN بھول جانے پر پیدائش کا سال — محفوظ `yob` نہ ہو تو سائن اپ / لاگ اِن فارم کی تاریخِ پیدائش کے پہلے 4 ہندسے (`mcsYobOf`)؛ ایجنٹ (`/pp_forgot`) کا پورٹل والا سال نہ ہو تو اسی موبائل والے MCS اکاؤنٹ کی تاریخِ پیدائش؛ فعال ایجنٹ نہ ہو تو `noagent`۔
+- 19 Nov 2026: CLAUDE.md — reply opening line changed to the owner's new sentence.
