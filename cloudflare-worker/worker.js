@@ -1711,6 +1711,33 @@ export class McsStats {
         this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
         return Response.json({ ok: true, user: { sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "" } });
       }
+      /* ===== MCS2011FR575 (مالک کا حکم): ایک لاگ اِن، ایک PIN، سب سے اونچا رول — رجسٹرڈ یوزر / ایجنٹ / ایڈمن 2 جس کا بھی PIN ملے سب کھلیں، اور باقی سب کا PIN یہی ہو جائے ===== */
+      if (b.act === "find1") {
+        if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
+        const id = b.ids.map((k) => key(k)).find(Boolean) || "", u = id && get(id);
+        if (u && !u.del) return Response.json({ ok: true, id: u.id, pwh: u._pwh || "", mobile: entPhone(u.mobile) || "" });
+        return Response.json({ ok: true, id: "", pwh: "", mobile: "" });
+      }
+      if (b.act === "one") {
+        if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
+        const u = b.id ? get(b.id) : null, mob = entPhone((u && u.mobile) || b.mobile || ""), pin = String(b.pin || "");
+        const ag = mob ? this.sql.exec("SELECT id, data FROM agent WHERE phone = ?", mob).toArray().map((r) => { try { return JSON.parse(r.data); } catch (e) { return null; } }).find((d) => d && d.status === "approved" && !d.off) : null;
+        const cd = mob ? this.sql.exec("SELECT phone, name, pin, perms, COALESCE(off, 0) AS off FROM codev WHERE phone = ?", mob).toArray().find((r) => !r.off) : null;
+        const agOk = !!(ag && ag.pin && ag.pin === pin), cdOk = !!(cd && cd.pin && cd.pin === pin), uOk = !!(u && !u.del && b.userOk);
+        if (!(uOk || agOk || cdOk)) { fail(); return Response.json({ ok: false, reason: fails + 1 >= 8 ? "wait" : "login" }); }
+        this.sql.exec("DELETE FROM mcsfail WHERE k = ?", failK);
+        const synced = [];
+        if (/^\d{6}$/.test(pin)) {   /* ایک PIN — باقی رول بھی اسی پر */
+          if (u && !u.del && !uOk && b.pwh) { this.sql.exec("UPDATE mcsuser SET pwh = ? WHERE id = ?", b.pwh, u.id); synced.push("user"); }
+          if (ag && !agOk && !this.ppFind("agent", pin).some((x) => x.id !== ag.phone)) { const row = this.sql.exec("SELECT data FROM agent WHERE id = ?", ag.id).toArray()[0]; if (row) { const d = JSON.parse(row.data); d.pin = pin; this.sql.exec("UPDATE agent SET data = ? WHERE id = ?", JSON.stringify(d), ag.id); synced.push("agent"); } }
+          if (cd && !cdOk) { this.sql.exec("UPDATE codev SET pin = ? WHERE phone = ?", pin, cd.phone); synced.push("codev"); }
+        }
+        if (u && !u.del) this.sql.exec("UPDATE mcsuser SET seen = ? WHERE id = ?", now, u.id);
+        const admin1 = mob === "923206793793";
+        const top = admin1 ? "dev" : cd ? "codev" : ag ? "agent" : (u && !u.del) ? "reg" : "user";
+        return Response.json({ ok: true, top, admin1, synced, tok: u && !u.del ? await sess(u.id, "p") : "", user: u && !u.del ? out(u) : null,
+          agent: ag ? { name: ag.name || "", code: ag.code || "", phone: ag.phone } : null, codev: cd ? { name: cd.name || "", perms: this.cdPerms(cd) } : null, phone: mob });
+      }
       if (b.act === "find") {   /* لاگ اِن: Account ID / موبائل / ای میل → ہیش واپس (ورکر جانچے) */
         if (fails >= 8) return Response.json({ ok: false, reason: "wait" });
         const id = b.ids.map((k) => key(k)).find(Boolean) || "";
@@ -2722,6 +2749,18 @@ async function handleMcsAuth(request, env) {
       const gm = await verifyGoogleIdToken(b.gtoken);
       if (gm) { const lr = await call({ act: "glink", id: uid0, gmail: gm }); r.glink = lr && lr.ok ? gm : ((lr && lr.reason) || "no"); }
     }
+  } else if (op === "one") {   /* MCS2011FR575: ایک لاگ اِن، ایک PIN — سب سے اونچا رول */
+    const id = S(b.id, 80).toLowerCase(), ids = [];
+    if (/^mcs-?\d{6,}$/.test(id)) ids.push("a:" + id.replace(/^mcs-?/, "MCS-").toUpperCase());
+    else if (/^mcs-?\d{1,5}$/.test(id)) ids.push("a:MCS" + id.replace(/\D/g, "").padStart(3, "0"));
+    if (entPhone(id)) ids.push("m:" + entPhone(id));
+    const pin = pw.replace(/\D/g, "");
+    if (!ids.length || pin.length < 4) return reply({ ok: false, reason: "login" });
+    const fk = ip + "|" + ids[0];
+    const f = await call({ act: "find1", ids, fk });
+    if (!f || !f.ok) return reply(f || { ok: false, reason: "login" });
+    const userOk = !!(f.id && f.pwh && await uaCheck(pw, f.pwh));
+    r = await call({ act: "one", id: f.id || "", mobile: f.mobile || entPhone(id) || "", pin, userOk, pwh: /^\d{6}$/.test(pin) ? await uaHash(pin) : "", fk });
   } else if (op === "actmake") {   /* MCS1211TH334: صرف ڈویلپر (My City Shines ایڈمن) */
     if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
     const mobile = entPhone(b.mobile); if (!mobile) return reply({ ok: false, reason: "mobile" });
