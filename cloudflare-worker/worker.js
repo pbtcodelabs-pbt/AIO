@@ -1506,6 +1506,7 @@ export class McsStats {
         if (!id) return Response.json({ ok: false, reason: "busy" });
         const prev = isNew ? null : get(id);
         const d = { name: b.name, mobile: b.mobile, gmail: b.gmail, app: b.app, fp: b.fp || (prev && prev.fp) || "", at: (prev && prev.at) || now, upd: now };
+        if (prev && prev.dead) { d.dead = true; d.deadAt = prev.deadAt || now; }   /* AIO2011FR227: ہٹائی ہوئی ID اسی فون پر وہی رہے — نئی ID / نیا ٹرائل نہیں */
         this.sql.exec("INSERT INTO aioid (id, dev, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET dev = excluded.dev, data = excluded.data, ts = excluded.ts", id, b.dev, JSON.stringify(d), now);
         if (isNew && bm && bg) for (const r of rows) {
           if (r.id === id || app0(r.a.app) !== bapp || m10(r.a.mobile) !== bm || String(r.a.gmail || "").toLowerCase() !== bg) continue;
@@ -2273,12 +2274,22 @@ export class McsStats {
         const want = b.app === "DR" ? "DR" : "AIO", out = [];
         for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) {
           let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
-          if ((a.app === "DR" ? "DR" : "AIO") !== want) continue;
+          if (a.dead || (a.app === "DR" ? "DR" : "AIO") !== want) continue;
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
           out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays } : null });
         }
         out.sort((p, q) => (q.made || 0) - (p.made || 0));
         return Response.json({ ok: true, list: out.slice(0, 2000) });
+      }
+      if (b.op === "aiodel") {   /* AIO2011FR227 (مالک کا حکم): فالتو AIO ID ہٹانا — فہرست سے غائب، مگر ریکارڈ اندر رہتا ہے تاکہ اسی فون کو دوبارہ نئی ID / نیا مفت ٹرائل نہ ملے؛ جس ID پر پیکج چل رہا ہو وہ نہیں ہٹتی */
+        const ar = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
+        const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0], e = kr ? this.entGet(kr.id) : null;
+        if (e && !e.revoked && (!!e.life || (e.exp || 0) > now)) return Response.json({ ok: false, reason: "has_pkg" });
+        let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
+        a.dead = true; a.deadAt = now;
+        this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(a), b.aio);
+        try { this.finLog("aiodel", { aio: b.aio }); } catch (er) {}
+        return Response.json({ ok: true });
       }
       if (b.op === "aiolook" || b.op === "aiogrant" || b.op === "aioadd") {
         const ar = this.sql.exec("SELECT dev, data, ts FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
@@ -2290,7 +2301,7 @@ export class McsStats {
         /* AIO1811WE226: اسی موبائل یا Gmail کی دوسری IDs (پرانا / نیا فون) — مالک دیکھ کر دن جوڑے */
         const others = () => { const m10 = (v) => String(v || "").replace(/\D/g, "").slice(-10), bm = m10(a.mobile), bg = String(a.gmail || "").toLowerCase(), out = [];
           for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { if (r.id === b.aio) continue; let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {}
-            if ((x.app === "DR" ? "DR" : "AIO") !== (b.app === "DR" ? "DR" : "AIO")) continue;
+            if (x.dead || (x.app === "DR" ? "DR" : "AIO") !== (b.app === "DR" ? "DR" : "AIO")) continue;
             if (!((bm && m10(x.mobile) === bm) || (bg && String(x.gmail || "").toLowerCase() === bg))) continue;
             const k2 = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e2 = k2 ? this.entGet(k2.id) : null;
             out.push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", made: x.at || r.ts || 0, replacedBy: x.replacedBy || "", ent: e2 ? { active: !e2.revoked && (!!e2.life || (e2.exp || 0) > now), revoked: !!e2.revoked, life: !!e2.life, exp: e2.exp || 0, leftDays: e2.leftDays === undefined ? null : e2.leftDays, pkg: e2.pkgName || "" } : null }); }
@@ -3061,7 +3072,7 @@ async function handleEnt(request, env, path) {
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
-    if (op === "aiolook" || op === "aiogrant" || op === "aioadd") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
+    if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^AIO(DR)?\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
       return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
