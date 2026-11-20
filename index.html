@@ -813,7 +813,32 @@
 span.drPaidTag{margin:0 4px 0 0; font-size:11px;}
 .drHistDay{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin:14px 2px 6px; font-weight:800; font-size:13.5px;}
 .drHistDay small{color:var(--muted); font-size:11.5px; font-weight:700;}
-.drHistMore{width:100%; padding:10px; border:1.5px dashed #94a3b8; background:#f8fafc; border-radius:10px; font-weight:800; cursor:pointer; margin:8px 0 14px;}
+  /* AIO2011FR228 (مالک کا حکم): Recovery — بین الاقوامی ایپس جیسا صاف سٹائل: سادہ فہرست، کالم، چھوٹے بٹن، سفید پس منظر */
+  .drQuick{gap:6px; margin:0 0 8px;}
+  .drQuick button{flex:0 1 auto; padding:0 12px; height:30px; font-size:12px; font-weight:700; border-radius:8px; background:#fff; color:#0f172a; border:1px solid #d5dae1;}
+  .drQuick button.h{background:#fff; color:#0f172a; border-color:#d5dae1;}
+  .drSeg{display:flex; gap:2px; background:#f1f3f6; border-radius:9px; padding:2px; margin:0 0 8px;}
+  .drSeg button{flex:1; border:0; background:transparent; border-radius:7px; padding:6px 4px; font-size:12px; font-weight:700; color:#475569; cursor:pointer;}
+  .drSeg button.active{background:#fff; color:#0f172a; box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .drTh, .drR2g{display:grid; grid-template-columns:1.5fr .95fr 1fr .95fr; gap:6px; align-items:center;}
+  .drTh{font-size:10px; font-weight:700; color:#8a94a3; text-transform:uppercase; letter-spacing:.4px; padding:0 2px 5px; border-bottom:1px solid #e5e8ee;}
+  .drTh span:not(:first-child){text-align:right;}
+  .drR2{padding:8px 2px 6px; border-bottom:1px solid #eef0f4;}
+  .drR2n{min-width:0;} .drR2n b{display:block; font-size:13.5px; font-weight:700; line-height:1.3; word-break:break-word;} .drR2n small{display:block; font-size:10.5px; color:#8a94a3;}
+  .drR2v{text-align:right; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums;}
+  .drR2v.in{color:#111827; font-weight:800;} .drR2v.void{text-decoration:line-through; color:#8a94a3;}
+  .drR2g input{width:100%; box-sizing:border-box; padding:6px 6px; border:1px solid #cbd2dc; border-radius:7px; font-size:13.5px; font-weight:700; text-align:right; background:#fff;}
+  .drR2g input:focus{outline:2px solid rgba(37,99,235,.25); border-color:#2563eb;}
+  .drR2f{display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:4px;}
+  .drLast{font-size:10.5px; color:#6b7686; min-width:0; line-height:1.35;} .drLast b{color:#111827;} .drLast em{font-style:normal; color:#15803d; font-weight:700;}
+  .drIc{display:flex; gap:4px; flex:0 0 auto;} .drIc button{width:28px; height:26px; border:1px solid #e1e5eb; background:#fff; border-radius:7px; font-size:13px; padding:0; cursor:pointer;} .drIc button.del{border-color:#f3c9c9; background:#fff5f5;}
+  .drCRBox{background:#fff; border-radius:16px; width:min(400px,92vw); padding:16px; box-shadow:0 20px 50px rgba(0,0,0,.25);}
+  .drCRHead{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;} .drCRT{font-size:11px; color:#8a94a3; font-weight:700; text-transform:uppercase; letter-spacing:.5px;} .drCRN{font-size:17px; font-weight:800;}
+  .drCRX{border:0; background:#f1f3f6; border-radius:8px; width:30px; height:30px; cursor:pointer;}
+  .drCRDates{display:flex; gap:8px; margin-bottom:10px;} .drCRDates label{flex:1; font-size:10.5px; font-weight:700; color:#6b7686;} .drCRDates input{display:block; width:100%; box-sizing:border-box; margin-top:3px; padding:7px; border:1px solid #cbd2dc; border-radius:8px; font-size:13px;}
+  .drCRSum{display:flex; gap:8px; margin-bottom:12px;} .drCRSum div{flex:1; border:1px solid #e1e5eb; border-radius:10px; padding:7px 9px; font-size:10.5px; color:#6b7686; font-weight:700;} .drCRSum b{display:block; font-size:15px; color:#111827;}
+  .drCRBtns{display:flex; gap:8px;} .drCRBtns button{flex:1; height:40px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; border:1px solid #111827; background:#111827; color:#fff;} .drCRBtns button.s{background:#fff; color:#111827;}
+  .drHistMore{width:100%; padding:10px; border:1.5px dashed #94a3b8; background:#f8fafc; border-radius:10px; font-weight:800; cursor:pointer; margin:8px 0 14px;}
 .drRemBtn{margin-top:7px; width:100%; padding:7px; border:none; border-radius:9px; background:#dcfce7; color:#166534; font-weight:800; font-size:12.5px; cursor:pointer;}
   .drDayBtn{flex:1; padding:8px 4px; border:1.5px solid #cbd5e1; border-radius:10px; background:#fff; font-size:12px; font-weight:800; cursor:pointer;}
   .drDayBtn.active{background:#16a34a; border-color:#15803d; color:#fff;}
@@ -5243,7 +5268,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button class="active" id="drTab-today" onclick="drSetTab('today')">📅 Today</button>
           <button id="drTab-hist" onclick="drSetTab('hist')">📜 History</button>
         </div>
-        <button class="drPrintBtn" onclick="drPrintDay(drToday())" title="Print today's report">🖨️ Report</button>
+        <button class="drPrintBtn" onclick="drPrintDay(drToday())" title="Today's report (print / PDF)">🖨️ Report</button><button class="drPrintBtn" onclick="drShareDay(drToday())" title="Share today's report as image">🖼️</button>
       </div>
       <div id="drTodayWrap">
 
@@ -5268,6 +5293,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       </div>
 
       <div id="drHistWrap" style="display:none;">
+        <div class="drSeg"><button id="drSub-rec" class="active" onclick="drSubSet('rec')">Recoveries</button><button id="drSub-void" onclick="drSubSet('void')">Voided <span id="drVoidCnt"></span></button></div>
         <div class="drBar drOne"><input type="text" id="drHistSearch" placeholder="🔍 Search customer" oninput="DRH.q=this.value; DRH.days=30; drHistRender()" style="flex:1;"></div>
         <div class="drSummary" id="drHistSummary"></div>
         <div id="drHistList"></div>
@@ -25331,6 +25357,7 @@ function saveCollectReceivable(){
 const DR = { rec: {}, sort: 'high', area: '', q: '', all: false, msgFor: null, day: 'today' };
 const DR_DEFAULT_TPL = 'Dear {name},\n\nUp to now, the total remaining dues of {business} against you are Rs. {amount}.\n\nPlease keep my balance ready — I am coming {day}.\n\nThank you.';
 function drEsc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function drNum(n){ return Math.round(Number(n) || 0).toLocaleString(); }
 function drMoney(n){ return 'Rs. ' + Math.round(Number(n) || 0).toLocaleString(); }
 function drDue(c){ return Number(c.total_receivable) || 0; }
 function drReceived(c){ return Number(DR.rec[c.customer_id]) || 0; }
@@ -25363,7 +25390,7 @@ function drLeftInfo(c){
   const left = drDue(c) - drReceived(c);
   if(left < 0) return {txt: 'Too much', cls: 'orange'};
   if(left === 0) return {txt: 'Clear ✓', cls: 'green'};
-  return {txt: drMoney(left), cls: 'red'};
+  return {txt: drNum(left), cls: 'red'};
 }
 function drSummaryPaint(list){
   const due = list.reduce((s, c) => s + drDue(c), 0);
@@ -25372,24 +25399,24 @@ function drSummaryPaint(list){
     `<div>Customers<b>${list.length}</b></div><div>Total due<b>${drMoney(due)}</b></div><div>Received<b>${drMoney(got)}</b></div><div>Remaining<b>${drMoney(due - got)}</b></div>`;
 }
 function drRender(){
-  DRH.map = drBuildTodayMap();   /* AIO1811WE222 */
+  DRH.map = drBuildTodayMap(); DRH.prev = drBuildPrevMap();   /* AIO2011FR228: پچھلی ریکوری */
   const list = drList();
   const wrap = document.getElementById('drListWrap');
   if(!wrap) return;
   drSummaryPaint(list);
   if(!list.length){ wrap.innerHTML = '<div class="placeholder">No customer found</div>'; return; }
-  wrap.innerHTML = list.map(c => {
-    const id = c.customer_id, li = drLeftInfo(c), v = DR.rec[id];
-    const pt = drPaidToday(id);
-    return `<div class="drRow">
-      <div class="drTop"><b>${drEsc(c.name)}</b><small>${pt.sum > 0 ? `<span class="drPaidTag">✅ Today ${drMoney(pt.sum)}</span> ` : ''}${drEsc(c.area || '')}</small></div>
-      <div class="drGrid drG5">
-        <div class="drCell"><small>Balance</small><b>${drMoney(drDue(c))}</b></div>
-        <div class="drCell"><small>Recovery</small><input type="number" inputmode="decimal" min="0" placeholder="0" value="${v ? drEsc(v) : ''}" onfocus="this.select()" oninput="drTyped(${id}, this.value)"></div>
-        <div class="drCell"><small>Remaining</small><b class="drLeft ${li.cls}" id="drLeft-${id}">${li.txt}</b></div>
-        <div class="drCell"><button class="drPosterBtn" onclick="drPoster(${id})" title="Poster">🖼️</button></div>
-        <div class="drCell"><button class="drPosterBtn drWaBtn" onclick="drOpenReminder(${id})" title="Reminder">💬</button></div>
+  wrap.innerHTML = '<div class="drTh"><span>Customer</span><span>Balance</span><span>Recovery</span><span>Remaining</span></div>' + list.map(c => {
+    const id = c.customer_id, li = drLeftInfo(c), v = DR.rec[id], pt = drPaidToday(id), pv = DRH.prev[id];
+    const last = pv ? `Last paid <b>${drMoney(pv.amount)}</b> · ${drAgoTxt(drDaysAgo(pv.date))} (${drEsc(drNiceDate(pv.date))})` : 'No earlier recovery';
+    return `<div class="drR2">
+      <div class="drR2g">
+        <div class="drR2n"><b>${drEsc(c.name)}</b>${c.area ? `<small>${drEsc(c.area)}</small>` : ''}</div>
+        <div class="drR2v">${drNum(drDue(c))}</div>
+        <div><input type="number" inputmode="decimal" min="0" placeholder="0" value="${v ? drEsc(v) : ''}" onfocus="this.select()" oninput="drTyped(${id}, this.value)"></div>
+        <div class="drR2v"><span class="drLeft ${li.cls}" id="drLeft-${id}">${li.txt}</span></div>
       </div>
+      <div class="drR2f"><span class="drLast">${pt.sum > 0 ? `<em>✅ Today ${drMoney(pt.sum)}</em> · ` : ''}${last}</span>
+        <span class="drIc"><button onclick="drPoster(${id})" title="Poster">🖼️</button><button onclick="drOpenReminder(${id})" title="Reminder">💬</button><button onclick="drCustReport(${id})" title="Statement">📄</button></span></div>
     </div>`;
   }).join('');
 }
@@ -25480,7 +25507,7 @@ function drSendReminder(){
 
 
 // ===================== AIO1811WE222: Recovery — آج کی وصولی + تاریخ وار ہسٹری + پوسٹر (ڈیزائن My Diary والا) =====================
-const DRH = { tab: 'today', q: '', days: 30, map: null };
+const DRH = { tab: 'today', q: '', days: 30, map: null, sub: 'rec', prev: {} };
 function drToday(){ return localDateStr(new Date()); }
 function drIsCustIn(p){ return p && p.direction === 'in' && p.party_type === 'customer'; }
 // آج کی وصولیاں: customer_id → { sum, list:[payments (پرانی پہلے)] }
@@ -25494,38 +25521,211 @@ function drBuildTodayMap(){
   Object.values(m).forEach(e => e.list.sort((a, b) => (a.payment_id || 0) - (b.payment_id || 0)));
   return m;
 }
+// AIO2011FR228: ہر گاہک کی آج سے پہلے والی آخری ریکوری
+function drBuildPrevMap(){
+  const t = drToday(), m = {};
+  (paymentsData || []).forEach(p => {
+    if(!drIsCustIn(p) || !p.date || p.date >= t) return;
+    const e = m[p.party_id];
+    if(!e || p.date > e.date || (p.date === e.date && (p.payment_id || 0) > (e.payment_id || 0))) m[p.party_id] = p;
+  });
+  return m;
+}
+function drDaysAgo(d){ const a = new Date(d + 'T00:00:00'), b = new Date(drToday() + 'T00:00:00'); return Math.round((b - a) / 864e5); }
+function drAgoTxt(n){ return n <= 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; }
 function drPaidToday(id){ if(!DRH.map) DRH.map = drBuildTodayMap(); return DRH.map[id] || { sum: 0, list: [] }; }
 function drSetTab(tab){ DRH.tab = tab === 'hist' ? 'hist' : 'today'; drTabApply(); }
 /* AIO1811WE227: Customers والے دو چھوٹے بٹن */
 function drOpen(tab){ DRH.tab = tab === 'hist' ? 'hist' : 'today'; goTo('recovery'); }
 /* AIO1811WE227 (مالک کا حکم): کسی بھی دن کی صاف ستھری رپورٹ — ایک پرنٹ میں اس دن کی پوری ریکوری */
-function drPrintDay(d){
-  d = d || drToday();
-  const rows = (paymentsData || []).filter(p => drIsCustIn(p) && p.date === d).sort((a, b) => (a.payment_id || 0) - (b.payment_id || 0));
-  if(!rows.length){ alert('No recovery entry on ' + drNiceDate(d) + ' yet.'); return; }
-  const shop = drEsc(AppState.settings.businessName || 'AIO POS'), ph = drEsc(AppState.settings.businessPhone || '');
-  const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } };
-  const num = n => Math.round(Number(n) || 0).toLocaleString();
-  let tOld = 0, tGot = 0, tLeft = 0;
-  const body = rows.map((p, i) => { const o = Number(p.balance_before) || 0, g = Number(p.amount) || 0, l = Number(p.balance_after) || 0; tOld += o; tGot += g; tLeft += l;
-    return `<tr><td>${i + 1}</td><td class="n">${drEsc(p.party_name || '')}</td><td>${num(o)}</td><td class="g">${num(g)}</td><td class="${l > 0 ? 'r' : 'g'}">${l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear'}</td><td class="s">${tm(p)}<br>${drEsc(p.method || '')}</td></tr>`; }).join('');
+/* AIO2011FR228 (مالک کا حکم): سب رپورٹیں ایک ہی صاف سٹائل — سفید پس منظر، کالا Arial، گول کونوں والا صفحہ، سادہ سیاہ و سفید */
+function drFmtRem(l){ l = Number(l) || 0; return l > 0 ? drNum(l) : l < 0 ? 'Adv. ' + drNum(-l) : 'Clear'; }
+function drReportPrint(o){
+  const shop = drEsc(o.shop), ph = drEsc(o.phone || '');
+  const head = o.cols.map(c => `<th class="${c.a === 'r' ? 'r' : ''}" style="width:${Math.round(c.w * 100)}%">${drEsc(c.h)}</th>`).join('');
+  const body = o.rows.map(r => '<tr>' + r.map((v, i) => `<td class="${o.cols[i].a === 'r' ? 'r' : ''}">${drEsc(v)}</td>`).join('') + '</tr>').join('');
+  const foot = o.foot ? '<tfoot><tr>' + o.foot.map((v, i) => `<td class="${o.cols[i].a === 'r' ? 'r' : ''}">${drEsc(v)}</td>`).join('') + '</tr></tfoot>' : '';
+  const meta = (o.meta || []).map(m => `<div><small>${drEsc(m[0])}</small><b>${drEsc(m[1])}</b></div>`).join('');
   const w = window.open('', '_blank');
   if(!w){ alert('Please allow pop-ups to print.'); return; }
-  w.document.write(`<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recovery ${drEsc(drNiceDate(d))}</title><style>
-    body{font-family:Arial,sans-serif; padding:14px; color:#111; margin:0;} .h{text-align:center; border-bottom:2px solid #111; padding-bottom:6px; margin-bottom:8px;} .h b{font-size:18px;} .h div{font-size:12px; color:#444;}
-    .t{display:flex; justify-content:space-between; font-size:13px; font-weight:bold; margin:6px 0 8px;}
-    table{border-collapse:collapse; width:100%; font-size:12px;} th,td{border:1px solid #94a3b8; padding:4px 4px; text-align:right; white-space:nowrap;} th{background:#e2e8f0; font-size:11.5px;}
-    td:first-child,th:first-child{text-align:center; width:22px;} td.n,th.n{text-align:left; white-space:normal;} td.s{font-size:10px; color:#444; text-align:center; line-height:1.25;} .g{color:#15803d; font-weight:bold;} .r{color:#b91c1c; font-weight:bold;}
-    tfoot td{background:#f1f5f9; font-weight:bold;} .f{text-align:center; font-size:11.5px; color:#444; margin-top:10px;}
-    @media print{ body{padding:6mm;} }</style></head><body>
-    <div class="h"><b>${shop}</b><div>📅 Recovery Report — ${drEsc(drNiceDate(d))}</div></div>
-    <div class="t"><span>Entries: ${rows.length}</span><span>Total received: Rs. ${num(tGot)}</span></div>
-    <table><thead><tr><th>#</th><th class="n">Customer</th><th>Old Bal.</th><th>Received</th><th>Remaining</th><th style="text-align:center">Time</th></tr></thead><tbody>${body}</tbody>
-    <tfoot><tr><td></td><td class="n">Total</td><td>${num(tOld)}</td><td class="g">${num(tGot)}</td><td>${num(tLeft)}</td><td></td></tr></tfoot></table>
-    <div class="f">${shop}${ph ? ' • ' + ph : ''}</div>
-    <script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+  w.document.write(`<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${drEsc(o.title)} — ${drEsc(o.subtitle)}</title><style>
+    *{box-sizing:border-box} body{font-family:Arial,Helvetica,sans-serif; color:#000; background:#fff; margin:0; padding:14px;}
+    .page{border:1.5px solid #000; border-radius:16px; padding:20px 18px;}
+    .top{display:flex; justify-content:space-between; align-items:baseline; gap:10px;} .top b{font-size:20px;} .top span{font-size:12px; color:#444;}
+    h1{font-size:15px; margin:14px 0 2px;} .sub{font-size:12.5px; color:#444; margin-bottom:12px;}
+    .meta{display:flex; gap:8px; margin:0 0 14px;} .meta div{flex:1; border:1px solid #000; border-radius:10px; padding:8px 10px;}
+    .meta small{display:block; font-size:10px; color:#444; text-transform:uppercase; letter-spacing:.5px;} .meta b{font-size:15px;}
+    table{width:100%; border-collapse:collapse; font-size:12.5px;}
+    th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; border-bottom:1.5px solid #000; padding:7px 6px;}
+    td{border-bottom:1px solid #d9d9d9; padding:7px 6px; vertical-align:top;} .r{text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums;}
+    tfoot td{border-top:1.5px solid #000; border-bottom:0; font-weight:700;}
+    .f{display:flex; justify-content:space-between; font-size:11px; color:#444; margin-top:14px; border-top:1px solid #d9d9d9; padding-top:8px;}
+    @page{margin:8mm} @media print{ body{padding:0} }</style></head><body><div class="page">
+    <div class="top"><b>${shop}</b><span>${ph}</span></div>
+    <h1>${drEsc(o.title)}</h1><div class="sub">${drEsc(o.subtitle)}</div>
+    ${meta ? `<div class="meta">${meta}</div>` : ''}
+    <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${foot}</table>
+    <div class="f"><span>${shop}</span><span>Printed ${drEsc(drNiceDate(drToday()))}</span></div>
+    </div><script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
   w.document.close();
 }
+function drReportCanvas(o){
+  const W = 760, P = 30, rowH = 34, F = 'Arial, Helvetica, sans-serif';
+  const rows = o.rows.slice(0, 70), extra = o.rows.length - rows.length;
+  const L = P + 6, R = W - P - 6, tw = R - L;
+  const xs = []; let acc = L; o.cols.forEach(c => { xs.push(acc); acc += c.w * tw; });
+  const fit = (ctx, t, maxW) => { t = String(t == null ? '' : t); if(ctx.measureText(t).width <= maxW) return t; while(t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1); return t + '…'; };
+  const cell = (ctx, i, v, y, bold) => {
+    const c = o.cols[i], cw = c.w * tw - 12;
+    ctx.font = (bold ? '700 ' : '400 ') + '13.5px ' + F; ctx.fillStyle = '#000';
+    ctx.textAlign = c.a === 'r' ? 'right' : 'left';
+    ctx.fillText(fit(ctx, v, cw), c.a === 'r' ? xs[i] + c.w * tw - 6 : xs[i] + 6, y);
+  };
+  const draw = (ctx, H) => {
+    if(H){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.strokeStyle = '#000'; ctx.lineWidth = 2; roundRectPath(ctx, 8, 8, W - 16, H - 16, 18); ctx.stroke(); }
+    let y = P + 16;
+    ctx.textAlign = 'left'; ctx.fillStyle = '#000'; ctx.font = '700 22px ' + F; ctx.fillText(fit(ctx, o.shop, tw * 0.65), L, y + 10);
+    ctx.textAlign = 'right'; ctx.font = '400 12.5px ' + F; ctx.fillStyle = '#444'; ctx.fillText(o.phone || '', R, y + 10);
+    y += 34; ctx.textAlign = 'left'; ctx.fillStyle = '#000'; ctx.font = '700 16px ' + F; ctx.fillText(o.title, L, y);
+    y += 21; ctx.font = '400 13px ' + F; ctx.fillStyle = '#444'; ctx.fillText(fit(ctx, o.subtitle, tw), L, y);
+    y += 18;
+    if(o.meta && o.meta.length){
+      const n = o.meta.length, gap = 10, bw = (tw - gap * (n - 1)) / n;
+      o.meta.forEach((m, i) => { const bx = L + i * (bw + gap);
+        ctx.strokeStyle = '#000'; ctx.lineWidth = 1; roundRectPath(ctx, bx, y, bw, 54, 10); ctx.stroke();
+        ctx.textAlign = 'left'; ctx.fillStyle = '#555'; ctx.font = '600 10.5px ' + F; ctx.fillText(String(m[0]).toUpperCase(), bx + 10, y + 19);
+        ctx.fillStyle = '#000'; ctx.font = '700 17px ' + F; ctx.fillText(fit(ctx, m[1], bw - 20), bx + 10, y + 42); });
+      y += 54 + 18;
+    }
+    ctx.font = '700 10.5px ' + F; ctx.fillStyle = '#000';
+    o.cols.forEach((c, i) => { ctx.textAlign = c.a === 'r' ? 'right' : 'left'; ctx.fillText(c.h.toUpperCase(), c.a === 'r' ? xs[i] + c.w * tw - 6 : xs[i] + 6, y + 14); });
+    y += 22; ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
+    rows.forEach(r => { r.forEach((v, i) => cell(ctx, i, v, y + 22)); y += rowH; ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); });
+    if(o.foot){ ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); o.foot.forEach((v, i) => cell(ctx, i, v, y + 22, true)); y += rowH; }
+    if(extra > 0){ ctx.textAlign = 'left'; ctx.fillStyle = '#444'; ctx.font = '400 12px ' + F; ctx.fillText('+ ' + extra + ' more entries — use Print / PDF for the full list', L, y + 20); y += 28; }
+    y += 14; ctx.textAlign = 'left'; ctx.fillStyle = '#444'; ctx.font = '400 11px ' + F; ctx.fillText('Printed ' + drNiceDate(drToday()), L, y + 4);
+    return y + 4 + P;
+  };
+  const H = draw(document.createElement('canvas').getContext('2d'), 0);
+  const canvas = document.createElement('canvas'); canvas.width = W * 2; canvas.height = H * 2;
+  const ctx = canvas.getContext('2d'); ctx.scale(2, 2); draw(ctx, H); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  return canvas;
+}
+function drDayReportObj(d){
+  const rows = (paymentsData || []).filter(p => drIsCustIn(p) && p.date === d).sort((a, b) => (a.payment_id || 0) - (b.payment_id || 0));
+  if(!rows.length) return null;
+  const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } };
+  let tOld = 0, tGot = 0, tLeft = 0;
+  const body = rows.map((p, i) => { const o = Number(p.balance_before) || 0, g = Number(p.amount) || 0, l = Number(p.balance_after) || 0; tOld += o; tGot += g; tLeft += Math.max(0, l);
+    return [String(i + 1), p.party_name || '', drNum(o), drNum(g), drFmtRem(l), [tm(p), p.method || ''].filter(Boolean).join(' · ')]; });
+  return {
+    shop: AppState.settings.businessName || 'AIO POS', phone: AppState.settings.businessPhone || '',
+    title: 'Daily Recovery Report', subtitle: drNiceDate(d) + (d === drToday() ? ' (Today)' : ''),
+    meta: [['Entries', String(rows.length)], ['Total received', drMoney(tGot)], ['Still remaining', drMoney(tLeft)]],
+    cols: [{h:'#', w:.06}, {h:'Customer', w:.31}, {h:'Old balance', w:.16, a:'r'}, {h:'Received', w:.16, a:'r'}, {h:'Remaining', w:.14, a:'r'}, {h:'Time · Method', w:.17}],
+    rows: body, foot: ['', 'Total', drNum(tOld), drNum(tGot), drNum(tLeft), '']
+  };
+}
+function drPrintDay(d){
+  d = d || drToday();
+  const o = drDayReportObj(d);
+  if(!o){ alert('No recovery entry on ' + drNiceDate(d) + ' yet.'); return; }
+  drReportPrint(o);
+}
+async function drShareDay(d){
+  d = d || drToday();
+  const o = drDayReportObj(d);
+  if(!o){ alert('No recovery entry on ' + drNiceDate(d) + ' yet.'); return; }
+  showImageSharePreview(drReportCanvas(o), 'Recovery_Report_' + d + '.png', 'Daily Recovery Report', 'Recovery report ' + drNiceDate(d) + ' — total received ' + o.meta[1][1]);
+}
+
+// ---------- 📄 ایک گاہک کی ریکوری سٹیٹمنٹ — مہینہ / سال / اپنی تاریخیں؛ پرنٹ یا تصویر ----------
+const DRC = { id: 0, from: '', to: '', key: 'month' };
+function drEnsureCustModal(){
+  if(document.getElementById('drCustRepModal')) return;
+  const m = document.createElement('div'); m.className = 'modalOverlay'; m.id = 'drCustRepModal';
+  m.onclick = e => { if(e.target === m) m.classList.remove('show'); };
+  m.innerHTML = `<div class="drCRBox"><div class="drCRHead"><div><div class="drCRT">Recovery statement</div><div class="drCRN" id="drCRName"></div></div><button class="drCRX" onclick="document.getElementById('drCustRepModal').classList.remove('show')">✕</button></div>
+    <div class="drSeg" id="drCRSeg"><button data-k="month">This month</button><button data-k="last">Last month</button><button data-k="year">This year</button><button data-k="all">All time</button></div>
+    <div class="drCRDates"><label>From<input type="date" id="drCRFrom" onchange="drCRCustom()"></label><label>To<input type="date" id="drCRTo" onchange="drCRCustom()"></label></div>
+    <div class="drCRSum" id="drCRSum"></div>
+    <div class="drCRBtns"><button onclick="drCustPrint()">🖨️ Print / PDF</button><button class="s" onclick="drCustShare()">🖼️ Share image</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelector('#drCRSeg').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if(b) drCRPreset(b.dataset.k); });
+}
+function drCustReport(id){
+  const c = customersData.find(x => x.customer_id === id); if(!c) return;
+  drEnsureCustModal(); DRC.id = id;
+  document.getElementById('drCRName').textContent = c.name;
+  document.getElementById('drCustRepModal').classList.add('show');
+  drCRPreset('month');
+}
+function drCRPreset(k){
+  const t = new Date(), y = t.getFullYear(), mo = t.getMonth(); let f = '', to = drToday();
+  if(k === 'month') f = localDateStr(new Date(y, mo, 1));
+  else if(k === 'last'){ f = localDateStr(new Date(y, mo - 1, 1)); to = localDateStr(new Date(y, mo, 0)); }
+  else if(k === 'year') f = localDateStr(new Date(y, 0, 1));
+  else { f = ''; to = ''; }
+  DRC.from = f; DRC.to = to; DRC.key = k; drCRPaint();
+}
+function drCRCustom(){ DRC.from = document.getElementById('drCRFrom').value; DRC.to = document.getElementById('drCRTo').value; DRC.key = 'custom'; drCRPaint(); }
+function drCustRows(){
+  return (paymentsData || []).filter(p => drIsCustIn(p) && p.party_id === DRC.id && (!DRC.from || p.date >= DRC.from) && (!DRC.to || p.date <= DRC.to))
+    .sort((a, b) => (a.date === b.date ? (a.payment_id || 0) - (b.payment_id || 0) : (a.date < b.date ? -1 : 1)));
+}
+function drCRPaint(){
+  document.getElementById('drCRFrom').value = DRC.from; document.getElementById('drCRTo').value = DRC.to;
+  document.querySelectorAll('#drCRSeg button').forEach(b => b.classList.toggle('active', b.dataset.k === DRC.key));
+  const rows = drCustRows(), tot = rows.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  document.getElementById('drCRSum').innerHTML = `<div>Payments<b>${rows.length}</b></div><div>Total received<b>${drMoney(tot)}</b></div>`;
+}
+function drCustReportObj(){
+  const c = customersData.find(x => x.customer_id === DRC.id); if(!c) return null;
+  const rows = drCustRows(); if(!rows.length){ alert('No recovery from this customer in the selected period.'); return null; }
+  const tot = rows.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const period = (!DRC.from && !DRC.to) ? 'All time' : (DRC.from ? drNiceDate(DRC.from) : 'Start') + ' to ' + (DRC.to ? drNiceDate(DRC.to) : drNiceDate(drToday()));
+  return {
+    shop: AppState.settings.businessName || 'AIO POS', phone: AppState.settings.businessPhone || '',
+    title: 'Recovery Statement', subtitle: c.name + (c.phone ? ' · ' + c.phone : '') + ' · ' + period,
+    meta: [['Payments', String(rows.length)], ['Total received', drMoney(tot)], ['Current balance', drMoney(drDue(c))]],
+    cols: [{h:'#', w:.07}, {h:'Date', w:.17}, {h:'Old balance', w:.19, a:'r'}, {h:'Received', w:.19, a:'r'}, {h:'Balance after', w:.19, a:'r'}, {h:'Method', w:.19}],
+    rows: rows.map((p, i) => [String(i + 1), drNiceDate(p.date), drNum(p.balance_before), drNum(p.amount), drFmtRem(p.balance_after), p.method || '']),
+    foot: ['', 'Total', '', drNum(tot), '', '']
+  };
+}
+function drCustPrint(){ const o = drCustReportObj(); if(o) drReportPrint(o); }
+function drCustShare(){
+  const o = drCustReportObj(); if(!o) return;
+  const nm = String(DRC.id && (customersData.find(x => x.customer_id === DRC.id) || {}).name || 'Customer').replace(/\s+/g, '_');
+  showImageSharePreview(drReportCanvas(o), 'Statement_' + nm + '.png', 'Recovery Statement', 'Recovery statement — ' + o.subtitle + '. Total received: ' + o.meta[1][1]);
+}
+
+// ---------- 🗑️ ہسٹری سے ریکوری وائڈ — دو تصدیقیں + ایڈمن PIN؛ بقایہ اور کیش واپس، اندراج «Voided» میں ----------
+async function drVoid(paymentId){
+  const p = (paymentsData || []).find(x => x.payment_id === paymentId); if(!p) return;
+  const c = customersData.find(x => x.customer_id === p.party_id);
+  if(!c){ alert('This customer no longer exists, so the balance cannot be corrected.'); return; }
+  const amt = Number(p.amount) || 0, newBal = moneyRound((Number(c.total_receivable) || 0) + amt);
+  const name = `${p.party_name} — ${drMoney(amt)} (${drNiceDate(p.date)})`;
+  const ok1 = await dangerConfirm({ step: 'STEP 1 OF 2', title: 'Void this recovery?', okText: 'Yes, continue',
+    html: `You are about to void<span class="dcName">${drEsc(name)}</span><span class="dcNote">The customer's balance will change: ${drMoney(c.total_receivable)} → <b>${drMoney(newBal)}</b>.<br>${p.method === 'Wallet' ? 'The amount returns to the wallet.' : 'The amount is taken out of cash in hand.'}<br>The entry leaves the history and moves to <b>Voided</b>.</span>` });
+  if(!ok1) return;
+  const ok2 = await dangerConfirm({ step: 'STEP 2 OF 2', title: 'Enter Admin PIN to void', pin: true, final: true, okText: '🗑️ Void recovery',
+    html: `Your app is protected with a PIN.<br>Enter it to void <b>${drEsc(name)}</b>.` });
+  if(!ok2) return;
+  c.total_receivable = newBal;
+  if(p.method === 'Wallet') c.wallet_balance = moneyRound((Number(c.wallet_balance) || 0) + amt); else financeDummy.cashInHand -= amt;
+  if(Array.isArray(c.walletHistory)){ const wi = c.walletHistory.findIndex(h => h.type === 'receivable_collected' && Number(h.amount) === amt && h.date === p.date); if(wi >= 0) c.walletHistory.splice(wi, 1); }
+  const i = paymentsData.findIndex(x => x.payment_id === paymentId); if(i >= 0) paymentsData.splice(i, 1);
+  if(!Array.isArray(AppState.settings.voidedRecoveries)) AppState.settings.voidedRecoveries = [];
+  AppState.settings.voidedRecoveries.unshift(Object.assign({}, p, { voided_at: new Date().toISOString(), voided_by: AppState.currentUser?.name || '' }));
+  persistAllData();
+  DRH.map = null;
+  try{ renderPartyList(document.getElementById('partySearchInput')?.value); }catch(e){}
+  drHistRender();
+  try{ showNavToast('🗑️ Recovery voided — balance corrected'); }catch(e){}
+}
+function drSubSet(k){ DRH.sub = k === 'void' ? 'void' : 'rec'; drHistRender(); }
 function drTabApply(){
   const hist = DRH.tab === 'hist';
   const a = document.getElementById('drTodayWrap'), b = document.getElementById('drHistWrap');
@@ -25579,27 +25779,33 @@ function drNiceDate(d){ try{ return typeof formatDateDMY === 'function' ? format
 // ---------- تاریخ وار ہسٹری ----------
 function drHistRender(){
   const wrap = document.getElementById('drHistList'); if(!wrap) return;
-  const q = String(DRH.q || '').trim().toLowerCase();
-  const rows = (paymentsData || []).filter(p => drIsCustIn(p) && p.balance_before !== undefined && p.balance_after !== undefined && (!q || String(p.party_name || '').toLowerCase().includes(q)));
+  const q = String(DRH.q || '').trim().toLowerCase(), isVoid = DRH.sub === 'void';
+  const voided = (AppState.settings.voidedRecoveries || []);
+  const sa = document.getElementById('drSub-rec'), sb = document.getElementById('drSub-void'), vc = document.getElementById('drVoidCnt');
+  if(sa) sa.classList.toggle('active', !isVoid); if(sb) sb.classList.toggle('active', isVoid); if(vc) vc.textContent = voided.length ? '(' + voided.length + ')' : '';
+  const src = isVoid ? voided : (paymentsData || []).filter(p => drIsCustIn(p) && p.balance_before !== undefined && p.balance_after !== undefined);
+  const rows = src.filter(p => !q || String(p.party_name || '').toLowerCase().includes(q));
+  const total = rows.reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const byDay = {};
   rows.forEach(p => { (byDay[p.date] = byDay[p.date] || []).push(p); });
   const days = Object.keys(byDay).sort().reverse();
-  const total = rows.reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  document.getElementById('drHistSummary').innerHTML = `<div>Days<b>${days.length}</b></div><div>Payments<b>${rows.length}</b></div><div>Total received<b>${drMoney(total)}</b></div>`;
-  if(!days.length){ wrap.innerHTML = '<div class="placeholder">No recovery history yet</div>'; return; }
+  document.getElementById('drHistSummary').innerHTML = `<div>Days<b>${days.length}</b></div><div>${isVoid ? 'Voided' : 'Payments'}<b>${rows.length}</b></div><div>${isVoid ? 'Voided total' : 'Total received'}<b>${drMoney(total)}</b></div>`;
+  if(!days.length){ wrap.innerHTML = `<div class="placeholder">${isVoid ? 'No voided recovery' : 'No recovery history yet'}</div>`; return; }
   const shown = days.slice(0, DRH.days);
+  const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } };
   wrap.innerHTML = shown.map(d => {
     const list = byDay[d].sort((a, b) => (b.payment_id || 0) - (a.payment_id || 0));
     const sum = list.reduce((s, p) => s + (Number(p.amount) || 0), 0);
-    return `<div class="drHistDay"><span>📅 ${drEsc(drNiceDate(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} payment(s) • ${drMoney(sum)} <button class="drDayPrint" onclick="drPrintDay('${drEsc(d)}')" title="Print this day">🖨️</button></small></div>` + list.map(p => `<div class="drRow">
-      <div class="drTop"><b>${drEsc(p.party_name)}</b><small>${drEsc(p.by || '')}</small></div>
-      <div class="drGrid">
-        <div class="drCell"><small>Balance</small><b>${drMoney(p.balance_before)}</b></div>
-        <div class="drCell"><small>Recovery</small><b style="color:#15803d;">${drMoney(p.amount)}</b></div>
-        <div class="drCell"><small>Remaining</small><b class="drLeft ${p.balance_after > 0 ? 'red' : 'green'}">${p.balance_after > 0 ? drMoney(p.balance_after) : p.balance_after < 0 ? 'Advance ' + drMoney(-p.balance_after) : 'Clear ✓'}</b></div>
-        <div class="drCell"><button class="drPosterBtn" onclick="drHistPoster(${p.payment_id})" title="Poster">🖼️</button></div>
-      </div>
-    </div>`).join('');
+    return `<div class="drHistDay"><span>📅 ${drEsc(drNiceDate(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} • ${drMoney(sum)} ${isVoid ? '' : `<button class="drDayPrint" onclick="drPrintDay('${drEsc(d)}')" title="Print this day">🖨️</button><button class="drDayPrint" onclick="drShareDay('${drEsc(d)}')" title="Share this day as image">🖼️</button>`}</small></div>` +
+      '<div class="drTh"><span>Customer</span><span>Old balance</span><span>' + (isVoid ? 'Voided' : 'Received') + '</span><span>Remaining</span></div>' +
+      list.map(p => `<div class="drR2"><div class="drR2g">
+        <div class="drR2n"><b>${drEsc(p.party_name)}</b></div>
+        <div class="drR2v">${drNum(p.balance_before)}</div>
+        <div class="drR2v ${isVoid ? 'void' : 'in'}">${drNum(p.amount)}</div>
+        <div class="drR2v">${drFmtRem(p.balance_after)}</div></div>
+        <div class="drR2f"><span class="drLast">${isVoid ? `Voided ${drEsc(drNiceDate(localDateStr(p.voided_at)))} ${drEsc(tm({created_at: p.voided_at}))}${p.voided_by ? ' by ' + drEsc(p.voided_by) : ''}` : [tm(p), p.method, p.by ? 'by ' + p.by : ''].filter(Boolean).map(drEsc).join(' · ')}</span>
+          <span class="drIc">${isVoid ? '' : `<button onclick="drHistPoster(${p.payment_id})" title="Poster">🖼️</button><button onclick="drCustReport(${p.party_id})" title="Statement">📄</button><button class="del" onclick="drVoid(${p.payment_id})" title="Void this recovery">🗑️</button>`}</span></div>
+      </div>`).join('');
   }).join('') + (days.length > shown.length ? `<button class="drHistMore" onclick="DRH.days += 30; drHistRender()">⬇️ Show older days (${days.length - shown.length} more)</button>` : '');
 }
 // ---------- پوسٹر — My Diary کی رسید جیسا ڈیزائن: سلام، نام، پیغام + تین رنگین ڈبے (Old Balance / Recovery / Remaining)، فوٹر ----------
@@ -35477,7 +35683,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO1811WE227'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2011FR228'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
   const UPDATE_NOTE = 'Recovery: 2 small buttons on Customers, compact one-line screen, clean printable day report';
   const UPD_KEY = 'aioUpdateFromVersion';
