@@ -366,6 +366,15 @@ const AG_TAG = Object.fromEntries(Object.keys(AG_ABBR).map((k) => [agCatTag(k), 
 function refNorm(v) { const t = String(v || "").toUpperCase().trim(), c = t.replace(/[\s_-]+/g, ""); return (c === "PBTD" || c === "DEV" || c === "ADMIN1") ? "ADMIN1" : (c === "PBTC" || c === "CODEV" || c === "ADMIN2") ? "ADMIN2" : t; }   /* MCS1511SU429 (مالک کا حکم): DEV / CODEV ختم — اب ADMIN1 / ADMIN2 (پرانا لکھا بھی مانا جاتا ہے) */
 function agAbbrOfRk(rk) { return AG_TAG[String(rk || "").split("_")[1] || ""] || "BZ"; }   /* نئی (ایڈمن کی بنائی) قسم = BZ */
 function agNormRef(v) { const t = String(v || "").trim().toUpperCase().replace(/\s+/g, ""); const m = /^([A-Z]{2})[-.]?0*(\d{1,5})$/.exec(t); return m ? m[1] + m[2].padStart(3, "0") : String(v || "").trim(); }   /* MCS1511SU429: ڈیش کے بغیر AG001 */
+/* AIO2011FR230 (مالک کا حکم): ملازم کی AIO ID ہیلپ ڈیسک کی فہرست میں نہیں — صرف پیسے والے مالک کی۔
+   ملازم = جس فون نے دکان سے جڑ کر خود بتایا (jn = true) یا جسے مالک نے ابھی شامل کیا (invAt، دو دن تک، یا فون ابھی بتا نہ پایا)۔
+   جس ID پر اپنا پیکج / لین دین ہو (ent) وہ کبھی نہیں چھپتی۔ */
+function aioIsStaff(a, now) {
+  if (!a) return false;
+  if (a.jn === true) return true;
+  return !!a.invAt && (a.jn === undefined || now - a.invAt < 2 * 864e5);
+}
+
 export class McsStats {
   constructor(state) {
     this.sql = state.storage.sql;
@@ -1521,6 +1530,10 @@ export class McsStats {
         const a = get(b.id); if (!a || a.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
         if (b.op === "done") { this.sql.exec("DELETE FROM aioinv WHERE id = ?", b.id); return Response.json({ ok: true }); }
         if (b.op === "del") { this.sql.exec("DELETE FROM aioinv WHERE id = ?", b.id); this.sql.exec("DELETE FROM aioid WHERE id = ?", b.id); return Response.json({ ok: true }); }
+        if (typeof b.jn === "boolean" && a.jn !== b.jn) {   /* AIO2011FR230: فون بتاتا ہے کہ وہ دکان سے جڑا ملازم فون ہے یا نہیں */
+          const rr = this.sql.exec("SELECT data FROM aioid WHERE id = ?", b.id).toArray()[0];
+          if (rr) { let dd = {}; try { dd = JSON.parse(rr.data || "{}"); } catch (er) {} dd.jn = b.jn; dd.jnAt = now; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(dd), b.id); }
+        }
         const iv = this.sql.exec("SELECT data FROM aioinv WHERE id = ?", b.id).toArray()[0];
         return Response.json({ ok: true, name: a.name, inv: iv ? JSON.parse(iv.data) : null });
       }
@@ -1533,6 +1546,8 @@ export class McsStats {
         if (a.dev === b.by) return Response.json({ ok: false, reason: "self" });
         const d = { biz: b.biz, pin: b.pin, uname: b.uname, role: b.role, shop: b.shop, at: now };
         this.sql.exec("INSERT INTO aioinv (id, data, ts) VALUES (?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", b.id, JSON.stringify(d), now);
+        { const rr = this.sql.exec("SELECT data FROM aioid WHERE id = ?", b.id).toArray()[0];   /* AIO2011FR230: مالک نے شامل کیا → ملازم کی ID */
+          if (rr) { let dd = {}; try { dd = JSON.parse(rr.data || "{}"); } catch (er) {} dd.invAt = now; const ob = this.sql.exec("SELECT id FROM aioid WHERE dev = ?", b.by).toArray()[0]; if (ob) dd.invBy = ob.id; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(dd), b.id); } }
         return Response.json({ ok: true, name: a.name });
       }
       return Response.json({ ok: false, reason: "op" });
@@ -2276,6 +2291,7 @@ export class McsStats {
           let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
           if (a.dead || (a.app === "DR" ? "DR" : "AIO") !== want) continue;
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
+          if (!e && aioIsStaff(a, now)) continue;   /* AIO2011FR230: ملازم کی ID فہرست میں نہیں */
           out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays } : null });
         }
         out.sort((p, q) => (q.made || 0) - (p.made || 0));
@@ -2304,6 +2320,7 @@ export class McsStats {
             if (x.dead || (x.app === "DR" ? "DR" : "AIO") !== (b.app === "DR" ? "DR" : "AIO")) continue;
             if (!((bm && m10(x.mobile) === bm) || (bg && String(x.gmail || "").toLowerCase() === bg))) continue;
             const k2 = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e2 = k2 ? this.entGet(k2.id) : null;
+            if (!e2 && aioIsStaff(x, now)) continue;   /* AIO2011FR230 */
             out.push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", made: x.at || r.ts || 0, replacedBy: x.replacedBy || "", ent: e2 ? { active: !e2.revoked && (!!e2.life || (e2.exp || 0) > now), revoked: !!e2.revoked, life: !!e2.life, exp: e2.exp || 0, leftDays: e2.leftDays === undefined ? null : e2.leftDays, pkg: e2.pkgName || "" } : null }); }
           return out; };
         if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others() });
@@ -2916,7 +2933,7 @@ async function handleAgent(request, env, path) {
       return fwd("/aio_id", { op, dev, name, mobile, gmail, app: S(b.app, 8) || "AIO", fp: String(b.fp || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40) });   /* AIO1811WE226: فون کی پہچان */
     }
     if (!/^AIO(DR)?\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
-    if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", { op, id, dev }); }
+    if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", op === "me" && typeof b.jn === "boolean" ? { op, id, dev, jn: b.jn } : { op, id, dev }); }   /* AIO2011FR230: jn = یہ فون دکان سے جڑا ملازم فون ہے */
     const by = String(b.by || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (by.length < 6) return reply({ ok: false, reason: "bad_by" });
     if (op === "look") return fwd("/aio_id", { op, id, by });
     if (op === "invite") {
