@@ -838,6 +838,15 @@ span.drPaidTag{margin:0 4px 0 0; font-size:11px;}
   .drCRDates{display:flex; gap:8px; margin-bottom:10px;} .drCRDates label{flex:1; font-size:10.5px; font-weight:700; color:#6b7686;} .drCRDates input{display:block; width:100%; box-sizing:border-box; margin-top:3px; padding:7px; border:1px solid #cbd2dc; border-radius:8px; font-size:13px;}
   .drCRSum{display:flex; gap:8px; margin-bottom:12px;} .drCRSum div{flex:1; border:1px solid #e1e5eb; border-radius:10px; padding:7px 9px; font-size:10.5px; color:#6b7686; font-weight:700;} .drCRSum b{display:block; font-size:15px; color:#111827;}
   .drCRBtns{display:flex; gap:8px;} .drCRBtns button{flex:1; height:40px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; border:1px solid #111827; background:#111827; color:#fff;} .drCRBtns button.s{background:#fff; color:#111827;}
+  /* AIO2011FR228: ریکوری کی تاریخ کا چھوٹا ویل — ایپ کے ہلکے تھیم میں (کالا ڈبہ ختم) */
+  .drDate{display:flex; justify-content:center; margin:0 0 6px;}
+  .drDate .dwBox{--rad:var(--primary); --radTx:#0f172a; --radDim:#94a3b8; --radSoft:transparent; --radBg1:#fff; --radBg2:#fff; --radCol:#eef2f7; --radBd:#dbe1ea;
+    margin:0; padding:2px 10px; gap:8px; background:#fff; box-shadow:none; border:1px solid #dbe1ea; border-radius:12px; width:max-content;}
+  .drDate .dwDay{font-size:14px; color:var(--primary-dark); text-shadow:none;}
+  .drDate .dwShow{min-width:70px;}
+  .drDate .dwIt{font-size:14px;} .drDate .dwIt.on{color:var(--primary-dark); text-shadow:none;}
+  .drDate .dwBand{width:150px; box-shadow:none; border-top:1.5px solid #c7d2fe; border-bottom:1.5px solid #c7d2fe; background:rgba(99,102,241,.06);}
+  .drDate .dwTag.old{background:#e5e7eb; color:#374151;}
   .drHistMore{width:100%; padding:10px; border:1.5px dashed #94a3b8; background:#f8fafc; border-radius:10px; font-weight:800; cursor:pointer; margin:8px 0 14px;}
 .drRemBtn{margin-top:7px; width:100%; padding:7px; border:none; border-radius:9px; background:#dcfce7; color:#166534; font-weight:800; font-size:12.5px; cursor:pointer;}
   .drDayBtn{flex:1; padding:8px 4px; border:1.5px solid #cbd5e1; border-radius:10px; background:#fff; font-size:12px; font-weight:800; cursor:pointer;}
@@ -5268,9 +5277,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <button class="active" id="drTab-today" onclick="drSetTab('today')">📅 Today</button>
           <button id="drTab-hist" onclick="drSetTab('hist')">📜 History</button>
         </div>
-        <button class="drPrintBtn" onclick="drPrintDay(drToday())" title="Today's report (print / PDF)">🖨️ Report</button><button class="drPrintBtn" onclick="drShareDay(drToday())" title="Share today's report as image">🖼️</button>
+        <button class="drPrintBtn" onclick="drPrintDay(drSel())" title="Print the selected day's recovery (print / PDF)">🖨️ Print</button><button class="drPrintBtn" onclick="drShareDay(drSel())" title="Share the selected day's recovery as image">🖼️</button>
       </div>
       <div id="drTodayWrap">
+
+      <div class="drDate"><input type="date" id="drDate" class="dwWheel" onchange="drDateChanged(this.value)"></div>
 
       <div class="drBar drOne">
         <input type="text" id="drSearch" placeholder="🔍 Search" oninput="DR.q=this.value; drRender()">
@@ -5288,8 +5299,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       <div class="drSummary" id="drSummary"></div>
       <div id="drListWrap"></div>
 
-      <button class="checkoutBtn drSaveBtn" onclick="drSaveAll()">💾 Save received payments</button>
-      <div class="settingsHint" style="margin:4px 0 12px; font-size:11.5px;">Type the amount in each row, then press Save. 🖼️ = poster • 💬 = reminder • 🖨️ = today's report.</div>
+      <div id="drSaveWrap"><button class="checkoutBtn drSaveBtn" onclick="drSaveAll()">💾 Save received payments</button>
+      <div class="settingsHint" style="margin:4px 0 12px; font-size:11.5px;">Type the amount in each row, then press Save. 🖼️ = poster • 💬 = reminder • 🖨️ = print the selected day.</div></div>
       </div>
 
       <div id="drHistWrap" style="display:none;">
@@ -25362,7 +25373,7 @@ function drMoney(n){ return 'Rs. ' + Math.round(Number(n) || 0).toLocaleString()
 function drDue(c){ return Number(c.total_receivable) || 0; }
 function drReceived(c){ return Number(DR.rec[c.customer_id]) || 0; }
 function drList(){
-  let list = customersData.filter(c => !String(c.name || '').includes('Walk-in') && (DR.all || drDue(c) > 0 || drPaidToday(c.customer_id).sum > 0));   /* AIO1811WE222: آج وصول کرنے والا (بقایہ صفر ہو جانے پر بھی) فہرست میں رہے تاکہ پوسٹر مل سکے */
+  let list = customersData.filter(c => !String(c.name || '').includes('Walk-in') && (drIsToday() ? (DR.all || drDue(c) > 0 || drPaidToday(c.customer_id).sum > 0) : drPaidToday(c.customer_id).sum > 0));   /* AIO1811WE222: آج وصول کرنے والا (بقایہ صفر ہو جانے پر بھی) فہرست میں رہے تاکہ پوسٹر مل سکے */
   if(DR.area) list = list.filter(c => String(c.area || '').trim() === DR.area);
   if(DR.q) list = list.filter(c => partyMatchesQuery(c, DR.q));
   const by = {
@@ -25375,6 +25386,8 @@ function drList(){
   return list.sort(by);
 }
 function renderRecoveryScreen(){
+  DRH.date = '';   /* AIO2011FR228: سکرین کھلتے ہی آج کی تاریخ */
+  try{ AIO_DW.set(document.getElementById('drDate'), drToday()); }catch(e){}
   const areas = [...new Set(customersData.filter(c => c.area && String(c.area).trim()).map(c => String(c.area).trim()))].sort((a, b) => a.localeCompare(b));
   const sel = document.getElementById('drArea');
   sel.innerHTML = '<option value="">🗺️ All areas</option>' + areas.map(a => `<option value="${drEsc(a)}">${drEsc(a)}</option>`).join('');
@@ -25403,6 +25416,29 @@ function drRender(){
   const list = drList();
   const wrap = document.getElementById('drListWrap');
   if(!wrap) return;
+  const sw = document.getElementById('drSaveWrap'); if(sw) sw.style.display = drIsToday() ? '' : 'none';
+  if(!drIsToday()){   /* AIO2011FR228: کسی اور دن کی ریکوری — صرف دیکھنے کے لیے */
+    let o1 = 0, g1 = 0, l1 = 0;
+    const rows = list.map(c => {
+      const id = c.customer_id, pt = drPaidToday(id), pv = DRH.prev[id];
+      const first = pt.list[0], last = pt.list[pt.list.length - 1];
+      const old = Number(first.balance_before) || 0, left = Number(last.balance_after) || 0;
+      o1 += old; g1 += pt.sum; l1 += Math.max(0, left);
+      const lastTxt = pv ? `Last paid <b>${drMoney(pv.amount)}</b> · ${drAgoTxt(drDaysAgo(pv.date))} (${drEsc(drNiceDate(pv.date))})` : 'No earlier recovery';
+      return `<div class="drR2">
+      <div class="drR2g">
+        <div class="drR2n"><b>${drEsc(c.name)}</b>${c.area ? `<small>${drEsc(c.area)}</small>` : ''}</div>
+        <div class="drR2v">${drNum(old)}</div>
+        <div class="drR2v in" style="color:#15803d;">${drNum(pt.sum)}</div>
+        <div class="drR2v">${drFmtRem(left)}</div>
+      </div>
+      <div class="drR2f"><span class="drLast">${lastTxt}</span>
+        <span class="drIc"><button onclick="drPoster(${id})" title="Poster">🖼️</button><button onclick="drOpenReminder(${id})" title="Reminder">💬</button><button onclick="drCustReport(${id})" title="Statement">📄</button></span></div>
+    </div>`; }).join('');
+    document.getElementById('drSummary').innerHTML = `<div>Customers<b>${list.length}</b></div><div>Total due<b>${drMoney(o1)}</b></div><div>Received<b>${drMoney(g1)}</b></div><div>Remaining<b>${drMoney(l1)}</b></div>`;
+    wrap.innerHTML = list.length ? '<div class="drTh"><span>Customer</span><span>Balance</span><span>Recovery</span><span>Remaining</span></div>' + rows : `<div class="placeholder">No recovery on ${drEsc(drNiceDate(drSel()))}</div>`;
+    return;
+  }
   drSummaryPaint(list);
   if(!list.length){ wrap.innerHTML = '<div class="placeholder">No customer found</div>'; return; }
   wrap.innerHTML = '<div class="drTh"><span>Customer</span><span>Balance</span><span>Recovery</span><span>Remaining</span></div>' + list.map(c => {
@@ -25509,10 +25545,14 @@ function drSendReminder(){
 // ===================== AIO1811WE222: Recovery — آج کی وصولی + تاریخ وار ہسٹری + پوسٹر (ڈیزائن My Diary والا) =====================
 const DRH = { tab: 'today', q: '', days: 30, map: null, sub: 'rec', prev: {} };
 function drToday(){ return localDateStr(new Date()); }
+/* AIO2011FR228 (مالک کا حکم): ویل سے چنی ہوئی تاریخ — خالی ہو تو آج */
+function drSel(){ return DRH.date || drToday(); }
+function drIsToday(){ return drSel() === drToday(); }
+function drDateChanged(v){ DRH.date = (/^\d{4}-\d{2}-\d{2}$/.test(v || '') && v !== drToday()) ? v : ''; DR.rec = {}; drRender(); }
 function drIsCustIn(p){ return p && p.direction === 'in' && p.party_type === 'customer'; }
 // آج کی وصولیاں: customer_id → { sum, list:[payments (پرانی پہلے)] }
 function drBuildTodayMap(){
-  const t = drToday(), m = {};
+  const t = drSel(), m = {};
   (paymentsData || []).forEach(p => {
     if(!drIsCustIn(p) || p.date !== t) return;
     const e = m[p.party_id] || (m[p.party_id] = { sum: 0, list: [] });
@@ -25523,7 +25563,7 @@ function drBuildTodayMap(){
 }
 // AIO2011FR228: ہر گاہک کی آج سے پہلے والی آخری ریکوری
 function drBuildPrevMap(){
-  const t = drToday(), m = {};
+  const t = drSel(), m = {};
   (paymentsData || []).forEach(p => {
     if(!drIsCustIn(p) || !p.date || p.date >= t) return;
     const e = m[p.party_id];
@@ -25531,7 +25571,7 @@ function drBuildPrevMap(){
   });
   return m;
 }
-function drDaysAgo(d){ const a = new Date(d + 'T00:00:00'), b = new Date(drToday() + 'T00:00:00'); return Math.round((b - a) / 864e5); }
+function drDaysAgo(d){ const a = new Date(d + 'T00:00:00'), b = new Date(drSel() + 'T00:00:00'); return Math.round((b - a) / 864e5); }
 function drAgoTxt(n){ return n <= 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; }
 function drPaidToday(id){ if(!DRH.map) DRH.map = drBuildTodayMap(); return DRH.map[id] || { sum: 0, list: [] }; }
 function drSetTab(tab){ DRH.tab = tab === 'hist' ? 'hist' : 'today'; drTabApply(); }
@@ -25763,7 +25803,7 @@ async function drPoster(id){
   const t = drPaidToday(id);
   if(!t.list.length){ alert('Type the received amount first, then tap 🖼️.'); return; }
   const first = t.list[0], last = t.list[t.list.length - 1];
-  drShowPoster({ name: c.name, old: first.balance_before, got: t.sum, left: last.balance_after, date: drToday() });
+  drShowPoster({ name: c.name, old: first.balance_before, got: t.sum, left: last.balance_after, date: drSel() });
 }
 async function drHistPoster(paymentId){
   const p = (paymentsData || []).find(x => x.payment_id === paymentId); if(!p) return;
