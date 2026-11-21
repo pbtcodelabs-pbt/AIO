@@ -2218,7 +2218,7 @@ export class McsStats {
         for (const s of rows) { const sid = String(s.sid || "").replace(/[^A-Z0-9]/gi, "").toUpperCase(); if (!/^MCS\d+$/.test(sid)) continue;
           const u = userOf(s.mob), g = regOf(s.mob);
           const live = this.sql.exec("SELECT MAX(COALESCE(until, 0)) AS u, COUNT(*) AS n FROM prof WHERE rec LIKE ?", "p" + String(s.mob).slice(2) + "_%").toArray()[0] || {};
-          out.push({ sid, mob: s.mob, name: u.name || this.finCfg("sidname_" + s.mob, "") || "", biz: (g && g.reg && g.reg.biz) || "", city: (g && g.reg && (g.reg.city || g.reg.dist)) || u.district || "", hasImg: !!(g && g.img), until: live.u || 0, nBiz: live.n || 0, at: Math.max(u.ts || 0, s.ts || 0, (g && g.ts) || 0) }); }
+          out.push({ sid, mob: s.mob, name: u.name || this.finCfg("sidname_" + s.mob, "") || "", biz: (g && g.reg && g.reg.biz) || "", city: (g && g.reg && (g.reg.city || g.reg.dist)) || u.district || "", dist: (g && g.reg && g.reg.dist) || u.district || "", hasImg: !!(g && g.img), until: live.u || 0, nBiz: live.n || 0, at: Math.max(u.ts || 0, s.ts || 0, (g && g.ts) || 0) }); }
         out.sort((p, q) => q.at - p.at);
         /* MCS1811WE541: ٹیسٹ موڈ کے اکاؤنٹ (🧪) سب سے اوپر — الگ خانے سے */
         const tests = []; try { this.sql.exec("CREATE TABLE IF NOT EXISTS mcstest (k TEXT PRIMARY KEY, ttk TEXT, sid TEXT, data TEXT, until INTEGER, ts INTEGER)");
