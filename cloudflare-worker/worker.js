@@ -2286,13 +2286,15 @@ export class McsStats {
       }
       /* AIO1811WE224 (مالک کا حکم — کوڈ کا نظام ختم): ہیلپ ڈیسک سے AIO ID پر سیدھا پیکج — چابی "a:AIO12345"، اسی ID والا فون خود جڑتا ہے */
       if (b.op === "aionew") {   /* AIO1811WE225 (مالک کا حکم — ID بھیجنے / منگوانے کا نظام نہیں): سرور پر بنی ہر AIO ID خود ہیلپ ڈیسک کی فہرست میں (نام + حالت) */
-        const want = b.app === "DR" ? "DR" : "AIO", out = [];
+        const want = b.app === "DR" ? "DR" : "AIO", out = [], stf = {};
+        /* HD2111SA143: ہر مالک کی ID کے ساتھ اس کے جڑے ملازم (invBy) — پیکج والی فہرست میں دکھانے کے لیے */
+        for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} if (x.dead || !x.invBy) continue; (stf[x.invBy] = stf[x.invBy] || []).push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", at: x.invAt || x.at || r.ts || 0 }); }
         for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) {
           let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
           if (a.dead || (a.app === "DR" ? "DR" : "AIO") !== want) continue;
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
           if (!e && aioIsStaff(a, now)) continue;   /* AIO2011FR230: ملازم کی ID فہرست میں نہیں */
-          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays } : null });
+          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays } : null, staff: (stf[r.id] || []).sort((p, q) => p.at - q.at) });
         }
         out.sort((p, q) => (q.made || 0) - (p.made || 0));
         return Response.json({ ok: true, list: out.slice(0, 2000) });
@@ -2323,7 +2325,9 @@ export class McsStats {
             if (!e2 && aioIsStaff(x, now)) continue;   /* AIO2011FR230 */
             out.push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", made: x.at || r.ts || 0, replacedBy: x.replacedBy || "", ent: e2 ? { active: !e2.revoked && (!!e2.life || (e2.exp || 0) > now), revoked: !!e2.revoked, life: !!e2.life, exp: e2.exp || 0, leftDays: e2.leftDays === undefined ? null : e2.leftDays, pkg: e2.pkgName || "" } : null }); }
           return out; };
-        if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others() });
+        /* HD2111SA142 (مالک کا حکم): اس مالک کی ID سے جڑے ملازم — جنہیں اسی مالک نے شامل کیا (invBy = مالک کی ID)؛ صرف ہیلپ ڈیسک کی تفصیل میں، عام فہرست میں ملازم پھر بھی نہیں */
+        const staffOf = () => { const out = []; for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} if (x.dead || x.invBy !== b.aio) continue; out.push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", made: x.at || r.ts || 0, invAt: x.invAt || 0, jn: x.jn === true }); } out.sort((p, q) => (p.invAt || p.made || 0) - (q.invAt || q.made || 0)); return out; };
+        if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others(), staff: staffOf() });
         if (b.op === "aioadd") {   /* AIO1811WE226 (مالک کا حکم): سادہ بٹن — دن / مہینہ / سال / اپنے دن / لائف ٹائم سیدھے اسی ID میں */
           const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life = !!b.life; if (!days && !life) return Response.json({ ok: false, reason: "no_days" });
           if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: [], claims: [], exp: 0, at: now, by: "helpdesk", devices: 1 };
