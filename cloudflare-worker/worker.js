@@ -2287,7 +2287,7 @@ export class McsStats {
       /* AIO1811WE224 (مالک کا حکم — کوڈ کا نظام ختم): ہیلپ ڈیسک سے AIO ID پر سیدھا پیکج — چابی "a:AIO12345"، اسی ID والا فون خود جڑتا ہے */
       if (b.op === "aionew") {   /* AIO1811WE225 (مالک کا حکم — ID بھیجنے / منگوانے کا نظام نہیں): سرور پر بنی ہر AIO ID خود ہیلپ ڈیسک کی فہرست میں (نام + حالت) */
         const want = b.app === "DR" ? "DR" : "AIO", out = [], stf = {};
-        /* HD2111SA143: ہر مالک کی ID کے ساتھ اس کے جڑے ملازم (invBy) — پیکج والی فہرست میں دکھانے کے لیے */
+        /* HD2111SA144: ہر مالک کی ID کے ساتھ اس کے جڑے ملازم (invBy) — پیکج والی فہرست میں دکھانے کے لیے */
         for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} if (x.dead || !x.invBy) continue; (stf[x.invBy] = stf[x.invBy] || []).push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", at: x.invAt || x.at || r.ts || 0 }); }
         for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) {
           let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
@@ -2315,7 +2315,7 @@ export class McsStats {
         const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0];
         let e = kr ? this.entGet(kr.id) : null;
         const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", made: a.at || ar.ts || 0, dev: ar.dev || "", replacedBy: a.replacedBy || "", replacedAt: a.replacedAt || 0 };
-        const full = (x) => x ? Object.assign(this.entOut(x), { hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length, leftDays: x.leftDays === undefined ? null : x.leftDays, replacedBy: x.replacedBy || "" }) : null;
+        const full = (x) => x ? Object.assign(this.entOut(x), { pkgId: x.pkgId || "", pkgName: x.pkgName || "", hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length, leftDays: x.leftDays === undefined ? null : x.leftDays, replacedBy: x.replacedBy || "" }) : null;
         /* AIO1811WE226: اسی موبائل یا Gmail کی دوسری IDs (پرانا / نیا فون) — مالک دیکھ کر دن جوڑے */
         const others = () => { const m10 = (v) => String(v || "").replace(/\D/g, "").slice(-10), bm = m10(a.mobile), bg = String(a.gmail || "").toLowerCase(), out = [];
           for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { if (r.id === b.aio) continue; let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {}
@@ -2327,7 +2327,9 @@ export class McsStats {
           return out; };
         /* HD2111SA142 (مالک کا حکم): اس مالک کی ID سے جڑے ملازم — جنہیں اسی مالک نے شامل کیا (invBy = مالک کی ID)؛ صرف ہیلپ ڈیسک کی تفصیل میں، عام فہرست میں ملازم پھر بھی نہیں */
         const staffOf = () => { const out = []; for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} if (x.dead || x.invBy !== b.aio) continue; out.push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", made: x.at || r.ts || 0, invAt: x.invAt || 0, jn: x.jn === true }); } out.sort((p, q) => (p.invAt || p.made || 0) - (q.invAt || q.made || 0)); return out; };
-        if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others(), staff: staffOf() });
+        /* HD2111SA144 (مالک کا حکم): پیکج پر جڑے فونز کے نام / موبائل / AIO ID — فون کی چابی (dev) سے aioid ٹیبل میں ڈھونڈ کر */
+        const devmapOf = () => { const m = {}; for (const d of (Array.isArray(b.devs) ? b.devs : [])) { const r = this.sql.exec("SELECT id, data FROM aioid WHERE dev = ?", d).toArray()[0]; if (!r) continue; let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} m[d] = { aio: r.id, name: x.name || "", mobile: x.mobile || "" }; } return m; };
+        if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others(), staff: staffOf(), devmap: devmapOf() });
         if (b.op === "aioadd") {   /* AIO1811WE226 (مالک کا حکم): سادہ بٹن — دن / مہینہ / سال / اپنے دن / لائف ٹائم سیدھے اسی ID میں */
           const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life = !!b.life; if (!days && !life) return Response.json({ ok: false, reason: "no_days" });
           if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: [], claims: [], exp: 0, at: now, by: "helpdesk", devices: 1 };
@@ -3096,7 +3098,7 @@ async function handleEnt(request, env, path) {
     if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^AIO(DR)?\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
-      return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
+      return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), devs: Array.isArray(b.devs) ? b.devs.slice(0, 20).map((d) => String(d).slice(0, 120)) : undefined, price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
     if (app === "MCS" && (op === "tlook" || op === "tact" || op === "twipe")) return fwd("/ent_admin", { op, app, k: String(b.k || "").slice(0, 40) });   /* MCS1811WE541: ٹیسٹ اکاؤنٹ (صرف ایڈمن) */
