@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2011FR231</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2011FR232</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2011FR231</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2011FR232</span>
     </div>
   </div>
 
@@ -12284,7 +12284,70 @@ function printShortcutsSheet(){
   const rows = KB_ACTIONS.filter(a => st.map[a[0]]).map(a => `<tr><td>${a[1]}</td><td>${a[2]}</td><td style="text-align:right;"><b>${String(st.map[a[0]]).replace(/</g,'&lt;')}</b></td></tr>`).join('');
   const w = window.open('', '_blank');
   if(!w){ kbMsg('Allow pop-ups to print the list'); return; }
-  w.document.write(`<html><head><title>Keyboard Shortcuts</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{margin:0 0 10px}table{border-collapse:collapse;width:100%}td{border:1px solid #cbd5e1;padding:7px 10px;font-size:14px}tr:nth-child(even){background:#f1f5f9}</style></head><body><h2>⌨️ Keyboard Shortcuts</h2><table>${rows}</table><script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+  w.document.write(`<html><head><title>Keyboard Shortcuts</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{margin:0 0 10px}table{border-collapse:collapse;width:100%}td{border:1px solid #cbd5e1;padding:7px 10px;font-size:14px}tr:nth-child(even){background:#f1f5f9}</style></head><body><h2>⌨️ Keyboard Shortcuts</h2><table>${rows}</table><script>setTimeout(function(){window.print();},300)<\/script>
+<style id="aioRecoveryLedger232">
+/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
+#screen-recovery .drCleanCard,
+#screen-recovery .drHistCard{
+  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
+  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
+  padding:8px 3px !important;min-width:0;overflow:hidden;
+}
+#screen-recovery .drCleanTop,
+#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
+#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
+#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
+#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
+#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
+#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
+  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drCleanMeta span:last-child{border:0}
+#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
+  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
+#screen-recovery .drCleanEntry label{display:block;min-width:0}
+#screen-recovery .drCleanEntry label small,
+#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
+#screen-recovery .drCleanRemaining{min-width:0}
+#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
+#screen-recovery .drCleanEntry .drIc button,
+#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
+#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
+#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
+#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
+  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drHistMeta span:last-child{border:0}
+#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
+#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
+#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
+#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
+#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
+#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
+#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
+#screen-recovery .drSummary b{font-size:12px !important}
+#screen-recovery .drSeg{margin-bottom:6px !important}
+#screen-recovery .drSeg button{padding:7px 4px !important}
+#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
+@media(max-width:380px){
+ #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
+ #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
+ #screen-recovery .drCleanMeta b{font-size:9.5px !important}
+ #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
+ #screen-recovery .drCleanEntry .drIc{gap:2px !important}
+ #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
+ #screen-recovery .drHistMeta{gap:3px !important}
+ #screen-recovery .drHistMeta b{font-size:9.5px !important}
+}
+</style>
+
+</body></html>`);
   w.document.close();
 }
 // ---------- نئی کی پکڑنا (پاپ اپ میں) ----------
@@ -20991,7 +21054,70 @@ function printPartyStatement(){
     <h2>${shop}</h2><div class="m">📜 ${sup ? 'Supplier' : 'Customer'}: <b>${stEsc(st.name)}</b> &nbsp;•&nbsp; ${f.label} &nbsp;•&nbsp; Printed ${formatDateDMY(localDateStr(new Date()))}</div>
     <table><tr><th>Date</th><th>Detail</th><th>${sup ? 'Purchased (+)' : 'Billed (+)'}</th><th>${sup ? 'Paid (−)' : 'Received (−)'}</th><th>Balance</th></tr>${rowsHtml || '<tr><td colspan="5">No transactions</td></tr>'}</table>
     <div class="t">${(sup ? closing >= 0 : closing < 0) ? 'To be paid' : 'To be received'}: ${stMoney(Math.abs(closing))}</div>
-    <script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+    <script>setTimeout(function(){window.print();},300)<\/script>
+<style id="aioRecoveryLedger232">
+/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
+#screen-recovery .drCleanCard,
+#screen-recovery .drHistCard{
+  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
+  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
+  padding:8px 3px !important;min-width:0;overflow:hidden;
+}
+#screen-recovery .drCleanTop,
+#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
+#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
+#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
+#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
+#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
+#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
+  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drCleanMeta span:last-child{border:0}
+#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
+  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
+#screen-recovery .drCleanEntry label{display:block;min-width:0}
+#screen-recovery .drCleanEntry label small,
+#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
+#screen-recovery .drCleanRemaining{min-width:0}
+#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
+#screen-recovery .drCleanEntry .drIc button,
+#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
+#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
+#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
+#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
+  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drHistMeta span:last-child{border:0}
+#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
+#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
+#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
+#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
+#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
+#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
+#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
+#screen-recovery .drSummary b{font-size:12px !important}
+#screen-recovery .drSeg{margin-bottom:6px !important}
+#screen-recovery .drSeg button{padding:7px 4px !important}
+#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
+@media(max-width:380px){
+ #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
+ #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
+ #screen-recovery .drCleanMeta b{font-size:9.5px !important}
+ #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
+ #screen-recovery .drCleanEntry .drIc{gap:2px !important}
+ #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
+ #screen-recovery .drHistMeta{gap:3px !important}
+ #screen-recovery .drHistMeta b{font-size:9.5px !important}
+}
+</style>
+
+</body></html>`);
   w.document.close();
 }
 function sharePartyStatement(){
@@ -24170,7 +24296,70 @@ function printAdvanceOrdersList(){
         </div>
       </div>
     </div>
-  </body></html>`;
+  
+<style id="aioRecoveryLedger232">
+/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
+#screen-recovery .drCleanCard,
+#screen-recovery .drHistCard{
+  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
+  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
+  padding:8px 3px !important;min-width:0;overflow:hidden;
+}
+#screen-recovery .drCleanTop,
+#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
+#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
+#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
+#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
+#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
+#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
+  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drCleanMeta span:last-child{border:0}
+#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
+  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
+#screen-recovery .drCleanEntry label{display:block;min-width:0}
+#screen-recovery .drCleanEntry label small,
+#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
+#screen-recovery .drCleanRemaining{min-width:0}
+#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
+#screen-recovery .drCleanEntry .drIc button,
+#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
+#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
+#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
+#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
+  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drHistMeta span:last-child{border:0}
+#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
+#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
+#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
+#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
+#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
+#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
+#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
+#screen-recovery .drSummary b{font-size:12px !important}
+#screen-recovery .drSeg{margin-bottom:6px !important}
+#screen-recovery .drSeg button{padding:7px 4px !important}
+#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
+@media(max-width:380px){
+ #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
+ #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
+ #screen-recovery .drCleanMeta b{font-size:9.5px !important}
+ #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
+ #screen-recovery .drCleanEntry .drIc{gap:2px !important}
+ #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
+ #screen-recovery .drHistMeta{gap:3px !important}
+ #screen-recovery .drHistMeta b{font-size:9.5px !important}
+}
+</style>
+
+</body></html>`;
 
   const blob = new Blob([pageHtml], {type: 'text/html'});
   window.open(URL.createObjectURL(blob), '_blank');
@@ -25598,7 +25787,70 @@ function drReportPrint(o){
     ${meta ? `<div class="meta">${meta}</div>` : ''}
     <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${foot}</table>
     <div class="f"><span>${shop}</span><span>Printed ${drEsc(drNiceDate(drToday()))}</span></div>
-    </div><script>setTimeout(function(){window.print();},300)<\/script></body></html>`);
+    </div><script>setTimeout(function(){window.print();},300)<\/script>
+<style id="aioRecoveryLedger232">
+/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
+#screen-recovery .drCleanCard,
+#screen-recovery .drHistCard{
+  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
+  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
+  padding:8px 3px !important;min-width:0;overflow:hidden;
+}
+#screen-recovery .drCleanTop,
+#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
+#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
+#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
+#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
+#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
+#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
+  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drCleanMeta span:last-child{border:0}
+#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
+  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
+#screen-recovery .drCleanEntry label{display:block;min-width:0}
+#screen-recovery .drCleanEntry label small,
+#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
+#screen-recovery .drCleanRemaining{min-width:0}
+#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
+#screen-recovery .drCleanEntry .drIc button,
+#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
+#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
+#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
+#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
+  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drHistMeta span:last-child{border:0}
+#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
+#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
+#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
+#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
+#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
+#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
+#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
+#screen-recovery .drSummary b{font-size:12px !important}
+#screen-recovery .drSeg{margin-bottom:6px !important}
+#screen-recovery .drSeg button{padding:7px 4px !important}
+#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
+@media(max-width:380px){
+ #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
+ #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
+ #screen-recovery .drCleanMeta b{font-size:9.5px !important}
+ #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
+ #screen-recovery .drCleanEntry .drIc{gap:2px !important}
+ #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
+ #screen-recovery .drHistMeta{gap:3px !important}
+ #screen-recovery .drHistMeta b{font-size:9.5px !important}
+}
+</style>
+
+</body></html>`);
   w.document.close();
 }
 function drReportCanvas(o){
@@ -35713,7 +35965,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2011FR231'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2011FR232'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
   const UPDATE_NOTE = 'Staff phones report to the server so Help Desk lists only the paying owner IDs';
   const UPD_KEY = 'aioUpdateFromVersion';
@@ -36422,7 +36674,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   async function poll(){
     const m = me(); if(!m.id || !navigator.onLine) return;
     try{
-      const r = await call({op:'me', id: m.id, dev: dev(), jn: (function(){ try{ return !!isLinkedDevice(); }catch(e){ return false; } })()});   /* AIO2011FR231: سرور کو بتائیں کہ یہ دکان سے جڑا ملازم فون ہے — ہیلپ ڈیسک میں ملازم کی ID نہیں آتی */
+      const r = await call({op:'me', id: m.id, dev: dev(), jn: (function(){ try{ return !!isLinkedDevice(); }catch(e){ return false; } })()});   /* AIO2011FR232: سرور کو بتائیں کہ یہ دکان سے جڑا ملازم فون ہے — ہیلپ ڈیسک میں ملازم کی ID نہیں آتی */
       if(r && r.ok === false && r.reason === 'none'){ save({dev: m.dev}); paintCard(); return; }
       const iv = r && r.inv; if(!iv) return;
       const s = AppState.settings || {};
@@ -36888,6 +37140,69 @@ window.pbtHubPwOk = async function(p){
   try{ const _a = window.acctRecheck; if(typeof _a === 'function') window.acctRecheck = function(){ try{ gate(); }catch(e){} return _a.apply(this, arguments); }; }catch(e){}
 })();
 </script>
+
+<style id="aioRecoveryLedger232">
+/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
+#screen-recovery .drCleanCard,
+#screen-recovery .drHistCard{
+  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
+  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
+  padding:8px 3px !important;min-width:0;overflow:hidden;
+}
+#screen-recovery .drCleanTop,
+#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
+#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
+#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
+#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
+#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
+#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
+  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drCleanMeta span:last-child{border:0}
+#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
+  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
+#screen-recovery .drCleanEntry label{display:block;min-width:0}
+#screen-recovery .drCleanEntry label small,
+#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
+#screen-recovery .drCleanRemaining{min-width:0}
+#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
+#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
+#screen-recovery .drCleanEntry .drIc button,
+#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
+#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
+#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
+#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
+  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
+#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
+#screen-recovery .drHistMeta span:last-child{border:0}
+#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
+#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
+#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
+#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
+#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
+#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
+#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
+#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
+#screen-recovery .drSummary b{font-size:12px !important}
+#screen-recovery .drSeg{margin-bottom:6px !important}
+#screen-recovery .drSeg button{padding:7px 4px !important}
+#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
+@media(max-width:380px){
+ #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
+ #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
+ #screen-recovery .drCleanMeta b{font-size:9.5px !important}
+ #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
+ #screen-recovery .drCleanEntry .drIc{gap:2px !important}
+ #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
+ #screen-recovery .drHistMeta{gap:3px !important}
+ #screen-recovery .drHistMeta b{font-size:9.5px !important}
+}
+</style>
+
 </body>
 
 </html>
