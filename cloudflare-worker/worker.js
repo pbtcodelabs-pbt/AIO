@@ -1367,6 +1367,13 @@ export class McsStats {
     if (op === "/mcs_dir") {   /* MCS1611MO466 (مالک کا حکم — فائربیس کی لمٹ): MCS نمبر کے بغیر کارڈوں کی ایک نقل (gzip base64)؛ فون فائربیس کی بجائے یہیں سے */
       const b = await request.json();
       this.sql.exec("CREATE TABLE IF NOT EXISTS mcsdir (i INTEGER PRIMARY KEY, v TEXT)");
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcstomb (k TEXT PRIMARY KEY, at INTEGER)");   /* MCS2111SA603: ایڈمن کے حذف کیے ریکارڈوں کے نشان */
+      if (b.op === "tadd") { const now = Date.now(); let n = 0; for (const k of (Array.isArray(b.keys) ? b.keys : []).slice(0, 20)) { const s = String(k || "").slice(0, 160); if (!/^(fs|id):.+/.test(s)) continue; this.sql.exec("INSERT INTO mcstomb (k, at) VALUES (?, ?) ON CONFLICT (k) DO NOTHING", s, now); n++; } return Response.json({ ok: true, n }); }
+      if (b.op === "tget") { const rows = this.sql.exec("SELECT k, at FROM mcstomb ORDER BY at DESC LIMIT 5000").toArray(); return Response.json({ ok: true, keys: rows.map((r) => r.k), v: rows.length ? rows[0].at : 0 }); }
+      if (b.op === "paid") {   /* Google Play کی اصل (غیر مفت / غیر ٹیسٹ) خریداری اس ممبرشپ پر؟ */
+        try { const r = this.sql.exec("SELECT exp, sku FROM mbuy WHERE rec = ? AND COALESCE(free, 0) = 0 ORDER BY ts DESC LIMIT 1", String(b.rec || "")).toArray()[0]; return Response.json({ ok: true, paid: !!r, exp: r ? r.exp : 0, sku: r ? r.sku : "" }); }
+        catch (e) { if (/no such table/i.test(String(e && e.message))) return Response.json({ ok: true, paid: false }); return Response.json({ ok: false, error: "paid_check" }); }
+      }
       const meta = () => { try { return JSON.parse((this.sql.exec("SELECT v FROM agcfg WHERE k = 'dirmeta'").toArray()[0] || {}).v || "{}"); } catch (e) { return {}; } };
       if (b.op === "put") {
         const s = String(b.data || ""); if (!s || s.length > 8e6) return Response.json({ ok: false, reason: "size" });
@@ -2988,6 +2995,10 @@ async function handleAgent(request, env, path) {
   }
   if (path === "/mcsdir") {   /* MCS1611MO466: غیر رجسٹرڈ کارڈوں کی نقل — پڑھنا سب، لکھنا صرف ایڈمن 1 */
     if (b.op === "put") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "put", data: String(b.data || ""), n: b.n }); }
+    /* MCS2111SA603 (مالک کا حکم): ایڈمن کا حذف ہر فون سے — «حذف شدہ» نشان (tombstone)؛ ادائیگی شدہ (Google Play) ممبر کی جانچ */
+    if (b.op === "tadd") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "tadd", keys: Array.isArray(b.keys) ? b.keys.slice(0, 20).map((x) => String(x)) : [] }); }
+    if (b.op === "tget") return fwd("/mcs_dir", { op: "tget" });
+    if (b.op === "paid") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_dir", { op: "paid", rec: String(b.rec || "").slice(0, 120) }); }
     return fwd("/mcs_dir", { op: b.op === "get" ? "get" : "ver" });
   }
   if (path === "/mcsbackup") {   /* AGP1711TU036: روز کا بیک اپ — صرف ڈویلپر (فہرست / ڈاؤن لوڈ / ابھی بنائیں) */
