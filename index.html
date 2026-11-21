@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2011FR232</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2011FR234</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2011FR232</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2011FR234</span>
     </div>
   </div>
 
@@ -4530,6 +4530,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           <div id="npPartyAreaListWrap" class="custPickList" style="position:absolute; left:0; right:0; top:calc(100% + 3px); z-index:80;"></div>
         </div>
         <input type="text" id="npPartyKeywords" placeholder="Nickname / Keyword for search (e.g. Jago, Peshawar)">
+        <div id="npOpeningBalanceWrap" style="display:none; margin-top:10px; padding:10px; border:1px solid #bbf7d0; background:#f0fdf4; border-radius:10px;">
+          <label for="npOpeningBalance" style="display:block; font-size:12px; font-weight:800; color:#166534; margin-bottom:5px;">💰 Opening balance — customer already owes (Rs.)</label>
+          <input type="number" id="npOpeningBalance" min="0" step="0.01" inputmode="decimal" placeholder="0" onfocus="this.select()" style="width:100%; box-sizing:border-box;">
+          <div style="font-size:11px; color:#166534; margin-top:5px;">Optional. Save the customer's previous outstanding amount directly, without creating a bill.</div>
+        </div>
         <div class="modalBtns">
           <button class="cancelBtn" onclick="closeNewPartyModal()">Cancel</button>
           <button class="saveBtn" onclick="saveNewParty()">Save</button>
@@ -5123,7 +5128,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         <div class="txnTypeToggle">
           <button id="obAdd" class="active" onclick="setOpeningBalanceType('recv')">📥 To be received</button>
           <button id="obReduce" onclick="setOpeningBalanceType('pay')">📤 To be paid</button>
+          <button id="obSetExact" onclick="setOpeningBalanceType('exact')" style="display:none;">🎯 Set exact balance</button>
         </div>
+        <div id="obExactHint" style="display:none; margin:8px 0; padding:8px 10px; border-radius:8px; background:#eff6ff; color:#1e40af; font-size:12px;">Enter the correct final amount. The customer's receivable balance will become exactly this amount; no bill will be created.</div>
         <input type="number" id="obAmount" placeholder="Enter amount" onfocus="this.select()">
         <input type="text" id="obNote" placeholder="Note (optional, e.g. 'Old balance before app')" style="margin-top:8px;">
         <div class="modalBtns">
@@ -12285,67 +12292,7 @@ function printShortcutsSheet(){
   const w = window.open('', '_blank');
   if(!w){ kbMsg('Allow pop-ups to print the list'); return; }
   w.document.write(`<html><head><title>Keyboard Shortcuts</title><style>body{font-family:Arial,sans-serif;padding:20px}h2{margin:0 0 10px}table{border-collapse:collapse;width:100%}td{border:1px solid #cbd5e1;padding:7px 10px;font-size:14px}tr:nth-child(even){background:#f1f5f9}</style></head><body><h2>⌨️ Keyboard Shortcuts</h2><table>${rows}</table><script>setTimeout(function(){window.print();},300)<\/script>
-<style id="aioRecoveryLedger232">
-/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
-#screen-recovery .drCleanCard,
-#screen-recovery .drHistCard{
-  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
-  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
-  padding:8px 3px !important;min-width:0;overflow:hidden;
-}
-#screen-recovery .drCleanTop,
-#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
-#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
-#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
-#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
-#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
-#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
-#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
-  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drCleanMeta span:last-child{border:0}
-#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
-  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
-#screen-recovery .drCleanEntry label{display:block;min-width:0}
-#screen-recovery .drCleanEntry label small,
-#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
-#screen-recovery .drCleanRemaining{min-width:0}
-#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
-#screen-recovery .drCleanEntry .drIc button,
-#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
-#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
-#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
-#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
-  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drHistMeta span:last-child{border:0}
-#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
-#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
-#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
-#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
-#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
-#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
-#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
-#screen-recovery .drSummary b{font-size:12px !important}
-#screen-recovery .drSeg{margin-bottom:6px !important}
-#screen-recovery .drSeg button{padding:7px 4px !important}
-#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
-@media(max-width:380px){
- #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
- #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
- #screen-recovery .drCleanMeta b{font-size:9.5px !important}
- #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
- #screen-recovery .drCleanEntry .drIc{gap:2px !important}
- #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
- #screen-recovery .drHistMeta{gap:3px !important}
- #screen-recovery .drHistMeta b{font-size:9.5px !important}
-}
-</style>
+
 
 </body></html>`);
   w.document.close();
@@ -21055,67 +21002,7 @@ function printPartyStatement(){
     <table><tr><th>Date</th><th>Detail</th><th>${sup ? 'Purchased (+)' : 'Billed (+)'}</th><th>${sup ? 'Paid (−)' : 'Received (−)'}</th><th>Balance</th></tr>${rowsHtml || '<tr><td colspan="5">No transactions</td></tr>'}</table>
     <div class="t">${(sup ? closing >= 0 : closing < 0) ? 'To be paid' : 'To be received'}: ${stMoney(Math.abs(closing))}</div>
     <script>setTimeout(function(){window.print();},300)<\/script>
-<style id="aioRecoveryLedger232">
-/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
-#screen-recovery .drCleanCard,
-#screen-recovery .drHistCard{
-  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
-  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
-  padding:8px 3px !important;min-width:0;overflow:hidden;
-}
-#screen-recovery .drCleanTop,
-#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
-#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
-#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
-#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
-#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
-#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
-#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
-  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drCleanMeta span:last-child{border:0}
-#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
-  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
-#screen-recovery .drCleanEntry label{display:block;min-width:0}
-#screen-recovery .drCleanEntry label small,
-#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
-#screen-recovery .drCleanRemaining{min-width:0}
-#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
-#screen-recovery .drCleanEntry .drIc button,
-#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
-#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
-#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
-#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
-  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drHistMeta span:last-child{border:0}
-#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
-#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
-#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
-#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
-#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
-#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
-#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
-#screen-recovery .drSummary b{font-size:12px !important}
-#screen-recovery .drSeg{margin-bottom:6px !important}
-#screen-recovery .drSeg button{padding:7px 4px !important}
-#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
-@media(max-width:380px){
- #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
- #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
- #screen-recovery .drCleanMeta b{font-size:9.5px !important}
- #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
- #screen-recovery .drCleanEntry .drIc{gap:2px !important}
- #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
- #screen-recovery .drHistMeta{gap:3px !important}
- #screen-recovery .drHistMeta b{font-size:9.5px !important}
-}
-</style>
+
 
 </body></html>`);
   w.document.close();
@@ -24297,67 +24184,7 @@ function printAdvanceOrdersList(){
       </div>
     </div>
   
-<style id="aioRecoveryLedger232">
-/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
-#screen-recovery .drCleanCard,
-#screen-recovery .drHistCard{
-  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
-  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
-  padding:8px 3px !important;min-width:0;overflow:hidden;
-}
-#screen-recovery .drCleanTop,
-#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
-#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
-#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
-#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
-#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
-#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
-#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
-  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drCleanMeta span:last-child{border:0}
-#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
-  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
-#screen-recovery .drCleanEntry label{display:block;min-width:0}
-#screen-recovery .drCleanEntry label small,
-#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
-#screen-recovery .drCleanRemaining{min-width:0}
-#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
-#screen-recovery .drCleanEntry .drIc button,
-#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
-#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
-#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
-#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
-  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drHistMeta span:last-child{border:0}
-#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
-#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
-#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
-#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
-#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
-#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
-#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
-#screen-recovery .drSummary b{font-size:12px !important}
-#screen-recovery .drSeg{margin-bottom:6px !important}
-#screen-recovery .drSeg button{padding:7px 4px !important}
-#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
-@media(max-width:380px){
- #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
- #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
- #screen-recovery .drCleanMeta b{font-size:9.5px !important}
- #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
- #screen-recovery .drCleanEntry .drIc{gap:2px !important}
- #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
- #screen-recovery .drHistMeta{gap:3px !important}
- #screen-recovery .drHistMeta b{font-size:9.5px !important}
-}
-</style>
+
 
 </body></html>`;
 
@@ -25075,7 +24902,7 @@ let editingPartyId = null;   // null = نیا پارٹی، ورنہ اسی ID و
 let npPhotoDataUrl = null;   // ابھی منتخب کی گئی تصویر (Save پر محفوظ ہوگی)
 
 function resetNewPartyForm(){
-  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords'].forEach(id => document.getElementById(id).value = '');
+  ['npPartyName','npPartyPhone','npPartyAddress','npPartyArea','npPartyKeywords','npOpeningBalance'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
   npPhotoDataUrl = null;
   renderAvatarInto('npPhotoPreview', null, '👤');
   closePartyFormDropdowns();
@@ -25089,6 +24916,7 @@ function openNewPartyModal(){
   poOpenAfterNewSupplier = false;
   resetNewPartyForm();
   document.getElementById('newPartyTitle').textContent = currentPartyTab === 'customers' ? '🧑‍🤝‍🧑 New Customer' : '🚚 New Supplier';
+  document.getElementById('npOpeningBalanceWrap').style.display = currentPartyTab === 'customers' ? 'block' : 'none';
   document.getElementById('newPartyModal').classList.add('show');
 }
 
@@ -25105,6 +24933,7 @@ function openEditPartyModal(){
   closeProfileModal();
 
   document.getElementById('newPartyTitle').textContent = isCustomer ? '🧑‍🤝‍🧑 Edit Customer' : '🚚 Edit Supplier';
+  document.getElementById('npOpeningBalanceWrap').style.display = 'none'; // موجودہ بقایا پروفائل کے Opening Bal. / Correction سے تبدیل ہوگا
   document.getElementById('npPartyName').value = p.name || '';
   document.getElementById('npPartyPhone').value = p.phone || '';
   document.getElementById('npPartyAddress').value = p.address || '';
@@ -25242,6 +25071,11 @@ function saveNewParty(){
   const address = document.getElementById('npPartyAddress').value.trim();
   const area = document.getElementById('npPartyArea').value.trim();
   const keywords = document.getElementById('npPartyKeywords').value.trim();
+  const openingRaw = document.getElementById('npOpeningBalance')?.value.trim() || '';
+  const openingAmount = openingRaw === '' ? 0 : moneyRound(Number(openingRaw));
+  if(openingRaw !== '' && (!Number.isFinite(openingAmount) || openingAmount < 0)){
+    alert('Please enter a valid opening balance (0 or more).'); return;
+  }
 
   if(!name){
     alert('Please enter a name.');
@@ -25272,14 +25106,17 @@ function saveNewParty(){
       }
     }
   } else if(currentPartyTab === 'customers'){
-    // TODO: یہ customers table میں INSERT ہوگا
-    customersData.push({customer_id: nextCustomerId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, wallet_balance:0, total_receivable:0, walletHistory:[]});
+    // نیا کسٹمر: بغیر بل بنائے پرانا بقایا بطور Opening Balance محفوظ کریں
+    const newCustomer = {customer_id: nextCustomerId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, wallet_balance:0, total_receivable:openingAmount, walletHistory:[]};
+    if(openingAmount > 0) newCustomer.walletHistory.unshift({type:'opening_balance', amount:openingAmount, direction:'add', note:'Opening balance entered while creating customer', date:localDateStr(new Date())});
+    customersData.push(newCustomer);
   } else {
     // TODO: یہ suppliers table میں INSERT ہوگا
     suppliersData.push({supplier_id: nextSupplierId++, name, phone, address, area, keywords, photo: npPhotoDataUrl, total_payable:0});
   }
 
   closeNewPartyModal();
+  persistAllData();
   renderPartyList();
   // ---------- Purchase Orders کے "+ New PO" سے نیا سپلائر بنایا ہو تو سیدھا اسی کا PO کھولیں ----------
   if(poOpenAfterNewSupplier && editingPartyId === null && currentPartyTab !== 'customers'){
@@ -25348,19 +25185,29 @@ function openOpeningBalanceModal(customerId, party){
   document.getElementById('obHint').textContent = 'Opening balance from your register, or to settle a difference later. Choose: To be received (we take from them) or To be paid (we give to them).';
   document.getElementById('obAdd').textContent = '📥 To be received';
   document.getElementById('obReduce').textContent = '📤 To be paid';
+  document.getElementById('obSetExact').style.display = sup ? 'none' : 'block';
   setOpeningBalanceType(sup ? 'pay' : 'recv');
   document.getElementById('obAmount').value = '';
   document.getElementById('obNote').value = '';
   document.getElementById('openingBalanceModal').classList.add('show');
 }
 function setOpeningBalanceType(type){
-  activeOpeningBalanceType = type === 'pay' ? 'pay' : 'recv';
+  activeOpeningBalanceType = ['pay','exact'].includes(type) ? type : 'recv';
   document.getElementById('obAdd').classList.toggle('active', activeOpeningBalanceType === 'recv');
   document.getElementById('obReduce').classList.toggle('active', activeOpeningBalanceType === 'pay');
+  const exactBtn = document.getElementById('obSetExact');
+  if(exactBtn) exactBtn.classList.toggle('active', activeOpeningBalanceType === 'exact');
+  const exactHint = document.getElementById('obExactHint');
+  if(exactHint) exactHint.style.display = activeOpeningBalanceType === 'exact' ? 'block' : 'none';
+  const amountInput = document.getElementById('obAmount');
+  if(amountInput) amountInput.placeholder = activeOpeningBalanceType === 'exact' ? 'Enter correct final balance (0 allowed)' : 'Enter amount';
 }
 function saveOpeningBalanceAdjustment(){
-  const amount = moneyRound(parseFloat(document.getElementById('obAmount').value) || 0);
-  if(amount <= 0){ alert('Please enter a valid amount.'); return; }
+  const rawAmount = document.getElementById('obAmount').value.trim();
+  const amount = moneyRound(rawAmount === '' ? 0 : Number(rawAmount));
+  if(!Number.isFinite(amount) || amount < 0 || (activeOpeningBalanceType !== 'exact' && amount <= 0)){
+    alert(activeOpeningBalanceType === 'exact' ? 'Enter a valid final balance (0 or more).' : 'Please enter a valid amount greater than zero.'); return;
+  }
   const note = document.getElementById('obNote').value.trim();
   const recv = activeOpeningBalanceType === 'recv';
   if(activeOpeningBalanceParty === 'suppliers'){
@@ -25381,6 +25228,18 @@ function saveOpeningBalanceAdjustment(){
   const c = customersData.find(x => x.customer_id === activeOpeningBalanceCustomerId);
   if(!c) return;
   c.walletHistory = c.walletHistory || [];
+  if(activeOpeningBalanceType === 'exact'){
+    const previous = moneyRound(Number(c.total_receivable) || 0);
+    const delta = moneyRound(amount - previous);
+    c.total_receivable = amount;
+    c.walletHistory.unshift({type:'opening_balance', amount:Math.abs(delta), direction:delta >= 0 ? 'add' : 'pay', previousBalance:previous, correctedBalance:amount, note:note || `Balance corrected to Rs. ${amount.toLocaleString()}`, date:localDateStr(new Date())});
+    document.getElementById('openingBalanceModal').classList.remove('show');
+    persistAllData();
+    renderPartyList(document.getElementById('partySearchInput')?.value);
+    if(document.getElementById('profileModal')?.classList.contains('show')) openCustomerProfile(c.customer_id);
+    alert(`✅ ${c.name} — Correct balance: Rs. ${c.total_receivable.toLocaleString()}`);
+    return;
+  }
   if(recv){
     c.total_receivable = moneyRound((Number(c.total_receivable) || 0) + amount);
     c.walletHistory.unshift({type: 'opening_balance', amount, direction: 'add', note, date: localDateStr(new Date())});
@@ -25619,17 +25478,29 @@ function drRender(){
       const first=pt.list[0], last=pt.list[pt.list.length-1];
       const old=Number(first?.balance_before)||0, left=Number(last?.balance_after)||0;
       totalOld+=old; totalGot+=pt.sum; totalLeft+=Math.max(0,left);
-      return `<article class="drCleanCard">
-        <div class="drCleanTop"><div class="drCleanName">${drEsc(c.name)}${c.area?`<small>${drEsc(c.area)}</small>`:''}</div><div class="drCleanDue"><small>Balance</small><b>${drMoney(old)}</b></div></div>
-        <div class="drCleanMeta"><span><small>Last recovery</small><b>${lastDate}</b></span><span><small>Days ago</small><b>${ago}</b></span><span><small>Last amount</small><b>${lastAmount}</b></span><span><small>After recovery</small><b>${afterLast}</b></span></div>
-        <div class="drCleanBottom"><span class="drCleanReceived">Received today <b>${drMoney(pt.sum)}</b></span><span class="drCleanRemaining">Remaining <b>${drFmtRem(left)}</b></span><span class="drIc"><button onclick="drPoster(${id})" title="Poster">🖼️</button><button onclick="drOpenReminder(${id})" title="Reminder">💬</button><button onclick="drCustReport(${id})" title="Statement">📄</button></span></div>
+      return `<article class="drCleanCard drCleanRow">
+        <div class="drCleanName">${drEsc(c.name)}${c.area?`<small>${drEsc(c.area)}</small>`:''}</div>
+        <div class="drCleanDue"><small>Balance</small><b>${drMoney(old)}</b></div>
+        <div class="drCleanMetric"><small>Last recovery</small><b>${lastDate}</b></div>
+        <div class="drCleanMetric"><small>Days ago</small><b>${ago}</b></div>
+        <div class="drCleanMetric"><small>Last amount</small><b>${lastAmount}</b></div>
+        <div class="drCleanMetric"><small>Balance then</small><b>${afterLast}</b></div>
+        <div class="drCleanMetric"><small>Received today</small><b>${drMoney(pt.sum)}</b></div>
+        <div class="drCleanRemaining"><small>Remaining</small><b>${drFmtRem(left)}</b></div>
+        <span class="drIc"><button onclick="drPoster(${id})" title="Poster">🖼️</button><button onclick="drOpenReminder(${id})" title="Reminder">💬</button><button onclick="drCustReport(${id})" title="Statement">📄</button></span>
       </article>`;
     }
     const v=DR.rec[id], li=drLeftInfo(c), liveLeft=drDue(c)-drReceived(c);
-    return `<article class="drCleanCard">
-      <div class="drCleanTop"><div class="drCleanName">${drEsc(c.name)}${c.area?`<small>${drEsc(c.area)}</small>`:''}</div><div class="drCleanDue"><small>Current balance</small><b>${drMoney(drDue(c))}</b></div></div>
-      <div class="drCleanMeta"><span><small>Last recovery</small><b>${lastDate}</b></span><span><small>Days ago</small><b>${ago}</b></span><span><small>Last amount</small><b>${lastAmount}</b></span><span><small>Balance then</small><b>${afterLast}</b></span></div>
-      <div class="drCleanEntry"><label><small>Today's recovery</small><input type="number" inputmode="decimal" min="0" placeholder="Enter amount" value="${v?drEsc(v):''}" onfocus="this.select()" oninput="drTyped(${id},this.value)"></label><div class="drCleanRemaining"><small>After today's payment</small><b id="drLeft-${id}" class="${li.cls}">${drFmtRem(liveLeft)}</b></div><span class="drIc"><button onclick="drPoster(${id})" title="Poster">🖼️</button><button onclick="drOpenReminder(${id})" title="Reminder">💬</button><button onclick="drCustReport(${id})" title="Statement">📄</button></span></div>
+    return `<article class="drCleanCard drCleanRow">
+      <div class="drCleanName">${drEsc(c.name)}${c.area?`<small>${drEsc(c.area)}</small>`:''}</div>
+      <div class="drCleanDue"><small>Current balance</small><b>${drMoney(drDue(c))}</b></div>
+      <div class="drCleanMetric"><small>Last recovery</small><b>${lastDate}</b></div>
+      <div class="drCleanMetric"><small>Days ago</small><b>${ago}</b></div>
+      <div class="drCleanMetric"><small>Last amount</small><b>${lastAmount}</b></div>
+      <div class="drCleanMetric"><small>Balance then</small><b>${afterLast}</b></div>
+      <label class="drCleanInput"><small>Today's recovery</small><input type="number" inputmode="decimal" min="0" placeholder="Enter amount" value="${v?drEsc(v):''}" onfocus="this.select()" oninput="drTyped(${id},this.value)"></label>
+      <div class="drCleanRemaining"><small>After payment</small><b id="drLeft-${id}" class="${li.cls}">${drFmtRem(liveLeft)}</b></div>
+      <span class="drIc"><button onclick="drPoster(${id})" title="Poster">🖼️</button><button onclick="drOpenReminder(${id})" title="Reminder">💬</button><button onclick="drCustReport(${id})" title="Statement">📄</button></span>
     </article>`;
   }).join('');
   if(!isToday){
@@ -25788,67 +25659,7 @@ function drReportPrint(o){
     <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${foot}</table>
     <div class="f"><span>${shop}</span><span>Printed ${drEsc(drNiceDate(drToday()))}</span></div>
     </div><script>setTimeout(function(){window.print();},300)<\/script>
-<style id="aioRecoveryLedger232">
-/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
-#screen-recovery .drCleanCard,
-#screen-recovery .drHistCard{
-  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
-  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
-  padding:8px 3px !important;min-width:0;overflow:hidden;
-}
-#screen-recovery .drCleanTop,
-#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
-#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
-#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
-#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
-#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
-#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
-#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
-  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drCleanMeta span:last-child{border:0}
-#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
-  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
-#screen-recovery .drCleanEntry label{display:block;min-width:0}
-#screen-recovery .drCleanEntry label small,
-#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
-#screen-recovery .drCleanRemaining{min-width:0}
-#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
-#screen-recovery .drCleanEntry .drIc button,
-#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
-#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
-#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
-#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
-  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drHistMeta span:last-child{border:0}
-#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
-#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
-#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
-#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
-#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
-#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
-#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
-#screen-recovery .drSummary b{font-size:12px !important}
-#screen-recovery .drSeg{margin-bottom:6px !important}
-#screen-recovery .drSeg button{padding:7px 4px !important}
-#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
-@media(max-width:380px){
- #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
- #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
- #screen-recovery .drCleanMeta b{font-size:9.5px !important}
- #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
- #screen-recovery .drCleanEntry .drIc{gap:2px !important}
- #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
- #screen-recovery .drHistMeta{gap:3px !important}
- #screen-recovery .drHistMeta b{font-size:9.5px !important}
-}
-</style>
+
 
 </body></html>`);
   w.document.close();
@@ -26082,11 +25893,13 @@ function drHistRender(){
     const sum = list.reduce((s, p) => s + (Number(p.amount) || 0), 0);
     return `<div class="drHistDay"><span>📅 ${drEsc(drNiceDate(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} • ${drMoney(sum)} ${isVoid ? '' : `<button class="drDayPrint" onclick="drPrintDay('${drEsc(d)}')" title="Print this day">🖨️</button><button class="drDayPrint" onclick="drShareDay('${drEsc(d)}')" title="Share this day as image">🖼️</button>`}</small></div>` +
       '<div class="drTh"><span>Customer</span><span>Old balance</span><span>' + (isVoid ? 'Voided' : 'Received') + '</span><span>Remaining</span></div>' +
-      list.map(p => `<article class="drHistCard">
-        <div class="drHistTop"><b>${drEsc(p.party_name)}</b><strong class="${isVoid ? 'void' : ''}">${drMoney(p.amount)}</strong></div>
-        <div class="drHistMeta"><span><small>Old balance</small><b>${drMoney(p.balance_before)}</b></span><span><small>Remaining</small><b>${drFmtRem(p.balance_after)}</b></span><span><small>${isVoid ? 'Voided on' : 'Payment details'}</small><b>${isVoid ? drEsc(drNiceDate(localDateStr(p.voided_at))) : [tm(p), p.method, p.by ? 'by '+p.by : ''].filter(Boolean).map(drEsc).join(' · ') || '—'}</b></span></div>
-        <div class="drHistActions"><span class="drLast">${isVoid ? (p.voided_by ? 'By '+drEsc(p.voided_by) : 'Voided recovery') : 'Recovery receipt & customer record'}</span>
-          <span class="drIc">${isVoid ? '' : `<button onclick="drHistPoster(${p.payment_id})" title="Poster">🖼️</button><button onclick="drCustReport(${p.party_id})" title="Statement">📄</button><button class="del" onclick="drVoid(${p.payment_id})" title="Void this recovery">🗑️</button>`}</span></div>
+      list.map(p => `<article class="drHistCard drHistRow">
+        <span class="drHistCustomer">${drEsc(p.party_name)}</span>
+        <span class="drHistCell"><small>Old balance</small><b>${drMoney(p.balance_before)}</b></span>
+        <span class="drHistCell drHistGot"><small>${isVoid ? 'Voided' : 'Received'}</small><b class="${isVoid ? 'void' : ''}">${drMoney(p.amount)}</b></span>
+        <span class="drHistCell"><small>Remaining</small><b>${drFmtRem(p.balance_after)}</b></span>
+        <span class="drHistCell drHistPayment"><small>${isVoid ? 'Voided on' : 'Payment details'}</small><b>${isVoid ? drEsc(drNiceDate(localDateStr(p.voided_at))) : [tm(p), p.method, p.by ? 'by '+p.by : ''].filter(Boolean).map(drEsc).join(' · ') || '—'}</b></span>
+        <span class="drHistActions">${isVoid ? (p.voided_by ? 'By '+drEsc(p.voided_by) : 'Voided') : `<button onclick="drHistPoster(${p.payment_id})" title="Poster">🖼️</button><button onclick="drCustReport(${p.party_id})" title="Statement">📄</button><button class="del" onclick="drVoid(${p.payment_id})" title="Void this recovery">🗑️</button>`}</span>
       </article>`).join('');
   }).join('') + (days.length > shown.length ? `<button class="drHistMore" onclick="DRH.days += 30; drHistRender()">⬇️ Show older days (${days.length - shown.length} more)</button>` : '');
 }
@@ -35965,7 +35778,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2011FR232'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2011FR234'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
   const UPDATE_NOTE = 'Staff phones report to the server so Help Desk lists only the paying owner IDs';
   const UPD_KEY = 'aioUpdateFromVersion';
@@ -36674,7 +36487,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   async function poll(){
     const m = me(); if(!m.id || !navigator.onLine) return;
     try{
-      const r = await call({op:'me', id: m.id, dev: dev(), jn: (function(){ try{ return !!isLinkedDevice(); }catch(e){ return false; } })()});   /* AIO2011FR232: سرور کو بتائیں کہ یہ دکان سے جڑا ملازم فون ہے — ہیلپ ڈیسک میں ملازم کی ID نہیں آتی */
+      const r = await call({op:'me', id: m.id, dev: dev(), jn: (function(){ try{ return !!isLinkedDevice(); }catch(e){ return false; } })()});   /* AIO2011FR234: سرور کو بتائیں کہ یہ دکان سے جڑا ملازم فون ہے — ہیلپ ڈیسک میں ملازم کی ID نہیں آتی */
       if(r && r.ok === false && r.reason === 'none'){ save({dev: m.dev}); paintCard(); return; }
       const iv = r && r.inv; if(!iv) return;
       const s = AppState.settings || {};
@@ -37141,65 +36954,41 @@ window.pbtHubPwOk = async function(p){
 })();
 </script>
 
-<style id="aioRecoveryLedger232">
-/* AIO2011FR232 — Recovery & History: compact ledger layout, real screen styles */
-#screen-recovery .drCleanCard,
-#screen-recovery .drHistCard{
-  background:#fff !important;border:0 !important;border-bottom:1px solid #dfe5ec !important;
-  border-radius:0 !important;box-shadow:none !important;margin:0 !important;
-  padding:8px 3px !important;min-width:0;overflow:hidden;
-}
-#screen-recovery .drCleanTop,
-#screen-recovery .drHistTop{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
-#screen-recovery .drCleanName{font-size:14px !important;font-weight:800 !important;color:#202b3a !important;line-height:1.25}
-#screen-recovery .drCleanName small{display:block;margin:2px 0 0 !important;font-size:10px !important;color:#8490a0}
-#screen-recovery .drCleanDue{background:#f4f7fb;border-radius:7px;padding:3px 7px;white-space:nowrap}
-#screen-recovery .drCleanDue small{font-size:9px !important;text-align:right}
-#screen-recovery .drCleanDue b{font-size:14px !important;color:#a71924 !important}
-#screen-recovery .drCleanMeta{display:grid !important;grid-template-columns:1.15fr .72fr .82fr 1fr !important;gap:5px !important;
-  margin:6px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drCleanMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drCleanMeta span:last-child{border:0}
-#screen-recovery .drCleanMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanMeta b{font-size:10.5px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#screen-recovery .drCleanEntry{display:grid !important;grid-template-columns:minmax(90px,1fr) minmax(90px,.9fr) auto !important;
-  align-items:center;gap:6px !important;margin-top:5px !important;padding-top:5px;border-top:1px solid #edf0f4}
-#screen-recovery .drCleanEntry label{display:block;min-width:0}
-#screen-recovery .drCleanEntry label small,
-#screen-recovery .drCleanRemaining small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry input{padding:6px 7px !important;font-size:13px !important;min-height:32px}
-#screen-recovery .drCleanRemaining{min-width:0}
-#screen-recovery .drCleanRemaining b{font-size:12px !important;white-space:nowrap}
-#screen-recovery .drCleanEntry .drIc{display:flex;gap:3px !important}
-#screen-recovery .drCleanEntry .drIc button,
-#screen-recovery .drHistActions .drIc button{width:27px !important;height:27px !important;border-radius:7px !important;font-size:13px !important}
-#screen-recovery .drHistTop>b{font-size:13.5px !important;color:#202b3a !important}
-#screen-recovery .drHistTop>strong{font-size:14px !important;color:#087a43 !important;background:#eefaf3;border-radius:7px;padding:3px 7px}
-#screen-recovery .drHistMeta{display:grid !important;grid-template-columns:.85fr .85fr 1.4fr !important;gap:6px !important;
-  margin:5px 0 0 !important;padding:5px 0 !important;border-top:1px solid #edf0f4 !important;border-bottom:0 !important}
-#screen-recovery .drHistMeta span{min-width:0;border-right:1px solid #edf0f4;padding-right:4px}
-#screen-recovery .drHistMeta span:last-child{border:0}
-#screen-recovery .drHistMeta small{font-size:9px !important;white-space:nowrap}
-#screen-recovery .drHistMeta b{font-size:10px !important;line-height:1.25}
-#screen-recovery .drHistActions{display:flex !important;align-items:center;justify-content:space-between;gap:6px !important;margin-top:4px !important}
-#screen-recovery .drHistActions .drLast{font-size:9.5px !important}
-#screen-recovery .drHistDay{margin:10px 2px 4px !important;padding-bottom:4px;border-bottom:1px solid #dfe5ec;font-size:13px !important}
-#screen-recovery .drTh{padding-bottom:4px !important;font-size:9px !important}
-#screen-recovery .drSummary{gap:5px !important;margin:5px 0 7px !important}
-#screen-recovery .drSummary div{padding:5px 3px !important;font-size:9.5px !important}
-#screen-recovery .drSummary b{font-size:12px !important}
-#screen-recovery .drSeg{margin-bottom:6px !important}
-#screen-recovery .drSeg button{padding:7px 4px !important}
-#screen-recovery .drSaveBtn{margin-top:7px !important;padding:10px !important}
-@media(max-width:380px){
- #screen-recovery .drCleanCard,#screen-recovery .drHistCard{padding:7px 1px !important}
- #screen-recovery .drCleanMeta{grid-template-columns:1.12fr .68fr .8fr .95fr !important;gap:3px !important}
- #screen-recovery .drCleanMeta b{font-size:9.5px !important}
- #screen-recovery .drCleanEntry{grid-template-columns:minmax(82px,1fr) minmax(82px,.9fr) auto !important;gap:4px !important}
- #screen-recovery .drCleanEntry .drIc{gap:2px !important}
- #screen-recovery .drCleanEntry .drIc button,#screen-recovery .drHistActions .drIc button{width:24px !important;height:25px !important;font-size:12px !important}
- #screen-recovery .drHistMeta{gap:3px !important}
- #screen-recovery .drHistMeta b{font-size:9.5px !important}
+<style id="aioRecoveryLedger234">
+/* AIO2011FR234 — true horizontal ledger rows for Today and History */
+#screen-recovery #drListWrap,#screen-recovery #drHistList{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#screen-recovery .drCleanCard.drCleanRow{display:grid !important;grid-template-columns:145px 112px 105px 76px 95px 105px 115px 115px 112px;align-items:center;gap:8px;min-width:1000px;background:#fff;border:0;border-bottom:1px solid #dfe5ec;border-radius:0;box-shadow:none;margin:0;padding:9px 8px;overflow:visible}
+#screen-recovery .drCleanName{font-size:13px;font-weight:800;color:#243044;line-height:1.25;overflow-wrap:anywhere}
+#screen-recovery .drCleanName small{display:block;font-size:10px;color:#8994a3;margin:3px 0 0}
+#screen-recovery .drCleanDue,#screen-recovery .drCleanMetric,#screen-recovery .drCleanRemaining{min-width:0;text-align:left}
+#screen-recovery .drCleanDue small,#screen-recovery .drCleanMetric small,#screen-recovery .drCleanRemaining small,#screen-recovery .drCleanInput small{display:block;font-size:9px;font-weight:700;color:#8a95a3;line-height:1.2;margin-bottom:3px;white-space:nowrap}
+#screen-recovery .drCleanDue b{font-size:13px;color:#a71924;white-space:nowrap}
+#screen-recovery .drCleanMetric b{display:block;font-size:10.5px;color:#344054;white-space:nowrap;font-variant-numeric:tabular-nums}
+#screen-recovery .drCleanInput{display:block;min-width:0}
+#screen-recovery .drCleanInput input{box-sizing:border-box;width:100%;min-width:0;height:33px;padding:5px 7px;border:1.5px solid #9db8dc;border-radius:7px;font:inherit;font-size:12px;font-weight:800;text-align:right}
+#screen-recovery .drCleanRemaining b{display:block;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+#screen-recovery .drCleanRemaining .red{color:#b91c1c}#screen-recovery .drCleanRemaining .green{color:#15803d}#screen-recovery .drCleanRemaining .orange{color:#c2410c}
+#screen-recovery .drCleanRow .drIc{display:flex;align-items:center;gap:4px;white-space:nowrap}
+#screen-recovery .drCleanRow .drIc button{width:30px;height:30px;border-radius:7px;font-size:14px}
+#screen-recovery .drHistDay{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 5px;padding:0 2px 5px;border-bottom:1px solid #dfe5ec;font-size:13px;font-weight:800}
+#screen-recovery .drTh{display:grid;grid-template-columns:1.4fr .8fr .8fr .8fr 1.4fr 1fr;gap:8px;min-width:900px;padding:5px 8px;color:#8792a1;font-size:9px;font-weight:800;text-transform:uppercase;border-bottom:1px solid #e5eaf0}
+#screen-recovery .drHistCard.drHistRow{display:grid !important;grid-template-columns:1.4fr .8fr .8fr .8fr 1.4fr 1fr;align-items:center;gap:8px;min-width:900px;padding:8px;border:0;border-bottom:1px solid #e5eaf0;border-radius:0;background:#fff;box-shadow:none;margin:0}
+#screen-recovery .drHistCustomer{font-size:12px;font-weight:800;color:#273447;overflow-wrap:anywhere}
+#screen-recovery .drHistCell{min-width:0}
+#screen-recovery .drHistCell small{display:block;font-size:9px;color:#8a95a3;font-weight:700;margin-bottom:2px;white-space:nowrap}
+#screen-recovery .drHistCell b{display:block;font-size:10.5px;color:#344054;white-space:nowrap;font-variant-numeric:tabular-nums}
+#screen-recovery .drHistGot b{color:#087a43}
+#screen-recovery .drHistGot b.void{color:#8a94a3;text-decoration:line-through}
+#screen-recovery .drHistPayment b{white-space:normal;line-height:1.25}
+#screen-recovery .drHistActions{display:flex;align-items:center;justify-content:flex-end;gap:4px;white-space:nowrap}
+#screen-recovery .drHistActions button{width:28px;height:28px;border-radius:7px;font-size:13px}
+#screen-recovery .drSummary{gap:5px;margin:6px 0 8px}
+#screen-recovery .drSummary div{padding:6px 4px;font-size:10px}
+#screen-recovery .drSummary b{font-size:12px}
+#screen-recovery .drSaveBtn{margin-top:8px;padding:11px}
+@media(max-width:600px){
+ #screen-recovery .drCleanCard.drCleanRow{min-width:1000px}
+ #screen-recovery .drHistCard.drHistRow,#screen-recovery .drTh{min-width:900px}
 }
 </style>
 
