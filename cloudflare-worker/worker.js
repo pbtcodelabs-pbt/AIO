@@ -2218,7 +2218,7 @@ export class McsStats {
       const userOf = (mob) => { const k = this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + mob).toArray()[0], r = k && this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", k.id).toArray()[0]; let u = {}; try { u = r ? JSON.parse(r.data) : {}; } catch (e) {} return u; };
       const detail = (x) => { const u = userOf(x.mob), g = regOf(x.mob) || {};
         const recs = this.sql.exec("SELECT rec, since, until FROM prof WHERE rec LIKE ?", "p" + String(x.mob).slice(2) + "_%").toArray().map((r) => ({ rec: r.rec, since: r.since || 0, until: r.until || 0, sub: String(this.subOf(r.rec) || "").replace(/-/g, "") }));
-        return Object.assign({}, x, { susp: recs.some((r) => r.until === 1), gmail: u.gmail || u.email || "", dev: u.dev || "", district: u.district || "", created: u.ts || 0, reg: g.reg || null, regAt: g.ts || 0, img: g.img || "", recs }); };
+        return Object.assign({}, x, { gmail: u.gmail || u.email || "", dev: u.dev || "", district: u.district || "", created: u.ts || 0, reg: g.reg || null, regAt: g.ts || 0, img: g.img || "", recs }); };
       if (b.op === "mcslook") { const x = mcsLook(b.sid); return Response.json(x ? Object.assign({ ok: true }, detail(x)) : { ok: false, reason: "no_sid" }); }
       if (b.op === "mcsnew") {
         const rows = this.sql.exec("SELECT mob, sid, ts FROM mcssid").toArray(), out = [];
@@ -2240,29 +2240,6 @@ export class McsStats {
         if (b.op === "tact") { const until = Math.max(r.until || 0, now) + 365 * 864e5; this.sql.exec("UPDATE mcstest SET until = ? WHERE k = ?", until, r.k); r.until = until; }
         let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (er) {}
         return Response.json({ ok: true, test: true, k: r.k, sid: r.sid, sub: r.sid + "M1", mob: d.mobile || "", name: d.name || "", until: r.until || 0, reg: d.reg || null, img: "", gmail: "", dev: "", district: (d.reg && d.reg.city) || "", created: r.ts || 0, recs: d.rec ? [{ rec: d.rec, until: r.until || 0, sub: r.sid + "M1" }] : [] });
-      }
-      /* MCS2211SU615 (مالک کا حکم — ہیلپ ڈیسک): ⏸️ معطل (عارضی، مدت محفوظ؛ ID / رجسٹریشن رہتی ہے) اور 🗑️ مستقل ڈیلیٹ (ممبرشپ + رجسٹریشن + اکاؤنٹ + MCS ID سب ختم؛ ID خالی) */
-      if (b.op === "mcssusp") {
-        const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
-        let n = 0;
-        for (const r of this.sql.exec("SELECT rec, until FROM prof WHERE rec LIKE ?", "p" + String(x.mob).slice(2) + "_%").toArray()) {
-          if (b.on !== false) { if ((r.until || 0) > 1) { this.sql.exec("INSERT INTO agcfg (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", "suspu_" + r.rec, String(r.until)); this.sql.exec("UPDATE prof SET until = 1 WHERE rec = ?", r.rec); n++; } }
-          else if (r.until === 1) { const u0 = parseInt(this.finCfg("suspu_" + r.rec, "0"), 10) || 0; this.sql.exec("UPDATE prof SET until = ? WHERE rec = ?", u0 > 1 ? u0 : Date.now(), r.rec); this.sql.exec("DELETE FROM agcfg WHERE k = ?", "suspu_" + r.rec); n++; }
-        }
-        this.finLog(b.on !== false ? "suspend" : "unsuspend", { sid: x.sid, n, by: "helpdesk" });
-        return Response.json({ ok: true, sid: x.sid, n, susp: b.on !== false });
-      }
-      if (b.op === "mcsdel") {
-        const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
-        const mob = x.mob; if (this.adminSlotOf(mob)) return Response.json({ ok: false, reason: "admin_slot" });
-        let nb = 0, accs = 0;
-        for (const r of this.sql.exec("SELECT rec FROM prof WHERE rec LIKE ?", "p" + String(mob).slice(2) + "_%").toArray()) { this.sql.exec("DELETE FROM prof WHERE rec = ?", r.rec); this.sql.exec("DELETE FROM pimg WHERE rec = ?", r.rec); this.sql.exec("DELETE FROM agcfg WHERE k = ?", "suspu_" + r.rec); this.sql.exec("UPDATE sale SET subid = NULL WHERE rec = ? AND COALESCE(void, 0) = 0", r.rec); nb++; }
-        try { this.sql.exec("DELETE FROM mcsreg WHERE mob = ?", mob); } catch (er) {}
-        for (const r of this.sql.exec("SELECT id, data FROM mcsuser").toArray()) { let d = null; try { d = JSON.parse(r.data); } catch (er) {} if (!d || this.sidMob(d.mobile) !== mob) continue; this.sql.exec("DELETE FROM mcsukey WHERE id = ?", r.id); this.sql.exec("DELETE FROM mcssess WHERE id = ?", r.id); this.sql.exec("DELETE FROM mcsuser WHERE id = ?", r.id); accs++; }
-        this.sql.exec("DELETE FROM mcsukey WHERE k = ?", "m:" + mob);
-        this.sql.exec("DELETE FROM mcssid WHERE mob = ?", mob); this.sql.exec("DELETE FROM mcsukey WHERE k = ?", "a:" + x.sid);
-        this.finLog("sidretire", { sid: x.sid, nb, accs, why: "helpdesk permanent delete" });
-        return Response.json({ ok: true, sid: x.sid, nb, accs });
       }
       if (b.op === "mcsact") {
         const x = mcsLook(b.sid); if (!x) return Response.json({ ok: false, reason: "no_sid" });
@@ -3144,11 +3121,6 @@ async function handleEnt(request, env, path) {
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
     if (app === "MCS" && (op === "tlook" || op === "tact" || op === "twipe")) return fwd("/ent_admin", { op, app, k: String(b.k || "").slice(0, 40) });   /* MCS1811WE541: ٹیسٹ اکاؤنٹ (صرف ایڈمن) */
-    if (app === "MCS" && (op === "mcssusp" || op === "mcsdel")) {   /* MCS2211SU615: معطل / مستقل ڈیلیٹ (صرف ایڈمن) */
-      const sid = String(b.sid || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
-      if (!/^MCS\d{1,5}$/.test(sid)) return reply({ ok: false, reason: "no_sid" });
-      return fwd("/ent_admin", { op, app, sid, on: b.on !== false });
-    }
     if (app === "MCS" && op === "mcsact") {   /* MCS1811WE537: کوڈ کے بغیر ایک سال ایکٹیو (صرف ایڈمن) */
       const sid = String(b.sid || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
       if (!/^MCS\d{1,5}$/.test(sid)) return reply({ ok: false, reason: "no_sid" });
