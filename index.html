@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU240</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU241</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU240</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU241</span>
     </div>
   </div>
 
@@ -35779,9 +35779,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2211SU240'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2211SU241'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Recovery redesigned: Today shows only today\'s recoveries (No Recovery Today if none), one row per customer; History = choose a date; day report as a picture (WhatsApp / Save)';
+  const UPDATE_NOTE = 'Recovery prints and day report no longer show old recovery or days ago, only total remaining, recovery and remaining balance';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -37198,7 +37198,7 @@ window.pbtHubPwOk = async function(p){
   function receiptCanvas(o){
     const F = 'Arial, Helvetica, sans-serif';
     const W = 1080, P = 30, rowH = 118, n = o.rows.length, HH = 70;
-    const cols = [{h: ['CUSTOMER'], w: .215}, {h: ['LAST RECOVERY'], w: .27}, {h: ['TOTAL', 'REMAINING'], w: .17}, {h: o.recTitle ? [o.recTitle.toUpperCase()] : ["TODAY'S", 'RECOVERY'], w: .17}, {h: ['REMAINING', 'BALANCE'], w: .175}];
+    const cols = [{h: ['CUSTOMER'], w: .34}, {h: ['TOTAL', 'REMAINING'], w: .22}, {h: o.recTitle ? [o.recTitle.toUpperCase()] : ["TODAY'S", 'RECOVERY'], w: .22}, {h: ['REMAINING', 'BALANCE'], w: .22}];
     const tw = W - P * 2; let x0 = P; cols.forEach(c => { c.x = x0; c.px = Math.round(c.w * tw); x0 += c.px; });
     const multi = n > 1;
     const H = P + 160 + 18 + HH + rowH * n + (multi ? 76 : 0) + 26 + 66 + P;
@@ -37229,23 +37229,10 @@ window.pbtHubPwOk = async function(p){
       ctx.textAlign = 'left'; ctx.fillStyle = '#14213d';
       fs(ctx, r.name, cols[0].px - 26, 31, '800', F); ctx.fillText(fit(ctx, r.name, cols[0].px - 26), cols[0].x + 14, r.sub ? cy - 2 : cy + 11);
       if(r.sub){ ctx.fillStyle = '#64748b'; ctx.font = '600 21px ' + F; ctx.fillText(fit(ctx, r.sub, cols[0].px - 26), cols[0].x + 14, cy + 30); }
-      const c1 = cols[1];
-      if(r.prevDate){
-        const R = 42, bx = c1.x + 14 + 150 + R - 6;
-        ctx.fillStyle = '#64748b'; ctx.font = '700 22px ' + F; ctx.fillText(r.prevDate, c1.x + 14, cy - 8);
-        ctx.fillStyle = '#14213d'; fs(ctx, M(r.prevAmt), 146, 29, '800', F); ctx.fillText(M(r.prevAmt), c1.x + 14, cy + 28);
-        const bg = ctx.createRadialGradient(bx - 13, cy - 13, 4, bx, cy, R); bg.addColorStop(0, '#4ade80'); bg.addColorStop(1, '#16a34a');
-        ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, cy, R, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#dcfce7'; ctx.lineWidth = 4; ctx.stroke();
-        ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-        if(r.ago <= 0){ ctx.font = '900 20px ' + F; ctx.fillText('TODAY', bx, cy + 7); }
-        else { ctx.font = '900 31px ' + F; ctx.fillText(String(r.ago), bx, cy + 5); ctx.font = '800 12px ' + F; ctx.fillText(r.ago === 1 ? 'DAY AGO' : 'DAYS AGO', bx, cy + 24); }
-        ctx.textAlign = 'left';
-      } else { ctx.fillStyle = '#94a3b8'; ctx.font = '700 23px ' + F; ctx.fillText('No earlier recovery', c1.x + 14, cy + 8); }
       const amt = (k, v, col) => { ctx.fillStyle = col; fs(ctx, v, cols[k].px - 24, 31, '900', F); ctx.fillText(v, cols[k].x + 14, cy + 11); };
-      amt(2, M(r.before), '#d3112a');
-      amt(3, M(r.got), '#1d4ed8');
-      amt(4, remTxt(r.after), (Number(r.after) || 0) > 0 ? '#d3112a' : '#16a34a');
+      amt(1, M(r.before), '#d3112a');
+      amt(2, M(r.got), '#1d4ed8');
+      amt(3, remTxt(r.after), (Number(r.after) || 0) > 0 ? '#d3112a' : '#16a34a');
       y += rowH;
     });
     if(multi){
@@ -37253,8 +37240,8 @@ window.pbtHubPwOk = async function(p){
       const s = k => o.rows.reduce((a, r) => a + (Number(r[k]) || 0), 0);
       const tot = (k, v, col) => { ctx.fillStyle = col; fs(ctx, v, cols[k].px - 24, 30, '900', F); ctx.fillText(v, cols[k].x + 14, y + 49); };
       ctx.textAlign = 'left'; tot(0, 'TOTAL (' + n + ')', '#14213d');
-      tot(2, M(s('before')), '#d3112a'); tot(3, M(s('got')), '#1d4ed8');
-      tot(4, M(o.rows.reduce((a, r) => a + Math.max(0, Number(r.after) || 0), 0)), '#d3112a');
+      tot(1, M(s('before')), '#d3112a'); tot(2, M(s('got')), '#1d4ed8');
+      tot(3, M(o.rows.reduce((a, r) => a + Math.max(0, Number(r.after) || 0), 0)), '#d3112a');
       y += 76;
     }
     y += 26;
@@ -37617,9 +37604,7 @@ window.pbtHubPwOk = async function(p){
     const body = rows.map((p, i) => {
       const o = Number(p.balance_before) || 0, g = Number(p.amount) || 0, l = Number(p.balance_after) || 0;
       tOld += o; tGot += g; tLeft += Math.max(0, l);
-      const pv = prev(p), ago = pv ? dd(pv.date, p.date) : null;
-      const last = pv ? `${E(nice(pv.date))} · ${num(pv.amount)} <span class="ag">${ago <= 0 ? 'same day' : ago + (ago === 1 ? ' day ago' : ' days ago')}</span>` : '—';
-      return `<tr><td class="c">${i + 1}</td><td class="n">${E(p.party_name || '')}</td><td>${last}</td><td class="r">${num(o)}</td><td class="r b">${num(g)}</td><td class="r">${l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear ✓'}</td><td class="s">${E([tm(p), p.method || ''].filter(Boolean).join(' · '))}</td></tr>`;
+      return `<tr><td class="c">${i + 1}</td><td class="n">${E(p.party_name || '')}</td><td class="r">${num(o)}</td><td class="r b">${num(g)}</td><td class="r">${l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear ✓'}</td><td class="s">${E([tm(p), p.method || ''].filter(Boolean).join(' · '))}</td></tr>`;
     }).join('');
     const fs = Math.max(7, Math.min(11.5, 860 / ((rows.length + 3) * 2.25)));
     const w = window.open('', '_blank'); if(!w){ alert('Please allow pop-ups to print.'); return; }
@@ -37640,8 +37625,8 @@ window.pbtHubPwOk = async function(p){
       @page{size:A4;margin:7mm} @media print{body{padding:0} .page{page-break-inside:avoid}}</style></head><body><div class="page">
       <div class="top"><div><b>${shop}</b><small>${ph}</small></div><div class="r"><b>Daily Recovery Report</b><small>${E(nice(d))}${d === drToday() ? ' (Today)' : ''}</small></div></div>
       <div class="meta"><div><small>Customers</small><b>${rows.length}</b></div><div><small>Total received</small><b>Rs. ${num(tGot)}</b></div><div><small>Still remaining</small><b>Rs. ${num(tLeft)}</b></div></div>
-      <table><thead><tr><th class="c">#</th><th>Customer</th><th>Last Recovery</th><th class="r">Total Remaining</th><th class="r">Recovery</th><th class="r">Remaining Balance</th><th>Time · Method</th></tr></thead>
-      <tbody>${body}</tbody><tfoot><tr><td></td><td class="n">Total</td><td></td><td class="r">${num(tOld)}</td><td class="r">${num(tGot)}</td><td class="r">${num(tLeft)}</td><td></td></tr></tfoot></table>
+      <table><thead><tr><th class="c">#</th><th>Customer</th><th class="r">Total Remaining</th><th class="r">Recovery</th><th class="r">Remaining Balance</th><th>Time · Method</th></tr></thead>
+      <tbody>${body}</tbody><tfoot><tr><td></td><td class="n">Total</td><td class="r">${num(tOld)}</td><td class="r">${num(tGot)}</td><td class="r">${num(tLeft)}</td><td></td></tr></tfoot></table>
       <div class="f"><span>${shop}${ph ? ' • ' + ph : ''}</span><span>Printed ${E(nice(drToday()))}</span></div>
       </div><script>setTimeout(function(){window.print();},350)<\/script></body></html>`);
     w.document.close();
@@ -37689,7 +37674,7 @@ window.pbtHubPwOk = async function(p){
   function dayCanvas(d, rows){
     const S = 2, W = 720, P = 22, tw = W - P * 2;
     const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); }catch(e){ return ''; } };
-    const cols = [['#', .06], ['CUSTOMER', .29], ['LAST RECOVERY', .25], ['TOTAL\nREMAINING', .14], ['RECOVERY', .13], ['REMAINING\nBALANCE', .13]];
+    const cols = [['#', .07], ['CUSTOMER', .37], ['TOTAL\nREMAINING', .19], ['RECOVERY', .18], ['REMAINING\nBALANCE', .19]];
     let x0 = P; cols.forEach(c => { c.x = x0; c.w = c[1] * tw; x0 += c.w; });
     const rowH = 62, n = rows.length, H = P + 104 + 14 + 70 + 16 + 46 + rowH * n + 44 + 40 + P;
     const cv = document.createElement('canvas'); cv.width = W * S; cv.height = H * S;
@@ -37713,7 +37698,7 @@ window.pbtHubPwOk = async function(p){
     const tTop = y, tH = 46 + rowH * n + 44;
     ctx.save(); rr(ctx, P, tTop, tw, tH, 14); ctx.clip();
     ctx.fillStyle = '#000'; ctx.fillRect(P, y, tw, 46);
-    ctx.fillStyle = '#fff'; cols.forEach((c, i) => { const r = i >= 3; ctx.textAlign = r ? 'right' : 'left'; const tx = r ? c.x + c.w - 8 : c.x + 8; const ls = c[0].split('\n');
+    ctx.fillStyle = '#fff'; cols.forEach((c, i) => { const r = i >= 2; ctx.textAlign = r ? 'right' : 'left'; const tx = r ? c.x + c.w - 8 : c.x + 8; const ls = c[0].split('\n');
       ctx.font = '800 11.5px ' + F; if(ls.length === 1) ctx.fillText(ls[0], tx, y + 28); else { ctx.fillText(ls[0], tx, y + 20); ctx.fillText(ls[1], tx, y + 35); } });
     y += 46;
     rows.forEach((p, i) => {
@@ -37723,23 +37708,14 @@ window.pbtHubPwOk = async function(p){
       ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.font = '700 15px ' + F; ctx.fillText(String(i + 1), cols[0].x + cols[0].w / 2, y + 37);
       ctx.textAlign = 'left'; ctx.fillText(fitText(ctx, p.party_name || '', cols[1].w - 14, 17, '800', 11), cols[1].x + 7, y + 28);
       ctx.fillStyle = '#444'; ctx.fillText(fitText(ctx, [tm(p), p.method || ''].filter(Boolean).join(' · '), cols[1].w - 14, 12.5, '600', 9), cols[1].x + 7, y + 49);
-      const pv = prev(p), c2 = cols[2];
-      ctx.fillStyle = '#000';
-      if(pv){
-        const ago = dd(pv.date, p.date), at = ago <= 0 ? 'same day' : ago + (ago === 1 ? ' day ago' : ' days ago');
-        ctx.font = '600 13px ' + F; ctx.fillText(nice(pv.date), c2.x + 7, y + 25);
-        ctx.font = '800 15px ' + F; const amt = num(pv.amount); ctx.fillText(amt, c2.x + 7, y + 47);
-        const aw = ctx.measureText(amt).width; ctx.font = '700 11px ' + F; const pw = ctx.measureText(at).width + 14, px = c2.x + 14 + aw;
-        if(px + pw < c2.x + c2.w - 4){ ctx.lineWidth = 1.3; ctx.strokeStyle = '#000'; rr(ctx, px, y + 33, pw, 19, 9.5); ctx.stroke(); ctx.fillText(at, px + 7, y + 47); }
-      } else { ctx.font = '600 14px ' + F; ctx.fillText('—', c2.x + 7, y + 37); }
       const l = Number(p.balance_after) || 0;
       const cell = (k, v, bold) => { ctx.textAlign = 'right'; ctx.fillStyle = '#000'; ctx.fillText(fitText(ctx, v, cols[k].w - 14, 16, bold ? '900' : '600', 10), cols[k].x + cols[k].w - 8, y + 37); };
-      cell(3, num(p.balance_before)); cell(4, num(p.amount), 1); cell(5, l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear ✓');
+      cell(2, num(p.balance_before)); cell(3, num(p.amount), 1); cell(4, l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear ✓');
       y += rowH;
     });
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(P + tw, y); ctx.stroke();
     ctx.fillStyle = '#000'; ctx.textAlign = 'left'; ctx.font = '900 16px ' + F; ctx.fillText('Total', cols[1].x + 7, y + 28);
-    [[3, tOld], [4, tGot], [5, tLeft]].forEach(a => { ctx.textAlign = 'right'; ctx.fillText(fitText(ctx, num(a[1]), cols[a[0]].w - 14, 16, '900', 10), cols[a[0]].x + cols[a[0]].w - 8, y + 28); });
+    [[2, tOld], [3, tGot], [4, tLeft]].forEach(a => { ctx.textAlign = 'right'; ctx.fillText(fitText(ctx, num(a[1]), cols[a[0]].w - 14, 16, '900', 10), cols[a[0]].x + cols[a[0]].w - 8, y + 28); });
     ctx.restore();
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1.8; rr(ctx, P, tTop, tw, tH, 14); ctx.stroke();
     y = tTop + tH + 26;
@@ -37939,7 +37915,7 @@ window.pbtHubPwOk = async function(p){
 })();
 </script>
 
-<!-- AIO2211SU240 (مالک کا حکم): وصولی کی لائن دبائیں تو دو انتخاب — 🎨 اس وصولی کا رنگین پوسٹر، 📋 گاہک کی سب وصولیاں (کالا سفید، تاریخ / وقت / طریقہ / پہلے / دیے / بعد + ٹوٹل) -->
+<!-- AIO2211SU241 (مالک کا حکم): وصولی کی لائن دبائیں تو دو انتخاب — 🎨 اس وصولی کا رنگین پوسٹر، 📋 گاہک کی سب وصولیاں (کالا سفید، تاریخ / وقت / طریقہ / پہلے / دیے / بعد + ٹوٹل) -->
 <style id="aioRecAll">
 .apSheet{width:min(440px,94vw);background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}
 .apSheet .h{background:linear-gradient(#1e40af,#1d4ed8);color:#fff;padding:14px 16px;font-weight:900;font-size:17px;display:flex;align-items:center;gap:8px}
