@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU237</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU238</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU237</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU238</span>
     </div>
   </div>
 
@@ -35779,9 +35779,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2211SU237'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2211SU238'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Recovery: every customer in one single row (last recovery + days ago, remaining, today, balance); one-row receipt with Print / WhatsApp';
+  const UPDATE_NOTE = 'Recovery poster is back: red Total Balance, blue Today, red Remaining + your spoken / typed payment note; WhatsApp opens the customer chat';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -37107,7 +37107,7 @@ window.pbtHubPwOk = async function(p){
   }
   const btn = (ic, fn, t) => `<button onclick="${fn}" title="${t}">${ic}</button>`;
   function custBtns(id){
-    return btn('🧾', `drPoster(${id})`, 'Receipt') + btn('💬', `drOpenReminder(${id})`, 'Reminder') +
+    return btn('🖼️', `drPoster(${id})`, 'Poster') + btn('🧾', `rrReceiptOne(${id})`, 'Receipt') + btn('💬', `drOpenReminder(${id})`, 'Reminder') +
       (typeof drCustReport === 'function' ? btn('🖨️', `drCustReport(${id})`, 'Print statement') : '') +
       (typeof openCustomerProfile === 'function' ? btn('📄', `openCustomerProfile(${id})`, 'Details') : '');
   }
@@ -37168,7 +37168,7 @@ window.pbtHubPwOk = async function(p){
       ? drTiles([['Days', days.length], [isVoid ? 'Voided' : 'Payments', rows.length], [isVoid ? 'Voided total' : 'Total received', M(total)]], true)
       : tiles([['Days', days.length], ['Payments', rows.length], ['Total received', M(total)]]);
     if(!days.length){ wrap.innerHTML = `<div class="placeholder">${isVoid ? 'No voided recovery' : 'No recovery history yet'}</div>`; return; }
-    const shown = days.slice(0, DRH.days || 30);
+    const shown = days.slice(0, Math.max(DRH.days || 30, 90));
     const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); }catch(e){ return ''; } };
     wrap.innerHTML = shown.map(d => {
       const list = byDay[d].sort((a, b) => (b.payment_id || 0) - (a.payment_id || 0));
@@ -37182,16 +37182,18 @@ window.pbtHubPwOk = async function(p){
           return `<div class="rrR">${nameCell(c, p.party_name, by)}<div class="rrLast"><div class="rrLd"><small>Voided on ${E(vOn)}</small><b>${E(p.voided_by || '—')}</b></div></div><div class="rrM red">${MH(p.balance_before)}</div><div class="rrM void">${MH(p.amount)}</div><div class="rrM ${remCls(p.balance_after)}">${remH(p.balance_after)}</div><div class="rrA"></div></div>`;
         }
         const pv = prevOf(p.party_id, p.date, p.payment_id || 0);
-        const acts = btn('🧾', `drHistPoster(${p.payment_id})`, 'Receipt') +
+        const acts = btn('🖼️', `drHistPoster(${p.payment_id})`, 'Poster') + btn('🧾', `rrReceiptPay(${p.payment_id})`, 'Receipt') +
           (typeof drCustReport === 'function' ? btn('🖨️', `drCustReport(${p.party_id})`, 'Print statement') : '') +
           (typeof drVoid === 'function' ? btn('🗑️', `drVoid(${p.payment_id})`, 'Void this recovery') : '');
         return `<div class="rrR">${nameCell(c, p.party_name, by)}<div>${lastCell(pv, p.date)}</div><div class="rrM red">${MH(p.balance_before)}</div><div class="rrM blue">${MH(p.amount)}</div><div class="rrM ${remCls(p.balance_after)}">${remH(p.balance_after)}</div><div class="rrA">${acts}</div></div>`;
       }).join('');
-      return `<div class="drHistDay"><span>📅 ${E(nice(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} • ${M(sum)} ${dayBtns}</small></div>` +
-        `<div class="rrScroll"><div class="rrTbl">${head(isVoid ? 'Voided' : 'Recovery')}${lines}</div></div>`;
+      const on = !!(DRH.open && DRH.open[d]) || !!q;
+      return `<div class="rhD${on ? ' on' : ''}"><button class="rhDt" onclick="rrHTog('${E(d)}')"><b>${E(nice(d))}</b>${d === drToday() ? '<em>Today</em>' : ''}<span>${list.length} • ${M(sum)}</span><i>▾</i></button>${dayBtns}</div>` +
+        (on ? `<div class="rrScroll rhOpen"><div class="rrTbl">${head(isVoid ? 'Voided' : 'Recovery')}${lines}</div></div>` : '');
     }).join('') + (days.length > shown.length ? `<button class="drHistMore" onclick="DRH.days = (DRH.days || 30) + 30; drHistRender()">⬇️ Show older days (${days.length - shown.length} more)</button>` : '');
   };
 
+  window.rrHTog = function(d){ DRH.open = DRH.open || {}; DRH.open[d] = !DRH.open[d]; drHistRender(); };
   /* 🧾 رسید — اسی ایک لائن والے ڈیزائن میں (کینوس) */
   function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   function fit(ctx, t, w){ t = String(t || ''); if(ctx.measureText(t).width <= w) return t; while(t.length > 1 && ctx.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; }
@@ -37318,14 +37320,13 @@ window.pbtHubPwOk = async function(p){
   window.rrShowReceipt = showReceipt;
 
   /* 🧾 ایک گاہک (🧾 بٹن / History) — اسی ڈیزائن کی رسید */
-  window.drShowPoster = drShowPoster = async function(o){
+  window.__rrRcptFromPoster = async function(o){
     const c = customersData.find(x => x.name === o.name);
     const pid = c ? c.customer_id : null;
     const pv = pid != null ? prevOf(pid, o.date) : null;
     return showReceipt({ date: o.date, when: nowTxt(o.date), rows: [{ name: o.name, sub: c && c.area ? c.area : '', prevDate: pv ? nice(pv.date) : '', prevAmt: pv ? pv.amount : 0, ago: pv ? dayDiff(pv.date, o.date) : 0, before: o.old, got: o.got, left: o.left, after: o.left }] });
   };
-  window.drHistPoster = drHistPoster = function(paymentId){
-    const p = (paymentsData || []).find(x => x.payment_id === paymentId); if(!p) return;
+  window.rrShowReceiptRows = function(p){
     showReceipt({ date: p.date, when: nice(p.date), recTitle: 'Recovery', rows: [rowFrom(p)] });
   };
   /* 💾 Save — کامیاب ہوتے ہی سب کی ایک رسید */
@@ -37337,7 +37338,8 @@ window.pbtHubPwOk = async function(p){
     if(fresh.length){
       const skip = {}; fresh.forEach(p => { skip[p.payment_id] = 1; });
       const d = fresh[0].date || drToday();
-      setTimeout(() => showReceipt({ date: d, when: nowTxt(d), rows: fresh.map(p => rowFrom(p, skip)) }), 250);
+      if(fresh.length === 1){ const p = fresh[0]; setTimeout(() => window.drHistPoster(p.payment_id), 250); }
+      else setTimeout(() => showReceipt({ date: d, when: nowTxt(d), rows: fresh.map(p => rowFrom(p, skip)) }), 250);
     }
     return r;
   };
@@ -37347,6 +37349,308 @@ window.pbtHubPwOk = async function(p){
 
 
 
+
+<!-- AIO2211SU238 (مالک کا حکم): وصولی کا پوسٹر واپس — دائیں تین ڈبے (سرخ کل بقایا، نیلی آج کی وصولی، سرخ / سبز باقی)، بائیں خانے میں لکھی / بولی ہوئی بات (انگلش 🎤)؛ واٹس ایپ = اسی گاہک کا محفوظ نمبر۔ حساب نہیں بدلا۔ -->
+<style id="aioRecPoster">
+#screen-recovery .rrA{grid-template-columns:22px 22px 22px}
+#screen-recovery .rrR{grid-template-columns:minmax(118px,1.5fr) minmax(158px,1.7fr) minmax(88px,1fr) minmax(96px,1fr) minmax(88px,1fr) 80px}
+@media (max-width:560px){
+  #screen-recovery .rrTbl{width:calc(100% + 78px)}
+  #screen-recovery .rrR{grid-template-columns:minmax(0,20fr) minmax(0,29fr) minmax(0,17fr) minmax(0,17fr) minmax(0,17fr) 78px}
+}
+.rpBox{width:min(520px,95vw);max-height:94vh;display:flex;flex-direction:column;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.rpHead{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:linear-gradient(#e5162f,#b80c22);color:#fff;font-weight:800;font-size:15px}
+.rpHead button{border:0;background:rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px}
+.rpBody{overflow:auto;padding:10px;background:#eef2f7;flex:1}
+.rpBody img{width:100%;max-width:420px;display:block;margin:0 auto 10px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.rpNote{background:#fff;border:1.5px solid #cfd9e6;border-radius:14px;padding:9px}
+.rpNote b{display:block;font-size:12.5px;color:#14213d;margin-bottom:6px}
+.rpChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px}
+.rpChips button{border:1.5px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}
+.rpRow{display:flex;gap:7px;align-items:stretch}
+.rpRow textarea{flex:1;min-height:62px;border:1.5px solid #cbd5e1;border-radius:10px;padding:7px 9px;font-size:14px;font-family:inherit;resize:vertical}
+.rpMic{flex:0 0 64px;border:0;border-radius:12px;background:linear-gradient(#22c55e,#15803d);color:#fff;font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.rpMic span{font-size:22px}
+.rpMic.on{background:linear-gradient(#ef4444,#b91c1c);animation:rpPulse 1s infinite}
+@keyframes rpPulse{50%{box-shadow:0 0 0 6px rgba(239,68,68,.25)}}
+.rpHint{font-size:11px;color:#64748b;margin-top:5px}
+.rpBtns{display:flex;flex-direction:column;gap:7px;padding:10px}
+.rpBtns .wa{height:52px;border:0;border-radius:13px;background:#16a34a;color:#fff;font-size:15.5px;font-weight:900}
+.rpBtns .wa small{display:block;font-size:11px;font-weight:700;opacity:.9}
+.rpBtns div{display:flex;gap:7px}
+.rpBtns div button{flex:1;height:42px;border:0;border-radius:11px;background:#1d4ed8;color:#fff;font-size:13.5px;font-weight:800}
+.rpBtns div button.g{background:#475569}
+</style>
+<script id="aioRecPosterJs">
+(function(){
+  const E = s => (typeof drEsc === 'function' ? drEsc(s) : String(s == null ? '' : s));
+  const M = n => drMoney(n);
+  const nice = d => (typeof drNiceDate === 'function' ? drNiceDate(d) : d);
+  const FONT = 'Poppins, Arial, sans-serif';
+  function rrp(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function lines(ctx, text, w){
+    const out = [];
+    String(text || '').split(/\n/).forEach(par => {
+      let cur = '';
+      par.split(/\s+/).filter(Boolean).forEach(word => {
+        const t = cur ? cur + ' ' + word : word;
+        if(ctx.measureText(t).width <= w || !cur) cur = t; else { out.push(cur); cur = word; }
+      });
+      out.push(cur);
+    });
+    return out;
+  }
+  /* بائیں خانے میں متن — جگہ کے حساب سے لکھائی خود چھوٹی */
+  function boxText(ctx, text, x, y, w, h, color){
+    let size = 19, ls;
+    for(; size >= 10; size--){ ctx.font = '700 ' + size + 'px ' + FONT; ls = lines(ctx, text, w); if(ls.length * size * 1.3 <= h) break; }
+    const lh = size * 1.3, top = y + (h - ls.length * lh) / 2 + size;
+    ctx.fillStyle = color; ctx.textAlign = 'center';
+    ls.forEach((l, i) => ctx.fillText(l, x + w / 2, top + i * lh));
+  }
+  function posterCanvas(o, note){
+    const S = 2, W = 480, mX = 22, cW = W - mX * 2;
+    const old = Number(o.old) || 0, got = Number(o.got) || 0, left = Number(o.left) || 0;
+    const boxH = 78, gap = 10, colH = boxH * 3 + gap * 2;
+    const H = 20 + 50 + 12 + 22 + 54 + 16 + colH + 18 + 56 + 18;
+    const cv = document.createElement('canvas'); cv.width = W * S; cv.height = H * S;
+    const ctx = cv.getContext('2d'); ctx.scale(S, S);
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#b80c22'; ctx.lineWidth = 3; rrp(ctx, 7, 7, W - 14, H - 14, 14); ctx.stroke();
+    let y = 20; ctx.textAlign = 'center';
+    ctx.fillStyle = '#14532d'; rrp(ctx, mX, y, cW, 50, 25); ctx.fill();
+    ctx.fillStyle = '#fff'; boxText(ctx, 'Dear Customer! As-salamu alaykum wa rahmatullahi wa barakatuh', mX + 14, y + 4, cW - 28, 42, '#fff');
+    y += 62;
+    ctx.fillStyle = '#64748b'; ctx.font = '600 11px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('Customer  •  ' + nice(o.date), W / 2, y + 11);
+    y += 22;
+    ctx.fillStyle = '#1e3a5f'; rrp(ctx, mX, y, cW, 54, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; let ns = 21; do { ctx.font = '800 ' + ns + 'px ' + FONT; ns--; } while(ns > 12 && ctx.measureText(o.name || '').width > cW - 24);
+    ctx.fillText(o.name || '', W / 2, y + 34);
+    y += 70;
+    const lW = Math.round(cW * .40), rW = cW - lW - 12, lX = mX, rX = mX + lW + 12, top = y;
+    /* بائیں: لکھی / بولی ہوئی بات */
+    ctx.fillStyle = '#f0fdf4'; rrp(ctx, lX, top, lW, colH, 12); ctx.fill();
+    ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 1.6; rrp(ctx, lX, top, lW, colH, 12); ctx.stroke();
+    ctx.fillStyle = '#16a34a'; rrp(ctx, lX, top, lW, 30, 12); ctx.fill(); ctx.fillRect(lX, top + 18, lW, 12);
+    ctx.fillStyle = '#fff'; ctx.font = '800 12px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('PAYMENT DETAILS', lX + lW / 2, top + 20);
+    const txt = String(note || '').trim() || ('Payment received on ' + nice(o.date) + '. Thank you!');
+    boxText(ctx, txt, lX + 10, top + 38, lW - 20, colH - 48, '#14532d');
+    /* دائیں: تین ڈبے */
+    const remCol = left > 0 ? '#dc2626' : '#16a34a';
+    const remLbl = left > 0 ? 'Remaining Balance' : left < 0 ? 'Advance' : 'Balance Clear ✓';
+    [{l: 'Total Balance', v: old, c: '#dc2626'}, {l: "Today's Recovery", v: got, c: '#1d4ed8', pill: 1}, {l: remLbl, v: Math.abs(left), c: remCol}].forEach((b, i) => {
+      const by = top + i * (boxH + gap);
+      const g = ctx.createLinearGradient(0, by, 0, by + boxH); g.addColorStop(0, b.c); g.addColorStop(1, b.c === '#1d4ed8' ? '#1e40af' : b.c === '#16a34a' ? '#15803d' : '#b91c1c');
+      ctx.fillStyle = g; rrp(ctx, rX, by, rW, boxH, b.pill ? boxH / 2 : 12); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '600 12px ' + FONT; ctx.fillText(b.l, rX + rW / 2, by + 25);
+      let fs2 = 25; const v = 'Rs ' + Math.round(b.v).toLocaleString(); do { ctx.font = '800 ' + fs2 + 'px ' + FONT; fs2--; } while(fs2 > 13 && ctx.measureText(v).width > rW - 20);
+      ctx.fillText(v, rX + rW / 2, by + 58);
+    });
+    y = top + colH + 18;
+    ctx.fillStyle = '#14532d'; rrp(ctx, mX, y, cW, 56, 10); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.font = '700 13px ' + FONT;
+    ctx.fillText(AppState.settings.businessPhone || '', mX + 14, y + 32);
+    ctx.textAlign = 'right'; ctx.fillText(AppState.settings.businessName || 'AIO POS', mX + cW - 14, y + (AppState.settings.ownerName ? 25 : 32));
+    if(AppState.settings.ownerName){ ctx.font = '500 10.5px ' + FONT; ctx.globalAlpha = .9; ctx.fillText(AppState.settings.ownerName, mX + cW - 14, y + 41); ctx.globalAlpha = 1; }
+    return cv;
+  }
+  function waNum(p){
+    let d = String(p || '').replace(/[^\d+]/g, '');
+    if(!d) return '';
+    if(d[0] === '+') d = d.slice(1);
+    if(d.startsWith('00')) d = d.slice(2);
+    if(d.startsWith('0') && d.length === 11) d = '92' + d.slice(1);
+    else if(d.length === 10 && d[0] === '3') d = '92' + d;
+    return d.length >= 10 ? d : '';
+  }
+  const P = { o: null, cv: null, rec: null, t: 0 };
+  function ensure(){
+    if(document.getElementById('rpModal')) return;
+    const m = document.createElement('div'); m.className = 'modalOverlay'; m.id = 'rpModal';
+    m.onclick = e => { if(e.target === m) rpClose(); };
+    m.innerHTML = `<div class="rpBox"><div class="rpHead"><span>🖼️ Recovery Poster</span><button onclick="rpClose()">✕</button></div>
+      <div class="rpBody"><img id="rpImg" alt="Poster">
+        <div class="rpNote"><b>📝 Payment details (shows in the left box)</b>
+          <div class="rpChips"><button onclick="rpChip('in cash')">💵 Cash</button><button onclick="rpChip('through Easypaisa')">📱 Easypaisa</button><button onclick="rpChip('through JazzCash')">📱 JazzCash</button><button onclick="rpChip('by bank transfer')">🏦 Bank</button></div>
+          <div class="rpRow"><textarea id="rpTxt" placeholder="Type or press 🎤 and speak in English…" oninput="rpDraw()"></textarea><button class="rpMic" id="rpMic" onclick="rpMic()"><span>🎤</span>Speak</button></div>
+          <div class="rpHint" id="rpHint">Speak in English — your words are written here and printed on the poster.</div>
+        </div></div>
+      <div class="rpBtns"><button class="wa" id="rpWa" onclick="rpWa()">🟢 WhatsApp<small id="rpWaTo"></small></button>
+        <div><button onclick="rpShare()">📤 Share</button><button onclick="rpPrint()">🖨️ Print</button><button class="g" onclick="rpSave()">⬇️ Save</button></div></div></div>`;
+    document.body.appendChild(m);
+  }
+  window.rpDraw = function(){
+    clearTimeout(P.t);
+    P.t = setTimeout(() => {
+      const note = (document.getElementById('rpTxt') || {}).value || '';
+      P.cv = posterCanvas(P.o, note);
+      try{ if(typeof appendBrandFooter === 'function') appendBrandFooter(P.cv); }catch(e){}
+      document.getElementById('rpImg').src = P.cv.toDataURL('image/png');
+    }, 120);
+  };
+  window.rpChip = function(how){
+    const ta = document.getElementById('rpTxt');
+    ta.value = `Today you paid us Rs ${Math.round(Number(P.o.got) || 0).toLocaleString()} ${how}. Thank you!`;
+    rpDraw();
+  };
+  window.rpMic = function(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const btn = document.getElementById('rpMic'), hint = document.getElementById('rpHint'), ta = document.getElementById('rpTxt');
+    if(P.rec){ try{ P.rec.stop(); }catch(e){} return; }
+    if(!SR){ hint.textContent = '⚠️ Voice typing is not available here — please type, or use the 🎤 on your keyboard.'; return; }
+    const r = new SR(); r.lang = 'en-US'; r.interimResults = true; r.continuous = true;
+    const base = ta.value ? ta.value.replace(/\s+$/, '') + ' ' : '';
+    let fin = '';
+    r.onresult = ev => {
+      let inter = '';
+      for(let i = ev.resultIndex; i < ev.results.length; i++){ const s = ev.results[i][0].transcript; if(ev.results[i].isFinal) fin += s + ' '; else inter += s; }
+      ta.value = (base + fin + inter).replace(/\s+/g, ' ').replace(/^./, c => c.toUpperCase());
+      rpDraw();
+    };
+    r.onerror = ev => { hint.textContent = ev.error === 'not-allowed' ? '⚠️ Please allow the microphone for this app.' : '⚠️ Could not hear — try again.'; };
+    r.onend = () => { P.rec = null; btn.classList.remove('on'); btn.innerHTML = '<span>🎤</span>Speak'; rpDraw(); };
+    try{ r.start(); P.rec = r; btn.classList.add('on'); btn.innerHTML = '<span>⏹️</span>Stop'; hint.textContent = '🎙️ Listening… speak in English, then press Stop.'; }catch(e){ hint.textContent = '⚠️ ' + e.message; }
+  };
+  window.rpClose = function(){ if(P.rec){ try{ P.rec.stop(); }catch(e){} } const m = document.getElementById('rpModal'); if(m) m.classList.remove('show'); };
+  const fileName = () => `Recovery_${String(P.o.name || 'Customer').replace(/\s+/g, '_')}_${P.o.date}.png`;
+  const msg = () => `${P.o.name}: payment received ${M(P.o.got)}. Remaining balance: ${(Number(P.o.left) || 0) > 0 ? M(P.o.left) : 'Clear ✓'}`;
+  const blob = () => new Promise(res => P.cv.toBlob(res, 'image/png'));
+  /* 🟢 اسی گاہک کی واٹس ایپ چیٹ — تصویر کلپ بورڈ میں، چیٹ کھلتے ہی پیسٹ / بھیجیں */
+  window.rpWa = async function(){
+    if(!P.cv) return;
+    const n = waNum(P.o.phone), b = await blob();
+    let copied = false;
+    try{ if(navigator.clipboard && window.ClipboardItem){ await navigator.clipboard.write([new ClipboardItem({'image/png': b})]); copied = true; } }catch(e){}
+    if(!n){
+      const f = new File([b], fileName(), {type: 'image/png'});
+      if(navigator.canShare && navigator.canShare({files: [f]})){ try{ await navigator.share({files: [f], text: msg()}); }catch(e){} }
+      else alert('No mobile number is saved for this customer. Please add it in the customer details.');
+      return;
+    }
+    try{ showNavToast(copied ? '📋 Poster copied — in the chat, long-press the box → Paste → Send' : '⬇️ Poster saved — attach it in the chat'); }catch(e){}
+    if(!copied) rpSave();
+    window.open('https://wa.me/' + n + '?text=' + encodeURIComponent(msg()), '_blank');
+  };
+  window.rpShare = async function(){
+    const b = await blob(), f = new File([b], fileName(), {type: 'image/png'});
+    if(navigator.canShare && navigator.canShare({files: [f]})){ try{ await navigator.share({files: [f], title: 'Recovery Poster', text: msg()}); }catch(e){} }
+    else rpSave();
+  };
+  window.rpSave = async function(){
+    const b = await blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = fileName(); document.body.appendChild(a); a.click(); a.remove();
+  };
+  window.rpPrint = function(){
+    const w = window.open('', '_blank'); if(!w){ alert('Please allow pop-ups to print.'); return; }
+    w.document.write(`<html><head><meta charset="utf-8"><title>${E(fileName())}</title><style>body{margin:0;text-align:center}img{width:100%;max-width:480px}@page{margin:6mm}</style></head><body><img src="${P.cv.toDataURL('image/png')}" onload="setTimeout(function(){window.print()},300)"></body></html>`);
+    w.document.close();
+  };
+  async function open(o){
+    try{ await document.fonts.load('800 24px Poppins'); await document.fonts.ready; }catch(e){}
+    ensure(); P.o = o;
+    document.getElementById('rpTxt').value = '';
+    const n = waNum(o.phone);
+    document.getElementById('rpWaTo').textContent = n ? 'Send to ' + o.name + ' (' + o.phone + ')' : 'No number saved — share instead';
+    document.getElementById('rpHint').textContent = 'Speak in English — your words are written here and printed on the poster.';
+    document.getElementById('rpModal').classList.add('show');
+    rpDraw();
+  }
+  window.rpOpen = open;
+  const custOf = (id, name) => customersData.find(x => x.customer_id === id) || customersData.find(x => x.name === name) || null;
+  /* 🖼️ پوسٹر — Today کی لائن، History، اور اکیلی وصولی محفوظ ہونے پر */
+  window.drShowPoster = drShowPoster = function(o){
+    const c = custOf(o.cid, o.name);
+    return open({ name: o.name, phone: c ? c.phone : '', old: o.old, got: o.got, left: o.left, date: o.date });
+  };
+  window.drHistPoster = drHistPoster = function(pid){
+    const p = (paymentsData || []).find(x => x.payment_id === pid); if(!p) return;
+    const c = custOf(p.party_id, p.party_name);
+    open({ name: p.party_name, phone: c ? c.phone : '', old: p.balance_before, got: p.amount, left: p.balance_after, date: p.date });
+  };
+  /* 🧾 رسید (ایک لائن) الگ بٹن */
+  window.rrReceiptOne = function(id){
+    const t = drPaidToday(id); if(!t.list.length){ alert('No recovery saved for this customer on this day yet.'); return; }
+    const c = custOf(id), first = t.list[0], last = t.list[t.list.length - 1];
+    const _sp = window.__rrRcptFromPoster; if(_sp) _sp({ name: c ? c.name : '', old: first.balance_before, got: t.sum, left: last.balance_after, date: first.date });
+  };
+  window.rrReceiptPay = function(pid){
+    const p = (paymentsData || []).find(x => x.payment_id === pid); if(p && window.rrShowReceiptRows) window.rrShowReceiptRows(p);
+  };
+  try{ if(document.getElementById('screen-recovery').classList.contains('active')) drRender(); }catch(e){}
+})();
+</script>
+
+<!-- AIO2211SU238 (مالک کا حکم): History = صرف تاریخوں کی پتلی فہرست (نئی اوپر)، دبائیں تو اسی دن کی تفصیل؛ دن کی رپورٹ ایک صفحہ، بلیک اینڈ وائٹ، گول کنارے (Today اور History دونوں)۔ -->
+<style id="aioRecHist">
+#screen-recovery .rhD{display:flex;align-items:center;gap:6px;margin:0 0 6px}
+#screen-recovery .rhDt{flex:1;display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border:1.5px solid #cfd9e6;border-radius:12px;background:#fff;color:#14213d;font-family:inherit;text-align:left;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+#screen-recovery .rhDt b{font-size:15px;font-weight:900;letter-spacing:.2px}
+#screen-recovery .rhDt em{font-style:normal;font-size:10.5px;font-weight:800;background:#facc15;color:#000;border-radius:999px;padding:2px 8px}
+#screen-recovery .rhDt span{margin-left:auto;font-size:12.5px;font-weight:800;color:#1d4ed8;white-space:nowrap}
+#screen-recovery .rhDt i{font-style:normal;font-size:13px;color:#64748b;transition:transform .2s}
+#screen-recovery .rhD.on .rhDt{background:linear-gradient(#1e293b,#0f172a);color:#fff;border-color:#0f172a}
+#screen-recovery .rhD.on .rhDt span{color:#93c5fd}
+#screen-recovery .rhD.on .rhDt i{transform:rotate(180deg);color:#fff}
+#screen-recovery .rhD .drDayPrint{height:42px;min-width:40px;border-radius:12px}
+#screen-recovery .rhOpen{margin:-2px 0 12px}
+</style>
+<script id="aioRecHistJs">
+(function(){
+  const E = s => (typeof drEsc === 'function' ? drEsc(s) : String(s == null ? '' : s));
+  const nice = d => (typeof drNiceDate === 'function' ? drNiceDate(d) : d);
+  const num = n => Math.round(Number(n) || 0).toLocaleString();
+  const custIn = p => p && p.direction === 'in' && p.party_type === 'customer';
+  const dd = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5);
+  function prev(p){
+    let best = null;
+    (paymentsData || []).forEach(x => {
+      if(!custIn(x) || x.party_id !== p.party_id || !x.date) return;
+      if(x.date > p.date || (x.date === p.date && (x.payment_id || 0) >= (p.payment_id || 0))) return;
+      if(!best || x.date > best.date || (x.date === best.date && (x.payment_id || 0) > (best.payment_id || 0))) best = x;
+    });
+    return best;
+  }
+  /* 🖨️ دن کی رپورٹ — ایک صفحہ، بلیک اینڈ وائٹ، گول کنارے */
+  window.drPrintDay = drPrintDay = function(d){
+    d = d || drToday();
+    const rows = (paymentsData || []).filter(p => custIn(p) && p.date === d).sort((a, b) => (a.payment_id || 0) - (b.payment_id || 0));
+    if(!rows.length){ alert('No recovery entry on ' + nice(d) + ' yet.'); return; }
+    const shop = E(AppState.settings.businessName || 'AIO POS'), ph = E(AppState.settings.businessPhone || '');
+    const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); }catch(e){ return ''; } };
+    let tOld = 0, tGot = 0, tLeft = 0;
+    const body = rows.map((p, i) => {
+      const o = Number(p.balance_before) || 0, g = Number(p.amount) || 0, l = Number(p.balance_after) || 0;
+      tOld += o; tGot += g; tLeft += Math.max(0, l);
+      const pv = prev(p), ago = pv ? dd(pv.date, p.date) : null;
+      const last = pv ? `${E(nice(pv.date))} · ${num(pv.amount)} <span class="ag">${ago <= 0 ? 'same day' : ago + (ago === 1 ? ' day ago' : ' days ago')}</span>` : '—';
+      return `<tr><td class="c">${i + 1}</td><td class="n">${E(p.party_name || '')}</td><td>${last}</td><td class="r">${num(o)}</td><td class="r b">${num(g)}</td><td class="r">${l > 0 ? num(l) : l < 0 ? 'Adv ' + num(-l) : 'Clear ✓'}</td><td class="s">${E([tm(p), p.method || ''].filter(Boolean).join(' · '))}</td></tr>`;
+    }).join('');
+    const fs = Math.max(7, Math.min(11.5, 860 / ((rows.length + 3) * 2.25)));
+    const w = window.open('', '_blank'); if(!w){ alert('Please allow pop-ups to print.'); return; }
+    w.document.write(`<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recovery ${E(nice(d))}</title><style>
+      *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact} body{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;margin:0;padding:12px}
+      .page{border:1.6px solid #000;border-radius:18px;padding:14px 14px 10px}
+      .top{border:1.4px solid #000;border-radius:14px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+      .top b{font-size:19px;display:block} .top small{font-size:11.5px} .top .r{text-align:right} .top .r b{font-size:15px}
+      .meta{display:flex;gap:8px;margin:10px 0} .meta div{flex:1;border:1.2px solid #000;border-radius:12px;padding:6px 10px} .meta small{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px} .meta b{font-size:15px}
+      table{width:100%;border-collapse:separate;border-spacing:0;border:1.4px solid #000;border-radius:12px;overflow:hidden;font-size:${fs.toFixed(1)}px}
+      th{font-size:${(fs * .85).toFixed(1)}px;text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:${(fs * .5).toFixed(1)}px 5px;border-bottom:1.4px solid #000;background:#000;color:#fff}
+      td{padding:${(fs * .42).toFixed(1)}px 5px;border-bottom:1px solid #bbb;border-left:1px solid #ddd;vertical-align:middle;white-space:nowrap} td:first-child{border-left:0}
+      tbody tr:nth-child(even) td{background:#f2f2f2} tbody tr:last-child td{border-bottom:1.4px solid #000}
+      .r{text-align:right;font-variant-numeric:tabular-nums} th.r{text-align:right} .b{font-weight:900} .c{text-align:center;width:24px} .n{font-weight:700;white-space:normal} .s{font-size:.85em}
+      .ag{display:inline-block;border:1px solid #000;border-radius:999px;padding:0 5px;font-size:.82em;font-weight:700}
+      tfoot td{font-weight:900;border-bottom:0;background:#fff}
+      .f{display:flex;justify-content:space-between;font-size:10.5px;margin-top:8px}
+      @page{size:A4;margin:7mm} @media print{body{padding:0} .page{page-break-inside:avoid}}</style></head><body><div class="page">
+      <div class="top"><div><b>${shop}</b><small>${ph}</small></div><div class="r"><b>Daily Recovery Report</b><small>${E(nice(d))}${d === drToday() ? ' (Today)' : ''}</small></div></div>
+      <div class="meta"><div><small>Customers</small><b>${rows.length}</b></div><div><small>Total received</small><b>Rs. ${num(tGot)}</b></div><div><small>Still remaining</small><b>Rs. ${num(tLeft)}</b></div></div>
+      <table><thead><tr><th class="c">#</th><th>Customer</th><th>Last Recovery</th><th class="r">Total Remaining</th><th class="r">Recovery</th><th class="r">Remaining Balance</th><th>Time · Method</th></tr></thead>
+      <tbody>${body}</tbody><tfoot><tr><td></td><td class="n">Total</td><td></td><td class="r">${num(tOld)}</td><td class="r">${num(tGot)}</td><td class="r">${num(tLeft)}</td><td></td></tr></tfoot></table>
+      <div class="f"><span>${shop}${ph ? ' • ' + ph : ''}</span><span>Printed ${E(nice(drToday()))}</span></div>
+      </div><script>setTimeout(function(){window.print();},350)<\/script></body></html>`);
+    w.document.close();
+  };
+})();
+</script>
 
 </body>
 
