@@ -1348,6 +1348,20 @@ export class McsStats {
       }
       return Response.json({ ok: false, reason: "bad_op" });
     }
+    if (op === "/mcs_del") {   /* MCS2211SU617 (مالک کا حکم): ایڈمن نے جو کارڈ حذف کیا اس کی فہرست — ہر فون یہاں سے پڑھ کر اپنے پاس سے بھی فوراً ہٹاتا ہے (اپنا کارڈ ہو تب بھی) */
+      const b = await request.json();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mcsdel (id TEXT PRIMARY KEY, ts INTEGER, data TEXT)");
+      if (b.op === "add") {
+        const ids = (Array.isArray(b.ids) ? b.ids : []).map((x) => String(x || "").trim().slice(0, 80)).filter(Boolean).slice(0, 50); if (!ids.length) return Response.json({ ok: false, reason: "ids" });
+        const now = Date.now(), data = JSON.stringify({ mob: String(b.mob || "").replace(/\D/g, "").slice(-10), nm: String(b.nm || "").slice(0, 80) });
+        for (const id of ids) this.sql.exec("INSERT INTO mcsdel (id, ts, data) VALUES (?, ?, ?) ON CONFLICT (id) DO UPDATE SET ts = excluded.ts, data = excluded.data", id, now, data);
+        this.sql.exec("DELETE FROM mcsdel WHERE ts < ?", now - 180 * 864e5);
+        return Response.json({ ok: true, ts: now });
+      }
+      const since = Math.max(0, parseInt(b.since, 10) || 0);
+      const rows = this.sql.exec("SELECT id, ts, data FROM mcsdel WHERE ts > ? ORDER BY ts LIMIT 3000", since).toArray();
+      return Response.json({ ok: true, now: Date.now(), list: rows.map((r) => { let d = {}; try { d = JSON.parse(r.data || "{}"); } catch (e) {} return { id: r.id, ts: r.ts, mob: d.mob || "" }; }) });
+    }
     if (op === "/mcs_city") {   /* MCS1711TU494 (مالک کا حکم): ہر مقامی شہر کی ایک بڑی تصویر (لاگ اِن / سائن اپ کے اوپر) — پڑھنا سب، لگانا صرف ایڈمن؛ نام = شہر کا نام (ضلع کے ساتھ) */
       const b = await request.json();
       this.sql.exec("CREATE TABLE IF NOT EXISTS mcscity (city TEXT PRIMARY KEY, img TEXT, v INTEGER)");
@@ -2996,6 +3010,10 @@ async function handleAgent(request, env, path) {
     const data = js(b.data, 6000), res = js(b.res, 3000); if (data === null || res === null) return reply({ ok: false, reason: "too_big" });
     return fwd("/sm_code", { op, code, kind, app, data, res, uid, dev, st: S(b.st, 10), tid: S(b.tid, 80), shot: op === "proof" && /^data:image\/(jpeg|png|webp);base64,/.test(String(b.shot || "")) && String(b.shot).length < 400000 ? String(b.shot) : "", ip: request.headers.get("CF-Connecting-IP") || "" });
   }
+  if (path === "/mcsdel") {   /* MCS2211SU617: حذف شدہ کارڈوں کی فہرست — لکھنا صرف ایڈمن، پڑھنا سب (صرف ID) */
+    if (b.op === "add") { if (!(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403); return fwd("/mcs_del", { op: "add", ids: b.ids, mob: b.mob, nm: b.nm }); }
+    return fwd("/mcs_del", { op: "list", since: b.since });
+  }
   if (path === "/mcscity") {   /* MCS1711TU494: شہر کی تصویر — دیکھنا سب، لگانا / ہٹانا صرف ایڈمن */
     const op = ["put", "del", "list", "ver"].includes(b.op) ? b.op : "get";
     if ((op === "put" || op === "del") && !(await verifyFirebaseAdmin(request))) return reply({ error: "admin_only" }, 403);
@@ -3381,7 +3399,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq", "/adreq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const tp = new URL(request.url).pathname; if (tp === "/mcstest" && request.method === "POST") return handleMcsTest(request, env); }   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ */
