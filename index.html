@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU239</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU240</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU239</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU240</span>
     </div>
   </div>
 
@@ -35779,7 +35779,7 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2211SU239'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2211SU240'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
   const UPDATE_NOTE = 'Recovery redesigned: Today shows only today\'s recoveries (No Recovery Today if none), one row per customer; History = choose a date; day report as a picture (WhatsApp / Save)';
   const UPD_KEY = 'aioUpdateFromVersion';
@@ -37936,6 +37936,115 @@ window.pbtHubPwOk = async function(p){
   window.drHistRender = drHistRender = function(){ const r = _h.apply(this, arguments); try{ paint(); }catch(e){} return r; };
   window.drSetTab = drSetTab = function(tab){ DRH.tab = tab === 'hist' ? 'hist' : 'today'; RV.void = false; if(DRH.tab === 'hist'){ RV.open = !RV.d; } drTabApply(); };
   try{ if(document.getElementById('screen-recovery').classList.contains('active')) drTabApply(); }catch(e){}
+})();
+</script>
+
+<!-- AIO2211SU240 (مالک کا حکم): وصولی کی لائن دبائیں تو دو انتخاب — 🎨 اس وصولی کا رنگین پوسٹر، 📋 گاہک کی سب وصولیاں (کالا سفید، تاریخ / وقت / طریقہ / پہلے / دیے / بعد + ٹوٹل) -->
+<style id="aioRecAll">
+.apSheet{width:min(440px,94vw);background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.apSheet .h{background:linear-gradient(#1e40af,#1d4ed8);color:#fff;padding:14px 16px;font-weight:900;font-size:17px;display:flex;align-items:center;gap:8px}
+.apSheet .h span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apSheet .h button{border:0;background:rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px}
+.apSheet .b{padding:14px;display:flex;flex-direction:column;gap:10px}
+.apSheet .b button{display:flex;align-items:center;gap:12px;border:0;border-radius:16px;padding:14px;text-align:left;color:#fff;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.apSheet .b button i{font-style:normal;font-size:30px}
+.apSheet .b button b{display:block;font-size:16.5px;font-weight:900}
+.apSheet .b button small{display:block;font-size:12.5px;font-weight:600;opacity:.95}
+.apSheet .b .one{background:linear-gradient(135deg,#dc2626,#1d4ed8)}
+.apSheet .b .all{background:linear-gradient(#1f2937,#000)}
+</style>
+<script id="aioRecAllJs">
+(function(){
+  const E = s => (typeof drEsc === 'function' ? drEsc(s) : String(s == null ? '' : s));
+  const nice = d => (typeof drNiceDate === 'function' ? drNiceDate(d) : d);
+  const num = n => Math.round(Number(n) || 0).toLocaleString();
+  const custIn = p => p && p.direction === 'in' && p.party_type === 'customer';
+  const F = 'Arial, Helvetica, sans-serif';
+  function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function fit(ctx, t, w, size, weight, min){ t = String(t == null ? '' : t); let s = size; for(; s > (min || 9); s--){ ctx.font = weight + ' ' + s + 'px ' + F; if(ctx.measureText(t).width <= w) return t; }
+    ctx.font = weight + ' ' + s + 'px ' + F; while(t.length > 1 && ctx.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; }
+  const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); }catch(e){ return ''; } };
+  function allCanvas(c, list){
+    const S = 2, W = 720, P = 22, tw = W - P * 2;
+    const cols = [['#', .06], ['DATE', .17], ['TIME · METHOD', .26], ['BALANCE\nBEFORE', .17], ['PAID', .16], ['BALANCE\nAFTER', .18]];
+    let x0 = P; cols.forEach(k => { k.x = x0; k.w = k[1] * tw; x0 += k.w; });
+    const rowH = 44, n = list.length, H = P + 104 + 14 + 70 + 16 + 46 + rowH * n + 44 + 40 + P;
+    const cv = document.createElement('canvas'); cv.width = W * S; cv.height = H * S;
+    const ctx = cv.getContext('2d'); ctx.scale(S, S);
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 2.4; rr(ctx, 6, 6, W - 12, H - 12, 22); ctx.stroke();
+    const shop = AppState.settings.businessName || 'AIO POS', ph = AppState.settings.businessPhone || '';
+    let y = P; ctx.lineWidth = 1.8; rr(ctx, P, y, tw, 104, 16); ctx.stroke();
+    ctx.fillStyle = '#000'; ctx.textAlign = 'left'; ctx.fillText(fit(ctx, shop, tw * .5, 26, '900', 13), P + 18, y + 40);
+    ctx.font = '600 16px ' + F; if(ph) ctx.fillText(ph, P + 18, y + 72);
+    ctx.textAlign = 'right'; ctx.font = '900 21px ' + F; ctx.fillText('Customer Payments', P + tw - 18, y + 40);
+    ctx.fillText(fit(ctx, c.name || '', tw * .45, 19, '800', 11), P + tw - 18, y + 72);
+    y += 118;
+    const paid = list.reduce((a, p) => a + (Number(p.amount) || 0), 0), now = Number(c.total_receivable) || 0;
+    const meta = [['PAYMENTS', String(n)], ['TOTAL PAID', 'Rs. ' + num(paid)], ['BALANCE NOW', now > 0 ? 'Rs. ' + num(now) : 'Clear ✓']], mw = (tw - 20) / 3;
+    meta.forEach((m, i) => { const mx = P + i * (mw + 10); ctx.lineWidth = 1.6; rr(ctx, mx, y, mw, 70, 14); ctx.stroke(); ctx.textAlign = 'left'; ctx.fillStyle = '#000';
+      ctx.font = '700 12px ' + F; ctx.fillText(m[0], mx + 14, y + 24); ctx.fillText(fit(ctx, m[1], mw - 28, 23, '900', 12), mx + 14, y + 54); });
+    y += 86;
+    const tTop = y, tH = 46 + rowH * n + 44;
+    ctx.save(); rr(ctx, P, tTop, tw, tH, 14); ctx.clip();
+    ctx.fillStyle = '#000'; ctx.fillRect(P, y, tw, 46); ctx.fillStyle = '#fff';
+    cols.forEach((k, i) => { const r = i >= 3; ctx.textAlign = r ? 'right' : 'left'; const tx = r ? k.x + k.w - 8 : k.x + 8, ls = k[0].split('\n'); ctx.font = '800 11.5px ' + F;
+      if(ls.length === 1) ctx.fillText(ls[0], tx, y + 28); else { ctx.fillText(ls[0], tx, y + 20); ctx.fillText(ls[1], tx, y + 35); } });
+    y += 46;
+    list.forEach((p, i) => {
+      if(i % 2){ ctx.fillStyle = '#f1f1f1'; ctx.fillRect(P, y, tw, rowH); }
+      ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(P, y + rowH); ctx.lineTo(P + tw, y + rowH); ctx.stroke();
+      cols.forEach((k, j) => { if(j){ ctx.strokeStyle = '#ddd'; ctx.beginPath(); ctx.moveTo(k.x, y); ctx.lineTo(k.x, y + rowH); ctx.stroke(); } });
+      ctx.fillStyle = '#000'; ctx.textAlign = 'center'; ctx.font = '700 14px ' + F; ctx.fillText(String(i + 1), cols[0].x + cols[0].w / 2, y + 28);
+      ctx.textAlign = 'left'; ctx.fillText(fit(ctx, nice(p.date), cols[1].w - 12, 14.5, '700', 10), cols[1].x + 6, y + 28);
+      ctx.fillText(fit(ctx, [tm(p), p.method || 'Cash'].filter(Boolean).join(' · '), cols[2].w - 12, 13.5, '600', 9), cols[2].x + 6, y + 28);
+      const a = Number(p.balance_after) || 0;
+      const cell = (k, v, b) => { ctx.textAlign = 'right'; ctx.fillText(fit(ctx, v, cols[k].w - 14, 15, b ? '900' : '600', 10), cols[k].x + cols[k].w - 8, y + 28); };
+      cell(3, num(p.balance_before)); cell(4, num(p.amount), 1); cell(5, a > 0 ? num(a) : a < 0 ? 'Adv ' + num(-a) : 'Clear ✓');
+      y += rowH;
+    });
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(P + tw, y); ctx.stroke();
+    ctx.fillStyle = '#000'; ctx.textAlign = 'left'; ctx.font = '900 16px ' + F; ctx.fillText('Total paid', cols[1].x + 6, y + 28);
+    ctx.textAlign = 'right'; ctx.fillText(num(paid), cols[4].x + cols[4].w - 8, y + 28);
+    ctx.restore(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.8; rr(ctx, P, tTop, tw, tH, 14); ctx.stroke();
+    y = tTop + tH + 26; ctx.fillStyle = '#000'; ctx.textAlign = 'left'; ctx.font = '600 13px ' + F; ctx.fillText(fit(ctx, shop + (ph ? ' • ' + ph : ''), tw * .6, 13, '600', 9), P, y);
+    ctx.textAlign = 'right'; ctx.fillText('Made ' + nice(drToday()), P + tw, y);
+    return cv;
+  }
+  let AP = null, CUR = null;
+  function showCanvas(cv, file, text, title){
+    AP = { cv, file, text };
+    let m = document.getElementById('apModal');
+    if(!m){ m = document.createElement('div'); m.className = 'modalOverlay'; m.id = 'apModal'; m.onclick = e => { if(e.target === m) m.classList.remove('show'); };
+      m.innerHTML = `<div class="rdBox"><div class="rdHead"><span id="apT"></span><button onclick="document.getElementById('apModal').classList.remove('show')">✕</button></div><div class="rdBody"><img id="apImg" alt=""></div><div class="rdBtns"><button onclick="apShare()">🟢 WhatsApp / Share</button><button class="g" onclick="apSave()">⬇️ Save</button></div></div>`;
+      document.body.appendChild(m); }
+    document.getElementById('apT').textContent = title; document.getElementById('apImg').src = cv.toDataURL('image/png'); m.classList.add('show');
+  }
+  window.apShare = function(){ if(!AP) return; AP.cv.toBlob(async b => { const f = new File([b], AP.file, {type: 'image/png'});
+    if(navigator.canShare && navigator.canShare({files: [f]})){ try{ await navigator.share({files: [f], text: AP.text}); }catch(e){} } else apSave(); }, 'image/png'); };
+  window.apSave = function(){ if(!AP) return; AP.cv.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = AP.file; document.body.appendChild(a); a.click(); a.remove(); }, 'image/png'); };
+  window.apAll = function(pid){
+    const c = (customersData || []).find(x => String(x.customer_id) === String(pid)) || { name: '', total_receivable: 0 };
+    const list = (paymentsData || []).filter(p => custIn(p) && String(p.party_id) === String(pid) && p.date).sort((a, b) => a.date === b.date ? (a.payment_id || 0) - (b.payment_id || 0) : a.date < b.date ? -1 : 1);
+    if(!list.length){ alert('No payment from this customer yet.'); return; }
+    document.getElementById('apSheet') && document.getElementById('apSheet').classList.remove('show');
+    showCanvas(allCanvas(c.name ? c : Object.assign({}, c, {name: list[0].party_name}), list), 'Payments_' + String(c.name || list[0].party_name || 'Customer').replace(/\s+/g, '_') + '.png',
+      (c.name || list[0].party_name) + ': ' + list.length + ' payments, total Rs. ' + num(list.reduce((a, p) => a + (Number(p.amount) || 0), 0)), '📋 ' + (c.name || list[0].party_name) + ' — All payments');
+  };
+  window.apOne = function(){ document.getElementById('apSheet').classList.remove('show'); if(CUR) drShowPoster(CUR); };
+  window.rvPoster = function(d, pid){
+    const L = (paymentsData || []).filter(p => custIn(p) && p.date === d && String(p.party_id) === String(pid)).sort((a, b) => (a.payment_id || 0) - (b.payment_id || 0));
+    if(!L.length) return;
+    const c = (customersData || []).find(x => String(x.customer_id) === String(pid));
+    const name = c ? c.name : L[0].party_name;
+    CUR = { cid: pid, name, old: L[0].balance_before, got: L.reduce((a, p) => a + (Number(p.amount) || 0), 0), left: L[L.length - 1].balance_after, date: d };
+    let m = document.getElementById('apSheet');
+    if(!m){ m = document.createElement('div'); m.className = 'modalOverlay'; m.id = 'apSheet'; m.onclick = e => { if(e.target === m) m.classList.remove('show'); }; document.body.appendChild(m); }
+    m.innerHTML = `<div class="apSheet"><div class="h">🖼️ <span>${E(name)}</span><button onclick="document.getElementById('apSheet').classList.remove('show')">✕</button></div><div class="b">
+      <button class="one" onclick="apOne()"><i>🎨</i><span><b>This payment poster</b><small>${E(nice(d))} — paid Rs. ${num(CUR.got)} · before Rs. ${num(CUR.old)} · left Rs. ${num(CUR.left)}</small></span></button>
+      <button class="all" onclick="apAll(${JSON.stringify(pid)})"><i>📋</i><span><b>All payments (total)</b><small>Every payment till today — date, method, before / paid / after</small></span></button></div></div>`;
+    m.classList.add('show');
+  };
 })();
 </script>
 
