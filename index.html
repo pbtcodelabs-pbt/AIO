@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2111SA236</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU237</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2111SA236</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU237</span>
     </div>
   </div>
 
@@ -35779,9 +35779,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2111SA236'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2211SU237'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Recovery: new colour card design for Today and History (poster, print, details buttons)';
+  const UPDATE_NOTE = 'Recovery: every customer in one single row (last recovery + days ago, remaining, today, balance); one-row receipt with Print / WhatsApp';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -36994,6 +36994,357 @@ window.pbtHubPwOk = async function(p){
   try{ const _a = window.acctRecheck; if(typeof _a === 'function') window.acctRecheck = function(){ try{ gate(); }catch(e){} return _a.apply(this, arguments); }; }catch(e){}
 })();
 </script>
+
+
+
+<!-- AIO2211SU237 (مالک کا حکم، ہیلپ ڈیسک #326): وصولی — ہر گاہک ایک لائن: نام | آخری وصولی + دن پہلے | کل بقایا | آج کی وصولی | باقی؛ Today + History؛ ایک لائن والی رسید (پرنٹ / واٹس ایپ)۔ حساب نہیں بدلا۔ -->
+<style id="aioRecRow">
+#screen-recovery .rrScroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 10px;border:1.5px solid #cfd9e6;border-radius:14px;background:#fff;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+#screen-recovery .rrTbl{min-width:640px;width:100%;font-family:var(--font,'Arial Narrow','Roboto Condensed',Arial,sans-serif)}
+#screen-recovery .rrR{display:grid;grid-template-columns:minmax(118px,1.5fr) minmax(158px,1.7fr) minmax(88px,1fr) minmax(96px,1fr) minmax(88px,1fr) 58px;align-items:center;column-gap:0;border-bottom:1px solid #e5ebf2;background:#fff;min-height:54px;white-space:nowrap}
+#screen-recovery .rrR:last-child{border-bottom:0}
+#screen-recovery .rrR>div{padding:6px 7px;min-width:0;overflow:hidden;text-overflow:ellipsis;border-left:1px solid #eef2f7}
+#screen-recovery .rrR>div:first-child{border-left:0}
+#screen-recovery .rrR .rrN{position:sticky;left:0;z-index:1;background:inherit;box-shadow:2px 0 4px -2px rgba(15,23,42,.18)}
+#screen-recovery .rrN b{display:block;font-size:13px;font-weight:800;color:#14213d;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .rrN small{display:block;font-size:10.5px;color:#64748b;overflow:hidden;text-overflow:ellipsis}
+#screen-recovery .rrH{min-height:34px;background:linear-gradient(#1e293b,#0f172a)}
+#screen-recovery .rrH>div{color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.2px;text-transform:uppercase;border-left-color:rgba(255,255,255,.12)}
+#screen-recovery .rrH .rrN{background:#0f172a}
+#screen-recovery .rrLast{display:flex;align-items:center;justify-content:flex-start;gap:7px}
+#screen-recovery .rrLast .rrLd{flex:0 1 auto;min-width:0;overflow:hidden}
+#screen-recovery .rrLast .rrLd small{display:block;font-size:10.5px;color:#64748b;font-weight:700}
+#screen-recovery .rrLast .rrLd b{display:block;font-size:12.5px;color:#14213d;font-weight:800}
+#screen-recovery .rrAgo{flex:0 0 40px;width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4ade80,#16a34a 70%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;box-shadow:0 2px 5px rgba(22,163,74,.4),inset 0 -2px 0 rgba(0,0,0,.12);border:2px solid #dcfce7}
+#screen-recovery .rrAgo b{font-size:13.5px;font-weight:900}
+#screen-recovery .rrAgo i{font-style:normal;font-size:6.5px;font-weight:800;text-transform:uppercase;margin-top:1px;letter-spacing:.1px}
+#screen-recovery .rrAgo.t b{font-size:9.5px}
+#screen-recovery .rrM{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+#screen-recovery .rrM.red,#screen-recovery .rrR .drLeft.red{color:#d3112a}
+#screen-recovery .rrM.blue{color:#1d4ed8}
+#screen-recovery .rrM.green,#screen-recovery .rrR .drLeft.green{color:#16a34a}
+#screen-recovery .rrR .drLeft{font-size:13px;font-weight:800;background:none;padding:0;border:0}
+#screen-recovery .rrR .drLeft.orange{color:#ea580c}
+#screen-recovery .rrM small{display:block;font-size:9.5px;color:#64748b;font-weight:700}
+#screen-recovery .rrM.void{color:#94a3b8;text-decoration:line-through}
+#screen-recovery .rrIn input{width:100%;box-sizing:border-box;height:34px;border:1.8px solid #93c5fd;border-radius:9px;background:#eff6ff;color:#1d4ed8;font-size:14px;font-weight:800;text-align:right;padding:0 7px}
+#screen-recovery .rrIn input:focus{outline:none;border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(29,78,216,.15)}
+#screen-recovery .rrA{display:grid;grid-template-columns:22px 22px;gap:3px;justify-content:center;padding:4px!important}
+#screen-recovery .rrA button{width:22px;height:22px;border:1px solid #dbe3ee;border-radius:7px;background:#f8fafc;font-size:11.5px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#screen-recovery .rrA button:active{transform:scale(.92)}
+#screen-recovery .rrTot{background:#f1f5f9!important;min-height:40px}
+#screen-recovery .rrTot>div{font-weight:900}
+#screen-recovery .rrTot .rrN{background:#f1f5f9}
+#screen-recovery .rrN em{display:block;font-style:normal;font-size:9.5px;font-weight:800;color:#16a34a}
+@media (max-width:560px){
+  #screen-recovery .rrTbl{min-width:0;width:calc(100% + 54px)}
+  #screen-recovery .rrR{grid-template-columns:minmax(0,20fr) minmax(0,29fr) minmax(0,17fr) minmax(0,17fr) minmax(0,17fr) 54px}
+  #screen-recovery .rrR>div,#screen-recovery .rrR>label{padding:5px 4px}
+  #screen-recovery .rrH>div{font-size:7.6px;white-space:normal;line-height:1.15;letter-spacing:-.1px;text-overflow:clip}
+  #screen-recovery .rrN b{font-size:11.5px;letter-spacing:-.2px}
+  #screen-recovery .rrN small{font-size:9.5px}
+  #screen-recovery .rrM,#screen-recovery .rrR .drLeft{font-size:11px;letter-spacing:-.3px}
+  #screen-recovery .rrM small{font-size:8.5px}
+  #screen-recovery .rrLast{gap:4px}
+  #screen-recovery .rrLast .rrLd small{font-size:8.5px;letter-spacing:-.3px}
+  #screen-recovery .rrLast .rrLd b{font-size:11px;letter-spacing:-.3px}
+  #screen-recovery .rrAgo{flex-basis:32px;width:32px;height:32px;border-width:1.5px}
+  #screen-recovery .rrAgo b{font-size:12px}
+  #screen-recovery .rrAgo i{font-size:5.3px}
+  #screen-recovery .rrAgo.t b{font-size:7.5px}
+  #screen-recovery .rrIn input{height:32px;font-size:12px;padding:0 3px;letter-spacing:-.3px}
+  #screen-recovery .rs{display:none}
+}
+#screen-recovery .rs{font-style:normal}
+.rrRcBox{width:min(560px,94vw);max-height:92vh;display:flex;flex-direction:column;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.rrRcHead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(#e5162f,#b80c22);color:#fff;font-weight:800;font-size:15px}
+.rrRcHead button{border:0;background:rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px}
+.rrRcImg{overflow:auto;padding:10px;background:#eef2f7;flex:1}
+.rrRcImg img{width:100%;display:block;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.rrRcBtns{display:flex;gap:8px;padding:10px}
+.rrRcBtns button{flex:1;height:46px;border:0;border-radius:12px;font-size:14px;font-weight:800;color:#fff;background:#1d4ed8}
+.rrRcBtns button.wa{background:#16a34a}
+</style>
+<script id="aioRecRowJs">
+(function(){
+  const E = s => (typeof drEsc === 'function' ? drEsc(s) : String(s == null ? '' : s));
+  const M = n => drMoney(n);
+  const MH = n => { const s = drMoney(n); return s.indexOf('Rs. ') === 0 ? '<i class="rs">Rs. </i>' + s.slice(4) : s; };
+  const sel = () => (typeof drSel === 'function' ? drSel() : drToday());
+  const isToday = () => (typeof drIsToday === 'function' ? drIsToday() : true);
+  const nice = d => (typeof drNiceDate === 'function' ? drNiceDate(d) : d);
+  const dayDiff = (from, to) => Math.round((new Date(to + 'T00:00:00') - new Date(from + 'T00:00:00')) / 864e5);
+  const custIn = p => p && p.direction === 'in' && p.party_type === 'customer';
+  /* اس گاہک کی (تاریخ / پیمنٹ سے) پہلے والی آخری وصولی */
+  function prevOf(pid, date, beforeId, skip){
+    let best = null;
+    (paymentsData || []).forEach(p => {
+      if(!custIn(p) || p.party_id !== pid || !p.date || (skip && skip[p.payment_id])) return;
+      if(beforeId != null){ if(p.date > date || (p.date === date && (p.payment_id || 0) >= beforeId)) return; }
+      else if(p.date >= date) return;
+      if(!best || p.date > best.date || (p.date === best.date && (p.payment_id || 0) > (best.payment_id || 0))) best = p;
+    });
+    return best;
+  }
+  function agoHtml(n){
+    if(n == null) return '';
+    if(n <= 0) return '<span class="rrAgo t"><b>Today</b></span>';
+    return `<span class="rrAgo"><b>${n}</b><i>${n === 1 ? 'Day Ago' : 'Days Ago'}</i></span>`;
+  }
+  function lastCell(pv, refDate){
+    if(!pv) return '<div class="rrLast"><div class="rrLd"><small>No recovery yet</small><b>—</b></div></div>';
+    return `<div class="rrLast"><div class="rrLd"><small>${E(nice(pv.date))}</small><b>${MH(pv.amount)}</b></div>${agoHtml(dayDiff(pv.date, refDate))}</div>`;
+  }
+  function remTxt(l){ l = Number(l) || 0; return l > 0 ? M(l) : l < 0 ? 'Adv. ' + M(-l) : 'Clear ✓'; }
+  function remH(l){ l = Number(l) || 0; return l > 0 ? MH(l) : l < 0 ? 'Adv. ' + MH(-l) : 'Clear ✓'; }
+  function remCls(l){ l = Number(l) || 0; return l > 0 ? 'red' : 'green'; }
+  function head(t4){
+    return `<div class="rrR rrH"><div class="rrN">Customer</div><div>Last<br>Recovery</div><div>Total<br>Remaining</div><div>${t4}</div><div>Remaining<br>Balance</div><div></div></div>`;
+  }
+  function nameCell(c, fallback, sub, extra){
+    const area = c && c.area ? String(c.area) : '';
+    return `<div class="rrN"><b>${E(c ? c.name : fallback)}</b>${(sub || area) ? `<small>${E(sub || area)}</small>` : ''}${extra || ''}</div>`;
+  }
+  const btn = (ic, fn, t) => `<button onclick="${fn}" title="${t}">${ic}</button>`;
+  function custBtns(id){
+    return btn('🧾', `drPoster(${id})`, 'Receipt') + btn('💬', `drOpenReminder(${id})`, 'Reminder') +
+      (typeof drCustReport === 'function' ? btn('🖨️', `drCustReport(${id})`, 'Print statement') : '') +
+      (typeof openCustomerProfile === 'function' ? btn('📄', `openCustomerProfile(${id})`, 'Details') : '');
+  }
+  function tiles(a){
+    if(typeof drTiles === 'function') return drTiles(a);
+    return a.map(x => `<div>${E(x[0])}<b>${x[1]}</b></div>`).join('');
+  }
+
+  /* 📅 Today — ہر گاہک ایک لائن */
+  window.drRender = drRender = function(){
+    DRH.map = drBuildTodayMap();
+    const list = drList(), today = isToday(), ref = sel();
+    const wrap = document.getElementById('drListWrap'); if(!wrap) return;
+    const sw = document.getElementById('drSaveWrap'); if(sw) sw.style.display = today ? '' : 'none';
+    let tOld = 0, tGot = 0, tLeft = 0;
+    const rows = list.map(c => {
+      const id = c.customer_id, pv = prevOf(id, ref), pt = drPaidToday(id);
+      if(!today){
+        const first = pt.list[0], last = pt.list[pt.list.length - 1];
+        const old = Number(first && first.balance_before) || 0, left = Number(last && last.balance_after) || 0;
+        tOld += old; tGot += pt.sum; tLeft += Math.max(0, left);
+        return `<div class="rrR">${nameCell(c)}<div>${lastCell(pv, ref)}</div><div class="rrM red">${MH(old)}</div><div class="rrM blue">${MH(pt.sum)}</div><div class="rrM ${remCls(left)}">${remH(left)}</div><div class="rrA">${custBtns(id)}</div></div>`;
+      }
+      const v = DR.rec[id], li = drLeftInfo(c), live = drDue(c) - drReceived(c);
+      const paid = pt.sum > 0 ? `<em>✓ ${M(pt.sum)} got today</em>` : '';
+      return `<div class="rrR">${nameCell(c, '', '', paid)}<div>${lastCell(pv, ref)}</div><div class="rrM red">${MH(drDue(c))}</div><label class="rrIn"><input type="number" inputmode="decimal" min="0" placeholder="0" value="${v ? E(v) : ''}" onfocus="this.select()" oninput="drTyped(${id},this.value)"></label><div><b id="drLeft-${id}" class="drLeft ${li.cls}">${li.cls === 'red' ? MH(live) : li.txt}</b></div><div class="rrA">${custBtns(id)}</div></div>`;
+    }).join('');
+    if(!today){
+      const el = document.getElementById('drSummary'); el.className = 'drSummary';
+      el.innerHTML = tiles([['Customers', list.length], ['Total Balance', M(tOld)], ['Received', M(tGot)], ['Remaining', M(tLeft)]]);
+    } else drSummaryPaint(list);
+    wrap.innerHTML = rows
+      ? `<div class="rrScroll"><div class="rrTbl">${head(today ? "Today's<br>Recovery" : 'Recovery')}${rows}</div></div>`
+      : `<div class="placeholder">${today ? 'No customer found' : 'No recovery on ' + E(nice(ref))}</div>`;
+  };
+
+  const _typed = drTyped;
+  window.drTyped = drTyped = function(id){
+    const r = _typed.apply(this, arguments);
+    const el = document.getElementById('drLeft-' + id);
+    if(el && el.closest('.rrR')){ const c = customersData.find(x => x.customer_id === id); if(c && el.classList.contains('red')) el.innerHTML = MH(drDue(c) - drReceived(c)); }
+    return r;
+  };
+  /* 📜 History — ہر وصولی ایک لائن، وہی ڈیزائن */
+  window.drHistRender = drHistRender = function(){
+    const wrap = document.getElementById('drHistList'); if(!wrap) return;
+    const q = String(DRH.q || '').trim().toLowerCase(), isVoid = DRH.sub === 'void';
+    const voided = (AppState.settings.voidedRecoveries || []);
+    const sa = document.getElementById('drSub-rec'), sb = document.getElementById('drSub-void'), vc = document.getElementById('drVoidCnt');
+    if(sa) sa.classList.toggle('active', !isVoid); if(sb) sb.classList.toggle('active', isVoid); if(vc) vc.textContent = voided.length ? '(' + voided.length + ')' : '';
+    const src = isVoid ? voided : (paymentsData || []).filter(p => custIn(p) && p.balance_before !== undefined && p.balance_after !== undefined);
+    const rows = src.filter(p => !q || String(p.party_name || '').toLowerCase().includes(q));
+    const total = rows.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    const byDay = {}; rows.forEach(p => { (byDay[p.date] = byDay[p.date] || []).push(p); });
+    const days = Object.keys(byDay).sort().reverse();
+    const hs = document.getElementById('drHistSummary'); hs.className = 'drSummary three';
+    hs.innerHTML = typeof drTiles === 'function'
+      ? drTiles([['Days', days.length], [isVoid ? 'Voided' : 'Payments', rows.length], [isVoid ? 'Voided total' : 'Total received', M(total)]], true)
+      : tiles([['Days', days.length], ['Payments', rows.length], ['Total received', M(total)]]);
+    if(!days.length){ wrap.innerHTML = `<div class="placeholder">${isVoid ? 'No voided recovery' : 'No recovery history yet'}</div>`; return; }
+    const shown = days.slice(0, DRH.days || 30);
+    const tm = p => { try{ const t = new Date(p.created_at); return isNaN(t) ? '' : t.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); }catch(e){ return ''; } };
+    wrap.innerHTML = shown.map(d => {
+      const list = byDay[d].sort((a, b) => (b.payment_id || 0) - (a.payment_id || 0));
+      const sum = list.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+      const dayBtns = isVoid ? '' : `<button class="drDayPrint" onclick="drPrintDay('${E(d)}')" title="Print this day">🖨️</button>` + (typeof drShareDay === 'function' ? `<button class="drDayPrint" onclick="drShareDay('${E(d)}')" title="Share this day as image">🖼️</button>` : '');
+      const lines = list.map(p => {
+        const c = customersData.find(x => x.customer_id === p.party_id);
+        const by = [tm(p), p.method, p.by ? 'by ' + p.by : ''].filter(Boolean).join(' · ');
+        if(isVoid){
+          const vOn = p.voided_at ? nice(localDateStr(new Date(p.voided_at))) : '—';
+          return `<div class="rrR">${nameCell(c, p.party_name, by)}<div class="rrLast"><div class="rrLd"><small>Voided on ${E(vOn)}</small><b>${E(p.voided_by || '—')}</b></div></div><div class="rrM red">${MH(p.balance_before)}</div><div class="rrM void">${MH(p.amount)}</div><div class="rrM ${remCls(p.balance_after)}">${remH(p.balance_after)}</div><div class="rrA"></div></div>`;
+        }
+        const pv = prevOf(p.party_id, p.date, p.payment_id || 0);
+        const acts = btn('🧾', `drHistPoster(${p.payment_id})`, 'Receipt') +
+          (typeof drCustReport === 'function' ? btn('🖨️', `drCustReport(${p.party_id})`, 'Print statement') : '') +
+          (typeof drVoid === 'function' ? btn('🗑️', `drVoid(${p.payment_id})`, 'Void this recovery') : '');
+        return `<div class="rrR">${nameCell(c, p.party_name, by)}<div>${lastCell(pv, p.date)}</div><div class="rrM red">${MH(p.balance_before)}</div><div class="rrM blue">${MH(p.amount)}</div><div class="rrM ${remCls(p.balance_after)}">${remH(p.balance_after)}</div><div class="rrA">${acts}</div></div>`;
+      }).join('');
+      return `<div class="drHistDay"><span>📅 ${E(nice(d))}${d === drToday() ? ' (Today)' : ''}</span><small>${list.length} • ${M(sum)} ${dayBtns}</small></div>` +
+        `<div class="rrScroll"><div class="rrTbl">${head(isVoid ? 'Voided' : 'Recovery')}${lines}</div></div>`;
+    }).join('') + (days.length > shown.length ? `<button class="drHistMore" onclick="DRH.days = (DRH.days || 30) + 30; drHistRender()">⬇️ Show older days (${days.length - shown.length} more)</button>` : '');
+  };
+
+  /* 🧾 رسید — اسی ایک لائن والے ڈیزائن میں (کینوس) */
+  function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function fit(ctx, t, w){ t = String(t || ''); if(ctx.measureText(t).width <= w) return t; while(t.length > 1 && ctx.measureText(t + '…').width > w) t = t.slice(0, -1); return t + '…'; }
+  function fs(ctx, t, w, size, weight, F){ while(size > 12){ ctx.font = weight + ' ' + size + 'px ' + F; if(ctx.measureText(t).width <= w) break; size -= 1; } return size; }
+  function receiptCanvas(o){
+    const F = 'Arial, Helvetica, sans-serif';
+    const W = 1080, P = 30, rowH = 118, n = o.rows.length, HH = 70;
+    const cols = [{h: ['CUSTOMER'], w: .215}, {h: ['LAST RECOVERY'], w: .27}, {h: ['TOTAL', 'REMAINING'], w: .17}, {h: o.recTitle ? [o.recTitle.toUpperCase()] : ["TODAY'S", 'RECOVERY'], w: .17}, {h: ['REMAINING', 'BALANCE'], w: .175}];
+    const tw = W - P * 2; let x0 = P; cols.forEach(c => { c.x = x0; c.px = Math.round(c.w * tw); x0 += c.px; });
+    const multi = n > 1;
+    const H = P + 160 + 18 + HH + rowH * n + (multi ? 76 : 0) + 26 + 66 + P;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#cfd9e6'; ctx.lineWidth = 3; rr(ctx, 8, 8, W - 16, H - 16, 22); ctx.stroke();
+    let y = P;
+    const g = ctx.createLinearGradient(0, y, 0, y + 160); g.addColorStop(0, '#e5162f'); g.addColorStop(1, '#b80c22');
+    ctx.fillStyle = g; rr(ctx, P, y, tw, 160, 20); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'right'; ctx.font = '900 36px ' + F; ctx.fillText('PAYMENT RECEIPT', P + tw - 26, y + 62);
+    ctx.font = '700 26px ' + F; ctx.fillText(o.when, P + tw - 26, y + 108);
+    ctx.textAlign = 'left';
+    fs(ctx, o.shop, tw * .5, 46, '900', F); ctx.fillText(fit(ctx, o.shop, tw * .5), P + 26, y + 66);
+    if(o.phone){ ctx.font = '700 27px ' + F; ctx.globalAlpha = .92; ctx.fillText('Ph: ' + o.phone, P + 26, y + 112); ctx.globalAlpha = 1; }
+    y += 178;
+    ctx.fillStyle = '#0f172a'; rr(ctx, P, y, tw, HH, 12); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+    cols.forEach(c => { fs(ctx, c.h.reduce((m, s) => s.length > m.length ? s : m, ''), c.px - 24, 22, '800', F);
+      if(c.h.length === 1) ctx.fillText(c.h[0], c.x + 14, y + 43); else { ctx.fillText(c.h[0], c.x + 14, y + 30); ctx.fillText(c.h[1], c.x + 14, y + 57); } });
+    y += HH;
+    o.rows.forEach((r, i) => {
+      ctx.fillStyle = i % 2 ? '#f8fafc' : '#fff'; ctx.fillRect(P, y, tw, rowH);
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P, y + rowH); ctx.lineTo(P + tw, y + rowH); ctx.stroke();
+      cols.forEach((c, k) => { if(k){ ctx.beginPath(); ctx.moveTo(c.x, y + 12); ctx.lineTo(c.x, y + rowH - 12); ctx.stroke(); } });
+      const cy = y + rowH / 2;
+      ctx.textAlign = 'left'; ctx.fillStyle = '#14213d';
+      fs(ctx, r.name, cols[0].px - 26, 31, '800', F); ctx.fillText(fit(ctx, r.name, cols[0].px - 26), cols[0].x + 14, r.sub ? cy - 2 : cy + 11);
+      if(r.sub){ ctx.fillStyle = '#64748b'; ctx.font = '600 21px ' + F; ctx.fillText(fit(ctx, r.sub, cols[0].px - 26), cols[0].x + 14, cy + 30); }
+      const c1 = cols[1];
+      if(r.prevDate){
+        const R = 42, bx = c1.x + 14 + 150 + R - 6;
+        ctx.fillStyle = '#64748b'; ctx.font = '700 22px ' + F; ctx.fillText(r.prevDate, c1.x + 14, cy - 8);
+        ctx.fillStyle = '#14213d'; fs(ctx, M(r.prevAmt), 146, 29, '800', F); ctx.fillText(M(r.prevAmt), c1.x + 14, cy + 28);
+        const bg = ctx.createRadialGradient(bx - 13, cy - 13, 4, bx, cy, R); bg.addColorStop(0, '#4ade80'); bg.addColorStop(1, '#16a34a');
+        ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, cy, R, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#dcfce7'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+        if(r.ago <= 0){ ctx.font = '900 20px ' + F; ctx.fillText('TODAY', bx, cy + 7); }
+        else { ctx.font = '900 31px ' + F; ctx.fillText(String(r.ago), bx, cy + 5); ctx.font = '800 12px ' + F; ctx.fillText(r.ago === 1 ? 'DAY AGO' : 'DAYS AGO', bx, cy + 24); }
+        ctx.textAlign = 'left';
+      } else { ctx.fillStyle = '#94a3b8'; ctx.font = '700 23px ' + F; ctx.fillText('No earlier recovery', c1.x + 14, cy + 8); }
+      const amt = (k, v, col) => { ctx.fillStyle = col; fs(ctx, v, cols[k].px - 24, 31, '900', F); ctx.fillText(v, cols[k].x + 14, cy + 11); };
+      amt(2, M(r.before), '#d3112a');
+      amt(3, M(r.got), '#1d4ed8');
+      amt(4, remTxt(r.after), (Number(r.after) || 0) > 0 ? '#d3112a' : '#16a34a');
+      y += rowH;
+    });
+    if(multi){
+      ctx.fillStyle = '#f1f5f9'; ctx.fillRect(P, y, tw, 76);
+      const s = k => o.rows.reduce((a, r) => a + (Number(r[k]) || 0), 0);
+      const tot = (k, v, col) => { ctx.fillStyle = col; fs(ctx, v, cols[k].px - 24, 30, '900', F); ctx.fillText(v, cols[k].x + 14, y + 49); };
+      ctx.textAlign = 'left'; tot(0, 'TOTAL (' + n + ')', '#14213d');
+      tot(2, M(s('before')), '#d3112a'); tot(3, M(s('got')), '#1d4ed8');
+      tot(4, M(o.rows.reduce((a, r) => a + Math.max(0, Number(r.after) || 0), 0)), '#d3112a');
+      y += 76;
+    }
+    y += 26;
+    ctx.fillStyle = '#ecfdf5'; rr(ctx, P, y, tw, 66, 14); ctx.fill();
+    ctx.fillStyle = '#15803d'; ctx.textAlign = 'center';
+    const thx = '✓ Payment received with thanks — ' + (o.shop || '');
+    fs(ctx, thx, tw - 40, 28, '800', F); ctx.fillText(thx, W / 2, y + 43);
+    return cv;
+  }
+  function nowTxt(d){
+    const t = new Date(); let tt = '';
+    try{ tt = t.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); }catch(e){}
+    return nice(d) + (d === drToday() ? '  ' + tt : '');
+  }
+  function rowFrom(p, skip){
+    const c = customersData.find(x => x.customer_id === p.party_id);
+    const pv = prevOf(p.party_id, p.date, p.payment_id || 0, skip);
+    return { name: c ? c.name : p.party_name, sub: c && c.area ? c.area : '', prevDate: pv ? nice(pv.date) : '', prevAmt: pv ? pv.amount : 0, ago: pv ? dayDiff(pv.date, p.date) : 0, before: p.balance_before, got: p.amount, after: p.balance_after };
+  }
+  let RC = null;
+  function ensureModal(){
+    if(document.getElementById('rrRcModal')) return;
+    const m = document.createElement('div'); m.className = 'modalOverlay'; m.id = 'rrRcModal';
+    m.onclick = e => { if(e.target === m) m.classList.remove('show'); };
+    m.innerHTML = `<div class="rrRcBox"><div class="rrRcHead"><span id="rrRcT">🧾 Payment Receipt</span><button onclick="document.getElementById('rrRcModal').classList.remove('show')">✕</button></div><div class="rrRcImg"><img id="rrRcImg" alt="Receipt"></div><div class="rrRcBtns"><button onclick="rrRcPrint()">🖨️ Print</button><button class="wa" onclick="rrRcShare()">🟢 WhatsApp Share</button></div></div>`;
+    document.body.appendChild(m);
+  }
+  async function showReceipt(o){
+    try{ await document.fonts.ready; }catch(e){}
+    o.shop = AppState.settings.businessName || 'AIO POS'; o.phone = AppState.settings.businessPhone || '';
+    const cv = receiptCanvas(o);
+    try{ if(typeof appendBrandFooter === 'function') appendBrandFooter(cv); }catch(e){}
+    const nm = o.rows.length === 1 ? String(o.rows[0].name || 'Customer').replace(/\s+/g, '_') : o.rows.length + '_customers';
+    RC = { cv, file: `Receipt_${nm}_${o.date}.png`, text: o.rows.length === 1
+      ? `Payment received from ${o.rows[0].name}: ${M(o.rows[0].got)}. Remaining balance: ${remTxt(o.rows[0].after)}`
+      : `Recovery receipt ${nice(o.date)} — ${o.rows.length} customers, total ${M(o.rows.reduce((a, r) => a + (Number(r.got) || 0), 0))}` };
+    ensureModal();
+    document.getElementById('rrRcImg').src = cv.toDataURL('image/png');
+    document.getElementById('rrRcModal').classList.add('show');
+  }
+  window.rrRcPrint = function(){
+    if(!RC) return;
+    const w = window.open('', '_blank'); if(!w){ alert('Please allow pop-ups to print.'); return; }
+    w.document.write(`<html><head><meta charset="utf-8"><title>${E(RC.file)}</title><style>body{margin:0}img{width:100%;display:block}@page{margin:6mm}</style></head><body><img src="${RC.cv.toDataURL('image/png')}" onload="setTimeout(function(){window.print()},300)"></body></html>`);
+    w.document.close();
+  };
+  window.rrRcShare = function(){
+    if(!RC) return;
+    RC.cv.toBlob(async blob => {
+      if(!blob){ alert('There was a problem preparing the image.'); return; }
+      const file = new File([blob], RC.file, {type: 'image/png'});
+      if(navigator.canShare && navigator.canShare({files: [file]})){
+        try{ await navigator.share({files: [file], title: 'Payment Receipt', text: RC.text}); }catch(e){}
+        return;
+      }
+      try{ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = RC.file; document.body.appendChild(a); a.click(); a.remove(); }catch(e){}
+      window.open('https://wa.me/?text=' + encodeURIComponent(RC.text), '_blank');
+    }, 'image/png');
+  };
+  window.rrShowReceipt = showReceipt;
+
+  /* 🧾 ایک گاہک (🧾 بٹن / History) — اسی ڈیزائن کی رسید */
+  window.drShowPoster = drShowPoster = async function(o){
+    const c = customersData.find(x => x.name === o.name);
+    const pid = c ? c.customer_id : null;
+    const pv = pid != null ? prevOf(pid, o.date) : null;
+    return showReceipt({ date: o.date, when: nowTxt(o.date), rows: [{ name: o.name, sub: c && c.area ? c.area : '', prevDate: pv ? nice(pv.date) : '', prevAmt: pv ? pv.amount : 0, ago: pv ? dayDiff(pv.date, o.date) : 0, before: o.old, got: o.got, left: o.left, after: o.left }] });
+  };
+  window.drHistPoster = drHistPoster = function(paymentId){
+    const p = (paymentsData || []).find(x => x.payment_id === paymentId); if(!p) return;
+    showReceipt({ date: p.date, when: nice(p.date), recTitle: 'Recovery', rows: [rowFrom(p)] });
+  };
+  /* 💾 Save — کامیاب ہوتے ہی سب کی ایک رسید */
+  const _save = drSaveAll;
+  window.drSaveAll = drSaveAll = function(){
+    const before = {}; (paymentsData || []).forEach(p => { before[p.payment_id] = 1; });
+    const r = _save.apply(this, arguments);
+    const fresh = (paymentsData || []).filter(p => custIn(p) && !before[p.payment_id]);
+    if(fresh.length){
+      const skip = {}; fresh.forEach(p => { skip[p.payment_id] = 1; });
+      const d = fresh[0].date || drToday();
+      setTimeout(() => showReceipt({ date: d, when: nowTxt(d), rows: fresh.map(p => rowFrom(p, skip)) }), 250);
+    }
+    return r;
+  };
+  try{ if(document.getElementById('screen-recovery') && document.getElementById('screen-recovery').classList.contains('active')) drRender(); }catch(e){}
+})();
+</script>
+
 
 
 
