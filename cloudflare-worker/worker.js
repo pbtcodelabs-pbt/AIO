@@ -2341,7 +2341,7 @@ export class McsStats {
         for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} if (x.dead || !x.invBy) continue; (stf[x.invBy] = stf[x.invBy] || []).push({ aio: r.id, name: x.name || "", mobile: x.mobile || "", at: x.invAt || x.at || r.ts || 0 }); }
         for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) {
           let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {}
-          if (a.dead || ap3(a.app) !== want) continue;
+          if (a.dead || ap3(a.app) !== want || !idAppOk(r.id, want)) continue;   /* MD2311MO028: دوسری ایپ کی ID کبھی نہیں */
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
           if (!e && aioIsStaff(a, now)) continue;   /* AIO2011FR230: ملازم کی ID فہرست میں نہیں */
           out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays, devices: e.devices || 1,
@@ -2353,6 +2353,7 @@ export class McsStats {
       }
       if (b.op === "aiodel") {   /* AIO2011FR227 (مالک کا حکم): فالتو AIO ID ہٹانا — فہرست سے غائب، مگر ریکارڈ اندر رہتا ہے تاکہ اسی فون کو دوبارہ نئی ID / نیا مفت ٹرائل نہ ملے؛ جس ID پر پیکج چل رہا ہو وہ نہیں ہٹتی */
         const ar = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
+        { let a0 = {}; try { a0 = JSON.parse(ar.data || "{}"); } catch (er) {} if ((b.app === "SM" || b.app === "MD" || a0.app === "SM" || a0.app === "MD") && a0.app !== b.app) return Response.json({ ok: false, reason: "wrong_app" }); }   /* MD2311MO028: پکی روک */
         const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0], e = kr ? this.entGet(kr.id) : null;
         if (e && !e.revoked && (!!e.life || (e.exp || 0) > now)) return Response.json({ ok: false, reason: "has_pkg" });
         let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
@@ -2364,6 +2365,7 @@ export class McsStats {
       if (b.op === "aiolook" || b.op === "aiogrant" || b.op === "aioadd") {
         const ar = this.sql.exec("SELECT dev, data, ts FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
         let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
+        if ((b.app === "SM" || b.app === "MD" || a.app === "SM" || a.app === "MD") && a.app !== b.app) return Response.json({ ok: false, reason: "wrong_app" });   /* MD2311MO028: پکی روک */
         const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0];
         let e = kr ? this.entGet(kr.id) : null;
         const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", made: a.at || ar.ts || 0, dev: ar.dev || "", replacedBy: a.replacedBy || "", replacedAt: a.replacedAt || 0 };
@@ -2755,6 +2757,9 @@ async function verifySmDev(request, proj, emails) {
    /entstatus {app, key, dev} — پہلے سے جڑا فون (تجدید / بند ہونے کی خبر)
    /entadmin  (Authorization: MCS ایڈمن کا فائربیس ٹوکن) {op:'grant'|'list'|'revoke'|'unrevoke'|'reset'|'delete', ...}
    ===================================================================== */
+/* MD2311MO028 (مالک کا پکا حکم — ایک ایپ کا ڈیٹا دوسری میں کبھی نہیں): SM / MD کی ID صرف اپنی ایپ میں — SM12345 صرف سبزی منڈی، MD12345 صرف مدرسہ؛
+   دوسری ایپ کے نام سے دیکھنا / پیکج دینا / فون کھولنا سب رد (wrong_app)۔ AIO / AIO Direct پرانی IDs کی وجہ سے آپس میں ویسے */
+function idAppOk(id, app) { const k = /^SM\d{5}$/.test(id) ? "SM" : /^MD\d{5}$/.test(id) ? "MD" : "X"; if (app === "SM" || app === "MD") return k === app; return k === "X"; }
 const ENT_APPS = ["AIO", "MCS", "DR", "SM", "MD"];   /* MD2311MO028 (مالک کا حکم): مدرسہ سافٹ ویئر — MD ID پر پیکج (ہیلپ ڈیسک سے)، سبزی منڈی جیسا */   /* SM2211SU301 (مالک کا حکم): سبزی منڈی — SM ID پر پیکج (ہیلپ ڈیسک سے)، AIO Direct جیسا */   /* AIODR1811WE178: AIO Direct — AIO ID پر پیکج */   /* MCS1711TU499: My City Shines کے ایک سال کے رجسٹریشن کوڈ بھی اسی جدول میں (چھڑانا /pcode سے) */
 const GOOGLE_CLIENT_IDS = ["954131537356-2be2rne30mje71l9qibosblvj3j0eqoj.apps.googleusercontent.com"];
 let gJwks = null, gJwksAt = 0;
@@ -3146,6 +3151,7 @@ async function handleEnt(request, env, path) {
     else if (b.kind === "a") {   /* AIO1811WE224: AIO ID — صرف وہی فون جس نے یہ ID بنائی (سرور پر dev ملتا ہو) */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^(AIO(DR)?|SM|MD)\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
+      if (!idAppOk(aio, app)) return reply({ ok: false, reason: "wrong_app" });
       const adev = String(b.adev || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);   /* AIO ID بنانے والے فون کی اپنی چابی (ایپ میں محفوظ) */
       const chk = adev.length >= 6 ? await (await fwd("/aio_id", { op: "me", id: aio, dev: adev })).json() : null; if (!chk || !chk.ok) return reply({ ok: false, reason: "none" });
       key = "a:" + aio;
@@ -3175,6 +3181,7 @@ async function handleEnt(request, env, path) {
     if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^(AIO(DR)?|SM|MD)\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
+      if (!idAppOk(aio, app)) return reply({ ok: false, reason: "wrong_app" });
       return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), devs: Array.isArray(b.devs) ? b.devs.slice(0, 20).map((d) => String(d).slice(0, 120)) : undefined, price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
