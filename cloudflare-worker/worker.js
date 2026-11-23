@@ -1640,7 +1640,7 @@ export class McsStats {
         u.pk = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
         const d = Object.assign({}, u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), u.id); return u.pk;
       };
-      const out = (u) => ({ id: u.id, sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, hasYob: !!u.yob, ts: u.ts, pk: pkOf(u) });
+      const out = (u) => ({ id: u.id, sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, hasYob: !!u.yob, dob: u.dob || "", ts: u.ts, pk: pkOf(u) });   /* MCS2311MO642: پوری تاریخِ پیدائش */
       const sess = async (id, via) => { const raw = crypto.getRandomValues(new Uint8Array(24)); const tok = Array.from(raw).map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcssess (tok, id, via, ts, last) VALUES (?, ?, ?, ?, ?)", await uaTokHash(tok), id, via, now, now); return tok; };
       const failK = "f:" + (b.fk || ""), failR = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", failK).toArray()[0];
       const fails = failR && now - failR.ts < 15 * 60e3 ? failR.n : 0;
@@ -1854,6 +1854,14 @@ export class McsStats {
         this.sql.exec("INSERT INTO mcsreg (mob, data, img, ts) VALUES (?, ?, ?, ?) ON CONFLICT (mob) DO UPDATE SET data = excluded.data, img = excluded.img, ts = excluded.ts", mob, JSON.stringify(b.reg || {}), img, now);
         if (b.dev && !S.u.dev) { S.u.dev = b.dev; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); }
         return Response.json({ ok: true });
+      }
+      if (b.act === "setdob") {   /* MCS2311MO642 (#357): پوری تاریخِ پیدائش — سال پہلے سے ہو تو وہی رہے، بدلا ہوا سال قبول نہیں */
+        const dv = String(b.dob || ""), y = dv.slice(0, 4);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dv)) return Response.json({ ok: false, reason: "dob" });
+        if (S.u.yob && String(S.u.yob) !== y) return Response.json({ ok: false, reason: "yobmismatch" });
+        S.u.dob = dv; if (!S.u.yob) S.u.yob = y;
+        const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id);
+        return Response.json({ ok: true, user: out(S.u) });
       }
       if (b.act === "setyob") { S.u.yob = b.yob; const d = Object.assign({}, S.u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), S.u.id); return Response.json({ ok: true, user: out(S.u) }); }   /* MCS1711TU505 */
       if (b.act === "setpw") {   /* پاس ورڈ بدلیں — پرانا ٹھیک ہو، یا گوگل سے 15 منٹ کے اندر لاگ اِن ہوا ہو (پاس ورڈ بھول گئے) */
@@ -2101,6 +2109,15 @@ export class McsStats {
       const d = { id, name: c.name, phone: c.phone, city: c.city, biz: c.biz || "", bizRk: c.code, code: "", pin: "", status: "pending", at: now, upd: now, byCodev: cd.name, dev: "", ref: refNorm(String(c.ref || "").slice(0, 40)), mcsId: String(c.mcsId || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 20), cnic: c.cnic || "", father: "", address: "", wa: "", email: "", exp: "👥 کو-ڈویلپر " + cd.name + " نے تجویز کیا", note: "" };
       this.sql.exec("INSERT INTO agent (id, phone, data, ts) VALUES (?, ?, ?, ?)", id, c.phone, JSON.stringify(d), now);
       return Response.json({ ok: true });
+    }
+    if (op === "/ag_mydocs") {   /* MCS2311MO643 (#357): صرف اپنی دستاویز — موبائل + PIN + وہی فون */
+      const b = await request.json();
+      const r = this.sql.exec("SELECT data FROM agent WHERE phone = ?", b.phone).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "login" });
+      const d = JSON.parse(r.data); if (!d.pin || d.pin !== b.pin || d.dev !== b.dev) return Response.json({ ok: false, reason: "login" });
+      const out = { ok: true, cnic: d.cnic || "", cnicExp: d.cnicExp || "", father: d.father || "" }; let n = 0;
+      for (const k of ["front", "back", "selfie"]) { const x = this.sql.exec("SELECT data FROM agimg WHERE id = ? AND kind = ?", d.id, k).toArray()[0]; if (x && x.data) { out[k] = x.data; n++; } }
+      if (!n && !out.cnic) return Response.json({ ok: false, reason: "nodocs" });
+      return Response.json(out);
     }
     if (op === "/ag_docs") {   /* MCS0511TH139: ایجنٹ خود (نمبر + PIN + اسی فون) شناختی کارڈ نمبر اور تین تصویریں لگائے */
       const b = await request.json();
@@ -2887,6 +2904,11 @@ async function handleMcsAuth(request, env) {
     let img; if (b.img !== undefined) { const im = String(b.img || ""); img = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(im) && im.length <= 90000 ? im : ""; }
     const body = { act: "regsum", th, reg, dev }; if (img !== undefined) body.img = img;
     r = await call(body);
+  } else if (op === "setdob") {   /* MCS2311MO642 (#357) */
+    const dv = String(b.dob || ""), mm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dv), cy0 = new Date().getUTCFullYear();
+    if (!mm || +mm[1] < 1920 || +mm[1] > cy0 - 8) return reply({ ok: false, reason: "dob" });
+    const t0 = new Date(Date.UTC(+mm[1], +mm[2] - 1, +mm[3])); if (t0.getUTCFullYear() !== +mm[1] || t0.getUTCMonth() !== +mm[2] - 1 || t0.getUTCDate() !== +mm[3]) return reply({ ok: false, reason: "dob" });
+    r = await call({ act: "setdob", th, dob: dv });
   } else if (op === "setyob") {   /* MCS1711TU505 */
     if (!yobV) return reply({ ok: false, reason: "yob" });
     r = await call({ act: "setyob", th, yob: yobV });
@@ -2929,7 +2951,7 @@ async function handleAgent(request, env, path) {
     if (dev.length < 6) return reply({ error: "bad_dev" }, 400);
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     /* MCS0911MO264 (ہیلپ ڈیسک #172، مالک کی ⚡ منظوری): «Earn with MCS» کا سیدھا فارم — اپنا کاروبار نہ ہو تب بھی درخواست (bizRk خالی = noBiz)، منظوری مالک کی؛ کوڈ AG-001 */
-    const d = { name: S(b.name, 80), father: S(b.father, 80), cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), phone, wa: entPhone(b.wa) || "", email: S(b.email, 80), city: S(b.city, 60), address: S(b.address, 200), biz: S(b.biz, 120), bizRk: S(b.bizRk, 60), exp: S(b.exp, 400), dev, full: b.full ? 1 : 0, ref: refNorm(S(b.ref, 40).replace(/[^A-Za-z0-9_\-]/g, "")), mcsId: S(b.mcsId, 20).replace(/[^A-Za-z0-9]/g, "") };   /* MCS1511SU430: کس کے ریفرل سے + اس کی MCS ID */
+    const d = { name: S(b.name, 80), father: S(b.father, 80), cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), cnicExp: S(b.cnicExp, 10), phone, wa: entPhone(b.wa) || "", email: S(b.email, 80), city: S(b.city, 60), address: S(b.address, 200), biz: S(b.biz, 120), bizRk: S(b.bizRk, 60), exp: S(b.exp, 400), dev, full: b.full ? 1 : 0, ref: refNorm(S(b.ref, 40).replace(/[^A-Za-z0-9_\-]/g, "")), mcsId: S(b.mcsId, 20).replace(/[^A-Za-z0-9]/g, "") };   /* MCS1511SU430: کس کے ریفرل سے + اس کی MCS ID */
     if (!d.name || !d.city) return reply({ ok: false, reason: "missing" });
     if (d.full && (!d.father || !d.address || !/@/.test(d.email))) return reply({ ok: false, reason: "missing" });   /* MCS0911MO264: پورے فارم میں سب خانے لازمی */   /* MCS0511TH139: والد کا نام / پتہ اختیاری (آسان فارم) */
     return fwd("/ag_apply", { d, img });
@@ -2994,6 +3016,10 @@ async function handleAgent(request, env, path) {
     if (!c.name || !c.phone || !/^p\d{10}/.test(c.code)) return reply({ ok: false, reason: "missing" });
     if (!c.cnic) return reply({ ok: false, reason: "bad_cnic" });
     return fwd("/ag_propose", { cphone: entPhone(b.cphone), cpin: S(b.cpin, 10), c });
+  }
+  if (path === "/agmydocs") {   /* MCS2311MO643 (#357): ایجنٹ اپنی شناختی کارڈ کی تفصیل اور تصویریں دیکھے — موبائل + PIN + وہی رجسٹرڈ فون */
+    const phone = entPhone(b.phone); if (!phone || !b.pin || dev.length < 6) return reply({ ok: false, reason: "login" });
+    return fwd("/ag_mydocs", { phone, pin: S(b.pin, 10), dev });
   }
   if (path === "/agdocs") {
     const phone = entPhone(b.phone); if (!phone || !b.pin || dev.length < 6) return reply({ ok: false, reason: "login" });
@@ -3408,7 +3434,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq", "/adreq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agmydocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const tp = new URL(request.url).pathname; if (tp === "/mcstest" && request.method === "POST") return handleMcsTest(request, env); }   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ */
