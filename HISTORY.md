@@ -187,3 +187,4 @@
 - **SM2211SU301 سرور (مالک کا حکم):** سبزی منڈی کی SM ID — `ENT_APPS` میں SM، `/aioid reg app SM` (Gmail کے بغیر) → `SM#####`، `/entclaim kind a` اور `entadmin` کے aio ops میں `SM\d{5}`؛ پہلی بار 16 پیکج (صرف مالک / مالک + 1، 2، 3 ملازم × 1، 3، 6 مہینے، 1 سال، پرانے ریٹ والی قیمت)؛ `aionew` میں ہر ID کی رقم (`paid`، `lastAt`)۔
 - **MD2311MO028 (مالک کا حکم — سرور):** مدرسہ سافٹ ویئر بھی AIO ID والے نظام پر: `/aioid reg app MD` → `MD12345` (Gmail ضروری نہیں، جواب میں `at` = ٹرائل کی شروعات)، `ENT_APPS` میں `MD`، چار پیکج `md-1-1m` 500 / `md-1-1y` 5000 / `md-2-1m` 1000 / `md-2-1y` 10000 (2 فون)، ہیلپ ڈیسک `aionew / aiolook / aiogrant` اور فون `/entclaim kind a`۔
 - **MD2311MO028 (پکی روک):** `idAppOk` — SM / MD کی ID صرف اپنی ایپ میں (aionew / aiolook / aiogrant / aioadd / aiodel / entclaim پر `wrong_app`)؛ 19 جانچیں کامیاب۔
+- **MD2311MO031:** `/aioid op want` (اسی فون کی چابی سے) گاہک کا چنا پیکج `aioid.data.want`؛ `aionew` / `aiolook` میں `want`۔
