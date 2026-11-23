@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2211SU241</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2311MO242</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2211SU241</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2311MO242</span>
     </div>
   </div>
 
@@ -7155,6 +7155,17 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   </div>
 </div>
 
+<!-- 📦 AIO2311MO242 (#382): پیکج ختم ہونے کی وارننگ — قیمت/ادائیگی کا ذکر نہیں، صرف «پیکج دوبارہ لیں» -->
+<div class="modalOverlay" id="pkgExpiryModal" onclick="if(event.target===this) dismissPkgExpiryModal()">
+  <div class="backupConfirmBox" dir="rtl">
+    <div class="backupConfirmIconWrap" id="pkgExpIconWrap" style="background:#fff7ed; color:#c2410c;"><span id="pkgExpIcon">📦</span></div>
+    <h3 id="pkgExpTitle">آپ کا پیکج ختم ہونے والا ہے</h3>
+    <p style="font-size:13px; color:var(--muted); line-height:1.8; margin-top:2px;" id="pkgExpBody"></p>
+    <button class="backupConfirmCloseBtn" id="pkgExpBtn" style="background:linear-gradient(155deg,#ea580c,#c2410c); margin-top:14px;" onclick="dismissPkgExpiryModal(); openPackagePlansModal();">📦 پیکج دوبارہ لیں</button>
+    <button class="backupConfirmCloseBtn" style="background:#f1f5f9; color:var(--text); margin-top:8px;" onclick="dismissPkgExpiryModal()">بند کریں</button>
+  </div>
+</div>
+
 <!-- IMPORT BACKUP — تصدیقی پیغام (پرانے نیٹو confirm() کی جگہ، خوبصورت برانڈڈ ڈیزائن) -->
 <div class="modalOverlay" id="importConfirmModal" onclick="if(event.target===this) cancelImportConfirm()">
   <div class="backupConfirmBox">
@@ -9110,7 +9121,7 @@ function proceedToRestoreFilePicker(){
 // تو ڈیٹا پورا آ جائے مگر یہاں کی ایکٹیویشن خراب نہ ہو، اور کسی دوسرے فون کی سبسکرپشن یہاں نہ آ جائے ----------
 const BACKUP_KEEP_LOCAL_SETTINGS = ['syncOn','businessId','syncJoined','syncRole','syncSlot','syncWasListed','syncDeviceName','syncDevId','aioFbAuth','developerUnlock','devAuth','devPanelPasswordHash','deviceRecordPending','deviceUID','freeTrialGranted','isOnFreeTrial','lastActivationCode',
   'lifetimeLicense','subscriptionActivatedOn','subscriptionExpiry','subscriptionPlans','subscriptionViaPlayBilling','pendingPlayAcks',
-  'trialLockConfirmedOnline','trialReminderShownOn','needsFirstEnter'];
+  'trialLockConfirmedOnline','trialReminderShownOn','pkgWarnState','needsFirstEnter'];
 function restoreSettingsKeepingLicense(backupSettings){
   const keep = {};
   BACKUP_KEEP_LOCAL_SETTINGS.forEach(k => { if(Object.prototype.hasOwnProperty.call(AppState.settings, k)) keep[k] = AppState.settings[k]; });
@@ -9620,6 +9631,51 @@ function renderSubscriptionBanner(){
 
   // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
   if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
+  else maybeShowPackageExpiryWarning(daysLeft); // AIO2311MO242 (#382): خریدے ہوئے پیکج کی میعاد ختم ہونے کی وارننگ
+}
+
+// ---------- AIO2311MO242 (#382، مالک کا حکم): پیکج ختم ہونے کی وارننگ ----------
+// 15 دن سے کم رہ جائیں تو صرف ایک بار؛ 7 دن سے کم پر روز ایک بار (3 دن سے کم پر بھی دن میں ایک ہی بار، زیادہ نہیں)۔
+// بٹن «📦 پیکج دوبارہ لیں» — قیمت یا ادائیگی کا کوئی ذکر نہیں، صرف Google Play سے تجدید۔
+// نیا پیکج لیتے ہی تاریخ بدلتی ہے، تو گنتی خودبخود نئے سرے سے شروع ہو جاتی ہے۔
+function maybeShowPackageExpiryWarning(daysLeft){
+  try{
+    const st = AppState.settings;
+    if(st.developerUnlock || st.lifetimeLicense || st.isOnFreeTrial || isLinkedDevice()) return;
+    const exp = st.subscriptionExpiry;
+    if(!exp || !(daysLeft < 15)) return;
+    // پہلی بار ایپ کھلنے پر Google Drive والی دعوت آتی ہے — اس دن یہ نہ دکھائیں تاکہ دو پاپ اپ نہ ٹکرائیں
+    if(!st.gdrivePromptShown) return;
+    // کوئی اور پاپ اپ کھلا ہو تو اس کے اوپر نہ آئے
+    if(document.querySelector('.modalOverlay.show')) return;
+    const todayStr = new Date().toISOString().slice(0,10);
+    let ws = st.pkgWarnState;
+    if(!ws || typeof ws !== 'object' || ws.exp !== exp) ws = { exp: exp, firstDone: false, lastDay: '' }; // نیا/بدلا ہوا پیکج = نئی گنتی
+    if(daysLeft >= 7){
+      if(ws.firstDone) return;        // 7 سے 14 دن: بس ایک بار
+      ws.firstDone = true;
+    } else {
+      if(ws.lastDay === todayStr) return; // 7 دن سے کم: دن میں ایک بار
+    }
+    ws.lastDay = todayStr;
+    st.pkgWarnState = ws;
+    persistAllData();
+
+    const urgent = daysLeft < 3;
+    const when = daysLeft <= 0 ? 'آج ختم ہو رہا ہے' : (daysLeft === 1 ? 'کل ختم ہو جائے گا' : daysLeft + ' دن میں ختم ہو جائے گا');
+    const t = document.getElementById('pkgExpTitle'), b = document.getElementById('pkgExpBody');
+    const iw = document.getElementById('pkgExpIconWrap'), ic = document.getElementById('pkgExpIcon'), btn = document.getElementById('pkgExpBtn');
+    if(!t || !b) return;
+    t.textContent = 'آپ کا پیکج ' + when;
+    b.textContent = 'بغیر رکاوٹ کاروبار جاری رکھنے کے لیے پیکج پہلے ہی دوبارہ لے لیں۔ آپ کا ڈیٹا محفوظ رہے گا۔';
+    if(ic) ic.textContent = urgent ? '⏳' : '📦';
+    if(iw){ iw.style.background = urgent ? '#fee2e2' : '#fff7ed'; iw.style.color = urgent ? 'var(--danger)' : '#c2410c'; }
+    if(btn) btn.style.background = urgent ? 'linear-gradient(155deg,#dc2626,#991b1b)' : 'linear-gradient(155deg,#ea580c,#c2410c)';
+    document.getElementById('pkgExpiryModal').classList.add('show');
+  }catch(e){}
+}
+function dismissPkgExpiryModal(){
+  const m = document.getElementById('pkgExpiryModal'); if(m) m.classList.remove('show');
 }
 
 // ---------- 🎁 روزانہ ایک بار Trial یاد دہانی — 2 دن یا کم بچے ہوں تو زیادہ نمایاں (بٹن والا) پاپ اپ،
@@ -35779,9 +35835,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2211SU241'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2311MO242'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Recovery prints and day report no longer show old recovery or days ago, only total remaining, recovery and remaining balance';
+  const UPDATE_NOTE = 'Package expiry reminder: one warning under 15 days, then once a day under 7 days, with a Renew Package button';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
