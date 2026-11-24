@@ -2275,6 +2275,12 @@ export class McsStats {
           if (!/^03\d{9}$/.test(m) || c.length !== 8) return Response.json({ ok: false, reason: "bad_shop" });
           const r = this.sql.exec("SELECT w FROM shopwait WHERE w = ?", String(b.w || "")).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "no_phone" });
           this.sql.exec("UPDATE shopwait SET push = ? WHERE w = ?", JSON.stringify({ m, c, shop: String(b.shop || "").slice(0, 60), owner: String(b.owner || "").slice(0, 60), exp: now + 864e5, by: b.aio || "" }), r.w);
+          if (/^SM\d{5}$/.test(String(b.aio || ""))) {   /* HD2411TU176: پیسٹ کی ہوئی دکان بھی اسی SM ID پر یاد — اگلی بار سیدھی فہرست میں */
+            const r0 = this.sql.exec("SELECT data FROM aioid WHERE id = ?", b.aio).toArray()[0];
+            if (r0) { let d0 = {}; try { d0 = JSON.parse(r0.data || "{}"); } catch (er) {} const L = Array.isArray(d0.shops) ? d0.shops : []; const ex = L.find((x) => x.m === m && x.c === c);
+              if (ex) ex.last = now; else L.unshift({ m, c, shop: String(b.shop || "").slice(0, 60), owner: String(b.owner || "").slice(0, 60), n: 0, first: now, last: now });
+              d0.shops = L.sort((x, y) => (y.last || 0) - (x.last || 0)).slice(0, 6); this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(d0), b.aio); }
+          }
           return Response.json({ ok: true });
         }
         const fps = {}; for (const r of this.sql.exec("SELECT id, data FROM aioid WHERE id LIKE 'SM%'").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} if (a.fp) (fps[a.fp] = fps[a.fp] || []).push(r.id); }
