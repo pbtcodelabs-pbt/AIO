@@ -200,3 +200,4 @@
 - **🎁 SM2411TU314 (سرور):** `smtrial` جدول (`m:<موبائل>` → first, endAt)؛ `/smrestore op trial` (عام) اور ایڈمن `smtrialend` / `smtrialget`۔ جانچ `node:sqlite`۔
 - **SM2411TU314 (درستی):** `/entadmin` راستے میں `smtrialend` / `smtrialget` آگے بھیجنا رہ گیا تھا (`bad_op`)۔
 - **📩 SM2411TU317 (سرور):** `/aioid op want` میں `amt` (گاہک کو دکھی رقم) — `want {pkg, at, amt}`۔
+- **⏳ SM2411TU318 (سرور، مالک کا حکم):** `aiogrant` میں `got` / `due` — باقی ہو تو `e.due {amt, pkg, at}`، ہسٹری میں `got` / `due`؛ گاہک کی درخواست `want` → `wantDone`؛ نیا ایڈمن `aiodue {aio, got}` (باقی کم، صفر پر ختم)؛ `aionew` / `aiolook` میں `due`۔ جانچ `node:sqlite`۔
