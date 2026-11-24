@@ -1553,7 +1553,7 @@ export class McsStats {
           inf.done = { at: now, m: String(d.m || "").replace(/\D/g, "").slice(0, 11), shop: String(d.shop || "").slice(0, 60), n: N(d.n), cu: N(d.cu), inv: N(d.inv) };
           this.sql.exec("UPDATE shopwait SET push = NULL, info = ?, ts = ? WHERE w = ?", JSON.stringify(inf), now, b.w); return Response.json({ ok: true });
         }
-        if (b.fail) { const r0 = this.sql.exec("SELECT info FROM shopwait WHERE w = ?", b.w).toArray()[0]; let inf = {}; try { inf = JSON.parse((r0 && r0.info) || "{}"); } catch (er) {} inf.fail = { r: String(b.fail).slice(0, 20), c: String(b.fc || "").slice(0, 8), at: now }; this.sql.exec("UPDATE shopwait SET push = NULL, info = ? WHERE w = ?", JSON.stringify(inf), b.w); return Response.json({ ok: true }); }
+        if (b.fail) { const r0 = this.sql.exec("SELECT info FROM shopwait WHERE w = ?", b.w).toArray()[0]; let inf = {}; try { inf = JSON.parse((r0 && r0.info) || "{}"); } catch (er) {} inf.fail = { r: String(b.fail).slice(0, 40), c: String(b.fc || "").slice(0, 8), m: String(b.fm || "").replace(/\D/g, "").slice(0, 11), at: now }; this.sql.exec("UPDATE shopwait SET push = NULL, info = ? WHERE w = ?", JSON.stringify(inf), b.w); return Response.json({ ok: true }); }
         const r = this.sql.exec("SELECT push FROM shopwait WHERE w = ?", b.w).toArray()[0];
         let P = r ? pnow(r.push) : null;
         if (!P) {
@@ -3158,7 +3158,7 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
   if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
-    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60), fail: S(b.fail, 20), fc: String(b.fc || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8), done: b.done && typeof b.done === "object" ? { m: S(b.done.m, 13), shop: S(b.done.shop, 60), n: b.done.n, cu: b.done.cu, inv: b.done.inv } : null }); }   /* SM2411TU310: ناکامی کی اطلاع */
+    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60), fail: S(b.fail, 40), fm: String(b.fm || "").replace(/\D/g, "").slice(0, 11), fc: String(b.fc || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8), done: b.done && typeof b.done === "object" ? { m: S(b.done.m, 13), shop: S(b.done.shop, 60), n: b.done.n, cu: b.done.cu, inv: b.done.inv } : null }); }   /* SM2411TU310: ناکامی کی اطلاع */
     const m = String(b.m || "").replace(/\D/g, ""), code = String(b.code || "").replace(/\D/g, "");
     if (!/^03\d{9}$/.test(m) || code.length !== 6) return reply({ ok: false, reason: "missing" });
     return fwd("/sm_restore", { m, code });
