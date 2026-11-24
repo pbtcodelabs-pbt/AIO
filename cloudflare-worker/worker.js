@@ -1543,6 +1543,7 @@ export class McsStats {
         const r = this.sql.exec("SELECT push FROM shopwait WHERE w = ?", b.w).toArray()[0];
         if (r && r.push) { this.sql.exec("DELETE FROM shopwait WHERE w = ?", b.w); let p = null; try { p = JSON.parse(r.push); } catch (er) {} if (p && p.exp > now) return Response.json({ ok: true, push: { m: p.m, c: p.c, shop: p.shop || "", owner: p.owner || "" } }); }
         this.sql.exec("INSERT INTO shopwait (w, fp, ua, ts, first, push) VALUES (?, ?, ?, ?, ?, NULL) ON CONFLICT(w) DO UPDATE SET fp = excluded.fp, ua = excluded.ua, ts = excluded.ts", b.w, b.fp || "", b.ua || "", now, now);
+        if (b.mob || b.nm) { try { this.sql.exec("ALTER TABLE shopwait ADD COLUMN info TEXT"); } catch (er) {} this.sql.exec("UPDATE shopwait SET info = ? WHERE w = ?", JSON.stringify({ mob: b.mob || "", nm: b.nm || "" }), b.w); }   /* SM2411TU309: فارم میں لکھا نمبر / نام (اختیاری) */
         return Response.json({ ok: true, wait: true });
       }
       this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
@@ -2285,8 +2286,11 @@ export class McsStats {
         }
         const fps = {}; for (const r of this.sql.exec("SELECT id, data FROM aioid WHERE id LIKE 'SM%'").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} if (a.fp) (fps[a.fp] = fps[a.fp] || []).push(r.id); }
         let myfp = ""; if (b.aio) { const r0 = this.sql.exec("SELECT data FROM aioid WHERE id = ?", b.aio).toArray()[0]; try { myfp = r0 ? JSON.parse(r0.data || "{}").fp || "" : ""; } catch (er) {} }
-        const list = this.sql.exec("SELECT w, fp, ua, ts, first, push FROM shopwait WHERE ts > ? ORDER BY ts DESC LIMIT 40", now - 2 * 864e5).toArray()
-          .map((r) => ({ w: r.w, ua: r.ua || "", ts: r.ts, first: r.first, sent: !!r.push, match: !!(myfp && r.fp === myfp), ids: (fps[r.fp] || []).slice(0, 4), live: now - r.ts < 90e3 }));
+        try { this.sql.exec("ALTER TABLE shopwait ADD COLUMN info TEXT"); } catch (er) {}
+        const who = {}, byMob = {}; for (const r of this.sql.exec("SELECT id, data FROM aioid WHERE id LIKE 'SM%'").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} who[r.id] = { id: r.id, name: a.name || "", mobile: a.mobile || "" }; const m10 = String(a.mobile || "").replace(/\D/g, "").slice(-10); if (m10) (byMob[m10] = byMob[m10] || []).push(r.id); }
+        const list = this.sql.exec("SELECT w, fp, ua, ts, first, push, info FROM shopwait WHERE ts > ? ORDER BY ts DESC LIMIT 40", now - 2 * 864e5).toArray()
+          .map((r) => { let inf = {}; try { inf = JSON.parse(r.info || "{}"); } catch (er) {} const m10 = String(inf.mob || "").slice(-10); const ids = [...new Set((fps[r.fp] || []).concat(m10.length === 10 ? byMob[m10] || [] : []))].slice(0, 4);
+            return { w: r.w, ua: r.ua || "", ts: r.ts, first: r.first, sent: !!r.push, match: !!(myfp && r.fp === myfp), ids, idn: ids.map((i) => who[i]).filter(Boolean), mob: inf.mob || "", nm: inf.nm || "", live: now - r.ts < 90e3 }; });   /* SM2411TU309: پرانی SM ID کا نام / موبائل اور فارم میں لکھا نمبر / نام */
         list.sort((x, y) => (y.match - x.match) || (y.ts - x.ts));
         return Response.json({ ok: true, list });
       }
@@ -3121,7 +3125,7 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
   if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
-    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60) }); }
+    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60) }); }
     const m = String(b.m || "").replace(/\D/g, ""), code = String(b.code || "").replace(/\D/g, "");
     if (!/^03\d{9}$/.test(m) || code.length !== 6) return reply({ ok: false, reason: "missing" });
     return fwd("/sm_restore", { m, code });
