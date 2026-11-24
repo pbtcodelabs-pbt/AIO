@@ -1535,6 +1535,21 @@ export class McsStats {
       if (b.op === "wipe") { this.sql.exec("DELETE FROM mcstest WHERE ttk = ?", b.ttk); this.sql.exec("DELETE FROM mcsttk WHERE ttk = ?", b.ttk); return Response.json({ ok: true }); }
       return Response.json({ ok: false, reason: "op" });
     }
+    if (op === "/sm_restore") {   /* SM2411TU305: گاہک ہیلپ ڈیسک کا 6 ہندسوں کا کوڈ + اپنا موبائل لکھے → دکان کا پتہ (ایک بار) */
+      const b = await request.json(), now = Date.now();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
+      this.sql.exec("CREATE TABLE IF NOT EXISTS shoprf (m TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
+      const fr = this.sql.exec("SELECT n, ts FROM shoprf WHERE m = ?", b.m).toArray()[0];
+      if (fr && fr.n >= 8 && now - fr.ts < 3600e3) return Response.json({ ok: false, reason: "wait" });
+      const row = this.sql.exec("SELECT data, exp FROM shoprc WHERE code = ?", b.code).toArray()[0];
+      let d = null; try { d = row ? JSON.parse(row.data) : null; } catch (er) {}
+      if (!row || row.exp < now || !d || d.m !== b.m) {
+        this.sql.exec("INSERT INTO shoprf (m, n, ts) VALUES (?, 1, ?) ON CONFLICT(m) DO UPDATE SET n = CASE WHEN ? - ts > 3600000 THEN 1 ELSE n + 1 END, ts = ?", b.m, now, now, now);
+        return Response.json({ ok: false, reason: row && row.exp >= now ? "mismatch" : "bad_code" });
+      }
+      this.sql.exec("DELETE FROM shoprc WHERE code = ?", b.code); this.sql.exec("DELETE FROM shoprf WHERE m = ?", b.m);
+      return Response.json({ ok: true, m: d.m, c: d.c, shop: d.shop || "", owner: d.owner || "" });
+    }
     if (op === "/aio_id") {   /* AIO0911MO190 (ہیلپ ڈیسک #193، مالک کا حکم): ملازم کا فون جوڑنا سادہ — AIO ID → مالک شامل کرے → ملازم کا فون خود جڑے */
       const b = await request.json(), now = Date.now();
       const get = (id) => { const r = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", id).toArray()[0]; return r ? Object.assign(JSON.parse(r.data), { dev: r.dev }) : null; };
@@ -1562,6 +1577,14 @@ export class McsStats {
           try { this.finLog("aio_replaced", { old: r.id, by: id }); } catch (er) {}
         }
         return Response.json({ ok: true, id, reused, at: d.at });   /* MD2311MO028: ID بننے کا وقت — ٹرائل سرور کے حساب سے */
+      }
+      if (b.op === "shop") {   /* SM2411TU305 (مالک کا حکم — «دکان اڑ جائے تو ہم اپنی طرف سے واپس چالو کریں»): مالک کا فون اپنی دکان کا پتہ (موبائل + خفیہ کوڈ) اسی SM ID پر لکھتا ہے؛ پرانے پتے بھی یاد (آخری 6) */
+        const r0 = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.id).toArray()[0]; if (!r0 || r0.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
+        let d0 = {}; try { d0 = JSON.parse(r0.data || "{}"); } catch (er) {}
+        const L = Array.isArray(d0.shops) ? d0.shops : [], k = b.m + "-" + b.c, ex = L.find((x) => x.m + "-" + x.c === k);
+        if (ex) { ex.last = now; ex.shop = b.shop || ex.shop; ex.owner = b.owner || ex.owner; ex.n = b.n || ex.n; } else L.unshift({ m: b.m, c: b.c, shop: b.shop, owner: b.owner, n: b.n || 0, first: now, last: now });
+        d0.shops = L.sort((x, y) => (y.last || 0) - (x.last || 0)).slice(0, 6); this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(d0), b.id);
+        return Response.json({ ok: true });
       }
       if (b.op === "want") {   /* MD2311MO031 (مالک کا حکم): گاہک نے ایپ میں جو پیکج چنا — اسی ID پر لکھا، ہیلپ ڈیسک کی فہرست میں پہلے سے چنا نظر آئے */
         const r0 = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.id).toArray()[0]; if (!r0 || r0.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
@@ -2237,6 +2260,24 @@ export class McsStats {
       const now = Date.now();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [], pin: e.pin || "", pend: e.pend || null, redeemed: e.redeemed || 0, label: e.label || "", code: e.code || ((e.keys || []).find((k) => k.startsWith("c:")) || "").slice(2), pkgId: e.pkgId || "", pkgName: e.pkgName || "", usedAt: e.usedAt || 0, biz: e.biz || "", aio: ((e.keys || []).find((k) => k.startsWith("a:")) || "").slice(2), hist: e.hist || [] }); }) });
       if (b.op === "pkglist") return Response.json({ ok: true, list: this.entPkgList(b.app) });
+      if (b.op === "shopcode" || b.op === "shopfind") {   /* SM2411TU305: دکان کی بحالی (صرف ایڈمن) — SM ID کے محفوظ پتے / موبائل سے تلاش؛ 6 ہندسوں کا وقتی کوڈ (24 گھنٹے، ایک بار، موبائل کے ساتھ) */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
+        if (b.op === "shopfind") {
+          const m10 = String(b.mobile || "").replace(/\D/g, "").slice(-10), out = []; if (m10.length < 10) return Response.json({ ok: false, reason: "bad_phone" });
+          const add = (x, src) => { if (!x || !x.m || !x.c || String(x.m).replace(/\D/g, "").slice(-10) !== m10) return; const k = x.m + "-" + x.c; const o = out.find((y) => y.m + "-" + y.c === k); if (o) { o.last = Math.max(o.last || 0, x.last || 0); if (o.src.indexOf(src) < 0) o.src += "، " + src; } else out.push({ m: x.m, c: x.c, shop: x.shop || "", owner: x.owner || "", n: x.n || 0, last: x.last || 0, src }); };
+          for (const r of this.sql.exec("SELECT id, data FROM aioid").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} (a.shops || []).forEach((x) => add(x, r.id)); }
+          try { for (const r of this.sql.exec("SELECT code, kind, res, data, upd FROM smcode").toArray()) { let x = {}; try { x = JSON.parse(r.res || "{}"); } catch (er) {} if (x && x.m && x.c) add({ m: x.m, c: x.c, shop: x.shop || "", last: r.upd || 0 }, "ملازم کوڈ " + r.code); } } catch (er) {}
+          out.sort((x, y) => (y.last || 0) - (x.last || 0));
+          return Response.json({ ok: true, list: out.slice(0, 20) });
+        }
+        const m = String(b.m || "").replace(/\D/g, ""), c = String(b.c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        if (!/^03\d{9}$/.test(m) || c.length !== 8) return Response.json({ ok: false, reason: "bad_shop" });
+        this.sql.exec("DELETE FROM shoprc WHERE exp < ?", now);
+        let code = ""; for (let i = 0; i < 30; i++) { const t = String(100000 + Math.floor(Math.random() * 900000)); if (!this.sql.exec("SELECT code FROM shoprc WHERE code = ?", t).toArray()[0]) { code = t; break; } }
+        if (!code) return Response.json({ ok: false, reason: "busy" });
+        this.sql.exec("INSERT INTO shoprc (code, data, exp) VALUES (?, ?, ?)", code, JSON.stringify({ m, c, shop: String(b.shop || "").slice(0, 60), owner: String(b.owner || "").slice(0, 60), fails: 0 }), now + 864e5);
+        return Response.json({ ok: true, code, exp: now + 864e5 });
+      }
       if (b.op === "pkgsave") {   /* پیکج بنانا / بدلنا — id خالی ہو تو نیا */
         this.entPkgList(b.app);
         const p = b.pkg || {};
@@ -2354,7 +2395,7 @@ export class McsStats {
           if (a.dead || ap3(a.app) !== want || !idAppOk(r.id, want)) continue;   /* MD2311MO028: دوسری ایپ کی ID کبھی نہیں */
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
           if (!e && aioIsStaff(a, now)) continue;   /* AIO2011FR230: ملازم کی ID فہرست میں نہیں */
-          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", want: a.want || null, ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays, devices: e.devices || 1,
+          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", want: a.want || null, shops: (a.shops || []).slice(0, 6), ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays, devices: e.devices || 1,
             /* SM2211SU301 (مالک کا حکم): ہر ID کی رقم اور شروع کی تاریخ — ہیلپ ڈیسک میں «کتنے کا پیکج، کتنے دن گزرے / باقی» اور کل وصولی */
             paid: (e.hist || []).reduce((s, h) => s + (parseFloat(String(h.price || "").replace(/,/g, "")) || 0), 0), lastAt: ((e.hist || [])[(e.hist || []).length - 1] || {}).at || e.at || 0, lastPrice: ((e.hist || [])[(e.hist || []).length - 1] || {}).price || "" } : null, staff: (stf[r.id] || []).sort((p, q) => p.at - q.at) });
         }
@@ -2378,7 +2419,7 @@ export class McsStats {
         if ((b.app === "SM" || b.app === "MD" || a.app === "SM" || a.app === "MD") && a.app !== b.app) return Response.json({ ok: false, reason: "wrong_app" });   /* MD2311MO028: پکی روک */
         const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0];
         let e = kr ? this.entGet(kr.id) : null;
-        const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", want: a.want || null, made: a.at || ar.ts || 0, dev: ar.dev || "", replacedBy: a.replacedBy || "", replacedAt: a.replacedAt || 0 };
+        const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", want: a.want || null, made: a.at || ar.ts || 0, dev: ar.dev || "", replacedBy: a.replacedBy || "", replacedAt: a.replacedAt || 0, shops: Array.isArray(a.shops) ? a.shops : [] };
         const full = (x) => x ? Object.assign(this.entOut(x), { pkgId: x.pkgId || "", pkgName: x.pkgName || "", hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length, leftDays: x.leftDays === undefined ? null : x.leftDays, replacedBy: x.replacedBy || "" }) : null;
         /* AIO1811WE226: اسی موبائل یا Gmail کی دوسری IDs (پرانا / نیا فون) — مالک دیکھ کر دن جوڑے */
         const others = () => { const m10 = (v) => String(v || "").replace(/\D/g, "").slice(-10), bm = m10(a.mobile), bg = String(a.gmail || "").toLowerCase(), out = [];
@@ -3019,6 +3060,7 @@ async function handleAgent(request, env, path) {
       return fwd("/aio_id", { op, dev, name, mobile, gmail, app: S(b.app, 8) || "AIO", fp: String(b.fp || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40) });   /* AIO1811WE226: فون کی پہچان */
     }
     if (!/^(AIO(DR)?|SM|MD)\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
+    if (op === "shop") { if (dev.length < 6 || !/^SM\d{5}$/.test(id)) return reply({ ok: false, reason: "none" }); const m = String(b.m || "").replace(/\D/g, ""), c = String(b.c || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (!/^03\d{9}$/.test(m) || c.length !== 8) return reply({ ok: false, reason: "bad_shop" }); return fwd("/aio_id", { op, id, dev, m, c, shop: S(b.shop, 60), owner: S(b.owner, 60), n: Math.max(0, Math.min(1e7, parseInt(b.n, 10) || 0)) }); }   /* SM2411TU305 */
     if (op === "want") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); const pkg = S(b.pkg, 40).replace(/[^a-z0-9-]/g, ""); if (!pkg) return reply({ ok: false, reason: "no_pkg" }); return fwd("/aio_id", { op, id, dev, pkg }); }   /* MD2311MO031 */
     if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", op === "me" && typeof b.jn === "boolean" ? { op, id, dev, jn: b.jn } : { op, id, dev }); }   /* AIO2011FR230: jn = یہ فون دکان سے جڑا ملازم فون ہے */
     const by = String(b.by || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (by.length < 6) return reply({ ok: false, reason: "bad_by" });
@@ -3047,6 +3089,11 @@ async function handleAgent(request, env, path) {
     const cnic = String(b.cnic || "").replace(/\D/g, ""); if (cnic.length !== 13) return reply({ ok: false, reason: "bad_cnic" });
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
+  }
+  if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
+    const m = String(b.m || "").replace(/\D/g, ""), code = String(b.code || "").replace(/\D/g, "");
+    if (!/^03\d{9}$/.test(m) || code.length !== 6) return reply({ ok: false, reason: "missing" });
+    return fwd("/sm_restore", { m, code });
   }
   if (path === "/smcode") {   /* SM1611MO275 (مالک کا حکم): سبزی منڈی کے چھوٹے 6 ہندسوں کے کوڈ — NB نیا کاروبار / SB تجدید (دکاندار ← ڈویلپر)، JS ملازم ← مالک */
     const op = S(b.op, 8), code = String(b.code || "").replace(/\D/g, "").slice(-6), app = b.app === "DR" ? "DR" : "SM";
@@ -3186,6 +3233,8 @@ async function handleEnt(request, env, path) {
       return fwd("/ent_admin", { op, app, id: String(b.id || "").slice(0, 40), keys, days, life: !!b.life, devices, name: String(b.name || "").slice(0, 80), note: b.note === undefined ? undefined : String(b.note).slice(0, 300), setExp: parseInt(b.setExp, 10) || 0, bindDev: String(b.uid || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64).replace(/^(.{0,5})$/, "") });
     }
     if (op === "pkglist") return fwd("/ent_admin", { op, app });
+    if (op === "shopfind") return fwd("/ent_admin", { op, app, mobile: String(b.mobile || "").slice(0, 20) });   /* SM2411TU305 */
+    if (op === "shopcode") return fwd("/ent_admin", { op, app, m: String(b.m || "").slice(0, 20), c: String(b.c || "").slice(0, 20), shop: S(b.shop, 60), owner: S(b.owner, 60) });
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
@@ -3457,7 +3506,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq", "/adreq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agmydocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agmydocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/smrestore", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const tp = new URL(request.url).pathname; if (tp === "/mcstest" && request.method === "POST") return handleMcsTest(request, env); }   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ */
