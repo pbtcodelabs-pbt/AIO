@@ -1537,6 +1537,14 @@ export class McsStats {
     }
     if (op === "/sm_restore") {   /* SM2411TU305: گاہک ہیلپ ڈیسک کا 6 ہندسوں کا کوڈ + اپنا موبائل لکھے → دکان کا پتہ (ایک بار) */
       const b = await request.json(), now = Date.now();
+      if (b.op === "wait") {   /* SM2411TU306 (مالک کا حکم — گاہک کچھ نہ لکھے): خالی فون رجسٹریشن صفحے پر «انتظار» لکھتا ہے؛ ہیلپ ڈیسک نے دکان بھیجی ہو تو ایک بار واپس */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS shopwait (w TEXT PRIMARY KEY, fp TEXT, ua TEXT, ts INTEGER, first INTEGER, push TEXT)");
+        this.sql.exec("DELETE FROM shopwait WHERE ts < ?", now - 3 * 864e5);
+        const r = this.sql.exec("SELECT push FROM shopwait WHERE w = ?", b.w).toArray()[0];
+        if (r && r.push) { this.sql.exec("DELETE FROM shopwait WHERE w = ?", b.w); let p = null; try { p = JSON.parse(r.push); } catch (er) {} if (p && p.exp > now) return Response.json({ ok: true, push: { m: p.m, c: p.c, shop: p.shop || "", owner: p.owner || "" } }); }
+        this.sql.exec("INSERT INTO shopwait (w, fp, ua, ts, first, push) VALUES (?, ?, ?, ?, ?, NULL) ON CONFLICT(w) DO UPDATE SET fp = excluded.fp, ua = excluded.ua, ts = excluded.ts", b.w, b.fp || "", b.ua || "", now, now);
+        return Response.json({ ok: true, wait: true });
+      }
       this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
       this.sql.exec("CREATE TABLE IF NOT EXISTS shoprf (m TEXT PRIMARY KEY, n INTEGER, ts INTEGER)");
       const fr = this.sql.exec("SELECT n, ts FROM shoprf WHERE m = ?", b.m).toArray()[0];
@@ -2260,6 +2268,22 @@ export class McsStats {
       const now = Date.now();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [], pin: e.pin || "", pend: e.pend || null, redeemed: e.redeemed || 0, label: e.label || "", code: e.code || ((e.keys || []).find((k) => k.startsWith("c:")) || "").slice(2), pkgId: e.pkgId || "", pkgName: e.pkgName || "", usedAt: e.usedAt || 0, biz: e.biz || "", aio: ((e.keys || []).find((k) => k.startsWith("a:")) || "").slice(2), hist: e.hist || [] }); }) });
       if (b.op === "pkglist") return Response.json({ ok: true, list: this.entPkgList(b.app) });
+      if (b.op === "shopwaits" || b.op === "shoppush") {   /* SM2411TU306: ہیلپ ڈیسک — رجسٹریشن صفحے پر انتظار والے فون (فون کی پہچان SM ID سے ملے تو ✅) اور ایک ٹچ سے دکان اسی فون پر */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS shopwait (w TEXT PRIMARY KEY, fp TEXT, ua TEXT, ts INTEGER, first INTEGER, push TEXT)");
+        if (b.op === "shoppush") {
+          const m = String(b.m || "").replace(/\D/g, ""), c = String(b.c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+          if (!/^03\d{9}$/.test(m) || c.length !== 8) return Response.json({ ok: false, reason: "bad_shop" });
+          const r = this.sql.exec("SELECT w FROM shopwait WHERE w = ?", String(b.w || "")).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "no_phone" });
+          this.sql.exec("UPDATE shopwait SET push = ? WHERE w = ?", JSON.stringify({ m, c, shop: String(b.shop || "").slice(0, 60), owner: String(b.owner || "").slice(0, 60), exp: now + 864e5, by: b.aio || "" }), r.w);
+          return Response.json({ ok: true });
+        }
+        const fps = {}; for (const r of this.sql.exec("SELECT id, data FROM aioid WHERE id LIKE 'SM%'").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} if (a.fp) (fps[a.fp] = fps[a.fp] || []).push(r.id); }
+        let myfp = ""; if (b.aio) { const r0 = this.sql.exec("SELECT data FROM aioid WHERE id = ?", b.aio).toArray()[0]; try { myfp = r0 ? JSON.parse(r0.data || "{}").fp || "" : ""; } catch (er) {} }
+        const list = this.sql.exec("SELECT w, fp, ua, ts, first, push FROM shopwait WHERE ts > ? ORDER BY ts DESC LIMIT 40", now - 2 * 864e5).toArray()
+          .map((r) => ({ w: r.w, ua: r.ua || "", ts: r.ts, first: r.first, sent: !!r.push, match: !!(myfp && r.fp === myfp), ids: (fps[r.fp] || []).slice(0, 4), live: now - r.ts < 90e3 }));
+        list.sort((x, y) => (y.match - x.match) || (y.ts - x.ts));
+        return Response.json({ ok: true, list });
+      }
       if (b.op === "shopcode" || b.op === "shopfind") {   /* SM2411TU305: دکان کی بحالی (صرف ایڈمن) — SM ID کے محفوظ پتے / موبائل سے تلاش؛ 6 ہندسوں کا وقتی کوڈ (24 گھنٹے، ایک بار، موبائل کے ساتھ) */
         this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
         if (b.op === "shopfind") {
@@ -3091,6 +3115,7 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
   if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
+    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60) }); }
     const m = String(b.m || "").replace(/\D/g, ""), code = String(b.code || "").replace(/\D/g, "");
     if (!/^03\d{9}$/.test(m) || code.length !== 6) return reply({ ok: false, reason: "missing" });
     return fwd("/sm_restore", { m, code });
@@ -3235,6 +3260,8 @@ async function handleEnt(request, env, path) {
     if (op === "pkglist") return fwd("/ent_admin", { op, app });
     if (op === "shopfind") return fwd("/ent_admin", { op, app, mobile: String(b.mobile || "").slice(0, 20) });   /* SM2411TU305 */
     if (op === "shopcode") return fwd("/ent_admin", { op, app, m: String(b.m || "").slice(0, 20), c: String(b.c || "").slice(0, 20), shop: S(b.shop, 60), owner: S(b.owner, 60) });
+    if (op === "shopwaits") return fwd("/ent_admin", { op, app, aio: S(b.aio, 20) });   /* SM2411TU306 */
+    if (op === "shoppush") return fwd("/ent_admin", { op, app, w: S(b.w, 12), aio: S(b.aio, 20), m: String(b.m || "").slice(0, 20), c: String(b.c || "").slice(0, 20), shop: S(b.shop, 60), owner: S(b.owner, 60) });
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
