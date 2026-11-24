@@ -201,3 +201,4 @@
 - **SM2411TU314 (درستی):** `/entadmin` راستے میں `smtrialend` / `smtrialget` آگے بھیجنا رہ گیا تھا (`bad_op`)۔
 - **📩 SM2411TU317 (سرور):** `/aioid op want` میں `amt` (گاہک کو دکھی رقم) — `want {pkg, at, amt}`۔
 - **⏳ SM2411TU318 (سرور، مالک کا حکم):** `aiogrant` میں `got` / `due` — باقی ہو تو `e.due {amt, pkg, at}`، ہسٹری میں `got` / `due`؛ گاہک کی درخواست `want` → `wantDone`؛ نیا ایڈمن `aiodue {aio, got}` (باقی کم، صفر پر ختم)؛ `aionew` / `aiolook` میں `due`۔ جانچ `node:sqlite`۔
+- **🔗 MD2511WE091 (سرور، مالک کا حکم — مدرسہ والدین کا لنک، ONLINE-PLAN §3):** `/mdpar` (عام راستہ) → DO `/md_par`، جدول `mdpar (tok, md, sid, pinh, data, ts, fails, lockt)`؛ `put` / `del` صرف اسی MD ID کا مین موبائل (`aioid.dev`)، ایک بچے کا ایک لنک (نیا tok پرانا مٹاتا ہے)، پن سرور پر صرف SHA-256(`mdpar|tok|pin`)، رپورٹ ≤ 160KB؛ `get` (tok + 4 ہندسوں کا پن) — 5 غلط پر 15 منٹ روک۔ جانچ `node:sqlite`۔
