@@ -476,8 +476,12 @@ export class McsStats {
       rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
     }
     if (!rows.length && app === "MD") {   /* MD2311MO028 (مالک کا حکم): مدرسہ سافٹ ویئر — ایک موبائل 500 / مہینہ، 5,000 / سال؛ دو موبائل (منتظم + استاد، والدین کا لنک شامل) 1,000 / مہینہ، 10,000 / سال */
-      const S = [["md-1-1m", "MD-1M", "ایک موبائل — 1 مہینہ", 30, 1, "500"], ["md-1-1y", "MD-1Y", "ایک موبائل — 1 سال", 365, 1, "5000"], ["md-2-1m", "MD2-1M", "دو موبائل — 1 مہینہ", 30, 2, "1000"], ["md-2-1y", "MD2-1Y", "دو موبائل — 1 سال", 365, 2, "10000"]];
+      const S = [["md-1-1m", "MD-1M", "ایک موبائل — 1 مہینہ", 30, 1, "500"], ["md-1-6m", "MD-6M", "ایک موبائل — 6 مہینے", 180, 1, "2750"], ["md-1-1y", "MD-1Y", "ایک موبائل — 1 سال", 365, 1, "5000"], ["md-2-1m", "MD2-1M", "دو موبائل — 1 مہینہ", 30, 2, "1000"], ["md-2-6m", "MD2-6M", "دو موبائل — 6 مہینے", 180, 2, "5500"], ["md-2-1y", "MD2-1Y", "دو موبائل — 1 سال", 365, 2, "10000"]];
       S.forEach((x, n) => { const d = { id: x[0], prefix: x[1], name: x[2], days: x[3], devices: x[4], life: false, sku: "", price: x[5], active: true, sort: n + 1 }; this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", app + "|" + d.id, app, JSON.stringify(d), Date.now()); });
+      rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
+    }
+    if (app === "MD" && rows.length && !rows.some((r) => JSON.parse(r.data).id === "md-1-6m")) {   /* MD2411TU075 (مالک کا حکم): 6 مہینے کا پیکج — ایک موبائل 2,750، دو موبائل 5,500 */
+      [["md-1-6m", "MD-6M", "ایک موبائل — 6 مہینے", 180, 1, "2750", 1.5], ["md-2-6m", "MD2-6M", "دو موبائل — 6 مہینے", 180, 2, "5500", 3.5]].forEach((x) => { const d = { id: x[0], prefix: x[1], name: x[2], days: x[3], devices: x[4], life: false, sku: "", price: x[5], active: true, sort: x[6] }; this.sql.exec("INSERT OR IGNORE INTO entpkg (k, app, data, ts) VALUES (?, ?, ?, ?)", app + "|" + d.id, app, JSON.stringify(d), Date.now()); });
       rows = this.sql.exec("SELECT data FROM entpkg WHERE app = ?", app).toArray();
     }
     if (!rows.length && app === "MCS") {   /* MCS1711TU499: پہلی بار — ایک سال کی رجسٹریشن */

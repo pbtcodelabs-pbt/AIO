@@ -188,3 +188,4 @@
 - **MD2311MO028 (مالک کا حکم — سرور):** مدرسہ سافٹ ویئر بھی AIO ID والے نظام پر: `/aioid reg app MD` → `MD12345` (Gmail ضروری نہیں، جواب میں `at` = ٹرائل کی شروعات)، `ENT_APPS` میں `MD`، چار پیکج `md-1-1m` 500 / `md-1-1y` 5000 / `md-2-1m` 1000 / `md-2-1y` 10000 (2 فون)، ہیلپ ڈیسک `aionew / aiolook / aiogrant` اور فون `/entclaim kind a`۔
 - **MD2311MO028 (پکی روک):** `idAppOk` — SM / MD کی ID صرف اپنی ایپ میں (aionew / aiolook / aiogrant / aioadd / aiodel / entclaim پر `wrong_app`)؛ 19 جانچیں کامیاب۔
 - **MD2311MO031:** `/aioid op want` (اسی فون کی چابی سے) گاہک کا چنا پیکج `aioid.data.want`؛ `aionew` / `aiolook` میں `want`۔
+- **MD2411TU075 (مالک کا حکم، سرور):** مدرسہ (MD) کے 6 مہینے کے پیکج `md-1-6m` (ایک موبائل 2,750، 180 دن) اور `md-2-6m` (دو موبائل 5,500) — `entPkgList` میں نئے سرور پر seed، پرانے پر ایک بار خود جوڑ (sort 1.5 / 3.5)؛ ہیلپ ڈیسک `pkglist` سے خود دکھاتا ہے۔
