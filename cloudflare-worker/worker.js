@@ -1535,6 +1535,29 @@ export class McsStats {
       if (b.op === "wipe") { this.sql.exec("DELETE FROM mcstest WHERE ttk = ?", b.ttk); this.sql.exec("DELETE FROM mcsttk WHERE ttk = ?", b.ttk); return Response.json({ ok: true }); }
       return Response.json({ ok: false, reason: "op" });
     }
+    if (op === "/md_par") {   /* MD2511WE091 (مالک کا حکم — ONLINE-PLAN §3): والدین کا لنک — ہر بچے کی ایک تیار رپورٹ (JSON)؛ لنک = خفیہ tok + 4 ہندسوں کا پن (سرور پر صرف SHA-256)؛ صرف اسی مدرسے کا مین موبائل (MD ID + dev) لکھ سکتا ہے؛ والدین صرف اپنا بچہ دیکھیں؛ 5 غلط پن پر 15 منٹ روک */
+      const b = await request.json(), now = Date.now();
+      this.sql.exec("CREATE TABLE IF NOT EXISTS mdpar (tok TEXT PRIMARY KEY, md TEXT, sid TEXT, pinh TEXT, data TEXT, ts INTEGER, fails INTEGER, lockt INTEGER)");
+      const H = async (t) => { const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("mdpar|" + t)); return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, "0")).join(""); };
+      if (b.op === "put" || b.op === "del") {
+        const r0 = this.sql.exec("SELECT dev FROM aioid WHERE id = ?", b.id).toArray()[0]; if (!r0 || r0.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
+        if (b.op === "del") { this.sql.exec("DELETE FROM mdpar WHERE md = ? AND sid = ?", b.id, b.sid); return Response.json({ ok: true }); }
+        this.sql.exec("DELETE FROM mdpar WHERE md = ? AND sid = ? AND tok <> ?", b.id, b.sid, b.tok);
+        const old = this.sql.exec("SELECT md FROM mdpar WHERE tok = ?", b.tok).toArray()[0]; if (old && old.md !== b.id) return Response.json({ ok: false, reason: "tok" });
+        const pinh = b.pin ? await H(b.tok + "|" + b.pin) : (this.sql.exec("SELECT pinh FROM mdpar WHERE tok = ?", b.tok).toArray()[0] || {}).pinh;
+        if (!pinh) return Response.json({ ok: false, reason: "pin" });
+        this.sql.exec("INSERT INTO mdpar (tok, md, sid, pinh, data, ts, fails, lockt) VALUES (?, ?, ?, ?, ?, ?, 0, 0) ON CONFLICT(tok) DO UPDATE SET pinh = excluded.pinh, data = excluded.data, ts = excluded.ts", b.tok, b.id, b.sid, pinh, b.data, now);
+        return Response.json({ ok: true, ts: now });
+      }
+      if (b.op === "get") {
+        const r = this.sql.exec("SELECT md, pinh, data, ts, fails, lockt FROM mdpar WHERE tok = ?", b.tok).toArray()[0]; if (!r) return Response.json({ ok: false, reason: "gone" });
+        if ((r.lockt || 0) > now) return Response.json({ ok: false, reason: "lock", wait: Math.ceil((r.lockt - now) / 60000) });
+        if (await H(b.tok + "|" + b.pin) !== r.pinh) { const f = (r.fails || 0) + 1; this.sql.exec("UPDATE mdpar SET fails = ?, lockt = ? WHERE tok = ?", f >= 5 ? 0 : f, f >= 5 ? now + 15 * 60000 : 0, b.tok); return Response.json({ ok: false, reason: "pin", left: Math.max(0, 5 - f) }); }
+        if (r.fails) this.sql.exec("UPDATE mdpar SET fails = 0 WHERE tok = ?", b.tok);
+        return Response.json({ ok: true, data: r.data, ts: r.ts });
+      }
+      return Response.json({ ok: false, reason: "op" });
+    }
     if (op === "/sm_restore") {   /* SM2411TU305: گاہک ہیلپ ڈیسک کا 6 ہندسوں کا کوڈ + اپنا موبائل لکھے → دکان کا پتہ (ایک بار) */
       const b = await request.json(), now = Date.now();
       if (b.op === "trial") {   /* SM2411TU314 (مالک کا حکم — «اگر وہی موبائل ہے تو ٹرائل ختم»): مفت ٹرائل موبائل نمبر پر یاد — نیا براؤزر / APK / ڈیٹا صاف کر کے دوبارہ 7 دن نہیں؛ پہلا ٹرائل = اس نمبر کا سب سے پہلا (فون کا مقامی آغاز، اسی نمبر کی SM IDs کی تاریخ)؛ ہیلپ ڈیسک `endAt` سے فوراً ختم */
@@ -3183,6 +3206,16 @@ async function handleAgent(request, env, path) {
     const img = {}; for (const k of ["front", "back", "selfie"]) { const v = String((b.img || {})[k] || ""); if (!/^data:image\/(jpeg|png|webp);base64,/.test(v) || v.length > 700000) return reply({ ok: false, reason: "bad_img", which: k }); img[k] = v; }
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
+  if (path === "/mdpar") {   /* MD2511WE091: والدین کا لنک (مدرسہ) */
+    const tok = String(b.tok || ""); if (!/^[A-Za-z0-9]{20}$/.test(tok) && b.op !== "del") return reply({ ok: false, reason: "tok" });
+    if (b.op === "get") { const pin = String(b.pin || "").replace(/\D/g, ""); if (pin.length !== 4) return reply({ ok: false, reason: "pin" }); return fwd("/md_par", { op: "get", tok, pin }); }
+    const id = String(b.id || "").toUpperCase(); if (!/^MD\d{5}$/.test(id) || dev.length < 6) return reply({ ok: false, reason: "none" });
+    const sid = String(b.sid || "").replace(/[^A-Za-z0-9-]/g, "").slice(0, 16); if (!sid) return reply({ ok: false, reason: "sid" });
+    if (b.op === "del") return fwd("/md_par", { op: "del", id, dev, sid });
+    const data = typeof b.data === "string" ? b.data : ""; if (!data || data.length > 160000) return reply({ ok: false, reason: "size" });
+    const pin = String(b.pin || "").replace(/\D/g, ""); if (pin && pin.length !== 4) return reply({ ok: false, reason: "pin" });
+    return fwd("/md_par", { op: "put", id, dev, sid, tok, pin, data });
+  }
   if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
     if (b.op === "trial") return fwd("/sm_restore", { op: "trial", mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), start: Number(b.start) || 0 });   /* SM2411TU314 */
     if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60), fail: S(b.fail, 40), fm: String(b.fm || "").replace(/\D/g, "").slice(0, 11), fc: String(b.fc || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8), done: b.done && typeof b.done === "object" ? { m: S(b.done.m, 13), shop: S(b.done.shop, 60), n: b.done.n, cu: b.done.cu, inv: b.done.inv } : null }); }   /* SM2411TU310: ناکامی کی اطلاع */
@@ -3605,7 +3638,7 @@ export default {
     if (new URL(request.url).pathname === "/mcsbuy" && request.method === "POST") return handleMcsBuy(request, env, ctx);
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq", "/adreq"].includes(pp)) return handleProf(request, env, pp); }
-    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agmydocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/smrestore", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agmydocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/smrestore", "/mdpar", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const tp = new URL(request.url).pathname; if (tp === "/mcstest" && request.method === "POST") return handleMcsTest(request, env); }   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ */
