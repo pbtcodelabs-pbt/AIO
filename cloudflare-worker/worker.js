@@ -3215,6 +3215,7 @@ async function handleMcsTest(request, env) {
   return reply({ ok: false, reason: "op" });
 }
 async function handleEnt(request, env, path) {
+  const S = (v, n) => String(v == null ? "" : v).replace(/[<>"]/g, "").replace(/\s+/g, " ").slice(0, n).trim();   /* HD2411TU176: shopwaits / shoppush / shopcode میں S تھا مگر اس فنکشن میں بنا نہیں تھا — سرور گر جاتا تھا */
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
   const fwd = async (op, body) => { const r = await stub.fetch("https://s" + op, { method: "POST", body: JSON.stringify(body || {}) }); return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...CORS } }); };
