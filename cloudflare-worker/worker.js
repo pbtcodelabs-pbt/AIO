@@ -1537,6 +1537,15 @@ export class McsStats {
     }
     if (op === "/sm_restore") {   /* SM2411TU305: گاہک ہیلپ ڈیسک کا 6 ہندسوں کا کوڈ + اپنا موبائل لکھے → دکان کا پتہ (ایک بار) */
       const b = await request.json(), now = Date.now();
+      if (b.op === "trial") {   /* SM2411TU314 (مالک کا حکم — «اگر وہی موبائل ہے تو ٹرائل ختم»): مفت ٹرائل موبائل نمبر پر یاد — نیا براؤزر / APK / ڈیٹا صاف کر کے دوبارہ 7 دن نہیں؛ پہلا ٹرائل = اس نمبر کا سب سے پہلا (فون کا مقامی آغاز، اسی نمبر کی SM IDs کی تاریخ)؛ ہیلپ ڈیسک `endAt` سے فوراً ختم */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS smtrial (k TEXT PRIMARY KEY, first INTEGER, endAt INTEGER, info TEXT)");
+        const m10 = String(b.mob || "").replace(/\D/g, "").slice(-10); if (m10.length !== 10) return Response.json({ ok: false, reason: "mob" });
+        const r0 = this.sql.exec("SELECT first, endAt FROM smtrial WHERE k = ?", "m:" + m10).toArray()[0];
+        let first = r0 ? r0.first : now; const st = Number(b.start) || 0; if (st > 1.7e12 && st < now) first = Math.min(first, st);
+        try { for (const r of this.sql.exec("SELECT data FROM aioid WHERE id LIKE 'SM%'").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} if (String(a.mobile || "").replace(/\D/g, "").slice(-10) === m10 && a.made > 1.7e12) first = Math.min(first, a.made); } } catch (er) {}
+        this.sql.exec("INSERT INTO smtrial (k, first, endAt, info) VALUES (?, ?, 0, '') ON CONFLICT(k) DO UPDATE SET first = excluded.first", "m:" + m10, first);
+        return Response.json({ ok: true, first, endAt: (r0 && r0.endAt) || 0 });
+      }
       if (b.op === "wait") {   /* SM2411TU306 (مالک کا حکم — گاہک کچھ نہ لکھے): خالی فون رجسٹریشن صفحے پر «انتظار» لکھتا ہے؛ ہیلپ ڈیسک نے دکان بھیجی ہو تو ایک بار واپس */
         this.sql.exec("CREATE TABLE IF NOT EXISTS shopwait (w TEXT PRIMARY KEY, fp TEXT, ua TEXT, ts INTEGER, first INTEGER, push TEXT)");
         this.sql.exec("DELETE FROM shopwait WHERE ts < ?", now - 3 * 864e5);
@@ -2292,6 +2301,13 @@ export class McsStats {
       const now = Date.now();
       if (b.op === "list") return Response.json({ ok: true, list: this.sql.exec("SELECT data FROM ent WHERE app = ? ORDER BY ts DESC LIMIT 1000", b.app).toArray().map((r) => { const e = JSON.parse(r.data); return Object.assign(this.entOut(e), { note: e.note || "", at: e.at || 0, claims: e.claims || [], pin: e.pin || "", pend: e.pend || null, redeemed: e.redeemed || 0, label: e.label || "", code: e.code || ((e.keys || []).find((k) => k.startsWith("c:")) || "").slice(2), pkgId: e.pkgId || "", pkgName: e.pkgName || "", usedAt: e.usedAt || 0, biz: e.biz || "", aio: ((e.keys || []).find((k) => k.startsWith("a:")) || "").slice(2), hist: e.hist || [] }); }) });
       if (b.op === "pkglist") return Response.json({ ok: true, list: this.entPkgList(b.app) });
+      if (b.op === "smtrialend" || b.op === "smtrialget") {   /* SM2411TU314 (صرف ایڈمن): اس موبائل کا مفت ٹرائل فوراً ختم / حالت */
+        this.sql.exec("CREATE TABLE IF NOT EXISTS smtrial (k TEXT PRIMARY KEY, first INTEGER, endAt INTEGER, info TEXT)");
+        const m10 = String(b.mob || "").replace(/\D/g, "").slice(-10); if (m10.length !== 10) return Response.json({ ok: false, reason: "mob" });
+        if (b.op === "smtrialend") this.sql.exec("INSERT INTO smtrial (k, first, endAt, info) VALUES (?, ?, ?, '') ON CONFLICT(k) DO UPDATE SET endAt = excluded.endAt", "m:" + m10, now, b.undo ? 0 : now);
+        const r0 = this.sql.exec("SELECT first, endAt FROM smtrial WHERE k = ?", "m:" + m10).toArray()[0] || {};
+        return Response.json({ ok: true, first: r0.first || 0, endAt: r0.endAt || 0 });
+      }
       if (b.op === "shopwaits" || b.op === "shoppush") {   /* SM2411TU306: ہیلپ ڈیسک — رجسٹریشن صفحے پر انتظار والے فون (فون کی پہچان SM ID سے ملے تو ✅) اور ایک ٹچ سے دکان اسی فون پر */
         this.sql.exec("CREATE TABLE IF NOT EXISTS shopwait (w TEXT PRIMARY KEY, fp TEXT, ua TEXT, ts INTEGER, first INTEGER, push TEXT)");
         if (b.op === "shoppush") {
@@ -3158,6 +3174,7 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
   if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
+    if (b.op === "trial") return fwd("/sm_restore", { op: "trial", mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), start: Number(b.start) || 0 });   /* SM2411TU314 */
     if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60), fail: S(b.fail, 40), fm: String(b.fm || "").replace(/\D/g, "").slice(0, 11), fc: String(b.fc || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8), done: b.done && typeof b.done === "object" ? { m: S(b.done.m, 13), shop: S(b.done.shop, 60), n: b.done.n, cu: b.done.cu, inv: b.done.inv } : null }); }   /* SM2411TU310: ناکامی کی اطلاع */
     const m = String(b.m || "").replace(/\D/g, ""), code = String(b.code || "").replace(/\D/g, "");
     if (!/^03\d{9}$/.test(m) || code.length !== 6) return reply({ ok: false, reason: "missing" });

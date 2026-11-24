@@ -197,3 +197,4 @@
 - **🛟 SM2411TU310 (سرور، ہیلپ ڈیسک #400 — «ایک موبائل میں دو IDs، دکان واپس نہیں آئی»):** `/sm_restore op wait`: بھیجی دکان (`push`) اب پہنچتے ہی نہیں مٹتی — کامیابی تک رہتی ہے؛ اپنی پہچان پر نہ ہو تو اسی موبائل نمبر (یا اسی fp + ماڈل، بغیر نمبر، 6 گھنٹے میں) والی دوسری پہچان کی push اس پر منتقل؛ فون `fail:notfound` بھیجے تو push صاف + `info.fail`؛ `shopwaits` ایک فون کی سب پہچانیں ایک قطار (`alt`، `fail`)۔ جانچ `node:sqlite` (ایک فون تین پہچانیں، دوسرا گاہک الگ)۔
 - **✅ SM2411TU311 (سرور، مالک کا حکم):** `/sm_restore op wait` میں `done:{m, shop, n, cu, inv}` → `info.done` (fail صاف، push صاف، ts تازہ)؛ `shopwaits` میں `done` (گروپ میں بھی)۔ جانچ `node:sqlite`۔
 - **🛟 SM2411TU312 (سرور):** `/sm_restore` fail میں `m` (بھیجا موبائل، `fm`) اور 40 حروف تک وجہ۔
+- **🎁 SM2411TU314 (سرور):** `smtrial` جدول (`m:<موبائل>` → first, endAt)؛ `/smrestore op trial` (عام) اور ایڈمن `smtrialend` / `smtrialget`۔ جانچ `node:sqlite`۔
