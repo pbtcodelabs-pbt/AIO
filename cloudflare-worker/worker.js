@@ -3322,6 +3322,7 @@ async function handleEnt(request, env, path) {
     if (op === "shopfind") return fwd("/ent_admin", { op, app, mobile: String(b.mobile || "").slice(0, 20) });   /* SM2411TU305 */
     if (op === "shopcode") return fwd("/ent_admin", { op, app, m: String(b.m || "").slice(0, 20), c: String(b.c || "").slice(0, 20), shop: S(b.shop, 60), owner: S(b.owner, 60) });
     if (op === "shopwaits") return fwd("/ent_admin", { op, app, aio: S(b.aio, 20) });   /* SM2411TU306 */
+    if (op === "smtrialend" || op === "smtrialget") return fwd("/ent_admin", { op, app, mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), undo: !!b.undo });   /* SM2411TU314 */
     if (op === "shoppush") return fwd("/ent_admin", { op, app, w: S(b.w, 12), aio: S(b.aio, 20), m: String(b.m || "").slice(0, 20), c: String(b.c || "").slice(0, 20), shop: S(b.shop, 60), owner: S(b.owner, 60) });
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
