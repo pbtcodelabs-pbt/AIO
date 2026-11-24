@@ -199,3 +199,4 @@
 - **🛟 SM2411TU312 (سرور):** `/sm_restore` fail میں `m` (بھیجا موبائل، `fm`) اور 40 حروف تک وجہ۔
 - **🎁 SM2411TU314 (سرور):** `smtrial` جدول (`m:<موبائل>` → first, endAt)؛ `/smrestore op trial` (عام) اور ایڈمن `smtrialend` / `smtrialget`۔ جانچ `node:sqlite`۔
 - **SM2411TU314 (درستی):** `/entadmin` راستے میں `smtrialend` / `smtrialget` آگے بھیجنا رہ گیا تھا (`bad_op`)۔
+- **📩 SM2411TU317 (سرور):** `/aioid op want` میں `amt` (گاہک کو دکھی رقم) — `want {pkg, at, amt}`۔

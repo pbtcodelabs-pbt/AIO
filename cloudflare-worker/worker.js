@@ -1630,7 +1630,7 @@ export class McsStats {
       if (b.op === "want") {   /* MD2311MO031 (مالک کا حکم): گاہک نے ایپ میں جو پیکج چنا — اسی ID پر لکھا، ہیلپ ڈیسک کی فہرست میں پہلے سے چنا نظر آئے */
         const r0 = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.id).toArray()[0]; if (!r0 || r0.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
         let d0 = {}; try { d0 = JSON.parse(r0.data || "{}"); } catch (er) {}
-        d0.want = { pkg: b.pkg, at: now }; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(d0), b.id);
+        d0.want = { pkg: b.pkg, at: now, amt: Math.max(0, Math.min(1e7, parseInt(b.amt, 10) || 0)) };   /* SM2411TU317: گاہک کو دکھائی گئی رقم */ this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(d0), b.id);
         return Response.json({ ok: true });
       }
       if (b.op === "me" || b.op === "done" || b.op === "del") {
@@ -3144,7 +3144,7 @@ async function handleAgent(request, env, path) {
     }
     if (!/^(AIO(DR)?|SM|MD)\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
     if (op === "shop") { if (dev.length < 6 || !/^SM\d{5}$/.test(id)) return reply({ ok: false, reason: "none" }); const m = String(b.m || "").replace(/\D/g, ""), c = String(b.c || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (!/^03\d{9}$/.test(m) || c.length !== 8) return reply({ ok: false, reason: "bad_shop" }); return fwd("/aio_id", { op, id, dev, m, c, shop: S(b.shop, 60), owner: S(b.owner, 60), n: Math.max(0, Math.min(1e7, parseInt(b.n, 10) || 0)) }); }   /* SM2411TU305 */
-    if (op === "want") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); const pkg = S(b.pkg, 40).replace(/[^a-z0-9-]/g, ""); if (!pkg) return reply({ ok: false, reason: "no_pkg" }); return fwd("/aio_id", { op, id, dev, pkg }); }   /* MD2311MO031 */
+    if (op === "want") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); const pkg = S(b.pkg, 40).replace(/[^a-z0-9-]/g, ""); if (!pkg) return reply({ ok: false, reason: "no_pkg" }); return fwd("/aio_id", { op, id, dev, pkg, amt: parseInt(b.amt, 10) || 0 }); }   /* MD2311MO031 · SM2411TU317: رقم بھی */
     if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", op === "me" && typeof b.jn === "boolean" ? { op, id, dev, jn: b.jn } : { op, id, dev }); }   /* AIO2011FR230: jn = یہ فون دکان سے جڑا ملازم فون ہے */
     const by = String(b.by || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (by.length < 6) return reply({ ok: false, reason: "bad_by" });
     if (op === "look") return fwd("/aio_id", { op, id, by });
