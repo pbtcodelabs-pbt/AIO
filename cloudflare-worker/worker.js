@@ -1540,10 +1540,26 @@ export class McsStats {
       if (b.op === "wait") {   /* SM2411TU306 (مالک کا حکم — گاہک کچھ نہ لکھے): خالی فون رجسٹریشن صفحے پر «انتظار» لکھتا ہے؛ ہیلپ ڈیسک نے دکان بھیجی ہو تو ایک بار واپس */
         this.sql.exec("CREATE TABLE IF NOT EXISTS shopwait (w TEXT PRIMARY KEY, fp TEXT, ua TEXT, ts INTEGER, first INTEGER, push TEXT)");
         this.sql.exec("DELETE FROM shopwait WHERE ts < ?", now - 3 * 864e5);
+        try { this.sql.exec("ALTER TABLE shopwait ADD COLUMN info TEXT"); } catch (er) {}
+        /* SM2411TU310 (مالک کا حکم — «ایک ہی فون پر دو پہچان، دکان واپس نہیں آئی»): (1) بھیجی دکان فوراً مٹتی نہیں — فون کامیاب ہو کر رجسٹر ہو جائے تو خود رک جاتا ہے؛
+           ناکام ہو تو `fail` لکھتا ہے (ہیلپ ڈیسک میں دکھے)؛ (2) فون کا ڈیٹا صاف ہو کر نئی پہچان بنے تو پرانی پہچان پر بھیجی دکان نئی کو مل جاتی ہے —
+           صرف اگر فارم کا موبائل ایک ہو، یا (موبائل نہ ہو تو) فون کی پہچان fp + ماڈل ایک ہو اور بھیجے ابھی 6 گھنٹے سے کم ہوئے ہوں */
+        const pnow = (s0) => { let p = null; try { p = JSON.parse(s0 || "null"); } catch (er) {} return p && p.exp > now ? p : null; };
+        const m10 = String(b.mob || "").slice(-10);
+        if (b.fail) { const r0 = this.sql.exec("SELECT info FROM shopwait WHERE w = ?", b.w).toArray()[0]; let inf = {}; try { inf = JSON.parse((r0 && r0.info) || "{}"); } catch (er) {} inf.fail = { r: String(b.fail).slice(0, 20), c: String(b.fc || "").slice(0, 8), at: now }; this.sql.exec("UPDATE shopwait SET push = NULL, info = ? WHERE w = ?", JSON.stringify(inf), b.w); return Response.json({ ok: true }); }
         const r = this.sql.exec("SELECT push FROM shopwait WHERE w = ?", b.w).toArray()[0];
-        if (r && r.push) { this.sql.exec("DELETE FROM shopwait WHERE w = ?", b.w); let p = null; try { p = JSON.parse(r.push); } catch (er) {} if (p && p.exp > now) return Response.json({ ok: true, push: { m: p.m, c: p.c, shop: p.shop || "", owner: p.owner || "" } }); }
+        let P = r ? pnow(r.push) : null;
+        if (!P) {
+          for (const o of this.sql.exec("SELECT w, fp, ua, push, info FROM shopwait WHERE push IS NOT NULL AND w <> ?", b.w).toArray()) {
+            const p = pnow(o.push); if (!p) continue; let inf = {}; try { inf = JSON.parse(o.info || "{}"); } catch (er) {}
+            const om = String(inf.mob || "").slice(-10);
+            const ok = (m10.length === 10 && om === m10) || (b.fp && o.fp === b.fp && o.ua === (b.ua || "") && (!m10 || !om) && now - (p.exp - 864e5) < 6 * 3600e3);
+            if (ok) { P = p; this.sql.exec("UPDATE shopwait SET push = NULL WHERE w = ?", o.w); break; }
+          }
+        }
         this.sql.exec("INSERT INTO shopwait (w, fp, ua, ts, first, push) VALUES (?, ?, ?, ?, ?, NULL) ON CONFLICT(w) DO UPDATE SET fp = excluded.fp, ua = excluded.ua, ts = excluded.ts", b.w, b.fp || "", b.ua || "", now, now);
-        if (b.mob || b.nm) { try { this.sql.exec("ALTER TABLE shopwait ADD COLUMN info TEXT"); } catch (er) {} this.sql.exec("UPDATE shopwait SET info = ? WHERE w = ?", JSON.stringify({ mob: b.mob || "", nm: b.nm || "" }), b.w); }   /* SM2411TU309: فارم میں لکھا نمبر / نام (اختیاری) */
+        if (b.mob || b.nm) { const r1 = this.sql.exec("SELECT info FROM shopwait WHERE w = ?", b.w).toArray()[0]; let inf = {}; try { inf = JSON.parse((r1 && r1.info) || "{}"); } catch (er) {} inf.mob = b.mob || ""; inf.nm = b.nm || ""; this.sql.exec("UPDATE shopwait SET info = ? WHERE w = ?", JSON.stringify(inf), b.w); }   /* SM2411TU309: فارم میں لکھا نمبر / نام (اختیاری) */
+        if (P) { this.sql.exec("UPDATE shopwait SET push = ? WHERE w = ?", JSON.stringify(P), b.w); return Response.json({ ok: true, push: { m: P.m, c: P.c, shop: P.shop || "", owner: P.owner || "" } }); }
         return Response.json({ ok: true, wait: true });
       }
       this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
@@ -2290,9 +2306,19 @@ export class McsStats {
         const who = {}, byMob = {}; for (const r of this.sql.exec("SELECT id, data FROM aioid WHERE id LIKE 'SM%'").toArray()) { let a = {}; try { a = JSON.parse(r.data || "{}"); } catch (er) {} who[r.id] = { id: r.id, name: a.name || "", mobile: a.mobile || "" }; const m10 = String(a.mobile || "").replace(/\D/g, "").slice(-10); if (m10) (byMob[m10] = byMob[m10] || []).push(r.id); }
         const list = this.sql.exec("SELECT w, fp, ua, ts, first, push, info FROM shopwait WHERE ts > ? ORDER BY ts DESC LIMIT 40", now - 2 * 864e5).toArray()
           .map((r) => { let inf = {}; try { inf = JSON.parse(r.info || "{}"); } catch (er) {} const m10 = String(inf.mob || "").slice(-10); const ids = [...new Set((fps[r.fp] || []).concat(m10.length === 10 ? byMob[m10] || [] : []))].slice(0, 4);
-            return { w: r.w, ua: r.ua || "", ts: r.ts, first: r.first, sent: !!r.push, match: !!(myfp && r.fp === myfp), ids, idn: ids.map((i) => who[i]).filter(Boolean), mob: inf.mob || "", nm: inf.nm || "", live: now - r.ts < 90e3 }; });   /* SM2411TU309: پرانی SM ID کا نام / موبائل اور فارم میں لکھا نمبر / نام */
-        list.sort((x, y) => (y.match - x.match) || (y.ts - x.ts));
-        return Response.json({ ok: true, list });
+            return { w: r.w, fp: r.fp || "", ua: r.ua || "", ts: r.ts, first: r.first, sent: !!r.push, match: !!(myfp && r.fp === myfp), ids, idn: ids.map((i) => who[i]).filter(Boolean), mob: inf.mob || "", nm: inf.nm || "", fail: inf.fail || null, live: now - r.ts < 90e3 }; });   /* SM2411TU309: پرانی SM ID کا نام / موبائل اور فارم میں لکھا نمبر / نام */
+        /* SM2411TU310: ایک ہی فون کی کئی پہچانیں (ڈیٹا صاف ہو کر نئی بنی) ایک قطار میں — فارم کا موبائل ایک ہو، یا موبائل نہ ہو اور fp + ماڈل ایک؛ سب سے نئی پہچان اوپر، پرانی `alt` میں */
+        list.sort((x, y) => y.ts - x.ts);
+        const grp = [], keyOf = (x) => { const mm = String(x.mob || "").slice(-10); return mm.length === 10 ? "m" + mm : ""; };
+        for (const x of list) {
+          const k = keyOf(x); let g = k ? grp.find((G) => G.k === k) : null;
+          if (!g && x.fp) g = grp.find((G) => G.fps.has(x.fp + "|" + x.ua) && (!k || !G.k));
+          if (g) { g.x.alt.push(x.w.slice(-4)); if (x.sent) g.x.sent = true; if (!g.x.fail && x.fail) g.x.fail = x.fail; if (!g.x.mob && x.mob) { g.x.mob = x.mob; g.x.nm = x.nm; g.k = k; } g.x.ids = [...new Set(g.x.ids.concat(x.ids))]; g.x.idn = g.x.ids.map((i) => who[i]).filter(Boolean); if (x.match) g.x.match = true; if (x.fp) g.fps.add(x.fp + "|" + x.ua); continue; }
+          grp.push({ k, fps: new Set(x.fp ? [x.fp + "|" + x.ua] : []), x: Object.assign(x, { alt: [] }) });
+        }
+        const out = grp.map((G) => { const o = G.x; delete o.fp; return o; });
+        out.sort((x, y) => (y.match - x.match) || (y.ts - x.ts));
+        return Response.json({ ok: true, list: out });
       }
       if (b.op === "shopcode" || b.op === "shopfind") {   /* SM2411TU305: دکان کی بحالی (صرف ایڈمن) — SM ID کے محفوظ پتے / موبائل سے تلاش؛ 6 ہندسوں کا وقتی کوڈ (24 گھنٹے، ایک بار، موبائل کے ساتھ) */
         this.sql.exec("CREATE TABLE IF NOT EXISTS shoprc (code TEXT PRIMARY KEY, data TEXT, exp INTEGER)");
@@ -3125,7 +3151,7 @@ async function handleAgent(request, env, path) {
     return fwd("/ag_docs", { phone, pin: S(b.pin, 10), dev, cnic: cnic.replace(/^(\d{5})(\d{7})(\d)$/, "$1-$2-$3"), father: S(b.father, 80), img });
   }
   if (path === "/smrestore") {   /* SM2411TU305: ہیلپ ڈیسک کا کوڈ → دکان کا پتہ */
-    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60) }); }
+    if (b.op === "wait") { const w = String(b.w || ""); if (!/^W[A-Z0-9]{9}$/.test(w)) return reply({ ok: false, reason: "missing" }); return fwd("/sm_restore", { op: "wait", w, fp: S(b.fp, 40), ua: S(b.ua, 60), mob: String(b.mob || "").replace(/\D/g, "").slice(0, 13), nm: S(b.nm, 60), fail: S(b.fail, 20), fc: String(b.fc || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) }); }   /* SM2411TU310: ناکامی کی اطلاع */
     const m = String(b.m || "").replace(/\D/g, ""), code = String(b.code || "").replace(/\D/g, "");
     if (!/^03\d{9}$/.test(m) || code.length !== 6) return reply({ ok: false, reason: "missing" });
     return fwd("/sm_restore", { m, code });
