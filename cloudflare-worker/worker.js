@@ -1630,7 +1630,7 @@ export class McsStats {
       if (b.op === "want") {   /* MD2311MO031 (مالک کا حکم): گاہک نے ایپ میں جو پیکج چنا — اسی ID پر لکھا، ہیلپ ڈیسک کی فہرست میں پہلے سے چنا نظر آئے */
         const r0 = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.id).toArray()[0]; if (!r0 || r0.dev !== b.dev) return Response.json({ ok: false, reason: "none" });
         let d0 = {}; try { d0 = JSON.parse(r0.data || "{}"); } catch (er) {}
-        d0.want = { pkg: b.pkg, at: now }; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(d0), b.id);
+        d0.want = { pkg: b.pkg, at: now, amt: Math.max(0, Math.min(1e7, parseInt(b.amt, 10) || 0)) };   /* SM2411TU317: گاہک کو دکھائی گئی رقم */ this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(d0), b.id);
         return Response.json({ ok: true });
       }
       if (b.op === "me" || b.op === "done" || b.op === "del") {
@@ -2478,7 +2478,7 @@ export class McsStats {
           if (a.dead || ap3(a.app) !== want || !idAppOk(r.id, want)) continue;   /* MD2311MO028: دوسری ایپ کی ID کبھی نہیں */
           const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + r.id).toArray()[0], e = kr ? this.entGet(kr.id) : null;
           if (!e && aioIsStaff(a, now)) continue;   /* AIO2011FR230: ملازم کی ID فہرست میں نہیں */
-          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", want: a.want || null, shops: (a.shops || []).slice(0, 6), ent: e ? { active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays, devices: e.devices || 1,
+          out.push({ aio: r.id, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", made: a.at || r.ts || 0, upd: a.upd || r.ts || 0, replacedBy: a.replacedBy || "", want: a.want || null, shops: (a.shops || []).slice(0, 6), ent: e ? { due: e.due || null, active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, life: !!e.life, exp: e.exp || 0, pkg: e.pkgName || "", leftDays: e.leftDays === undefined ? null : e.leftDays, devices: e.devices || 1,
             /* SM2211SU301 (مالک کا حکم): ہر ID کی رقم اور شروع کی تاریخ — ہیلپ ڈیسک میں «کتنے کا پیکج، کتنے دن گزرے / باقی» اور کل وصولی */
             paid: (e.hist || []).reduce((s, h) => s + (parseFloat(String(h.price || "").replace(/,/g, "")) || 0), 0), lastAt: ((e.hist || [])[(e.hist || []).length - 1] || {}).at || e.at || 0, lastPrice: ((e.hist || [])[(e.hist || []).length - 1] || {}).price || "" } : null, staff: (stf[r.id] || []).sort((p, q) => p.at - q.at) });
         }
@@ -2496,14 +2496,14 @@ export class McsStats {
         try { this.finLog("aiodel", { aio: b.aio }); } catch (er) {}
         return Response.json({ ok: true });
       }
-      if (b.op === "aiolook" || b.op === "aiogrant" || b.op === "aioadd") {
+      if (b.op === "aiolook" || b.op === "aiogrant" || b.op === "aioadd" || b.op === "aiodue") {
         const ar = this.sql.exec("SELECT dev, data, ts FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
         let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
         if ((b.app === "SM" || b.app === "MD" || a.app === "SM" || a.app === "MD") && a.app !== b.app) return Response.json({ ok: false, reason: "wrong_app" });   /* MD2311MO028: پکی روک */
         const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|a:" + b.aio).toArray()[0];
         let e = kr ? this.entGet(kr.id) : null;
         const who = { aio: b.aio, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "", app: a.app || "", want: a.want || null, made: a.at || ar.ts || 0, dev: ar.dev || "", replacedBy: a.replacedBy || "", replacedAt: a.replacedAt || 0, shops: Array.isArray(a.shops) ? a.shops : [] };
-        const full = (x) => x ? Object.assign(this.entOut(x), { pkgId: x.pkgId || "", pkgName: x.pkgName || "", hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length, leftDays: x.leftDays === undefined ? null : x.leftDays, replacedBy: x.replacedBy || "" }) : null;
+        const full = (x) => x ? Object.assign(this.entOut(x), { due: x.due || null, pkgId: x.pkgId || "", pkgName: x.pkgName || "", hist: x.hist || [], at: x.at || 0, claims: (x.claims || []).length, leftDays: x.leftDays === undefined ? null : x.leftDays, replacedBy: x.replacedBy || "" }) : null;
         /* AIO1811WE226: اسی موبائل یا Gmail کی دوسری IDs (پرانا / نیا فون) — مالک دیکھ کر دن جوڑے */
         const others = () => { const m10 = (v) => String(v || "").replace(/\D/g, "").slice(-10), bm = m10(a.mobile), bg = String(a.gmail || "").toLowerCase(), out = [];
           for (const r of this.sql.exec("SELECT id, data, ts FROM aioid").toArray()) { if (r.id === b.aio) continue; let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {}
@@ -2518,6 +2518,13 @@ export class McsStats {
         /* HD2111SA144 (مالک کا حکم): پیکج پر جڑے فونز کے نام / موبائل / AIO ID — فون کی چابی (dev) سے aioid ٹیبل میں ڈھونڈ کر */
         const devmapOf = () => { const m = {}; for (const d of (Array.isArray(b.devs) ? b.devs : [])) { const r = this.sql.exec("SELECT id, data FROM aioid WHERE dev = ?", d).toArray()[0]; if (!r) continue; let x = {}; try { x = JSON.parse(r.data || "{}"); } catch (er) {} m[d] = { aio: r.id, name: x.name || "", mobile: x.mobile || "" }; } return m; };
         if (b.op === "aiolook") return Response.json({ ok: true, who, ent: full(e), others: others(), staff: staffOf(), devmap: devmapOf() });
+        if (b.op === "aiodue") {   /* SM2411TU318 (مالک کا حکم): ادھار پر دیا پیکج — باقی رقم وصول (جتنی آئی اتنی کم، صفر ہو تو یاد دہانی ختم) */
+          if (!e || !e.due) return Response.json({ ok: false, reason: "no_due" });
+          const g = Math.max(0, parseInt(b.got, 10) || 0); if (!g) return Response.json({ ok: false, reason: "no_amt" });
+          e.due.amt = Math.max(0, (e.due.amt || 0) - g); e.hist = e.hist || []; e.hist.push({ at: now, pkg: "💰 باقی رقم وصول", price: String(g), days: 0, exp: e.life ? 0 : e.exp }); if (e.hist.length > 50) e.hist = e.hist.slice(-50);
+          if (!e.due.amt) delete e.due; this.entPut(e); try { this.finLog("aiodue", { aio: b.aio, got: g }); } catch (er) {}
+          return Response.json({ ok: true, who, ent: full(e), others: others() });
+        }
         if (b.op === "aioadd") {   /* AIO1811WE226 (مالک کا حکم): سادہ بٹن — دن / مہینہ / سال / اپنے دن / لائف ٹائم سیدھے اسی ID میں */
           const days = Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life = !!b.life; if (!days && !life) return Response.json({ ok: false, reason: "no_days" });
           if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app: b.app, keys: [], claims: [], exp: 0, at: now, by: "helpdesk", devices: 1 };
@@ -2539,6 +2546,9 @@ export class McsStats {
         e.hist = e.hist || []; e.hist.push({ at: now, pkgId: pk.id, pkg: pk.name || pk.prefix, days: pk.life ? 0 : pk.days, life: !!pk.life, devices: pk.devices || 1, price: String(b.price || "").slice(0, 20), exp: e.life ? 0 : e.exp }); if (e.hist.length > 50) e.hist = e.hist.slice(-50);
         e.pkgId = pk.id; e.pkgName = pk.name || pk.prefix;
         delete e.replacedBy; delete e.leftDays;
+        /* SM2411TU318 (مالک کا حکم): پیسے ابھی باقی ہوں تب بھی پیکج چالو — باقی رقم `e.due` میں، ہیلپ ڈیسک بار بار یاد دلائے؛ گاہک کی درخواست (want) پوری */
+        { const due = Math.max(0, parseInt(b.due, 10) || 0); if (due) e.due = { amt: due, pkg: e.pkgName, at: now }; else delete e.due; const H = e.hist[e.hist.length - 1]; if (H) { H.got = Math.max(0, parseInt(b.got, 10) || 0); if (due) H.due = due; } }
+        try { if (a.want) { a.wantDone = Object.assign({}, a.want, { done: now }); delete a.want; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(a), b.aio); } } catch (er) {}
         this.entPut(e); try { this.finLog("aiogrant", { aio: b.aio, pkg: pk.id }); } catch (er) {}
         return Response.json({ ok: true, who, ent: full(e), others: others() });
       }
@@ -3144,7 +3154,7 @@ async function handleAgent(request, env, path) {
     }
     if (!/^(AIO(DR)?|SM|MD)\d{5}$/.test(id)) return reply({ ok: false, reason: "bad_id" });
     if (op === "shop") { if (dev.length < 6 || !/^SM\d{5}$/.test(id)) return reply({ ok: false, reason: "none" }); const m = String(b.m || "").replace(/\D/g, ""), c = String(b.c || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (!/^03\d{9}$/.test(m) || c.length !== 8) return reply({ ok: false, reason: "bad_shop" }); return fwd("/aio_id", { op, id, dev, m, c, shop: S(b.shop, 60), owner: S(b.owner, 60), n: Math.max(0, Math.min(1e7, parseInt(b.n, 10) || 0)) }); }   /* SM2411TU305 */
-    if (op === "want") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); const pkg = S(b.pkg, 40).replace(/[^a-z0-9-]/g, ""); if (!pkg) return reply({ ok: false, reason: "no_pkg" }); return fwd("/aio_id", { op, id, dev, pkg }); }   /* MD2311MO031 */
+    if (op === "want") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); const pkg = S(b.pkg, 40).replace(/[^a-z0-9-]/g, ""); if (!pkg) return reply({ ok: false, reason: "no_pkg" }); return fwd("/aio_id", { op, id, dev, pkg, amt: parseInt(b.amt, 10) || 0 }); }   /* MD2311MO031 · SM2411TU317: رقم بھی */
     if (op === "me" || op === "done" || op === "del") { if (dev.length < 6) return reply({ ok: false, reason: "none" }); return fwd("/aio_id", op === "me" && typeof b.jn === "boolean" ? { op, id, dev, jn: b.jn } : { op, id, dev }); }   /* AIO2011FR230: jn = یہ فون دکان سے جڑا ملازم فون ہے */
     const by = String(b.by || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64); if (by.length < 6) return reply({ ok: false, reason: "bad_by" });
     if (op === "look") return fwd("/aio_id", { op, id, by });
@@ -3327,11 +3337,11 @@ async function handleEnt(request, env, path) {
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
-    if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel") {   /* AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
+    if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel" || op === "aiodue") {   /* SM2411TU318: aiodue = باقی رقم وصول · AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^(AIO(DR)?|SM|MD)\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
       if (!idAppOk(aio, app)) return reply({ ok: false, reason: "wrong_app" });
-      return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), devs: Array.isArray(b.devs) ? b.devs.slice(0, 20).map((d) => String(d).slice(0, 120)) : undefined, price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true });
+      return fwd("/ent_admin", { op, app, aio, pkgId: String(b.pkgId || "").slice(0, 40), devs: Array.isArray(b.devs) ? b.devs.slice(0, 20).map((d) => String(d).slice(0, 120)) : undefined, price: String(b.price || "").replace(/[^0-9.,]/g, "").slice(0, 12), days: Math.max(0, Math.min(3650, parseInt(b.days, 10) || 0)), life: b.life === true, due: Math.max(0, Math.min(1e7, parseInt(b.due, 10) || 0)), got: Math.max(0, Math.min(1e7, parseInt(b.got, 10) || 0)) });
     }
     if (app === "MCS" && op === "mcsnew") return fwd("/ent_admin", { op, app });   /* MCS1811WE537: نئے MCS نمبر */
     if (app === "MCS" && (op === "tlook" || op === "tact" || op === "twipe")) return fwd("/ent_admin", { op, app, k: String(b.k || "").slice(0, 40) });   /* MCS1811WE541: ٹیسٹ اکاؤنٹ (صرف ایڈمن) */
