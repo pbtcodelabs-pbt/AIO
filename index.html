@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2311MO242</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2511WE243</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2311MO242</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2511WE243</span>
     </div>
   </div>
 
@@ -7155,7 +7155,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   </div>
 </div>
 
-<!-- 📦 AIO2311MO242 (#382): پیکج ختم ہونے کی وارننگ — قیمت/ادائیگی کا ذکر نہیں، صرف «پیکج دوبارہ لیں» -->
+<!-- 📦 AIO2511WE243 (#382): پیکج ختم ہونے کی وارننگ — قیمت/ادائیگی کا ذکر نہیں، صرف «پیکج دوبارہ لیں» -->
 <div class="modalOverlay" id="pkgExpiryModal" onclick="if(event.target===this) dismissPkgExpiryModal()">
   <div class="backupConfirmBox" dir="rtl">
     <div class="backupConfirmIconWrap" id="pkgExpIconWrap" style="background:#fff7ed; color:#c2410c;"><span id="pkgExpIcon">📦</span></div>
@@ -9631,10 +9631,10 @@ function renderSubscriptionBanner(){
 
   // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
   if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
-  else maybeShowPackageExpiryWarning(daysLeft); // AIO2311MO242 (#382): خریدے ہوئے پیکج کی میعاد ختم ہونے کی وارننگ
+  else maybeShowPackageExpiryWarning(daysLeft); // AIO2511WE243 (#382): خریدے ہوئے پیکج کی میعاد ختم ہونے کی وارننگ
 }
 
-// ---------- AIO2311MO242 (#382، مالک کا حکم): پیکج ختم ہونے کی وارننگ ----------
+// ---------- AIO2511WE243 (#382، مالک کا حکم): پیکج ختم ہونے کی وارننگ ----------
 // 15 دن سے کم رہ جائیں تو صرف ایک بار؛ 7 دن سے کم پر روز ایک بار (3 دن سے کم پر بھی دن میں ایک ہی بار، زیادہ نہیں)۔
 // بٹن «📦 پیکج دوبارہ لیں» — قیمت یا ادائیگی کا کوئی ذکر نہیں، صرف Google Play سے تجدید۔
 // نیا پیکج لیتے ہی تاریخ بدلتی ہے، تو گنتی خودبخود نئے سرے سے شروع ہو جاتی ہے۔
@@ -30985,7 +30985,7 @@ async function verifyPurchaseOnServer(purchaseToken, sku){
     const res = await fetch(PLAY_VERIFY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ purchaseToken, sku }),
+      body: JSON.stringify(Object.assign({ purchaseToken, sku }, (function(){ try{ const m = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'aioId') || 'null') || {}; return { aio: m.id || '', name: m.name || '', mobile: m.mobile || '', gmail: m.gmail || '' }; }catch(e){ return {}; } })())),   /* AIO2511WE231: خریدار کی پہچان — اطلاع اور ہیلپ ڈیسک میں */
       signal: ctrl.signal
     });
     clearTimeout(timer);
@@ -35835,9 +35835,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2311MO242'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2511WE243'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Package expiry reminder: one warning under 15 days, then once a day under 7 days, with a Renew Package button';
+  const UPDATE_NOTE = 'Google Play purchase now carries your AIO ID, name and mobile — the package shows on your AIO ID at once';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
