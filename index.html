@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2511WE243</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2511WE244</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2511WE243</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2511WE244</span>
     </div>
   </div>
 
@@ -7155,7 +7155,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   </div>
 </div>
 
-<!-- 📦 AIO2511WE243 (#382): پیکج ختم ہونے کی وارننگ — قیمت/ادائیگی کا ذکر نہیں، صرف «پیکج دوبارہ لیں» -->
+<!-- 📦 AIO2511WE244 (#382): پیکج ختم ہونے کی وارننگ — قیمت/ادائیگی کا ذکر نہیں، صرف «پیکج دوبارہ لیں» -->
 <div class="modalOverlay" id="pkgExpiryModal" onclick="if(event.target===this) dismissPkgExpiryModal()">
   <div class="backupConfirmBox" dir="rtl">
     <div class="backupConfirmIconWrap" id="pkgExpIconWrap" style="background:#fff7ed; color:#c2410c;"><span id="pkgExpIcon">📦</span></div>
@@ -9631,10 +9631,10 @@ function renderSubscriptionBanner(){
 
   // ---------- روزانہ صرف ایک بار: ہلکا Toast یا (آخری 2 دن میں) زیادہ نمایاں پاپ اپ — صرف Free Trial کے دوران ----------
   if(AppState.settings.isOnFreeTrial) maybeShowTrialReminder(daysLeft);
-  else maybeShowPackageExpiryWarning(daysLeft); // AIO2511WE243 (#382): خریدے ہوئے پیکج کی میعاد ختم ہونے کی وارننگ
+  else maybeShowPackageExpiryWarning(daysLeft); // AIO2511WE244 (#382): خریدے ہوئے پیکج کی میعاد ختم ہونے کی وارننگ
 }
 
-// ---------- AIO2511WE243 (#382، مالک کا حکم): پیکج ختم ہونے کی وارننگ ----------
+// ---------- AIO2511WE244 (#382، مالک کا حکم): پیکج ختم ہونے کی وارننگ ----------
 // 15 دن سے کم رہ جائیں تو صرف ایک بار؛ 7 دن سے کم پر روز ایک بار (3 دن سے کم پر بھی دن میں ایک ہی بار، زیادہ نہیں)۔
 // بٹن «📦 پیکج دوبارہ لیں» — قیمت یا ادائیگی کا کوئی ذکر نہیں، صرف Google Play سے تجدید۔
 // نیا پیکج لیتے ہی تاریخ بدلتی ہے، تو گنتی خودبخود نئے سرے سے شروع ہو جاتی ہے۔
@@ -31162,8 +31162,18 @@ async function purchaseViaPlayBilling(sku, days){
     persistAllData();
     document.getElementById('packagePlansModal')?.classList.remove('show');
     refreshAllScreens();
-    alert(lifetime ? '♾️ Lifetime License activated via Google Play — it never expires. Thank you!' : '✅ Subscription activated successfully via Google Play!');
     afterSubscriptionChanged();
+    /* AIO2511WE244: الرٹ کی جگہ ٹیم کی طرف سے مبارکباد کا کارڈ (انگلش) — کوئی نمبر / ذاتی نام نہیں، مدد Help Desk */
+    try{
+      const st = AppState.settings || {}; let who = '';
+      try{ who = (JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'aioId') || 'null') || {}).name || ''; }catch(e){}
+      who = who || st.businessName || '';
+      const n = Math.max(1, Number(planDevicesFromSku(sku)) || 1);
+      const plan = lifetime ? 'Lifetime License' : (days >= 360 ? '1 Year' : (Math.round(days / 30) || 1) + (Math.round(days / 30) > 1 ? ' Months' : ' Month')) + ' Subscription';
+      if(typeof window.pbtCongrats === 'function') window.pbtCongrats({ lang: 'en', app: 'AIO POS', name: who, plan, until: newExpiry, life: lifetime, key: STORAGE_PREFIX + 'congratsLast',
+        perks: ['✅ All features of AIO POS are now unlocked', '🧾 Unlimited bills, stock, purchases & reports', (n > 1 ? '📱 Works on ' + n + ' phones with live sync' : '📱 Your full shop record on your phone'), '☁️ Your records stay safe with backup'] });
+      else alert(lifetime ? '♾️ Lifetime License activated via Google Play — it never expires. Thank you!' : '✅ Subscription activated successfully via Google Play!');
+    }catch(e){ alert('✅ Subscription activated successfully via Google Play!'); }
   } catch(err){
     console.error('Play Billing purchase failed:', err);
     if(err && err.name !== 'AbortError'){ // ---------- صارف نے خود منسوخ کیا ہو تو خاموشی سے واپس، ورنہ پیغام دکھائیں ----------
@@ -35835,9 +35845,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2511WE243'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2511WE244'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Google Play purchase now carries your AIO ID, name and mobile — the package shows on your AIO ID at once';
+  const UPDATE_NOTE = 'A warm congratulations card from Team AIO POS when you subscribe — plan, valid-until date and Help Desk';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -38080,6 +38090,70 @@ window.pbtHubPwOk = async function(p){
 })();
 </script>
 
+<style id="pbtCongrats">
+/* 🎉 سبسکرپشن کی مبارکباد (مالک کا حکم، 25 نومبر 2026 — AIO / MCS / سبزی منڈی): ٹیم کی طرف سے، کوئی نمبر / ذاتی نام نہیں، مدد صرف Help Desk */
+#pbtCg{position:fixed;inset:0;z-index:2147483600;background:rgba(10,20,40,.62);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow:hidden;animation:pbtCgF .25s ease}
+#pbtCg *{box-sizing:border-box}
+#pbtCg .cd{position:relative;width:100%;max-width:380px;max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:22px;box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center;animation:pbtCgP .45s cubic-bezier(.2,1.4,.4,1)}
+#pbtCg .tp{background:linear-gradient(135deg,#f59e0b,#ef4444 55%,#8b5cf6);color:#fff;padding:22px 16px 18px;border-radius:22px 22px 0 0}
+#pbtCg .em{font-size:52px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+#pbtCg h2{margin:8px 0 2px;font-size:22px;font-weight:800;line-height:1.35}
+#pbtCg .sb{font-size:14px;opacity:.95;line-height:1.5}
+#pbtCg .bd{padding:14px 18px 6px;color:#1e293b}
+#pbtCg .pl{display:inline-block;background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d;border-radius:999px;padding:6px 14px;font-weight:800;font-size:15px;margin:2px 0 8px}
+#pbtCg .un{font-size:14px;color:#334155;margin-bottom:10px}
+#pbtCg ul{list-style:none;margin:0 0 10px;padding:0;text-align:start}
+#pbtCg li{padding:5px 0;font-size:14.5px;line-height:1.5;border-bottom:1px dashed #e2e8f0}
+#pbtCg li:last-child{border-bottom:0}
+#pbtCg .ty{font-size:14px;color:#475569;line-height:1.6;margin:6px 0 4px}
+#pbtCg .sg{font-weight:800;color:#0f766e;font-size:14.5px;margin:4px 0 12px}
+#pbtCg .bt{display:flex;flex-direction:column;gap:8px;padding:0 18px 18px}
+#pbtCg .bt button{border:0;border-radius:14px;padding:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit}
+#pbtCg .go{background:linear-gradient(135deg,#16a34a,#0f766e);color:#fff}
+#pbtCg .hd{background:#fef9c3;color:#422006;border:1.5px solid #eab308!important;display:flex;align-items:center;justify-content:center;gap:8px}
+#pbtCg i.cf{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;opacity:.9;animation:pbtCgC linear forwards;pointer-events:none}
+#pbtCg[dir=rtl]{font-family:'Jameel Noori Nastaleeq','Noori','Noto Nastaliq Urdu',serif}
+#pbtCg[dir=rtl] h2{font-size:24px}#pbtCg[dir=rtl] li,#pbtCg[dir=rtl] .ty{line-height:1.9}
+@keyframes pbtCgF{from{opacity:0}to{opacity:1}}
+@keyframes pbtCgP{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pbtCgC{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+<script id="pbtCongratsJs">
+/* pbtCongrats({lang:'en'|'ur', app:'AIO POS', name:'', plan:'3 Months', until:'2027-02-25', life:false, perks:[], help:fn}) */
+(function(){
+  const E = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function fmt(d, ur){ try{ const x = new Date(String(d).slice(0, 10) + 'T12:00:00'); if(isNaN(x)) return String(d || ''); return x.toLocaleDateString(ur ? 'en-GB' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); }catch(e){ return String(d || ''); } }
+  window.pbtCongrats = function(o){
+    o = o || {}; const ur = o.lang === 'ur';
+    try{ document.getElementById('pbtCg')?.remove(); }catch(e){}
+    const T = ur ? {
+      t: 'مبارک ہو' + (o.name ? '، ' + o.name : '') + '!', s: 'آپ کا پیکج کامیابی سے چالو ہو گیا ہے',
+      u: o.life ? '♾️ تاحیات — کبھی ختم نہیں ہو گا' : ('📅 ' + fmt(o.until, 1) + ' تک'),
+      ty: o.app + ' پر بھروسہ کرنے کا دل سے شکریہ۔ ہم ہر قدم پر آپ کے ساتھ ہیں — کوئی بھی مسئلہ یا مشورہ ہو تو نیچے Help Desk پر لکھیں، ہماری ٹیم جواب دے گی۔',
+      sg: '— ٹیم ' + o.app, go: '✅ شروع کریں', hd: 'مدد / مشورہ'
+    } : {
+      t: 'Congratulations' + (o.name ? ', ' + o.name : '') + '!', s: 'Your subscription is now active',
+      u: o.life ? '♾️ Lifetime — it never expires' : ('📅 Valid until ' + fmt(o.until)),
+      ty: 'Thank you for choosing ' + o.app + '. We are with you at every step — for any question or suggestion, just write to us on the Help Desk and our team will reply.',
+      sg: '— Team ' + o.app, go: '✅ Let\'s start', hd: 'Support'
+    };
+    const w = document.createElement('div'); w.id = 'pbtCg'; w.setAttribute('data-noen', ''); if(ur) w.setAttribute('dir', 'rtl');
+    w.innerHTML = `<div class="cd" role="dialog" aria-modal="true"><div class="tp"><div class="em">🎉</div><h2>${E(T.t)}</h2><div class="sb">${E(T.s)}</div></div>
+      <div class="bd">${o.plan ? `<div class="pl">⭐ ${E(o.plan)}</div>` : ''}<div class="un">${E(T.u)}</div>
+      ${(o.perks || []).length ? '<ul>' + o.perks.map(p => `<li>${E(p)}</li>`).join('') + '</ul>' : ''}
+      <div class="ty">${E(T.ty)}</div><div class="sg">${E(T.sg)}</div></div>
+      <div class="bt"><button type="button" class="go">${E(T.go)}</button><button type="button" class="hd"><span class="pbthd-sos" style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(#fde047,#facc15);color:#111;border-radius:999px;padding:2px 9px;font:800 12px/1.35 Arial,sans-serif;box-shadow:0 2px 0 #ca8a04;white-space:nowrap;vertical-align:middle;direction:ltr"><b style="background:#111;color:#facc15;border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;font-size:11px">?</b>Help Desk</span> ${E(T.hd)}</button></div></div>`;
+    const cols = ['#f59e0b', '#ef4444', '#8b5cf6', '#10b981', '#3b82f6', '#ec4899'];
+    for(let i = 0; i < 36; i++){ const c = document.createElement('i'); c.className = 'cf'; c.style.left = (Math.random() * 100) + '%'; c.style.background = cols[i % cols.length]; c.style.animationDuration = (2.2 + Math.random() * 2) + 's'; c.style.animationDelay = (Math.random() * .8) + 's'; w.appendChild(c); }
+    document.body.appendChild(w);
+    const close = () => w.remove();
+    w.querySelector('.go').onclick = close;
+    w.querySelector('.hd').onclick = () => { close(); try{ o.help ? o.help() : (window.openHelpDesk && window.openHelpDesk()); }catch(e){} };
+    w.addEventListener('click', e => { if(e.target === w) close(); });
+    try{ if(o.key) localStorage.setItem(o.key, JSON.stringify({ at: Date.now(), plan: o.plan || '', until: o.until || '', life: !!o.life })); }catch(e){}
+  };
+})();
+</script>
 </body>
 
 </html>
