@@ -79,6 +79,14 @@ function notifySale(ctx, info) {
     "🌍 ملک: " + countryName(info.country),
     "💰 قیمت: " + (info.price || "معلوم نہیں")
   ];
+  /* AIO2511WE231 (مالک کا حکم): کس نے لیا — ایپ کی اپنی پہچان (گوگل یہ نہیں دیتا) */
+  const w = info.who || {};
+  if (w.aio || w.name || w.mobile) {
+    lines.unshift("👤 " + (w.name || "نام معلوم نہیں") + (w.aio ? " — " + w.aio : ""));
+    if (w.mobile) lines.splice(1, 0, "📞 " + w.mobile);
+    if (w.gmail) lines.splice(w.mobile ? 2 : 1, 0, "✉️ " + w.gmail);
+  }
+  if (info.exp) lines.push("📅 مدت: " + new Date(info.exp).toISOString().slice(0, 10) + " تک");
   if (info.trial) lines.push("🎁 مفت آزمائش سے شروع");
   if (info.test) lines.push("🧪 یہ ٹیسٹ خریداری ہے (اصل پیسے نہیں)");
   const p = fetch("https://ntfy.sh/", {
@@ -94,6 +102,20 @@ function notifySale(ctx, info) {
   }).catch(() => {});
   if (ctx && ctx.waitUntil) ctx.waitUntil(p);
   return p;
+}
+
+/* AIO2511WE231: ایپ کا بھیجا AIO ID (+ نام / موبائل / Gmail) → سرور پر اسی ID کا پیکج؛ واپس پہچان (اطلاع میں لکھنے کو) */
+async function playSaleLink(env, body, s) {
+  const aio = String((body && body.aio) || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const who0 = { aio: /^AIO(DR)?\d{5}$/.test(aio) ? aio : "", name: String((body && body.name) || "").replace(/[<>"]/g, "").slice(0, 60), mobile: String((body && body.mobile) || "").replace(/[^\d+]/g, "").slice(0, 16), gmail: String((body && body.gmail) || "").replace(/[<>"\s]/g, "").slice(0, 80) };
+  if (!who0.aio || !env.MCS_STATS) return who0;
+  try {
+    const tok = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s.token)))).map((x) => x.toString(16).padStart(2, "0")).join("").slice(0, 32);
+    const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+    const r = await (await stub.fetch("https://s/play_sale", { method: "POST", body: JSON.stringify({ aio: who0.aio, sku: s.sku, plan: planName(s.sku), exp: s.exp, life: !!s.life, price: s.price || "", country: s.country || "", test: !!s.test, tok }) })).json();
+    if (r && r.ok) return { aio: who0.aio, name: r.name || who0.name, mobile: r.mobile || who0.mobile, gmail: r.gmail || who0.gmail };
+  } catch (e) {}
+  return who0;
 }
 
 function fmtPrice(micros, cur) {
@@ -181,7 +203,7 @@ async function getAccessToken(env, scope) {
 
 // ---------- ♾️ لائف ٹائم (one-time product) کی تصدیق اور منظوری ----------
 // purchaseState: 0 = خریدا گیا، 1 = منسوخ/واپس، 2 = ادائیگی زیرِ التوا
-async function verifyOneTime(base, accessToken, sku, token, ctx, pkg) {
+async function verifyOneTime(base, accessToken, sku, token, ctx, pkg, env, body) {
   const url = base + "/purchases/products/" + encodeURIComponent(sku) + "/tokens/" + encodeURIComponent(token);
   const res = await fetch(url, { headers: { Authorization: "Bearer " + accessToken } });
   if (!res.ok) return reply({ access: false, error: "google_" + res.status, productId: sku });
@@ -197,7 +219,8 @@ async function verifyOneTime(base, accessToken, sku, token, ctx, pkg) {
       });
       acknowledged = ackRes.ok;
       if (ackRes.ok) {
-        notifySale(ctx, { pkg, sku, country: d.regionCode || "", price: "", test: d.purchaseType === 0 });
+        const ps = env ? await playSaleLink(env, body, { sku, exp: 0, life: true, price: "", country: countryName(d.regionCode || ""), test: d.purchaseType === 0, token }) : null;   /* AIO2511WE231 */
+        notifySale(ctx, { pkg, sku, country: d.regionCode || "", price: "", test: d.purchaseType === 0, who: ps });
       }
     } catch (e) {
       acknowledged = false;
@@ -2309,6 +2332,24 @@ export class McsStats {
       this.sql.exec("INSERT INTO entfail (dev, n, ts) VALUES (?, ?, ?) ON CONFLICT (dev) DO UPDATE SET n = excluded.n, ts = excluded.ts", b.dev, cur + 1, r && now - r.ts < 9e5 ? r.ts : now);
       return Response.json({ ok: true });
     }
+    if (op === "/play_sale") {   /* AIO2511WE231 (مالک کا حکم): Google Play خریداری خود اسی AIO ID کے پیکج پر — ہیلپ ڈیسک «AIO ID — پیکج ایکٹیو» میں نام، مدت، قیمت، ملک کے ساتھ */
+      const b = await request.json(), now = Date.now();
+      const ar = this.sql.exec("SELECT data FROM aioid WHERE id = ?", String(b.aio || "")).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
+      let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
+      const app = a.app === "DR" ? "DR" : "AIO"; if (a.app === "SM" || a.app === "MD") return Response.json({ ok: false, reason: "wrong_app" });
+      const kr = this.sql.exec("SELECT id FROM entkey WHERE k = ?", app + "|a:" + b.aio).toArray()[0];
+      let e = kr ? this.entGet(kr.id) : null;
+      if (!e) e = { id: "E" + now.toString(36) + Math.random().toString(36).slice(2, 6), app, keys: [], claims: [], exp: 0, at: now, by: "play", devices: 1 };
+      if (!e.keys.includes("a:" + b.aio)) e.keys.push("a:" + b.aio);
+      e.name = a.name || e.name || ""; e.note = "AIO ID " + b.aio + (a.mobile ? " · " + a.mobile : "") + " · Google Play"; e.revoked = false; delete e.replacedBy; delete e.leftDays;
+      const st = String(b.sku || "").match(/plus([0-9])_/); e.devices = Math.max(e.devices || 1, st ? 1 + Number(st[1]) : 1);
+      const isNew = !(e.play || []).includes(b.tok);
+      if (b.life) e.life = true; else if (b.exp > 0) e.exp = Math.max(e.exp || 0, Number(b.exp));
+      e.pkgName = "▶️ Google Play — " + String(b.plan || b.sku || "").slice(0, 60); e.pkgId = "play:" + String(b.sku || "").slice(0, 40);
+      if (isNew) { e.play = (e.play || []).concat(b.tok).slice(-20); e.hist = e.hist || []; e.hist.push({ at: now, pkg: e.pkgName, sku: String(b.sku || "").slice(0, 60), days: 0, life: !!b.life, devices: e.devices, price: String(b.price || "").slice(0, 30), country: String(b.country || "").slice(0, 40), test: !!b.test, exp: e.life ? 0 : e.exp }); if (e.hist.length > 50) e.hist = e.hist.slice(-50); }
+      this.entPut(e); if (isNew) { try { this.finLog("playsale", { aio: b.aio, sku: b.sku, test: !!b.test }); } catch (er) {} }
+      return Response.json({ ok: true, isNew, name: a.name || "", mobile: a.mobile || "", gmail: a.gmail || "" });
+    }
     if (op === "/ent_dev") {   /* AIO0411WE161: ڈویلپر نے یہ فون (UID) جوڑا ہے؟ — گاہک کا فون خود کھلے */
       const b = await request.json();
       for (const r of this.sql.exec("SELECT data FROM ent WHERE app = ?", b.app).toArray()) {
@@ -3538,7 +3579,7 @@ async function handleMcsBuy(request, env, ctx) {
     for (let t = 0; t < 3 && !ackOk; t++) {   /* MCS1511SU427: acknowledge تین کوششیں */
       try {
         const ack = await fetch(base + "/purchases/subscriptions/" + line.productId + "/tokens/" + encodeURIComponent(token) + ":acknowledge", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: "{}" });
-        if (ack.ok) { ackOk = true; notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: isTest, trial: isTrial }); } else ackErr = "ack_" + ack.status;
+        if (ack.ok) { ackOk = true; notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: isTest, trial: isTrial, exp, who: { aio: rec || "", name: String(b.name || b.biz || "").replace(/[<>"]/g, "").slice(0, 60), mobile: /^p\d{10}/.test(rec) ? "0" + rec.slice(1, 11) : "" } }); } else ackErr = "ack_" + ack.status;   /* AIO2511WE231: کاروبار کا موبائل / نام */
       } catch (e) { ackErr = "ack_error"; }
       if (!ackOk && t < 2) await new Promise((r) => setTimeout(r, 800));
     }
@@ -3669,7 +3710,7 @@ export default {
 
       // ---------- لائف ٹائم ہو تو products والا راستہ ----------
       if (sku && (ONETIME[pkg] || []).includes(sku)) {
-        return await verifyOneTime(base, accessToken, sku, token, ctx, pkg);
+        return await verifyOneTime(base, accessToken, sku, token, ctx, pkg, env, body);
       }
 
       // ---------- باقی سب سبسکرپشن (پہلے جیسا) ----------
@@ -3692,16 +3733,21 @@ export default {
           acknowledged = ackRes.ok;
           if (ackRes.ok) {
             const pi = await subPriceInfo(base, accessToken, line.productId, token);
+            const ps = await playSaleLink(env, body, { sku: line.productId, exp: Date.parse(line.expiryTime) || 0, price: pi.price, country: countryName(pi.country || d.regionCode || ""), test: pi.test || !!d.testPurchase, token });
             notifySale(ctx, {
               pkg, sku: line.productId,
               country: pi.country || d.regionCode || "",
               price: pi.price, test: pi.test || !!d.testPurchase,
-              trial: pi.trial || !!(line.offerDetails && /trial/i.test(line.offerDetails.offerId || ""))
+              trial: pi.trial || !!(line.offerDetails && /trial/i.test(line.offerDetails.offerId || "")),
+              who: ps, exp: Date.parse(line.expiryTime) || 0
             });
           }
         } catch (e) {
           acknowledged = false;
         }
+      } else if (body && body.aio) {   /* AIO2511WE231: پرانی / پہلے سے منظور خریداری بھی AIO ID کے پیکج پر (ایک ہی بار، ٹوکن سے) */
+        const exp0 = Date.parse(line.expiryTime) || 0;
+        if (exp0 > Date.now()) ctx.waitUntil(playSaleLink(env, body, { sku: line.productId, exp: exp0, price: "", country: countryName(d.regionCode || ""), test: !!d.testPurchase, token }));
       }
 
       const expiryMs = Date.parse(line.expiryTime);
