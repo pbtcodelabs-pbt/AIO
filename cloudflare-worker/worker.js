@@ -469,6 +469,104 @@ export class McsStats {
   paidActive(rec) {   /* اس کاروبار کی کوئی Google Play خریداری (ادا شدہ یا ریڈیم) ابھی چل رہی ہے؟ */
     try { return !!this.sql.exec("SELECT tok FROM mbuy WHERE rec = ? AND exp > ? LIMIT 1", rec, Date.now()).toArray().length; } catch (e) { return false; }
   }
+  /* ===== MCS2511WE674: یاد دہانی و اطلاعات کا مرکزی انجن (مدد گار) ===== */
+  remInit() {
+    if (this._remOk) return; this._remOk = 1;
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mrem (id TEXT PRIMARY KEY, uid TEXT, title TEXT, descr TEXT, at INTEGER, rep TEXT, kind TEXT, mand INTEGER, rel TEXT, inapp INTEGER, push INTEGER, active INTEGER, st TEXT, created INTEGER, by1 TEXT, last INTEGER, nxt INTEGER)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS mrem_due ON mrem (active, nxt)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS mrem_uid ON mrem (uid)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mnote (id TEXT PRIMARY KEY, uid TEXT, rid TEXT, title TEXT, msg TEXT, typ TEXT, mand INTEGER, rd INTEGER DEFAULT 0, rdts INTEGER, ts INTEGER, due INTEGER, rel TEXT, st TEXT, snz INTEGER DEFAULT 0, ek TEXT UNIQUE, pushq INTEGER DEFAULT 0, pushed INTEGER DEFAULT 0)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS mnote_uid ON mnote (uid, ts)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS mnote_q ON mnote (pushq)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mpush (ep TEXT PRIMARY KEY, uid TEXT, p256dh TEXT, auth TEXT, dev TEXT, on1 INTEGER, upd INTEGER, fails INTEGER DEFAULT 0)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS mpush_uid ON mpush (uid)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mdeliv (id INTEGER PRIMARY KEY AUTOINCREMENT, nid TEXT, ch TEXT, st TEXT, ts INTEGER, dts INTEGER, err TEXT)");
+    this.sql.exec("CREATE INDEX IF NOT EXISTS mdeliv_n ON mdeliv (nid)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mprefs (uid TEXT PRIMARY KEY, data TEXT)");
+    this.sql.exec("CREATE TABLE IF NOT EXISTS mkv (k TEXT PRIMARY KEY, v TEXT)");
+  }
+  remKv(k, v) { if (v === undefined) { const r = this.sql.exec("SELECT v FROM mkv WHERE k = ?", k).toArray()[0]; return r ? r.v : ""; } this.sql.exec("INSERT INTO mkv (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", k, String(v)); }
+  remPrefs(uid) {
+    const D = { inapp: true, push: true, personal: true, subs: true, biz: true, agent: true, sys: true };
+    const r = this.sql.exec("SELECT data FROM mprefs WHERE uid = ?", uid).toArray()[0];
+    try { return Object.assign(D, r ? JSON.parse(r.data) : {}); } catch (e) { return D; }
+  }
+  remUidOfMob(mob) { const m = this.sidMob(mob); if (!m) return ""; const r = this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", "m:" + m).toArray()[0]; return r ? r.id : ""; }
+  /* ایک اطلاع بنائیں (ek = ایک ہی واقعے کی دوہری نہیں)؛ push چاہیے تو قطار میں — ٹک یا فوراً بھیجتا ہے۔ لازمی (mand) کبھی ترتیبات سے نہیں چھپتی */
+  remNotify(uid, o) {
+    if (!uid) return "";
+    const P = this.remPrefs(uid), typ = o.typ || "sys", now = Date.now();
+    const catOn = { personal: P.personal, subs: P.subs, biz: P.biz, agent: P.agent, sys: P.sys, pay: P.subs }[typ] !== false;
+    if (!catOn && !o.mand) return "";
+    const id = "n" + now.toString(36) + Math.random().toString(36).slice(2, 7);
+    const wantPush = (o.push !== false) && P.push !== false && catOn;
+    try {
+      this.sql.exec("INSERT INTO mnote (id, uid, rid, title, msg, typ, mand, rd, ts, due, rel, st, ek, pushq) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?)",
+        id, uid, o.rid || "", String(o.title || "").slice(0, 120), String(o.msg || "").slice(0, 600), typ, o.mand ? 1 : 0, now, o.due || now, o.rel || "", o.mand ? "due" : "info", o.ek || id, wantPush ? 1 : 0);
+    } catch (e) { return ""; }   /* ek پہلے سے = دوہری نہیں */
+    this.remDeliv(id, "inapp", "queued", "");
+    return id;
+  }
+  remDeliv(nid, ch, st, err) { if (!nid) return; this.sql.exec("INSERT INTO mdeliv (nid, ch, st, ts, dts, err) VALUES (?, ?, ?, ?, ?, ?)", nid, ch, st, Date.now(), st === "delivered" || st === "sent" ? Date.now() : 0, String(err || "").slice(0, 200)); }
+  async remVapid() {
+    const v = this.remKv("vapid"); if (v) { try { return JSON.parse(v); } catch (e) {} }
+    const k = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    const jwk = await crypto.subtle.exportKey("jwk", k.privateKey), pub = b64url(new Uint8Array(await crypto.subtle.exportKey("raw", k.publicKey)));
+    const o = { pub, jwk }; this.remKv("vapid", JSON.stringify(o)); return o;
+  }
+  async remPushNote(nid) {
+    const n = this.sql.exec("SELECT * FROM mnote WHERE id = ?", nid).toArray()[0]; if (!n) return 0;
+    this.sql.exec("UPDATE mnote SET pushq = 0, pushed = 1 WHERE id = ?", nid);
+    const subs = this.sql.exec("SELECT * FROM mpush WHERE uid = ? AND on1 = 1", n.uid).toArray();
+    if (!subs.length) { this.remDeliv(nid, "push", "no_device", ""); return 0; }
+    const V = await this.remVapid(); let ok = 0;
+    const payload = JSON.stringify({ t: n.title, b: String(n.msg || "").slice(0, 180), u: "./?mnote=" + encodeURIComponent(n.id), tag: n.id });
+    for (const s of subs) {
+      let st = 0, err = "";
+      for (let tr = 0; tr < 2 && !(st >= 200 && st < 300) && st !== 404 && st !== 410; tr++) { try { st = await webPushSend(s, payload, V); } catch (e) { err = String((e && e.message) || e); } }   /* ایک بار دوبارہ کوشش */
+      if (st >= 200 && st < 300) { ok++; this.remDeliv(nid, "push", "sent", ""); this.sql.exec("UPDATE mpush SET fails = 0 WHERE ep = ?", s.ep); }
+      else if (st === 404 || st === 410) { this.remDeliv(nid, "push", "expired", "HTTP " + st); this.sql.exec("UPDATE mpush SET on1 = 0 WHERE ep = ?", s.ep); }   /* پرانی رکنیت ہٹائیں */
+      else { this.remDeliv(nid, "push", "failed", err || "HTTP " + st); this.sql.exec("UPDATE mpush SET fails = fails + 1, on1 = CASE WHEN fails >= 9 THEN 0 ELSE on1 END WHERE ep = ?", s.ep); }
+    }
+    return ok;
+  }
+  monthAdd(t, n) { const d = new Date(t); const day = d.getUTCDate(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + n); const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate(); d.setUTCDate(Math.min(day, last)); return d.getTime(); }
+  async remTick(now) {
+    let made = 0, pushed = 0;
+    /* (1) صارف کی اپنی یاد دہانیاں — آف لائن رہنے پر بھی ایک ہی اطلاع، اگلی باری آگے */
+    for (const r of this.sql.exec("SELECT * FROM mrem WHERE active = 1 AND nxt <= ? LIMIT 300", now).toArray()) {
+      if (this.remPrefs(r.uid).personal !== false) {
+        const id = this.remNotify(r.uid, { title: r.title, msg: r.descr, typ: "personal", mand: r.inapp ? 1 : 0, push: !!r.push, rel: r.rel || "", rid: r.id, due: r.nxt, ek: "rem:" + r.id + ":" + r.nxt });
+        if (id) made++;
+      }
+      if (r.rep === "once") this.sql.exec("UPDATE mrem SET active = 0, st = 'due', last = ? WHERE id = ?", now, r.id);
+      else {
+        let nx = r.nxt, g = 0; const step = (t) => r.rep === "daily" ? t + 864e5 : r.rep === "weekly" ? t + 7 * 864e5 : this.monthAdd(t, 1);
+        while (nx <= now && g++ < 400) nx = step(nx);
+        this.sql.exec("UPDATE mrem SET nxt = ?, last = ?, st = 'pending' WHERE id = ?", nx, now, r.id);
+      }
+    }
+    /* (2) ممبرشپ ختم ہونے کی یاد دہانی (لازمی) — دن مرکزی ترتیب mkv expDays (اصل 7,3,0) سے، پاکستانی دن کے حساب سے؛ ہر گھنٹے ایک بار */
+    if (now - (Number(this.remKv("expAt")) || 0) > 3600e3) {
+      this.remKv("expAt", now);
+      const days = (this.remKv("expDays") || "7,3,0").split(",").map(Number).filter((x) => x >= 0), maxD = Math.max(0, ...days);
+      const pk = (t) => Math.floor((t + 5 * 3600e3) / 864e5);
+      for (const p of this.sql.exec("SELECT rec, data, until FROM prof WHERE until > ? AND until < ?", now - 864e5, now + (maxD + 2) * 864e5).toArray()) {
+        const left = pk(p.until) - pk(now); if (left < 0) continue;
+        const okD = days.filter((d) => left <= d); if (!okD.length) continue; const stage = Math.min(...okD);
+        const uid = this.remUidOfMob(p.rec); if (!uid) continue;
+        let nm = ""; try { const d = JSON.parse(p.data || "{}"); nm = d.nameEn || d.name || d.nameUr || ""; } catch (e) {}
+        const dt = new Date(p.until + 5 * 3600e3).toISOString().slice(0, 10);
+        const msg = "Your My City Shines membership" + (nm ? " for " + nm : "") + (left === 0 ? " ends today." : " expires in " + left + " day" + (left > 1 ? "s" : "") + ".") + " Please renew to keep your business live on MCS. Due date: " + dt;
+        if (this.remNotify(uid, { title: "Renew MCS Subscription", msg, typ: "subs", mand: 1, rel: "renew:" + p.rec, due: p.until, ek: "exp:" + p.rec + ":" + p.until + ":" + stage })) made++;
+      }
+    }
+    /* (3) اسنوز ختم — دوبارہ فون پر */
+    for (const n of this.sql.exec("SELECT id, uid FROM mnote WHERE st = 'snoozed' AND snz <= ? AND pushed = 0 LIMIT 50", now).toArray()) this.sql.exec("UPDATE mnote SET " + (this.remPrefs(n.uid).push !== false ? "pushq = 1" : "pushed = 1") + " WHERE id = ?", n.id);
+    /* (4) push کی قطار (ایک ٹک میں 60) */
+    for (const n of this.sql.exec("SELECT id FROM mnote WHERE pushq = 1 ORDER BY ts LIMIT 60").toArray()) pushed += await this.remPushNote(n.id);
+    return { ok: true, made, pushed };
+  }
   entGet(id) { const r = this.sql.exec("SELECT data FROM ent WHERE id = ?", id).toArray()[0]; return r ? JSON.parse(r.data) : null; }
   entPut(e) { e.ts = Date.now(); this.sql.exec("INSERT INTO ent (id, app, data, ts) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET data = excluded.data, ts = excluded.ts", e.id, e.app, JSON.stringify(e), e.ts); (e.keys || []).forEach((k) => this.sql.exec("INSERT INTO entkey (k, id) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET id = excluded.id", e.app + "|" + k, e.id)); }
   entOut(e) { const now = Date.now(); return { ok: true, id: e.id, name: e.name || "", life: !!e.life, exp: e.exp || 0, active: !e.revoked && (!!e.life || (e.exp || 0) > now), revoked: !!e.revoked, devices: e.devices || 1, used: (e.claims || []).length, keys: e.keys || [] }; }
@@ -1756,6 +1854,83 @@ export class McsStats {
       const unread = this.sql.exec("SELECT COUNT(*) AS n FROM agnote WHERE who = ? AND rd = 0", "A:" + code).toArray()[0].n;
       return Response.json({ ok: true, unread, agent: { name: d.name, phone: d.phone, code, biz: d.biz, city: d.city, okAt: d.okAt || d.ts || 0, off: !!d.off, wa: d.wa || "", email: d.email || "", yob: this.ppYob("agent", d.phone) }, rate, refs, years, due: fp.due, paidOut, balance: fp.due - paidOut, fin: fp, pays: fp.pays, proofs, msgs });
     }
+    /* ===== MCS2511WE674 (مالک کا حکم، 25 نومبر 2026): مرکزی یاد دہانی و اطلاعات — ایک ہی انجن سب کے لیے (ممبر / ایجنٹ / ایڈمن)؛
+       mrem یاد دہانی، mnote اطلاع + پاپ اپ کی حالت، mpush فون، mdeliv ہر چینل کی ترسیل الگ، mprefs ترتیبات؛ وقت سرور کا (UTC ms)، ہر منٹ cron ===== */
+    if (op === "/rem" || op === "/rem_tick") {
+      this.remInit();
+      const b = op === "/rem" ? await request.json() : {}, now = Date.now();
+      if (op === "/rem_tick") return Response.json(await this.remTick(now));
+      if (b.act === "vapid") return Response.json({ ok: true, key: (await this.remVapid()).pub });
+      if (b.act === "announce") {   /* صرف ایڈمن (ورکر نے verifyFirebaseAdmin کیا) — سب اکاؤنٹس کو؛ push ٹک کی قطار سے */
+        if (!b.admin) return Response.json({ ok: false, reason: "admin_only" });
+        let n = 0;
+        for (const r of this.sql.exec("SELECT id FROM mcsuser").toArray()) if (this.remNotify(r.id, { title: b.title, msg: b.msg, typ: "sys", mand: b.mand ? 1 : 0, ek: "ann:" + b.ek + ":" + r.id })) n++;
+        return Response.json({ ok: true, n });
+      }
+      if (b.act === "sys") {   /* سرور کے اندر کے واقعات (ادائیگی کی تصدیق وغیرہ) — /mcsrem سے کبھی نہیں آتا */
+        const id = this.remNotify(this.remUidOfMob(b.mob), { title: b.title, msg: b.msg, typ: b.typ || "sys", mand: b.mand ? 1 : 0, rel: b.rel || "", ek: b.ek });
+        if (id) await this.remPushNote(id); return Response.json({ ok: !!id });
+      }
+      const sr = b.th ? this.sql.exec("SELECT id FROM mcssess WHERE tok = ?", b.th).toArray()[0] : null;
+      const u0 = sr ? this.sql.exec("SELECT data FROM mcsuser WHERE id = ?", sr.id).toArray()[0] : null;
+      let del = true; try { del = !u0 || !!JSON.parse(u0.data).del; } catch (e) {}
+      if (del) return Response.json({ ok: false, reason: "session" });
+      const uid = sr.id, P = this.remPrefs(uid);
+      if (b.act === "list") {
+        const rems = this.sql.exec("SELECT id, title, descr, at, rep, inapp, push, active, st, nxt FROM mrem WHERE uid = ? AND st != 'cancelled' ORDER BY nxt DESC LIMIT 100", uid).toArray();
+        const notes = this.sql.exec("SELECT id, rid, title, msg, typ, mand, rd, ts, due, rel, st, snz FROM mnote WHERE uid = ? ORDER BY ts DESC LIMIT 100", uid).toArray();
+        const due = this.sql.exec("SELECT id, rid, title, msg, typ, mand, rd, ts, due, rel, st, snz FROM mnote WHERE uid = ? AND mand = 1 AND (st IN ('due', 'displayed') OR (st = 'snoozed' AND snz <= ?)) ORDER BY ts LIMIT 20", uid, now).toArray();
+        const unread = this.sql.exec("SELECT COUNT(*) AS n FROM mnote WHERE uid = ? AND rd = 0", uid).toArray()[0].n;
+        return Response.json({ ok: true, now, rems, notes, due, unread, prefs: P, push: this.sql.exec("SELECT COUNT(*) AS n FROM mpush WHERE uid = ? AND on1 = 1", uid).toArray()[0].n });
+      }
+      if (b.act === "add") {
+        const at = Number(b.at) || 0;
+        if (!b.title) return Response.json({ ok: false, reason: "title" });
+        if (!(at > now - 60e3)) return Response.json({ ok: false, reason: "past" });
+        if (!["once", "daily", "weekly", "monthly"].includes(b.rep)) return Response.json({ ok: false, reason: "rep" });
+        if (!b.inapp && !b.push) return Response.json({ ok: false, reason: "method" });
+        if (this.sql.exec("SELECT COUNT(*) AS n FROM mrem WHERE uid = ? AND active = 1", uid).toArray()[0].n >= 200) return Response.json({ ok: false, reason: "limit" });
+        const id = "r" + now.toString(36) + Math.random().toString(36).slice(2, 6);
+        this.sql.exec("INSERT INTO mrem (id, uid, title, descr, at, rep, kind, mand, rel, inapp, push, active, st, created, by1, last, nxt) VALUES (?, ?, ?, ?, ?, ?, 'personal', 1, ?, ?, ?, 1, 'pending', ?, ?, 0, ?)",
+          id, uid, b.title, b.descr || "", at, b.rep, b.rel || "", b.inapp ? 1 : 0, b.push ? 1 : 0, now, uid, at);
+        return Response.json({ ok: true, id });
+      }
+      if (b.act === "cancel") { this.sql.exec("UPDATE mrem SET active = 0, st = 'cancelled' WHERE id = ? AND uid = ?", String(b.id || ""), uid); return Response.json({ ok: true }); }
+      if (b.act === "read") { const id = String(b.id || ""); this.sql.exec("UPDATE mnote SET rd = 1, rdts = ? WHERE uid = ? AND rd = 0 AND (? = '*' OR id = ?)", now, uid, id, id); return Response.json({ ok: true }); }
+      if (b.act === "seen") {   /* پاپ اپ سکرین پر آ گیا */
+        this.sql.exec("UPDATE mnote SET st = 'displayed' WHERE id = ? AND uid = ? AND st IN ('due', 'snoozed')", String(b.id || ""), uid);
+        this.remDeliv(String(b.id || ""), "inapp", "delivered", ""); return Response.json({ ok: true });
+      }
+      if (b.act === "act") {   /* done = کام ہو گیا؛ dismiss = پاپ اپ بند (یاد دہانی نہ حذف نہ مکمل)؛ snooze = بعد میں */
+        const n = this.sql.exec("SELECT id, rid FROM mnote WHERE id = ? AND uid = ?", String(b.id || ""), uid).toArray()[0];
+        if (!n) return Response.json({ ok: false, reason: "none" });
+        if (b.a === "snooze") { const m = Math.min(Math.max(Number(b.mins) || 15, 5), 7 * 1440), snz = now + m * 60e3; this.sql.exec("UPDATE mnote SET st = 'snoozed', snz = ?, pushed = 0, rd = 1, rdts = ? WHERE id = ?", snz, now, n.id); return Response.json({ ok: true, snz }); }
+        if (b.a === "done") {
+          this.sql.exec("UPDATE mnote SET st = 'completed', rd = 1, rdts = ? WHERE id = ?", now, n.id);
+          if (n.rid) this.sql.exec("UPDATE mrem SET st = 'completed', active = 0 WHERE id = ? AND rep = 'once'", n.rid);
+          return Response.json({ ok: true });
+        }
+        this.sql.exec("UPDATE mnote SET st = 'dismissed', rd = 1, rdts = ? WHERE id = ?", now, n.id);
+        return Response.json({ ok: true });
+      }
+      if (b.act === "prefs") {
+        const np = Object.assign({}, P);
+        ["inapp", "push", "personal", "subs", "biz", "agent", "sys"].forEach((k) => { if (typeof (b.prefs || {})[k] === "boolean") np[k] = b.prefs[k]; });
+        this.sql.exec("INSERT INTO mprefs (uid, data) VALUES (?, ?) ON CONFLICT (uid) DO UPDATE SET data = excluded.data", uid, JSON.stringify(np));
+        return Response.json({ ok: true, prefs: np });
+      }
+      if (b.act === "sub") {   /* فون کی push رکنیت — ایک اکاؤنٹ کے کئی فون */
+        const s = b.sub || {};
+        if (!/^https:\/\//.test(String(s.endpoint || "")) || !s.p256dh || !s.auth) return Response.json({ ok: false, reason: "bad_sub" });
+        this.sql.exec("INSERT INTO mpush (ep, uid, p256dh, auth, dev, on1, upd, fails) VALUES (?, ?, ?, ?, ?, 1, ?, 0) ON CONFLICT (ep) DO UPDATE SET uid = excluded.uid, p256dh = excluded.p256dh, auth = excluded.auth, dev = excluded.dev, on1 = 1, upd = excluded.upd, fails = 0",
+          String(s.endpoint), uid, String(s.p256dh), String(s.auth), String(b.dev || ""), now);
+        let sent = 0;
+        if (b.test) { const id = this.remNotify(uid, { title: "🔔 Notifications are on", msg: "My City Shines will remind you here — even when the app is closed.", typ: "sys", mand: 0, ek: "pt:" + now }); if (id) sent = await this.remPushNote(id); }
+        return Response.json({ ok: true, sent });
+      }
+      if (b.act === "unsub") { const ep = String((b.sub || {}).endpoint || ""); this.sql.exec("UPDATE mpush SET on1 = 0, upd = ? WHERE uid = ? AND (? = '' OR ep = ?)", now, uid, ep, ep); return Response.json({ ok: true }); }
+      return Response.json({ ok: false, reason: "bad_act" });
+    }
     if (op === "/ua") {   /* MCS0511TH161: اکاؤنٹ — ورکر نے ان پٹ صاف / پاس ورڈ ہیش / گوگل تصدیق کر دی */
       const b = await request.json(), now = Date.now();
       const key = (k) => (this.sql.exec("SELECT id FROM mcsukey WHERE k = ?", k).toArray()[0] || {}).id || "";
@@ -3016,6 +3191,68 @@ async function uaCheck(pw, stored) {
   if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0;
 }
 async function uaTokHash(tok) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("ua:" + tok)))).slice(0, 48); }
+/* ===== MCS2511WE674: فون کے اوپر اطلاع (Web Push، RFC 8291 aes128gcm + VAPID) — Android Chrome / TWA میں یہی FCM کے راستے پہنچتی ہے؛
+   کوئی فائربیس سرور چابی نہیں چاہیے — VAPID جوڑی سرور خود ایک بار بناتا ہے (mkv vapid) ===== */
+const unb64url = (s) => Uint8Array.from(atob(String(s).replace(/-/g, "+").replace(/_/g, "/") + "===".slice((String(s).length + 3) % 4)), (c) => c.charCodeAt(0));
+async function hkdf(salt, ikm, info, len) {
+  const k = await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt, info }, k, len * 8));
+}
+const u8cat = (...a) => { const o = new Uint8Array(a.reduce((s, x) => s + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
+async function webPushEncrypt(p256dh, authB64, payload) {
+  const ua = unb64url(p256dh), auth = unb64url(authB64), te = new TextEncoder();
+  const eph = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey("raw", eph.publicKey));
+  const uaKey = await crypto.subtle.importKey("raw", ua, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: uaKey }, eph.privateKey, 256));
+  const ikm = await hkdf(auth, shared, u8cat(te.encode("WebPush: info\0"), ua, asPub), 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const cek = await hkdf(salt, ikm, te.encode("Content-Encoding: aes128gcm\0"), 16);
+  const nonce = await hkdf(salt, ikm, te.encode("Content-Encoding: nonce\0"), 12);
+  const key = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, key, u8cat(te.encode(payload), new Uint8Array([2]))));
+  return u8cat(salt, new Uint8Array([0, 0, 16, 0]), new Uint8Array([65]), asPub, ct);
+}
+async function vapidAuth(endpoint, V) {
+  const aud = new URL(endpoint).origin;
+  const h = b64url(JSON.stringify({ typ: "JWT", alg: "ES256" })), c = b64url(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: "https://pbtcodelabs-pbt.github.io/help/" }));
+  const k = await crypto.subtle.importKey("jwk", V.jwk, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, k, new TextEncoder().encode(h + "." + c)));
+  return "vapid t=" + h + "." + c + "." + b64url(sig) + ", k=" + V.pub;
+}
+async function webPushSend(sub, payload, V) {
+  const body = await webPushEncrypt(sub.p256dh, sub.auth, payload);
+  const r = await fetch(sub.ep, { method: "POST", headers: { "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", TTL: "86400", Urgency: "high", Authorization: await vapidAuth(sub.ep, V) }, body });
+  return r.status;
+}
+/* ایپ کا راستہ: /mcsrem — لاگ اِن ٹوکن سے صرف اپنی یاد دہانیاں / اطلاعات؛ اعلان صرف ایڈمن */
+async function handleMcsRem(request, env) {
+  if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
+  let b = {}; try { b = JSON.parse(await request.text()); } catch (e) { return reply({ error: "bad_json" }, 400); }
+  const S = (v, n) => String(v == null ? "" : v).replace(/[<>]/g, "").replace(/[\u0000-\u001f]/g, " ").slice(0, n).trim();
+  const act = String(b.act || "");
+  const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+  const call = async (o) => reply(await (await stub.fetch("https://s/rem", { method: "POST", body: JSON.stringify(o) })).json());
+  if (act === "vapid") return call({ act });
+  if (act === "announce") {
+    if (!(await verifyFirebaseAdmin(request))) return reply({ ok: false, reason: "admin_only" }, 403);
+    const title = S(b.title, 120), msg = S(b.msg, 600); if (!title) return reply({ ok: false, reason: "title" });
+    return call({ act, admin: true, title, msg, mand: !!b.mand, ek: Date.now().toString(36) });
+  }
+  if (!["list", "add", "cancel", "read", "seen", "act", "prefs", "sub", "unsub"].includes(act)) return reply({ ok: false, reason: "bad_act" }, 400);
+  const th = b.tok ? await uaTokHash(String(b.tok).slice(0, 80)) : ""; if (!th) return reply({ ok: false, reason: "session" });
+  const o = { act, th };
+  if (act === "add") Object.assign(o, { title: S(b.title, 120), descr: S(b.descr, 600), at: Number(b.at) || 0, rep: String(b.rep || ""), inapp: b.inapp !== false, push: !!b.push, rel: /^(renew:p\d{10}_[a-z0-9]{2,12}|portal|account)?$/.test(String(b.rel || "")) ? String(b.rel || "") : "" });
+  if (["cancel", "read", "seen", "act"].includes(act)) o.id = S(b.id, 40);
+  if (act === "act") { o.a = ["done", "dismiss", "snooze"].includes(b.a) ? b.a : "dismiss"; o.mins = Number(b.mins) || 15; }
+  if (act === "prefs") o.prefs = b.prefs && typeof b.prefs === "object" ? b.prefs : {};
+  if (act === "sub" || act === "unsub") {
+    const s = b.sub || {};
+    if (act === "sub") { let h = ""; try { h = new URL(String(s.endpoint || "")).hostname; } catch (e) {} if (!/(^|\.)(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com)$/.test(h)) return reply({ ok: false, reason: "bad_sub" }); }   /* صرف اصل push سروس */
+    o.sub = { endpoint: S(s.endpoint, 600), p256dh: S(s.p256dh, 200), auth: S(s.auth, 60) }; o.dev = S(b.dev, 80); o.test = !!b.test;
+  }
+  return call(o);
+}
 async function handleMcsAuth(request, env) {
   if (!env.MCS_STATS) return reply({ error: "not_ready" }, 503);
   const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
@@ -3579,6 +3816,7 @@ async function handleMcsBuy(request, env, ctx) {
     for (let t = 0; t < 3 && !ackOk; t++) {   /* MCS1511SU427: acknowledge تین کوششیں */
       try {
         const ack = await fetch(base + "/purchases/subscriptions/" + line.productId + "/tokens/" + encodeURIComponent(token) + ":acknowledge", { method: "POST", headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" }, body: "{}" });
+        if (ack.ok && /^p\d{10}_/.test(rec || "") && env.MCS_STATS) { try { const st0 = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs")); ctx.waitUntil(st0.fetch("https://s/rem", { method: "POST", body: JSON.stringify({ act: "sys", mob: rec, typ: "pay", title: "✅ Payment confirmed", msg: "Your My City Shines membership payment through Google Play is confirmed" + (exp ? " — active until " + new Date(exp + 5 * 3600e3).toISOString().slice(0, 10) : "") + ". Thank you!", ek: "pay:" + rec + ":" + (exp || Date.now()) }) })); } catch (e) {} }   /* MCS2511WE674: ادائیگی کی تصدیق کی اطلاع */
         if (ack.ok) { ackOk = true; notifySale(ctx, { pkg: MCS_PKG, sku: line.productId, country: pi.country || d.regionCode || "", price: pi.price, test: isTest, trial: isTrial, exp, who: { aio: rec || "", name: String(b.name || b.biz || "").replace(/[<>"]/g, "").slice(0, 60), mobile: /^p\d{10}/.test(rec) ? "0" + rec.slice(1, 11) : "" } }); } else ackErr = "ack_" + ack.status;   /* AIO2511WE231: کاروبار کا موبائل / نام */
       } catch (e) { ackErr = "ack_error"; }
       if (!ackOk && t < 2) await new Promise((r) => setTimeout(r, 800));
@@ -3670,6 +3908,7 @@ async function handleProf(request, env, path) {
 export default {
   async scheduled(event, env, ctx) {   /* AGP1711TU036: روز رات 3 بجے (PKT) MCS کا پورا بیک اپ */
     const stub = env.MCS_STATS.get(env.MCS_STATS.idFromName("mcs"));
+    if (event.cron === "* * * * *") { ctx.waitUntil(stub.fetch("https://s/rem_tick", { method: "POST", body: "{}" })); return; }   /* MCS2511WE674: ہر منٹ — یاد دہانی / اطلاعات */
     ctx.waitUntil(stub.fetch("https://s/bk_run", { method: "POST", body: "{}" }));
   },
   async fetch(request, env, ctx) {
@@ -3680,6 +3919,7 @@ export default {
     if (new URL(request.url).pathname === "/mcssid" && request.method === "POST") return handleMcsSid(request, env);
     { const pp = new URL(request.url).pathname; if (["/plist", "/pget", "/pstatus", "/pimg", "/pclaim", "/pcode", "/psave", "/padmin", "/preq", "/adreq"].includes(pp)) return handleProf(request, env, pp); }
     { const ap = new URL(request.url).pathname; if (["/aioid", "/agapply", "/agstatus", "/agadmin", "/agref", "/agportal", "/codev", "/codevadmin", "/agdocs", "/agmydocs", "/agpropose", "/agfind", "/agfree", "/cdfin", "/cdchat", "/mcschat", "/mcsuse", "/mcsdir", "/mcsbackup", "/mcscity", "/mcsdel", "/smcode", "/smrestore", "/mdpar", "/pplogin", "/fin2"].includes(ap) && request.method === "POST") return handleAgent(request, env, ap); }
+    if (new URL(request.url).pathname === "/mcsrem" && request.method === "POST") return handleMcsRem(request, env);   /* MCS2511WE674: یاد دہانی / اطلاعات */
     if (new URL(request.url).pathname === "/mcsauth" && request.method === "POST") return handleMcsAuth(request, env);
     { const ep = new URL(request.url).pathname; if (["/entclaim", "/entstatus", "/entadmin", "/entdev"].includes(ep) && request.method === "POST") return handleEnt(request, env, ep); }
     { const tp = new URL(request.url).pathname; if (tp === "/mcstest" && request.method === "POST") return handleMcsTest(request, env); }   /* MCS1811WE541: ٹیسٹ موڈ کا الگ خانہ */

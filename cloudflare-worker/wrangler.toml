@@ -15,7 +15,7 @@ binding = "AI"
 # MCS: کالوں/واٹس ایپ کی گنتی (راستہ /stat) — Durable Object، SQLite
 # MCS: روز رات 3 بجے (پاکستان) پورا بیک اپ — AGP1711TU036
 [triggers]
-crons = ["0 22 * * *"]
+crons = ["0 22 * * *", "* * * * *"]   # MCS2511WE674: ہر منٹ یاد دہانی / اطلاعات
 
 [[durable_objects.bindings]]
 name = "MCS_STATS"
