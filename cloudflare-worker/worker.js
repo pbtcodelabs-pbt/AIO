@@ -2739,6 +2739,13 @@ export class McsStats {
         out.sort((p, q) => (q.made || 0) - (p.made || 0));
         return Response.json({ ok: true, list: out.slice(0, 2000) });
       }
+      if (b.op === "aiowantdel") {   /* HD2611TH192 (مالک کا حکم): پیکج کی درخواست صاف — صرف want ہٹتا ہے؛ ID، پیکج، ٹرائل، فون کی پہچان کو کچھ نہیں */
+        const ar = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
+        let a = {}; try { a = JSON.parse(ar.data || "{}"); } catch (er) {}
+        const ap5 = (v) => (v === "DR" ? "DR" : v === "SM" ? "SM" : v === "MD" ? "MD" : v === "FM" ? "FM" : v === "MA" ? "MA" : "AIO"); if (ap5(a.app) !== ap5(b.app)) return Response.json({ ok: false, reason: "wrong_app" });
+        if (a.want) { a.wantCleared = Object.assign({}, a.want, { cleared: now }); delete a.want; this.sql.exec("UPDATE aioid SET data = ? WHERE id = ?", JSON.stringify(a), b.aio); try { this.finLog("aiowantdel", { aio: b.aio }); } catch (er) {} }
+        return Response.json({ ok: true });
+      }
       if (b.op === "aiodel") {   /* AIO2011FR227 (مالک کا حکم): فالتو AIO ID ہٹانا — فہرست سے غائب، مگر ریکارڈ اندر رہتا ہے تاکہ اسی فون کو دوبارہ نئی ID / نیا مفت ٹرائل نہ ملے؛ جس ID پر پیکج چل رہا ہو وہ نہیں ہٹتی */
         const ar = this.sql.exec("SELECT dev, data FROM aioid WHERE id = ?", b.aio).toArray()[0]; if (!ar) return Response.json({ ok: false, reason: "no_aio" });
         { let a0 = {}; try { a0 = JSON.parse(ar.data || "{}"); } catch (er) {} if ((b.app === "SM" || b.app === "MD" || b.app === "FM" || b.app === "MA" || a0.app === "SM" || a0.app === "MD" || a0.app === "FM" || a0.app === "MA") && a0.app !== b.app) return Response.json({ ok: false, reason: "wrong_app" }); }   /* MD2311MO028: پکی روک */
@@ -3663,7 +3670,7 @@ async function handleEnt(request, env, path) {
     if (op === "pkgsave") return fwd("/ent_admin", { op, app, pkg: b.pkg && typeof b.pkg === "object" ? b.pkg : {} });
     if (op === "pkgdel") return fwd("/ent_admin", { op, app, pkgId: String(b.pkgId || "").slice(0, 40) });
     if (op === "aionew") return fwd("/ent_admin", { op, app });   /* AIO1811WE225: سب AIO IDs (صرف ایڈمن) */
-    if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel" || op === "aiodue") {   /* SM2411TU318: aiodue = باقی رقم وصول · AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
+    if (op === "aiolook" || op === "aiogrant" || op === "aioadd" || op === "aiodel" || op === "aiodue" || op === "aiowantdel") {   /* HD2611TH192: aiowantdel = درخواست صاف · SM2411TU318: aiodue = باقی رقم وصول · AIO1811WE224: AIO ID پر سیدھا پیکج (صرف ایڈمن)؛ AIO1811WE226: aioadd = دن جوڑیں */
       const aio = String(b.aio || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (!/^(AIO(DR)?|SM|MD|FM|MA)\d{5}$/.test(aio)) return reply({ ok: false, reason: "bad_id" });
       if (!idAppOk(aio, app)) return reply({ ok: false, reason: "wrong_app" });
