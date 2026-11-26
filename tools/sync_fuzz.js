@@ -1,7 +1,7 @@
 // دو فون + نقلی Firestore: ایک ساتھ بل/وصولی/اوپننگ/ایڈٹ — آخر میں دونوں پر ہر گاہک کا بقایا ماڈل کے برابر
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
-const [dir, seedArg, roundsArg, legacy] = process.argv.slice(2);
+const [dir, seedArg, roundsArg, legacy] = process.argv.slice(2); const LOSSY = process.env.LOSSY || '0';
 let seed = +seedArg || 1; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
 const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
 const docs = new Map(); let tick = 0;
@@ -33,12 +33,13 @@ function fakeFS(method, p, body){
     await pg.evaluate((slot) => {
       window.alert = () => {}; window.confirm = () => true;
       try{ showImageSharePreview = () => {}; openInvoicePreview = () => {}; sharePaymentReceiptImage = async () => {}; }catch(e){}
-      aioAuthFetch = async (p, o = {}) => { const r = await window.fakeFS(o.method || 'GET', p, o.body || null); return {status: r.status, ok: r.status < 300, json: async () => r.json}; };
+      aioAuthFetch = async (p, o = {}) => { const r = await window.fakeFS(o.method || 'GET', p, o.body || null); if(window.__lossy && (o.method || 'GET') === 'PATCH' && !/_index/.test(p) && r.status < 300 && Math.random() < window.__lossy) throw new Error('lost reply'); return {status: r.status, ok: r.status < 300, json: async () => r.json}; };   /* LOSSY: کلاؤڈ پر لکھ گیا مگر جواب نہیں آیا */
       Object.assign(AppState.settings, {syncOn: true, businessId: 'BIZ-TEST-0000-0001', syncSlot: slot, syncRole: slot ? 'staff' : 'owner', trackInventory: false, taxEnabled: false});
       refreshMultiFlag();
       try{ clearInterval(syncPollTimer); }catch(e){}
       document.querySelectorAll('.modalOverlay.show').forEach(m => m.classList.remove('show')); goTo('billing');
     }, slot);
+    await pg.evaluate(l => { window.__lossy = +l || 0; }, LOSSY);
     return pg;
   };
   const A = await mk(0), B = await mk(1);
@@ -90,7 +91,9 @@ function fakeFS(method, p, body){
     let a = await st(A), bb = await st(B);
     let bad = Object.keys(N).filter(k => Math.abs(a.N[k] - N[k]) > .01 || Math.abs(bb.N[k] - N[k]) > .01);
     if(bad.length || a.inv !== bb.inv){ // ادھورا سنک؟ رک کر دوبارہ — پھر بھی فرق ہو تو ہی ناکام
-      await A.waitForTimeout(2500); for(const pg of [A, B, A, B]){ await sync(pg); await pg.waitForTimeout(400); }
+      for(const pg of [A, B]) await pg.evaluate(() => { window.__lossy = 0; });   /* LOSSY: آخری ملاپ صاف نیٹ پر */
+      for(let z = 0; z < (LOSSY !== '0' ? 4 : 1); z++){ await A.waitForTimeout(2500); for(const pg of [A, B, A, B]){ await sync(pg); await pg.waitForTimeout(400); } }
+      for(const pg of [A, B]) await pg.evaluate(l => { window.__lossy = +l || 0; }, LOSSY);
       a = await st(A); bb = await st(B);
       bad = Object.keys(N).filter(k => Math.abs(a.N[k] - N[k]) > .01 || Math.abs(bb.N[k] - N[k]) > .01);
       if(!bad.length && a.inv === bb.inv) log.push('(late sync converged)');
