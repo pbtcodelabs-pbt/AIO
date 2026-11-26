@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2511WE244</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2611TH245</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2511WE244</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2611TH245</span>
     </div>
   </div>
 
@@ -7666,7 +7666,7 @@ async function syncGetChunk(chunk){
     const d = await res.json();
     let items = [];
     try{ items = JSON.parse(d.fields?.json?.stringValue || '[]'); }catch(e){}
-    return {items: Array.isArray(items) ? items : [], ut: d.updateTime};
+    return {items: Array.isArray(items) ? items : [], ut: d.updateTime, by: d.fields?.by?.stringValue || ''};
   }catch(e){ return null; }
 }
 async function syncPutChunk(chunk, json, ut){
@@ -7830,12 +7830,14 @@ function syncApplyChunk(docType, chunk, merged, snap){
 // ---------- ایک حصے کا سنک ----------
 async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
   const k = known[chunk] || {};
-  const mustFetch = (idxMs || 0) > (k.ms || 0) || (!k.ut && !!idxMs);
-  let remoteItems = null, ut = k.ut || null;
+  const mustFetch = !!k.force || (idxMs || 0) > (k.ms || 0) || (!k.ut && !!idxMs);   /* force: ٹکراؤ کے بعد کلاؤڈ والا لازمی پڑھیں */
+  let remoteItems = null, ut = k.ut || null, echo = false;
   if(mustFetch){
     const r = await syncGetChunk(chunk);
     if(r === null) throw new Error('offline');
     remoteItems = r.items; ut = r.missing ? null : r.ut;
+    /* AIO2611TH245: کلاؤڈ پر آخری بار اسی فون نے لکھا (جواب راستے میں گم ہو گیا تو base پرانا رہ گیا تھا) — تو کلاؤڈ والی حالت ہی ہماری base ہے؛ ورنہ وہی بل / وصولی دوبارہ جمع ہو کر بقایا دگنا (8,040 → 16,080) */
+    if(!r.missing && r.by && r.by === syncDeviceUid() && baseStr !== JSON.stringify(remoteItems)){ baseStr = JSON.stringify(remoteItems); echo = true; }
   }
   const base = baseStr ? JSON.parse(baseStr) : [];
   const merged = remoteItems === null ? localItems : syncMerge3(docType, base, localItems, remoteItems);
@@ -7844,6 +7846,7 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
   if(mergedStr !== JSON.stringify(localItems)) syncApplyChunk(docType, chunk, merged, localItems);
   if(mergedStr === remoteStr){
     await syncBaseSet(chunk, mergedStr);
+    if(echo){ const ms = Date.now(); known[chunk] = {ms, ut, idxPending: !(await syncSetIndex(chunk, ms))}; return true; }   /* گم جواب والی لکھائی — اب دوسرے فونوں کو بتائیں */
     known[chunk] = {ms: Math.max(idxMs || 0, k.ms || 0), ut};
     return true;
   }
@@ -7861,7 +7864,7 @@ async function syncChunk(docType, chunk, localItems, baseStr, idxMs, known){
   if(put === 'error'){ cloudSyncStatus = 'error'; return 'skip'; }
   if(put === 'conflict'){
     if(remoteItems !== null) await syncBaseSet(chunk, remoteStr);
-    known[chunk] = {ms: 0, ut: null}; syncAgain = true; return false;
+    known[chunk] = {ms: 0, ut: null, force: true}; syncAgain = true; return false;
   }
   const ms = Date.now();
   syncNoteBox(chunk, mergedStr.length);
@@ -20647,6 +20650,31 @@ function isDateInRange(dateVal, range){
 // ---------- کسی invoice پر ابھی کتنی رقم باقی ہے (نہ ہونے کی صورت میں credit سے اندازہ) — Pending/Cleared فلٹر کے لیے ----------
 // AIO3010FR126: بل کا «Due» اب اصل وقت میں — گاہک کی وصولی پہلے پرانے بل صاف کرتی ہے؛ باقی بقایا نئے بلوں پر
 function invStoredDue(inv){ return (inv.amount_due !== undefined) ? inv.amount_due : (inv.payment_method === 'credit' ? inv.grand_total : 0); }
+
+/* AIO2611TH245: دگنا بقایا پکڑنا / درست کرنا — کھاتا (buildPartyStatement) شروع سے: earlier = محفوظ بقایا − کھاتے کا جوڑ؛ صرف تب جب فرق مثبت اور بالکل کسی بل (یا سب بلوں) کے برابر */
+function aioBalDupCheck(c){
+  if(!c) return null;
+  const st = buildPartyStatement('customers', c.customer_id); if(!st) return null;
+  const extra = moneyRound(st.earlier); if(!(extra > 0.5)) return null;
+  const bills = st.rows.filter(r => r.dr > 0 && /🧾/.test(r.text));
+  const one = bills.find(r => Math.abs(r.dr - extra) < 0.5), all = Math.abs(bills.reduce((t, r) => t + r.dr, 0) - extra) < 0.5;
+  if(!one && !(all && bills.length)) return null;
+  const why = one ? (String(one.text).replace(/^🧾\s*/, '').split(' — ')[0] + ' counted twice') : 'all bills counted twice';
+  return {cur: moneyRound(Number(c.total_receivable) || 0), should: moneyRound((Number(c.total_receivable) || 0) - extra), extra, why};
+}
+async function aioBalDupFix(cid){
+  const c = customersData.find(x => x.customer_id === cid); const fx = aioBalDupCheck(c); if(!fx) return;
+  const ok = await dangerConfirm({ step: 'ADMIN PIN', title: 'Fix this balance?', pin: true, final: true, okText: '✅ Fix balance',
+    html: `<b>${String(c.name).replace(/[&<>"]/g, '')}</b><br>Rs. ${fx.cur.toLocaleString()} → <b>Rs. ${fx.should.toLocaleString()}</b><br><span style="font-size:12px;color:#64748b">Bills and payments stay exactly the same — only the wrong extra Rs. ${fx.extra.toLocaleString()} is removed.</span>` });
+  if(!ok) return;
+  (c.walletHistory = c.walletHistory || []).unshift({type: 'balance_fix', from: fx.cur, to: fx.should, amount: fx.extra, date: localDateStr(new Date()), at: new Date().toISOString(), by: (AppState.currentUser && AppState.currentUser.name) || '', note: 'Duplicate (sync) removed — ' + fx.why});
+  c.total_receivable = fx.should;
+  persistAllData();
+  try{ if(typeof syncNow === 'function') setTimeout(() => syncNow(), 300); }catch(e){}
+  try{ openCustomerProfile(cid); }catch(e){}
+  try{ renderPartyList(); }catch(e){}
+  alert(`✅ Fixed — ${c.name}: Rs. ${fx.should.toLocaleString()}`);
+}
 let _invDueCache = new Map();
 function getInvoiceAmountDue(inv){
   const stored = invStoredDue(inv);
@@ -20736,6 +20764,8 @@ function openCustomerProfile(customerId){
     <div class="pfBox"><div class="pfLabel">📥 To be received</div><div class="pfValue receivable">Rs. ${c.total_receivable.toLocaleString()}</div></div>
   `;
 
+  /* AIO2611TH245 (مالک کا حکم — اکرم صوفی: ایک بل 8,040 مگر بقایا 16,080): سنک کا جواب گم ہونے سے کوئی بل دوبارہ جمع ہو گیا ہو تو یہاں پکڑیں — بقایا = کھاتے (بل − وصولی ± اوپننگ) سے زیادہ اور فرق بالکل کسی بل کے برابر */
+  try{ const o0 = document.getElementById('aioBalFix'); if(o0) o0.remove(); const fx = aioBalDupCheck(c); if(fx) figuresEl.insertAdjacentHTML('afterend', `<div id="aioBalFix" style="margin:8px 10px 0;padding:9px 11px;border:2px solid #dc2626;border-radius:12px;background:#fef2f2;color:#7f1d1d;font-size:13.5px;line-height:1.45">⚠️ <b>Balance mismatch</b> — bills &amp; payments add up to <b>Rs. ${fx.should.toLocaleString()}</b>, but the balance shows <b>Rs. ${fx.cur.toLocaleString()}</b> (extra Rs. ${fx.extra.toLocaleString()} = ${fx.why}).<button type="button" onclick="aioBalDupFix(${c.customer_id})" style="display:block;width:100%;margin-top:7px;padding:8px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-weight:800;font-size:14px">✅ Fix balance to Rs. ${fx.should.toLocaleString()}</button></div>`); }catch(e){}
   // --- بائیں طرف چھوٹے 3D آئیکن بٹنوں کا کالم (New Bill سب سے اوپر — سب سے زیادہ استعمال ہونے والا عمل)؛ Transactions سب سے نیچے ---
   const sideEl = document.getElementById('profileQuickActions');
   sideEl.innerHTML = `
@@ -35845,9 +35875,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2511WE244'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2611TH245'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'A warm congratulations card from Team AIO POS when you subscribe — plan, valid-until date and Help Desk';
+  const UPDATE_NOTE = 'Multi-device fix: a bill can no longer be counted twice in a customer balance when the internet drops while saving; customer profile shows a Balance mismatch card with one-tap Fix (admin PIN)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
