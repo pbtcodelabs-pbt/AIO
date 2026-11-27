@@ -1955,7 +1955,7 @@ export class McsStats {
         u.pk = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
         const d = Object.assign({}, u); delete d._pwh; this.sql.exec("UPDATE mcsuser SET data = ? WHERE id = ?", JSON.stringify(d), u.id); return u.pk;
       };
-      const out = (u) => ({ id: u.id, sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, hasYob: !!u.yob, dob: u.dob || "", ts: u.ts, pk: pkOf(u) });   /* MCS2311MO642: پوری تاریخِ پیدائش */
+      const out = (u) => ({ id: u.id, sid: this.adminSlotOf(u.mobile) || this.staffSid(u.mobile) || this.sidGet(u.mobile) || "", mcsId: this.sidGet(u.mobile) || "", name: u.name, mobile: u.mobile, district: u.district || "", locality: u.locality || "", email: u.email || "", gmail: u.gmail || "", hasPw: !!u._pwh, hasYob: !!u.yob, dob: u.dob || "", ts: u.ts, pk: pkOf(u) });   /* MCS2311MO642: پوری تاریخِ پیدائش */
       const sess = async (id, via) => { const raw = crypto.getRandomValues(new Uint8Array(24)); const tok = Array.from(raw).map((x) => x.toString(16).padStart(2, "0")).join(""); this.sql.exec("INSERT INTO mcssess (tok, id, via, ts, last) VALUES (?, ?, ?, ?, ?)", await uaTokHash(tok), id, via, now, now); return tok; };
       const failK = "f:" + (b.fk || ""), failR = this.sql.exec("SELECT n, ts FROM mcsfail WHERE k = ?", failK).toArray()[0];
       const fails = failR && now - failR.ts < 15 * 60e3 ? failR.n : 0;
