@@ -1595,8 +1595,10 @@ export class McsStats {
     if (op === "/ent_claim") {   /* گاہک: اپنی چابی (جی میل / موبائل) سے اس فون پر کھولنا — فون کی حد تک */
       const b = await request.json();
       const row = this.sql.exec("SELECT id FROM entkey WHERE k = ?", b.app + "|" + b.key).toArray()[0];
-      if (!row) return Response.json({ ok: false, reason: "none" });
-      const e = this.entGet(row.id); if (!e) return Response.json({ ok: false, reason: "none" });
+      /* HD2711FR204 (مالک کا حکم): میرا مکتبہ — حذف شدہ پیکج بھی «معطل» مانا جائے تاکہ گاہک کا فون بند ہو (key a: پہلے ہی فون سے تصدیق شدہ) */
+      const gone = b.app === "MA" && String(b.key).startsWith("a:") ? "revoked" : "none";
+      if (!row) return Response.json({ ok: false, reason: gone });
+      const e = this.entGet(row.id); if (!e) return Response.json({ ok: false, reason: gone });
       if (e.revoked) return Response.json({ ok: false, reason: "revoked" });
       e.claims = e.claims || [];
       const mine = e.claims.find((c) => c.dev === b.dev);
