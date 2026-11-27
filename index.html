@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2611TH246</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2711FR247</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2611TH246</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2711FR247</span>
     </div>
   </div>
 
@@ -35875,9 +35875,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2611TH246'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2711FR247'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Logout is now one red round power button; it asks "Logout? Yes / Cancel" first (same in all PBT apps)';
+  const UPDATE_NOTE = 'Recovery Details: long amounts and labels now fit on mobile, and "Days Ago" now counts up to today';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -37917,6 +37917,21 @@ window.pbtHubPwOk = async function(p){
   #rv2 .rvCard .rvBtns{flex:1 1 100%;border-left:0;padding-left:0;border-top:1.5px solid #cbd5e1;padding-top:8px}
   #rv2 .rvCard .rvBtns button{flex:1;justify-content:center;height:44px}
 }
+/* #436: mobile - two-line card (name + last recovery on top, 3 amounts below); nothing clipped or overlapping */
+@media (max-width:699px){
+  #rv2 .rvScroll{overflow-x:hidden}
+  #rv2 .rvRow{grid-template-columns:repeat(3,minmax(0,1fr))!important;white-space:normal!important}
+  #rv2 .rvRow>div{padding:6px 4px!important;min-width:0;overflow:hidden;overflow-wrap:anywhere;word-break:break-word}
+  #rv2 .rvRow>div:first-child{grid-column:1/2;border-left:0!important}
+  #rv2 .rvRow>.rvL{grid-column:2/4;gap:6px}
+  #rv2 .rvRow>div:nth-child(n+3){border-top:1.5px solid #cbd5e1}
+  #rv2 .rvRow>div:nth-child(3){border-left:0!important}
+  #rv2 .rvNm{display:block;-webkit-line-clamp:unset;overflow:visible;text-overflow:clip}
+  #rv2 .rvLb b{white-space:nowrap;font-size:11.5px!important}
+  #rv2 .rvLb em{white-space:normal;overflow-wrap:anywhere;line-height:1.15;font-size:13px!important}
+  #rv2 .rvV{white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;line-height:1.2;font-size:13px!important;letter-spacing:0}
+  #rv2 .rvRow small.l{font-size:10px!important}
+}
 @media (min-width:700px){
   #rv2 .rvNm{font-size:16px!important}#rv2 .rvV{font-size:17px!important}#rv2 .rvRow small.l,#rv2 .rvLb small{font-size:12px!important}#rv2 .rvLb b{font-size:14px!important}#rv2 .rvLb em{font-size:16px!important}
   #rv2 .rvAgo{flex-basis:44px!important;width:44px!important;height:44px!important}#rv2 .rvAgo b{font-size:16px!important}#rv2 .rvAgo i{font-size:8px!important}
@@ -37942,7 +37957,7 @@ window.pbtHubPwOk = async function(p){
   }
   function dates(){ const m = {}; all().forEach(p => { const e = m[p.date] || (m[p.date] = { n: 0, s: 0 }); e.n++; e.s += Number(p.amount) || 0; }); return Object.keys(m).sort().reverse().map(d => ({ d, n: m[d].n, s: m[d].s })); }
   function rowHtml(r, d, isToday){
-    const pv = r.prev, ago = pv ? dd(pv.date, d) : null;
+    const pv = r.prev, ago = pv ? dd(pv.date, (typeof drToday === 'function' ? drToday() : d)) : null;
     const last = pv ? `<div class="rvLb"><small>Last Recovery:</small><b>${E(nice(pv.date))}</b><em>${M(pv.amount)}</em></div><div class="rvAgo">${ago <= 0 ? '<b style="font-size:10px">Same</b><i>day</i>' : `<b>${ago}</b><i>${ago === 1 ? 'Day<br>Ago' : 'Days<br>Ago'}</i>`}</div>`
       : `<div class="rvLb"><small>Last Recovery:</small><b>—</b><em style="font-size:11px">First recovery</em></div>`;
     const rem = r.after > 0 ? M(r.after) : r.after < 0 ? 'Adv. ' + M(-r.after) : 'Clear ✓';
