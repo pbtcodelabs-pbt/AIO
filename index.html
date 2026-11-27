@@ -799,7 +799,7 @@
   .drChk{flex:1 1 0; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700;}
   .drSummary{display:flex; gap:4px; margin:4px 0 8px; font-size:10.5px;}
   .drSummary div{flex:1; min-width:0; background:#f1f5f9; border-radius:8px; padding:4px 2px; text-align:center; font-weight:700; color:#475569;}
-  .drSummary b{display:block; font-size:12.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .drSummary b{display:block; font-size:12.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:clip;}
   .drRow{background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:6px 8px; margin-bottom:6px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
   .drTop{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:3px;}
   .drTop b{font-size:14.5px;} .drTop small{color:var(--muted); font-size:11px;}
@@ -3465,7 +3465,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div class="loginLogoBadge">🧾</div>
     <h2 id="loginHeading" style="cursor:default; user-select:none;">AIO POS Login</h2>
     <!-- ---------- 🧪 لاگ ان پیج پر بھی ورژن دکھائیں — بغیر لاگ ان کیے تصدیق ہو سکے کہ لیٹسٹ فائل لائیو ہے (Home page والے بیج جیسا ہی نمبر، اپڈیٹ کرتے وقت دونوں جگہ بدلیں) ---------- -->
-    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2711FR247</div>
+    <div id="loginVersionBadge" onclick="devConsoleBadgeTap()" style="cursor:default; user-select:none; -webkit-tap-highlight-color:transparent; font-size:10px; color:var(--muted,#64748b); font-weight:700; letter-spacing:.3px; margin-top:-4px; margin-bottom:6px; opacity:.75;">AIO2811SA248</div>
 
     <!-- ---------- ہمیشہ نظر آنے والی سبسکرپشن حیثیت — مختصر ایک لائن، Trial/Subscribed دونوں یہاں ---------- -->
     <div id="loginSubStatus" class="trialEndedBadge" style="display:none;"></div>
@@ -3687,7 +3687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <div style="display:flex; flex-direction:column; align-items:center; gap:2px; flex:0 0 auto; margin-left:auto;">
       <span id="connStatusBadge" class="online">Online</span>
       <!-- ---------- بہت چھوٹا بلڈ نمبر — Online بیج کے بالکل نیچے، صاف سفید رنگ میں تاکہ آسانی سے پڑھا جا سکے ---------- -->
-      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2711FR247</span>
+      <span id="topVersionBadge" onclick="devConsoleBadgeTap()" style="font-size:9px; color:rgba(255,255,255,.85); font-weight:700; letter-spacing:.3px; cursor:default; user-select:none; -webkit-tap-highlight-color:transparent;">AIO2811SA248</span>
     </div>
   </div>
 
@@ -25540,8 +25540,21 @@ function drLeftInfo(c){
   if(left === 0) return {txt: 'Clear ✓', cls: 'green'};
   return {txt: drNum(left), cls: 'red'};
 }
+/* AIO2811SA248 (ہیلپ ڈیسک #442): اوپر کے خانوں میں لمبی رقم «Rs. 85…» کٹ جاتی تھی، اس لیے لگتا تھا حساب غلط ہے — اب رقم چھوٹی ہو کر پوری دکھتی ہے */
+function drFitAll(){
+  try{
+    document.querySelectorAll('.drSummary b').forEach(b => {
+      b.style.fontSize = '';
+      if(!b.clientWidth) return;
+      let fs = parseFloat(getComputedStyle(b).fontSize) || 16;
+      while(b.scrollWidth > b.clientWidth + 0.5 && fs > 7){ fs -= 0.5; b.style.fontSize = fs + 'px'; }
+    });
+  }catch(e){}
+}
+window.addEventListener('resize', () => setTimeout(drFitAll, 50));
 function drTiles(a, three){
   const ic = three ? ['📅','🧾','💰'] : ['👥','💰','✅','❗'];
+  setTimeout(drFitAll, 0); setTimeout(drFitAll, 150); setTimeout(drFitAll, 600);
   return a.map((x, i) => `<div class="t${i + 1}"><i>${ic[i]}</i>${drEsc(x[0])}<b>${x[1]}</b></div>`).join('');
 }
 function drSummaryPaint(list){
@@ -35875,9 +35888,9 @@ try{ storeHydrate(); }catch(e){ _storeHydrating = false; }
   let refreshing = false;
 
   // ---------- AIO910FR005: اس فائل کا ورژن — اپڈیٹ کے بعد پرانا/نیا ورژن دکھانے کے لیے ----------
-  const APP_VERSION = 'AIO2711FR247'; window.APP_UPD_OLD = APP_VERSION;
+  const APP_VERSION = 'AIO2811SA248'; window.APP_UPD_OLD = APP_VERSION;
   // ---------- ہر ریلیز پر ایک چھوٹی لائن (انگریزی) — Update complete کارڈ میں دکھتی ہے ----------
-  const UPDATE_NOTE = 'Recovery Details: long amounts and labels now fit on mobile, and "Days Ago" now counts up to today';
+  const UPDATE_NOTE = 'Daily Recovery: the top boxes (Total Due / Received / Remaining) now show the full amount instead of cutting it off (Rs. 85…)';
   const UPD_KEY = 'aioUpdateFromVersion';
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
   function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
@@ -36998,7 +37011,7 @@ window.pbtHubPwOk = async function(p){
 #screen-recovery .drSummary.three{grid-template-columns:repeat(3,1fr)}
 #screen-recovery .drSummary>div{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;min-width:0;padding:7px 3px 6px;border-radius:13px;border:1.5px solid;text-align:center;font-weight:800;color:var(--rcInk);line-height:1.2}
 #screen-recovery .drSummary>div i{font-style:normal;font-size:22px;line-height:1.1}
-#screen-recovery .drSummary>div b{display:block;font-size:19px;font-weight:900;color:var(--rcInk);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+#screen-recovery .drSummary>div b{display:block;font-size:19px;font-weight:900;color:var(--rcInk);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip;margin-top:2px}
 #screen-recovery .drSummary .t1{background:#e3edfb;border-color:#bcd2f1}
 #screen-recovery .drSummary .t2{background:#e5f6e2;border-color:#b6e0ae}#screen-recovery .drSummary .t2 b{color:#c2001b}
 #screen-recovery .drSummary .t3{background:#e4eefb;border-color:#bcd2f1}
